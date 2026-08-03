@@ -101,6 +101,10 @@ CapsLock-
 └── 📄 README.md
 ```
 
+#### SVG 生成规范 (Assets Generation)
+- 所有生成的 .svg 文件（如 assets/dots.svg, assets/bar.svg 等）的内容末尾必须包含一个换行符 \n，以符合 POSIX 标准并避免版本控制中的警告。
+- 生成时使用统一的深色主题样式，配合 #8A9E8B 等强调色。
+
 #### 赞助区块 (必须包含)
 ```markdown
 ## 💰 Support the Author
