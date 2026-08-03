@@ -3,202 +3,451 @@ name: readme-craft
 description: 帮助开发者编写结构清晰、风格专业、视觉美观的 README 文档，并自动生成配套 SVG 图形资源，支持多语言本地化。
 ---
 
-## 适用场景
+## 核心设计理念
+- **视觉优先**：严格遵循深色优雅主题（#1E1E1E 背景，#8A9E8B 强调色），确保所有 README 具有一致的品牌辨识度。
+- **结构标准**：采用开源社区广泛认可的 README 结构，确保信息易于查找。
+- **内容实用**：根据项目类型（Web应用、CLI工具、代码库等）自动调整章节重点，避免模板化空洞。
+- **个人品牌**：自动注入专属的「支持作者」赞助区块，保持个人风格。
 
-- 你完成了一个项目，需要编写一份高质量的 README 来展示功能、用法和设计。
-- 你想借鉴 CapsLock Extended 项目 README 的文档风格（包括 Hero 区块、功能卡片、表格速查、配置详解等），但内容不限定于任何特定技术。
-- 你需要一份既适合技术用户快速上手，又能全面展示项目特色和深度的说明文档，且希望所有引用的图形资源（分隔线、Logo 等）能自动生成，无需手动找图。
-- 你的目标读者可能使用不同语言，希望文档能自动适配用户的母语环境。
+## 工作流程
+当用户请求生成 README 时，按以下步骤执行：
 
-## 语言检测与本地化
+### 第一步：信息收集 (Context Gathering)
+通过交互式提问或分析现有项目文件，收集以下信息：
+- **项目名称** (`project_name`)
+- **项目简介** (`project_description`)：一句话核心价值。
+- **技术栈** (`tech_stack`)：如 AutoHotkey v2, React, Go 等。
+- **核心功能列表** (`features`)：至少 3 个主要功能点。
+- **安装步骤** (`installation`)
+- **使用示例** (`usage`)
+- **作者信息** (`author`)：姓名、邮箱、微信号（可选）。
+- **项目类型** (`project_type`)：WebApp, CLI, Library, API, 或其他。
+- **是否生成项目结构**：如果用户提供了项目根目录路径或目录树，则生成 `📁 Project Structure` 章节。
+- **忽略规则**（可选）：询问用户是否需要忽略某些文件或文件夹（支持通配符，如 `*.tmp`, `node_modules/`, `dist/` 等），生成结构时会自动过滤掉这些条目。
 
-使用本 Skill 时，**必须**自动检测用户的语言偏好，并按以下优先级确定生成文档的语言：
+### 第二步：内容结构生成 (Structure Drafting)
+根据收集的信息和项目类型，生成符合以下规范的内容结构：
 
-1.  **显式指定语言**：如果用户在请求中明确指定了语言（如“用中文写 README”或“generate README in Spanish”），则直接使用该语言。
-2.  **用户系统语言**：如果可以从用户环境（如对话上下文、系统信息）推断出语言，则优先使用。例如，已知用户使用 Windows 11 中文版，则默认为中文。
-3.  **对话语言**：如果用户最近的消息使用某种语言，则沿用该语言。
-4.  **回退语言**：如果以上均无法确定，默认使用 **英文（en-US）**。
+#### 必选章节
+1.  **Hero 区域** (深色中心对齐，含 Logo、标题、描述、Badges、导航)
+2.  **📖 Overview** (项目概述与核心价值说明)
+3.  **✨ Core Features** (使用功能卡片展示，每个卡片含 Emoji 和列表)
+4.  **🚀 Installation & Setup** (分步骤，含代码块)
+5.  **⚙️ Configuration & Parameters** (可选，有配置时添加)
+6.  **📄 License** (明确许可证)
+7.  **💰 Support the Author** (赞助区块，必须包含指定内容)
 
-**实现要求**：
-- 所有固定文本（如章节标题、描述性文字、按钮标签）均应根据检测到的语言进行翻译。
-- 代码块、配置示例、快捷键等专业术语应保留原文（通常为英文），不做翻译，以确保技术准确性。
-- 如果某一语言没有完整的翻译模板，应至少提供英文版本，并在文档开头用目标语言注明“本文档部分内容为英文以保持技术准确性”。
+#### 推荐章节 (根据项目类型选择)
+8.  **🎹 Shortcut Quick Reference** (快捷键/命令速查表，CLI/工具类项目必选)
+9.  **📚 Usage / API Documentation** (使用示例/API 文档，库/API 项目必选)
+10. **🧠 Implementation Highlights** (技术实现亮点，复杂项目推荐)
+11. **🔐 Security Notes** (涉及加密/数据时必选)
+12. **🤝 Contributing & Feedback**
+13. **📁 Project Structure** (中大型项目推荐，必须用树状结构 + Emoji 标注)
 
-**推荐语言支持**（优先支持）：中文（简体）、英文、西班牙文、法文、德文、日文、韩文。其他语言可根据用户请求灵活处理。
+### 第三步：视觉与风格渲染 (Styling)
+严格遵循以下视觉规范：
 
-当调用此 Skill 时，应在响应中明确说明生成的文档语言，并确保所有固定章节（如“概述”、“核心功能”、“安装与设置”、“贡献与反馈”、“许可证”、“支持作者”）均使用该语言。
+#### 配色方案
+| 用途 | 色值 |
+|------|------|
+| 页面主背景 | `#1E1E1E` |
+| 卡片/区块背景 | `#2A2A2A` |
+| 主标题文字 | `#E6DED6` |
+| 正文文字 | `#BEB8AE` |
+| 强调色（链接、高亮） | `#8A9E8B` |
+| 次要强调 | `#7A8E8E`、`#9E8F7E` |
+| 虚线/分隔线 | `#5A6B6B` |
+| 卡片内小标题 | `#D6D2CC` |
 
-## 文档结构要求
+#### Hero 区域 HTML 模板
+```html
+<div align="center" style="background-color: #1E1E1E; padding: 40px 20px; border-radius: 28px;">
+<div style="background: #2A2A2A; border-radius: 36px; padding: 42px 18px; margin-bottom: 28px;">
+<img src="assets/logo.png" alt="Project Logo" width="80">
+<h1 style="color: #E6DED6; font-weight: 350; letter-spacing: 2px; margin: 18px 0 8px;">{项目名称}</h1>
+<p style="color: #BEB8AE; font-size: 1.2em; max-width: 600px; margin: 0 auto;">{项目简介}</p>
+<p style="color: #8A9E8B; font-size: 0.95em; margin-top: 12px;">{技术栈副标题}</p>
+</div>
+<!-- Badges 和导航链接 -->
+</div>
+```
 
-当使用此 Skill 编写文档时，你**必须**遵循以下结构，并确保各部分内容完整、层次分明：
+#### 功能卡片 HTML 模板
+```html
+<div style="background: #2A2A2A; border-radius: 20px; padding: 16px; margin: 16px 0;">
+<h3 style="margin-top: 0; color: #D6D2CC;">🚀 功能名称</h3>
+<ul style="color: #BEB8AE;">
+<li><code>快捷键/命令</code> 功能描述</li>
+</ul>
+</div>
+```
 
-1.  **Hero 区块**
-    - 位于文档顶部，使用 `div align="center"` 进行居中。
-    - 包含项目 Logo（使用 `<img>` 标签，尺寸建议 80x80，引用 `assets/logo-placeholder.svg` 或自定义 Logo）。
-    - 包含项目名称（`<h1>`，字体加粗 350，颜色建议 `#E6DED6`，深色背景时使用）。
-    - 包含一句简洁有力的项目副标题（`<p>`，字体 1.2em，颜色建议 `#BEB8AE`）。
-    - 包含一句技术定位描述（`<p>`，颜色建议 `#8A9E8B`，例如“一个高性能的 Vim 风格系统增强工具”）。
+#### 项目结构生成规范
+- 使用 ```tree 代码块，以根目录名开始。
+- 每一层用缩进 (空格或 `│` `├──` `└──`) 展示层级关系。
+- 文件夹用 📁 前缀，普通文件用 📄 前缀，图片资源用 🖼️，音频用 🎵，配置文件按类型加对应 Emoji（如 ⚙️ 或 🔧）。
+- 如果用户提供了忽略规则，生成时自动跳过匹配的文件/文件夹（路径匹配支持通配符，不区分大小写）。
+- 示例（参考 CapsLock Extended README）：
+```tree
+CapsLock-
+├── 📁 assets
+│   ├── 🎵 AlwaysOnTopOn.wav
+│   ├── 🖼️ CapsLock-.ico
+│   └── 📄 dots.svg
+├── 📁 Config
+│   ├── 📄 ConfigManager.ahk
+│   └── 📄 Globals.ahk
+└── 📄 README.md
+```
 
-2.  **Badge 行**
-    - 紧随 Hero 区块，使用标准 Shields.io 标签。
-    - 应包含：主要运行环境/版本、许可证、平台、支持链接（如 Sponsor 或 Buy Me a Coffee）。
-    - 颜色主题应与项目整体色调（暗色、哑光绿/金）协调一致。
+#### 赞助区块 (必须包含)
+```markdown
+## 💰 Support the Author
+如果这个项目提升了你的工作效率，不妨请作者喝杯咖啡 ☕
+<div align="center">
+<a href="https://cyojkoy.github.io/Payment/">
+<img src="https://img.shields.io/badge/👉_请我喝咖啡-9E8F7E?style=for-the-badge&logo=buy-me-a-coffee&logoColor=BEB8AE" alt="Support Me">
+</a>
+</div>
+```
 
-3.  **快速导航**
-    - 使用锚点链接，提供到文档关键章节的快捷跳转。
-    - 链接样式应柔和（如虚线底边框），与整体暗色主题协调。
+### 第四步：生成与输出
+1. 将以上所有部分组合成一个完整的 Markdown 文档。
+2. 确保所有 HTML 标签正确闭合，Markdown 语法正确。
+3. 检查是否包含赞助区块。
+4. 最终输出完整的 README.md 内容，并告知用户已生成。
 
-4.  **概述 (Overview)**
-    - 用 1-2 段话清晰说明项目的核心目的和解决的问题。
-    - 强调项目的设计哲学（例如：“将最被低估的按键变成生产力指挥中心”）。
+## 风格指南 (写作规范)
+- **语言**：默认使用英文撰写（除非用户明确指定中文）。
+- **语气**：专业且友好，略带极客风格，避免过于僵硬或随意。
+- **Emoji**：**每个章节标题必须加一个合适的 Emoji**（如 📖、✨、🚀、⚙️、📄、💰、🎹、📚、🧠、🔐、🤝、📁 等），增强可读性和视觉吸引力。
+- **代码高亮**：所有代码块、命令、快捷键均使用 `<code>` 或 Markdown 代码块标注语言。
+- **重要提示**：使用 `> **Note**` 或 `> ⚠️` 引出，确保醒目。
+- **表格**：保持对齐，必要列可加粗（如功能名称）。
+- **简洁**：优先使用列表和表格，避免长段落。
 
-5.  **核心功能 (Core Features)**
-    - 使用带背景色的卡片式 `div` 对功能进行分类展示。
-    - 每个类别使用 `<h3>` 标题和带 Emoji 的图标（如 ⌨️, 📋, 🪟）。
-    - 功能点使用 `<ul>` 列表，每个条目内嵌 `<code>` 标签高亮关键操作或命令。
+## 项目类型适配 (Project Type Adaptation)
+根据识别的 `project_type`，自动调整章节侧重：
+- **CLI 工具**：强化 `🎹 Shortcut Quick Reference`，包含所有命令行参数。
+- **代码库/框架**：强化 `📚 Usage / API Documentation`，提供清晰的示例代码。
+- **Web 应用**：增加 **在线演示** 或 **部署说明** 章节。
+- **API 服务**：增加 **API 端点** 和 **认证方式** 说明。
 
-6.  **快速参考表 (Quick Reference)**
-    - 使用 Markdown 表格。
-    - 表格列：`Category`, `Shortcut / Command`, `Description`。
-    - 清晰说明操作前提（如“按住某个修饰键”）。
-    - 分类明确（如系统、剪贴板、导航、窗口、标签页等）。
+## 个人偏好注入
+- 始终保持深色主题，除非用户明确要求浅色。
+- 始终在文档末尾包含指定的「支持作者」赞助区块。
+- 导航链接使用 `•` 分隔，样式为 `color: #8A9E8B; border-bottom: 1px dotted #5A6B6B`。
+- 若生成项目结构，必须使用树状格式 + Emoji 标注，并询问用户是否需要忽略特定文件/文件夹。
 
-7.  **安装与设置 (Installation & Setup)**
-    - 包含 **前置依赖**：明确列出所需软件及版本（如运行时环境、编译器、解释器等）及可选依赖。
-    - 包含 **快速开始**：使用编号步骤，从下载到运行。
-    - 包含 **可选配置**：针对高级功能提供具体的配置步骤。
+## 示例输出片段
+<div align="center" style="background-color: #1E1E1E; padding: 40px 20px; border-radius: 28px;">
 
-8.  **配置与参数 (Configuration & Parameters)**
-    - **菜单/UI 设置**：以表格形式列出所有可配置项及其功能描述。
-    - **配置文件**：提供示例配置文件（如 `config.ini`, `settings.json`）的代码块，并逐行注释说明每个参数的作用。
-    - **高级变量**：列出高级用户可以修改的环境变量或全局参数，包括默认值和说明。
+  <div style="background: #2A2A2A; border-radius: 36px; padding: 42px 18px; margin-bottom: 28px;">
+    <img src="assets/CapsLock-.ico" alt="CapsLock Extended Logo" width="80">
+    <h1 style="color: #E6DED6; font-weight: 350; letter-spacing: 2px; margin: 18px 0 8px;">CapsLock Extended</h1>
+    <p style="color: #BEB8AE; font-size: 1.2em; max-width: 600px; margin: 0 auto;">Turn the most underrated key on your keyboard into your productivity command center</p>
+    <p style="color: #8A9E8B; font-size: 0.95em; margin-top: 12px;">A high-performance, Vim-style system enhancement tool based on AutoHotkey v2</p>
+  </div>
 
-9.  **项目结构 (Project Structure)**
-    - 使用 `tree` 命令风格的代码块展示项目的目录和文件结构。
-    - 确保 `assets/` 目录包含以下 SVG 文件（后续在 SVG 生成部分详述）：`dots.svg`, `bar.svg`, `logo-placeholder.svg`。
-    - 在每个文件夹名称前加上 Emoji 图标（如 📁, 📄）以增强可读性。
+  <p>
+    <a href="https://www.autohotkey.com/"><img src="https://img.shields.io/badge/AutoHotkey-v2.0-8A9E8B?logo=autohotkey&logoColor=BEB8AE&style=flat-square" alt="AutoHotkey v2"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-7A8E8E?style=flat-square" alt="License"></a>
+    <img src="https://img.shields.io/badge/Platform-Windows-9E8F7E?style=flat-square" alt="Platform">
+    <a href="https://cyojkoy.github.io/Payment/"><img src="https://img.shields.io/badge/Support_Me-9E8F7E?logo=buy-me-a-coffee&logoColor=BEB8AE&style=flat-square" alt="Support Me"></a>
+  </p>
 
-10. **实现亮点 (Implementation Highlights)**
-    - 列出 5-10 个技术实现上的关键点或设计决策。
-    - 使用加粗标题（如 **“内存中文件粘贴”**）后跟简短描述。
-    - 重点突出脚本的健壮性、性能优化和安全特性。
+  <p style="word-spacing: 6px; margin-top: 20px;">
+    <a href="#-shortcut-quick-reference" style="color: #8A9E8B; text-decoration: none; border-bottom: 1px dotted #5A6B6B;">Shortcut Quick Reference</a> &nbsp;•&nbsp;
+    <a href="#-installation--setup" style="color: #8A9E8B; text-decoration: none; border-bottom: 1px dotted #5A6B6B;">Installation & Setup</a> &nbsp;•&nbsp;
+    <a href="#️-configuration--parameters" style="color: #8A9E8B; text-decoration: none; border-bottom: 1px dotted #5A6B6B;">Configuration & Parameters</a> &nbsp;•&nbsp;
+    <a href="#-support-the-author" style="color: #8A9E8B; text-decoration: none; border-bottom: 1px dotted #5A6B6B;">Support the Author</a>
+  </p>
+</div>
 
-11. **安全说明 (Security Notes)**
-    - 明确告知用户任何潜在的安全风险（如固定加密密钥、明文存储等）。
-    - 提供明确的缓解或替代方案建议。
+<div align="center">
+  <img src="assets/dots.svg" alt="separator" width="160" height="12">
+</div>
 
-12. **固定末尾区块（必须包含）**
-    - 以下三个部分必须按顺序出现在文档末尾，且内容格式需与模板一致（具体链接、许可证名称、技术栈名称可根据项目实际情况调整，但标题和描述应翻译为目标语言）：
+## 📖 Overview
 
-    ---
-    ## 🤝 Contributing & Feedback
+**CapsLock Extended** redefines the purpose of the `CapsLock` key, turning it into a "super modifier key".  
+By holding `CapsLock` and combining it with other keys, you can perform Vim-style home row cursor movement, advanced clipboard management (including encrypted history), window transparency adjustment, tab switching, and other workflow automations—all without leaving the keyboard's home row.
 
-    Issues and Pull Requests are welcome.  
-    Please ensure your code conforms to the project's coding standards and follows the existing modular style.
+> **Note**  
+> This script supports **AutoHotkey v2 only** and is not backward compatible with v1.
 
-    ---
+---
 
-    ## 📄 License
+## ✨ Core Features
 
-    This project is licensed under the **[License Name]** (e.g., MIT, GPL-3.0).  
-    See the [LICENSE](LICENSE) file for details.
+<div style="background: #2A2A2A; border-radius: 20px; padding: 16px; margin: 16px 0;">
+  <h3 style="margin-top: 0; color: #D6D2CC;">⌨️ Vim‑Style Navigation</h3>
+  <ul style="color: #BEB8AE;">
+    <li><code>←</code>/<code>→</code> move cursor by word</li>
+    <li><code>↑</code>/<code>↓</code> jump to beginning / end of line</li>
+    <li><code>Shift</code> + arrows for smart text selection</li>
+    <li><code>Space</code> selects whole word under cursor</li>
+    <li><code>A</code>/<code>D</code> delete char, <code>Shift+A/D</code> delete word</li>
+  </ul>
+</div>
 
-    ---
+<div style="background: #2A2A2A; border-radius: 20px; padding: 16px; margin: 16px 0;">
+  <h3 style="margin-top: 0; color: #D6D2CC;">📋 Advanced Clipboard</h3>
+  <ul style="color: #BEB8AE;">
+    <li><code>C</code> copy as plain text</li>
+    <li><code>V</code> smart paste (multi‑file merging, image→PDF, path content merge, etc.)</li>
+    <li><code>Shift+V</code> encrypted history quick menu with preview, single/batch paste, delete</li>
+    <li><code>F</code> instant case swap of clipboard text</li>
+    <li>Custom ignore rules to exclude sensitive or temporary files during paste</li>
+  </ul>
+</div>
 
-    ## 💰 Support the Author
+<div style="background: #2A2A2A; border-radius: 20px; padding: 16px; margin: 16px 0;">
+  <h3 style="margin-top: 0; color: #D6D2CC;">🪟 Window & Tabs</h3>
+  <ul style="color: #BEB8AE;">
+    <li>Hold CapsLock + Left/Right mouse button to adjust window opacity</li>
+    <li>Middle mouse button toggles "ghost mode" (10% ↔ 100%)</li>
+    <li><code>T</code> toggle always on top (with sound and OSD feedback)</li>
+    <li><code>W</code>/<code>8</code>/<code>Num8</code> maximize/restore, <code>S</code>/<code>2</code>/<code>Num2</code> minimize</li>
+    <li><code>Q</code>/<code>E</code> previous / next tab</li>
+  </ul>
+</div>
 
-    If this project has boosted your productivity, consider buying me a coffee! ☕
+<div style="background: #2A2A2A; border-radius: 20px; padding: 16px; margin: 16px 0;">
+  <h3 style="margin-top: 0; color: #D6D2CC;">📂 Full History Browser</h3>
+  <ul style="color: #BEB8AE;">
+    <li>Open full clipboard history window via bottom entry of the history menu</li>
+    <li>Supports search, multi‑select, batch paste as file or text</li>
+    <li>Delete entries directly from the window with real‑time updates</li>
+  </ul>
+</div>
 
-    <div align="center">
-      <a href="https://your-support-link.com">
-        <img src="https://img.shields.io/badge/👉_Click_Here_to_Support_Me-9E8F7E?style=for-the-badge&logo=buy-me-a-coffee&logoColor=BEB8AE" alt="Support Me Button">
-      </a>
-    </div>
+---
 
-    <div align="center">
-      <br>
-      <i style="color: #8A9E8B;">Made with ❤️ and [Your Tech Stack]</i>
-    </div>
+## 🎹 Shortcut Quick Reference
 
-    ---
+_All shortcuts below require **holding `CapsLock`** while pressing the corresponding key (except double‑click `CapsLock`)._
 
-## SVG 资源生成
+| Category       | Shortcut                    | Description                                                                |
+| :------------- | :-------------------------- | :------------------------------------------------------------------------- |
+| **System**     | `CapsLock` (double‑click)   | Toggle native CapsLock state (50~300ms double‑click window)                |
+| **Clipboard**  | `C`                         | Copy selection as **plain text** (auto strip formatting)                   |
+|                | `V`                         | **Smart paste** (image paths→PDF / multi‑file content merge / mixed paths) |
+|                | `Shift+V`                   | Open **clipboard history** quick menu                                      |
+|                | `F`                         | **Swap case** of clipboard text and paste (original retained)              |
+| **Navigation** | `←` / `→`                   | Move cursor left/right **by one word**                                     |
+|                | `↑` / `↓`                   | Jump to **beginning** / **end of line**                                    |
+|                | `Space`                     | Select the **entire word** under the cursor                                |
+| **Selection**  | `Shift+←` / `→`             | Extend selection left/right **by word**                                    |
+|                | `Shift+↑` / `↓`             | Extend selection from cursor to start/end of line                          |
+| **Editing**    | `A` / `D`                   | `Backspace` / `Delete` (delete single character)                           |
+|                | `Shift+A` / `D`             | Delete left/right **entire word**                                          |
+|                | `Backspace` / `Delete`      | Delete **entire line**                                                     |
+| **Window**     | `T`                         | Toggle current window **always on top**                                    |
+|                | `W` / `8` / `Num8`          | **Maximize / Restore** current window                                      |
+|                | `S` / `2` / `Num2`          | **Minimize** current window                                                |
+| **Mouse**      | `Left Button` (click/hold)  | **Increase** window transparency (click +20, hold +100 per second)         |
+|                | `Right Button` (click/hold) | **Decrease** window transparency (click -20, hold -100 per second)         |
+|                | `Middle Button`             | **Toggle** transparency: 10% (ghost mode) ↔ 100% (normal)                  |
+| **Tabs**       | `Q` / `E`                   | Switch to **previous** / **next** tab (`Ctrl+PgUp` / `Ctrl+PgDn`)          |
 
-使用本 Skill 时，**必须**生成以下 SVG 文件，并将它们放置在 `assets/` 目录中，确保 README 中引用的所有图形资源完整可用。
+---
 
-### 必需文件
+## 🚀 Installation & Setup
 
-- **`assets/dots.svg`** – 用于章节间的分隔装饰（如 Overview 与 Core Features 之间）。  
-  示例代码（简约三点式）：
-  ```svg
-  <svg xmlns="http://www.w3.org/2000/svg" width="160" height="12" viewBox="0 0 160 12">
-    <circle cx="20" cy="6" r="4" fill="#8A9E8B" opacity="0.6"/>
-    <circle cx="80" cy="6" r="4" fill="#8A9E8B" opacity="0.8"/>
-    <circle cx="140" cy="6" r="4" fill="#8A9E8B" opacity="0.6"/>
-  </svg>
-  ```
+### Prerequisites
 
-- **`assets/bar.svg`** – 用于文档底部的细长分隔条。  
-  示例代码（渐变细线）：
-  ```svg
-  <svg xmlns="http://www.w3.org/2000/svg" width="240" height="8" viewBox="0 0 240 8">
-    <rect x="0" y="3" width="240" height="2" fill="url(#grad)" rx="1"/>
-    <defs>
-      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#8A9E8B" stop-opacity="0"/>
-        <stop offset="20%" stop-color="#8A9E8B" stop-opacity="0.6"/>
-        <stop offset="50%" stop-color="#BEB8AE" stop-opacity="1"/>
-        <stop offset="80%" stop-color="#8A9E8B" stop-opacity="0.6"/>
-        <stop offset="100%" stop-color="#8A9E8B" stop-opacity="0"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  ```
+1. **AutoHotkey v2** – Download and install from [autohotkey.com](https://www.autohotkey.com/)
+2. **ImageMagick** (optional) – Required for image‑to‑PDF feature; install from [imagemagick.org](https://imagemagick.org/) (check "Install legacy utilities" during setup)
 
-- **`assets/logo-placeholder.svg`** – 项目 Logo 占位图，Hero 区块中引用。可根据项目风格自定义颜色和形状。  
-  示例代码（简约菱形）：
-  ```svg
-  <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
-    <rect width="80" height="80" rx="16" fill="#2A2A2A" stroke="#8A9E8B" stroke-width="2"/>
-    <polygon points="40,12 68,40 40,68 12,40" fill="#8A9E8B" opacity="0.8"/>
-    <polygon points="40,24 56,40 40,56 24,40" fill="#E6DED6"/>
-  </svg>
-  ```
+### Quick Start
 
-**生成方式**：当调用此 Skill 时，应将上述 SVG 代码以文本文件形式与 README 一同输出（例如通过 `artifact_bundle_create` 打包为 ZIP），并在项目结构中明确包含 `assets/` 目录。
+1. **Download the project** and place `CapsLock-.ahk` along with all subdirectories (`Config/`, `Core/`, `History/`, etc.) in the same folder.
+2. **Run the script**: double‑click `CapsLock-.ahk`; an icon will appear in the system tray.
+3. **(Optional) Auto‑start with Windows**: right‑click the tray icon → check **"Load on start up"** (writes to `HKCU\Run`).
 
-## 写作风格指南
+### Configure ImageMagick (only needed for image‑to‑PDF)
 
-- **语气**：专业、自信、友好。技术解释要精准，但整体氛围是鼓励和赋能。
-- **格式**：
-    - 键名、文件名、代码和路径使用反引号 (`` ` ``) 包裹。
-    - 所有代码块必须指定语言（如 `ini`, `json`, `yaml`, `bash`, `tree`, `svg` 等）。
-    - 充分利用 Emoji 为标题和列表增加视觉层次感。
-- **目标读者**：面向具备基本编程或脚本使用经验的中高级用户。
-- **描述要积极**：聚焦于“它能做什么”，而不是“它不能做什么”。
-- **清晰胜于简洁**：对于复杂的快捷键或配置项，提供详细的文字说明，不要担心篇幅。
-- **本地化一致性**：所有非代码文本（标题、段落、表格内容、按钮标签）均需翻译为目标语言，且保持术语统一。
+1. Right‑click the tray icon → click **"ImageMagick: Not Set"**.
+2. Browse to your ImageMagick installation directory and select `magick.exe` (e.g., `C:\Program Files\ImageMagick-7.x.x-Q16\magick.exe`).
+3. The path is saved automatically to `configs/Config.ini` and the menu entry changes to **"ImageMagick: Valid"**.
 
-## 约束
+---
 
-- **不要** 使用与项目无关的占位文本（如“这里写你的项目名”）。
-- **不要** 省略上述结构中的任何部分，尤其是末尾固定区块。
-- **颜色方案**：如果项目本身未定义，建议采用 CapsLock Extended 的暗色方案（背景 `#1E1E1E` 和 `#2A2A2A`，文字色 `#E6DED6` 和 `#BEB8AE`，强调色 `#8A9E8B`）。对于明亮主题，可相应调整，但结构保持不变。
-- **准确性**：确保所有快捷键、配置文件路径和依赖项名称与你的项目完全匹配。
-- **通用性**：本 Skill 不限定于任何特定技术（如 AutoHotkey、Python 等），请根据项目实际情况填充内容。
-- **SVG 完整性**：生成的 `assets/` 目录必须包含上述三个 SVG 文件，且内容有效、颜色协调。
-- **语言检测**：必须按优先级规则确定语言，并输出指定语言的完整文档。若目标语言不常见，可以英文为主，并附简要翻译说明。
+## ⚙️ Configuration & Parameters
 
-## 示例用法
+### Tray Menu Settings
 
-**用户输入（中文）**：
-> 为我的命令行工具 `mycli` 写一份 README，它使用 Go 编写，提供文件批量重命名功能。
+| Menu Item                      | Description                                                                            |
+| :----------------------------- | :------------------------------------------------------------------------------------- |
+| `ImageMagick: Not Set / Valid` | Set or change the ImageMagick executable path                                          |
+| `Open Temp Folder`             | Open the temporary folder (`%TEMP%`, where temporary paste files are stored)           |
+| `Delete Mode`                  | Temp file cleanup strategy: 1=delayed delete, 2=batch cleanup, 3=never delete          |
+| `Set Delay...`                 | Delay in seconds for Mode 1 (default 10 seconds)                                       |
+| `Set Cleanup Interval...`      | Cleanup interval in seconds for Mode 2 (default 30 seconds)                            |
+| `Set Max History...`           | Maximum clipboard history entries (0 disables history, default 10000)                  |
+| `Auto Clean History`           | Periodically trims history down to `maxHistoryItems` (off by default)                 |
+| `Paste Mode`                   | Paste mode: 1=paste as temp file, 2=paste as plain text with source markers            |
+| `Ignore Rules`                 | Edit a list of regex patterns; matched files/paths are skipped during paste operations |
+| `Language`                     | Switch UI language (based on `lang.csv`; 13 languages supported)                       |
+| `Load on start up`             | Toggle auto‑start with Windows (registry `HKCU\Run`)                                   |
+| `Reload`                       | Reload the script                                                                      |
+| `Exit`                         | Exit the script                                                                        |
 
-**预期输出**：
-一份中文（简体）的 `README.md` 文档，所有章节标题和描述均为中文，代码示例和配置保持英文，同时包含 `assets/` 目录下的三个 SVG 文件，所有文件打包为 ZIP 下载。
+### Configuration File `configs/Config.ini`
 
-**用户输入（英文）**：
-> Generate a README for my Go CLI tool `mycli` that does batch file renaming.
+📁 configs/Config.ini
 
-**预期输出**：
-一份英文的 `README.md` 文档，所有文本为英文，结构相同，并包含相同的 SVG 资源。
+```ini
+[Cleanup]
+deleteMode=1          ; 1=delayed 2=batch 3=never
+deleteDelay=10        ; delay in seconds
+cleanupInterval=30    ; batch cleanup interval in seconds
+
+[History]
+maxHistory=10000      ; max history entries
+
+[General]
+pasteMode=1           ; 1=paste as file 2=paste as text with source
+autoClean=0           ; 1=enable periodic auto-trim of history (runs every 60s)
+maxHistoryItems=500   ; when autoClean is on, history is trimmed to this size
+
+[ImageMagick]
+Path=C:\Program Files\ImageMagick-7.1.1-Q16\magick.exe
+
+[Ignore]
+Rules=                ; multiple regexes separated by |
+; Examples (in the UI editor each pattern is on its own line):
+; ^C:\\Windows\\.*    # ignore all files under Windows folder
+; \\.tmp$             # ignore .tmp files
+```
+
+### Advanced Global Variables (modifiable in `Config/Globals.ahk`)
+
+| Variable           | Default               | Description                                      |
+| :----------------- | :-------------------- | :----------------------------------------------- |
+| `ENCRYPT_KEY`      | `0x5A`                | XOR encryption key (0 = plaintext history)       |
+| `MAX_VISIBLE_MENU` | `5`                   | Maximum entries shown in the history quick menu  |
+| `MAX_FULL_HISTORY_DISPLAY` | `50`          | Initial rows shown in the full history window    |
+| `TextFormats`      | 50+ common extensions | List of extensions treated as "text files"       |
+| `ImageFormats`     | png, jpg, bmp…        | Image formats supported for PDF conversion       |
+| `IgnorePatterns`   | (empty)               | Default ignore rules (overridable via Tray menu) |
+
+---
+
+## 🧱 Project Structure
+
+```tree
+CapsLock-
+├── 📁 assets
+│   ├── 🎵 AlwaysOnTopOn.wav
+│   ├── 🎵 AlwaysOnTopOff.wav
+│   ├── 🖼️ bar.svg
+│   ├── 🖼️ CapsLock-.ico
+│   ├── 🖼️ Config.ico
+│   ├── 🖼️ Core.ico
+│   ├── 🖼️ dots.svg
+│   ├── 🖼️ History.ico
+│   ├── 🖼️ Hotkeys.ico
+│   ├── 🖼️ Tray.ico
+│   ├── 🖼️ UI.ico
+│   └── 🖼️ Utils.ico
+├── 📁 Config
+│   ├── 📄 ConfigManager.ahk
+│   ├── 📄 Encryption.ahk
+│   └── 📄 Globals.ahk
+├── 📁 Core
+│   ├── 📄 Cleanup.ahk
+│   ├── 📄 Clipboard.ahk
+│   ├── 📄 ClipboardPaste.ahk
+│   ├── 📄 FileOperations.ahk
+│   ├── 📄 FileValidation.ahk
+│   ├── 📄 ImageToPdf.ahk
+│   └── 📄 WindowUtils.ahk
+├── 📁 History
+│   ├── 📄 FullHistoryGui.ahk
+│   ├── 📄 FullHistoryHandlers.ahk
+│   ├── 📄 HistoryDelete.ahk
+│   ├── 📄 HistoryMenu.ahk
+│   ├── 📄 HistoryPaste.ahk
+│   └── 📄 HistoryStorage.ahk
+├── 📁 Hotkeys
+│   ├── 📄 HotkeyActions.ahk
+│   ├── 📄 HotkeyBindings.ahk
+│   └── 📄 PasteHandler.ahk
+├── 📁 Tray
+│   ├── 📄 TrayMenu.ahk
+│   └── 📄 TraySettings.ahk
+├── 📁 UI
+│   ├── 📄 OSD.ahk
+│   └── 📄 PreviewGui.ahk
+├── 📁 Utils
+│   ├── 📄 Language.ahk
+│   ├── 📄 MethodsUtils.ahk
+│   └── 📄 ResourceSound.ahk
+├── 📄 CapsLock-.ahk
+├── ⚖️ LICENSE
+├── 📖 README.md
+└── 🌐 lang.csv
+```
+
+---
+
+## 🧠 Implementation Highlights
+
+- **In‑memory file paste** – Constructs a `DROPFILES` structure directly in memory to write multiple file paths to the clipboard.
+- **Smart loop prevention** – Uses the `ignoreNextClipChange` flag to prevent temporary files (`ClipTemp_*.txt`) from triggering infinite `OnClipboardChange` loops.
+- **Encrypted history storage** – Employs simple XOR stream encryption to obfuscate the history file; for high‑security needs, combine with Windows EFS or BitLocker.
+- **Delayed / batch / off cleanup** – Three strategies (`DeleteMode` 1–3) for temporary file cleanup to control I/O pressure and disk usage.
+- **Modular design** – Each functional domain is separated into its own `.ahk` file for easy maintenance and extension.
+- **Multi‑language support** – CSV‑based translation system; 13 languages switchable on the fly from the tray menu.
+- **Ignore rules** – Regex‑based filtering (gitignore syntax) to safely exclude unwanted files or paths from paste operations.
+- **Custom dark‑themed menu** – `CustomMenu` builds a lightweight, hover‑aware popup GUI, replacing the native `Menu` control for history and context menus.
+- **OSD notification system** – `OSD` class provides a single‑line, auto‑dismissing notification banner used throughout the app for status feedback.
+
+---
+
+## 🔐 Security Notes
+
+> ⚠️ The history file `configs/ClipHistory.bin` is encrypted using a **fixed XOR key** (default `0x5A`). This is **only intended to prevent casual viewing and offers no cryptographic strength**.
+
+If you handle highly sensitive data, it is recommended to:
+
+1. Set `ENCRYPT_KEY` to `0` (disable encryption)
+2. Use Windows built‑in **EFS** or **BitLocker** to encrypt the entire configuration folder
+
+---
+
+## 🤝 Contributing & Feedback
+
+Issues and Pull Requests are welcome.  
+Please ensure your code conforms to AHK v2 syntax and follows the existing modular style.
+
+---
+
+## 📄 License
+
+This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.  
+See the [LICENSE](LICENSE) file for details.
+
+---
+
+## 💰 Support the Author
+
+If this project has boosted your productivity, consider buying me a coffee! ☕
+
+<div align="center">
+  <a href="https://cyojkoy.github.io/Payment/">
+    <img src="https://img.shields.io/badge/👉_Click_Here_to_Support_Me-9E8F7E?style=for-the-badge&logo=buy-me-a-coffee&logoColor=BEB8AE" alt="Support Me Button">
+  </a>
+</div>
+
+<div align="center">
+  <br>
+  <i style="color: #8A9E8B;">Made with ❤️ and AutoHotkey v2</i>
+</div>
+
+<div align="center">
+  <img src="assets/bar.svg" alt="footer bar" width="240" height="8">
+</div>
