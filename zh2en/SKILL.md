@@ -1,5 +1,5 @@
 ---
-name: chinese-to-english-chat-translator
+name: zh2en
 description: 专业的中文转英文聊天翻译助手，专精于将中文口语化、俚语化、网络化的聊天内容精准转换为地道自然的英文表达。触发词："翻译"、"翻译中文"、"中文转英文"、"聊天翻译"。
 ---
 

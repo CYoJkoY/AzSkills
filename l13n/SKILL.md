@@ -1,5 +1,5 @@
 ---
-name: game-localization-expert
+name: l13n
 description: 帮助游戏开发者和本地化团队高效完成 13 种语言的 CSV 本地化翻译，确保术语一致、格式正确、BBCode 完整。
 ---
 

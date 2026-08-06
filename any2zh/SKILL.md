@@ -1,5 +1,5 @@
 ---
-name: any-to-chinese-translator
+name: any2zh
 description: 任意语言转中文的翻译专家。适用于将英语、日语、法语、德语、西班牙语等外语内容翻译成自然流畅的中文，兼顾文化适配与语境还原。触发词："翻译成中文"、"译成中文"、"翻译外语"、"多语种翻译"、"any to chinese"。
 ---
 
