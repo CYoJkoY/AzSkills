@@ -14,9 +14,9 @@
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/Skills-5-8A9E8B?style=flat-square" alt="5 skills">
+  <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/CYoJkoY/AzSkills/main/.github/badges/skills.json&style=flat-square" alt="Skill count">
   <img src="https://img.shields.io/badge/Format-SKILL.md-7A8E8E?style=flat-square" alt="SKILL.md format">
-  <img src="https://img.shields.io/badge/License-MIT-9E8F7E?style=flat-square" alt="MIT License">
+  <img src="https://img.shields.io/github/license/CYoJkoY/AzSkills?style=flat-square&color=9E8F7E" alt="License">
 </p>
 
 </div>
@@ -27,13 +27,7 @@
 
 **AzSkills** is a lightweight collection of reusable **AI agent skill definitions**. Each skill is isolated in its own directory and centered around a `SKILL.md` specification, making the repository easy to inspect, copy, version, and extend.
 
-The collection currently covers five practical areas:
-
-- **AHK v2 engineering** — optimization, standardization, performance, UI, memory, and testing guidance.
-- **Multilingual translation** — language-aware translation into natural Chinese while preserving structure and formatting.
-- **Game localization** — structured 13-language CSV localization with terminology consistency and BBCode preservation.
-- **README engineering** — visual-first README generation, SVG assets, documentation structure, and GitHub-oriented presentation.
-- **Chinese-to-English chat translation** — natural conversational English for casual, professional, gaming, and social contexts.
+The collection currently covers practical areas including AHK v2 engineering, multilingual translation, game localization, README engineering, and Chinese-to-English conversational translation.
 
 AzSkills is intentionally modular: use one skill independently, combine several skills in a workflow, or add your own skill without changing the existing definitions.
 
@@ -82,7 +76,7 @@ A structured localization workflow for game CSV data. It enforces the fixed lang
 
 **Professional README Generation**
 
-A visual-first documentation skill for creating structured, polished README files. It defines Hero composition, dark-theme styling, SVG asset generation, feature presentation, project-structure formatting, project-type adaptation, and GitHub-friendly documentation patterns.
+A visual-first documentation skill for creating structured, polished README files. It defines Hero composition, dark-theme styling, SVG asset generation, feature presentation, project-type adaptation, and GitHub-friendly documentation patterns.
 
 [Open `readme-craft`](readme-craft/SKILL.md)
 
@@ -179,6 +173,11 @@ Because the core artifact is Markdown, developers can audit, edit, review, and v
 
 ```tree
 AzSkills/
+├── 📁 .github/
+│   ├── 📁 badges/
+│   │   └── 📄 skills.json
+│   └── 📁 workflows/
+│       └── ⚙️ update-skill-badge.yml
 ├── 📁 ahkv2-opt/
 │   └── 📄 SKILL.md
 ├── 📁 any2zh/
@@ -207,6 +206,8 @@ AzSkills follows a few simple maintenance rules:
 3. Prefer explicit workflows and output contracts over vague behavioral descriptions.
 4. Keep documentation and examples aligned with the actual skill definition.
 5. Preserve the existing directory-level naming convention when adding new skills.
+
+The Skill badge in this README is generated from the repository's actual `SKILL.md` files by GitHub Actions, so the displayed count updates automatically when skills are added or removed. The License badge is provided directly by Shields from the repository's GitHub license metadata. citeturn412694search0turn412694search1turn412694search4
 
 ---
 
