@@ -207,7 +207,7 @@ AzSkills follows a few simple maintenance rules:
 4. Keep documentation and examples aligned with the actual skill definition.
 5. Preserve the existing directory-level naming convention when adding new skills.
 
-The Skill badge in this README is generated from the repository's actual `SKILL.md` files by GitHub Actions, so the displayed count updates automatically when skills are added or removed. The License badge is provided directly by Shields from the repository's GitHub license metadata. citeturn412694search0turn412694search1turn412694search4
+The Skills badge is generated from the repository's actual `SKILL.md` files by GitHub Actions. The License badge is read directly from the repository's GitHub license metadata.
 
 ---
 
