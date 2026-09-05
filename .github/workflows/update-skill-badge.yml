@@ -7,6 +7,7 @@ on:
     paths:
       - "**/SKILL.md"
       - ".github/workflows/update-skill-badge.yml"
+  workflow_dispatch:
 
 permissions:
   contents: write
