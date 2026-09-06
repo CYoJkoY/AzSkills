@@ -123,7 +123,13 @@ Refine:
 Prefer one strong compositional reveal over many unrelated micro-animations. Use transform and opacity for motion whenever possible.
 
 ### Pass 5 — Quality Gate
-Before delivery, run the checks in `DESIGN_SYSTEM.md` and inspect rendered screenshots. A technically valid deck that looks crowded, generic, repetitive, or unfinished is not considered complete.
+Before delivery, run the checks in `DESIGN_SYSTEM.md`, run the static audit when a local HTML file exists, and inspect rendered screenshots. A technically valid deck that looks crowded, generic, repetitive, or unfinished is not considered complete.
+
+```bash
+python scripts/quality_audit.py path/to/deck.html
+```
+
+Treat `FAIL` results as blocking. Treat `WARN` results as review items that require a conscious decision.
 
 ## New Presentation Workflow
 
@@ -256,6 +262,7 @@ Minimum verification before finalizing:
 - Reduced-motion mode disables or minimizes nonessential motion.
 - The deck remains a fixed 16:9 composition at 1280×720.
 - A phone viewport does not cause content reflow or break the stage.
+- The static audit passes without blocking failures.
 - At least one screenshot inspection pass checks visual rhythm, whitespace, hierarchy, contrast, and alignment.
 - The deck does not contain internal generation notes, template labels, placeholder text, or accidental debug output.
 
@@ -267,5 +274,6 @@ Minimum verification before finalizing:
 - `html-template.md` — presentation architecture, interaction, accessibility, and editing reference.
 - `animation-patterns.md` — motion patterns and performance guidance.
 - `scripts/extract-pptx.py` — PowerPoint extraction helper.
+- `scripts/quality_audit.py` — dependency-free static quality audit for generated HTML.
 
 Source lineage: adapted from `zarazhangrui/frontend-slides`; visual design discipline is additionally informed by `nextlevelbuilder/ui-ux-pro-max-skill`. Preserve the upstream license and attribution in this directory.
