@@ -2,7 +2,7 @@
 
 <img src="assets/azskills-hero.svg" alt="AzSkills — Modular AI Skills for Real Work" width="100%">
 
-### A focused collection of reusable AI skills for development, translation, localization, documentation, and engineering craftsmanship.
+### A focused collection of reusable AI skills for development, translation, localization, documentation, presentations, and engineering craftsmanship.
 
 <p>
   <a href="#-overview">Overview</a> •
@@ -27,7 +27,7 @@
 
 **AzSkills** is a lightweight collection of reusable **AI agent skill definitions**. Each skill is isolated in its own directory and centered around a `SKILL.md` specification, making the repository easy to inspect, copy, version, and extend.
 
-The collection currently covers AHK v2 engineering, multilingual translation, game localization, README engineering, Chinese-to-English conversational translation, and deep engineering craftsmanship.
+The collection covers AHK v2 engineering, multilingual translation, game localization, README engineering, Chinese-to-English conversational translation, HTML presentation generation, and deep engineering craftsmanship.
 
 AzSkills is intentionally modular: use one skill independently, combine several skills in a workflow, or add your own skill without changing the existing definitions.
 
@@ -38,11 +38,12 @@ AzSkills is intentionally modular: use one skill independently, combine several 
 | Capability | What it provides |
 | :--- | :--- |
 | **Modular skill definitions** | Each capability lives in a self-contained `SKILL.md`. |
-| **Explicit behavior contracts** | Trigger conditions, standards, workflows, and output rules are documented directly in the skill. |
-| **Development standards** | AHK v2 guidance includes code size limits, control-flow rules, performance practices, UI optimization, and testing guidance. |
-| **Engineering craftsmanship** | `ultrathink` adds assumption-checking, architecture planning, adversarial review, iterative refinement, and ruthless simplification for complex engineering work. |
+| **Explicit behavior contracts** | Trigger conditions, standards, workflows, and output rules are documented directly in each skill. |
+| **Development standards** | AHK v2 guidance includes code-size limits, control-flow rules, performance practices, UI optimization, and testing guidance. |
+| **Engineering craftsmanship** | `ultrathink` adds assumption-checking, architecture planning, adversarial review, iterative refinement, and simplification for complex engineering work. |
 | **Localization workflows** | CSV-oriented localization rules cover 13 language columns, escaping, terminology, and BBCode integrity. |
 | **Documentation tooling** | `readme-craft` defines README structure, visual direction, SVG requirements, feature presentation, and project-type adaptations. |
+| **Presentation generation** | `frontend-slides` provides fixed-stage 16:9 HTML presentation generation, visual style discovery, animation guidance, and PowerPoint extraction. |
 | **Language-aware translation** | Translation skills preserve intent, tone, formatting, and technical context instead of relying on literal conversion. |
 
 ---
@@ -61,11 +62,21 @@ A rule-driven engineering skill for refactoring and reviewing AutoHotkey v2 code
 
 **Deep Engineering Craftsmanship Methodology**
 
-A craftsmanship-oriented skill for complex engineering tasks. It explicitly questions assumptions before implementation, maps architecture and constraints, designs from the caller's perspective, scrutinizes naming and abstractions, considers edge cases, runs tests, compares alternatives, and iterates beyond the first working solution. It also emphasizes ruthless simplification and avoiding premature abstraction.
+A craftsmanship-oriented skill for complex engineering tasks. It explicitly questions assumptions before implementation, maps architecture and constraints, designs from the caller’s perspective, scrutinizes naming and abstractions, considers edge cases, runs tests, compares alternatives, and iterates beyond the first working solution. It also emphasizes ruthless simplification and avoiding premature abstraction.
 
 The skill was imported from [HaydenLundin/ultrathink](https://github.com/HaydenLundin/ultrathink) and retains the upstream MIT license in [`ultrathink/LICENSE`](ultrathink/LICENSE).
 
 [Open `ultrathink`](ultrathink/SKILL.md)
+
+### 🎞️ `frontend-slides`
+
+**Animation-Rich HTML Presentation Generation**
+
+A presentation-focused skill adapted from [zarazhangrui/frontend-slides](https://github.com/zarazhangrui/frontend-slides). It provides a fixed 1920×1080 stage model, visual style discovery, presentation architecture, animation patterns, typography guidance, PowerPoint-to-web extraction, and verification rules for overflow, overlap, accessibility, and responsive viewport scaling.
+
+The integration includes the core skill plus the supporting reference files it directly depends on. The upstream MIT license is preserved in [`frontend-slides/LICENSE`](frontend-slides/LICENSE).
+
+[Open `frontend-slides`](frontend-slides/SKILL.md)
 
 ### 🌐 `any2zh`
 
@@ -103,7 +114,7 @@ A chat-focused translation skill for turning informal, slang-heavy, or context-d
 
 ## 🚀 Installation & Setup
 
-AzSkills is a collection of skill definitions rather than a standalone executable application. There is no build step or package installation required by the repository itself.
+AzSkills is a collection of skill definitions rather than a standalone executable application. There is no repository-wide build step.
 
 ### Clone the repository
 
@@ -119,6 +130,7 @@ Choose the directory that matches the task you want to support:
 ```text
 ahkv2-opt/
 any2zh/
+frontend-slides/
 l13n/
 readme-craft/
 ultrathink/
@@ -127,7 +139,21 @@ zh2en/
 
 ### Register the skill with your agent
 
-Copy or link the selected skill directory into the skill-discovery location used by your AI agent or development environment. The skill is defined by its `SKILL.md` file and does not require compilation.
+Copy or link the selected skill directory into the skill-discovery location used by your AI agent or development environment. The skill is defined by its `SKILL.md` file and should remain next to its supporting references.
+
+For `frontend-slides`, keep these files together:
+
+```text
+frontend-slides/
+├── SKILL.md
+├── STYLE_PRESETS.md
+├── viewport-base.css
+├── html-template.md
+├── animation-patterns.md
+├── LICENSE
+└── scripts/
+    └── extract-pptx.py
+```
 
 > **Note:** Skill discovery paths vary between agent frameworks. Keep the directory name and `SKILL.md` together when integrating a skill.
 
@@ -137,7 +163,7 @@ Copy or link the selected skill directory into the skill-discovery location used
 
 Each skill is designed to be invoked by matching its purpose, trigger conditions, and documented workflow.
 
-For example, an agent working on an AutoHotkey v2 module can load `ahkv2-opt` when asked to refactor or optimize code. A documentation workflow can use `readme-craft` to generate a visual README and its SVG assets. A localization workflow can apply `l13n` to a structured CSV without changing its schema. For complex implementation, architectural refactoring, or tasks where the first working solution may not be sufficient, `ultrathink` can be loaded to enforce a deeper craftsmanship workflow.
+For example, an agent working on an AutoHotkey v2 module can load `ahkv2-opt` when asked to refactor or optimize code. A documentation workflow can use `readme-craft` to generate a visual README and its SVG assets. A localization workflow can apply `l13n` to a structured CSV without changing its schema. `frontend-slides` can be loaded whenever the task involves building, converting, or enhancing HTML presentations. For complex implementation or architectural refactoring, `ultrathink` can be combined with another task-specific skill.
 
 A typical workflow is:
 
@@ -151,7 +177,10 @@ Select relevant skill
 Read SKILL.md
    │
    ▼
-Apply its workflow and constraints
+Load only the referenced support files needed for the task
+   │
+   ▼
+Apply the workflow and constraints
    │
    ▼
 Produce task-specific output
@@ -165,11 +194,11 @@ The skills are deliberately explicit so an agent can inspect the rules before ac
 
 ### Self-contained specifications
 
-Every skill is packaged as a small, readable Markdown specification with frontmatter, purpose, workflows, and enforcement rules. This keeps the skill portable and easy to review.
+Every skill is packaged as a readable Markdown specification with frontmatter, purpose, workflows, and enforcement rules. This keeps the skill portable and easy to review.
 
 ### Constraint-driven workflows
 
-The skills do more than describe goals. They define concrete constraints such as line-count limits, output schemas, formatting preservation, terminology requirements, or README section standards.
+The skills do more than describe goals. They define concrete constraints such as line-count limits, output schemas, formatting preservation, terminology requirements, fixed slide dimensions, and presentation verification rules.
 
 ### Specialized rather than monolithic
 
@@ -194,6 +223,15 @@ AzSkills/
 │   └── 📄 SKILL.md
 ├── 📁 any2zh/
 │   └── 📄 SKILL.md
+├── 📁 frontend-slides/
+│   ├── 📄 SKILL.md
+│   ├── 📄 STYLE_PRESETS.md
+│   ├── 📄 viewport-base.css
+│   ├── 📄 html-template.md
+│   ├── 📄 animation-patterns.md
+│   ├── ⚖️ LICENSE
+│   └── 📁 scripts/
+│       └── 🐍 extract-pptx.py
 ├── 📁 l13n/
 │   └── 📄 SKILL.md
 ├── 📁 readme-craft/
@@ -222,8 +260,9 @@ AzSkills follows a few simple maintenance rules:
 4. Keep documentation and examples aligned with the actual skill definition.
 5. Preserve the existing directory-level naming convention when adding new skills.
 6. Preserve third-party skill licensing and attribution when importing an external skill.
+7. Keep referenced support files next to the imported skill whenever the upstream skill depends on them.
 
-The Skills badge is generated from the repository's actual `SKILL.md` files by GitHub Actions. The License badge is read directly from the repository's GitHub license metadata.
+The Skills badge is generated from the repository’s actual `SKILL.md` files by GitHub Actions. The License badge is read directly from the repository’s GitHub license metadata.
 
 ---
 
