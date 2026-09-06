@@ -2,7 +2,7 @@
 
 <img src="assets/azskills-hero.svg" alt="AzSkills — Modular AI Skills for Real Work" width="100%">
 
-### A focused collection of reusable AI skills for development, translation, localization, and documentation.
+### A focused collection of reusable AI skills for development, translation, localization, documentation, and engineering craftsmanship.
 
 <p>
   <a href="#-overview">Overview</a> •
@@ -27,7 +27,7 @@
 
 **AzSkills** is a lightweight collection of reusable **AI agent skill definitions**. Each skill is isolated in its own directory and centered around a `SKILL.md` specification, making the repository easy to inspect, copy, version, and extend.
 
-The collection currently covers practical areas including AHK v2 engineering, multilingual translation, game localization, README engineering, and Chinese-to-English conversational translation.
+The collection currently covers AHK v2 engineering, multilingual translation, game localization, README engineering, Chinese-to-English conversational translation, and deep engineering craftsmanship.
 
 AzSkills is intentionally modular: use one skill independently, combine several skills in a workflow, or add your own skill without changing the existing definitions.
 
@@ -40,8 +40,9 @@ AzSkills is intentionally modular: use one skill independently, combine several 
 | **Modular skill definitions** | Each capability lives in a self-contained `SKILL.md`. |
 | **Explicit behavior contracts** | Trigger conditions, standards, workflows, and output rules are documented directly in the skill. |
 | **Development standards** | AHK v2 guidance includes code size limits, control-flow rules, performance practices, UI optimization, and testing guidance. |
+| **Engineering craftsmanship** | `ultrathink` adds assumption-checking, architecture planning, adversarial review, iterative refinement, and ruthless simplification for complex engineering work. |
 | **Localization workflows** | CSV-oriented localization rules cover 13 language columns, escaping, terminology, and BBCode integrity. |
-| **Documentation tooling** | `readme-craft` defines README structure, visual direction, SVG requirements, and project-type adaptations. |
+| **Documentation tooling** | `readme-craft` defines README structure, visual direction, SVG requirements, feature presentation, and project-type adaptations. |
 | **Language-aware translation** | Translation skills preserve intent, tone, formatting, and technical context instead of relying on literal conversion. |
 
 ---
@@ -55,6 +56,16 @@ AzSkills is intentionally modular: use one skill independently, combine several 
 A rule-driven engineering skill for refactoring and reviewing AutoHotkey v2 code. It covers file and function size limits, control-flow simplification, state management, hotkey design, timer behavior, data structures, DllCall usage, GUI performance, memory management, and testing.
 
 [Open `ahkv2-opt`](ahkv2-opt/SKILL.md)
+
+### 🧠 `ultrathink`
+
+**Deep Engineering Craftsmanship Methodology**
+
+A craftsmanship-oriented skill for complex engineering tasks. It explicitly questions assumptions before implementation, maps architecture and constraints, designs from the caller's perspective, scrutinizes naming and abstractions, considers edge cases, runs tests, compares alternatives, and iterates beyond the first working solution. It also emphasizes ruthless simplification and avoiding premature abstraction.
+
+The skill was imported from [HaydenLundin/ultrathink](https://github.com/HaydenLundin/ultrathink) and retains the upstream MIT license in [`ultrathink/LICENSE`](ultrathink/LICENSE).
+
+[Open `ultrathink`](ultrathink/SKILL.md)
 
 ### 🌐 `any2zh`
 
@@ -110,6 +121,7 @@ ahkv2-opt/
 any2zh/
 l13n/
 readme-craft/
+ultrathink/
 zh2en/
 ```
 
@@ -125,7 +137,7 @@ Copy or link the selected skill directory into the skill-discovery location used
 
 Each skill is designed to be invoked by matching its purpose, trigger conditions, and documented workflow.
 
-For example, an agent working on an AutoHotkey v2 module can load `ahkv2-opt` when asked to refactor or optimize code. A documentation workflow can use `readme-craft` to generate a visual README and its SVG assets. A localization workflow can apply `l13n` to a structured CSV without changing its schema.
+For example, an agent working on an AutoHotkey v2 module can load `ahkv2-opt` when asked to refactor or optimize code. A documentation workflow can use `readme-craft` to generate a visual README and its SVG assets. A localization workflow can apply `l13n` to a structured CSV without changing its schema. For complex implementation, architectural refactoring, or tasks where the first working solution may not be sufficient, `ultrathink` can be loaded to enforce a deeper craftsmanship workflow.
 
 A typical workflow is:
 
@@ -187,6 +199,9 @@ AzSkills/
 ├── 📁 readme-craft/
 │   ├── ⚖️ LICENSE
 │   └── 📄 SKILL.md
+├── 📁 ultrathink/
+│   ├── ⚖️ LICENSE
+│   └── 📄 SKILL.md
 ├── 📁 zh2en/
 │   └── 📄 SKILL.md
 ├── 📁 assets/
@@ -206,6 +221,7 @@ AzSkills follows a few simple maintenance rules:
 3. Prefer explicit workflows and output contracts over vague behavioral descriptions.
 4. Keep documentation and examples aligned with the actual skill definition.
 5. Preserve the existing directory-level naming convention when adding new skills.
+6. Preserve third-party skill licensing and attribution when importing an external skill.
 
 The Skills badge is generated from the repository's actual `SKILL.md` files by GitHub Actions. The License badge is read directly from the repository's GitHub license metadata.
 
@@ -215,7 +231,7 @@ The Skills badge is generated from the repository's actual `SKILL.md` files by G
 
 Contributions are welcome, especially improvements that make a skill more precise, reusable, or easier for agents to follow.
 
-When adding a skill, include a concise frontmatter definition, clear trigger conditions, explicit workflow rules, practical examples where useful, and a scope that does not overlap unnecessarily with existing skills.
+When adding a skill, include a concise frontmatter definition, clear trigger conditions, explicit workflow rules, practical examples where useful, and a scope that does not overlap unnecessarily with existing skills. When importing an external skill, preserve its applicable license and attribution information.
 
 For bug reports, describe the affected skill, the input that triggered the problem, the expected behavior, and the observed behavior.
 
@@ -225,7 +241,7 @@ For bug reports, describe the affected skill, the input that triggered the probl
 
 AzSkills is released under the **MIT License**.
 
-See [`LICENSE`](LICENSE) for the complete license text.
+See [`LICENSE`](LICENSE) for the complete license text. Individual imported skills may retain additional upstream licensing notices where required; see the corresponding skill directory for details.
 
 ---
 
