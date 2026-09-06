@@ -1,127 +1,207 @@
 # Style Presets Reference
 
-Curated visual styles for Frontend Slides. Each preset is inspired by real design references. Abstract shapes are preferred over generic illustration clutter.
+Curated visual systems for Frontend Slides. Presets are starting points, not templates to copy mechanically. The deck's subject, audience, and visual thesis always outrank the preset.
 
-**Viewport CSS:** For mandatory base styles, see [viewport-base.css](viewport-base.css). Include it in every presentation.
+**Mandatory base:** include the complete [viewport-base.css](viewport-base.css) in every generated presentation.
 
----
+## How to Use Presets
+
+1. Pick a visual thesis first.
+2. Select a preset whose typography, palette, and composition support that thesis.
+3. Keep the preset's visual grammar consistent across the full deck.
+4. Introduce variation through composition and narrative role, not by changing the entire style every slide.
+5. Refine after the first full pass; do not stop at the preset's default appearance.
 
 ## Dark Themes
 
 ### 1. Bold Signal
-**Vibe:** Confident, bold, modern, high-impact
+**Vibe:** confident, direct, high-impact
 
-**Layout:** Colored card on a dark field. Number top-left, navigation top-right, title bottom-left.
+**Composition:** dark field + one dominant accent plane; large section numerals; asymmetric title block.
 
 **Typography:** Archivo Black + Space Grotesk
 
-**Signature:** Bold accent card, large section numbers, breadcrumb navigation, grid alignment.
+**Signature:** oversized numeral, sharp accent panel, disciplined grid, concise utility labels.
+
+**Best for:** keynotes, launches, strategy, strong opinions.
 
 ### 2. Electric Studio
-**Vibe:** Bold, clean, professional, high contrast
+**Vibe:** polished, contemporary, decisive
 
-**Layout:** Split panel with a white upper area and blue lower area.
+**Composition:** split field with one strong color zone and restrained white space.
 
 **Typography:** Manrope
 
-**Signature:** Vertical split, accent bar, quote-scale hero typography, restrained spacing.
+**Signature:** vertical split, accent rule, oversized statement type, low ornament.
+
+**Best for:** product, business, portfolio, executive storytelling.
 
 ### 3. Creative Voltage
-**Vibe:** Creative, energetic, retro-modern
+**Vibe:** energetic, experimental, retro-futurist
 
-**Layout:** Electric-blue and dark split panels with mono/script accents.
+**Composition:** dark base + electric accent; grid/halftone details used as atmosphere rather than filler.
 
 **Typography:** Syne + Space Mono
 
-**Signature:** Neon contrast, halftone/grid effects, energetic badges and callouts.
+**Signature:** energetic labels, controlled neon, modular geometry.
+
+**Best for:** creative technology, culture, design, entertainment.
 
 ### 4. Dark Botanical
-**Vibe:** Elegant, sophisticated, premium
+**Vibe:** premium, literary, calm
 
-**Layout:** Centered content on dark with abstract atmospheric shapes.
+**Composition:** deep dark background with warm organic forms and restrained editorial rules.
 
 **Typography:** Cormorant + IBM Plex Sans
 
-**Signature:** Warm accents, thin rules, editorial hierarchy, restrained abstract forms.
+**Signature:** elegant serif scale contrast, fine rules, atmospheric forms.
+
+**Best for:** research, culture, luxury, reflective narratives.
 
 ## Light Themes
 
 ### 5. Notebook Tabs
-**Vibe:** Editorial, organized, tactile
+**Vibe:** tactile, organized, editorial
+
+**Composition:** warm paper field with edge tabs and precise page-like geometry.
 
 **Typography:** Bodoni Moda + DM Sans
 
-**Signature:** Cream paper surface, colorful edge tabs, binder-hole details.
+**Signature:** tab system, binder-hole details, strong editorial hierarchy.
+
+**Best for:** teaching, research notes, workshops, handouts.
 
 ### 6. Pastel Geometry
-**Vibe:** Friendly, modern, approachable
+**Vibe:** friendly, contemporary, approachable
+
+**Composition:** bright neutral field with geometric accents and generous whitespace.
 
 **Typography:** Plus Jakarta Sans
 
-**Signature:** White card, vertical pills, geometric accents, soft hierarchy.
+**Signature:** vertical labels, geometric accents, controlled soft shapes.
+
+**Best for:** education, community, consumer products.
 
 ### 7. Split Pastel
-**Vibe:** Playful, modern, friendly
+**Vibe:** playful, modern, human
+
+**Composition:** two-color field with a clear vertical or diagonal division.
 
 **Typography:** Outfit
 
-**Signature:** Two-color vertical split, rounded badges, grid overlay, clear CTA treatment.
+**Signature:** rounded but not over-rounded geometry, simple status markers, clear CTA hierarchy.
+
+**Best for:** workshops, creative products, social/community topics.
 
 ### 8. Vintage Editorial
-**Vibe:** Witty, confident, personality-driven
+**Vibe:** witty, confident, personality-led
+
+**Composition:** warm paper with bordered callouts, editorial blocks, and geometric anchors.
 
 **Typography:** Fraunces + Work Sans
 
-**Signature:** Cream canvas, geometric accents, bordered callouts, editorial voice.
+**Signature:** print-like framing, expressive serif headline, restrained color.
+
+**Best for:** culture, opinion, storytelling, brand narratives.
 
 ## Specialty Themes
 
 ### 9. Neon Cyber
-**Vibe:** Futuristic, technology-forward
+**Vibe:** technical, futuristic, intense
+
+**Composition:** dark navy field, precision grid, one cyan/magenta signal layer.
 
 **Typography:** Clash Display + Satoshi
 
-**Signature:** Dark navy, cyan/magenta accents, grid and particle atmosphere.
+**Signature:** thin data-like rules, particle/grid atmosphere, selective glow.
+
+**Best for:** software, AI, cybersecurity, emerging technology.
 
 ### 10. Terminal Green
-**Vibe:** Developer-focused, hacker aesthetic
+**Vibe:** developer-first, archival, hacker
+
+**Composition:** terminal surface with command-line hierarchy and scan-line atmosphere.
 
 **Typography:** JetBrains Mono
 
-**Signature:** Terminal palette, scan-line atmosphere, cursor/code motifs.
+**Signature:** monospace hierarchy, status markers, code motifs used sparingly.
+
+**Best for:** engineering talks, open source, tooling, demos.
 
 ### 11. Swiss Modern
-**Vibe:** Clean, precise, geometric
+**Vibe:** precise, neutral, rigorous
+
+**Composition:** visible grid logic, asymmetry, strong alignment, one accent.
 
 **Typography:** Archivo + Nunito
 
-**Signature:** Strong grid, asymmetric layout, geometric forms, one high-contrast accent.
+**Signature:** measured spacing, modular blocks, typographic restraint.
+
+**Best for:** strategy, architecture, systems, corporate communication.
 
 ### 12. Paper & Ink
-**Vibe:** Literary, thoughtful, editorial
+**Vibe:** thoughtful, literary, archival
+
+**Composition:** warm paper, fine rules, pull quotes, diagrammatic marginalia.
 
 **Typography:** Cormorant Garamond + Source Serif 4
 
-**Signature:** Warm paper, drop caps, pull quotes, elegant horizontal rules.
+**Signature:** drop caps, elegant rules, quiet information density.
+
+**Best for:** essays, history, research, narrative talks.
 
 ## Font Pairing Quick Reference
 
-| Preset | Display | Body |
-|---|---|---|
-| Bold Signal | Archivo Black | Space Grotesk |
-| Electric Studio | Manrope | Manrope |
-| Creative Voltage | Syne | Space Mono |
-| Dark Botanical | Cormorant | IBM Plex Sans |
-| Notebook Tabs | Bodoni Moda | DM Sans |
-| Pastel Geometry | Plus Jakarta Sans | Plus Jakarta Sans |
-| Split Pastel | Outfit | Outfit |
-| Vintage Editorial | Fraunces | Work Sans |
-| Neon Cyber | Clash Display | Satoshi |
-| Terminal Green | JetBrains Mono | JetBrains Mono |
+| Preset | Display | Body | Utility |
+|---|---|---|---|
+| Bold Signal | Archivo Black | Space Grotesk | Space Mono |
+| Electric Studio | Manrope | Manrope | Manrope |
+| Creative Voltage | Syne | Space Mono | Space Mono |
+| Dark Botanical | Cormorant | IBM Plex Sans | IBM Plex Mono |
+| Notebook Tabs | Bodoni Moda | DM Sans | DM Mono |
+| Pastel Geometry | Plus Jakarta Sans | Plus Jakarta Sans | DM Mono |
+| Split Pastel | Outfit | Outfit | Space Mono |
+| Vintage Editorial | Fraunces | Work Sans | IBM Plex Mono |
+| Neon Cyber | Clash Display | Satoshi | Space Mono |
+| Terminal Green | JetBrains Mono | JetBrains Mono | JetBrains Mono |
+| Swiss Modern | Archivo | Nunito | IBM Plex Mono |
+| Paper & Ink | Cormorant Garamond | Source Serif 4 | IBM Plex Mono |
+
+## Palette Discipline
+
+Do not distribute colors evenly across all elements. Use semantic roles:
+
+- background
+- surface
+- primary text
+- muted text
+- primary accent
+- optional secondary accent
+- status colors when needed
+
+Keep the primary palette small, typically 2–5 core colors. The accent should indicate meaning or attention, not simply make the slide more colorful.
+
+## Composition Discipline
+
+Presets should vary slide composition while keeping the same visual grammar. Rotate among editorial splits, hero statements, evidence + annotation, timelines, system maps, comparisons, metric constellations, quote slides, full-bleed imagery, and section dividers.
+
+Avoid repeating an identical 3/4/6-card grid as the deck's default content layout.
+
+## Visual Selection Rules
+
+When producing style previews, choose:
+
+- one safe/restrained direction
+- one strong signature direction
+- one context-specific wildcard
+
+The three must differ in typography scale, composition, or visual energy enough that a user can make a meaningful choice by looking at them.
 
 ## Avoid Generic AI Patterns
 
-Do not use Inter/Roboto/Arial/system fonts as the main display face, generic indigo or purple-gradient-on-white palettes, all-centered hero layouts, identical card grids, or decorative elements without a narrative purpose.
+Do not use Inter/Roboto/Arial/system fonts as expressive defaults, purple-gradient-on-white clichés, decorative blobs without purpose, all-centered layouts, excessive glassmorphism, default chart styling, or motion on every element.
+
+The final question is not “does this look stylish?” It is “does every visual decision support the deck's message and visual thesis?”
 
 ## CSS Gotcha
 
