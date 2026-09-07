@@ -65,9 +65,37 @@ Long README pages need visual landmarks, but decorative repetition is a defect. 
 
 ## Semantic Icon System
 
-Icons are a meaning layer, not a fixed decoration pack.
+Icons are a meaning layer, not a decoration layer. They should make hierarchy easier to scan or clarify the meaning of a deliberate visual component.
 
-Read `references/icon-selection.md` whenever icons are used for section headers, feature groups, workflows, quick-start actions, or other semantic landmarks.
+Read `references/icon-selection.md` whenever icons are needed.
+
+### Placement rule — icons belong to hierarchy
+
+Default placement is **immediately adjacent to a heading or inside a deliberate visual component**.
+
+Preferred:
+
+```text
+## [icon] Section title
+### [icon] Category title
+[icon]  Feature card / workflow step / diagram node
+```
+
+Avoid:
+
+```text
+[icon] paragraph
+[icon] sentence
+[icon] code block introduction
+[icon] random whitespace
+[icon] isolated line before a heading
+```
+
+Do not place a standalone icon between a heading and its first paragraph. Do not prepend icons to installation commands, prose instructions, selection notes, links, or code fences merely to create decoration.
+
+For section headings, use at most one semantic icon immediately before the title. For category headings, use at most one semantic icon immediately before the category name. Do not place a second icon on the same heading line.
+
+Use icons inside tables/cards/diagrams only when the component is intentionally visual and the icon contributes meaning to that component. A workflow table may use one distinct icon per step; a normal documentation paragraph should not.
 
 ### Mandatory selection process
 
@@ -88,14 +116,14 @@ context + repetition check
       ↓
 theme-safe adaptation
       ↓
-placement
+placement at the correct hierarchy level
 ```
 
 Never choose `settings`, `arrow`, `adjustment`, or another familiar icon simply because it was used earlier. The icon must match the meaning of the current content.
 
 ### Semantic diversity
 
-Build a local icon vocabulary for the README. Typical mappings include:
+Build a local icon vocabulary for the README. Typical families include:
 
 ```text
 engineering          → gear / wrench / terminal / system
@@ -116,12 +144,13 @@ These are families, not fixed assignments. Search the available source and choos
 
 Default rules:
 
-- Do not use the same icon for two adjacent section headers unless it represents the same persistent navigation concept.
-- Avoid repeating one icon more than twice within a three-section window.
+- Do not use the same icon for two adjacent section or category headings unless it represents the same persistent concept.
+- Avoid repeating one heading icon more than twice within a three-section window.
 - Workflow steps with different actions should use different icons when clear candidates exist.
 - Prefer a repeated icon over a semantically weaker substitute when the repeated meaning is genuinely the same.
+- Never rotate through a fixed icon subset merely to make the README look decorated.
 
-The goal is a vocabulary, not a rotating set of arbitrary shapes.
+The goal is a coherent vocabulary, not arbitrary visual variation.
 
 ### Project-native precedence
 
@@ -380,6 +409,8 @@ Do not create dozens of icons merely to appear varied. Create only the semantic 
 - Prefer project-native visual support over a raw payment URL when it improves hierarchy.
 - Generate support visuals from target-repository evidence automatically.
 - Use semantic icons selectively and contextually.
+- Put semantic icons primarily on headings and deliberate visual components.
+- Do not place icons in arbitrary paragraph margins, between headings and prose, or beside code fences.
 - Do not turn every line into a decorated card.
 
 ## Verification
@@ -404,7 +435,8 @@ Before delivery, verify at realistic GitHub widths.
 - Typography remains readable.
 - Narrow preview remains understandable.
 - Contrast works on light and dark GitHub themes.
-- Icons match their text semantically.
+- Heading icons sit directly beside their headings.
+- Standalone inline icons are absent unless they belong to an intentional visual component.
 - Adjacent sections do not reuse icons without a real reason.
 - The icon set feels like a semantic vocabulary, not a four-icon template.
 - Support CTA is obviously clickable and looks native to the target repository.
@@ -432,7 +464,7 @@ Preserve valid support destinations unless explicitly told to remove or replace 
 
 ## References
 
-- `references/icon-selection.md` — semantic icon discovery, scoring, diversity, and reuse limits.
+- `references/icon-selection.md` — semantic icon discovery, scoring, diversity, reuse limits, and placement rules.
 - `references/support-cta-auto-adapt.md` — zero-configuration project-native support CTA generation.
 - `../design-intelligence.md` — shared visual reasoning layer.
 - `../THIRD_PARTY_NOTICES.md` — reused asset provenance.
