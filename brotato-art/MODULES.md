@@ -2,6 +2,8 @@
 
 `SKILL.md` is the entry point. Load the smallest module that matches the requested asset, then combine modules only when the task spans multiple asset classes.
 
+The character module is intentionally stricter than the generic asset grammar because playable characters require stronger silhouette and identity control than ordinary icons or props.
+
 | Module | Scope | Use when |
 | :--- | :--- | :--- |
 | `character.md` | Characters / NPCs | Designing or refining playable characters, NPCs, bosses, potato-like characters |
@@ -16,6 +18,12 @@
 ## Loading Strategy
 
 For a character request, load `SKILL.md` + `character.md` + `prompt-templates.md`.
+
+For a character that repeatedly becomes generic, additionally use the `Character — Silhouette-Only Test Prompt` and `Character — Anti-Generic Prompt Addendum` in `prompt-templates.md`.
+
+For a character roster, use `character.md` + `Character — Roster Variation Template` and deliberately vary body mass, silhouette hook, pose, prop scale, and color identity while keeping rendering grammar fixed.
+
+For a character reference redraw, use `character.md` + `Character — Reference Redesign Template` and lock all unspecified identity properties.
 
 For a weapon request, load `SKILL.md` + `weapon.md` + `prompt-templates.md`.
 
@@ -43,9 +51,20 @@ For a reference-image redraw, load `SKILL.md` + the relevant asset module + the 
 
 `ui + animation` — animated cursor, status indicator, loading state, or interface feedback.
 
-## Precedence
+## Character-Specific Precedence
 
-When modules conflict, use this order:
+For character generation, use this precedence after explicit user requirements:
+
+1. `character.md` identity and silhouette rules.
+2. `prompt-templates.md` character construction rules.
+3. Generic `SKILL.md` asset rules.
+4. Generic style keywords.
+
+This prevents broad phrases such as "potato character" or "thick black outline" from overriding the character's actual identity architecture.
+
+## General Precedence
+
+For non-character assets, when modules conflict, use this order:
 
 1. Explicit user requirements.
 2. `SKILL.md` core style lock.
