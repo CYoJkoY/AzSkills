@@ -7,7 +7,7 @@
 
   <g font-family="Inter, Segoe UI, Arial, sans-serif">
     <g fill="#8FA9A8" font-family="Cascadia Code, Consolas, monospace" font-size="13" letter-spacing="3">
-      <text x="62" y="68">CYojkoY / AZSKILLS</text>
+      <text x="62" y="68">CYoJkoY / AZSKILLS</text>
       <text x="1138" y="68" text-anchor="end">MODULAR / REUSABLE / OPEN SOURCE</text>
     </g>
 
@@ -20,7 +20,7 @@
 
       <g transform="translate(0 232)" font-family="Cascadia Code, Consolas, monospace">
         <rect x="0" y="0" width="112" height="38" rx="10" fill="#1D2B2E" stroke="#385055"/>
-        <text x="56" y="25" text-anchor="middle" fill="#B4C8C7" font-size="13">11 Skills</text>
+        <text id="skill-count" x="56" y="25" text-anchor="middle" fill="#B4C8C7" font-size="13">11 Skills</text>
         <rect x="124" y="0" width="112" height="38" rx="10" fill="#1D2B2E" stroke="#385055"/>
         <text x="180" y="25" text-anchor="middle" fill="#B4C8C7" font-size="13">Modular</text>
         <rect x="248" y="0" width="126" height="38" rx="10" fill="#1D2B2E" stroke="#385055"/>
