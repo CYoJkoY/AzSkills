@@ -25,9 +25,19 @@ Informed by:
 
 The transferable design methodology is maintained in [`design-intelligence.md`](design-intelligence.md) as a cross-cutting reference layer, not a standalone Skill.
 
-It is inherited by visual workflows such as `logo-generator` and `frontend-slides`, and is intended to guide future visual skills as well. This layer covers visual-thesis formation, contextual style selection, semantic color and typography roles, spacing and composition, accessibility, interaction quality, motion discipline, information density, anti-pattern filtering, and visual quality gates.
+It is inherited by visual workflows such as `logo-generator`, `frontend-slides`, and `readme-craft`. It covers visual-thesis formation, contextual style selection, semantic color and typography roles, spacing and composition, accessibility, interaction quality, motion discipline, information density, anti-pattern filtering, and visual quality gates.
 
 AzSkills does not vendor the upstream UI/UX plugin, searchable design database, generated examples, or repository-specific scripts.
+
+## `readme-craft`
+
+Informed by:
+
+- https://github.com/oil-oil/beautify-github-readme
+
+The AzSkills version integrates the upstream project's strongest README-specific methodology: the first-screen test, `Value → Proof → Mechanism → First use → Detail` content architecture, project-native visual derivation, proof-first composition, GitHub-safe SVG production, realistic render-size testing, coordinated asset organization, and opt-in motion.
+
+The integrated reference is [`readme-craft/references/beautify-github-readme.md`](readme-craft/references/beautify-github-readme.md). Upstream example assets and repository-specific implementation are not mechanically vendored.
 
 ## `ip-as-logo`
 
