@@ -2,7 +2,7 @@
 
 <img src="assets/azskills-hero.svg" alt="AzSkills — Modular AI Skills for Real Work" width="100%">
 
-### A focused collection of reusable AI skills for development, translation, localization, documentation, presentations, and engineering craftsmanship.
+### A focused collection of reusable AI skills for development, translation, localization, documentation, presentations, creative production, and engineering craftsmanship.
 
 <p>
   <a href="#-overview">Overview</a> •
@@ -27,7 +27,7 @@
 
 **AzSkills** is a lightweight collection of reusable **AI agent skill definitions**. Each skill is isolated in its own directory and centered around a `SKILL.md` specification, making the repository easy to inspect, copy, version, and extend.
 
-The collection covers AHK v2 engineering, multilingual translation, game localization, README engineering, Chinese-to-English conversational translation, HTML presentation generation, and deep engineering craftsmanship.
+The collection covers AHK v2 engineering, multilingual translation, game localization, README engineering, Chinese-to-English conversational translation, HTML presentation generation, deep engineering craftsmanship, and Brotato-inspired 2D game art production.
 
 AzSkills is intentionally modular: use one skill independently, combine several skills in a workflow, or add your own skill without changing the existing definitions.
 
@@ -37,13 +37,14 @@ AzSkills is intentionally modular: use one skill independently, combine several 
 
 | Capability | What it provides |
 | :--- | :--- |
-| **Modular skill definitions** | Each capability lives in a self-contained `SKILL.md`. |
+| **Modular skill definitions** | Each capability lives in a self-contained `SKILL.md` or a clearly defined modular skill package. |
 | **Explicit behavior contracts** | Trigger conditions, standards, workflows, and output rules are documented directly in each skill. |
 | **Development standards** | AHK v2 guidance includes code-size limits, control-flow rules, performance practices, UI optimization, and testing guidance. |
 | **Engineering craftsmanship** | `ultrathink` adds assumption-checking, architecture planning, adversarial review, iterative refinement, and simplification for complex engineering work. |
 | **Localization workflows** | CSV-oriented localization rules cover 13 language columns, escaping, terminology, and BBCode integrity. |
 | **Documentation tooling** | `readme-craft` defines README structure, visual direction, SVG requirements, feature presentation, and project-type adaptations. |
 | **Presentation generation** | `frontend-slides` provides fixed-stage 16:9 HTML presentation generation, visual style discovery, animation guidance, and PowerPoint extraction. |
+| **Game art production** | `brotato-art` provides a modular visual system for characters, weapons, items, enemies, effects, UI, cursors, and sprite animations. |
 | **Language-aware translation** | Translation skills preserve intent, tone, formatting, and technical context instead of relying on literal conversion. |
 
 ---
@@ -102,6 +103,36 @@ A visual-first documentation skill for creating structured, polished README file
 
 [Open `readme-craft`](readme-craft/SKILL.md)
 
+### 🎨 `brotato-art`
+
+**Brotato-Inspired 2D Game Art System**
+
+A modular game-art Skill for generating and refining 2D assets inspired by the visual language of **Brotato**. It is designed for characters, NPCs, enemies, bosses, weapons, items, relics, attack effects, particles, UI icons, mouse cursors, and Sprite Sheet animations.
+
+Unlike a single image-generation prompt, `brotato-art` separates global visual rules from asset-specific construction rules and reusable prompt templates. This makes the visual language more consistent across an entire game or mod rather than optimizing each asset independently.
+
+The core system enforces bold hand-drawn contours, chunky rounded silhouettes, flat color blocks, restrained hard-edged cartoon shading, limited palettes, strong small-size readability, transparent game-ready output where appropriate, and continuity constraints for animation.
+
+#### Module structure
+
+```text
+brotato-art/
+├── SKILL.md                 # Core visual rules and quality gates
+├── MODULES.md               # Module selection and precedence
+├── character.md             # Characters / NPCs / Bosses
+├── weapon.md                # Weapons
+├── item.md                  # Items / Relics / Collectibles
+├── enemy.md                 # Enemies / Elites / Bosses
+├── effect.md                # Attacks / Magic / Explosions / Particles / Trails
+├── ui.md                    # HUD / UI / Icons / Cursors
+├── sprite-animation.md      # Sprite Sheets and animation continuity
+└── prompt-templates.md      # Reusable generation and redraw templates
+```
+
+The modules are intentionally loaded selectively. A character task does not need every effect or UI rule, while an animation task can combine the global style, the relevant asset module, and `sprite-animation.md`.
+
+[Open `brotato-art`](brotato-art/SKILL.md) · [View module map](brotato-art/MODULES.md)
+
 ### 💬 `zh2en`
 
 **Chinese-to-English Conversational Translation**
@@ -130,6 +161,7 @@ Choose the directory that matches the task you want to support:
 ```text
 ahkv2-opt/
 any2zh/
+brotato-art/
 frontend-slides/
 l13n/
 readme-craft/
@@ -139,7 +171,7 @@ zh2en/
 
 ### Register the skill with your agent
 
-Copy or link the selected skill directory into the skill-discovery location used by your AI agent or development environment. The skill is defined by its `SKILL.md` file and should remain next to its supporting references.
+Copy or link the selected skill directory into the skill-discovery location used by your AI agent or development environment. A simple skill is defined by its `SKILL.md`; modular skills such as `brotato-art` should keep `SKILL.md` together with their referenced module files.
 
 For `frontend-slides`, keep these files together:
 
@@ -155,7 +187,23 @@ frontend-slides/
     └── extract-pptx.py
 ```
 
-> **Note:** Skill discovery paths vary between agent frameworks. Keep the directory name and `SKILL.md` together when integrating a skill.
+For `brotato-art`, keep the core file and modules together:
+
+```text
+brotato-art/
+├── SKILL.md
+├── MODULES.md
+├── character.md
+├── weapon.md
+├── item.md
+├── enemy.md
+├── effect.md
+├── ui.md
+├── sprite-animation.md
+└── prompt-templates.md
+```
+
+> **Note:** Skill discovery paths vary between agent frameworks. Keep the directory name, `SKILL.md`, and any referenced support files together when integrating a skill.
 
 ---
 
@@ -163,7 +211,58 @@ frontend-slides/
 
 Each skill is designed to be invoked by matching its purpose, trigger conditions, and documented workflow.
 
-For example, an agent working on an AutoHotkey v2 module can load `ahkv2-opt` when asked to refactor or optimize code. A documentation workflow can use `readme-craft` to generate a visual README and its SVG assets. A localization workflow can apply `l13n` to a structured CSV without changing its schema. `frontend-slides` can be loaded whenever the task involves building, converting, or enhancing HTML presentations. For complex implementation or architectural refactoring, `ultrathink` can be combined with another task-specific skill.
+For example, an agent working on an AutoHotkey v2 module can load `ahkv2-opt` when asked to refactor or optimize code. A documentation workflow can use `readme-craft` to generate a visual README and its SVG assets. A localization workflow can apply `l13n` to a structured CSV without changing its schema. `frontend-slides` can be loaded whenever the task involves building, converting, or enhancing HTML presentations. `brotato-art` can be loaded whenever the task involves producing or refining Brotato-inspired game assets. For complex implementation or architectural refactoring, `ultrathink` can be combined with another task-specific skill.
+
+### Modular skill loading
+
+For modular skills, load only the files relevant to the current task. `brotato-art` defines an explicit loading strategy:
+
+```text
+Character
+→ SKILL.md
+→ character.md
+→ prompt-templates.md
+
+Weapon
+→ SKILL.md
+→ weapon.md
+→ prompt-templates.md
+
+Item
+→ SKILL.md
+→ item.md
+→ prompt-templates.md
+
+Enemy
+→ SKILL.md
+→ enemy.md
+→ prompt-templates.md
+
+Effect
+→ SKILL.md
+→ effect.md
+→ prompt-templates.md
+
+UI / Cursor
+→ SKILL.md
+→ ui.md
+→ prompt-templates.md
+
+Sprite / Animation
+→ SKILL.md
+→ relevant asset module
+→ sprite-animation.md
+→ prompt-templates.md
+```
+
+When multiple rules apply, use this precedence order:
+
+```text
+1. Explicit user requirements
+2. Skill core rules in SKILL.md
+3. Most specific asset/task module
+4. Reusable prompt templates
+```
 
 A typical workflow is:
 
@@ -183,6 +282,9 @@ Load only the referenced support files needed for the task
 Apply the workflow and constraints
    │
    ▼
+Run the skill's quality checks
+   │
+   ▼
 Produce task-specific output
 ```
 
@@ -198,11 +300,13 @@ Every skill is packaged as a readable Markdown specification with frontmatter, p
 
 ### Constraint-driven workflows
 
-The skills do more than describe goals. They define concrete constraints such as line-count limits, output schemas, formatting preservation, terminology requirements, fixed slide dimensions, and presentation verification rules.
+The skills do more than describe goals. They define concrete constraints such as line-count limits, output schemas, formatting preservation, terminology requirements, fixed slide dimensions, visual proportions, animation continuity, and verification rules.
 
 ### Specialized rather than monolithic
 
 AzSkills does not try to create one universal prompt. Specialized skills can be selected independently and combined only when their responsibilities overlap in a useful way.
+
+For visual production, `brotato-art` demonstrates this approach by separating global art direction from character, weapon, item, enemy, effect, UI, and animation modules.
 
 ### Human-readable by design
 
@@ -223,6 +327,17 @@ AzSkills/
 │   └── 📄 SKILL.md
 ├── 📁 any2zh/
 │   └── 📄 SKILL.md
+├── 📁 brotato-art/
+│   ├── 📄 SKILL.md
+│   ├── 📄 MODULES.md
+│   ├── 📄 character.md
+│   ├── 📄 weapon.md
+│   ├── 📄 item.md
+│   ├── 📄 enemy.md
+│   ├── 📄 effect.md
+│   ├── 📄 ui.md
+│   ├── 📄 sprite-animation.md
+│   └── 📄 prompt-templates.md
 ├── 📁 frontend-slides/
 │   ├── 📄 SKILL.md
 │   ├── 📄 STYLE_PRESETS.md
@@ -261,6 +376,7 @@ AzSkills follows a few simple maintenance rules:
 5. Preserve the existing directory-level naming convention when adding new skills.
 6. Preserve third-party skill licensing and attribution when importing an external skill.
 7. Keep referenced support files next to the imported skill whenever the upstream skill depends on them.
+8. When a skill develops stable task-specific branches, prefer modular reference files over an increasingly monolithic `SKILL.md`.
 
 The Skills badge is generated from the repository’s actual `SKILL.md` files by GitHub Actions. The License badge is read directly from the repository’s GitHub license metadata.
 
@@ -271,6 +387,8 @@ The Skills badge is generated from the repository’s actual `SKILL.md` files by
 Contributions are welcome, especially improvements that make a skill more precise, reusable, or easier for agents to follow.
 
 When adding a skill, include a concise frontmatter definition, clear trigger conditions, explicit workflow rules, practical examples where useful, and a scope that does not overlap unnecessarily with existing skills. When importing an external skill, preserve its applicable license and attribution information.
+
+When a skill contains multiple stable task types, consider using a modular structure with a small core `SKILL.md` and focused supporting files. Document the loading strategy and rule precedence so agents do not need to load unrelated material.
 
 For bug reports, describe the affected skill, the input that triggered the problem, the expected behavior, and the observed behavior.
 
