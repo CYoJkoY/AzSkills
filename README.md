@@ -27,24 +27,11 @@ A focused library of human-readable `SKILL.md` specifications for engineering, t
 
 ---
 
-## Start here
+## 🧭 Start here
 
 AzSkills is a **library of reusable AI behavior definitions**. It is not a framework, runtime, or executable application.
 
 Each Skill lives in its own directory and is centered on a `SKILL.md` that defines its trigger boundary, hard constraints, workflow, quality gates, and output contract.
-
-<div align="center">
-
-<table>
-<tr>
-<td align="center" width="25%"><img src="assets/readme/icons/contract.svg" width="28" alt="Behavior contract"><br><strong>Structured</strong><br><sub>Explicit behavior contracts</sub></td>
-<td align="center" width="25%"><img src="assets/readme/icons/model.svg" width="28" alt="Composition"><br><strong>Composable</strong><br><sub>Small skills, focused scope</sub></td>
-<td align="center" width="25%"><img src="assets/readme/icons/verification.svg" width="28" alt="Quality"><br><strong>Checked</strong><br><sub>Workflow + quality gates</sub></td>
-<td align="center" width="25%"><img src="assets/readme/icons/installation.svg" width="28" alt="Practical use"><br><strong>Practical</strong><br><sub>Built for real tasks</sub></td>
-</tr>
-</table>
-
-</div>
 
 ### Find the right Skill
 
@@ -66,7 +53,7 @@ Each Skill lives in its own directory and is centered on a `SKILL.md` that defin
 
 ---
 
-## The AzSkills model
+## 🧩 The AzSkills model
 
 AzSkills treats a Skill as a **behavior contract**, not a prompt snippet.
 
@@ -119,7 +106,7 @@ This keeps the catalog focused without forcing unrelated workflows into one univ
 
 ## Skill catalog
 
-<h3><img src="assets/readme/icons/engineering.svg" width="24" alt="Engineering"> Engineering</h3>
+### <img src="assets/readme/icons/engineering.svg" width="24" alt=""> Engineering
 
 #### [`ahkv2-opt`](ahkv2-opt/SKILL.md)
 
@@ -133,7 +120,7 @@ A rule-driven workflow for refactoring and reviewing AutoHotkey v2 code, coverin
 
 A methodology for complex engineering and refactoring: question assumptions, map architecture, design from the caller's perspective, inspect abstractions, consider edge cases, test alternatives, and simplify beyond the first working implementation.
 
-<h3><img src="assets/readme/icons/visual-design.svg" width="24" alt="Visual design"> Presentation & visual design</h3>
+### <img src="assets/readme/icons/visual-design.svg" width="24" alt=""> Presentation & visual design
 
 #### [`frontend-slides`](frontend-slides/SKILL.md)
 
@@ -159,7 +146,7 @@ A narrower workflow for highly simplified character/IP symbols, emphasizing domi
 
 Keeps a supplied photograph faithful while deriving a restrained abstract panel from its spatial, tonal, and color relationships.
 
-<h3><img src="assets/readme/icons/documentation.svg" width="24" alt="Documentation"> Documentation & publishing</h3>
+### <img src="assets/readme/icons/documentation.svg" width="24" alt=""> Documentation & publishing
 
 #### [`readme-craft`](readme-craft/SKILL.md)
 
@@ -175,7 +162,7 @@ Treats a repository homepage as a communication interface: clarify the project f
 
 Produces structured Chinese/English Mod descriptions and change logs with BBCode discipline, practical wording, and strict feature accuracy.
 
-<h3><img src="assets/readme/icons/localization.svg" width="24" alt="Language and localization"> Language & localization</h3>
+### <img src="assets/readme/icons/localization.svg" width="24" alt=""> Language & localization
 
 #### [`any2zh`](any2zh/SKILL.md)
 
@@ -197,9 +184,9 @@ Turns informal, slang-heavy, and context-dependent Chinese into natural English 
 
 ---
 
-## Shared design intelligence
+## 🎨 Shared design intelligence
 
-<img src="assets/readme/icons/visual-design.svg" width="26" alt="Visual design system"> [`design-intelligence.md`](design-intelligence.md) is a **shared reference layer**, not another Skill.
+[`design-intelligence.md`](design-intelligence.md) is a **shared reference layer**, not another Skill.
 
 Visual Skills inherit it when a task changes how an artifact looks, feels, moves, or is interacted with. It provides common guidance for visual thesis, style selection, typography, semantic color, composition, spacing, density, accessibility, motion, anti-pattern filtering, and visual QA.
 
@@ -216,7 +203,7 @@ The layer is an AzSkills synthesis informed by the public methodology of [`nextl
 
 ---
 
-## How it works
+## 🔄 How it works
 
 <div align="center">
 
@@ -235,13 +222,11 @@ Complex tasks can compose multiple Skills. A visual documentation task, for exam
 
 ---
 
-## Installation
+## 📦 Installation
 
 AzSkills is a collection of Markdown specifications and supporting files. There is no repository-wide runtime or build step.
 
 ### Clone
-
-<img src="assets/readme/icons/installation.svg" width="22" alt="Install">
 
 ```bash
 git clone https://github.com/CYoJkoY/AzSkills.git
@@ -274,9 +259,9 @@ Copy or link the selected Skill into the skill-discovery location used by your A
 
 ---
 
-## Skill selection
+## 🎯 Skill selection
 
-<img src="assets/readme/icons/selection.svg" width="22" alt="Selection"> Use the narrowest capability first:
+Use the narrowest capability first:
 
 ```text
 User task
@@ -297,7 +282,7 @@ Visual tasks inherit `design-intelligence.md` automatically.
 
 ---
 
-## Repository structure
+## 🗂️ Repository structure
 
 ```text
 AzSkills/
@@ -341,7 +326,7 @@ The Skill count badge is generated from the repository's `SKILL.md` files by [`u
 
 ---
 
-## Documentation principles
+## 📐 Documentation principles
 
 AzSkills applies the same standards it teaches:
 
@@ -353,7 +338,7 @@ AzSkills applies the same standards it teaches:
 
 **Correct destinations.** A source repository, deployed website, online documentation, payment page, and downloadable release are different destinations. README rewrites must preserve the destination that actually completes the user's intended action.
 
-**Semantic icon systems.** Icons are selected for meaning, project context, and local visual hierarchy. This README deliberately uses different icons for different concepts rather than cycling through a fixed four-icon palette.
+**Semantic icon systems.** Icons are selected for meaning, project context, and local visual hierarchy. They belong primarily to headings and deliberate visual components, not to arbitrary paragraphs or whitespace.
 
 **Adaptive support.** Support visuals are generated or selected from the target project's own identity rather than copied from another repository. Users should not need to micro-tune colors, iconography, dimensions, or illustration prompts.
 
@@ -363,9 +348,7 @@ For the complete method, see [`readme-craft/SKILL.md`](readme-craft/SKILL.md), [
 
 ---
 
-## Contributing
-
-<img src="assets/readme/icons/contributing.svg" width="24" alt="Contributing">
+## 🤝 Contributing
 
 A strong contribution should add a **clear capability**, improve an existing workflow, fix a concrete defect, or remove unnecessary complexity.
 
@@ -395,7 +378,7 @@ Support the continued development of AzSkills and its Skill library.
 
 ---
 
-## License & provenance
+## ⚖️ License & provenance
 
 AzSkills is released under the [MIT License](LICENSE).
 
