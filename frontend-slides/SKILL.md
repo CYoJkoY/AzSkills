@@ -7,6 +7,8 @@ description: Create production-quality, distinctive HTML presentations from scra
 
 Create presentation-grade, zero-dependency HTML decks that feel designed rather than generated. The default quality bar is a polished editorial or product-design artifact: clear hierarchy, deliberate composition, cohesive typography, controlled motion, and no accidental visual noise.
 
+Before designing, automatically inherit [`../design-intelligence.md`](../design-intelligence.md). This shared layer supplies contextual style selection, semantic color and typography roles, spacing rhythm, accessibility, interaction quality, motion discipline, anti-pattern filtering, and the final visual-quality mindset. This is automatic; the user does not need to name the external methodology.
+
 This skill is deliberately inspired by the visual craft and fixed-stage workflow of `zarazhangrui/frontend-slides`, and by the design-system, token, accessibility, and visual-hierarchy discipline of `nextlevelbuilder/ui-ux-pro-max-skill`. Do not copy their templates mechanically. Extract the principles and apply them to the user's subject.
 
 ## Core Principles
@@ -275,5 +277,6 @@ Minimum verification before finalizing:
 - `animation-patterns.md` — motion patterns and performance guidance.
 - `scripts/extract-pptx.py` — PowerPoint extraction helper.
 - `scripts/quality_audit.py` — dependency-free static quality audit for generated HTML.
+- `../design-intelligence.md` — shared cross-skill visual intelligence inherited by AzSkills visual workflows.
 
 Source lineage: adapted from `zarazhangrui/frontend-slides`; visual design discipline is additionally informed by `nextlevelbuilder/ui-ux-pro-max-skill`. Preserve the upstream license and attribution in this directory.
