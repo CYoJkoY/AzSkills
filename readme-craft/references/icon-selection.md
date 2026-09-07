@@ -6,12 +6,70 @@ Use this reference whenever a README needs semantic icons.
 
 Icons must explain structure, not decorate empty space. A good icon should be immediately interpretable, visually compatible with the target repository, and distinct from neighboring icons.
 
+## Placement hierarchy
+
+Icon placement is part of information architecture. Choose the placement level before choosing the exact asset.
+
+Preferred order:
+
+```text
+heading / category title
+        ↓
+intentional visual component
+        ↓
+workflow step / diagram node / card
+        ↓
+inline semantic cue only when genuinely necessary
+```
+
+Default rule: an icon belongs beside a heading or inside an intentionally visual component. It should not float between unrelated content blocks.
+
+### Heading usage
+
+Use at most one icon immediately before an H2/H3 heading when the section benefits from a visual marker.
+
+Good:
+
+```markdown
+## <icon> Installation
+### <icon> Language & localization
+```
+
+Avoid:
+
+```markdown
+## Installation
+<icon>
+
+text...
+```
+
+Avoid placing an icon between a heading and its first paragraph, directly before a code fence, or as an isolated line above/below a heading.
+
+### Visual component usage
+
+Icons may appear in a table, card, workflow, diagram, or other deliberate visual unit when each icon has a clear semantic job inside that unit.
+
+For example:
+
+```text
+[download icon] Install → [document icon] Configure → [check icon] Verify
+```
+
+Do not add an icon to a normal paragraph simply because that paragraph is visually plain.
+
+### Inline exception
+
+Inline icons are exceptional. Use one only when the icon itself carries information that would otherwise be lost, such as a tiny status marker, platform indicator, or genuinely semantic action cue. Never use inline icons as section decoration.
+
 ## Selection workflow
 
 ```text
 README meaning
       ↓
 semantic label
+      ↓
+choose placement level
       ↓
 inspect project-native assets
       ↓
@@ -65,7 +123,7 @@ Avoid using the same icon repeatedly in nearby blocks.
 
 Default limits:
 
-- Do not use the same semantic icon for more than one adjacent section header.
+- Do not use the same semantic icon for more than one adjacent section/category heading.
 - Avoid repeating the same icon more than twice within a 3-section window unless it represents the same persistent navigation concept.
 - For workflow steps, use distinct icons when each step has a different action.
 - If a repeated icon is the clearest representation, keep it repeated rather than replacing it with a semantically weaker icon.
@@ -104,8 +162,10 @@ Do not make all icons identical just to create consistency. Consistency comes fr
 Before delivery:
 
 1. Read each icon meaning beside its text without relying on color.
-2. Check neighboring icons for accidental repetition.
-3. Check light and dark GitHub backgrounds.
-4. Check that the icon does not imply a different function than the text.
-5. Check that removing the icon would reduce scanning value; if not, remove it.
-6. Check that the icon set feels like a vocabulary rather than a four-icon template.
+2. Check placement hierarchy before checking icon variety.
+3. Check neighboring icons for accidental repetition.
+4. Check light and dark GitHub backgrounds.
+5. Check that the icon does not imply a different function than the text.
+6. Check that removing the icon would reduce scanning value; if not, remove it.
+7. Check that the icon set feels like a vocabulary rather than a four-icon template.
+8. Remove any icon that was added only to fill whitespace.
