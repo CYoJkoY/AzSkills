@@ -154,7 +154,9 @@ A valid existing support destination must be preserved unless the user explicitl
 
 Support is an action layer. It should be visually recognizable and easy to activate, but never at the cost of link clarity or accessibility.
 
-A raw standalone payment URL often reads like implementation detail. Prefer a compact project-native linked visual CTA with concise wording and an icon or symbol. The visual itself should link to the canonical support destination.
+A raw standalone payment URL often reads like implementation detail. Prefer a compact project-native linked visual CTA with concise wording and a visual motif that belongs to the project. The visual itself should link to the canonical support destination.
+
+The support graphic is a project-specific interface asset, not a universal AzSkills asset. Never copy an existing repository's branded `support.svg`, Hero artwork, mascot, palette, or other identity-bearing CTA into another project merely because the layout works. Rebuild or retune the asset from the destination repository's own visual language.
 
 The canonical support URL must also remain present as ordinary searchable/copyable Markdown. Never make an image the only way to discover or copy the support destination.
 
@@ -166,7 +168,7 @@ Preferred structure:
 <div align="center">
 
 <a href="<canonical-support-url>">
-  <img src="assets/readme/support.svg" alt="Support <Project>" width="420">
+  <img src="assets/readme/support-cta.svg" alt="Support <Project>" width="420">
 </a>
 
 <short project-native support sentence>
@@ -176,7 +178,29 @@ Preferred structure:
 </div>
 ```
 
-A support asset should be a compact CTA, not a second Hero. Avoid oversized donation banners, manipulative language, false urgency, unsupported commercial claims, and generic styling that is not native to the project.
+A support asset should be a compact CTA, not a second Hero. It should normally contain:
+
+```text
+project-native motif or illustration
+        +
+clear support action
+        +
+small amount of supporting text
+```
+
+The visual treatment should be derived from the repository's identity, not from this example's literal colors, iconography, character, or composition. Match the project's existing palette, geometry, typography, art style, mascot, product screenshot language, or other authentic cue whenever one exists.
+
+Use the following fallback hierarchy when no strong project art exists:
+
+```text
+existing project artwork / logo / UI motif
+        ↓
+project-derived geometric or semantic motif
+        ↓
+minimal neutral donation/support illustration
+```
+
+Do not use a generic donation illustration when a strong project-native visual language is available. Conversely, do not invent a mascot or elaborate scene solely to decorate a payment link.
 
 ### Distinguish source, deployment, and download destinations
 
@@ -299,7 +323,7 @@ configuration → settings / adjustment
 workflow      → arrow / route
 engineering   → tool / gear / system
 translation   → A-to-Z / language
-documentation→ document / editing
+documentation → document / editing
 support       → heart / star / contribution
 ```
 
@@ -393,14 +417,16 @@ assets/readme/
 ├── showcase.png
 ├── section-*.svg
 ├── workflow.svg
-├── support.svg
+├── support-cta.svg
 ├── icons/
 │   ├── category-*.svg
 │   └── utility-*.svg
 └── source/
     ├── hero-layout.svg
     ├── hero-subject.png
-    └── hero-prompt.txt
+    ├── support-layout.svg
+    ├── support-subject.png
+    └── support-prompt.txt
 ```
 
 Use lowercase hyphenated names except where an upstream filename is intentionally retained. Keep source assets separate from published assets.
@@ -422,7 +448,8 @@ For coordinated assets, share typography hierarchy, palette roles, radius/stroke
 - Classify important links as source, deployment/live, or download/release.
 - Use the destination that actually completes the user's intended action.
 - Preserve valid sponsorship/donation/support destinations.
-- Prefer a compact visual support CTA over a bare payment URL when it improves hierarchy.
+- Prefer a compact project-native visual support CTA over a bare payment URL when it improves hierarchy.
+- Do not reuse branded support artwork from another repository.
 - Keep the canonical support URL accessible in Markdown.
 - Use semantic icons to break visual monotony in long sections.
 - Do not turn every line of documentation into a decorated card.
@@ -432,16 +459,72 @@ For coordinated assets, share typography hierarchy, palette roles, radius/stroke
 A support block should read as an intentional action surface:
 
 ```text
-[ icon + support action ]
-        ↓
+[ project-native visual support CTA ]
+                ↓
 short project-native explanation
-        ↓
+                ↓
 canonical direct URL
 ```
 
-A local SVG CTA is preferred when the repository already uses local visual assets. The CTA should be visually coherent, compact, clickable, and accessible.
+A local visual CTA is preferred when the repository already uses local visual assets. The CTA should be visually coherent, compact, clickable, and accessible.
 
 The actual support endpoint remains the canonical source of truth; the graphic is only the interface layer.
+
+### Project-specific asset rule
+
+The support CTA must belong to the repository it appears in. Treat every support illustration as an authored project asset, not as a global template asset.
+
+For each new repository:
+
+1. inspect its logo, mascot, UI, screenshots, art direction, palette, typography, and recurring motifs;
+2. identify one authentic visual cue that can carry the support action;
+3. design a compact CTA around that cue;
+4. adapt wording and visual weight to the repository's audience and overall README hierarchy;
+5. retain the canonical support URL in Markdown outside the graphic.
+
+An existing support asset from AzSkills or any other repository may be used as structural inspiration only. Do not transplant its project name, mascot, illustration, exact palette, decorative motif, or brand-specific composition into another repository unless the target project genuinely shares that identity.
+
+### What the CTA should contain
+
+Prefer a small visual narrative rather than a plain label:
+
+```text
+visual motif / project artifact
+          +
+Support / Sponsor / Contribute action
+          +
+optional one-line rationale
+```
+
+Good subjects include a project mascot offering a heart/star, a product artifact connected to contribution, a stylized project UI element with a support cue, or an abstract motif derived from the repository's own identity.
+
+Do not place critical instructions, payment identifiers, legal terms, or the only support URL inside the artwork.
+
+### Fallback when project visuals are weak
+
+Use this order:
+
+```text
+project-native artwork
+        ↓
+project-native logo / UI / geometric motif
+        ↓
+small deterministic support symbol + typography
+```
+
+A neutral, tasteful support illustration is preferable to a visually loud but unrelated mascot or stock-style donation banner.
+
+### Anti-patterns
+
+Avoid:
+
+- raw URL as the only support presentation when a visual CTA would improve hierarchy;
+- a giant donation banner that behaves like a second Hero;
+- generic "Buy me a coffee" artwork copied across unrelated repositories;
+- AzSkills-specific support artwork transplanted into unrelated projects;
+- decorative art with no recognizable support action;
+- urgent or manipulative fundraising language;
+- unsupported claims about impact, funding, popularity, or project sustainability.
 
 ## Third-Party Icon Provenance
 
@@ -518,7 +601,7 @@ Before delivery, verify at realistic GitHub widths.
 - Icons are sparse enough to guide scanning but frequent enough to break long text runs.
 - Section-to-section visual rhythm does not become a continuous wall of text.
 - Support CTA is obviously clickable.
-- The result looks specific to the repository.
+- Support CTA looks native to the target repository rather than copied from another project.
 
 ### Maintenance
 
