@@ -33,20 +33,13 @@ Informed by:
 - https://github.com/zhangyu1818/appicon-forge
 - https://github.com/Nieobie/game-icon-pack
 
-The AzSkills version integrates README-specific methodology with a project-native visual system, dynamic repository facts, semantic iconography, GitHub-safe SVG production, realistic render-size testing, support-action UX, and explicit source/deployment/download link semantics.
+The AzSkills version integrates README-specific methodology with a project-native visual system, semantic icon selection, adaptive support CTAs, GitHub-safe SVG production, realistic render-size testing, and explicit source/deployment/download link semantics.
 
 `appicon-forge` is used as a generation/customization reference for project-specific icons and compact identity assets. When its generated icons use Iconify, fonts, images, or other third-party inputs, their individual rights must be checked separately.
 
-`game-icon-pack` is the preferred reusable icon source when a matching semantic icon exists. Its repository metadata declares `CC0-1.0`, and selected SVG assets are copied locally into AzSkills under `assets/readme/icons/` rather than hotlinked from the upstream repository.
+`game-icon-pack` is a permitted reusable icon source when a matching semantic icon exists. Its repository metadata declares `CC0-1.0`. Readme-craft requires semantic discovery and context matching rather than maintaining a fixed subset of icons.
 
-Current local icon assets derived from `game-icon-pack`:
-
-| Local asset | Upstream asset | License |
-| :--- | :--- | :--- |
-| `assets/readme/icons/settings.svg` | `svg/padding/8-ui/settings.svg` | CC0-1.0 |
-| `assets/readme/icons/adjustment.svg` | `svg/padding/8-ui/adjustment.svg` | CC0-1.0 |
-| `assets/readme/icons/arrow-right.svg` | `svg/padding/8-ui/arrow-right.svg` | CC0-1.0 |
-| `assets/readme/icons/a-to-z.svg` | `svg/padding/11-symbols/A-to-Z.svg` | CC0-1.0 |
+The AzSkills README also contains locally authored project-specific semantic icons under `assets/readme/icons/`. These are original local assets and do not require attribution to `game-icon-pack`.
 
 The integrated README reference remains [`readme-craft/references/beautify-github-readme.md`](readme-craft/references/beautify-github-readme.md). Upstream example assets and repository-specific implementations are not mechanically vendored.
 
