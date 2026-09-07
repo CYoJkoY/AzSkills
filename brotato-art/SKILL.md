@@ -1,21 +1,21 @@
 ---
 name: brotato-art
-description: Brotato Art Direction Skill v4. Generate and refine 2D game assets using the visual grammar of Brotato's actual in-game roster and asset system. Covers characters, weapons, items, relics, enemies, NPCs, effects, UI, cursors, and sprite animations. Character tasks use an official-roster-inspired portrait-first grammar: pale potato-creature masses, simple facial composition, bold black contours, one dominant identity feature, flat colors, minimal shading, and strict small-size readability.
+description: Brotato Art Direction Skill v5. Generate and refine 2D game assets using the visual grammar of Brotato's actual in-game roster and asset system. Covers characters, weapons, items, relics, enemies, NPCs, effects, UI, cursors, environments, and sprite animations. Character tasks use an authentic roster grammar: a compact pale potato-creature base, extremely simple facial composition, one dominant identity feature, restrained body variation, bold black contours, flat color masses, minimal hard-edged shading, and strict icon-scale readability.
 ---
 
-# Brotato Art Direction v4
+# Brotato Art Direction v5
 
 ## Mission
 
-Use this skill for Brotato-style or Brotato-inspired 2D game assets. The target is not generic "thick black outline + flat colors". The target is an asset that could naturally coexist with Brotato's actual in-game visual system.
+Use this skill for Brotato-style or Brotato-inspired 2D game assets. The target is not merely "thick black outline + flat colors". The target is an asset that could naturally coexist with Brotato's actual in-game visual system.
 
-For characters, prioritize the visual grammar visible across the official character roster: compact pale potato-creature masses, highly compressed facial design, strong but simple identity features, bold black contours, flat color regions, and tiny-icon readability. The official roster contains many different character identities, but they remain members of the same graphic species.
+The reference standard is the visual construction of the real Brotato character roster and game assets. The current character roster contains many distinct identities while preserving a shared compact creature/icon language: pale potato-like bodies, extremely compressed facial graphics, a small number of large identity features, heavy contours, broad flat colors, and minimal shading. citehttps://brotato.wiki.spellsandguns.com/Characters
 
 Think:
 
 > If this asset had shipped as a native in-game Brotato asset, how would it have been constructed?
 
-Do not turn the target into a modern mascot, polished vector illustration, mobile-game promotional art, anime, fantasy RPG character sheet, concept art, or 3D render.
+Do not turn the target into a modern mascot, polished SVG illustration, mobile-game promotional asset, anime character, fantasy RPG character sheet, realistic creature, concept-art render, or 3D model.
 
 ## Absolute Priority
 
@@ -23,156 +23,261 @@ When requirements conflict:
 
 1. Explicit user requirements.
 2. Brotato visual language.
-3. Character/asset silhouette and identity.
-4. Small-size game readability.
-5. Bold black outer contour.
-6. Simple organic proportions.
-7. Limited flat color blocks.
+3. Character/asset identity.
+4. Icon/sprite readability.
+5. Strong black outer contour.
+6. Compact organic proportions.
+7. Limited flat color masses.
 8. Sparse internal structure.
-9. Minimal cartoon shading.
-10. Decorative details.
+9. Minimal hard-edged cartoon shading.
+10. Decorative detail.
 
 If a lower-priority detail damages a higher-priority rule, delete it.
 
 ## Core Visual DNA
 
-The visual language is defined by deliberate compression:
+The visual language is defined by deliberate visual compression:
 
 - compact chunky organic forms
-- short or compressed proportions
-- pale/neutral potato-like creature bases where appropriate
+- pale/off-white potato-like creature bases where appropriate
 - bold black outer contours
 - extremely simple faces
-- limited color palettes
-- flat or near-flat color regions
+- one or a few strong identity features
+- limited flat color regions
 - small hard-edged shadow blocks
 - sparse internal lines
 - controlled asymmetry
-- strong thumbnail readability
-- obvious game-sprite construction
+- high recognition at small sizes
+- obvious game-asset construction
 
-The hand-drawn feeling comes from shape language, proportion, and controlled contour imperfection—not sketch noise, brush texture, random jitter, or scribbles.
+The hand-drawn quality comes from shape language, proportion, and controlled contour irregularity—not sketch noise, brush texture, random jitter, or scribbles.
 
-## Silhouette-First Construction
+## Authentic Roster Principle
 
-Every asset follows:
+Brotato characters are a coherent species/system, not 62 unrelated character designs. Do not force every character to have a radically different body.
 
-```text
-Identity
-→ silhouette
-→ major color mass
-→ defining feature
-→ functional structure
-→ minimal shading
-→ simplification
-→ thumbnail test
-```
-
-For characters, use the dedicated character grammar rather than treating clothing/equipment as the starting point.
-
-Start from the black silhouette. If the subject is not recognizable as a silhouette, redesign the silhouette instead of adding detail.
-
-## Character Grammar — Official Roster Mode
-
-Character tasks use `character.md` as a specialized rule set.
-
-The default character construction is:
+The correct target is:
 
 ```text
-potato creature mass
-→ face composition
-→ body/contour variation
-→ one dominant identity feature
-→ optional secondary feature
+shared potato-creature foundation
+→ face identity
+→ primary visual identity feature
+→ expression
+→ 0–3 secondary features
+→ subtle body variation when useful
+→ optional equipment
 → restrained color
+→ minimal shading
 ```
 
-Do not default to:
+The wrong target is:
+
+```text
+generic potato
+→ elaborate costume
+→ weapon
+→ accessories
+→ decorative detail
+```
+
+and also:
 
 ```text
 human character
 → potato skin
-→ costume
+→ human anatomy
 ```
 
-or:
+Character identity should usually come from the face plus one or a few large graphic features, not from excessive equipment.
 
-```text
-generic oval potato
-→ hat
-→ job equipment
-```
+## Character Presentation
 
-### Character Presentation
-
-When the user asks for a character without specifying a full gameplay pose, prefer the visual language of the official character selection portraits:
+When the user asks for a character without explicitly requesting a gameplay animation or full-body action pose, prefer the compact character-icon language used by the roster:
 
 - one compact potato creature
-- pale/off-white body
-- bold black contour
-- face clearly visible
-- front-facing or slightly directional orientation
-- one or a few large identity features
+- pale/off-white body unless the concept explicitly requires another material
+- thick black contour
+- face large and clearly readable
+- mostly frontal or slightly directional orientation
+- one dominant identity feature
 - compact framing
+- minimal visible limbs
 - no environment
 - no cinematic perspective
 
-Do not automatically generate a full-body RPG character sheet.
+Do not automatically create an RPG-style full-body illustration, turnaround sheet, or dramatic scene.
 
-### Character Body
+## Character Base Body
 
-The potato mass is the character, not a fixed oval template.
+The default body is a simple potato-like organic mass. It is not a mathematically perfect oval and it is not a human torso.
 
-Allow deliberate variation:
+Allow restrained variation:
 
 - round
-- tall
-- wide
-- flattened
+- slightly tall
+- slightly wide
+- slightly flattened
 - lopsided
 - swollen
 - tapered
-- pointed
+- subtly pointed
 - compressed
 - irregularly bulged
-- tilted
+- slightly tilted
 
-Keep the result as a simple organic potato creature rather than realistic monster or human anatomy.
+Do not force extreme deformation. The character should still belong to the same visual species as the roster.
 
-### Character Face
+## Character Face
 
-The face is a primary identity layer.
+The face is a primary identity layer and must remain extremely simple.
+
+Useful elements:
+
+- tiny black eyes
+- small oval eyes
+- simple eyelids
+- tiny eyebrows
+- short mouth
+- tiny curved mouth
+- small teeth/fangs only when necessary
+- one obscured or altered eye
+- asymmetric eye placement
+- simple facial marking
+
+Avoid:
+
+- anime eyes
+- detailed irises
+- realistic pupils
+- eyelashes
+- realistic nose
+- realistic lips
+- detailed teeth
+- realistic facial anatomy
+- 3D facial modeling
+
+Facial personality comes from placement, scale, angle, and a few black graphic shapes—not detail.
+
+## Primary Identity Feature
+
+Every original character should have one obvious graphic identity feature. Suitable examples include:
+
+- hat
+- helmet
+- goggles
+- eye patch
+- mask
+- hair mass
+- beard/moustache mass
+- horns
+- ears
+- unusual eye
+- simple mechanical block
+- tentacle-like extension
+- scarf
+- crown
+- large facial marking
+- simple cape
+- distinctive body protrusion
+
+One strong feature is preferable to many small accessories.
+
+## Secondary Features
+
+Use zero to three secondary features. Keep them subordinate to the face and primary identity feature.
+
+Do not fill empty space merely because it is available.
+
+## Character Limbs
+
+For portrait/icon characters, limbs may be absent or only minimally visible. For gameplay sprites, use short chunky appendages.
+
+Never force human anatomy into the design. Avoid realistic elbows, knees, fingers, feet, musculature, shoulders, hips, or a narrow waist.
+
+Hands and feet are graphic shapes.
+
+## Character Clothing and Equipment
+
+Clothing is a graphic mass, not a realistic garment.
 
 Prefer:
 
-- small black eyes
-- simple eyelids/brows
-- tiny mouth
-- small teeth/fangs only when identity requires them
-- one obscured or altered eye when useful
-- asymmetric placement when purposeful
+- simple coat
+- simple robe
+- simple helmet
+- simple cape
+- simple collar
+- simple belt
 
-Avoid detailed facial anatomy, anime eyes, realistic pupils, eyelashes, realistic noses, realistic lips, or 3D facial modeling.
+Avoid:
 
-### Character Identity Feature
+- realistic folds
+- fabric weave
+- detailed stitching
+- layered fashion
+- complex armor construction
+- dozens of straps or pouches
 
-Every original character should have one dominant graphic identity feature. It may be the body contour, face, hair/beard-like mass, hat, goggles, mask, horn, ear, mechanical block, tentacle-like extension, or another simple motif.
+Starting weapons are gameplay data and should not automatically become part of the character illustration. Include a weapon only when the user explicitly asks for it or when it is inseparable from the visual identity.
 
-Do not use many small accessories to compensate for weak character design.
+## Character Color
 
-### Character Limbs
+Default potato-creature bodies should favor:
 
-Portrait characters may have no visible limbs or only minimal indications. Gameplay sprites can show short chunky limbs.
+- pale ivory
+- off-white
+- cream
+- light neutral
 
-Never force human arms, legs, joints, hands, or feet into the design.
+Do not automatically make the body yellow, golden, orange, or brown.
 
-### Character Color
+Use a restrained palette:
 
-Default potato-like characters should favor off-white, ivory, cream, or pale neutral bodies. Use one dominant accent and at most a small secondary accent unless the concept explicitly requires another body material.
+```text
+body
++ primary identity color
++ optional secondary color
++ tiny accent
++ black contour
+```
 
-### Character Shading
+## Character Shading
 
-Use little or no shading. Prefer a flat body fill with one small hard-edged shadow region and a heavy black contour.
+Use very little shading.
+
+Default:
+
+```text
+flat body fill
++ one small hard-edged shadow block
++ optional tiny highlight
++ black contour
+```
+
+For character icons, no shading can be better than over-rendering.
+
+## Silhouette System
+
+All assets should begin from a readable shape, but character silhouette testing must be interpreted correctly.
+
+For many roster characters, the silhouette primarily communicates:
+
+- the shared potato-creature body
+- the head shape
+- hat/hair/goggles/ears/horns or another large identity feature
+
+Do not require the black silhouette alone to identify every exact character. Facial composition is an essential identity layer and should be tested separately.
+
+Character validation order:
+
+```text
+base creature test
+→ silhouette test
+→ face test
+→ identity-feature test
+→ roster test
+→ thumbnail test
+```
 
 ## Non-Character Shape Language
 
@@ -182,14 +287,14 @@ Prefer:
 - potato-like blobs
 - rounded rectangles
 - soft asymmetric polygons
-- chunky limbs
+- chunky appendages
 - simple primitives
 - exaggerated compact forms
 
 Avoid:
 
-- perfect mathematical geometry
-- sterile symmetry
+- sterile mathematical geometry
+- perfect symmetry
 - realistic anatomy
 - elegant fashion proportions
 - complex perspective construction
@@ -202,15 +307,15 @@ Use a strong black outer contour: `#000000`.
 
 The outer contour must be visibly heavier than internal marks and feel rounded, organic, clean, and slightly hand-drawn.
 
-A starting range of approximately 1/45–1/25 of the canvas short edge may be used as a perceived-weight guideline, not a literal requirement. Smaller assets may need heavier contours; complex assets may need slightly lighter contours.
+A perceived-weight range of approximately 1/45–1/25 of the canvas short edge may be used as a starting guideline, not a literal requirement. Smaller assets may need heavier contours.
 
 ## Internal Lines
 
 Internal lines are subordinate to the outer contour. Prefer color separation first.
 
-Good uses: eyes, mouth, short structural separators, important seams, weapon joints, functional indicators.
+Good uses: eyes, mouth, facial marks, short structural separators, important seams, weapon joints, and functional indicators.
 
-Bad uses: cross-hatching, dense anatomy lines, decorative line forests, technical diagrams, sketch construction.
+Bad uses: cross-hatching, dense anatomy lines, decorative line forests, technical diagrams, and sketch construction.
 
 ## Color System
 
@@ -218,9 +323,9 @@ Use a restrained palette:
 
 - one dominant color
 - one or two secondary colors
-- a small accent color
+- a small accent
 - black contour
-- sparse highlight/shadow colors
+- sparse shadow/highlight colors
 
 Do not use smooth gradients, photographic color variation, cinematic grading, rainbow palettes, color noise, complex material maps, or excessive neon accents.
 
@@ -237,8 +342,6 @@ base color
 + black contour
 ```
 
-For character portraits, reduce this further when necessary. No shading is often better than over-rendering.
-
 Avoid airbrush, soft gradients, PBR, realistic reflections, rim lighting, volumetric lighting, cinematic illumination, and painterly rendering.
 
 ## Materials
@@ -250,32 +353,32 @@ Do not add realistic metal reflections, leather grain, wood grain, fabric textur
 ## Asset Modules
 
 ### Character
-Load `character.md`. Priorities: potato-creature mass → face composition → body/contour variation → dominant identity feature → optional secondary feature → restrained palette → minimal shading. For unspecified character presentation, prefer official-roster portrait grammar rather than full-body RPG composition.
+Load `character.md`. Priorities: shared potato-creature foundation → face identity → primary identity feature → expression → 0–3 secondary features → subtle body variation when useful → restrained palette → minimal shading. For unspecified presentation, use compact roster/icon grammar rather than a full-body RPG composition.
 
 ### Weapon
 Priorities: recognizable weapon profile → orientation → major functional components → limited palette → minimal material separation. Use the most recognizable angle rather than forcing every weapon into front view.
 
 ### Item / Relic
-Use one dominant object or symbol. Keep the icon compact and understandable without text. Legendary items may have unusual silhouettes or stronger accents, but “legendary” does not mean “more micro-detail”.
+Use one dominant object or symbol. Keep the icon compact and understandable without text. Legendary identity comes from silhouette, motif, and hierarchy, not micro-detail.
 
 ### Enemy / Boss
-Use exaggerated silhouettes and one or two defining features. Mutant, alien, fantasy, mechanical, or Cthulhu-like concepts remain chunky, graphic, and low-detail rather than realistic creature concept art.
+Use an exaggerated compact silhouette and one or two defining features. Mutant, alien, fantasy, mechanical, or Cthulhu-like concepts remain graphic and low-detail rather than realistic creature concept art.
 
 ### NPC
-Use the same body, face, outline, color, and detail grammar as playable characters. Identity comes from silhouette, clothing, equipment, or one memorable prop.
+Use the same creature, face, contour, color, and detail grammar as playable characters. Identity comes from a clear silhouette, clothing mass, equipment, or one memorable prop.
 
 ### Effect / VFX
 Prefer simple circles, blobs, arcs, bursts, rings, impact shapes, flames, clouds, trails, and controlled particles. Effects should be readable before spectacular.
 
 ### UI / Cursor
-Use the same simplified geometry and outline language. UI may be slightly cleaner/geometric where necessary, but must retain optical consistency.
+Use simplified geometry and the same optical weight as the game art. UI may be slightly cleaner where required, but should remain visually compatible.
 
 ### Environment
 Use simple gameplay-readable shapes and limited decoration. Environment supports gameplay readability rather than becoming a polished illustration.
 
 ## Composition
 
-Character: default to compact character-icon framing unless full-body gameplay sprite is explicitly requested. Keep the face and dominant identity feature large enough to survive reduction.
+Character: compact character-icon framing by default. Keep the face and primary identity feature large enough to survive reduction.
 
 Weapon: single object, dynamic but readable orientation, compact composition, transparent background.
 
@@ -287,15 +390,15 @@ Effect: one readable effect state, clear center, controlled particles, transpare
 
 Do not add cinematic backgrounds or environmental storytelling unless explicitly requested.
 
-## 64×64 / Thumbnail Test
+## Thumbnail Test
 
-Treat 64×64 as a readability test, not necessarily the source resolution. For characters, also test approximately 48×48 when practical because the official character selection presentation is icon-like.
+Treat 64×64 as a readability test, not necessarily the source resolution. For character icons, also test approximately 48×48 and 32×32 when practical.
 
 At small size, the viewer should still identify:
 
 - potato-creature mass
 - face
-- dominant identity feature
+- primary identity feature
 - major color grouping
 - main functional feature if present
 
@@ -303,9 +406,9 @@ If the test fails:
 
 ```text
 simplify
-→ strengthen body contour
+→ strengthen contour
 → simplify face
-→ enlarge defining feature
+→ enlarge identity feature
 → improve color separation
 → remove decoration
 ```
@@ -334,9 +437,9 @@ Frankenstein-inspired: asymmetrical face/body marks, one crude mechanical/electr
 
 ## Anti-Generic-Vector Rule
 
-If the result looks like a Figma illustration, corporate mascot, polished SVG character, modern mobile-game asset, marketing illustration, or generic sticker pack, it has failed.
+If the result looks like a Figma illustration, corporate mascot, polished SVG character, modern mobile-game marketing asset, or generic sticker pack, it has failed.
 
-Correct by reducing geometric perfection, increasing controlled organic asymmetry, simplifying the face, strengthening the black contour, reducing color count, removing decoration, and simplifying shading.
+Correct by reducing geometric perfection, simplifying the face, strengthening the black contour, reducing color count, removing decoration, and simplifying shading.
 
 ## Anti-Human-Character Rule
 
@@ -349,7 +452,7 @@ Correct by:
 3. shortening or hiding limbs
 4. simplifying hands and feet
 5. redesigning the face as graphic marks
-6. making the potato contour carry identity
+6. making the potato contour carry the character
 
 ## Anti-AI-Noise Rule
 
@@ -371,22 +474,23 @@ Adjacent frames should differ through small incremental changes. Do not independ
 
 ## Prompt Construction
 
-Build final prompts in this order:
+Build final prompts in this order.
 
 ### Character
 
 1. character concept
-2. potato-creature mass
-3. body contour/proportion variation
-4. face composition
-5. one dominant identity feature
-6. optional secondary feature
-7. compact attitude/pose
-8. palette
-9. outline
-10. flat shading
-11. framing/readability
-12. relevant negative constraints
+2. shared potato-creature foundation
+3. face composition
+4. primary identity feature
+5. expression
+6. optional secondary features
+7. subtle body variation when useful
+8. optional equipment
+9. palette
+10. outline
+11. flat shading
+12. icon framing/readability
+13. relevant negative constraints
 
 ### Other Assets
 
@@ -411,7 +515,7 @@ Put concrete subject information before generic style adjectives.
 
 ## Character Prompt
 
-> Create a single Brotato-style playable character based on **[CHARACTER CONCEPT]**. Design it first as a compact pale potato-like creature, not a human and not a potato costume. Give the underlying potato mass a deliberate shape: **[BODY CONTOUR / PROPORTION]**. Build the face as a primary identity element: **[EYE COMPOSITION]**, **[MOUTH / EXPRESSION]**. Add one dominant graphic identity feature: **[ONE FEATURE]**. If needed, add only **[OPTIONAL SECONDARY FEATURE]**. Keep the character extremely compact, with a large body mass, tiny/simple facial marks, short or minimally visible limbs, and no realistic anatomy. Use **[PALETTE]** as broad flat color regions, a heavy black organic outer contour, sparse internal lines, and minimal hard-edged cartoon shading. The result must look like one member of the official Brotato character roster: bizarre but simple, expressive through a few graphic shapes, highly readable as a tiny game character, and visually coherent with a row of small character icons. Transparent background unless otherwise requested. Readable at 48–64 px. No detailed costume, no realistic human anatomy, no cinematic pose, no concept-art rendering.
+> Create a single Brotato-style playable character based on **[CHARACTER CONCEPT]**. Design it as a compact pale ivory/off-white potato-like creature, not a human and not a potato costume. Keep the base creature simple and roster-consistent. Define the character primarily through **[FACE IDENTITY]**, **[PRIMARY IDENTITY FEATURE]**, and **[EXPRESSION]**. Add only **[0–3 SECONDARY FEATURES]** when they materially strengthen identity. Use **[SUBTLE BODY VARIATION]** only if it helps the concept; do not radically transform the body by default. If explicitly required, include **[OPTIONAL EQUIPMENT]** as a simple graphic element rather than detailed equipment design. Keep the body compact, facial marks tiny but expressive, limbs short or minimally visible, and anatomy non-human. Use **[PALETTE]** as broad flat color masses, a heavy black organic outer contour, sparse internal lines, one small hard-edged shadow block, and minimal highlights. Mostly frontal compact character-icon composition, transparent background, highly readable at 96x96, 64x64, and approximately 48x48. The result must look like one member of the actual Brotato character roster: bizarre but simple, expressive through a few graphic shapes, coherent with the shared creature species, and immediately readable at small size. No detailed costume, realistic anatomy, cinematic pose, concept-art rendering, or polished mascot treatment.
 
 ## Negative Prompt Base
 
@@ -426,7 +530,7 @@ When a reference image is supplied:
 1. Preserve subject identity and requested composition.
 2. Extract visual grammar rather than incidental noise.
 3. Match silhouette, contour weight, palette, shading complexity, and detail density.
-4. For characters, preserve the potato-creature mass and face grammar unless the user explicitly requests a different base form.
+4. For characters, preserve the potato-creature foundation and facial grammar unless the user explicitly requests a different base form.
 5. Preserve transparency/game-sprite behavior when appropriate.
 6. If editing, modify only requested elements and preserve all other established properties.
 
@@ -436,17 +540,22 @@ Never invent a second visual system absent from the reference.
 
 ### Character
 - Reads immediately as a compact potato creature.
-- Body contour is deliberate, not a generic perfect oval.
+- Body contour is deliberate, but extreme body mutation is not mandatory.
 - Face uses very few intentional marks.
-- One dominant identity feature is obvious.
-- Accessories are secondary.
+- One primary identity feature is obvious.
+- Accessories remain secondary.
 - Works at approximately 48–64 px.
-- Looks like a member of the official roster rather than an RPG character or mascot.
+- Looks like a member of the actual roster rather than an RPG character or mascot.
 
 ### Silhouette
-- Recognizable as a black silhouette.
-- Primary shape immediately obvious.
-- Important appendages/equipment visible.
+- Shared creature mass is obvious.
+- Primary external feature is immediately visible.
+- Important appendages/equipment are readable when present.
+
+### Face
+- Eyes and mouth remain simple.
+- Expression survives reduction.
+- No realistic facial anatomy.
 
 ### Outline
 - Outer contour clearly bold.
@@ -475,82 +584,34 @@ Never invent a second visual system absent from the reference.
 
 ## Failure and Correction Matrix
 
-Too generic/vector-like → reduce geometric perfection, add controlled organic asymmetry, strengthen black contour, simplify color blocks.
+Too generic/vector-like → reduce geometric perfection, simplify the face, strengthen black contour, reduce color count, remove decoration.
 
-Too polished → remove detail, gradients, reflections, and decoration; return to silhouette + flat fills + simple shadows.
+Too much like a human → collapse torso/hips into one creature mass, shorten limbs, remove anatomy, simplify face.
 
-Too anime → simplify eyes/facial anatomy and restore chunky proportions.
+Too much like a fantasy RPG character → remove costume layers, weapons, armor, and cinematic pose; return to compact icon grammar.
 
-Too realistic → flatten materials/lighting and remove texture.
+Too much like a mascot → remove polished symmetry, simplify expression, reduce accessory count, restore chunky organic mass.
 
-Too human → collapse torso/waist/hips into one potato mass, shorten limbs, simplify face, remove costume construction.
+Too much like a generic potato → strengthen the face, add one dominant identity feature, change expression, and use a subtle body variation only if necessary.
 
-Too generic potato → redesign body contour and facial composition before adding accessories.
+Too detailed → remove micro-detail before changing the silhouette.
 
-Same potato, different hat → vary body mass, face composition, dominant identity feature, and contour first.
+Too flat → add one hard-edged shadow block, not a gradient.
 
-Outline too thin → increase perceived outer-contour weight and remove unnecessary internal lines.
+Too realistic → remove texture, material rendering, anatomy, and cinematic lighting.
 
-Too detailed → remove 20–40% of nonessential detail.
+Too pixel-art-like → use clean raster/vector-like shapes without deliberate pixel construction.
 
-Poor readability → enlarge defining feature, increase silhouette separation, remove clutter, simplify colors.
+Character loses identity at small size → enlarge the face/primary identity feature, simplify secondary features, increase silhouette separation.
 
-## Consistency Across a Mod
-
-All assets in one Mod must share:
-
-- contour language
-- perceived outline weight
-- face grammar
-- body/proportion philosophy
-- color philosophy
-- shading philosophy
-- detail density
-- silhouette-first construction
-
-Character consistency specifically means a shared potato-creature species and graphic grammar while deliberately varying body contour, face composition, and identity features.
-
-## Modular Loading
-
-Use `MODULES.md` to load only what the task requires.
-
-```text
-Character → SKILL.md → character.md → prompt-templates.md
-Weapon → SKILL.md → weapon.md → prompt-templates.md
-Item/Relic → SKILL.md → item.md → prompt-templates.md
-Enemy/Boss → SKILL.md → enemy.md → prompt-templates.md
-Effect/VFX → SKILL.md → effect.md → prompt-templates.md
-UI/Cursor → SKILL.md → ui.md → prompt-templates.md
-Animation → SKILL.md → relevant asset module → sprite-animation.md → prompt-templates.md
-```
-
-Precedence:
-
-1. Explicit user requirements.
-2. This core `SKILL.md`.
-3. Most specific asset module.
-4. Prompt templates.
-
-## Output Behavior
-
-When producing prompts:
-
-- describe the concrete asset first
-- for characters, define potato mass and face before clothing/equipment
-- use high-signal style constraints
-- keep prompts task-specific
-- do not expose hidden reasoning
-- do not claim pixel-perfect reproduction of copyrighted source artwork
-- preserve consistency across related assets
+Character looks like "same potato, different hat" → change the facial composition and expression first, then adjust body proportion or add one secondary identity feature. Do not solve it by adding more accessories.
 
 ## Final Rule
 
-When uncertain: simplify.
+The strongest Brotato asset is not the most detailed asset. It is the asset that communicates identity with the fewest visual decisions.
 
-If uncertain about a character: redesign the potato mass and face before adding accessories.
+For characters specifically:
 
-If the result looks like a human, collapse it back into a potato creature.
+> Shared potato creature + distinctive face + one strong identity feature + restrained variation + flat graphic rendering.
 
-If the result looks too polished: simplify again.
-
-The target is a simple, expressive, immediately readable 2D game asset that naturally belongs inside the Brotato visual ecosystem.
+If the result cannot survive simplification, it is not finished.
