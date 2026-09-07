@@ -2,16 +2,18 @@
 name: logo-generator
 description: >
   Design and iterate professional logos, product marks, app symbols, wordmark systems,
-  mascot marks, colorways, SVG assets, and brand-system boards. Use when the user asks
-  for logo concepts, icon design, brand symbols, logo prompts, SVG logo generation,
-  logo variants, colorway exploration, or polished logo presentation boards.
+  mascot marks, minimalist black-and-white explorations, colorways, SVG assets, and
+  brand-system boards. Use when the user asks for logo concepts, icon design, brand
+  symbols, logo prompts, SVG logo generation, logo variants, black-and-white logo
+  exploration, colorway exploration, or polished logo presentation boards.
 ---
 
 # Logo Generator
 
 Use this skill as AzSkills' general-purpose logo design and logo-production workflow.
-It unifies conceptual logo design, geometric SVG construction, mascot/IP routes,
-colorway exploration, brand-system boards, and presentation-ready showcase output.
+It unifies conceptual logo design, minimalist exploration, geometric SVG construction,
+mascot/IP routes, colorway exploration, brand-system boards, and presentation-ready
+showcase output.
 
 ## Scope and mode selection
 
@@ -20,6 +22,7 @@ Identify the narrowest mode that satisfies the request:
 | Mode | Use for |
 | :--- | :--- |
 | `concept` | New logo ideas, symbolic routes, design rationale |
+| `exploration` | Rapid multi-direction exploration, especially black-and-white concept boards |
 | `svg` | Editable vector marks, icons, simple logo assets |
 | `mascot` | Character-led brand marks; defer to `ip-as-logo` for highly simplified IP characters |
 | `colorway` | Palette exploration and light/dark/mono variants |
@@ -45,7 +48,23 @@ Collect or infer:
 
 When the product itself already provides enough context, inspect the supplied repository/readme/product copy before asking background questions.
 
-### 2. Build symbolic routes
+### 2. Deep concept analysis
+
+Before broad exploration, analyze the brief across useful conceptual dimensions:
+
+1. Functional attributes — what the product does.
+2. Usage context — where and when it is experienced.
+3. Emotional quality — the feeling it should create.
+4. Cultural context — the cultural or category space it occupies.
+5. Structural features — physical or conceptual structures associated with it.
+6. Dynamic relationships — movement, transformation, interaction, or flow.
+7. Symbolic metaphors — deeper associations that can become a visual device.
+8. Brand personality — how the identity behaves as a character.
+9. User perception — what should be understood at first glance.
+
+Condense this into a `Visual Core` and, when useful, a `Key Tension` that drives exploration.
+
+### 3. Build symbolic routes
 
 Develop 2–4 genuinely different symbolic routes before polishing a single mark. Each route should connect a visual mechanism to a product idea rather than merely changing color or rotation.
 
@@ -56,13 +75,44 @@ Prefer:
 - Letterform integration when it improves memorability.
 - Geometric systems with repeatable construction logic.
 - Controlled organic forms when the brand requires personality.
+- Visual puns where two meanings reinforce one another.
 - One strong visual metaphor over several weak ones.
 
 Avoid category clichés unless the brief explicitly requests them.
 
-### 3. Select a direction
+### 4. Exploration mode
 
-For each route, state:
+Use `exploration` when the user wants many distinct ideas before selecting one direction, especially for minimalist or black-and-white Logo work.
+
+The exploration board should be treated as a design archive, not as the final logo. It may include substantially different construction strategies such as:
+
+- Negative-space marks.
+- Letterform fusion.
+- Geometric badges.
+- Circular symbols.
+- Modular grids.
+- Linear marks.
+- Bold black masses.
+- Visual-pun structures.
+- Abstract mascots.
+- Product or action abstractions.
+- Experimental typography.
+- Wordmarks.
+
+For a dedicated black-and-white exploration pass:
+
+- Prefer pure black and white; minor grayscale is acceptable only when needed for hierarchy.
+- Remove gradients, color effects, 3D rendering, glossy material, and decorative scenery.
+- Ensure concepts are genuinely different in construction, not repeated versions with altered rotation or thickness.
+- Use the grid only for exploration and comparison; never mistake it for the final brand asset.
+- Favor conceptual reduction rather than literally drawing the subject as an icon.
+- Explore both symbol-led and wordmark-led directions when the brief permits.
+
+A 4×6 / 24-concept board can be used when the user explicitly asks for a large exploration batch. Smaller batches are preferable when the user asks for focused refinement.
+
+### 5. Select a direction
+
+For each promising route, state:
 
 - Symbol mechanism.
 - Why it is specific to the product.
@@ -70,9 +120,9 @@ For each route, state:
 - Expected behavior at small sizes.
 - Best usage surfaces.
 
-Select the strongest route for execution, but preserve the rejected routes as documented alternatives when the task calls for a design exploration package.
+Select the strongest route for execution, but preserve rejected routes as documented alternatives when the task calls for a design exploration package.
 
-### 4. Generate the logo artifact
+### 6. Generate the logo artifact
 
 For SVG work:
 
@@ -86,7 +136,7 @@ For SVG work:
 
 For rendered-image prompts, describe the visual result rather than leaking implementation jargon into the image prompt. State output constraints naturally.
 
-### 5. Design-system expansion
+### 7. Design-system expansion
 
 When the user asks for a complete identity direction, expand the chosen mark into a restrained system:
 
@@ -101,7 +151,7 @@ When the user asks for a complete identity direction, expand the chosen mark int
 
 Do not invent applications that the brand would not plausibly need.
 
-### 6. Colorway mode
+### 8. Colorway mode
 
 Treat color as a system, not decoration. Generate purposeful variants such as:
 
@@ -113,7 +163,7 @@ Treat color as a system, not decoration. Generate purposeful variants such as:
 
 Maintain contrast and semantic consistency. Do not force gradients simply because a logo can contain them. Flat fills are preferred for marks that need maximum reproduction reliability.
 
-### 7. System-board mode
+### 9. System-board mode
 
 For a brand-system board, use a square or near-square grid with clearly separated modules. A typical board can contain:
 
@@ -128,7 +178,7 @@ For a brand-system board, use a square or near-square grid with clearly separate
 
 Keep the board subordinate to the actual mark. The board demonstrates a coherent system; it is not the logo itself.
 
-### 8. Showcase mode
+### 10. Showcase mode
 
 Use showcase backgrounds only after the logo direction is stable. Choose presentation styles based on brand personality and usage context rather than offering a random background gallery.
 
@@ -143,7 +193,7 @@ Useful presentation families include:
 
 Do not allow showcase effects to alter the geometry or color relationships of the actual mark.
 
-### 9. Revision mode
+### 11. Revision mode
 
 When revision notes are supplied, preserve the useful parts of the current direction and change only the requested dimensions.
 
@@ -185,6 +235,7 @@ Avoid:
 - Presentation mockups that obscure the actual logo.
 - Randomized variants that differ only by color or rotation.
 - Reusing another brand's distinctive trademark silhouette.
+- Treating an exploration contact sheet as if it were the production logo.
 
 ## Reference-driven design
 
@@ -206,9 +257,17 @@ For a concept package, return:
 
 - `Logo Direction`
 - `Symbol Concept`
+- `Visual Core`
 - `Visual System Notes`
 - `Small-size Behavior`
 - `Recommended Production Route`
+
+For exploration work, additionally return:
+
+- Exploration strategy.
+- Number and structure of concepts requested.
+- Distinct construction families used.
+- Selection guidance for narrowing to 2–3 directions.
 
 For SVG work, additionally return:
 
@@ -232,7 +291,7 @@ For showcase work, additionally return:
 
 ## Relationship to other AzSkills
 
-Use `logo-generator` for general logo and identity work.
+Use `logo-generator` for general logo and identity work, including minimalist black-and-white exploration.
 
 Use `ip-as-logo` when the defining requirement is an extremely simplified, cute, character-like IP mark with strict silhouette and color budgets.
 
@@ -244,5 +303,6 @@ This skill is an original AzSkills synthesis informed by public workflows and id
 
 - https://github.com/op7418/logo-generator-skill
 - https://github.com/SanbaoAI/logo-generator-skill
+- https://github.com/fucha1122/minimalist-bw-logo-skill
 
-The unified skill intentionally removes duplicated workflows, implementation-specific assumptions, and unrelated sample assets while preserving the useful conceptual structure.
+The unified skill removes duplicated workflows and implementation-specific assumptions while preserving useful conceptual methods. It does not copy the upstream repository's example asset library.
