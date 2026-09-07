@@ -1,6 +1,6 @@
 ---
 name: readme-craft
-description: Design, redesign, audit, and produce project-native GitHub README homepages with semantic icon systems, adaptive support CTAs, GitHub-safe assets, accessible proof, preserved action links, dynamic repository facts, and maintainable Markdown.
+description: Design, redesign, audit, and produce project-native GitHub README homepages with mandatory semantic heading icons, automatically adapted project-specific support CTAs, GitHub-safe assets, accessible proof, preserved action links, dynamic repository facts, and maintainable Markdown.
 ---
 
 # README Craft
@@ -14,9 +14,9 @@ Use the narrowest mode that satisfies the request:
 | Mode | Purpose |
 | :--- | :--- |
 | `audit` | Review content, hierarchy, visual quality, trust, accessibility, and maintenance without editing |
-| `whole-readme` | Redesign information architecture, copy, visual system, and required assets |
-| `visual-refresh` | Preserve useful information architecture while improving visual presentation |
-| `asset-only` | Create only requested Hero, section, workflow, icon, diagram, showcase, or motion assets |
+| `whole-readme` | Redesign information architecture, copy, visual system, heading icon system, support visuals, and required assets |
+| `visual-refresh` | Preserve useful information architecture while improving visual presentation, heading icons, and project-native visuals |
+| `asset-only` | Create only requested Hero, section, workflow, icon, diagram, showcase, support, or motion assets |
 
 Never expand `asset-only` into README rewriting without explicit authorization.
 
@@ -32,6 +32,84 @@ Resolve decisions in this order:
 4. Optional references and examples.
 
 The result must look native to the repository, not like a generic template.
+
+## Non-negotiable output gates
+
+A request to **redesign / rewrite / recreate a README** is not complete until all applicable gates below are satisfied.
+
+### Gate A — Structural redesign
+
+The result must visibly change or validate all of these dimensions:
+
+```text
+project story
+information hierarchy
+first-screen composition
+section ordering
+semantic heading system
+project-native visual language
+support/funding treatment when applicable
+```
+
+Simply rewriting paragraphs while retaining the old visual structure is not considered a redesign.
+
+### Gate B — Heading icon system
+
+For a whole README redesign, **semantic icons on section/category headings are mandatory whenever there are suitable concepts to represent**.
+
+Minimum requirement:
+
+- Every major H2 section that benefits from a visual marker receives one semantic icon immediately before the heading text.
+- Related H3 category headings should receive icons when they introduce distinct semantic concepts or grouped content.
+- Icons must be real assets, not textual emoji substitutes, unless the platform or requested format explicitly rules out image assets.
+- Icon files must live inside the target repository, normally under `assets/readme/icons/`.
+- The icon must be visually related to the target repository's identity rather than copied from the AzSkills README as a generic decoration.
+
+Before delivery, inspect the final Markdown and verify that headings actually contain the icon markup. Designing icon files without wiring them into headings is a failed implementation.
+
+### Gate C — Automatic project-native support CTA
+
+When a README contains a support / sponsor / donation / funding CTA, the support visual must be **derived from the target repository itself** unless the repository already provides a finished project-specific support asset.
+
+A support CTA is considered adapted only when its composition uses at least two independent project signals, such as:
+
+```text
+logo / mascot / icon
+real application UI / game artwork / screenshot
+project palette / theme tokens
+project-specific geometric motif
+project-specific typography treatment
+project-specific domain imagery
+```
+
+A generic heart, coffee cup, donation icon, or AzSkills-themed panel with the project name swapped in is not an adapted CTA.
+
+For whole-readme and visual-refresh work:
+
+1. Inspect project identity evidence.
+2. Extract visual tokens.
+3. Select the strongest project-native subject.
+4. Compose a compact support graphic around that subject.
+5. Save it in the target repository, normally as `assets/readme/support-cta.svg`.
+6. Wire the actual support destination into Markdown outside the graphic as well.
+
+When the target project is visually weak, derive the fallback motif from the repository's own name, logo geometry, UI, domain, or technical artifacts. Do not revert to a cross-project generic donation banner.
+
+The implementation must be repository-native and zero-configuration. Do not ask the user to select colors, fonts, layouts, dimensions, illustration prompts, or light/dark variants when repository evidence is sufficient.
+
+### Gate D — Repository-specific visual evidence
+
+For a whole README redesign, identify the evidence used for the visual system:
+
+```text
+identity source:
+palette source:
+shape/stroke source:
+icon source:
+support CTA subject:
+```
+
+If the final README contains a visual system that cannot be traced back to the repository, rework it.
 
 ## Core Principles
 
@@ -78,7 +156,7 @@ Preferred:
 ```text
 ## [icon] Section title
 ### [icon] Category title
-[icon]  Feature card / workflow step / diagram node
+[icon] Feature card / workflow step / diagram node
 ```
 
 Avoid:
@@ -174,7 +252,7 @@ Record reused third-party icon provenance in `THIRD_PARTY_NOTICES.md`.
 
 ## Adaptive Visual Support CTA
 
-Support CTA generation is **zero-configuration by default**. The user should not have to choose colors, fonts, icon packs, dimensions, illustration prompts, coordinates, or light/dark variants.
+Support CTA generation is **zero-configuration by default**, but project adaptation is mandatory for whole README redesigns whenever a support CTA exists.
 
 Read `references/support-cta-auto-adapt.md` whenever support/sponsor/funding is present and no finished project-specific CTA already exists.
 
@@ -193,7 +271,7 @@ CSS / themes / design tokens / manifests
         ↓
 semantic icon sources
         ↓
-minimal deterministic fallback
+minimal deterministic fallback derived from the project itself
 ```
 
 Extract:
@@ -222,12 +300,18 @@ real product artifact / UI
         ↓
 project-derived geometric motif
         ↓
-support symbol + typography
+support symbol + project-specific treatment
 ```
 
 Then adapt the CTA automatically to the project's palette, typography approximation, geometry, aspect ratio, language, density, and GitHub light/dark backgrounds.
 
 The scaffold is geometry only; it is not a cross-project visual template.
+
+### Zero generic CTA rule
+
+Never reuse the same support graphic across unrelated repositories except for a plain text/link treatment where no image is used.
+
+Two repositories with different identities must not receive the same CTA artwork with only the project name changed.
 
 ### No-manual-tuning rule
 
@@ -335,6 +419,21 @@ Useful patterns include `split`, `integrated`, `artifact-wall`, `before-after`, 
 
 Do not default to a left-text/right-graphic Hero.
 
+### Step 6 — Build the local visual asset set
+
+For whole-readme and visual-refresh work:
+
+```text
+assets/readme/
+├── hero.*
+├── support-cta.svg
+└── icons/
+    ├── <semantic>-*.svg
+    └── ...
+```
+
+Create only the assets actually used by the README, then wire every created asset into the document. An unused asset is not evidence of implementation.
+
 ## Hero Design
 
 The Hero is the visual summary of the repository, not a generic banner.
@@ -408,7 +507,7 @@ Do not create dozens of icons merely to appear varied. Create only the semantic 
 - Preserve useful outbound links.
 - Prefer project-native visual support over a raw payment URL when it improves hierarchy.
 - Generate support visuals from target-repository evidence automatically.
-- Use semantic icons selectively and contextually.
+- Use semantic icons selectively and contextually, with heading usage mandatory for whole-readme redesigns when suitable.
 - Put semantic icons primarily on headings and deliberate visual components.
 - Do not place icons in arbitrary paragraph margins, between headings and prose, or beside code fences.
 - Do not turn every line into a decorated card.
@@ -435,12 +534,21 @@ Before delivery, verify at realistic GitHub widths.
 - Typography remains readable.
 - Narrow preview remains understandable.
 - Contrast works on light and dark GitHub themes.
+- Major headings contain real semantic icon assets when applicable.
 - Heading icons sit directly beside their headings.
 - Standalone inline icons are absent unless they belong to an intentional visual component.
 - Adjacent sections do not reuse icons without a real reason.
 - The icon set feels like a semantic vocabulary, not a four-icon template.
-- Support CTA is obviously clickable and looks native to the target repository.
+- Support CTA is visibly project-specific, not a generic template with a renamed title.
+- Support CTA visual subject can be traced to repository evidence.
 - Long README sections have deliberate visual rhythm.
+
+### Implementation
+
+- Every newly created heading icon is referenced by the README.
+- The support CTA asset is referenced by the README when a support visual is required.
+- No asset exists solely as an unused decorative artifact.
+- The final Markdown actually contains the intended image/icon markup rather than merely describing it in prose.
 
 ### Maintenance
 
