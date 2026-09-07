@@ -33,6 +33,19 @@ AzSkills is a **library of reusable AI behavior definitions**. It is not a frame
 
 Each Skill lives in its own directory and is centered on a `SKILL.md` that defines its trigger boundary, hard constraints, workflow, quality gates, and output contract.
 
+<div align="center">
+
+<table>
+<tr>
+<td align="center" width="25%"><img src="assets/readme/icons/settings.svg" width="28" alt="Configuration"><br><strong>Structured</strong><br><sub>Explicit behavior contracts</sub></td>
+<td align="center" width="25%"><img src="assets/readme/icons/adjustment.svg" width="28" alt="Composition"><br><strong>Composable</strong><br><sub>Small skills, focused scope</sub></td>
+<td align="center" width="25%"><img src="assets/readme/icons/arrow-right.svg" width="28" alt="Workflow"><br><strong>Actionable</strong><br><sub>Workflow + quality gates</sub></td>
+<td align="center" width="25%"><img src="assets/readme/icons/a-to-z.svg" width="28" alt="Language"><br><strong>Practical</strong><br><sub>Built for real tasks</sub></td>
+</tr>
+</table>
+
+</div>
+
 ### Find the right Skill
 
 | Your task | Start with |
@@ -106,7 +119,7 @@ This keeps the catalog focused without forcing unrelated workflows into one univ
 
 ## Skill catalog
 
-### Engineering
+<h3><img src="assets/readme/icons/settings.svg" width="24" alt="Engineering"> Engineering</h3>
 
 #### [`ahkv2-opt`](ahkv2-opt/SKILL.md)
 
@@ -120,7 +133,7 @@ A rule-driven workflow for refactoring and reviewing AutoHotkey v2 code, coverin
 
 A methodology for complex engineering and refactoring: question assumptions, map architecture, design from the caller's perspective, inspect abstractions, consider edge cases, test alternatives, and simplify beyond the first working implementation.
 
-### Presentation & visual design
+<h3><img src="assets/readme/icons/adjustment.svg" width="24" alt="Visual design"> Presentation & visual design</h3>
 
 #### [`frontend-slides`](frontend-slides/SKILL.md)
 
@@ -146,7 +159,7 @@ A narrower workflow for highly simplified character/IP symbols, emphasizing domi
 
 Keeps a supplied photograph faithful while deriving a restrained abstract panel from its spatial, tonal, and color relationships.
 
-### Documentation & publishing
+<h3><img src="assets/readme/icons/arrow-right.svg" width="24" alt="Documentation flow"> Documentation & publishing</h3>
 
 #### [`readme-craft`](readme-craft/SKILL.md)
 
@@ -162,7 +175,7 @@ Treats a repository homepage as a communication interface: clarify the project f
 
 Produces structured Chinese/English Mod descriptions and change logs with BBCode discipline, practical wording, and strict feature accuracy.
 
-### Language & localization
+<h3><img src="assets/readme/icons/a-to-z.svg" width="24" alt="Language"> Language & localization</h3>
 
 #### [`any2zh`](any2zh/SKILL.md)
 
@@ -186,7 +199,7 @@ Turns informal, slang-heavy, and context-dependent Chinese into natural English 
 
 ## Shared design intelligence
 
-[`design-intelligence.md`](design-intelligence.md) is a **shared reference layer**, not another Skill.
+<img src="assets/readme/icons/adjustment.svg" width="26" alt="Design intelligence"> [`design-intelligence.md`](design-intelligence.md) is a **shared reference layer**, not another Skill.
 
 Visual Skills inherit it when a task changes how an artifact looks, feels, moves, or is interacted with. It provides common guidance for visual thesis, style selection, typography, semantic color, composition, spacing, density, accessibility, motion, anti-pattern filtering, and visual QA.
 
@@ -205,23 +218,18 @@ The layer is an AzSkills synthesis informed by the public methodology of [`nextl
 
 ## How it works
 
-The normal integration loop is intentionally small:
+<div align="center">
 
-```text
-Task
-  ↓
-Choose the narrowest Skill
-  ↓
-Read SKILL.md
-  ↓
-Load references / support files when needed
-  ↓
-Apply workflow + constraints
-  ↓
-Run quality checks
-  ↓
-Produce the result
-```
+<table>
+<tr>
+<td align="center"><img src="assets/readme/icons/settings.svg" width="30" alt="Choose"><br><strong>Choose</strong><br><sub>Narrowest matching Skill</sub></td>
+<td align="center"><img src="assets/readme/icons/arrow-right.svg" width="30" alt="Read"><br><strong>Read</strong><br><sub>Load its contract</sub></td>
+<td align="center"><img src="assets/readme/icons/adjustment.svg" width="30" alt="Apply"><br><strong>Apply</strong><br><sub>Rules + constraints</sub></td>
+<td align="center"><img src="assets/readme/icons/a-to-z.svg" width="30" alt="Verify"><br><strong>Verify</strong><br><sub>Quality + output</sub></td>
+</tr>
+</table>
+
+</div>
 
 Complex tasks can compose multiple Skills. A visual documentation task, for example, can use `readme-craft` while inheriting `design-intelligence.md`; a difficult implementation can pair `ultrathink` with a domain-specific Skill.
 
@@ -266,7 +274,7 @@ Copy or link the selected Skill into the skill-discovery location used by your A
 
 ## Skill selection
 
-Use the narrowest capability first:
+<img src="assets/readme/icons/arrow-right.svg" width="22" alt="Selection flow"> Use the narrowest capability first:
 
 ```text
 User task
@@ -296,7 +304,13 @@ AzSkills/
 │   └── workflows/update-skill-badge.yml
 ├── assets/
 │   ├── azskills-hero.svg
-│   └── readme/support.svg
+│   └── readme/
+│       ├── support.svg
+│       └── icons/
+│           ├── settings.svg
+│           ├── adjustment.svg
+│           ├── arrow-right.svg
+│           └── a-to-z.svg
 ├── ahkv2-opt/SKILL.md
 ├── any2zh/SKILL.md
 ├── frontend-slides/
@@ -330,7 +344,7 @@ AzSkills applies the same standards it teaches:
 
 **Correct destinations.** A source repository, deployed website, online documentation, payment page, and downloadable release are different destinations. README rewrites must preserve the destination that actually completes the user's intended action.
 
-**Preserved action links.** Existing valid release, documentation, Demo, support, sponsorship, and related-project links are part of the repository's action layer and are not removed merely to improve visual polish.
+**Visual landmarks.** Long-form README pages should alternate between information-dense text and compact visual relief. Semantic icons may mark categories, workflows, and action surfaces when they improve scanning.
 
 **Conservative GitHub rendering.** Visual assets should survive realistic wide and narrow content widths, use repository-relative paths where possible, remain accessible, and avoid fragile browser-specific behavior.
 
