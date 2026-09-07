@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
   <title id="title">AzSkills — reusable AI skills with explicit behavior contracts</title>
-  <desc id="desc">A dark modular diagram showing multiple SKILL.md definitions converging on a task and producing a checked result, with AzSkills principles along the bottom.</desc>
+  <desc id="desc">A dark modular diagram showing reusable SKILL.md definitions converging on a task and producing a checked result.</desc>
 
   <rect width="1200" height="650" rx="32" fill="#11171A"/>
   <rect x="28" y="28" width="1144" height="594" rx="26" fill="#162024" stroke="#33484A" stroke-width="2"/>
@@ -20,7 +20,7 @@
 
       <g transform="translate(0 232)" font-family="Cascadia Code, Consolas, monospace">
         <rect x="0" y="0" width="112" height="38" rx="10" fill="#1D2B2E" stroke="#385055"/>
-        <text id="skill-count" x="56" y="25" text-anchor="middle" fill="#B4C8C7" font-size="13">11 Skills</text>
+        <text x="56" y="25" text-anchor="middle" fill="#B4C8C7" font-size="13">Skill catalog</text>
         <rect x="124" y="0" width="112" height="38" rx="10" fill="#1D2B2E" stroke="#385055"/>
         <text x="180" y="25" text-anchor="middle" fill="#B4C8C7" font-size="13">Modular</text>
         <rect x="248" y="0" width="126" height="38" rx="10" fill="#1D2B2E" stroke="#385055"/>
