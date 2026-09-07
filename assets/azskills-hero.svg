@@ -36,51 +36,51 @@
       <text x="0" y="24" fill="#9DAEAC" font-size="14">Reusable behavior modules</text>
 
       <g transform="translate(0 42)">
-        <rect x="0" y="0" width="332" height="52" rx="14" fill="#1C2B2E" stroke="#3B5558"/>
-        <circle cx="26" cy="26" r="8" fill="#8FB7AC"/>
-        <text x="48" y="23" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="13" font-weight="700">SKILL.md</text>
-        <text x="48" y="42" fill="#92A7A6" font-size="12">engineering</text>
+        <rect x="0" y="0" width="332" height="50" rx="14" fill="#1C2B2E" stroke="#3B5558"/>
+        <circle cx="26" cy="25" r="8" fill="#8FB7AC"/>
+        <text x="48" y="22" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="13" font-weight="700">SKILL.md</text>
+        <text x="48" y="40" fill="#92A7A6" font-size="12">engineering</text>
       </g>
-      <g transform="translate(0 104)">
-        <rect x="0" y="0" width="332" height="52" rx="14" fill="#1C2B2E" stroke="#3B5558"/>
-        <circle cx="26" cy="26" r="8" fill="#7EA3B8"/>
-        <text x="48" y="23" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="13" font-weight="700">SKILL.md</text>
-        <text x="48" y="42" fill="#92A7A6" font-size="12">visual design</text>
+      <g transform="translate(0 102)">
+        <rect x="0" y="0" width="332" height="50" rx="14" fill="#1C2B2E" stroke="#3B5558"/>
+        <circle cx="26" cy="25" r="8" fill="#7EA3B8"/>
+        <text x="48" y="22" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="13" font-weight="700">SKILL.md</text>
+        <text x="48" y="40" fill="#92A7A6" font-size="12">visual design</text>
       </g>
-      <g transform="translate(0 166)">
-        <rect x="0" y="0" width="332" height="52" rx="14" fill="#1C2B2E" stroke="#3B5558"/>
-        <circle cx="26" cy="26" r="8" fill="#D7A85A"/>
-        <text x="48" y="23" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="13" font-weight="700">SKILL.md</text>
-        <text x="48" y="42" fill="#92A7A6" font-size="12">documentation</text>
+      <g transform="translate(0 162)">
+        <rect x="0" y="0" width="332" height="50" rx="14" fill="#1C2B2E" stroke="#3B5558"/>
+        <circle cx="26" cy="25" r="8" fill="#D7A85A"/>
+        <text x="48" y="22" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="13" font-weight="700">SKILL.md</text>
+        <text x="48" y="40" fill="#92A7A6" font-size="12">documentation</text>
       </g>
-      <g transform="translate(0 228)">
-        <rect x="0" y="0" width="332" height="52" rx="14" fill="#1C2B2E" stroke="#3B5558"/>
-        <circle cx="26" cy="26" r="8" fill="#8FB7AC"/>
-        <text x="48" y="23" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="13" font-weight="700">SKILL.md</text>
-        <text x="48" y="42" fill="#92A7A6" font-size="12">translation</text>
+      <g transform="translate(0 222)">
+        <rect x="0" y="0" width="332" height="50" rx="14" fill="#1C2B2E" stroke="#3B5558"/>
+        <circle cx="26" cy="25" r="8" fill="#8FB7AC"/>
+        <text x="48" y="22" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="13" font-weight="700">SKILL.md</text>
+        <text x="48" y="40" fill="#92A7A6" font-size="12">translation</text>
       </g>
-      <g transform="translate(0 290)">
-        <rect x="0" y="0" width="332" height="52" rx="14" fill="#1C2B2E" stroke="#3B5558"/>
-        <circle cx="26" cy="26" r="8" fill="#86A9B7"/>
-        <text x="48" y="23" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="13" font-weight="700">SKILL.md</text>
-        <text x="48" y="42" fill="#92A7A6" font-size="12">localization</text>
+      <g transform="translate(0 282)">
+        <rect x="0" y="0" width="332" height="50" rx="14" fill="#1C2B2E" stroke="#3B5558"/>
+        <circle cx="26" cy="25" r="8" fill="#86A9B7"/>
+        <text x="48" y="22" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="13" font-weight="700">SKILL.md</text>
+        <text x="48" y="40" fill="#92A7A6" font-size="12">localization</text>
       </g>
-      <g transform="translate(0 352)">
-        <rect x="0" y="0" width="332" height="52" rx="14" fill="#1C2B2E" stroke="#3B5558"/>
-        <circle cx="26" cy="26" r="8" fill="#D7A85A"/>
-        <text x="48" y="23" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="13" font-weight="700">SKILL.md</text>
-        <text x="48" y="42" fill="#92A7A6" font-size="12">publishing</text>
+      <g transform="translate(0 342)">
+        <rect x="0" y="0" width="332" height="50" rx="14" fill="#1C2B2E" stroke="#3B5558"/>
+        <circle cx="26" cy="25" r="8" fill="#D7A85A"/>
+        <text x="48" y="22" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="13" font-weight="700">SKILL.md</text>
+        <text x="48" y="40" fill="#92A7A6" font-size="12">publishing</text>
       </g>
     </g>
 
     <!-- Connectors: center column to task -->
     <g fill="none" stroke="#708D8D" stroke-width="2" opacity="0.85">
-      <path d="M770 172 C790 172 798 184 818 184"/>
-      <path d="M770 234 C790 234 798 222 818 222"/>
-      <path d="M770 296 C792 296 800 260 818 260"/>
-      <path d="M770 358 C792 358 800 298 818 298"/>
-      <path d="M770 420 C792 420 800 336 818 336"/>
-      <path d="M770 482 C792 482 800 374 818 374"/>
+      <path d="M770 171 C790 171 798 184 818 184"/>
+      <path d="M770 231 C790 231 798 222 818 222"/>
+      <path d="M770 291 C792 291 800 260 818 260"/>
+      <path d="M770 351 C792 351 800 298 818 298"/>
+      <path d="M770 411 C792 411 800 336 818 336"/>
+      <path d="M770 471 C792 471 800 374 818 374"/>
     </g>
 
     <!-- Right column: task/output -->
@@ -98,21 +98,21 @@
     </g>
 
     <!-- Bottom principles -->
-    <line x1="64" y1="500" x2="1136" y2="500" stroke="#33484A"/>
+    <line x1="64" y1="518" x2="1136" y2="518" stroke="#33484A"/>
 
-    <g transform="translate(64 532)">
+    <g transform="translate(64 550)">
       <text x="0" y="0" fill="#D7A85A" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">BEHAVIOR CONTRACTS</text>
       <text x="0" y="22" fill="#9DAEAC" font-size="13">Triggers · rules · workflow · QA · output</text>
     </g>
-    <g transform="translate(330 532)">
+    <g transform="translate(330 550)">
       <text x="0" y="0" fill="#D7A85A" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">SHARED DESIGN INTELLIGENCE</text>
       <text x="0" y="22" fill="#9DAEAC" font-size="13">A common visual reasoning layer</text>
     </g>
-    <g transform="translate(688 532)">
+    <g transform="translate(688 550)">
       <text x="0" y="0" fill="#D7A85A" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">SMALL SKILLS / BIG COMBINATIONS</text>
       <text x="0" y="22" fill="#9DAEAC" font-size="13">Compose only what the task needs</text>
     </g>
-    <g transform="translate(990 532)">
+    <g transform="translate(990 550)">
       <text x="0" y="0" fill="#D7A85A" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">OPEN SOURCE</text>
       <text x="0" y="22" fill="#9DAEAC" font-size="13">Inspectable · editable · versioned</text>
     </g>
