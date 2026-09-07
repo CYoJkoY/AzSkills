@@ -1,13 +1,13 @@
 ---
 name: readme-craft
-description: Design, redesign, audit, and produce project-native GitHub README homepages with strong content architecture, deliberate visual identity, GitHub-safe SVG assets, accessible proof, preserved project links and support/sponsorship entry points, explicit source/deployment/download URL semantics, and maintainable Markdown. Use when a repository homepage needs clearer storytelling, stronger visual hierarchy, hero/section assets, responsive-safe visuals, or a complete visual refresh.
+description: Design, redesign, audit, and produce project-native GitHub README homepages with strong content architecture, deliberate visual identity, GitHub-safe SVG assets, accessible proof, preserved project links and support/sponsorship entry points, explicit source/deployment/download URL semantics, dynamic repository facts, and maintainable Markdown. Use when a repository homepage needs clearer storytelling, stronger visual hierarchy, hero/section assets, responsive-safe visuals, or a complete visual refresh.
 ---
 
 # README Craft
 
 Turn a GitHub repository homepage into a readable visual story without turning it into a decorative poster.
 
-This skill combines AzSkills' existing README engineering rules with an integrated README-beautification methodology: inspect the real repository first, move proof before detail, derive the visual system from the project, separate Markdown from deterministic SVG and raster assets, preserve important project-native links and support paths, distinguish source/deployment/download destinations, and verify the result at realistic GitHub widths.
+This skill combines README engineering with a project-native visual methodology: inspect the real repository first, move proof before detail, derive the visual system from the project, separate Markdown from deterministic assets, preserve important destinations and action paths, distinguish source/deployment/download URLs, keep changing repository facts dynamic when practical, and verify the result at realistic GitHub widths.
 
 ## Scope
 
@@ -61,57 +61,86 @@ Do not lead with internal architecture, contributor instructions, long tables, o
 
 ### Real proof beats decoration
 
-Prefer:
-
-- real screenshots;
-- real generated outputs;
-- real UI or artifacts;
-- real diagrams derived from the repository;
-- real command examples;
-- existing project artwork and identity assets.
-
-Generated material is acceptable only when it performs a specific communication job that real material cannot perform as well.
+Prefer real screenshots, outputs, UI, artifacts, diagrams derived from the repository, command examples, and existing project artwork. Generated material is acceptable only when it performs a specific communication job that real material cannot perform as well.
 
 Never invent adoption numbers, benchmarks, compatibility claims, testimonials, screenshots, features, or behavior.
+
+### Dynamic facts have one source of truth
+
+Do not hard-code changing repository facts in multiple locations.
+
+Common examples include:
+
+- Skill or package counts;
+- release/version labels;
+- generated badges;
+- repository statistics;
+- generated catalog summaries;
+- build or compatibility metadata.
+
+Prefer a single authoritative source and automate derived presentation where practical:
+
+```text
+repository state
+      ↓
+canonical generated fact
+      ↓
+badge / Hero / summary / table
+```
+
+A visual asset should not require regeneration merely because a count changed. Keep changing data separate from stable composition. Use explicit machine-readable markers in deterministic SVG when automated replacement is appropriate.
 
 ### Preserve project-native links and support
 
 README redesign is not permission to remove useful project destinations.
 
-Before rewriting, inventory existing outbound links and action-oriented endpoints, including:
-
-- download/release links;
-- documentation and demos;
-- source or related repositories;
-- issue/discussion/support channels;
-- sponsor, donation, funding, or author-support links;
-- legal and privacy destinations.
+Before rewriting, inventory outbound links and action-oriented endpoints, including downloads/releases, documentation/demos, source or related repositories, issues/discussions, sponsorship/donation/funding, and legal/privacy destinations.
 
 If an existing sponsorship or donation entry is intentional and still valid, preserve it unless the user explicitly asks to remove or replace it.
 
-For support or sponsorship, favor a directly usable Markdown link to the canonical destination when the original README already exposed the URL. Do not replace a convenient direct URL with an opaque image-only button merely for visual polish.
+Support is an action layer. It should be visually recognizable and easy to activate, but never at the cost of link clarity or accessibility.
 
-A support section is part of the project's action layer, not decorative footer content. It may appear near the end of the README, but the destination itself must remain directly accessible and easy to copy.
+A raw standalone payment URL often reads like implementation detail rather than a polished call to action. Prefer a compact project-native linked visual CTA—typically a small SVG or badge-style button—with concise wording and an icon or symbol. The visual itself should link directly to the canonical support destination.
 
-Never invent a sponsor URL, funding provider, payment endpoint, campaign, or support relationship. Reuse only verified project-owned or explicitly supplied destinations.
+The canonical support URL must also remain present as ordinary searchable/copyable Markdown, either as a labeled text link or a clearly labeled direct-link line. Do not hide the only support destination inside an image.
+
+For example:
+
+```markdown
+## Support
+
+<div align="center">
+
+<a href="https://example.com/support">
+  <img src="assets/readme/support.svg" alt="Support Project Name" width="420">
+</a>
+
+Support the continued development of Project Name.
+
+**Direct support link:** https://example.com/support
+
+</div>
+```
+
+The preferred visual CTA should be repository-relative, deterministic, accessible, and stylistically consistent with the README. A shields.io badge may be used when it is genuinely the best fit, but do not introduce an external service merely because it is convenient.
+
+Do not use a decorative graphic that looks like a button but is not clickable. Do not make the image the only place where the destination can be discovered or copied.
 
 ### Distinguish source, deployment, and download destinations
 
-Treat these as different link types with different user purposes:
+Treat these as different link types:
 
 ```text
 Source repository   → code, issues, history, contribution
-Deployment / live   → website, Demo, online docs, sponsor/payment page
+Deployment / live   → website, Demo, online docs, hosted dashboard, sponsor/payment page
 Download / release  → installer, executable, package, release artifact
 ```
 
-Do not substitute one destination type for another simply because they share the same project name.
+Do not substitute one destination type for another simply because they share a project name.
 
-For every important external or cross-repository link, determine what the visitor is expected to do next. Then point the README to the destination that actually completes that action:
+For every important external or cross-repository link, determine what the visitor is expected to do next. Then point the README to the destination that actually completes that action.
 
-- For a website, Demo, online documentation, hosted dashboard, or deployed sponsorship/payment page, use the live deployment URL.
-- For source inspection, contribution, issues, or upstream implementation details, use the source repository URL.
-- For binaries, installers, packages, or release assets, use the release/download URL.
+For support/payment in particular, use the deployed user-facing page when one exists. Keep the source repository as a separate, explicitly labeled source link when useful.
 
 Example:
 
@@ -120,21 +149,17 @@ Payment source:   https://github.com/CYoJkoY/Payment
 Payment website:  https://cyojkoy.github.io/Payment/
 ```
 
-The first is the source repository; the second is the user-facing deployed payment page. A README support section should use the deployed payment page when that is the actual canonical user action.
-
-When both source and deployment are useful, keep both with explicit labels rather than silently replacing one with the other.
-
-Never invent, guess, or infer a deployment URL merely from a repository name. Verify it from repository configuration, README links, GitHub Pages settings when accessible, project metadata, or an explicitly supplied destination.
+Never invent, guess, or infer a deployment URL from a repository name. Verify it from project configuration, existing README links, GitHub Pages configuration when accessible, project metadata, or an explicitly supplied destination.
 
 ### Content and visual layers stay separate
 
 Use Markdown for explanations, commands, links, configuration, API details, compatibility, limitations, security, contribution, support/sponsorship destinations, and other searchable/copyable information.
 
-Use SVG for deterministic heroes, section transitions, workflow diagrams, identity modules, and structured visual explanations.
+Use SVG for deterministic Heroes, workflow diagrams, identity modules, structured visual explanations, and compact action graphics.
 
 Use PNG/WebP for screenshots, photo-like material, generated artwork, and complex composites.
 
-Use GIF only for explicitly approved motion that communicates something meaningful. Keep a static SVG/PNG fallback.
+Use GIF only for explicitly approved motion that communicates something meaningful. Keep a static fallback.
 
 Never rasterize the entire README.
 
@@ -151,10 +176,10 @@ Collect enough evidence to understand the project:
 - existing README and current structure;
 - real screenshots, outputs, diagrams, UI, logos, or artwork;
 - package/manifests and relevant metadata;
-- current badges, license, release information, and directory structure;
-- existing outbound links, support/sponsorship destinations, and action buttons;
+- badges, license, release information, and directory structure;
+- outbound links, support/sponsorship destinations, and action buttons;
 - whether important links resolve to source repositories, live deployments, or downloadable artifacts;
-- design tokens or existing visual identity when available.
+- design tokens or existing visual identity.
 
 For a GitHub URL, inspect the live repository and default branch before proposing changes.
 
@@ -212,7 +237,7 @@ Use this as the default:
 6. How to use — installation + first successful action.
 7. Compatibility, limits, security, contribution, license, and support when relevant.
 
-Keep sponsor/support actions available without allowing them to displace the primary product narrative. A concise support block is usually appropriate near the end unless the original project intentionally places it elsewhere.
+Keep sponsor/support actions available without allowing them to displace the primary product narrative. A concise visual support CTA is usually appropriate near the end unless the original project intentionally places it elsewhere.
 
 Use the project's actual information needs to override the default when necessary.
 
@@ -220,16 +245,7 @@ Use the project's actual information needs to override the default when necessar
 
 Use one strong composition rather than many small decorative graphics.
 
-Useful patterns:
-
-- `split` — title plus one clear proof artifact;
-- `integrated` — title and proof share one grid;
-- `artifact-wall` — several real outputs with controlled scale and whitespace;
-- `before-after` — useful when transformation is the product mechanism;
-- `system-map` — one source feeding components or outputs;
-- `annotated-specimen` — one real artifact with a few meaningful callouts;
-- `sequence-strip` — three to six dependent stages;
-- `title-only` — when no honest visual proof exists or severe minimalism is intentional.
+Useful patterns include `split`, `integrated`, `artifact-wall`, `before-after`, `system-map`, `annotated-specimen`, `sequence-strip`, and `title-only`.
 
 Do not default to a left-text/right-graphic Hero merely because it is familiar.
 
@@ -246,6 +262,20 @@ A Hero may contain:
 5. Small high-signal metadata.
 
 Let the project artifact influence typography, composition, and motif. The project should remain recognizable even if its name is removed.
+
+### Maintenance rule for Hero data
+
+Never bake changing repository facts into the visual design unless there is an explicit synchronization mechanism.
+
+When a Hero contains mutable facts such as Skill count, version, package count, supported locales, or generated statistics:
+
+1. Identify the canonical source.
+2. Give the visual a stable machine-readable marker, for example `id="skill-count"`.
+3. Add automation that derives the displayed fact from the canonical source.
+4. Fail loudly if the marker is missing or duplicated.
+5. Keep the visual composition unchanged when the fact changes.
+
+Prefer stable metadata such as category, architectural principle, or workflow relationship when no synchronization mechanism is needed.
 
 ### Implementation decision
 
@@ -270,26 +300,9 @@ Do not introduce generated imagery merely for decoration.
 
 Use standard SVG shapes, paths, text, fills, strokes, clipping paths, patterns, and simple transforms.
 
-Use:
+Use system font stacks, explicit geometry, consistent radii, semantic `<title>` / `<desc>` where useful, stable positioning, and repository-relative assets.
 
-- system font stacks;
-- explicit geometry;
-- consistent radii;
-- semantic `<title>` / `<desc>` where useful;
-- stable positioning;
-- repository-relative assets.
-
-Avoid:
-
-- `foreignObject`;
-- JavaScript;
-- external stylesheets;
-- remote fonts;
-- remote image URLs inside SVG;
-- fragile selectors;
-- essential content inside animation;
-- browser-specific layout tricks;
-- published SVGs that depend on unresolved local raster references.
+Avoid `foreignObject`, JavaScript, external stylesheets, remote fonts, remote image URLs inside SVG, fragile selectors, essential content inside animation, browser-specific layout tricks, and unresolved local raster references.
 
 Every generated SVG must end with a newline.
 
@@ -305,6 +318,7 @@ assets/readme/
 ├── showcase.png
 ├── section-*.svg
 ├── workflow.svg
+├── support.svg
 └── source/
     ├── hero-layout.svg
     ├── hero-subject.png
@@ -313,7 +327,7 @@ assets/readme/
 
 Use lowercase hyphenated names. Remove discarded variants unless the user asks to preserve the exploration archive.
 
-For a coordinated set, share typography hierarchy, palette roles, radius/stroke language, spacing rhythm, and motif vocabulary while giving each asset a specific communication job.
+For coordinated assets, share typography hierarchy, palette roles, radius/stroke language, spacing rhythm, and motif vocabulary while giving each asset a specific communication job.
 
 ## README Content Engineering
 
@@ -327,33 +341,48 @@ Apply these editing rules:
 - Keep searchable/copyable text in Markdown, not SVG.
 - Avoid long prose in multi-column Markdown tables.
 - Keep repository facts dynamic when trustworthy endpoints or automation can provide them.
-- Never maintain a changing number manually when GitHub can provide it dynamically.
+- Never maintain a changing number manually when GitHub or repository automation can provide it dynamically.
 - Inventory and preserve existing useful outbound links unless explicitly asked to remove them.
 - Classify important links as source, deployment/live, or download/release before changing them.
 - Use the destination that actually completes the user's intended action.
-- Preserve valid sponsorship/donation/support destinations, especially direct URLs already present in the original README.
-- When the original README exposes a deployment URL directly, preserve that deployed destination rather than replacing it with the source repository.
-- Do not hide action URLs behind decorative graphics when a direct link is more convenient for users.
+- Preserve valid sponsorship/donation/support destinations.
+- Prefer a compact visual support CTA over a bare raw payment URL when it improves hierarchy.
+- Keep the canonical support URL directly accessible in Markdown even when a visual CTA is present.
+- Do not turn an action URL into image-only content.
 
-### Support and sponsorship block
+## Support and sponsorship UX
 
-When a project has an existing support or sponsorship destination, keep a compact action block such as:
+When a project has a verified support or sponsorship destination, treat it as a small product surface rather than an afterthought.
+
+Preferred structure:
 
 ```markdown
 ## Support
 
-If this project saves you time or improves your workflow, you can support its development:
+<div align="center">
 
-https://cyojkoy.github.io/Payment/
+<a href="<canonical-support-url>">
+  <img src="assets/readme/support.svg" alt="Support <Project>" width="420">
+</a>
+
+<short project-native support sentence>
+
+**Direct support link:** <canonical-support-url>
+
+</div>
 ```
 
-A richer badge or button may be added only when it improves the interface without removing the direct destination. The canonical URL must remain easy to discover, click, and copy.
+Use the visual CTA when it improves scanability and gives the README a coherent action affordance. Keep the direct URL because users may need to copy it, inspect it, or access it when images are blocked.
 
-The exact support copy should remain project-native. Do not imply commercial sponsorship, crowdfunding status, or payment-provider relationships that the repository does not establish.
+A support asset should be a compact CTA, not a second Hero. Avoid oversized donation banners, manipulative language, false urgency, unsupported commercial claims, or generic “Buy Me a Coffee” styling when it is not native to the project.
 
-### Link inventory
+The CTA destination must be the user-facing support/payment page, not the payment project's source repository, when the deployed page is available and verified.
 
-Before a whole-README redesign, record important destinations in a small internal inventory:
+Never invent a funding relationship or imply sponsorship that does not exist.
+
+## Link inventory
+
+Before a whole-README redesign, record important destinations in an internal inventory:
 
 | Purpose | URL type | Canonical destination | Preserve? |
 | :--- | :--- | :--- | :--- |
@@ -363,7 +392,7 @@ Before a whole-README redesign, record important destinations in a small interna
 | Download | release / artifact | actual download endpoint | Yes |
 | Support | deployment | deployed payment/sponsor page | Yes |
 
-Do not assume that a GitHub repository URL is the canonical destination for every one of these actions.
+Do not assume that a GitHub repository URL is the canonical destination for every action.
 
 ## Visual Quality and UX Rules
 
@@ -379,7 +408,9 @@ Treat a README as an interface:
 - no repeated cards when a diagram, specimen, or direct example is clearer;
 - no decorative element that competes with proof;
 - preserve dark/light rendering contrast where practical;
-- keep important action destinations obvious and usable.
+- keep important action destinations obvious and usable;
+- a visual CTA must remain obviously clickable;
+- support copy must not overpower the primary project narrative.
 
 The goal is not maximal decoration. The goal is lower cognitive load and faster comprehension.
 
@@ -389,19 +420,13 @@ Motion is opt-in.
 
 Use it only when it communicates a state, process, transition, or relationship. GitHub can render GIFs but does not play animation embedded inside SVG, so an animated module must retain a static fallback.
 
-For approved GIFs, verify:
-
-- entry frame;
-- settled hold;
-- exit;
-- loop boundary;
-- readability without animation.
+For approved GIFs, verify entry frame, settled hold, exit, loop boundary, and readability without animation.
 
 Never make required instructions depend on motion.
 
 ## Verification
 
-Before delivery, verify at realistic GitHub widths:
+Before delivery, verify at realistic GitHub widths.
 
 ### Content
 
@@ -416,6 +441,7 @@ Before delivery, verify at realistic GitHub widths:
 - Important links still point to the correct destination type: source, deployment/live, or download/release.
 - Sponsor/support URLs remain directly usable when they were intentionally exposed before redesign.
 - A deployed website or payment page is not accidentally replaced by its source repository URL.
+- Changing repository facts have one authoritative source rather than multiple hard-coded copies.
 
 ### Visual
 
@@ -427,6 +453,8 @@ Before delivery, verify at realistic GitHub widths:
 - Contrast works on relevant GitHub backgrounds.
 - Alt text is meaningful.
 - Visual density is deliberate.
+- Support CTA is visibly an action, not an unclickable decoration.
+- Support CTA styling is consistent with the rest of the README.
 - The result looks specific to the repository rather than reusable as a generic template.
 
 ### Maintenance
@@ -435,10 +463,12 @@ Before delivery, verify at realistic GitHub widths:
 - SVG files end with newline.
 - No remote font/script dependency.
 - Dynamic facts are dynamic when practical.
+- Hero mutable-data markers are unique and automation fails when they are missing.
 - Discarded assets are removed unless intentionally retained.
 - Unrelated files are untouched.
 - Canonical action URLs are not replaced with fragile or incorrect endpoints.
 - Source and deployment destinations remain clearly distinguished.
+- A future repository update should not require manual edits in multiple locations for the same changing fact.
 
 When the repository contains a README audit script, run it. Otherwise perform an equivalent manual audit.
 
@@ -450,63 +480,29 @@ If the user requests asset-only work, do not silently change README copy, orderi
 
 If the user requests a whole-README redesign, limit edits to the authorized repository homepage and its directly required visual assets.
 
-Preserving an existing sponsor/support link is considered a content-preservation requirement during redesign unless the user explicitly authorizes its removal.
+Preserving an existing sponsor/support link is a content-preservation requirement unless the user explicitly requests removal or replacement.
 
-Do not change a source URL into a deployment URL, or vice versa, without verifying the intended user action and destination.
-
-Do not commit, push, open a PR, or publish without explicit authorization.
+For a support CTA redesign, replacing a raw URL presentation with a linked visual CTA is allowed when the canonical URL remains directly available in Markdown and the destination itself is unchanged.
 
 ## Output Contract
 
-### Audit
+For `whole-readme` work, the delivered result should include:
 
-Return:
-
-- first-screen clarity assessment;
-- content architecture issues;
-- visual system issues;
-- accessibility/trust issues;
-- link destination issues, including source/deployment/download mismatches;
-- maintenance risks;
-- prioritized recommendations.
-
-### Whole README / Visual refresh
-
-Return:
-
-- project story;
-- visual thesis;
-- changed content structure;
-- visual asset plan;
-- preserved action/link inventory, including support or sponsorship;
-- verified source/deployment/download destinations;
-- verification results;
-- files changed and files deliberately untouched.
-
-### Asset-only
-
-Return:
-
-- asset rationale;
-- implementation type (SVG / hybrid PNG/WebP / approved GIF);
-- source and rendered assets;
-- embed snippet when useful;
-- verification notes;
-- explicit statement that README content remains unchanged unless embedding was separately authorized.
-
-## References
-
-Read these when the task needs deeper guidance:
-
-- `design-intelligence.md` — cross-cutting AzSkills visual design rules.
-- `references/beautify-github-readme.md` — integrated README-beautification methodology, GitHub-safe canvas rules, project-native art direction, proof-first content architecture, asset organization, and motion policy.
+1. Project-native first screen.
+2. Clear value and early proof.
+3. Appropriate Hero and section assets.
+4. Searchable installation and usage instructions.
+5. Preserved and verified action links.
+6. Clear support/sponsorship entry point when applicable.
+7. Dynamic repository facts where practical.
+8. Repository structure and maintenance notes when useful.
+9. Source/deployment/download link semantics kept correct.
+10. No unsupported claims.
 
 ## Provenance
 
-This Skill is an AzSkills synthesis informed by the public methodology of:
+This Skill is an AzSkills synthesis informed by:
 
 - https://github.com/oil-oil/beautify-github-readme
 
-The upstream project contributes the useful ideas of first-screen testing, `Value → Proof → Mechanism → First use → Detail` content sequencing, project-native visual derivation, proof-first design, GitHub-safe SVG production, realistic render-size testing, coordinated asset organization, and opt-in motion.
-
-AzSkills rewrites these ideas to fit its own modular architecture and combines them with its existing README engineering and shared design-intelligence rules. Upstream example assets and repository-specific implementation are not mechanically vendored.
+Its methodology is adapted to AzSkills' architecture rather than mechanically vendored. Third-party provenance and licensing information should be recorded in the repository's `THIRD_PARTY_NOTICES.md` when applicable.
