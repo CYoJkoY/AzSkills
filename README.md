@@ -37,7 +37,7 @@ Each Skill lives in its own directory and is centered on a `SKILL.md` that defin
 
 <table>
 <tr>
-<td align="center" width="25%"><img src="assets/readme/icons/settings.svg" width="28" alt="Configuration"><br><strong>Structured</strong><br><sub>Explicit behavior contracts</sub></td>
+<td align="center" width="25%"><img src="assets/readme/icons/contract.svg" width="28" alt="Behavior contract"><br><strong>Structured</strong><br><sub>Explicit behavior contracts</sub></td>
 <td align="center" width="25%"><img src="assets/readme/icons/model.svg" width="28" alt="Composition"><br><strong>Composable</strong><br><sub>Small skills, focused scope</sub></td>
 <td align="center" width="25%"><img src="assets/readme/icons/verification.svg" width="28" alt="Quality"><br><strong>Checked</strong><br><sub>Workflow + quality gates</sub></td>
 <td align="center" width="25%"><img src="assets/readme/icons/installation.svg" width="28" alt="Practical use"><br><strong>Practical</strong><br><sub>Built for real tasks</sub></td>
@@ -223,8 +223,8 @@ The layer is an AzSkills synthesis informed by the public methodology of [`nextl
 <table>
 <tr>
 <td align="center"><img src="assets/readme/icons/selection.svg" width="30" alt="Choose"><br><strong>Choose</strong><br><sub>Narrowest matching Skill</sub></td>
-<td align="center"><img src="assets/readme/icons/documentation.svg" width="30" alt="Read"><br><strong>Read</strong><br><sub>Load its contract</sub></td>
-<td align="center"><img src="assets/readme/icons/model.svg" width="30" alt="Apply"><br><strong>Compose</strong><br><sub>Rules + constraints</sub></td>
+<td align="center"><img src="assets/readme/icons/read.svg" width="30" alt="Read"><br><strong>Read</strong><br><sub>Load its contract</sub></td>
+<td align="center"><img src="assets/readme/icons/model.svg" width="30" alt="Compose"><br><strong>Compose</strong><br><sub>Rules + constraints</sub></td>
 <td align="center"><img src="assets/readme/icons/verification.svg" width="30" alt="Verify"><br><strong>Verify</strong><br><sub>Quality + output</sub></td>
 </tr>
 </table>
@@ -241,7 +241,7 @@ AzSkills is a collection of Markdown specifications and supporting files. There 
 
 ### Clone
 
-<img src="assets/readme/icons/installation.svg" width="22" alt="Install"> 
+<img src="assets/readme/icons/installation.svg" width="22" alt="Install">
 
 ```bash
 git clone https://github.com/CYoJkoY/AzSkills.git
@@ -309,6 +309,7 @@ AzSkills/
 │   └── readme/
 │       ├── support-cta.svg
 │       └── icons/
+│           ├── contract.svg
 │           ├── engineering.svg
 │           ├── visual-design.svg
 │           ├── documentation.svg
@@ -316,7 +317,9 @@ AzSkills/
 │           ├── model.svg
 │           ├── installation.svg
 │           ├── selection.svg
+│           ├── read.svg
 │           ├── verification.svg
+│           ├── contributing.svg
 │           ├── settings.svg
 │           ├── adjustment.svg
 │           ├── arrow-right.svg
@@ -354,7 +357,7 @@ AzSkills applies the same standards it teaches:
 
 **Correct destinations.** A source repository, deployed website, online documentation, payment page, and downloadable release are different destinations. README rewrites must preserve the destination that actually completes the user's intended action.
 
-**Semantic icon systems.** Icons are selected for meaning and local context, not from a fixed four-icon palette. Neighboring sections should use distinct, semantically accurate icons when clear candidates exist.
+**Semantic icon systems.** Icons are selected for meaning, project context, and local visual hierarchy. This README deliberately uses different icons for different concepts rather than cycling through a fixed four-icon palette.
 
 **Adaptive support.** Support visuals are generated or selected from the target project's own identity rather than copied from another repository. Users should not need to micro-tune colors, iconography, dimensions, or illustration prompts.
 
