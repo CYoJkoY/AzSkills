@@ -1,42 +1,56 @@
-# Prompt Templates
+# Brotato Art Direction v3 — Prompt Templates
 
-These templates are construction patterns, not mandatory keyword dumps. Replace bracketed fields with concrete task information.
+These are construction patterns, not keyword dumps. Replace bracketed fields with concrete task information. Load `SKILL.md` first and use the smallest relevant template.
 
 ## Universal Asset
 
-> 2D hand-drawn flat cartoon game asset in a Brotato-inspired visual language. [SUBJECT]. Strong compact silhouette, rounded chunky shapes, exaggerated but readable proportions, bold black outer contour with controlled natural hand-drawn variation, clean saturated flat color blocks, one or two hard-edged cartoon shadow shapes, minimal highlights, low-detail high-readability game sprite design, transparent background. No photorealism, realistic anatomy, anime rendering, 3D/PBR rendering, smooth gradients, painterly shading, dense texture, thin technical linework, cinematic lighting, or excessive micro-detail.
+> Create a clean 2D game-ready asset using the visual grammar of Brotato. [SUBJECT]. Build the design from a strong compact organic silhouette, chunky rounded shapes, exaggerated but readable proportions, and a bold black outer contour with controlled hand-drawn irregularity. Use a limited flat-color palette, sparse internal lines, one or two hard-edged cartoon shadow blocks, and minimal highlights. Prioritize silhouette, function, identity, and small-size readability over detail. The asset must feel like a real in-game indie game sprite rather than a modern vector mascot, promotional illustration, concept-art sheet, anime character, or 3D render. Transparent background unless otherwise requested. Keep the design recognizable at 64x64. Remove unnecessary detail.
 
 ## Character
 
-> [CHARACTER CONCEPT], compact rounded body, [POSE], [FACE], [PRIMARY EQUIPMENT], [SECONDARY ACCESSORY]. Body visually dominant, strong readable silhouette, bold black hand-drawn outer contour, clean flat color blocks, restrained hard-edged shadows, simple facial features, exaggerated game-readable proportions, readable at 64x64, 2D indie game character sprite, transparent background.
+> [CHARACTER CONCEPT]. Compact, short, rounded organic potato-like body with slightly asymmetric silhouette and low center of gravity. [POSE]. Extremely simple black dot/oval eyes and [MOUTH/EXPRESSION]. [PRIMARY EQUIPMENT]. [SECONDARY ACCESSORY]. Equipment participates in the silhouette and remains immediately readable. Bold black outer contour with controlled natural hand-drawn variation, sparse internal lines, limited flat colors, one or two hard-edged cartoon shadow blocks, minimal highlights, low detail, strong thumbnail readability, transparent background, 64x64-readable 2D game sprite.
 
 ## Weapon
 
-> [WEAPON], immediately recognizable chunky profile, [ORIENTATION], [MAJOR COMPONENTS], limited palette, bold black outer contour, clean flat color blocks, one or two hard-edged cartoon shadows, minimal functional details, strong thumbnail readability, 2D indie game weapon sprite, transparent background.
+> [WEAPON]. Immediately recognizable chunky weapon profile, [ORIENTATION], [MAJOR FUNCTIONAL COMPONENTS]. Use a limited flat palette, bold black outer contour, simple organic/rounded construction, sparse internal structure, one or two hard-edged cartoon shadow blocks, minimal material detail, strong thumbnail readability, 2D game-ready weapon sprite, transparent background. Prefer the most recognizable angle rather than forcing a front view.
 
-## Item
+## Item / Relic
 
-> [ITEM], single dominant central object or symbol, compact readable silhouette, rounded simplified geometry, bold black outer contour, clean saturated flat colors, limited palette, minimal hard-edged shadow, sparse highlight, instantly recognizable game item icon, transparent background.
+> [ITEM OR RELIC]. One dominant central object or symbol, compact readable silhouette, slightly organic orientation, bold black outer contour, limited flat colors, sparse internal lines, one or two hard-edged shadow blocks, minimal highlight, no decorative micro-detail, instantly recognizable at thumbnail size, 2D game-ready item icon, transparent background.
 
-## Enemy
+## Legendary Item
 
-> [ENEMY], aggressive simplified cartoon creature, exaggerated readable silhouette, [SIGNATURE FEATURE], chunky organic shapes, bold black hand-drawn contour, clean saturated flat colors, restrained hard-edged shadows, minimal detail, strong gameplay readability, 2D indie game enemy sprite, transparent background.
+> [LEGENDARY ITEM]. One unusually distinctive silhouette or central visual motif, stronger but restrained accent color, bold black outer contour, limited flat palette, minimal hard-edged shading, low detail, high visual mass and instant recognition at small size. Legendary identity comes from silhouette, motif, and visual hierarchy—not micro-detail. Transparent background.
 
-## Effect
+## Enemy / Boss
 
-> [EFFECT], [MOTION OR STATE], clear graphic silhouette, simplified 2D cartoon effect, clean saturated color blocks, chunky particles, minimal hard-edged shading, controlled black contour where appropriate, strong gameplay readability, transparent background.
+> [ENEMY]. Exaggerated compact organic body, strong instantly recognizable silhouette, [ONE OR TWO DEFINING FEATURES], minimal face if applicable, chunky appendages, bold black outer contour, limited flat colors, sparse internal lines, restrained hard-edged cartoon shadows, low detail, high gameplay readability, transparent background. Keep mutant, alien, fantasy, mechanical, or Cthulhu-like concepts graphic and stylized rather than realistic body horror or creature concept art.
 
-## UI
+## NPC
 
-> [UI ELEMENT], compact highly readable game interface icon, simplified rounded geometry, bold black contour where appropriate, clean flat colors, minimal shading, consistent optical weight, strong contrast, transparent background, readable at native UI size.
+> [NPC CONCEPT]. Same compact rounded body language as Brotato characters, [CLOTHING/PROP], [POSE], extremely simple face, bold black outer contour, limited flat palette, sparse internal lines, minimal hard-edged shading, one memorable identity feature, low detail, transparent background, game-ready 2D sprite.
 
-## Animation
+## Effect / VFX
 
-> Continuous sprite animation of [SUBJECT], [GRID], [FRAME COUNT]. Preserve exact identity, silhouette, palette, outline weight, camera, scale, pivot, and framing across every frame. Animate only [PROPERTY] with small incremental changes between adjacent frames. [LOOP REQUIREMENT]. Clean 2D hand-drawn flat cartoon game-art rendering, transparent background.
+> [EFFECT], [MOTION OR STATE]. Clear graphic silhouette using simple circles, blobs, arcs, bursts, rings, impact shapes, flames, clouds, or controlled particles. Limited high-contrast flat colors, minimal hard-edged shading, controlled black contour where appropriate, strong gameplay readability, transparent background. No particle spam, cinematic smoke, realistic fire, volumetric rendering, or excessive glow.
+
+## UI / Cursor
+
+> [UI ELEMENT]. Compact highly readable game-interface asset using simplified rounded geometry and the same optical weight as Brotato game art. Bold black contour where appropriate, limited flat colors, minimal shading, strong contrast, instant recognition at native UI size, testable at 32x32 where practical, transparent background.
+
+## Animation / Sprite Sheet
+
+> Continuous 2D game animation of [SUBJECT], [GRID], [FRAME COUNT]. Preserve exact identity, silhouette, palette, outline weight, camera, scale, pivot, framing, and relevant background pixels across all frames. Animate only [PROPERTY] with small incremental changes between adjacent frames. No independent redraws. [LOOP REQUIREMENT]. Maintain consistent Brotato visual language and 64x64 readability.
 
 ## Reference Redraw
 
-> Preserve the supplied reference's subject identity, major silhouette, composition, palette relationships, and visual hierarchy. Re-render it using the established Brotato-inspired 2D hand-drawn flat cartoon system: bold black outer contour, rounded chunky shapes, clean flat colors, restrained hard-edged shadows, minimal detail, strong thumbnail readability. Modify only [REQUESTED CHANGE]. Transparent background unless otherwise specified.
+> Preserve the supplied reference's subject identity, major silhouette, composition, palette relationships, outline hierarchy, and visual detail density. Re-render it using the established Brotato Art Direction v3 system: organic chunky shapes, bold black outer contour, limited flat colors, sparse internal lines, restrained hard-edged cartoon shadows, minimal detail, strong thumbnail readability. Modify only [REQUESTED CHANGE]. Preserve all unspecified properties. Transparent background unless otherwise specified.
+
+## Theme Translation
+
+Use this pattern when the asset belongs to a strong Mod theme:
+
+> [ASSET] using Brotato Art Direction v3, translated into [THEME]. Express the theme through silhouette, one or two memorable props/symbols, restrained accent colors, and simple graphic motifs. Do not replace the Brotato visual grammar with realistic [THEME-SPECIFIC MATERIALS/EFFECTS].
 
 ## Negative Prompt Base
 
@@ -45,8 +59,12 @@ These templates are construction patterns, not mandatory keyword dumps. Replace 
 ## Template Rules
 
 - Put concrete subject information before style adjectives.
+- Build from silhouette before detail.
 - Use only constraints relevant to the task.
-- Do not repeat the same style keyword excessively.
-- Do not combine contradictory requirements.
-- Add exact dimensions, grid structure, and transparency requirements when known.
+- Do not repeat style keywords excessively.
+- Do not force weapons/items into a universal camera angle.
+- Do not use fixed color percentages as hard requirements.
+- Treat 64x64 as a readability test, not necessarily the source resolution.
 - For reference edits, explicitly lock unchanged properties and identify the requested delta.
+- For animations, explicitly lock identity, camera, palette, scale, pivot, and frame continuity.
+- If the output looks too polished, simplify instead of adding more style keywords.
