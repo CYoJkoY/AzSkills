@@ -2,7 +2,7 @@
 
 `SKILL.md` is the entry point. Load the smallest module that matches the requested asset, then combine modules only when the task spans multiple asset classes.
 
-The character module is intentionally stricter than the generic asset grammar because playable characters require stronger silhouette and identity control than ordinary icons or props.
+The character module is intentionally stricter than the generic asset grammar because Brotato characters use a highly compressed roster grammar: compact pale potato-creature masses, simple facial composition, one dominant identity feature, bold black contour, and icon-level readability.
 
 | Module | Scope | Use when |
 | :--- | :--- | :--- |
@@ -19,11 +19,15 @@ The character module is intentionally stricter than the generic asset grammar be
 
 For a character request, load `SKILL.md` + `character.md` + `prompt-templates.md`.
 
-For a character that repeatedly becomes generic, additionally use the `Character — Silhouette-Only Test Prompt` and `Character — Anti-Generic Prompt Addendum` in `prompt-templates.md`.
+For a character portrait, selection icon, or unspecified character presentation, use the `Character — Portrait / Selection Icon` template by default.
 
-For a character roster, use `character.md` + `Character — Roster Variation Template` and deliberately vary body mass, silhouette hook, pose, prop scale, and color identity while keeping rendering grammar fixed.
+For a true full-body gameplay sprite, explicitly use the `Character — Gameplay Sprite` template. Do not assume every character request is a full-body RPG character.
 
-For a character reference redraw, use `character.md` + `Character — Reference Redesign Template` and lock all unspecified identity properties.
+For a character that repeatedly becomes generic, additionally use the `Character — Silhouette-Only Test` and `Character — Face-First Test` templates.
+
+For a character roster, use `character.md` + `Character — Roster Variation` and deliberately vary body contour, face composition, dominant identity feature, and accent color while keeping the rendering grammar fixed.
+
+For a character reference redraw, use `character.md` + `Character — Reference Redesign` and lock all unspecified identity properties.
 
 For a weapon request, load `SKILL.md` + `weapon.md` + `prompt-templates.md`.
 
@@ -55,12 +59,12 @@ For a reference-image redraw, load `SKILL.md` + the relevant asset module + the 
 
 For character generation, use this precedence after explicit user requirements:
 
-1. `character.md` identity and silhouette rules.
-2. `prompt-templates.md` character construction rules.
+1. `character.md` official roster grammar.
+2. Character-specific template in `prompt-templates.md`.
 3. Generic `SKILL.md` asset rules.
 4. Generic style keywords.
 
-This prevents broad phrases such as "potato character" or "thick black outline" from overriding the character's actual identity architecture.
+Character-specific rules control the body mass, face composition, identity feature, presentation, and detail ceiling. Generic style keywords must not turn the character into a human, RPG character, mascot, or detailed vector illustration.
 
 ## General Precedence
 
