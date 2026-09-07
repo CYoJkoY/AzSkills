@@ -6,6 +6,21 @@ Use this reference whenever a README needs semantic icons.
 
 Icons must explain structure, not decorate empty space. A good icon should be immediately interpretable, visually compatible with the target repository, and distinct from neighboring icons.
 
+## Required implementation
+
+For a **whole-readme redesign**, semantic heading icons are an implementation requirement whenever the README has multiple meaningful sections and suitable concepts exist.
+
+The workflow is not complete until the final Markdown itself contains image references on the intended H2/H3 headings. Creating icon files without placing them in headings is insufficient.
+
+Minimum implementation pattern:
+
+```markdown
+## <img src="assets/readme/icons/architecture.svg" width="20" alt=""> Architecture
+## <img src="assets/readme/icons/download.svg" width="20" alt=""> Installation
+```
+
+Use actual repository-local SVG assets rather than emoji when the README design calls for a persistent visual system.
+
 ## Placement hierarchy
 
 Icon placement is part of information architecture. Choose the placement level before choosing the exact asset.
@@ -28,11 +43,13 @@ Default rule: an icon belongs beside a heading or inside an intentionally visual
 
 Use at most one icon immediately before an H2/H3 heading when the section benefits from a visual marker.
 
+For whole README redesigns, prefer icons on the major H2 sections. Use H3 icons when they communicate genuinely distinct concepts rather than mechanically decorating every subsection.
+
 Good:
 
 ```markdown
-## <icon> Installation
-### <icon> Language & localization
+## <img src="assets/readme/icons/installation.svg" width="20" alt=""> Installation
+### <img src="assets/readme/icons/package.svg" width="18" alt=""> Package model
 ```
 
 Avoid:
@@ -80,6 +97,8 @@ score candidates
 adapt contrast / scale if needed
       ↓
 place with local usage context
+      ↓
+verify the Markdown actually references the asset
 ```
 
 Do not begin by picking a favorite icon and retrofitting the meaning afterward.
@@ -100,7 +119,7 @@ Prefer the highest total. If two candidates are close, choose the one that is le
 
 ## Semantic diversity
 
-Treat icon choice as a local vocabulary rather than a global theme:
+Treat icon choice as a local vocabulary rather than a global theme. The shapes, stroke weight, fill behavior, corner treatment, and accent colors should also reflect the target repository when practical.
 
 ```text
 Engineering          → gear / wrench / terminal / system
@@ -144,6 +163,8 @@ simple local deterministic SVG
 
 A reusable icon may be recolored or wrapped for theme safety, but its semantic shape should not be distorted.
 
+When project-owned artwork already communicates the concept, use that evidence before introducing generic third-party iconography.
+
 ## Adaptation rules
 
 Automatically adapt presentation without asking the user for micro-decisions:
@@ -168,4 +189,5 @@ Before delivery:
 5. Check that the icon does not imply a different function than the text.
 6. Check that removing the icon would reduce scanning value; if not, remove it.
 7. Check that the icon set feels like a vocabulary rather than a four-icon template.
-8. Remove any icon that was added only to fill whitespace.
+8. Inspect the rendered Markdown source and confirm the intended H2/H3 headings contain the image references.
+9. Remove any icon that was added only to fill whitespace.
