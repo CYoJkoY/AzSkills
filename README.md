@@ -7,6 +7,7 @@
 <p>
   <a href="#-overview">Overview</a> •
   <a href="#-skill-catalog">Skill Catalog</a> •
+  <a href="#-design-intelligence">Design Intelligence</a> •
   <a href="#-installation--setup">Installation</a> •
   <a href="#-usage">Usage</a> •
   <a href="#-project-structure">Structure</a> •
@@ -31,7 +32,7 @@ The collection covers AutoHotkey v2 engineering, multilingual translation, game 
 
 AzSkills is intentionally modular: use one skill independently, combine several skills in a workflow, or add a new skill without changing the existing definitions.
 
-> **Design principle:** one directory, one purpose, one clearly defined behavior contract.
+> **Architecture principle:** task skills stay focused; shared design intelligence is inherited by visual workflows instead of becoming another top-level skill.
 
 ## ✨ Core Features
 
@@ -39,16 +40,62 @@ AzSkills is intentionally modular: use one skill independently, combine several 
 | :--- | :--- |
 | **Modular skill definitions** | Each capability lives in a self-contained `SKILL.md` or a clearly defined modular skill package. |
 | **Explicit behavior contracts** | Trigger conditions, standards, workflows, and output rules are documented directly in each skill. |
+| **Shared design intelligence** | `design-intelligence.md` provides contextual visual hierarchy, style selection, typography, color semantics, spacing, accessibility, motion, density, anti-pattern filtering, and quality gates for visual work. |
 | **Development standards** | `ahkv2-opt` provides concrete AutoHotkey v2 refactoring, performance, UI, state-management, and testing guidance. |
 | **Engineering craftsmanship** | `ultrathink` adds assumption-checking, architecture planning, adversarial review, iterative refinement, and simplification for complex engineering work. |
 | **Localization workflows** | `l13n` defines a structured 13-language CSV localization workflow with terminology, escaping, and BBCode preservation rules. |
-| **Documentation tooling** | `readme-craft` defines README structure, visual direction, SVG requirements, feature presentation, and project-type adaptations. |
+| **Documentation tooling** | `readme-craft` defines README structure, visual direction, SVG requirements, feature presentation, project-type adaptation, and GitHub-friendly documentation patterns. |
 | **Presentation generation** | `frontend-slides` provides fixed-stage 16:9 HTML presentation generation, design systems, animation guidance, PowerPoint extraction, and quality auditing. |
 | **Steam Mod publishing** | `steam-mod-page` generates structured Chinese/English Steam-style Mod descriptions and change logs while preserving required BBCode structure. |
-| **Visual identity** | `logo-generator` unifies logo concepts, SVG marks, minimalist black-and-white exploration, mascot routes, colorways, identity boards, and showcase workflows. |
+| **Visual identity** | `logo-generator` unifies logo concepts, minimalist exploration, SVG marks, mascot routes, colorways, identity boards, showcase workflows, and small-size quality checks. |
 | **Character-led identity** | `ip-as-logo` specializes in extremely simplified mascot/IP marks with strict silhouette and small-size recognition rules. |
 | **Editorial photo abstraction** | `photo-abstract-editorial` transforms a supplied photograph into a faithful photo + restrained abstract editorial composition. |
 | **Language-aware translation** | `any2zh` and `zh2en` preserve intent, tone, formatting, and technical context instead of relying on literal conversion. |
+
+---
+
+## 🎨 Design Intelligence
+
+`design-intelligence.md` is a **cross-cutting design foundation**, not a standalone Skill.
+
+When any existing skill changes how an artifact **looks, feels, moves, or is interacted with**, the design intelligence layer is applied automatically. Users do not need to request a separate UI/UX methodology by name.
+
+It distills the useful, transferable parts of the public `nextlevelbuilder/ui-ux-pro-max-skill` methodology into AzSkills' modular architecture:
+
+- visual thesis before implementation
+- context-driven style selection
+- primitive → semantic → component token thinking
+- typography as hierarchy rather than decoration
+- semantic color roles and contrast discipline
+- composition before component accumulation
+- accessible interaction and clear affordances
+- context-aware motion with reduced-motion support
+- deliberate information density
+- real content and real evidence over decorative filler
+- visual hierarchy, affordance, and final quality audits
+- systematic anti-pattern filtering
+
+The implementation deliberately does **not** vendor the upstream plugin, its searchable data library, generated examples, or provider-specific scripts.
+
+### Inheritance
+
+```text
+                         AzSkills
+                            │
+                 ┌──────────┴──────────┐
+                 │                     │
+        Task-specific Skills     Design Intelligence
+                 │                     │
+       ┌─────────┼─────────┐           │
+       │         │         │           │
+      Logo     Slides    README ◄──────┘
+       │         │         │
+       └─────────┼─────────┘
+                 │
+              Output
+```
+
+Domain-specific rules remain authoritative. The shared layer supplies the common visual decision framework.
 
 ---
 
@@ -66,7 +113,7 @@ A rule-driven engineering skill for refactoring and reviewing AutoHotkey v2 code
 
 **Deep Engineering Craftsmanship Methodology**
 
-A craftsmanship-oriented skill for complex engineering tasks. It explicitly questions assumptions before implementation, maps architecture and constraints, designs from the caller's perspective, scrutinizes naming and abstractions, considers edge cases, runs tests, compares alternatives, and iterates beyond the first working solution. It also emphasizes ruthless simplification and avoiding premature abstraction.
+A craftsmanship-oriented skill for complex engineering tasks. It explicitly questions assumptions before implementation, maps architecture and constraints, designs from the caller's perspective, scrutinizes naming and abstractions, considers edge cases, runs tests, compares alternatives, and iterates beyond the first working solution.
 
 The skill was imported from [HaydenLundin/ultrathink](https://github.com/HaydenLundin/ultrathink) and retains the upstream MIT license in [`ultrathink/LICENSE`](ultrathink/LICENSE).
 
@@ -76,9 +123,9 @@ The skill was imported from [HaydenLundin/ultrathink](https://github.com/HaydenL
 
 **Animation-Rich HTML Presentation Generation**
 
-A presentation-focused skill adapted from [zarazhangrui/frontend-slides](https://github.com/zarazhangrui/frontend-slides). It provides a fixed 1920×1080 stage model, visual style discovery, presentation architecture, a reusable design system, animation patterns, typography guidance, PowerPoint-to-web extraction, and automated quality auditing for overflow, overlap, and layout issues.
+A presentation-focused skill adapted from [zarazhangrui/frontend-slides](https://github.com/zarazhangrui/frontend-slides). It provides a fixed 1920×1080 stage model, visual style discovery, presentation architecture, a reusable design system, animation patterns, typography guidance, PowerPoint-to-web extraction, and automated quality auditing.
 
-The integration includes the core skill plus the supporting files it directly depends on. The upstream MIT license is preserved in [`frontend-slides/LICENSE`](frontend-slides/LICENSE).
+The integration also inherits the shared `design-intelligence.md` layer, so style selection, hierarchy, semantic color, interaction quality, and visual quality checks are applied without requiring an explicit UI/UX mode request.
 
 [Open `frontend-slides`](frontend-slides/SKILL.md) · [View design system](frontend-slides/DESIGN_SYSTEM.md) · [View quality auditor](frontend-slides/scripts/quality_audit.py)
 
@@ -86,7 +133,9 @@ The integration includes the core skill plus the supporting files it directly de
 
 **Professional Logo & Visual Identity Design**
 
-The unified visual-identity skill for general logo work. It covers conceptual routes, minimalist black-and-white exploration boards, editable SVG marks, wordmarks, mascot directions, colorways, identity-system boards, showcase presentation, small-size testing, and targeted revision. It combines the strongest reusable parts of multiple public Logo-generation workflows without keeping duplicated top-level skills.
+The unified visual-identity skill for general logo work. It covers conceptual routes, minimalist black-and-white exploration boards, editable SVG marks, wordmarks, mascot directions, colorways, identity-system boards, showcase presentation, small-size testing, and targeted revision.
+
+Its default workflow inherits the shared design-intelligence layer, so style-to-context matching, typography hierarchy, semantic color roles, composition discipline, and anti-pattern filtering are applied automatically.
 
 [Open `logo-generator`](logo-generator/SKILL.md)
 
@@ -126,7 +175,9 @@ A structured localization workflow for game CSV data. It enforces the fixed lang
 
 **Professional README Generation**
 
-A visual-first documentation skill for creating structured, polished README files. It defines Hero composition, dark-theme styling, SVG asset generation, feature presentation, project-type adaptation, and GitHub-friendly documentation patterns.
+A visual-first documentation skill for creating structured, polished README files. It defines Hero composition, GitHub-safe SVG asset generation, feature presentation, project-type adaptation, repository proof, and maintenance-aware documentation patterns.
+
+Visual README work also inherits the shared design-intelligence layer automatically.
 
 [Open `readme-craft`](readme-craft/SKILL.md)
 
@@ -177,11 +228,13 @@ ultrathink/
 zh2en/
 ```
 
+`design-intelligence.md` is a shared reference and is not counted as an independent Skill.
+
 ### Register the skill with your agent
 
 Copy or link the selected skill directory into the skill-discovery location used by your AI agent or development environment. A simple skill is defined by its `SKILL.md`; skills with supporting files should keep those files together.
 
-For `frontend-slides`, keep the supporting design-system and script files together. For the visual skills, the current repository intentionally keeps the core rules in a compact `SKILL.md` so the agent can load the correct mode without pulling an entire unrelated example library into context.
+For visual workflows, keep `design-intelligence.md` available at the repository root so the relevant Skill can inherit the shared design rules.
 
 > **Note:** Skill discovery paths vary between agent frameworks. Keep the directory name, `SKILL.md`, and any referenced support files together when integrating a skill.
 
@@ -192,6 +245,8 @@ For `frontend-slides`, keep the supporting design-system and script files togeth
 Each skill is designed to be invoked by matching its purpose, trigger conditions, and documented workflow.
 
 Use `logo-generator` for general logo and identity tasks. It also handles minimalist black-and-white exploration through its `exploration` mode. Use `ip-as-logo` instead when the identity is specifically a compact character/IP symbol. Use `photo-abstract-editorial` only for photo-preserving editorial abstractions.
+
+When a task is visual, the shared design-intelligence layer is applied automatically. There is no separate `ui-ux-pro-max` Skill to invoke and no additional user wording is required.
 
 An AutoHotkey v2 refactoring task can load `ahkv2-opt`. A documentation workflow can use `readme-craft`. A localization workflow can apply `l13n` to a structured CSV without changing its schema. `frontend-slides` can be loaded for building, converting, or enhancing HTML presentations. `steam-mod-page` can be loaded when creating Steam Workshop-style Mod copy or change logs. `any2zh` and `zh2en` handle different translation directions and conversational contexts. For complex implementation or architectural refactoring, `ultrathink` can be combined with another task-specific skill.
 
@@ -222,7 +277,10 @@ Select the narrowest matching skill
    └── Complex engineering ───────────► ultrathink + task skill
    │
    ▼
-Read SKILL.md
+Apply shared design intelligence when visual
+   │
+   ▼
+Read the selected SKILL.md
    │
    ▼
 Load referenced support files when needed
@@ -242,8 +300,9 @@ When multiple rules apply, use this precedence order:
 ```text
 1. Explicit user requirements
 2. Skill core rules in SKILL.md
-3. Most specific referenced support rules
-4. Reusable examples / templates
+3. Shared design-intelligence rules
+4. Most specific referenced support rules
+5. Reusable examples / templates
 ```
 
 ---
@@ -252,23 +311,27 @@ When multiple rules apply, use this precedence order:
 
 ### Self-contained specifications
 
-Every skill is packaged as a readable Markdown specification with frontmatter, purpose, workflows, and enforcement rules. This keeps the skill portable and easy to review.
+Every Skill is packaged as a readable Markdown specification with frontmatter, purpose, workflows, and enforcement rules. This keeps the Skill portable and easy to review.
+
+### Cross-cutting visual intelligence
+
+Visual design knowledge is kept as a shared reference rather than duplicated across every Skill. Domain-specific Skills remain small, while common decisions about hierarchy, typography, color, spacing, interaction, motion, accessibility, and visual quality stay synchronized.
 
 ### Constraint-driven workflows
 
-The skills do more than describe goals. They define concrete constraints such as code-size limits, output schemas, formatting preservation, terminology requirements, fixed slide dimensions, BBCode structure, logo construction rules, small-size readability, and visual transformation boundaries.
+The Skills do more than describe goals. They define concrete constraints such as code-size limits, output schemas, formatting preservation, terminology requirements, fixed slide dimensions, BBCode structure, logo construction rules, small-size readability, and visual transformation boundaries.
 
 ### Specialized rather than monolithic
 
-AzSkills does not try to create one universal prompt. Specialized skills can be selected independently and combined only when their responsibilities overlap in a useful way.
+AzSkills does not try to create one universal prompt. Specialized Skills can be selected independently and combined only when their responsibilities overlap in a useful way. Shared visual intelligence is the exception: it is inherited automatically because the same quality layer applies across visual domains.
 
 ### Curated synthesis
 
-When multiple public skills overlap, AzSkills favors a single coherent capability over redundant copies. Shared functionality is merged, narrower workflows become explicit modes, and unrelated domains remain separate.
+When multiple public Skills overlap, AzSkills favors a single coherent capability over redundant copies. Shared functionality is merged, narrower workflows become explicit modes, and unrelated domains remain separate.
 
 ### Human-readable by design
 
-Because the core artifact is Markdown, developers can audit, edit, review, and version-control the rules without a separate authoring toolchain.
+Because the core artifacts are Markdown, developers can audit, edit, review, and version-control the rules without a separate authoring toolchain.
 
 ---
 
@@ -314,6 +377,7 @@ AzSkills/
 │   └── 📄 SKILL.md
 ├── 📁 zh2en/
 │   └── 📄 SKILL.md
+├── 📄 design-intelligence.md
 ├── 📁 assets/
 │   └── 🖼️ azskills-hero.svg
 ├── ⚖️ LICENSE
@@ -327,29 +391,30 @@ AzSkills/
 
 AzSkills follows a few simple maintenance rules:
 
-1. Keep each skill focused on a clearly bounded responsibility.
-2. Keep operational rules inside the corresponding `SKILL.md` rather than scattering them across the repository.
+1. Keep each Skill focused on a clearly bounded responsibility.
+2. Keep operational rules inside the corresponding `SKILL.md` and shared design rules inside `design-intelligence.md`.
 3. Prefer explicit workflows and output contracts over vague behavioral descriptions.
-4. Keep documentation and examples aligned with the actual skill definition.
-5. Preserve the existing directory-level naming convention when adding new skills.
-6. Preserve third-party skill licensing and attribution when importing an external skill.
-7. Keep referenced support files next to the skill whenever the skill depends on them.
-8. When overlapping skills are imported, merge the shared core and expose meaningful differences as modes or narrower skills instead of duplicating capability.
-9. Remove documentation references to retired skills immediately so the README remains an accurate index of the repository.
+4. Keep documentation and examples aligned with the actual Skill definition.
+5. Preserve the existing directory-level naming convention when adding new Skills.
+6. Preserve third-party Skill licensing and attribution when importing or synthesizing from public methodologies.
+7. Keep referenced support files next to the Skill whenever the Skill depends on them.
+8. When overlapping Skills are imported, merge the shared core and expose meaningful differences as modes or narrower Skills instead of duplicating capability.
+9. Apply the shared design-intelligence layer automatically to visual workflows rather than creating redundant UI/UX Skills.
+10. Remove documentation references to retired Skills immediately so the README remains an accurate index of the repository.
 
-The Skills badge is generated from the repository's actual `SKILL.md` files by GitHub Actions. The License badge is read directly from the repository's GitHub license metadata.
+The Skills badge is generated from the repository's actual `SKILL.md` files by GitHub Actions. The shared design-intelligence reference is intentionally not a `SKILL.md` and therefore does not change the Skill count.
 
 ---
 
 ## 🤝 Contributing & Feedback
 
-Contributions are welcome, especially improvements that make a skill more precise, reusable, or easier for agents to follow.
+Contributions are welcome, especially improvements that make a Skill more precise, reusable, or easier for agents to follow.
 
-When adding a skill, include a concise frontmatter definition, clear trigger conditions, explicit workflow rules, practical examples where useful, and a scope that does not overlap unnecessarily with existing skills. When importing an external skill, preserve its applicable license and attribution information.
+When adding a Skill, include a concise frontmatter definition, clear trigger conditions, explicit workflow rules, practical examples where useful, and a scope that does not overlap unnecessarily with existing Skills. When importing or synthesizing from an external Skill, preserve provenance and applicable licensing information.
 
-When a skill contains multiple stable task types, consider using a modular structure with a small core `SKILL.md` and focused supporting files. Document any loading strategy and rule precedence so agents do not need to load unrelated material.
+When a Skill contains multiple stable task types, consider using a modular structure with a small core `SKILL.md` and focused supporting files. Document any loading strategy and rule precedence so agents do not need to load unrelated material.
 
-For bug reports, describe the affected skill, the input that triggered the problem, the expected behavior, and the observed behavior.
+For bug reports, describe the affected Skill, the input that triggered the problem, the expected behavior, and the observed behavior.
 
 ---
 
@@ -357,7 +422,7 @@ For bug reports, describe the affected skill, the input that triggered the probl
 
 AzSkills is released under the **MIT License**.
 
-See [`LICENSE`](LICENSE) for the complete license text. Individual imported skills may retain additional upstream licensing notices where required; see the corresponding skill directory for details.
+See [`LICENSE`](LICENSE) for the complete license text. Individual imported Skills may retain additional upstream licensing notices where required; see the corresponding skill directory or [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 ---
 
