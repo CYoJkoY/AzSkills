@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src="assets/azskills-hero.svg" alt="AzSkills — reusable AI skills organized as explicit, composable behavior contracts" width="100%">
+<img src="assets/azskills-hero.svg" alt="AzSkills — reusable AI skills with explicit behavior contracts, composed into checked task outputs" width="100%">
 
 # AzSkills
 
-### Reusable AI Skills for real work.
+**Reusable AI Skills for real work.**
 
-Small, composable, human-readable `SKILL.md` specifications for engineering, translation, localization, documentation, presentations, and visual design.
+A focused library of human-readable `SKILL.md` specifications for engineering, translation, localization, documentation, presentations, and visual workflows.
 
 <p>
   <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/CYoJkoY/AzSkills/main/.github/badges/skills.json&style=flat-square" alt="Skill count">
@@ -17,10 +17,10 @@ Small, composable, human-readable `SKILL.md` specifications for engineering, tra
 
 <p>
   <a href="#start-here">Start here</a> ·
-  <a href="#skills">Skills</a> ·
+  <a href="#skill-catalog">Skills</a> ·
   <a href="#the-azskills-model">Model</a> ·
   <a href="#installation">Installation</a> ·
-  <a href="#contributing">Contributing</a>
+  <a href="#support">Support</a>
 </p>
 
 </div>
@@ -29,13 +29,13 @@ Small, composable, human-readable `SKILL.md` specifications for engineering, tra
 
 ## Start here
 
-AzSkills is a **library of reusable AI instructions**. It is not a framework, runtime, or executable application.
+AzSkills is a **library of reusable AI behavior definitions**. It is not a framework, runtime, or executable application.
 
-Each capability is isolated in its own directory and centered on a `SKILL.md`. The file defines when the Skill applies, what must remain true, how the work should proceed, what quality checks matter, and what the output should look like.
+Each Skill lives in its own directory and is centered on a `SKILL.md` that defines its trigger boundary, hard constraints, workflow, quality gates, and output contract.
 
-### Find a Skill by task
+### Find the right Skill
 
-| Task | Skill |
+| Your task | Start with |
 | :--- | :--- |
 | Optimize or refactor AutoHotkey v2 | [`ahkv2-opt`](ahkv2-opt/SKILL.md) |
 | Work through a difficult engineering task | [`ultrathink`](ultrathink/SKILL.md) |
@@ -45,11 +45,11 @@ Each capability is isolated in its own directory and centered on a `SKILL.md`. T
 | Turn a supplied photo into an editorial abstraction | [`photo-abstract-editorial`](photo-abstract-editorial/SKILL.md) |
 | Translate content into natural Chinese | [`any2zh`](any2zh/SKILL.md) |
 | Localize game CSV data into 13 languages | [`l13n`](l13n/SKILL.md) |
-| Write or redesign a GitHub README | [`readme-craft`](readme-craft/SKILL.md) |
+| Design or rewrite a GitHub README | [`readme-craft`](readme-craft/SKILL.md) |
 | Write a Steam Workshop / Mod page | [`steam-mod-page`](steam-mod-page/SKILL.md) |
 | Translate Chinese chat into natural English | [`zh2en`](zh2en/SKILL.md) |
 
-> **Selection rule:** start with the narrowest Skill that completely covers the task. Combine Skills only when each contributes a distinct responsibility.
+> **Selection rule:** use the smallest Skill that completely covers the task. Compose Skills only when each adds a distinct responsibility.
 
 ---
 
@@ -67,18 +67,18 @@ How is quality verified?
 What should the output contain?
 ```
 
-This makes the resulting knowledge easier to inspect, version, test, adapt, and reuse.
+That turns working knowledge into something an agent can load, inspect, version, test, and reuse.
 
 ### One directory, one responsibility
 
-The smallest useful Skill looks like this:
+The smallest useful Skill is intentionally simple:
 
 ```text
 my-skill/
 └── SKILL.md
 ```
 
-A larger Skill can own supporting material without turning into a monolith:
+When supporting material is required, it stays with the Skill that owns it:
 
 ```text
 my-skill/
@@ -89,24 +89,22 @@ my-skill/
 └── assets/
 ```
 
-Supporting files remain local to the Skill that owns their behavior.
-
 ### Compose instead of duplicate
 
 AzSkills prefers the smallest architectural unit that solves the problem:
 
 ```text
-new domain-specific capability  →  new Skill
-narrow variation of a Skill     →  mode
-shared reusable guidance        →  reference
-cross-domain visual reasoning   →  shared design intelligence
+new domain-specific behavior  →  new Skill
+narrow variation              →  mode
+shared reusable guidance      →  reference
+cross-domain visual reasoning →  shared design intelligence
 ```
 
-That keeps Skills focused without forcing unrelated domains into one universal prompt.
+This keeps the catalog focused without forcing unrelated workflows into one universal prompt.
 
 ---
 
-## Skills
+## Skill catalog
 
 ### Engineering
 
@@ -114,13 +112,13 @@ That keeps Skills focused without forcing unrelated domains into one universal p
 
 **AutoHotkey v2 optimization and standardization.**
 
-A rule-driven workflow for refactoring and reviewing AutoHotkey v2 code, including code sizing, control flow, state management, hotkeys, timers, data structures, `DllCall`, GUI performance, memory behavior, and testing.
+A rule-driven workflow for refactoring and reviewing AutoHotkey v2 code, covering code sizing, control flow, state management, hotkeys, timers, data structures, `DllCall`, GUI performance, memory behavior, and testing.
 
 #### [`ultrathink`](ultrathink/SKILL.md)
 
 **Deep engineering craftsmanship for difficult implementation work.**
 
-A methodology for complex engineering and refactoring tasks that emphasizes assumption checking, architecture mapping, caller-oriented design, abstraction review, edge cases, alternative evaluation, testing, and simplification.
+A methodology for complex engineering and refactoring: question assumptions, map architecture, design from the caller's perspective, inspect abstractions, consider edge cases, test alternatives, and simplify beyond the first working implementation.
 
 ### Presentation & visual design
 
@@ -128,19 +126,19 @@ A methodology for complex engineering and refactoring tasks that emphasizes assu
 
 **Animation-rich HTML presentation generation.**
 
-A fixed 1920×1080 workflow for presentation architecture, visual direction, design-system construction, typography, animation patterns, PowerPoint extraction, and quality auditing.
+A fixed 1920×1080 workflow for visual direction, narrative structure, design-system construction, typography, animation patterns, PowerPoint extraction, and quality auditing.
 
 #### [`logo-generator`](logo-generator/SKILL.md)
 
 **General logo and visual-identity production.**
 
-Covers concept development, black-and-white exploration, SVG marks, wordmarks, mascot routes, colorways, identity-system boards, showcase layouts, small-size testing, and targeted revision.
+Covers concept routes, black-and-white exploration, SVG marks, wordmarks, mascots, colorways, identity-system boards, showcase layouts, small-size testing, and targeted revision.
 
 #### [`ip-as-logo`](ip-as-logo/SKILL.md)
 
 **Character-led IP and mascot marks.**
 
-A narrower identity workflow for highly simplified character/IP symbols, with strong silhouette, restrained color, and small-size recognition requirements.
+A narrower workflow for highly simplified character/IP symbols, emphasizing dominant silhouette, restrained color, and small-size recognition.
 
 #### [`photo-abstract-editorial`](photo-abstract-editorial/SKILL.md)
 
@@ -154,15 +152,15 @@ Keeps a supplied photograph faithful while deriving a restrained abstract panel 
 
 **Project-native GitHub README engineering.**
 
-Turns a repository homepage into a readable visual story through first-screen clarity, proof-first structure, project-native art direction, GitHub-safe SVGs, realistic render-size checks, accessible presentation, link preservation, and maintenance-aware documentation.
+Treats a repository homepage as a communication interface: clarify the project first, move proof before detail, derive visual language from the real project, preserve important destinations, keep technical information searchable in Markdown, and verify visuals at realistic GitHub widths.
 
-**This README is written using `readme-craft` itself.**
+> This README is produced using `readme-craft` itself.
 
 #### [`steam-mod-page`](steam-mod-page/SKILL.md)
 
 **Steam Workshop / Mod Store writing.**
 
-Produces structured Chinese/English Mod descriptions and change logs with practical wording, BBCode discipline, and strict feature accuracy.
+Produces structured Chinese/English Mod descriptions and change logs with BBCode discipline, practical wording, and strict feature accuracy.
 
 ### Language & localization
 
@@ -190,18 +188,9 @@ Turns informal, slang-heavy, and context-dependent Chinese into natural English 
 
 [`design-intelligence.md`](design-intelligence.md) is a **shared reference layer**, not another Skill.
 
-Visual Skills inherit it automatically when a task changes how an artifact looks, feels, moves, or is interacted with.
+Visual Skills inherit it when a task changes how an artifact looks, feels, moves, or is interacted with. It provides common guidance for visual thesis, style selection, typography, semantic color, composition, spacing, density, accessibility, motion, anti-pattern filtering, and visual QA.
 
-It provides a common framework for:
-
-- visual thesis and context-driven style selection;
-- typography hierarchy and semantic color roles;
-- composition, spacing, geometry, and information density;
-- accessibility and interaction affordances;
-- motion and reduced-motion behavior;
-- anti-pattern filtering and visual quality review.
-
-Its precedence is explicit:
+Its precedence is:
 
 ```text
 1. User requirements
@@ -210,18 +199,18 @@ Its precedence is explicit:
 4. Referenced guidance and examples
 ```
 
-The layer is an AzSkills synthesis informed by the public methodology of [`nextlevelbuilder/ui-ux-pro-max-skill`](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill). AzSkills keeps transferable design reasoning without vendoring the upstream plugin, generated database, or provider-specific tooling.
+The layer is an AzSkills synthesis informed by the public methodology of [`nextlevelbuilder/ui-ux-pro-max-skill`](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill).
 
 ---
 
 ## How it works
 
-A typical workflow is deliberately small:
+The normal integration loop is intentionally small:
 
 ```text
 Task
   ↓
-Choose the narrowest matching Skill
+Choose the narrowest Skill
   ↓
 Read SKILL.md
   ↓
@@ -229,18 +218,18 @@ Load references / support files when needed
   ↓
 Apply workflow + constraints
   ↓
-Run relevant quality checks
+Run quality checks
   ↓
-Produce the task-specific result
+Produce the result
 ```
 
-Skills can be composed when the task genuinely crosses domains. For example, a complex engineering task can use `ultrathink` together with a domain-specific Skill, while a visual documentation task can use `readme-craft` and inherit the shared design layer automatically.
+Complex tasks can compose multiple Skills. A visual documentation task, for example, can use `readme-craft` while inheriting `design-intelligence.md`; a difficult implementation can pair `ultrathink` with a domain-specific Skill.
 
 ---
 
 ## Installation
 
-AzSkills has no repository-wide runtime or build step. It is a collection of Markdown specifications and supporting files.
+AzSkills is a collection of Markdown specifications and supporting files. There is no repository-wide runtime or build step.
 
 ### Clone
 
@@ -251,7 +240,7 @@ cd AzSkills
 
 ### Choose
 
-Select the Skill directory that matches your task. Keep `SKILL.md` together with any support files it references.
+Select the Skill directory that matches your task and keep its `SKILL.md` together with any referenced support files.
 
 ```text
 ahkv2-opt/
@@ -271,9 +260,7 @@ zh2en/
 
 ### Register
 
-Copy or link the selected Skill directory into the discovery location used by your AI agent or development environment.
-
-Discovery paths differ between agent frameworks, so AzSkills intentionally does not prescribe a single universal install directory.
+Copy or link the selected Skill into the skill-discovery location used by your AI agent or development environment. Discovery paths vary by framework, so AzSkills does not prescribe one universal install directory.
 
 ---
 
@@ -300,95 +287,52 @@ Visual tasks inherit `design-intelligence.md` automatically.
 
 ---
 
-## Why the repository stays modular
-
-### Explicit contracts
-
-Skills document triggers, rules, workflows, constraints, quality gates, and output expectations directly in Markdown.
-
-### Composable capabilities
-
-There is no universal “do everything” prompt. Small capabilities are easier to load, audit, revise, test, and reuse.
-
-### Shared knowledge without duplication
-
-Cross-domain visual reasoning lives in one shared layer while domain-specific behavior remains authoritative inside each Skill.
-
-### Curated synthesis
-
-When public Skills overlap, AzSkills prefers one coherent capability over redundant top-level copies. Narrower workflows can become modes or references; unrelated domains stay independent.
-
-### Human-readable by default
-
-The core artifacts are ordinary Markdown and repository-local files, so the rules can be inspected and versioned like normal source material.
-
----
-
 ## Repository structure
 
 ```text
 AzSkills/
 ├── .github/
-│   ├── badges/
-│   │   └── skills.json
-│   └── workflows/
-│       └── update-skill-badge.yml
-├── assets/
-│   └── azskills-hero.svg
-├── ahkv2-opt/
-│   └── SKILL.md
-├── any2zh/
-│   └── SKILL.md
+│   ├── badges/skills.json
+│   └── workflows/update-skill-badge.yml
+├── assets/azskills-hero.svg
+├── ahkv2-opt/SKILL.md
+├── any2zh/SKILL.md
 ├── frontend-slides/
-│   ├── SKILL.md
-│   ├── DESIGN_SYSTEM.md
-│   ├── STYLE_PRESETS.md
-│   ├── viewport-base.css
-│   ├── html-template.md
-│   ├── animation-patterns.md
-│   └── scripts/
-├── ip-as-logo/
-│   └── SKILL.md
-├── l13n/
-│   └── SKILL.md
+├── ip-as-logo/SKILL.md
+├── l13n/SKILL.md
 ├── logo-generator/
-│   ├── SKILL.md
-│   └── references/
-├── photo-abstract-editorial/
-│   └── SKILL.md
+├── photo-abstract-editorial/SKILL.md
 ├── readme-craft/
-│   ├── SKILL.md
-│   └── references/
-├── steam-mod-page/
-│   └── SKILL.md
+├── steam-mod-page/SKILL.md
 ├── ultrathink/
-│   ├── SKILL.md
-│   └── LICENSE
-├── zh2en/
-│   └── SKILL.md
+├── zh2en/SKILL.md
 ├── design-intelligence.md
 ├── THIRD_PARTY_NOTICES.md
 ├── LICENSE
 └── README.md
 ```
 
-The Skill count badge is generated from the repository's `SKILL.md` files by [`update-skill-badge.yml`](.github/workflows/update-skill-badge.yml), so the count does not need to be maintained manually.
+The Skill count badge is generated from the repository's `SKILL.md` files by [`update-skill-badge.yml`](.github/workflows/update-skill-badge.yml), so the count is not manually maintained.
 
 ---
 
 ## Documentation principles
 
-AzSkills applies the same standards it teaches.
+AzSkills applies the same standards it teaches:
 
-**Project-native, not template-first.** Visual direction should come from the actual project, audience, existing identity, and communication job.
+**Project-native, not template-first.** Visual direction comes from the actual product, audience, existing identity, and communication job.
 
 **Proof before decoration.** Prefer real outputs, examples, commands, screenshots, diagrams, and repository artifacts over unsupported claims.
 
-**Searchable Markdown.** Installation, configuration, commands, limitations, APIs, links, and other copyable information stay in Markdown instead of being trapped inside images.
+**Searchable Markdown.** Installation, configuration, commands, limitations, links, and other copyable information stay in Markdown.
 
-**Conservative GitHub rendering.** Visual assets should survive realistic wide and narrow GitHub content widths, use repository-relative paths where possible, and avoid fragile browser-specific behavior.
+**Correct destinations.** A source repository, deployed website, online documentation, payment page, and downloadable release are different destinations. README rewrites must preserve the destination that actually completes the user's intended action.
 
-For the full README production method, see [`readme-craft/SKILL.md`](readme-craft/SKILL.md) and [`readme-craft/references/beautify-github-readme.md`](readme-craft/references/beautify-github-readme.md).
+**Preserved action links.** Existing valid release, documentation, Demo, support, sponsorship, and related-project links are part of the repository's action layer and are not removed merely to improve visual polish.
+
+**Conservative GitHub rendering.** Visual assets should survive realistic wide and narrow content widths, use repository-relative paths where possible, remain accessible, and avoid fragile browser-specific behavior.
+
+For the complete method, see [`readme-craft/SKILL.md`](readme-craft/SKILL.md) and [`readme-craft/references/beautify-github-readme.md`](readme-craft/references/beautify-github-readme.md).
 
 ---
 
@@ -396,11 +340,23 @@ For the full README production method, see [`readme-craft/SKILL.md`](readme-craf
 
 A strong contribution should add a **clear capability**, improve an existing workflow, fix a concrete defect, or remove unnecessary complexity.
 
-Before creating a new top-level Skill, check whether the behavior belongs in an existing Skill as a mode, reference, or shared rule.
+Before creating a new top-level Skill, check whether the behavior belongs in an existing Skill as a mode, reference, or shared rule. New Skills should have a distinct scope, clear trigger conditions, and a concrete output contract.
 
 For imported public methodologies, record provenance and applicable licensing information in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 Keep diffs focused, readable, and easy to audit.
+
+---
+
+## Support
+
+AzSkills is open source. If these Skills save you time or improve your workflows, you can support continued development through the deployed payment page:
+
+**https://cyojkoy.github.io/Payment/**
+
+The payment page is the user-facing destination; the [`Payment` source repository](https://github.com/CYoJkoY/Payment) is kept separate as a source link.
+
+---
 
 ## License & provenance
 
