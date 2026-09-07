@@ -1,59 +1,114 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 560" role="img" aria-labelledby="title desc">
-  <title id="title">AzSkills</title>
-  <desc id="desc">AzSkills is a modular collection of reusable AI skills for development, translation, localization, and documentation.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+  <title id="title">AzSkills — reusable AI skills with explicit behavior contracts</title>
+  <desc id="desc">A dark modular diagram showing multiple SKILL.md definitions converging on a task and producing a checked result, with AzSkills principles along the bottom.</desc>
 
-  <defs>
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#8A9E8B" stop-opacity="0.18"/>
-      <stop offset="72%" stop-color="#8A9E8B" stop-opacity="0.035"/>
-      <stop offset="100%" stop-color="#8A9E8B" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
+  <rect width="1200" height="650" rx="32" fill="#11171A"/>
+  <rect x="28" y="28" width="1144" height="594" rx="26" fill="#162024" stroke="#33484A" stroke-width="2"/>
 
-  <rect width="1600" height="560" rx="36" fill="#1E1E1E"/>
-  <rect x="34" y="34" width="1532" height="492" rx="30" fill="#2A2A2A" stroke="#5A6B6B" stroke-width="2"/>
-
-  <g fill="#8A9E8B">
-    <circle cx="118" cy="122" r="4" opacity="0.60"/>
-    <circle cx="150" cy="154" r="2" opacity="0.32"/>
-    <circle cx="1482" cy="122" r="4" opacity="0.60"/>
-    <circle cx="1450" cy="154" r="2" opacity="0.32"/>
-    <circle cx="118" cy="438" r="3" opacity="0.42"/>
-    <circle cx="1482" cy="438" r="3" opacity="0.42"/>
-  </g>
-
-  <g stroke="#5A6B6B" stroke-width="1.5" opacity="0.24">
-    <line x1="118" y1="122" x2="150" y2="154"/>
-    <line x1="1482" y1="122" x2="1450" y2="154"/>
-    <line x1="118" y1="438" x2="150" y2="406"/>
-    <line x1="1482" y1="438" x2="1450" y2="406"/>
-  </g>
-
-  <circle cx="800" cy="210" r="162" fill="url(#glow)"/>
-
-  <g transform="translate(800 210)">
-    <!-- Clean modular core -->
-    <circle r="112" fill="#202525" stroke="#8A9E8B" stroke-width="3"/>
-    <circle r="94" fill="none" stroke="#7A8E8E" stroke-width="2" stroke-dasharray="4 11" opacity="0.78"/>
-
-    <g fill="#8A9E8B">
-      <circle cx="0" cy="-112" r="7"/>
-      <circle cx="97" cy="-56" r="7"/>
-      <circle cx="97" cy="56" r="7"/>
-      <circle cx="0" cy="112" r="7"/>
-      <circle cx="-97" cy="56" r="7"/>
-      <circle cx="-97" cy="-56" r="7"/>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif">
+    <g fill="#8FA9A8" font-family="Cascadia Code, Consolas, monospace" font-size="13" letter-spacing="3">
+      <text x="62" y="68">CYojkoY / AZSKILLS</text>
+      <text x="1138" y="68" text-anchor="end">MODULAR / REUSABLE / OPEN SOURCE</text>
     </g>
 
-    <polygon points="0,-55 48,-27 48,27 0,55 -48,27 -48,-27" fill="#1E1E1E" stroke="#E6DED6" stroke-width="4"/>
-    <path d="M-24 4 L-8 20 L28 -17" fill="none" stroke="#8A9E8B" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
+    <g transform="translate(64 108)">
+      <path d="M0 30 L24 0 H54 L31 30 Z" fill="#9BBAB5"/>
+      <path d="M42 30 L58 8 L76 30 Z" fill="#D7A85A"/>
+      <text x="0" y="122" fill="#F0EBE2" font-size="56" font-weight="750" letter-spacing="7">AZSKILLS</text>
+      <text x="0" y="164" fill="#D9D5CC" font-size="22">Reusable AI skills with explicit behavior contracts.</text>
+      <rect x="0" y="194" width="94" height="6" rx="3" fill="#D7A85A"/>
 
-  <g font-family="Inter, Segoe UI, Arial, sans-serif" text-anchor="middle">
-    <text x="800" y="356" font-size="58" font-weight="700" letter-spacing="9" fill="#E6DED6">AZSKILLS</text>
-    <text x="800" y="396" font-size="19" font-weight="600" letter-spacing="3.5" fill="#8A9E8B">MODULAR AI SKILLS</text>
-    <text x="800" y="430" font-size="16" fill="#BEB8AE">Development · Translation · Localization · Documentation</text>
-  </g>
+      <g transform="translate(0 232)" font-family="Cascadia Code, Consolas, monospace">
+        <rect x="0" y="0" width="112" height="38" rx="10" fill="#1D2B2E" stroke="#385055"/>
+        <text x="56" y="25" text-anchor="middle" fill="#B4C8C7" font-size="13">11 Skills</text>
+        <rect x="124" y="0" width="112" height="38" rx="10" fill="#1D2B2E" stroke="#385055"/>
+        <text x="180" y="25" text-anchor="middle" fill="#B4C8C7" font-size="13">Modular</text>
+        <rect x="248" y="0" width="126" height="38" rx="10" fill="#1D2B2E" stroke="#385055"/>
+        <text x="311" y="25" text-anchor="middle" fill="#B4C8C7" font-size="13">GitHub-native</text>
+      </g>
+    </g>
 
-  <path d="M590 478 H1010" stroke="#5A6B6B" stroke-width="2" stroke-dasharray="4 10" opacity="0.75"/>
+    <g transform="translate(506 106)">
+      <g>
+        <rect x="0" y="0" width="242" height="78" rx="16" fill="#1C2B2E" stroke="#3B5558"/>
+        <text x="18" y="28" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="14" font-weight="700">SKILL.md</text>
+        <text x="18" y="51" fill="#92A7A6" font-size="13">engineering</text>
+        <circle cx="216" cy="24" r="7" fill="#8FB7AC"/>
+      </g>
+      <g transform="translate(260 0)">
+        <rect x="0" y="0" width="242" height="78" rx="16" fill="#1C2B2E" stroke="#3B5558"/>
+        <text x="18" y="28" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="14" font-weight="700">SKILL.md</text>
+        <text x="18" y="51" fill="#92A7A6" font-size="13">visual design</text>
+        <circle cx="216" cy="24" r="7" fill="#7EA3B8"/>
+      </g>
+
+      <g transform="translate(0 94)">
+        <rect x="0" y="0" width="242" height="78" rx="16" fill="#1C2B2E" stroke="#3B5558"/>
+        <text x="18" y="28" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="14" font-weight="700">SKILL.md</text>
+        <text x="18" y="51" fill="#92A7A6" font-size="13">documentation</text>
+        <circle cx="216" cy="24" r="7" fill="#D7A85A"/>
+      </g>
+      <g transform="translate(260 94)">
+        <rect x="0" y="0" width="242" height="78" rx="16" fill="#1C2B2E" stroke="#3B5558"/>
+        <text x="18" y="28" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="14" font-weight="700">SKILL.md</text>
+        <text x="18" y="51" fill="#92A7A6" font-size="13">translation</text>
+        <circle cx="216" cy="24" r="7" fill="#8FB7AC"/>
+      </g>
+
+      <g transform="translate(0 188)">
+        <rect x="0" y="0" width="242" height="78" rx="16" fill="#1C2B2E" stroke="#3B5558"/>
+        <text x="18" y="28" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="14" font-weight="700">SKILL.md</text>
+        <text x="18" y="51" fill="#92A7A6" font-size="13">localization</text>
+        <circle cx="216" cy="24" r="7" fill="#86A9B7"/>
+      </g>
+      <g transform="translate(260 188)">
+        <rect x="0" y="0" width="242" height="78" rx="16" fill="#1C2B2E" stroke="#3B5558"/>
+        <text x="18" y="28" fill="#C5D6D4" font-family="Cascadia Code, Consolas, monospace" font-size="14" font-weight="700">SKILL.md</text>
+        <text x="18" y="51" fill="#92A7A6" font-size="13">publishing</text>
+        <circle cx="216" cy="24" r="7" fill="#D7A85A"/>
+      </g>
+    </g>
+
+    <g fill="none" stroke="#708D8D" stroke-width="2" opacity="0.9">
+      <path d="M748 145 C782 145 786 145 810 180"/>
+      <path d="M766 200 C790 200 796 205 810 220"/>
+      <path d="M748 240 C782 240 790 238 810 238"/>
+      <path d="M766 294 C792 294 800 284 810 270"/>
+      <path d="M748 333 C782 333 790 320 810 300"/>
+      <path d="M768 363 C792 363 802 340 810 325"/>
+    </g>
+
+    <g transform="translate(824 170)">
+      <rect x="0" y="0" width="292" height="252" rx="22" fill="#142024" stroke="#6E9997" stroke-width="2"/>
+      <g fill="#9CB4B2" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">
+        <text x="22" y="30">TASK</text>
+      </g>
+      <path d="M146 48 v34 M132 68 l14 14 l14-14" stroke="#D7A85A" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="146" y="132" text-anchor="middle" fill="#F0EBE2" font-size="24" font-weight="700">Better results</text>
+      <text x="146" y="164" text-anchor="middle" fill="#D2D0C8" font-size="18">through composition.</text>
+      <line x1="66" y1="190" x2="226" y2="190" stroke="#33484A"/>
+      <circle cx="146" cy="216" r="16" fill="#8FB7AC"/>
+      <path d="M138 216 l6 6 l11-12" stroke="#102020" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="146" y="244" text-anchor="middle" fill="#8FB7AC" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">CHECKED OUTPUT</text>
+    </g>
+
+    <line x1="64" y1="490" x2="1136" y2="490" stroke="#33484A"/>
+
+    <g transform="translate(64 522)">
+      <text x="0" y="0" fill="#D7A85A" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">BEHAVIOR CONTRACTS</text>
+      <text x="0" y="23" fill="#9DAEAC" font-size="13">Triggers · rules · workflow · QA · output</text>
+    </g>
+    <g transform="translate(330 522)">
+      <text x="0" y="0" fill="#D7A85A" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">SHARED DESIGN INTELLIGENCE</text>
+      <text x="0" y="23" fill="#9DAEAC" font-size="13">A common visual reasoning layer</text>
+    </g>
+    <g transform="translate(688 522)">
+      <text x="0" y="0" fill="#D7A85A" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">SMALL SKILLS / BIG COMBINATIONS</text>
+      <text x="0" y="23" fill="#9DAEAC" font-size="13">Compose only what the task needs</text>
+    </g>
+    <g transform="translate(990 522)">
+      <text x="0" y="0" fill="#D7A85A" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">OPEN SOURCE</text>
+      <text x="0" y="23" fill="#9DAEAC" font-size="13">Inspectable · editable · versioned</text>
+    </g>
+  </g>
 </svg>
