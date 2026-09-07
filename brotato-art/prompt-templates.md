@@ -1,60 +1,78 @@
-# Brotato Art Direction v3 — Prompt Templates
+# Brotato Art Direction v4 — Prompt Templates
 
-These are construction patterns, not keyword dumps. Replace bracketed fields with concrete task information. Load `SKILL.md` first and use the smallest relevant template.
+These are construction patterns, not keyword dumps. Load `SKILL.md` first and use the smallest relevant template. Character prompts follow the official roster grammar: potato-creature mass first, face second, one dominant identity feature third, accessories last.
 
 ## Universal Asset
 
 > Create a clean 2D game-ready asset using the visual grammar of Brotato. [SUBJECT]. Build the design from a strong compact organic silhouette, chunky rounded shapes, exaggerated but readable proportions, and a bold black outer contour with controlled hand-drawn irregularity. Use a limited flat-color palette, sparse internal lines, one or two hard-edged cartoon shadow blocks, and minimal highlights. Prioritize silhouette, function, identity, and small-size readability over detail. The asset must feel like a real in-game indie game sprite rather than a modern vector mascot, promotional illustration, concept-art sheet, anime character, or 3D render. Transparent background unless otherwise requested. Keep the design recognizable at 64x64. Remove unnecessary detail.
 
-## Character — Identity-First Template
+## Character — Official Roster Template
 
-Do not use the old "generic potato + costume" construction. Resolve the character concept into a unique body silhouette before writing the style portion of the prompt.
+Use this as the default character template. Do not start from a human character, and do not start from a generic oval potato with a costume.
 
-> Create a single full-body 2D game character: **[CHARACTER CONCEPT]**. The character is a compact potato-like creature with a deliberately unique silhouette: **[BODY MUTATION]**. Its strongest visual hook is **[SILHOUETTE HOOK]**. Use an extremely simple face with **[EYE PLACEMENT / EXPRESSION]** and **[TINY MOUTH]**. Give the character a compact exaggerated pose: **[POSE LANGUAGE]**. Integrate **[SIGNATURE OBJECT / PRIMARY EQUIPMENT]** directly into the character silhouette so the concept is recognizable immediately. Add only **[0–3 SECONDARY MOTIFS]** when they reinforce identity. Use **[PALETTE]** as broad flat color masses. Render with a bold black organic outer contour, sparse internal lines, one or two hard-edged cartoon shadow blocks, and minimal highlights. Keep the body visually dominant, limbs short and simplified, hands and feet graphic, proportions chunky, and geometry slightly asymmetrical and organic. No realistic anatomy or detailed costume construction. Single character, full-body game-sprite framing, transparent background, highly readable at 64x64.
+> Create a single Brotato-style playable character based on **[CHARACTER CONCEPT]**. Design it first as a compact pale potato-like creature, not a human and not a potato costume. Give the underlying potato mass a deliberate shape: **[BODY CONTOUR / PROPORTION]**. Build the face as a primary identity element: **[EYE COMPOSITION]**, **[MOUTH / EXPRESSION]**. Add one dominant graphic identity feature: **[ONE FEATURE]**. If needed, add only **[OPTIONAL SECONDARY FEATURE]**. Keep the character extremely compact, with a large body mass, tiny/simple facial marks, short or minimally visible limbs, and no realistic anatomy. Use **[PALETTE]** as broad flat color regions, a heavy black organic outer contour, sparse internal lines, and minimal hard-edged cartoon shading. The result must look like one member of the official Brotato character roster: bizarre but simple, expressive through a few graphic shapes, highly readable as a tiny game character, and visually coherent with a row of small character icons. Transparent background unless otherwise requested. Readable at 48–64 px. No detailed costume, no realistic human anatomy, no cinematic pose, no concept-art rendering.
+
+## Character — Portrait / Selection Icon
+
+Use this when the user asks for a character portrait, selection icon, character card image, or does not specify a full gameplay sprite.
+
+> Create a compact Brotato-style character icon of **[CHARACTER]**. Show one pale potato-like creature occupying most of the frame. The body/head mass is deliberately shaped as **[BODY SHAPE]**, not a perfect oval. Give it a simple but highly distinctive face: **[EYES]**, **[MOUTH / EXPRESSION]**. Add **[DOMINANT IDENTITY FEATURE]** as one large graphic shape attached to or integrated with the potato mass. Add at most **[0–1 SECONDARY FEATURE]**. Keep the design front-facing or only slightly directional, with no human neck, torso, waist, long limbs, or realistic anatomy. Use a restrained palette of **[PALETTE]**, broad flat color fills, a heavy black hand-drawn outer contour, sparse internal lines, and minimal hard-edged shading. Make it read immediately as one member of the Brotato character roster at approximately 48–64 px. Transparent background unless otherwise requested.
+
+## Character — Gameplay Sprite
+
+Use this when a true in-game full-body character sprite is explicitly requested.
+
+> Create **[CHARACTER]** as a Brotato-style compact gameplay character. Preserve the official roster's potato-creature grammar: a large simple pale body mass, tiny/simple face, short chunky limbs, and one dominant identity feature. Body shape: **[BODY SHAPE]**. Face: **[FACE COMPOSITION]**. Dominant feature: **[FEATURE]**. Pose: **[COMPACT POSE]**. Equipment: **[PRIMARY EQUIPMENT]**, integrated as a simple silhouette mass rather than detailed gear. Use **[PALETTE]**, bold black organic contour, sparse internal lines, and minimal hard-edged cartoon shadows. Avoid humanoid torso construction, long legs, realistic hands, detailed clothing, cinematic perspective, or concept-art posing. Full body visible, transparent background, 64x64-readable.
 
 ## Character — Concept-to-Prompt Checklist
 
-Before producing a character prompt, resolve these fields:
+Resolve these fields before writing the final prompt:
 
 ```text
 CHARACTER CONCEPT: what the character is
-ARCHETYPE: the fastest visual category the player should perceive
-BODY MUTATION: how this potato differs from the default body
-SILHOUETTE HOOK: the one feature visible from far away
-FACE ANCHOR: eye placement + tiny expression
-POSE LANGUAGE: the character's characteristic physical attitude
-SIGNATURE OBJECT: the main prop/equipment
-SECONDARY MOTIFS: only identity-supporting details
-PALETTE: 2–4 major color masses + black contour
+POTATO BODY MASS: the underlying creature form
+BODY CONTOUR: how the mass differs from a generic oval
+FACE COMPOSITION: eye placement + mouth/expression
+DOMINANT IDENTITY FEATURE: one large readable feature
+SECONDARY FEATURE: optional, only if necessary
+ATTITUDE / POSE: compact visual attitude
+PALETTE: pale body + 1–2 accent masses + black contour
+PRESENTATION: portrait icon or gameplay sprite
 ```
 
-Never leave all of these implicit for an original character. A concrete concept is more valuable than a long list of style adjectives.
+Never leave the body mass and face completely implicit for an original character.
 
-## Character — Silhouette-Only Test Prompt
+## Character — Silhouette-Only Test
 
-Use this when a generated character keeps becoming generic:
+> Design **[CHARACTER]** first as a single readable black silhouette. The underlying potato creature must have a deliberate body contour: **[BODY CONTOUR]**. Use **[DOMINANT IDENTITY FEATURE]** as the strongest contour feature. Keep the face and accessories absent at this stage. The silhouette must already look like a distinct compact game creature rather than a human or generic oval mascot. Then convert the silhouette into a clean Brotato-style character using a pale flat body fill, tiny graphic facial marks, bold black contour, minimal color accents, and sparse hard-edged shading. Readable at 48–64 px.
 
-> Design **[CHARACTER]** first as a single readable black silhouette. Make the compact potato-like body itself distinctive through **[BODY MUTATION]**, with **[SILHOUETTE HOOK]** forming the dominant contour feature. Use short simplified limbs and an exaggerated compact pose **[POSE]**. The silhouette must identify the character concept before any clothing, color, facial detail, or texture is added. Then convert the silhouette into a clean 2D game sprite using bold black contour, limited flat color masses, sparse internal structure, and minimal hard-edged shading. Transparent background, 64x64-readable.
+## Character — Face-First Test
 
-## Character — Roster Variation Template
+Use this when generated characters look too similar despite different accessories.
 
-Use this when generating multiple characters in one Mod. The shared style must remain stable while the body design changes deliberately.
+> Design **[CHARACTER]** as a simple Brotato-style potato creature whose identity is carried primarily by facial composition. Use **[EYE ARRANGEMENT]**, **[MOUTH / EXPRESSION]**, and **[FACIAL FEATURE]**. Keep the body compact and organic with **[BODY CONTOUR]**. Add only one supporting identity feature: **[FEATURE]**. Use a heavy black contour, pale flat body color, minimal accent colors, sparse internal lines, and almost no shading. The face must remain recognizable at approximately 48–64 px. Do not use detailed human or anime facial anatomy.
 
-> Create **[CHARACTER]** as one member of a consistent Brotato-style playable character roster. Preserve the shared compact game-sprite rendering grammar, but deliberately vary the underlying character silhouette: **[BODY MASS / LEAN / SHAPE]**. Give this character a distinct **[SILHOUETTE HOOK]**, **[FACE ANCHOR]**, and **[POSE LANGUAGE]** so it cannot be mistaken for another roster member with a different hat or accessory. Integrate **[SIGNATURE OBJECT]** into the silhouette. Use **[PALETTE]** as broad flat masses, bold black organic contour, sparse internal lines, and minimal hard-edged shading. Keep the same sprite scale, camera, outline weight, face simplicity, and shading grammar as the roster while varying body mass, silhouette, pose, prop scale, and color identity. Transparent background, full body, 64x64-readable.
+## Character — Roster Variation
 
-## Character — Reference Redesign Template
+> Create **[CHARACTER]** as one member of a coherent Brotato character roster. Preserve the shared potato-creature species, pale body foundation, heavy black contour, simple facial grammar, flat color philosophy, and low detail. Deliberately vary the character's **body contour: [BODY SHAPE]**, **face composition: [FACE]**, and **dominant identity feature: [FEATURE]** so it cannot be mistaken for another roster member with a different hat. Add only **[OPTIONAL SECONDARY FEATURE]**. Keep the character compact and icon-readable at 48–64 px. Accessories are secondary and must never carry the entire identity.
 
-> Preserve the supplied character's core identity, body mass, silhouette hook, face placement, pose language, signature object, palette hierarchy, and overall composition. Rebuild it using the established Brotato character grammar: compact potato-like creature, chunky simplified proportions, bold black organic outer contour, sparse internal lines, limited flat color masses, one or two hard-edged cartoon shadow blocks, minimal highlights, and strong thumbnail readability. **Modify only [REQUESTED CHANGE].** Do not replace the character with a generic oval potato, do not add unrelated accessories, and do not redesign unspecified properties. Transparent background unless otherwise requested. Maintain 64x64 readability.
+## Character — Theme Translation
 
-## Character — Anti-Generic Prompt Addendum
+> Translate **[THEME / CHARACTER CONCEPT]** into a Brotato-style potato creature rather than a human fantasy character. Use a deliberately shaped potato mass **[BODY SHAPE]**, a distinctive simple face **[FACE]**, and one dominant graphic feature **[FEATURE]**. Express the theme through large readable shapes and restrained color accents, not realistic costume construction. Pale/off-white body, heavy black organic contour, flat colors, sparse internal lines, minimal hard-edged shading, compact icon-like framing, 48–64 px readability.
+
+## Character — Reference Redesign
+
+> Preserve the supplied character's identity, potato-creature mass, face composition, dominant identity feature, palette hierarchy, and overall composition. Rebuild it using the established Brotato character grammar: compact pale organic body mass, extremely simple facial marks, heavy black outer contour, limited flat colors, sparse internal lines, minimal hard-edged shading, and strong icon-level readability. **Modify only [REQUESTED CHANGE].** Do not replace the character with a generic oval potato, human character, or detailed fantasy costume. Do not add unrelated accessories. Transparent background unless otherwise requested.
+
+## Character — Anti-Generic Addendum
 
 Append this when the generator repeatedly produces generic potato mascots:
 
-> The body itself must carry character identity. Do not use a perfectly symmetrical oval potato as a universal base. Avoid "same potato, different costume" construction. Introduce one deliberate body-mass variation, one strong silhouette hook, one compact pose language, and one signature object. Keep the face extremely simple. Character identity must survive after removing all micro-details.
+> The potato body itself must be deliberately designed. Do not use a perfect symmetrical oval as the universal base. Make the body contour, eye composition, and one dominant identity feature unique before adding accessories. The character must still look distinctive after the hat, clothing, weapon, and props are removed. Keep the design as a compact game icon, not a full-body RPG character.
 
 ## Character Negative Prompt
 
-`generic potato mascot, identical oval potato body, same-body-different-hat, human miniature proportions, realistic human anatomy, long legs, narrow waist, heroic torso, realistic hands, detailed fingers, anime face, anime eyes, irises, eyelashes, detailed nose, realistic lips, detailed teeth, corporate mascot, polished vector character, glossy 3D character, concept art, character turnaround sheet, cinematic pose, realistic clothing folds, detailed armor construction, accessory overload, belts and pouches everywhere, wires everywhere, decorative clutter, texture, fabric grain, skin texture, gradients, airbrush shading, PBR, photorealistic lighting, rim light, volumetric lighting, excessive highlights, excessive particles, busy background`
+`human in potato costume, humanoid potato, human torso, neck, waist, hips, long legs, long arms, realistic anatomy, realistic hands, detailed fingers, realistic feet, anime face, anime eyes, large irises, eyelashes, realistic pupils, detailed nose, realistic lips, detailed teeth, Pixar character, Disney character, corporate mascot, polished mascot, sticker pack, perfect oval potato, identical potato body, same-body-different-hat, full RPG character, character turnaround, character sheet, fashion design, detailed costume, realistic armor, realistic clothing folds, belts, pouches, straps, buckles, excessive accessories, excessive machinery, concept art, cinematic lighting, 3D render, PBR, gradients, airbrush, painterly shading, realistic texture, fabric texture, skin texture, volumetric lighting, rim light, excessive highlights, excessive particles, busy background`
 
 ## Weapon
 
@@ -92,11 +110,9 @@ Append this when the generator repeatedly produces generic potato mascots:
 
 > Preserve the supplied reference's subject identity, major silhouette, composition, palette relationships, outline hierarchy, and visual detail density. Re-render it using the established Brotato Art Direction system: organic chunky shapes, bold black outer contour, limited flat colors, sparse internal lines, restrained hard-edged cartoon shadows, minimal detail, strong thumbnail readability. Modify only [REQUESTED CHANGE]. Preserve all unspecified properties. Transparent background unless otherwise specified.
 
-## Theme Translation
+## Theme Translation — Non-Character Assets
 
-Use this pattern when the asset belongs to a strong Mod theme:
-
-> [ASSET] using the established Brotato Art Direction system, translated into [THEME]. Express the theme through silhouette, one or two memorable props/symbols, restrained accent colors, and simple graphic motifs. Do not replace the character/asset grammar with realistic [THEME-SPECIFIC MATERIALS/EFFECTS].
+> [ASSET] using the established Brotato Art Direction system, translated into [THEME]. Express the theme through silhouette, one or two memorable props/symbols, restrained accent colors, and simple graphic motifs. Do not replace the asset grammar with realistic [THEME-SPECIFIC MATERIALS/EFFECTS].
 
 ## Negative Prompt Base
 
@@ -104,17 +120,19 @@ Use this pattern when the asset belongs to a strong Mod theme:
 
 ## Template Rules
 
-- Put concrete subject information before generic style adjectives.
-- For characters, define body mutation and silhouette hook before accessories.
+- For characters, start with potato-creature mass and face, not clothing or equipment.
+- For unspecified character presentation, use portrait/selection-icon grammar.
+- Define one dominant identity feature before adding secondary details.
 - Never let clothing or accessories become the only source of character identity.
-- Use deliberate body variation when generating a roster.
-- Keep face construction extremely simple.
+- Avoid human anatomy and full-body RPG construction unless explicitly required by the user.
+- Keep character faces extremely simple.
+- Use pale/off-white body colors by default for potato-like characters.
 - Build from silhouette before detail.
+- Treat 48–64 px as a practical character readability test.
+- Use deliberate body and face variation for rosters.
 - Use only constraints relevant to the task.
 - Do not repeat style keywords excessively.
 - Do not force weapons/items into a universal camera angle.
-- Do not use fixed color percentages as hard requirements.
-- Treat 64x64 as a readability test, not necessarily the source resolution.
 - For reference edits, explicitly lock unchanged properties and identify the requested delta.
 - For animations, explicitly lock identity, camera, palette, scale, pivot, and frame continuity.
-- If the output looks too polished, simplify instead of adding more style keywords.
+- If the output looks too polished or too human, simplify and collapse it back into the potato-creature grammar.
