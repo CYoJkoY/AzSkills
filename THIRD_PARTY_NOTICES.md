@@ -9,10 +9,25 @@ Informed by:
 - https://github.com/op7418/logo-generator-skill
 - https://github.com/SanbaoAI/logo-generator-skill
 - https://github.com/fucha1122/minimalist-bw-logo-skill
+- https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
 
-These public Logo workflows overlap substantially around logo ideation, prompt construction, SVG production, minimalist exploration, colorway exploration, brand-system boards, and showcase presentation. AzSkills therefore uses one unified `logo-generator` skill rather than maintaining competing Logo generators. The black-and-white source contributes an explicit `exploration` mode for broad monochrome concept development and a 24-concept archive-style option when the user requests a large exploration batch.
+These public Logo workflows overlap substantially around logo ideation, prompt construction, SVG production, minimalist exploration, colorway exploration, brand-system boards, showcase presentation, and design-quality review. AzSkills therefore uses one unified `logo-generator` skill rather than maintaining competing Logo generators.
+
+The UI/UX source contributes cross-cutting visual reasoning rather than a separate Logo implementation: contextual style selection, typography and color roles, spacing discipline, composition hierarchy, anti-pattern filtering, and final quality review.
 
 No upstream example asset library or repository-specific implementation is included in AzSkills.
+
+## Shared design intelligence layer
+
+Informed by:
+
+- https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+
+The transferable design methodology is maintained in [`design-intelligence.md`](design-intelligence.md) as a cross-cutting reference layer, not a standalone Skill.
+
+It is inherited by visual workflows such as `logo-generator` and `frontend-slides`, and is intended to guide future visual skills as well. This layer covers visual-thesis formation, contextual style selection, semantic color and typography roles, spacing and composition, accessibility, interaction quality, motion discipline, information density, anti-pattern filtering, and visual quality gates.
+
+AzSkills does not vendor the upstream UI/UX plugin, searchable design database, generated examples, or repository-specific scripts.
 
 ## `ip-as-logo`
 
