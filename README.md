@@ -319,11 +319,7 @@ AzSkills/
 │           ├── selection.svg
 │           ├── read.svg
 │           ├── verification.svg
-│           ├── contributing.svg
-│           ├── settings.svg
-│           ├── adjustment.svg
-│           ├── arrow-right.svg
-│           └── a-to-z.svg
+│           └── contributing.svg
 ├── ahkv2-opt/SKILL.md
 ├── any2zh/SKILL.md
 ├── frontend-slides/
