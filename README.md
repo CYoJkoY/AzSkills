@@ -305,7 +305,7 @@ AzSkills/
 ├── assets/
 │   ├── azskills-hero.svg
 │   └── readme/
-│       ├── support.svg
+│       ├── support-cta.svg
 │       └── icons/
 │           ├── settings.svg
 │           ├── adjustment.svg
@@ -369,14 +369,14 @@ Keep diffs focused, readable, and easy to audit.
 <div align="center">
 
 <a href="https://cyojkoy.github.io/Payment/">
-  <img src="assets/readme/support.svg" alt="Support AzSkills" width="420">
+  <img src="assets/readme/support-cta.svg" alt="Support AzSkills" width="420">
 </a>
 
 Support the continued development of AzSkills and its Skill library.
 
 **Direct support link:** https://cyojkoy.github.io/Payment/
 
-<sub>The payment page is the user-facing destination; the <a href="https://github.com/CYoJkoY/Payment">Payment source repository</a> remains available for source inspection.</sub>
+<sub>This graphic is an AzSkills-specific support CTA. Other repositories should derive their own support visual from their own identity rather than reuse this asset. The payment page is the user-facing destination; the <a href="https://github.com/CYoJkoY/Payment">Payment source repository</a> remains available for source inspection.</sub>
 
 </div>
 
