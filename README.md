@@ -27,7 +27,7 @@ A focused library of human-readable `SKILL.md` specifications for engineering, t
 
 ---
 
-## 🧭 Start here
+## <img src="assets/readme/icons/contract.svg" width="24" alt=""> Start here
 
 AzSkills is a **library of reusable AI behavior definitions**. It is not a framework, runtime, or executable application.
 
@@ -53,7 +53,7 @@ Each Skill lives in its own directory and is centered on a `SKILL.md` that defin
 
 ---
 
-## 🧩 The AzSkills model
+## <img src="assets/readme/icons/model.svg" width="24" alt=""> The AzSkills model
 
 AzSkills treats a Skill as a **behavior contract**, not a prompt snippet.
 
@@ -184,7 +184,7 @@ Turns informal, slang-heavy, and context-dependent Chinese into natural English 
 
 ---
 
-## 🎨 Shared design intelligence
+## <img src="assets/readme/icons/visual-design.svg" width="24" alt=""> Shared design intelligence
 
 [`design-intelligence.md`](design-intelligence.md) is a **shared reference layer**, not another Skill.
 
@@ -203,7 +203,7 @@ The layer is an AzSkills synthesis informed by the public methodology of [`nextl
 
 ---
 
-## 🔄 How it works
+## <img src="assets/readme/icons/model.svg" width="24" alt=""> How it works
 
 <div align="center">
 
@@ -222,7 +222,7 @@ Complex tasks can compose multiple Skills. A visual documentation task, for exam
 
 ---
 
-## 📦 Installation
+## <img src="assets/readme/icons/installation.svg" width="24" alt=""> Installation
 
 AzSkills is a collection of Markdown specifications and supporting files. There is no repository-wide runtime or build step.
 
@@ -259,7 +259,7 @@ Copy or link the selected Skill into the skill-discovery location used by your A
 
 ---
 
-## 🎯 Skill selection
+## <img src="assets/readme/icons/selection.svg" width="24" alt=""> Skill selection
 
 Use the narrowest capability first:
 
@@ -282,7 +282,7 @@ Visual tasks inherit `design-intelligence.md` automatically.
 
 ---
 
-## 🗂️ Repository structure
+## <img src="assets/readme/icons/documentation.svg" width="24" alt=""> Repository structure
 
 ```text
 AzSkills/
@@ -326,7 +326,7 @@ The Skill count badge is generated from the repository's `SKILL.md` files by [`u
 
 ---
 
-## 📐 Documentation principles
+## <img src="assets/readme/icons/verification.svg" width="24" alt=""> Documentation principles
 
 AzSkills applies the same standards it teaches:
 
@@ -348,7 +348,7 @@ For the complete method, see [`readme-craft/SKILL.md`](readme-craft/SKILL.md), [
 
 ---
 
-## 🤝 Contributing
+## <img src="assets/readme/icons/contributing.svg" width="24" alt=""> Contributing
 
 A strong contribution should add a **clear capability**, improve an existing workflow, fix a concrete defect, or remove unnecessary complexity.
 
@@ -360,7 +360,7 @@ Keep diffs focused, readable, and easy to audit.
 
 ---
 
-## Support
+## <img src="assets/readme/icons/heart.svg" width="24" alt=""> Support
 
 <div align="center">
 
@@ -378,7 +378,7 @@ Support the continued development of AzSkills and its Skill library.
 
 ---
 
-## ⚖️ License & provenance
+## <img src="assets/readme/icons/license.svg" width="24" alt=""> License & provenance
 
 AzSkills is released under the [MIT License](LICENSE).
 
