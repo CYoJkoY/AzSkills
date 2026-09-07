@@ -8,8 +8,9 @@ Informed by:
 
 - https://github.com/op7418/logo-generator-skill
 - https://github.com/SanbaoAI/logo-generator-skill
+- https://github.com/fucha1122/minimalist-bw-logo-skill
 
-The two upstream repositories overlap substantially around logo ideation, prompt construction, SVG production, colorway exploration, brand-system boards, and showcase presentation. AzSkills therefore uses one unified `logo-generator` skill rather than maintaining two competing logo generators.
+These public Logo workflows overlap substantially around logo ideation, prompt construction, SVG production, minimalist exploration, colorway exploration, brand-system boards, and showcase presentation. AzSkills therefore uses one unified `logo-generator` skill rather than maintaining competing Logo generators. The black-and-white source contributes an explicit `exploration` mode for broad monochrome concept development and a 24-concept archive-style option when the user requests a large exploration batch.
 
 No upstream example asset library or repository-specific implementation is included in AzSkills.
 
