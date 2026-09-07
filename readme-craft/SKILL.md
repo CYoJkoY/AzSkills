@@ -1,13 +1,13 @@
 ---
 name: readme-craft
-description: Design, redesign, audit, and produce project-native GitHub README homepages with strong content architecture, deliberate visual identity, GitHub-safe SVG assets, accessible proof, preserved project links and support/sponsorship entry points, and maintainable Markdown. Use when a repository homepage needs clearer storytelling, stronger visual hierarchy, hero/section assets, responsive-safe visuals, or a complete visual refresh.
+description: Design, redesign, audit, and produce project-native GitHub README homepages with strong content architecture, deliberate visual identity, GitHub-safe SVG assets, accessible proof, preserved project links and support/sponsorship entry points, explicit source/deployment/download URL semantics, and maintainable Markdown. Use when a repository homepage needs clearer storytelling, stronger visual hierarchy, hero/section assets, responsive-safe visuals, or a complete visual refresh.
 ---
 
 # README Craft
 
 Turn a GitHub repository homepage into a readable visual story without turning it into a decorative poster.
 
-This skill combines AzSkills' existing README engineering rules with an integrated README-beautification methodology: inspect the real repository first, move proof before detail, derive the visual system from the project, separate Markdown from deterministic SVG and raster assets, preserve important project-native links and support paths, and verify the result at realistic GitHub widths.
+This skill combines AzSkills' existing README engineering rules with an integrated README-beautification methodology: inspect the real repository first, move proof before detail, derive the visual system from the project, separate Markdown from deterministic SVG and raster assets, preserve important project-native links and support paths, distinguish source/deployment/download destinations, and verify the result at realistic GitHub widths.
 
 ## Scope
 
@@ -95,6 +95,37 @@ A support section is part of the project's action layer, not decorative footer c
 
 Never invent a sponsor URL, funding provider, payment endpoint, campaign, or support relationship. Reuse only verified project-owned or explicitly supplied destinations.
 
+### Distinguish source, deployment, and download destinations
+
+Treat these as different link types with different user purposes:
+
+```text
+Source repository   → code, issues, history, contribution
+Deployment / live   → website, Demo, online docs, sponsor/payment page
+Download / release  → installer, executable, package, release artifact
+```
+
+Do not substitute one destination type for another simply because they share the same project name.
+
+For every important external or cross-repository link, determine what the visitor is expected to do next. Then point the README to the destination that actually completes that action:
+
+- For a website, Demo, online documentation, hosted dashboard, or deployed sponsorship/payment page, use the live deployment URL.
+- For source inspection, contribution, issues, or upstream implementation details, use the source repository URL.
+- For binaries, installers, packages, or release assets, use the release/download URL.
+
+Example:
+
+```text
+Payment source:   https://github.com/CYoJkoY/Payment
+Payment website:  https://cyojkoy.github.io/Payment/
+```
+
+The first is the source repository; the second is the user-facing deployed payment page. A README support section should use the deployed payment page when that is the actual canonical user action.
+
+When both source and deployment are useful, keep both with explicit labels rather than silently replacing one with the other.
+
+Never invent, guess, or infer a deployment URL merely from a repository name. Verify it from repository configuration, README links, GitHub Pages settings when accessible, project metadata, or an explicitly supplied destination.
+
 ### Content and visual layers stay separate
 
 Use Markdown for explanations, commands, links, configuration, API details, compatibility, limitations, security, contribution, support/sponsorship destinations, and other searchable/copyable information.
@@ -122,6 +153,7 @@ Collect enough evidence to understand the project:
 - package/manifests and relevant metadata;
 - current badges, license, release information, and directory structure;
 - existing outbound links, support/sponsorship destinations, and action buttons;
+- whether important links resolve to source repositories, live deployments, or downloadable artifacts;
 - design tokens or existing visual identity when available.
 
 For a GitHub URL, inspect the live repository and default branch before proposing changes.
@@ -139,6 +171,8 @@ Primary proof:
 First successful action:
 Native visual material:
 Project character:
+Primary deployment / demo destination:
+Primary download destination:
 Support / sponsor destination:
 ```
 
@@ -295,7 +329,10 @@ Apply these editing rules:
 - Keep repository facts dynamic when trustworthy endpoints or automation can provide them.
 - Never maintain a changing number manually when GitHub can provide it dynamically.
 - Inventory and preserve existing useful outbound links unless explicitly asked to remove them.
+- Classify important links as source, deployment/live, or download/release before changing them.
+- Use the destination that actually completes the user's intended action.
 - Preserve valid sponsorship/donation/support destinations, especially direct URLs already present in the original README.
+- When the original README exposes a deployment URL directly, preserve that deployed destination rather than replacing it with the source repository.
 - Do not hide action URLs behind decorative graphics when a direct link is more convenient for users.
 
 ### Support and sponsorship block
@@ -307,12 +344,26 @@ When a project has an existing support or sponsorship destination, keep a compac
 
 If this project saves you time or improves your workflow, you can support its development:
 
-https://github.com/CYoJkoY/Payment
+https://cyojkoy.github.io/Payment/
 ```
 
 A richer badge or button may be added only when it improves the interface without removing the direct destination. The canonical URL must remain easy to discover, click, and copy.
 
 The exact support copy should remain project-native. Do not imply commercial sponsorship, crowdfunding status, or payment-provider relationships that the repository does not establish.
+
+### Link inventory
+
+Before a whole-README redesign, record important destinations in a small internal inventory:
+
+| Purpose | URL type | Canonical destination | Preserve? |
+| :--- | :--- | :--- | :--- |
+| Source | repository | GitHub source repo | Yes |
+| Live / Demo | deployment | hosted site | Yes |
+| Docs | deployment or repository | actual docs destination | Yes |
+| Download | release / artifact | actual download endpoint | Yes |
+| Support | deployment | deployed payment/sponsor page | Yes |
+
+Do not assume that a GitHub repository URL is the canonical destination for every one of these actions.
 
 ## Visual Quality and UX Rules
 
@@ -362,7 +413,9 @@ Before delivery, verify at realistic GitHub widths:
 - Important limitations are visible.
 - Critical instructions remain copyable/searchable.
 - Existing valid release, documentation, and support/sponsorship destinations remain available.
+- Important links still point to the correct destination type: source, deployment/live, or download/release.
 - Sponsor/support URLs remain directly usable when they were intentionally exposed before redesign.
+- A deployed website or payment page is not accidentally replaced by its source repository URL.
 
 ### Visual
 
@@ -384,7 +437,8 @@ Before delivery, verify at realistic GitHub widths:
 - Dynamic facts are dynamic when practical.
 - Discarded assets are removed unless intentionally retained.
 - Unrelated files are untouched.
-- Canonical action URLs are not replaced with fragile generated endpoints.
+- Canonical action URLs are not replaced with fragile or incorrect endpoints.
+- Source and deployment destinations remain clearly distinguished.
 
 When the repository contains a README audit script, run it. Otherwise perform an equivalent manual audit.
 
@@ -398,6 +452,8 @@ If the user requests a whole-README redesign, limit edits to the authorized repo
 
 Preserving an existing sponsor/support link is considered a content-preservation requirement during redesign unless the user explicitly authorizes its removal.
 
+Do not change a source URL into a deployment URL, or vice versa, without verifying the intended user action and destination.
+
 Do not commit, push, open a PR, or publish without explicit authorization.
 
 ## Output Contract
@@ -410,6 +466,7 @@ Return:
 - content architecture issues;
 - visual system issues;
 - accessibility/trust issues;
+- link destination issues, including source/deployment/download mismatches;
 - maintenance risks;
 - prioritized recommendations.
 
@@ -422,6 +479,7 @@ Return:
 - changed content structure;
 - visual asset plan;
 - preserved action/link inventory, including support or sponsorship;
+- verified source/deployment/download destinations;
 - verification results;
 - files changed and files deliberately untouched.
 
