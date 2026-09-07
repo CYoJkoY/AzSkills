@@ -6,8 +6,6 @@ on:
       - main
     paths:
       - "**/SKILL.md"
-      - ".github/workflows/update-skill-badge.yml"
-      - "assets/azskills-hero.svg"
   workflow_dispatch:
 
 permissions:
@@ -39,8 +37,8 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          import re
           import os
+          import re
 
           path = Path("assets/azskills-hero.svg")
           text = path.read_text(encoding="utf-8")
