@@ -1,13 +1,13 @@
 ---
 name: readme-craft
-description: Design, redesign, audit, and produce project-native GitHub README homepages with strong content architecture, deliberate visual identity, GitHub-safe SVG assets, accessible proof, and maintainable Markdown. Use when a repository homepage needs clearer storytelling, stronger visual hierarchy, hero/section assets, responsive-safe visuals, or a complete visual refresh.
+description: Design, redesign, audit, and produce project-native GitHub README homepages with strong content architecture, deliberate visual identity, GitHub-safe SVG assets, accessible proof, preserved project links and support/sponsorship entry points, and maintainable Markdown. Use when a repository homepage needs clearer storytelling, stronger visual hierarchy, hero/section assets, responsive-safe visuals, or a complete visual refresh.
 ---
 
 # README Craft
 
 Turn a GitHub repository homepage into a readable visual story without turning it into a decorative poster.
 
-This skill combines AzSkills' existing README engineering rules with an integrated README-beautification methodology: inspect the real repository first, move proof before detail, derive the visual system from the project, separate Markdown from deterministic SVG and raster assets, and verify the result at realistic GitHub widths.
+This skill combines AzSkills' existing README engineering rules with an integrated README-beautification methodology: inspect the real repository first, move proof before detail, derive the visual system from the project, separate Markdown from deterministic SVG and raster assets, preserve important project-native links and support paths, and verify the result at realistic GitHub widths.
 
 ## Scope
 
@@ -74,9 +74,30 @@ Generated material is acceptable only when it performs a specific communication 
 
 Never invent adoption numbers, benchmarks, compatibility claims, testimonials, screenshots, features, or behavior.
 
+### Preserve project-native links and support
+
+README redesign is not permission to remove useful project destinations.
+
+Before rewriting, inventory existing outbound links and action-oriented endpoints, including:
+
+- download/release links;
+- documentation and demos;
+- source or related repositories;
+- issue/discussion/support channels;
+- sponsor, donation, funding, or author-support links;
+- legal and privacy destinations.
+
+If an existing sponsorship or donation entry is intentional and still valid, preserve it unless the user explicitly asks to remove or replace it.
+
+For support or sponsorship, favor a directly usable Markdown link to the canonical destination when the original README already exposed the URL. Do not replace a convenient direct URL with an opaque image-only button merely for visual polish.
+
+A support section is part of the project's action layer, not decorative footer content. It may appear near the end of the README, but the destination itself must remain directly accessible and easy to copy.
+
+Never invent a sponsor URL, funding provider, payment endpoint, campaign, or support relationship. Reuse only verified project-owned or explicitly supplied destinations.
+
 ### Content and visual layers stay separate
 
-Use Markdown for explanations, commands, links, configuration, API details, compatibility, limitations, security, contribution, and other searchable/copyable information.
+Use Markdown for explanations, commands, links, configuration, API details, compatibility, limitations, security, contribution, support/sponsorship destinations, and other searchable/copyable information.
 
 Use SVG for deterministic heroes, section transitions, workflow diagrams, identity modules, and structured visual explanations.
 
@@ -100,6 +121,7 @@ Collect enough evidence to understand the project:
 - real screenshots, outputs, diagrams, UI, logos, or artwork;
 - package/manifests and relevant metadata;
 - current badges, license, release information, and directory structure;
+- existing outbound links, support/sponsorship destinations, and action buttons;
 - design tokens or existing visual identity when available.
 
 For a GitHub URL, inspect the live repository and default branch before proposing changes.
@@ -117,6 +139,7 @@ Primary proof:
 First successful action:
 Native visual material:
 Project character:
+Support / sponsor destination:
 ```
 
 Replace internal jargon with concrete outcomes. Explain each mechanism once. Move the shortest useful install path toward the first-use stage.
@@ -154,6 +177,8 @@ Use this as the default:
 5. How it works — short flow or architecture.
 6. How to use — installation + first successful action.
 7. Compatibility, limits, security, contribution, license, and support when relevant.
+
+Keep sponsor/support actions available without allowing them to displace the primary product narrative. A concise support block is usually appropriate near the end unless the original project intentionally places it elsewhere.
 
 Use the project's actual information needs to override the default when necessary.
 
@@ -269,6 +294,25 @@ Apply these editing rules:
 - Avoid long prose in multi-column Markdown tables.
 - Keep repository facts dynamic when trustworthy endpoints or automation can provide them.
 - Never maintain a changing number manually when GitHub can provide it dynamically.
+- Inventory and preserve existing useful outbound links unless explicitly asked to remove them.
+- Preserve valid sponsorship/donation/support destinations, especially direct URLs already present in the original README.
+- Do not hide action URLs behind decorative graphics when a direct link is more convenient for users.
+
+### Support and sponsorship block
+
+When a project has an existing support or sponsorship destination, keep a compact action block such as:
+
+```markdown
+## Support
+
+If this project saves you time or improves your workflow, you can support its development:
+
+https://github.com/CYoJkoY/Payment
+```
+
+A richer badge or button may be added only when it improves the interface without removing the direct destination. The canonical URL must remain easy to discover, click, and copy.
+
+The exact support copy should remain project-native. Do not imply commercial sponsorship, crowdfunding status, or payment-provider relationships that the repository does not establish.
 
 ## Visual Quality and UX Rules
 
@@ -283,7 +327,8 @@ Treat a README as an interface:
 - no accidental horizontal overflow;
 - no repeated cards when a diagram, specimen, or direct example is clearer;
 - no decorative element that competes with proof;
-- preserve dark/light rendering contrast where practical.
+- preserve dark/light rendering contrast where practical;
+- keep important action destinations obvious and usable.
 
 The goal is not maximal decoration. The goal is lower cognitive load and faster comprehension.
 
@@ -316,6 +361,8 @@ Before delivery, verify at realistic GitHub widths:
 - No unsupported claims.
 - Important limitations are visible.
 - Critical instructions remain copyable/searchable.
+- Existing valid release, documentation, and support/sponsorship destinations remain available.
+- Sponsor/support URLs remain directly usable when they were intentionally exposed before redesign.
 
 ### Visual
 
@@ -337,6 +384,7 @@ Before delivery, verify at realistic GitHub widths:
 - Dynamic facts are dynamic when practical.
 - Discarded assets are removed unless intentionally retained.
 - Unrelated files are untouched.
+- Canonical action URLs are not replaced with fragile generated endpoints.
 
 When the repository contains a README audit script, run it. Otherwise perform an equivalent manual audit.
 
@@ -347,6 +395,8 @@ If the user requests an audit, do not edit.
 If the user requests asset-only work, do not silently change README copy, ordering, embeds, or links.
 
 If the user requests a whole-README redesign, limit edits to the authorized repository homepage and its directly required visual assets.
+
+Preserving an existing sponsor/support link is considered a content-preservation requirement during redesign unless the user explicitly authorizes its removal.
 
 Do not commit, push, open a PR, or publish without explicit authorization.
 
@@ -371,6 +421,7 @@ Return:
 - visual thesis;
 - changed content structure;
 - visual asset plan;
+- preserved action/link inventory, including support or sponsorship;
 - verification results;
 - files changed and files deliberately untouched.
 
