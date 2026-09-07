@@ -1,444 +1,464 @@
 ---
 name: brotato-art
-description: Generate and refine 2D game art that closely matches Brotato's visual language, including characters, weapons, items, enemies, effects, UI icons, and sprite assets. Enforces bold hand-drawn outlines, flat color blocks, simplified cartoon geometry, restrained shading, transparent game-ready output, and strong 64x64 readability.
+description: Brotato Art Direction Skill v3. Generate and refine 2D game assets using Brotato's actual visual grammar rather than generic flat-vector or cartoon aesthetics. Covers characters, weapons, items, relics, enemies, NPCs, effects, UI, cursors, and sprite animations with silhouette-first design, bold black contours, limited colors, minimal shading, low detail, and strict small-size readability.
 ---
 
-# Brotato Art
+# Brotato Art Direction v3
 
-Use this skill when the user asks for Brotato-style, Brotato-inspired, potato-like roguelike, or similarly simplified 2D indie game assets. The goal is not to reproduce a single reference image mechanically. The goal is to consistently reproduce the visual grammar that makes Brotato assets read as one coherent game-art family.
+## Mission
 
-## Core Principle
+Use this skill for Brotato-style or Brotato-inspired 2D game assets. The target is not a generic image with “thick black outline + flat colors”. The target is an asset that could naturally coexist with Brotato's real in-game visual system.
 
-Treat the style as a **2D hand-drawn flat cartoon game-art system**, not as generic vector art, sticker art, marker art, anime art, or polished digital painting.
+Think:
 
-The visual hierarchy is:
+> If this asset had shipped as a native in-game Brotato asset, how would it have been constructed?
 
-1. Strong readable silhouette.
-2. Bold black outer contour.
-3. Simple rounded and slightly organic shapes.
-4. Clean flat color blocks.
-5. One or two simple shadow shapes.
-6. Minimal facial or structural details.
-7. Only identity-defining decorative details.
+Do not turn the target into a modern mascot, polished vector illustration, mobile-game promotional art, anime, concept art, or 3D render.
 
-If a detail conflicts with silhouette readability, remove the detail.
+## Absolute Priority
 
-## Style Lock
+When requirements conflict:
 
-Every generated asset should satisfy the following baseline unless the user explicitly overrides it:
+1. Explicit user requirements.
+2. Brotato visual language.
+3. Silhouette readability.
+4. Bold black outer contour.
+5. Simple organic proportions.
+6. Limited flat color blocks.
+7. Sparse internal structure.
+8. Minimal cartoon shading.
+9. Identity-defining details.
+10. Decorative details.
 
-- 2D game sprite or game icon.
-- Hand-drawn cartoon appearance.
-- Bold black outer outline.
-- Rounded, chunky, simplified geometry.
-- Slightly organic asymmetry rather than perfect geometric construction.
-- Flat, saturated, clean colors.
-- Minimal hard-edged cartoon shading.
-- No photographic rendering.
-- No PBR material response.
-- No smooth painterly gradients.
-- No dense texture.
-- No excessive micro-detail.
-- Strong foreground/background separation.
-- Game-ready composition.
-- Transparent background for standalone assets unless another background is explicitly requested.
+If a lower-priority detail damages a higher-priority rule, delete it.
 
-## Outline Rules
+## Core Visual DNA
 
-The outline is a major visual anchor, but do **not** force a universal pixel ratio such as 1/32 of the canvas. That produces unstable results across resolutions and can make the outline consume the artwork.
+The visual language is defined by deliberate simplicity:
 
-Use these rules instead:
+- compact, chunky, organic forms
+- short, low-profile proportions
+- bold black outer contours
+- extremely simple faces
+- limited color palettes
+- flat or near-flat color regions
+- small hard-edged shadow blocks
+- sparse internal lines
+- slight asymmetry and organic imperfection
+- strong thumbnail readability
+- obvious game-sprite construction
 
-- The outer contour must be visibly thick and black.
-- The contour must be substantially heavier than internal structural marks.
-- Use approximately 1/45 to 1/25 of the canvas short edge as a starting range for the main contour, then adjust by subject scale and complexity.
-- Smaller assets may need proportionally heavier contours.
-- More complex assets may need slightly lighter contours to preserve legibility.
-- Keep the visual weight consistent within one asset.
-- Allow small natural variations in curvature and thickness.
-- Do not introduce random severe jitter.
-- Corners should generally be rounded rather than mechanically sharp.
-- The contour should feel drawn, not CAD-generated.
+The hand-drawn feeling comes from shape language, proportion, and controlled contour imperfection—not sketch noise, brush texture, random jitter, or scribbles.
 
-Never describe the outline as a 40 mm marker or require a mathematically exact stroke width. The important constraint is **perceived outline weight**, not a literal physical measurement.
+## Silhouette-First Construction
+
+Every asset follows:
+
+```text
+Identity
+→ silhouette
+→ primary color
+→ major structure
+→ face / defining feature
+→ equipment
+→ minimal shading
+→ optional identity details
+→ simplification
+→ thumbnail test
+```
+
+Start from the black silhouette. If the subject is not recognizable as a silhouette, redesign the silhouette instead of adding detail.
+
+A successful asset becomes clearer, not more confusing, when reduced in size.
 
 ## Shape Language
 
 Prefer:
 
-- circles
-- ovals
+- organic ovals
+- potato-like blobs
 - rounded rectangles
-- simple polygons
-- soft organic blobs
-- chunky limbs and appendages
-- slightly asymmetric silhouettes
+- soft asymmetric polygons
+- chunky limbs
+- simple primitives
+- exaggerated compact forms
 
 Avoid:
 
+- perfect mathematical geometry
+- sterile symmetry
 - realistic anatomy
-- elegant fashion illustration proportions
-- sharp mechanical complexity unless the object itself requires it
-- intricate perspective construction
+- elegant fashion proportions
+- complex perspective construction
 - thin technical linework
-- highly symmetrical sterile geometry
+- unnecessary mechanical complexity
 
-Build the large silhouette first. Add internal structure only after the silhouette works.
+The construction should feel intentionally simple, not unfinished.
 
-## Character Rules
+## Character Grammar
 
-For characters, especially potato-like protagonists:
+### Body
 
-- Keep the body compact, rounded, and visually dominant.
-- Use an off-white, cream, or very light potato-like base when appropriate to the concept.
-- Do not automatically make the body yellow.
-- Keep facial features extremely simple.
-- Eyes are usually small black dots, ovals, or similarly minimal shapes.
-- Mouths should be simple marks or small shapes.
-- Equipment should be readable as part of the silhouette.
-- Use exaggerated but immediately readable poses.
-- Avoid human anatomical detail.
-- Avoid anime facial construction.
-- Preserve a strong face/body hierarchy.
+Characters should generally be short, compact, rounded, low-center-of-gravity, slightly asymmetric, and visually dominated by the body.
 
-### 64x64 Test
+The body is not a normal human torso. Avoid realistic chest, waist, muscle, bone, or heroic humanoid proportions.
 
-Assume the character may ultimately be viewed at approximately 64x64 pixels.
+For potato-like protagonists, prefer off-white, cream, ivory, or light neutral body colors when appropriate. Do not automatically make every potato yellow.
 
-At that size, the viewer should still be able to identify:
+### Face
 
-- body silhouette
-- face
-- primary equipment
-- major accessory
-- dominant color grouping
+Use extremely simple:
 
-If any of these disappear, simplify rather than adding more detail.
+- small black dot or oval eyes
+- short mouth line or tiny mouth shape
+- optional tiny eyebrow/expression mark
+- normally no realistic nose
 
-## Weapons and Items
+Never use detailed irises, anime eyes, eyelashes, realistic lips, or detailed facial anatomy.
 
-Weapons and items should share the same visual language as characters.
+### Limbs
 
-Use:
+Arms, legs, hands, and feet are short and simplified. They communicate pose and action, not anatomy.
 
-- strong outer contour
-- simple primary silhouette
-- limited color palette
-- one dominant material/color
-- one or two shadow blocks
-- a small number of functional details
+### Equipment
 
-For weapons, prioritize the recognizable weapon profile over realistic construction.
+Equipment must participate in the silhouette and be large enough to identify immediately. Do not turn equipment into detailed concept art.
 
-For item icons, prioritize instant category recognition at thumbnail size. Do not fill empty space with decorative texture merely to make the icon appear detailed.
+## Outline System
 
-## Enemies and NPCs
+Use a strong black outer contour: `#000000`.
 
-Enemies may be more aggressive, strange, or grotesque, but they must still belong to the same 2D cartoon system.
+The outer contour must be visibly heavier than internal marks and feel rounded, organic, clean, and slightly hand-drawn.
 
-Use exaggerated silhouettes and simple visual motifs rather than realistic anatomy or horror rendering.
+A starting range of approximately 1/45–1/25 of the canvas short edge may be used, but this is a perceived-weight guideline, not a literal mathematical requirement. Smaller assets may need heavier contours; complex assets may need slightly lighter contours.
 
-Cthulhu-like, mutant, alien, mechanical, or fantasy concepts can be incorporated through:
+Allowed:
 
-- unusual silhouettes
-- tentacles or appendages represented as simple chunky shapes
-- strong accent colors
-- exaggerated eyes or mouths
-- a small number of distinctive markings
+- small natural curvature variation
+- slight thickness variation
+- controlled organic imperfection
+- rounded corners
 
-Do not turn the asset into realistic body horror, detailed creature concept art, or painterly dark fantasy.
+Forbidden:
 
-## Color System
+- random severe jitter
+- scribbling
+- sketch construction lines
+- CAD-perfect strokes
+- hairline outlines
+- technical vector linework
 
-Use clean, saturated, readable colors.
-
-Recommended structure:
-
-- dominant base color: approximately 60–80%
-- secondary colors: approximately 15–30%
-- accent colors: generally below 10%
-- highlights: sparse
-- shadows: sparse
-
-Black is primarily reserved for contours and selected structural details. White or very light tones may be used for highlights and facial elements.
-
-Do not use:
-
-- photographic color variation
-- noisy color gradients
-- metallic PBR highlights
-- complex material maps
-- excessive neon accents
-- texture overlays
-
-## Shading System
-
-Use **hard-edged cartoon color blocks** rather than realistic lighting.
-
-A good default is:
-
-- base color
-- one darker shadow block
-- optional small light highlight
-- black contour
-
-Shadows should clarify volume without becoming a second illustration inside the asset.
-
-Avoid:
-
-- airbrush shading
-- soft cinematic lighting
-- ambient occlusion rendering
-- volumetric light
-- realistic reflections
-- multi-step painterly rendering
+Optimize perceived outline weight, not physical stroke measurements.
 
 ## Internal Lines
 
-Internal lines are allowed when they communicate structure, but they are subordinate to the outer contour.
+Internal lines are subordinate to the outer contour. Prefer color separation first.
 
-Prefer color separation first. Use black internal marks only when they improve recognition.
+Good uses: eyes, mouth, short structural separators, important seams, weapon joints, functional indicators.
 
-Good uses:
+Bad uses: cross-hatching, dense anatomy lines, decorative line forests, technical diagrams, sketch construction.
 
-- mouth
-- eye details
-- weapon joints
-- short structural separators
-- important seams
-- tiny functional indicators
+## Color System
 
-Bad uses:
+Use a restrained palette:
 
-- cross-hatching
-- dense sketch lines
-- anatomy construction lines
-- decorative line forests
-- thin technical diagrams
+- one dominant color
+- one or two secondary colors
+- a small accent color
+- black contour
+- sparse highlight/shadow colors
+
+Colors should be clean and readable. Saturated colors are allowed, but do not make every color maximally saturated.
+
+Do not use smooth gradients, photographic color variation, cinematic grading, rainbow palettes, color noise, complex material maps, or excessive neon accents.
+
+Do not enforce rigid percentage splits between colors. Readability and hierarchy matter more than fixed ratios.
+
+## Shading
+
+Use hard-edged cartoon color blocks.
+
+Default:
+
+```text
+base color
++ one darker shadow block
++ optional small highlight
++ black contour
+```
+
+Avoid airbrush, soft gradients, PBR, realistic reflections, rim lighting, volumetric lighting, cinematic illumination, and painterly rendering.
+
+Shading clarifies volume; it must not become a second illustration.
+
+## Materials
+
+Represent materials through color, silhouette, and simple structural blocks.
+
+Do not add realistic metal reflections, leather grain, wood grain, fabric texture, skin texture, scratches, surface noise, or micro-material detail.
+
+## Asset Modules
+
+### Character
+Priorities: body silhouette → face → pose → primary equipment → secondary accessory → theme/class identifier. Keep the body visually dominant.
+
+### Weapon
+Priorities: recognizable weapon profile → orientation → major functional components → limited palette → minimal material separation. Use the most recognizable angle: side, diagonal, horizontal, vertical, or three-quarter view. Do not force every weapon into front view.
+
+### Item / Relic
+Use one dominant object or symbol. Keep the icon compact and understandable without text. Legendary items may have unusual silhouettes, stronger accents, or distinctive visual mass, but “legendary” does not mean “more micro-detail”.
+
+### Enemy / Boss
+Use exaggerated silhouettes and one or two defining features. Mutant, alien, fantasy, mechanical, or Cthulhu-like concepts remain chunky, graphic, and low-detail rather than realistic creature concept art or body horror.
+
+### NPC
+Use the same body, face, outline, color, and detail grammar as playable characters. Identity comes from silhouette, clothing, equipment, or one memorable prop.
+
+### Effect / VFX
+Prefer simple circles, blobs, arcs, bursts, rings, impact shapes, flames, clouds, trails, and controlled particles. Effects should be readable before spectacular. Avoid particle spam, cinematic smoke, realistic fire, volumetric electricity, and excessive glow.
+
+### UI / Cursor
+Use the same simplified geometry and outline language. UI may be slightly cleaner/geometric where necessary, but must retain optical consistency. At very small sizes, prioritize instant recognition over decoration.
+
+### Environment
+Use simple gameplay-readable shapes and limited decoration. Environment supports gameplay readability rather than becoming a polished illustration.
 
 ## Composition
 
-For standalone assets:
+Character: single subject, centered unless directional pose requires otherwise, large readable body, safe margin, transparent background by default.
 
-- center the subject unless the user requests a directional pose
-- keep a clean safety margin
-- fill most of the canvas without touching the edges
-- keep the silhouette intact
-- use transparent background by default
+Weapon: single object, dynamic but readable orientation, compact composition, transparent background.
 
-For icons:
+Item: one central object/symbol, compact silhouette, minimal empty space, transparent background.
 
-- maximize readable subject area
-- avoid unnecessary empty space
-- maintain a strong thumbnail silhouette
+Enemy: single readable enemy, clear pose, strong silhouette, transparent background.
 
-For sprite sheets:
+Effect: one readable effect state, clear center, controlled particles, transparent background.
 
-- keep cell dimensions explicit
-- keep scale and pivot consistent
-- preserve character identity across frames
-- maintain consistent outline weight and palette
-- avoid independent redraws between adjacent frames
+Do not add cinematic backgrounds or environmental storytelling unless explicitly requested.
+
+## 64×64 / Thumbnail Test
+
+Treat 64×64 as a readability test, not necessarily the source resolution. At small size, the viewer should still identify the main silhouette, face if present, primary equipment, dominant color grouping, and main functional feature.
+
+For UI icons, test 32×32 where practical.
+
+If the test fails:
+
+```text
+simplify
+→ strengthen silhouette
+→ remove internal lines
+→ enlarge defining feature
+→ improve color separation
+```
+
+Never add detail to solve a readability failure.
+
+## Detail Budget
+
+Default detail density: LOW.
+
+Keep a detail only if it communicates identity/function, strengthens silhouette, improves gameplay readability, or distinguishes the asset from another asset. Otherwise delete it.
+
+A useful final pass is to remove 10–30% of nonessential detail.
+
+## Theme Translation
+
+Mod themes must be translated into Brotato's visual language rather than replacing it.
+
+Cosmic: simple stars, circular cosmic symbols, dark accents, compact celestial shapes.
+
+Ancient magic: simple rune symbols, one strong accent, thick contour, simplified mystical prop.
+
+Cyberpunk: one or two bright accents, compact geometric equipment, simplified neon-like color blocks.
+
+Cthulhu: chunky organic tentacles, one strange facial feature, limited dark/accent palette, no realistic horror texture.
+
+Do not use realistic nebulae, dense machinery, detailed engravings, or photorealistic horror textures merely because the theme suggests them.
+
+## Anti-Generic-Vector Rule
+
+If the result looks like a Figma illustration, corporate mascot, polished SVG character, modern mobile-game asset, marketing illustration, or generic sticker pack, it has failed.
+
+Correct by reducing geometric perfection, increasing controlled organic asymmetry, simplifying the face, strengthening the black contour, reducing color count, removing decoration, and simplifying shading.
+
+## Anti-AI-Noise Rule
+
+Avoid random micro-details, inconsistent contour weights, meaningless decorative shapes, unnecessary highlights, random particles, excessive symmetry, unexplained texture, and over-rendering.
+
+Every surviving detail should have a design reason.
+
+## Anti-Pixel-Art Rule
+
+Brotato is not pixel art. Unless explicitly requested, do not use pixel dithering, deliberate pixel staircases, pixel-block construction, or retro pixel palettes.
+
+The target is clean 2D raster/game illustration with hand-drawn cartoon construction.
 
 ## Animation and Sprite Sheets
 
-When generating an animation sheet, treat frames as a continuous sequence rather than independent illustrations.
+Treat frames as one continuous sequence, not independent illustrations.
 
-Requirements:
+Preserve exact identity, palette, lighting direction, outline weight, camera, scale, pivot, framing, and relevant background pixels.
 
-- preserve exact character identity
-- preserve palette and lighting direction
-- preserve camera and framing
-- change only the intended animated properties
-- use small incremental pose changes between adjacent frames
-- maintain consistent silhouette logic
-- ensure the final frame transitions naturally to the first frame for loops when looping is requested
+Adjacent frames should differ through small incremental changes. Do not independently redraw each frame.
 
-For a looping sequence, explicitly preserve first/last-state equivalence when the requested animation requires it.
+For loops, preserve first/last-state equivalence when requested. If the user specifies pixel-level identity between first and last frames, treat it as a hard constraint.
 
-## Asset-Specific Modules
+## Prompt Construction
 
-### Character module
+Build final prompts in this order:
 
-Add:
+1. asset type and purpose
+2. concrete subject
+3. defining identity features
+4. silhouette and proportions
+5. pose/orientation
+6. equipment or major structure
+7. color palette
+8. outline treatment
+9. flat shading
+10. composition/background
+11. size/readability
+12. relevant negative constraints
 
-- body silhouette
-- face
-- pose
-- primary equipment
-- secondary accessories
-- class/theme identifier
+Put concrete subject information before generic style adjectives. Do not repeat style keywords dozens of times.
 
-Keep the body visually dominant.
+## Universal Prompt
 
-### Weapon module
+> Create a clean 2D game-ready asset using the visual grammar of Brotato. [SUBJECT]. Build the design from a strong compact organic silhouette, chunky rounded shapes, exaggerated but readable proportions, and a bold black outer contour with controlled hand-drawn irregularity. Use a limited flat-color palette, sparse internal lines, one or two hard-edged cartoon shadow blocks, and minimal highlights. Prioritize silhouette, function, identity, and small-size readability over detail. The asset must feel like a real in-game indie game sprite rather than a modern vector mascot, promotional illustration, concept-art sheet, anime character, or 3D render. Transparent background unless otherwise requested. Keep the design recognizable at 64x64. Remove unnecessary detail.
 
-Add:
-
-- weapon profile
-- grip or attachment only if needed
-- one dominant material/color
-- minimal functional details
-
-Keep the weapon readable without realistic engineering detail.
-
-### Item module
-
-Add:
-
-- one central object or symbol
-- strong outline
-- simple color grouping
-- minimal supporting decoration
-
-The icon should be understandable without text.
-
-### Effect module
-
-Use simple graphic shapes, particles, arcs, bursts, rings, clouds, flames, or impact marks. Effects should remain stylistically compatible with the thick-outline cartoon system unless the effect is intentionally outline-free.
-
-### UI module
-
-UI icons should use the same simplified geometry and outline logic, but can be cleaner and more geometric when necessary for interface consistency.
-
-## Prompt Construction Workflow
-
-When the user asks for a new asset, construct the generation prompt in this order:
-
-1. Asset type and purpose.
-2. Subject and defining concept.
-3. Silhouette and proportions.
-4. Pose or orientation.
-5. Primary equipment/details.
-6. Color palette.
-7. Outline treatment.
-8. Flat shading.
-9. Composition and background.
-10. Resolution/readability requirements.
-11. Negative constraints.
-
-Do not repeat the same style adjective dozens of times. A concise, hierarchical prompt is more stable than a keyword pile.
-
-## Prompt Template
-
-Use this internal template when a generation model needs a single natural-language prompt:
-
-> 2D hand-drawn flat cartoon game asset in a Brotato-inspired visual language. [SUBJECT]. Strong compact silhouette, rounded chunky shapes, exaggerated but readable proportions, bold black outer contour with natural hand-drawn variation, clean saturated flat color blocks, one or two hard-edged cartoon shadow shapes, minimal highlights, simplified details, high thumbnail readability, game-ready sprite design, centered composition, transparent background. Preserve a low-detail, high-readability indie-game aesthetic. No realistic anatomy, no painterly rendering, no gradients, no PBR, no texture, no thin technical linework, no anime rendering, no cinematic lighting, no excessive detail.
-
-Replace [SUBJECT] with concrete object-specific information rather than generic style prose.
-
-## Negative Prompt
-
-Use only the negative terms relevant to the generation model, prioritizing:
+## Negative Prompt Base
 
 `photorealistic, realistic anatomy, anime, manga, semi-realistic, 3D render, PBR, cinematic lighting, smooth gradients, painterly shading, airbrush, watercolor, oil painting, detailed texture, high-frequency detail, thin line art, hairline strokes, technical vector illustration, CAD-like geometry, cross hatching, sketch, concept art, realistic materials, photographic perspective, excessive highlights, excessive particles, busy composition, complex background`
 
-Do not add contradictory negative terms. For example, do not forbid all asymmetry if the prompt explicitly requests organic hand-drawn asymmetry.
+Use only relevant negative terms. Do not add contradictory constraints.
 
 ## Reference Image Handling
 
 When a reference image is supplied:
 
-1. Preserve its subject identity and composition unless the user asks for structural changes.
-2. Extract the visual grammar rather than copying incidental noise.
-3. Match silhouette, outline weight, palette, shading complexity, and detail density.
-4. Preserve transparent-background behavior when the source is a game asset.
-5. If editing an existing image, change only the requested elements and retain the established art language.
+1. Preserve subject identity and requested composition.
+2. Extract visual grammar rather than incidental noise.
+3. Match silhouette, contour weight, palette, shading complexity, and detail density.
+4. Preserve transparency/game-sprite behavior when appropriate.
+5. If editing, modify only requested elements and preserve all other established properties.
 
-Never invent additional stylistic systems that are absent from the reference.
+Never invent a second visual system absent from the reference.
 
 ## Quality Gate
 
-Before considering an asset complete, check:
-
 ### Silhouette
-- Can it be recognized as a thumbnail?
-- Is the primary shape immediately obvious?
-- Are important appendages or equipment visible?
+- Recognizable as a black silhouette.
+- Primary shape immediately obvious.
+- Important appendages/equipment visible.
 
 ### Outline
-- Is the outer contour clearly bold?
-- Is it heavier than internal marks?
-- Is it thick without swallowing the subject?
-- Does it feel hand-drawn rather than CAD-perfect?
+- Outer contour clearly bold.
+- Heavier than internal marks.
+- Thick without swallowing the subject.
+- Organic rather than CAD-perfect.
 
 ### Color
-- Are the fills clean and mostly flat?
-- Is the palette limited and readable?
-- Are accents restrained?
+- Mostly flat fills.
+- Limited palette.
+- Restrained accents.
 
 ### Shading
-- Are shadows hard-edged and simple?
-- Is realistic lighting absent?
-- Does shading support rather than compete with the silhouette?
+- Hard-edged and simple.
+- No realistic lighting.
+- Supports the silhouette.
 
 ### Detail
-- Are only useful details present?
-- Is there unnecessary texture or micro-detail?
-- Does the face remain readable at small size?
+- Only useful details remain.
+- No unnecessary texture/micro-detail.
+- Face survives at small size.
 
 ### Game readiness
-- Is the background transparent when appropriate?
-- Is the subject centered and safely inside the canvas?
-- Does it look like a usable game asset rather than concept art?
+- Correct transparency.
+- Safe canvas margins.
+- Looks like a usable game asset, not concept art.
 
-## Failure Modes and Corrections
+### Style fidelity
+- Would visually coexist with Brotato-style characters, weapons, items, and enemies?
+- Avoids modern commercial illustration aesthetics?
+- Avoids obvious AI visual noise?
 
-### Too much like generic vector art
-Cause: perfect geometry, uniform strokes, corporate icon construction.
+## Failure and Correction Matrix
 
-Correction: introduce rounded organic shapes, controlled asymmetry, bold hand-drawn contour character, and simpler color blocking.
+Too generic/vector-like → reduce geometric perfection, add controlled organic asymmetry, strengthen black contour, simplify color blocks.
 
-### Too much like a sticker
-Cause: exaggerated white border, glossy finish, decorative drop shadows.
+Too polished → remove detail, gradients, reflections, and decoration; return to silhouette + flat fills + simple shadows.
 
-Correction: use the black game-art contour as the primary edge treatment and remove sticker-specific effects.
+Too anime → simplify eyes/facial anatomy and restore chunky proportions.
 
-### Too much like AI concept art
-Cause: excessive texture, tiny details, dramatic lighting, complex backgrounds.
+Too realistic → flatten materials/lighting and remove texture.
 
-Correction: reduce detail aggressively and rebuild from silhouette + flat fills + simple shadows.
+Outline too thin → increase perceived outer-contour weight and remove unnecessary internal lines.
 
-### Too much like anime
-Cause: detailed eyes, human proportions, expressive facial anatomy.
+Outline too heavy → reduce contour until body/equipment color masses remain visually dominant.
 
-Correction: simplify facial features and restore chunky cartoon proportions.
+Too detailed → remove 20–40% of nonessential detail.
 
-### Outline is too heavy
-Cause: blindly applying a fixed mathematical stroke ratio.
+Too generic → strengthen silhouette and add one memorable identity feature rather than many small details.
 
-Correction: reduce the contour until the body, equipment, and internal color masses remain visually dominant while the contour is still clearly bold.
+Poor readability → enlarge defining feature, increase silhouette separation, remove clutter, simplify colors.
 
-### Outline is too thin
-Cause: treating the asset as modern vector iconography.
+## Consistency Across a Mod
 
-Correction: increase the outer contour and remove unnecessary internal lines.
+All assets in one Mod must share:
 
-## User Overrides
+- contour language
+- perceived outline weight
+- face grammar
+- body/proportion philosophy
+- color philosophy
+- shading philosophy
+- detail density
+- silhouette-first construction
 
-The user's explicit asset requirements override the defaults for:
+A sci-fi weapon, Cthulhu enemy, fantasy relic, or cosmic character may have different subject matter, but they must remain members of the same 2D game-art system.
 
-- canvas size
-- sprite-sheet layout
-- animation frame count
-- subject concept
-- palette
-- orientation
-- background
-- transparency
-- required accessories
-- exact composition
+## Modular Loading
 
-However, preserve the core visual language unless the user explicitly asks for a different style.
+Use `MODULES.md` to load only what the task requires.
+
+```text
+Character → SKILL.md → character.md → prompt-templates.md
+Weapon → SKILL.md → weapon.md → prompt-templates.md
+Item/Relic → SKILL.md → item.md → prompt-templates.md
+Enemy/Boss → SKILL.md → enemy.md → prompt-templates.md
+Effect/VFX → SKILL.md → effect.md → prompt-templates.md
+UI/Cursor → SKILL.md → ui.md → prompt-templates.md
+Animation → SKILL.md → relevant asset module → sprite-animation.md → prompt-templates.md
+```
+
+Precedence:
+
+1. Explicit user requirements.
+2. This core `SKILL.md`.
+3. Most specific asset module.
+4. Prompt templates.
 
 ## Output Behavior
 
-When producing a prompt for an image-generation model:
+When producing prompts:
 
-- Give the concrete asset description first.
-- Apply this style system implicitly and explicitly where useful.
-- Do not expose internal reasoning.
-- Do not claim pixel-perfect similarity to copyrighted source artwork.
-- Prefer concise, high-signal constraints over enormous keyword lists.
+- describe the concrete asset first
+- use high-signal style constraints
+- keep prompts task-specific
+- do not expose hidden reasoning
+- do not claim pixel-perfect reproduction of copyrighted source artwork
+- preserve consistency across related assets
 
-When producing multiple related assets, reuse the same style lock and vary only the asset-specific module so the set remains visually coherent.
+When generating a set, reuse the same core style lock and vary only asset-specific identity.
+
+## Final Rule
+
+When uncertain: simplify.
+
+If still uncertain: simplify the silhouette.
+
+If the result looks too polished: simplify again.
+
+The target is not more detail. The target is a simple, expressive, immediately readable 2D game asset that naturally belongs inside the Brotato visual ecosystem.
