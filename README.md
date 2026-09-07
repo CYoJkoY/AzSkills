@@ -294,7 +294,9 @@ AzSkills/
 ├── .github/
 │   ├── badges/skills.json
 │   └── workflows/update-skill-badge.yml
-├── assets/azskills-hero.svg
+├── assets/
+│   ├── azskills-hero.svg
+│   └── readme/support.svg
 ├── ahkv2-opt/SKILL.md
 ├── any2zh/SKILL.md
 ├── frontend-slides/
@@ -350,11 +352,19 @@ Keep diffs focused, readable, and easy to audit.
 
 ## Support
 
-AzSkills is open source. If these Skills save you time or improve your workflows, you can support continued development through the deployed payment page:
+<div align="center">
 
-**https://cyojkoy.github.io/Payment/**
+<a href="https://cyojkoy.github.io/Payment/">
+  <img src="assets/readme/support.svg" alt="Support AzSkills" width="420">
+</a>
 
-The payment page is the user-facing destination; the [`Payment` source repository](https://github.com/CYoJkoY/Payment) is kept separate as a source link.
+Support the continued development of AzSkills and its Skill library.
+
+**Direct support link:** https://cyojkoy.github.io/Payment/
+
+<sub>The payment page is the user-facing destination; the <a href="https://github.com/CYoJkoY/Payment">Payment source repository</a> remains available for source inspection.</sub>
+
+</div>
 
 ---
 
