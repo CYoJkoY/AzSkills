@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 96" role="img" aria-labelledby="title desc">
-  <title id="title">Support AzSkills</title>
-  <desc id="desc">A compact dark support button with a heart icon and the label Support AzSkills.</desc>
-  <rect x="2" y="2" width="416" height="92" rx="20" fill="#162024" stroke="#496364" stroke-width="2"/>
-  <circle cx="52" cy="48" r="25" fill="#1F3032" stroke="#D7A85A" stroke-width="2"/>
-  <path d="M52 66 C47 60 38 55 38 46 C38 40 42 36 48 36 C51 36 54 38 56 41 C58 38 61 36 65 36 C71 36 75 40 75 46 C75 55 66 60 52 66 Z" fill="#D7A85A"/>
-  <text x="94" y="43" fill="#F0EBE2" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="700">Support AzSkills</text>
-  <text x="94" y="68" fill="#9FB0AE" font-family="Segoe UI, Arial, sans-serif" font-size="14">Help keep the Skill library growing.</text>
-</svg>
