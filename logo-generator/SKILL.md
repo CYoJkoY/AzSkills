@@ -15,6 +15,12 @@ It unifies conceptual logo design, minimalist exploration, geometric SVG constru
 mascot/IP routes, colorway exploration, brand-system boards, and presentation-ready
 showcase output.
 
+Before applying a visual direction, automatically inherit [`../design-intelligence.md`](../design-intelligence.md).
+The design-intelligence layer is not optional for substantial visual work; it supplies
+shared rules for hierarchy, style selection, typography, color semantics, spacing,
+anti-pattern avoidance, and quality control. User requirements and this skill's
+logo-specific constraints remain higher priority.
+
 ## Scope and mode selection
 
 Identify the narrowest mode that satisfies the request:
@@ -297,6 +303,12 @@ Use `ip-as-logo` when the defining requirement is an extremely simplified, cute,
 
 Use `photo-abstract-editorial` for photo-preserving editorial abstractions. Do not treat that skill as a logo generator.
 
+## Design Intelligence inheritance
+
+This skill automatically inherits the shared AzSkills design-intelligence layer. Users do not need to explicitly request a UI/UX design system or name an external design methodology for these principles to apply.
+
+For Logo work, the inherited layer contributes visual thesis formation, coherent typography and color roles, composition discipline, style-to-context matching, anti-pattern filtering, and final visual-quality review. Logo-specific construction, brand-mark recognition, and identity-system rules in this file remain authoritative.
+
 ## Provenance
 
 This skill is an original AzSkills synthesis informed by public workflows and ideas observed in:
@@ -304,5 +316,6 @@ This skill is an original AzSkills synthesis informed by public workflows and id
 - https://github.com/op7418/logo-generator-skill
 - https://github.com/SanbaoAI/logo-generator-skill
 - https://github.com/fucha1122/minimalist-bw-logo-skill
+- https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
 
 The unified skill removes duplicated workflows and implementation-specific assumptions while preserving useful conceptual methods. It does not copy the upstream repository's example asset library.
