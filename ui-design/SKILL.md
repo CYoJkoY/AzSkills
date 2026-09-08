@@ -1,62 +1,127 @@
 ---
 name: ui-design
-description: Design, audit, and refine production UI with a coherent design system, interaction model, motion language, accessibility baseline, responsive behavior, and anti-generic visual quality. Apply automatically to web interfaces, controls, dashboards, tools, settings, and interactive product surfaces.
+description: Design, build, audit, and refine production frontend interfaces with an explicit visual direction, stack-aware implementation strategy, coherent design system, responsive behavior, accessible interaction model, motion language, performance discipline, localization resilience, and rigorous visual QA. Apply automatically to web interfaces, applications, dashboards, tools, settings, forms, component libraries, and interactive product surfaces.
 ---
 
 # UI Design
 
-A cross-stack UI design skill for turning product requirements into coherent, production-ready interfaces. Treat visual design, interaction design, accessibility, motion, content, and implementation quality as one system.
+A production frontend design skill for turning a product requirement into a coherent visual system and a usable implementation. Treat aesthetic direction, information hierarchy, interaction design, accessibility, responsiveness, motion, content, performance, and implementation architecture as one system.
 
-This skill is informed by the public skill taxonomy and publicly described practices collected by UI Skills, especially its Systems, Visual, Interaction, Motion, Accessibility, and Craft categories. It is synthesized for AzSkills rather than copied or vendored.
+This is an AzSkills synthesis of public frontend-design methodologies. It deliberately combines the strongest transferable ideas from high-profile public skills without copying or vendoring their repository-specific text or data.
 
 ## Automatic scope
 
-Use this skill whenever a task changes any of the following:
+Apply this skill whenever a task changes any of the following:
 
-- interface layout or composition
-- component styling or states
-- navigation, forms, settings, dialogs, menus, or controls
-- responsive behavior
-- hover, focus, press, drag, gesture, transition, or page motion
-- typography, spacing, color, contrast, iconography, borders, or elevation
-- empty, loading, error, success, disabled, or partial-content states
-- internationalization or bidirectional layout behavior
+- page, route, shell, navigation, layout, or component structure
+- visual styling, typography, color, spacing, borders, surfaces, shadows, or iconography
+- responsive behavior, mobile layout, touch behavior, or viewport adaptation
+- forms, dialogs, menus, tabs, tables, filters, search, settings, or other controls
+- loading, empty, error, success, disabled, offline, partial-content, or permission states
+- hover, focus, active, drag, gesture, transition, scroll, or page motion
+- theming, light/dark mode, design tokens, or component-library consistency
+- internationalization, locale switching, text expansion, or RTL behavior
+- dashboard metrics, charts, data visualization, or information-density changes
 
-For pure backend or data-only work, do not apply it mechanically.
+For pure backend, data, infrastructure, or non-visual scripting work, do not apply it mechanically.
 
-## Priority order
+## Governing priority
+
+When rules conflict, use this order:
 
 1. Explicit user requirements.
-2. Product/domain constraints.
-3. Existing project design system and platform conventions.
-4. This skill.
-5. Optional aesthetic references.
+2. Existing product identity and established design system.
+3. Product/domain and platform conventions.
+4. Accessibility and usability requirements.
+5. This Skill.
+6. Optional aesthetic references.
 
-Preserve product identity. Do not replace an established system merely to make the UI look fashionable.
+Do not replace an established design system merely because a newer trend exists. New visual choices must earn their place through product fit, clarity, and implementation value.
 
-## 1. Begin with a UI thesis
+## 1. Context gathering before design
 
-Before substantial implementation, define:
+Before writing substantial UI code, inspect the project rather than designing against assumptions.
+
+Determine:
 
 ```text
-Purpose:
+Product:
 Primary user:
 Primary task:
+Usage context:
 Content density:
-Visual personality:
-Interaction personality:
-Layout model:
-Type hierarchy:
-Color roles:
-Motion language:
-Accessibility baseline:
+Supported locales:
+Primary input methods:
+Existing visual identity:
+Existing component system:
+Framework / stack:
+Styling architecture:
+Browser / device constraints:
+Performance constraints:
+Accessibility requirements:
+
+Visual thesis:
+Interaction thesis:
+Signature element:
 ```
 
-A UI thesis is a decision tool. Every major visual or motion choice should support it.
+Read the existing source of truth first. Depending on the project, inspect files such as:
 
-## 2. Design system before components
+- `package.json`
+- `vite.config.*`, `next.config.*`, `astro.config.*`, framework config
+- Tailwind or CSS configuration
+- global styles and token files
+- component-library configuration
+- theme files
+- route/app shell files
+- existing design documentation
 
-Build a compact token hierarchy:
+Never invent a parallel stack or styling system when the project already has one.
+
+## 2. Commit to one visual direction
+
+Before implementation, choose a deliberate visual direction rather than assembling fashionable parts.
+
+Useful axes:
+
+- minimal ↔ expressive
+- editorial ↔ technical
+- calm ↔ energetic
+- formal ↔ playful
+- organic ↔ geometric
+- flat ↔ dimensional
+- dense ↔ spacious
+
+Choose one primary direction and record the reason it fits the product.
+
+A strong direction answers:
+
+```text
+Purpose: What problem is the interface solving?
+Tone: What should it feel like?
+Constraint: What must not be compromised?
+Differentiation: What visual idea will be remembered?
+```
+
+Spend most of the visual boldness on one or two signature decisions. Do not make every component novel.
+
+Reject generic AI convergence by default:
+
+- purple gradient SaaS screens with no product-specific rationale
+- interchangeable card grids as the whole composition
+- default font choices selected only because they are common in generated code
+- arbitrary glassmorphism, glow, blur, bevel, chrome, or 3D effects
+- decorative blobs without a communication job
+- excessive pills, badges, and rounded containers
+- emoji substituted for a real icon system
+
+Distinctive does not mean noisy. Refined restraint is a valid direction.
+
+## 3. Design-system-first workflow
+
+For new pages, new products, or broad redesigns, create a small design system before styling isolated components.
+
+Use this hierarchy:
 
 ```text
 Primitive → Semantic → Component → State
@@ -64,411 +129,660 @@ Primitive → Semantic → Component → State
 
 At minimum define:
 
-- color roles: canvas, surface, elevated surface, text, muted text, accent, success, warning, danger, focus
-- spacing scale
-- typography roles
-- radii
-- border and divider roles
-- elevation/shadow roles
-- motion durations and easing
-- interaction states
+```text
+Colors:
+  canvas / surface / elevated / inverse
+  text / muted / subtle
+  accent / accent-contrast
+  success / warning / danger / info
+  focus / selected / disabled
 
-Do not scatter one-off values throughout the implementation when a reusable token would express the same intent.
+Geometry:
+  spacing scale
+  radii
+  border widths
+  control heights
 
-## 3. Layout and hierarchy
+Typography:
+  display / heading / body / label / metadata / numeric
+  size / weight / line-height / tracking
+
+Motion:
+  micro / state / overlay / section
+  easing curves
+
+Effects:
+  border / shadow / elevation / focus ring
+```
+
+Prefer a small, intentional token vocabulary. Do not create tokens for every one-off value.
+
+For larger products, maintain one global source of truth and explicit page-level overrides rather than copying tokens into every feature.
+
+## 4. Stack awareness
+
+Implementation rules must follow the detected stack.
+
+Use the project's existing conventions first. When the stack is established:
+
+- React / Next.js: preserve the project's component and server/client boundary model.
+- Vue / Nuxt: follow the existing SFC and composable conventions.
+- Svelte / SvelteKit: prefer existing component and transition patterns.
+- Astro: keep static-first behavior and hydrate only interactive islands.
+- Plain HTML/CSS/JS: use semantic HTML, modern CSS, and progressively enhanced behavior.
+- Tailwind projects: use the existing token and utility conventions rather than creating a second styling layer.
+- CSS Modules / CSS-in-JS / custom CSS systems: extend the existing system before introducing another one.
+
+Do not assume React, Tailwind, Next.js, or any other default stack merely because it is common.
+
+When a task is implementation-heavy, distinguish three decisions:
+
+```text
+design decision → component architecture → framework implementation
+```
+
+Do not let framework convenience dictate the visual hierarchy.
+
+## 5. Feature before shell
+
+Design the specific user task before adding global chrome.
+
+For every new surface, identify:
+
+```text
+Primary task
+Primary action
+Supporting evidence
+Secondary actions
+Exceptional / destructive actions
+Progress or feedback
+```
+
+The shell, navigation, cards, and decorative framing should support the task rather than dominate it.
+
+## 6. Composition and hierarchy
 
 Composition comes before decoration.
 
 Establish:
 
-- a clear primary action
-- a predictable reading order
-- grouping through proximity and alignment
-- a stable grid or alignment axis
-- deliberate negative space
-- content density appropriate to the task
+- clear primary and secondary emphasis
+- predictable reading order
+- stable alignment axes
+- deliberate grouping and proximity
+- useful negative space
+- density appropriate to the job
+- a clear focal point
 
-Do not default to a dashboard full of identical cards. Cards, pills, badges, dividers, and floating controls are tools for grouping or interaction, not the layout strategy itself.
+Useful composition patterns include:
 
-Prefer progressive disclosure when secondary detail competes with the primary task.
+- hero + focal visual
+- asymmetric editorial split
+- evidence + annotation
+- timeline / process spine
+- comparison matrix
+- system diagram
+- full-bleed visual + typographic anchor
+- content-first operational panel
 
-## 4. Responsive behavior
+Cards, pills, badges, and dividers are grouping tools, not a default page architecture.
 
-Design behavior, not just breakpoints.
+Avoid making every section a rectangle with the same radius, border, shadow, and padding.
 
-For each viewport class decide what should:
+## 7. Modern CSS architecture
 
-- stay anchored
-- compress
-- wrap
-- collapse
-- scroll
-- move into secondary navigation
-- become progressively disclosed
+When the environment supports modern CSS, prefer native platform capabilities over unnecessary abstractions.
 
-Never rely on accidental wrapping as responsive design.
+Use deliberately:
 
-The interface must remain usable at narrow widths, text zoom, and touch input. Avoid horizontal overflow unless the content itself is intrinsically horizontal.
+- CSS custom properties for tokens
+- cascade layers (`@layer`) when the project benefits from explicit style precedence
+- native nesting where supported by the target browser baseline
+- `:has()` for parent-aware states when it materially simplifies the UI
+- container queries for component-driven responsive behavior
+- subgrid when shared column or row alignment materially improves consistency
+- `aspect-ratio` for media and reserved visual geometry
+- `clamp()` / fluid sizing where smooth scaling is more appropriate than breakpoint jumps
+- logical properties for direction-aware layouts (`margin-inline`, `padding-block`, etc.)
 
-## 5. Typography
+Do not use modern CSS merely because it is available. Prefer the simplest technique that preserves the project's browser baseline and maintainability.
 
-Treat typography as a functional hierarchy:
+Do not introduce a preprocessor, utility framework, or component library solely to solve a problem the existing stack already solves cleanly.
 
-- display / page statement
-- heading / section
-- body / explanation
-- utility / metadata
-- numeral / data
-- control / label
+## 8. Responsive behavior is a model
 
-Protect readable line length, line height, wrapping, contrast, and optical alignment.
+Do not define responsiveness as a list of pixel breakpoints.
 
-Do not use typography merely as decoration. Do not solve density problems by shrinking type until hierarchy collapses.
-
-For bilingual interfaces, reserve enough width for expansion and test both scripts. Never assume translated strings will have the same length as the source language.
-
-## 6. Color and contrast
-
-Assign every color a semantic role. A restrained palette is usually easier to maintain than a large collection of decorative colors.
-
-For light and dark themes, define semantic tokens rather than swapping arbitrary raw colors. Verify text, controls, borders, focus indicators, disabled states, and selected states independently.
-
-Never make color the sole carrier of status, selection, or errors; pair color with text, icon, shape, or another redundant cue.
-
-For image boundaries, prefer a subtle neutral outline rather than a tinted edge that visually contaminates the image.
-
-## 7. Surfaces, borders, and elevation
-
-Use borders for structure and state; use shadows for elevation.
-
-For nested surfaces, keep radii visually concentric: the outer radius should account for inner padding rather than mechanically repeating the same radius.
-
-Do not stack heavy borders, large shadows, blur, glow, and glass effects without a specific reason.
-
-Depth should clarify hierarchy, not simulate visual complexity.
-
-## 8. Interaction states are first-class design
-
-Every interactive control should have an explicit model for:
+For each component determine what happens as available space changes:
 
 ```text
-rest → hover → focus → active/pressed → selected → disabled
+stay anchored
+compress
+wrap
+reflow
+collapse
+scroll
+move to secondary navigation
+progressively disclose
+remove only when non-essential
 ```
 
-Where relevant, also define:
+Prefer content-driven or container-aware thresholds when the component's size matters more than the viewport.
+
+Protect:
+
+- no accidental horizontal overflow
+- readable line lengths
+- usable controls at narrow widths
+- media aspect ratios
+- sticky/fixed UI safe areas
+- preserved primary actions
+
+Test at least one narrow phone width, one wide desktop width, and an intermediate layout where wrapping pressure is real.
+
+## 9. Typography as system architecture
+
+Choose typography based on the product and language rather than generated-code convention.
+
+Define roles for:
 
 ```text
-loading → success / error
-empty → populated
-expanded → collapsed
-open → closing
+display
+page title
+section heading
+body
+label / control
+metadata
+numeric / data
 ```
 
-Every state should communicate through at least one static cue and, when useful, one motion cue.
+Verify:
 
-Never rely on hover alone. Preserve keyboard focus. Keep controls predictable when input is interrupted.
+- font fallback behavior
+- weight availability
+- line-height
+- line length
+- wrapping
+- optical alignment
+- tabular numerals when comparing numbers
+- multilingual glyph coverage
+- text expansion under localization
 
-## 9. Micro-interactions
+Avoid using typography as a density patch. If the layout is overloaded, simplify hierarchy or disclosure before shrinking type.
 
-Micro-interactions should confirm cause and effect rather than advertise themselves.
+## 10. Color and perceptual design
 
-Use short transitions for frequent interactions and avoid repeated decorative animations on high-frequency events.
+Color must communicate hierarchy and state.
 
-Preferred patterns:
+Prefer semantic tokens instead of hard-coded component colors.
 
-- hover: subtle lift or color emphasis
-- press: `scale(0.96)` when tactile feedback helps
-- selected state: color/weight/indicator plus optional restrained transition
-- toggle: interruptible movement or cross-fade
-- toast/status: compact scale + fade or opacity transition
-- modal/drawer: contextual enter/exit preserving spatial relationships
+Where the project's browser baseline allows it, OKLCH or another perceptually grounded color model can be used for palette construction and controlled lightness/chroma adjustments.
 
-Motion is never the only feedback channel.
+The implementation should still expose semantic roles such as:
 
-## 10. Motion system
+```text
+--color-bg
+--color-surface
+--color-surface-elevated
+--color-text
+--color-text-muted
+--color-accent
+--color-focus
+--color-success
+--color-warning
+--color-danger
+```
+
+Light and dark themes are separate contrast problems. Validate both independently.
+
+Never use color as the only carrier of:
+
+- error
+- success
+- selection
+- disabled state
+- required state
+- information priority
+
+Pair color with text, icon, shape, label, position, or another redundant cue.
+
+## 11. Surfaces, borders, and depth
+
+Assign one job to each visual layer:
+
+- border: structure or state
+- shadow: elevation
+- fill: grouping or emphasis
+- blur / transparency: depth only when it helps context
+- glow: intentional emphasis only
+
+For nested surfaces, use optically concentric radii and consistent padding.
+
+Avoid stacking border + heavy shadow + blur + glow + gradient simply to make a surface feel premium.
+
+A good depth system remains legible in light mode, dark mode, reduced transparency, and low-end rendering conditions.
+
+## 12. Component responsibilities and reuse
+
+A component should have a clear responsibility boundary.
+
+Separate:
+
+```text
+content/data
+state and behavior
+layout
+visual tokens
+accessibility semantics
+```
+
+Extract repeated patterns only after their repeated behavior is real. Do not build a giant universal component with dozens of boolean props merely to avoid a small amount of duplication.
+
+When three or more components share the same visual rule, prefer a token or primitive before copying raw values.
+
+## 13. Interaction state matrix
+
+Every interactive control needs an explicit state model:
+
+```text
+rest
+hover
+focus-visible
+active / pressed
+selected
+disabled
+```
+
+When applicable:
+
+```text
+loading
+success
+error
+empty
+expanded
+collapsed
+open
+closing
+offline
+permission denied
+```
+
+Use at least one static cue for important state changes. Motion can reinforce the cue but must never be the only signal.
+
+Never make hover a prerequisite for an action.
+
+## 14. Forms and task flows
+
+Use native semantics first:
+
+- `<label>` for inputs
+- `<button>` for actions
+- `<a href>` for navigation
+- native validation and input types where appropriate
+
+Rules:
+
+- placeholders are hints, not labels
+- preserve paste and browser autofill
+- do not block zoom
+- group fields according to the user's mental model
+- validate at a useful point in the task
+- place errors next to the affected field and summarize complex errors
+- preserve user input after errors
+- focus the first actionable error when appropriate
+- explain what happened and what the user can do next
+
+For menus, tabs, dialogs, listboxes, comboboxes, sliders, and other composite widgets, follow established keyboard interaction patterns instead of inventing new ones.
+
+## 15. Accessibility baseline
+
+Use semantic HTML before ARIA.
+
+Every pointer interaction requires a keyboard path.
+
+Focus requirements:
+
+- use `:focus-visible`
+- keep a visible, high-contrast focus indicator
+- use a clear perimeter or equivalent visible area; do not visually hide focus
+- restore focus predictably after dialogs and overlays close
+
+Target sizes:
+
+- practical minimum: about 24×24 CSS px for exceptions where density requires it
+- preferred desktop target: about 40×40 when density permits
+- preferred touch target: about 44×44
+
+Icon-only controls need accessible names. Decorative icons should not become meaningless screen-reader content.
+
+Do not rely on hover, color, motion, or shape alone for critical information.
+
+Respect user font scaling and system contrast preferences where the platform exposes them.
+
+## 16. Reduced motion and motion sensitivity
+
+Treat reduced motion as a first-class design variant.
+
+Under `prefers-reduced-motion: reduce`:
+
+- keep content visible
+- remove non-essential translation, scale, parallax, and continuous loops
+- prefer immediate state changes or subtle opacity transitions
+- disable autoplay-driven decorative motion
+- preserve task feedback through static cues
+
+Never let an essential state depend on an animation completing.
+
+## 17. Motion system
 
 Use a small reusable motion vocabulary.
 
-### Core primitives
+Recommended starting ranges:
 
-**Fade + rise**
+```text
+micro interaction:       120–200ms
+UI state change:         180–260ms
+overlay / toast:         220–320ms
+section entrance:        400–800ms
+hero / onboarding:       800–1600ms
+```
 
-Use for infrequent page-section or dialog entrances.
+Use a small set of easing curves. Ease-out is generally suitable for entering and feedback; exits should be shorter and context-preserving.
 
-- opacity: 0 → 1
-- translateY: 12–24px → 0
-- duration: roughly 300–700ms
+Use:
 
-**Scale + fade**
+- fade + rise for infrequent entrances
+- scale + fade for compact overlays and emphasis
+- slide for drawers and local panel transitions
+- shared-element continuity only when stable geometry materially improves comprehension
 
-Use for compact overlays, toasts, and selected-state emphasis.
+Stagger only infrequent, choreographed entrances. Do not animate every row, keystroke, or hover.
 
-- scale: 0.98 → 1
-- opacity: 0 → 1
+Motion must be interruptible. Prefer transitions that can reverse cleanly from the current state.
 
-**Slide**
+## 18. Performance-aware visual engineering
 
-Use for drawers, local panels, and step transitions. Animate transform rather than layout geometry.
-
-**Shared-element / morph**
-
-Use only when geometry is stable and continuity materially improves comprehension, such as segmented indicators or expanding surfaces.
-
-### Motion timing
-
-Use ranges rather than one universal duration:
-
-- micro interaction: 120–200ms
-- UI state transition: 180–260ms
-- small overlay/toast: 220–320ms
-- section entrance: 400–800ms
-- hero or onboarding sequence: 800–1600ms
-
-Use a small set of easing curves. Prefer ease-out for entering and UI feedback; use faster ease-in for exits. Avoid elastic/bouncy defaults unless the product language is intentionally playful.
-
-### Choreography
-
-For infrequent entrances:
-
-1. primary visual or headline first
-2. supporting content second
-3. primary action last
-
-Use small stagger intervals, generally around 40–90ms, and smaller values on mobile. Do not stagger routine clicks, typing, hovering, or every child in a list.
-
-### Interruptibility
-
-Interactive transitions should usually use CSS transitions or an animation system that can reverse from the current state. Avoid animations that fight the user's next action.
-
-## 11. Performance rules
-
-Prefer compositor-friendly properties:
+Prefer compositor-friendly animation properties:
 
 - `transform`
 - `opacity`
 
-Avoid repeatedly animating:
+Avoid repeatedly animating layout-heavy properties such as:
 
 - `width`
 - `height`
 - `top`
 - `left`
-- large-area filters or blur
 
-Do not measure layout every animation frame. Use `will-change` only when a real first-frame or rendering issue justifies it, and only for properties that benefit from compositing.
+Be cautious with large-area blur, filters, and backdrop effects.
 
-Keep concurrent motion small enough that the interface remains responsive on mid-range hardware and mobile devices.
+Use `will-change` only after identifying a real rendering problem.
 
-## 12. Accessibility baseline
+Prevent layout instability:
 
-Use native semantics first.
+- reserve image/media dimensions
+- avoid late font swaps that cause visible layout jumps when practical
+- avoid unnecessary synchronous layout measurement
+- virtualize genuinely large lists when the existing stack supports it
+- keep decorative effects from dominating frame time
 
-- `<button>` for actions
-- `<a href>` for navigation
-- real `<label>` elements for inputs
-- native form controls where practical
+For content-heavy surfaces, consider `content-visibility` and containment only after understanding their effect on the project's browser and accessibility baseline.
 
-Every pointer interaction needs a keyboard path.
+## 19. Imagery and iconography
 
-Focus requirements:
+Use imagery for communication, not merely decoration.
 
-- use `:focus-visible`
-- keep a visible focus indicator with at least a clear 2px perimeter or equivalent visible area
-- never remove focus without a verified replacement
+Image treatment must account for:
 
-Hit areas:
+- crop behavior
+- focal point
+- aspect ratio
+- low-quality placeholders
+- loading state
+- light/dark surroundings
+- text over image contrast
 
-- 24×24 CSS px is a minimum baseline when exceptions do not apply
-- aim for 40×40 on desktop interfaces when density permits
-- aim for 44×44 in touch contexts
-- do not let expanded hit areas overlap adjacent controls
+For icon systems:
 
-Icon-only controls need descriptive accessible names. Decorative content must not become focusable or announced unnecessarily.
+- use one coherent vocabulary per surface
+- prefer semantic SVG icons with `currentColor`
+- keep stroke weight visually compatible with typography
+- use filled variants intentionally for active/selected states
+- optically align asymmetric icons
+- do not use emoji as a UI icon substitute unless explicitly required
 
-## 13. Reduced motion
+## 20. Data visualization
 
-Reduced motion is a design variant, not an afterthought.
+When UI includes charts or metrics, choose the representation from the question being answered rather than visual novelty.
 
-Under `prefers-reduced-motion: reduce`:
+First determine whether the user needs:
 
-- keep content visible
-- remove non-essential translation and scale
-- replace motion with immediate state changes or subtle opacity changes
-- disable parallax and autoplay-driven motion
+```text
+comparison
+trend
+distribution
+part-to-whole
+relationship
+ranking
+single KPI
+```
 
-Do not make essential state information depend on animation.
+Then choose a chart that matches the task.
 
-## 14. Dynamic content and feedback
+Rules:
 
-Design all non-static states explicitly:
+- label axes and units where needed
+- keep legends understandable
+- preserve color-independent differentiation
+- provide accessible text summaries or equivalent information
+- avoid decoration that hides the signal
+- use consistent scales across comparable charts
 
-- loading
-- success
-- validation error
-- server error
-- offline or partial data
-- empty state
-- no-results state
-- disabled/unavailable state
+## 21. Internationalization and RTL
 
-Routine updates should use a polite status region where appropriate. Urgent errors should be announced distinctly from routine feedback.
+Treat localization as a layout and interaction requirement.
 
-A state change should explain what happened and what the user can do next.
+Use stable message keys, not source-language sentences, as the UI model.
 
-## 15. Forms and controls
+Test all supported locales for:
 
-Inputs require visible labels; placeholders are supplemental hints, not labels.
-
-Match control type to the expected data and device input method. Do not block paste or zoom.
-
-Keep submit actions available until an operation starts; validate at the point of submission and focus the first actionable error.
-
-For segmented controls, tabs, menus, sliders, and other composite widgets, use established keyboard behavior instead of inventing custom navigation.
-
-## 16. Internationalization and RTL
-
-Treat localization as a layout concern.
-
-Use stable message keys rather than using source-language sentences as the application's internal model.
-
-Do not translate arbitrary user data, color names, filenames, IDs, or source labels as though they were UI strings.
-
-Test:
-
-- both locales on every route
+- every route
 - dynamically rendered content
-- placeholders, titles, aria-labels, tooltips, and toasts
-- longer translations and line wrapping
-- date/number formatting where applicable
-- RTL when the locale requires it
+- buttons and labels
+- placeholders
+- titles and tooltips
+- `aria-label`s
+- toasts and validation errors
+- empty and error states
+- long translations
+- date / number / currency formatting
+- RTL behavior where applicable
 
-A UI is not localized until newly rendered and stateful content remains in the selected language.
+Use logical CSS properties where appropriate so direction changes do not require duplicating layout rules.
 
-## 17. Icons
+Do not translate user data, filenames, identifiers, IDs, or proper nouns merely because they appear in the UI.
 
-Use one coherent icon vocabulary per surface.
+## 22. Content hierarchy and UX writing
 
-Prefer semantic SVG icons using `currentColor`. Use outline icons by default and filled variants for active states when the visual system supports that distinction.
+A polished UI is also clear copy.
 
-Match icon stroke weight to nearby typography and optically align asymmetric symbols rather than trusting geometric centering.
+Prefer labels that tell the user what an action does, not what the internal implementation calls it.
 
-Do not use emoji as a substitute for deliberate interface iconography unless the product explicitly calls for it.
+For important actions:
 
-## 18. Taste and anti-generic rules
+```text
+what will happen
+what object is affected
+whether the action is reversible
+what happens next
+```
 
-Reject visual decisions that feel copied from a generic SaaS template without a product-specific reason.
+Error copy should identify:
 
-Common anti-patterns:
+```text
+problem → impact → recovery action
+```
 
-- excessive rounded cards
-- identical card grids everywhere
-- arbitrary glassmorphism or glow
-- gradients added simply to look modern
-- decorative blobs with no communication job
-- inconsistent radii and shadows
-- tiny helper text used to fit more content
-- hover-only actions
-- one animation duration for every interaction
-- animation on every element
-- excessive 3D tilt/parallax
-- color used as the only status signal
-- replacing meaningful icons with emoji
+Do not hide essential instructions in tiny helper text merely to keep a layout visually sparse.
 
-A distinctive UI does not require novelty everywhere. It requires consistent choices with a clear reason.
+## 23. Hardening and edge cases
 
-## 19. Verification protocol
+Before calling a surface complete, inspect:
 
-Before calling a UI task complete, perform a structured pass:
+- empty data
+- one item
+- many items
+- very long text
+- localized text expansion
+- slow network
+- duplicate submissions
+- failed submission
+- partial data
+- permission denied
+- offline / reconnecting
+- loading skeleton or spinner behavior
+- disabled controls
+- keyboard-only operation
+- narrow viewport
+- large text / zoom
+- dark mode
+- reduced motion
 
-### Visual
+A UI that only works with ideal content is unfinished.
 
-- hierarchy is obvious within a few seconds
-- primary action is visually dominant
-- spacing follows a repeatable rhythm
-- nested radii are coherent
-- shadows and borders have distinct jobs
-- light and dark themes are both legible
-- no accidental clipping or overflow
+## 24. Verification protocol
 
-### Interaction
+Use a repeatable review loop instead of relying on visual intuition alone.
 
-- rest / hover / focus / active / disabled states exist where relevant
-- keyboard interaction completes every primary flow
-- controls provide static feedback even when motion is disabled
-- route, overlay, and drawer transitions preserve context
+### Pass A — structure
 
-### Motion
+- primary task is obvious
+- hierarchy is understandable within seconds
+- information architecture matches the user's mental model
+- shell does not dominate feature content
 
-- animations serve hierarchy, feedback, continuity, or delight
-- no routine interaction is over-animated
-- transforms and opacity dominate
-- timings are intentional rather than universal
-- interrupted interactions recover cleanly
-- reduced-motion mode is usable
+### Pass B — states
 
-### Accessibility
+- rest / hover / focus / active / selected / disabled are coherent
+- loading / success / error / empty states exist where relevant
+- feedback explains cause and next action
+- focus restoration works after overlays close
 
-- semantic elements are used where possible
+### Pass C — responsive
+
+- narrow phone width
+- intermediate wrapping pressure
+- wide desktop
+- zoom / large text
+- no accidental horizontal overflow
+
+### Pass D — accessibility
+
+- semantic elements are used
+- keyboard flow completes the primary task
 - focus is visible
-- target sizes are practical
-- labels and accessible names exist
-- dynamic updates are announced appropriately
-- content survives zoom and narrow widths
-- contrast and non-color cues are verified
+- icon-only controls are named
+- contrast and non-color cues are sufficient
+- reduced motion remains usable
 
-### Content / i18n
+### Pass E — themes
 
-- every route is checked in every supported locale
-- dynamic rendering does not reintroduce source-language UI
-- placeholders, titles, aria-labels, toasts, errors, and empty states are localized
-- user data is not mistranslated as UI
+- light mode verified
+- dark mode verified
+- focus, disabled, selected, and muted states remain legible in both
+- image boundaries do not visually contaminate either theme
 
-### Code quality
+### Pass F — performance
 
-- repeated visual values use tokens
-- transitions specify exact properties; never use `transition: all`
-- animation code is reusable rather than duplicated per component
-- `will-change` is rare and justified
-- no temporary debug UI or design notes remain visible
+- animation uses transform / opacity where possible
+- expensive effects are justified
+- layout shift is controlled
+- no unnecessary repeated measurement
+- large lists and media are handled appropriately
 
-## 20. Review method
+### Pass G — visual QA
 
-When auditing an existing interface:
+When browser tooling or screenshots are available, inspect the rendered result rather than only the source code. Look for:
 
-1. Walk the primary flow with a mouse.
-2. Walk the same flow keyboard-only.
-3. Inspect hover, focus, active, loading, empty, and error states.
-4. Slow animation to roughly 10% speed in browser tooling to expose timing and continuity problems.
-5. Compare light/dark themes.
-6. Check the smallest practical viewport and 200% text zoom.
-7. Audit repeated components for token drift.
-8. Remove unnecessary decoration before adding new effects.
+- spacing drift
+- inconsistent radii
+- token drift
+- misaligned icons
+- clipping
+- awkward wrapping
+- weak focal hierarchy
+- excessive decoration
+- motion that feels slow, noisy, or disconnected
 
-Separate systemic findings from isolated polish issues. Fix systemic rules first.
+For animation-heavy work, review at significantly reduced playback speed to expose continuity and sequencing problems.
 
-## 21. Done standard
+## 25. Review method for existing interfaces
+
+When auditing an existing implementation:
+
+1. Walk the primary flow with a pointer.
+2. Repeat it keyboard-only.
+3. Inspect all relevant component states.
+4. Compare narrow and wide layouts.
+5. Compare light and dark themes.
+6. Test large text / browser zoom.
+7. Inspect localization and long strings.
+8. Review animation at reduced speed.
+9. Search for repeated raw values that should be tokens.
+10. Separate systemic problems from isolated polish issues.
+11. Fix systemic rules before adding visual effects.
+
+When possible, classify findings as:
+
+```text
+BLOCKER   prevents task completion or violates a critical accessibility requirement
+HIGH      materially harms comprehension, consistency, or usability
+MEDIUM    noticeable quality defect with a practical workaround
+LOW       polish / refinement
+```
+
+## 26. Anti-generic quality gate
+
+Before delivery, ask:
+
+```text
+Could this exact page belong to another product without changing the copy?
+Is there a clear reason for the typography choice?
+Does the color system communicate hierarchy or merely decorate?
+Does the composition serve the task?
+Are effects improving comprehension or only signaling "modern"?
+Is the signature element actually specific to this product?
+Would the interface remain good if all gradients and shadows were removed?
+```
+
+If the answer suggests template-like output, redesign the direction before polishing details.
+
+## 27. Done standard
 
 The UI is done when:
 
-- the visual system is coherent across routes and states
-- interaction feedback is predictable and accessible
-- motion feels like one language instead of a collection of effects
-- localization survives dynamic rendering
-- responsive behavior is intentional
-- reduced-motion remains usable
-- no major accessibility or hierarchy issue remains
-- additional decoration is more likely to weaken than improve the interface
+- the visual thesis is coherent and product-specific
+- the design system is consistent across routes and states
+- the implementation matches the existing stack
+- responsive behavior is intentional rather than accidental
+- keyboard and touch interactions are predictable
+- light and dark themes both work
+- localization survives dynamic rendering and text expansion
+- reduced-motion users retain a usable experience
+- major accessibility and hierarchy problems are resolved
+- motion is one system rather than unrelated effects
+- performance costs from visual treatment are justified
+- additional decoration is more likely to weaken than improve the result
 
 ## Provenance
 
-This skill is an AzSkills synthesis informed by the public catalog and publicly described practices on:
+This Skill is an original AzSkills synthesis informed by public frontend design methodologies, including:
 
-- https://www.ui-skills.com/skills
-- https://www.ui-skills.com/skills/visual
-- https://www.ui-skills.com/skills/interaction
-- https://www.ui-skills.com/skills/motion
-- https://www.ui-skills.com/skills/accessibility
-- https://www.ui-skills.com/skills/craft
-- https://www.ui-skills.com/skills/taste
+- Anthropic's public `frontend-design` skill: https://github.com/anthropics/skills/tree/main/skills/frontend-design
+- NextLevelBuilder UI/UX Pro Max: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+- `better-web-ui`: https://github.com/aladicf/better-web-ui
+- `frontend-designer-skill`: https://github.com/kozz36/frontend-designer-skill
+- UI Skills public catalog: https://www.ui-skills.com/skills/frontend
 
-Specific practices were cross-checked against public descriptions of UI Skills entries such as `better-ui`, `better-accessibility`, and `animation-systems`. AzSkills does not vendor those repositories, generated assets, or private/internal source material.
+These sources were used for transferable principles such as context-first design direction, anti-generic aesthetics, design-system generation, stack awareness, responsive/component reasoning, accessibility hardening, motion discipline, visual QA, and maintainable frontend architecture. AzSkills does not vendor their repositories, generated databases, example assets, private material, or repository-specific implementation.
