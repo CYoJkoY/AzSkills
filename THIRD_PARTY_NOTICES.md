@@ -15,15 +15,27 @@ These public workflows overlap around logo ideation, prompt construction, SVG pr
 
 No upstream example asset library or repository-specific implementation is included.
 
-## Shared design intelligence
+## `ui-design` and shared design intelligence
 
-Informed by:
+The unified UI design layer is informed by public material from the UI Skills catalog:
+
+- https://www.ui-skills.com/skills
+- https://www.ui-skills.com/skills/visual
+- https://www.ui-skills.com/skills/interaction
+- https://www.ui-skills.com/skills/motion
+- https://www.ui-skills.com/skills/accessibility
+- https://www.ui-skills.com/skills/craft
+- https://www.ui-skills.com/skills/taste
+
+Specific public entries cross-checked during synthesis include `better-ui`, `better-accessibility`, and `animation-systems`.
+
+The broader shared layer is also informed by:
 
 - https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
 
-The transferable design methodology is maintained in [`design-intelligence.md`](design-intelligence.md) as a cross-cutting reference layer, not a standalone Skill.
+The transferable methodology is maintained in [`ui-design/SKILL.md`](ui-design/SKILL.md) for executable UI guidance and [`design-intelligence.md`](design-intelligence.md) for cross-Skill inheritance.
 
-AzSkills does not vendor the upstream UI/UX plugin, searchable design database, generated examples, or repository-specific scripts.
+AzSkills does not vendor UI Skills, the upstream UI/UX plugin, searchable design databases, generated examples, private/internal material, or repository-specific scripts.
 
 ## `readme-craft`
 
