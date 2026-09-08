@@ -1,331 +1,243 @@
 # AzSkills Design Intelligence Layer
 
-This is a cross-cutting reference layer, not a standalone Skill. Visual and UI Skills in AzSkills inherit these rules unless explicit user requirements or a more specific Skill rule takes precedence.
+This is a cross-cutting reference layer, not a standalone Skill. Visual and UI Skills inherit these rules unless explicit user requirements or a more specific Skill rule takes precedence.
 
-The layer is an AzSkills synthesis informed by public design-engineering methodologies, including the public UI Skills catalog at https://www.ui-skills.com/ and the previously integrated `nextlevelbuilder/ui-ux-pro-max-skill`. It is deliberately adapted to AzSkills' smaller, modular skill architecture.
+The layer is an AzSkills synthesis informed by public frontend design methodologies, including Anthropic's `frontend-design`, NextLevelBuilder's UI/UX Pro Max, `better-web-ui`, the framework-agnostic `frontend-designer-skill`, and the public UI Skills catalog. It intentionally keeps the architecture modular rather than importing an external skill wholesale.
 
 ## Automatic application
 
-Apply this layer automatically whenever a task changes how an artifact looks, feels, moves, or is interacted with. This includes interfaces, dashboards, web apps, settings, forms, component libraries, icons, logos, SVG identity assets, README visuals, HTML presentations, banners, and other visual deliverables.
+Apply this layer whenever a task changes how an artifact looks, feels, moves, or is interacted with. This includes interfaces, dashboards, web apps, settings, forms, component libraries, icons, logos, SVG identity assets, README visuals, HTML presentations, banners, and other visual deliverables.
 
-For UI implementation or review, automatically inherit [`ui-design/SKILL.md`](ui-design/SKILL.md). The shared layer provides the cross-artifact design reasoning; `ui-design` provides the executable UI design and audit rules.
+For executable UI work, automatically inherit [`ui-design/SKILL.md`](ui-design/SKILL.md). The shared layer supplies cross-artifact reasoning; `ui-design` supplies the executable frontend workflow and audit contract.
 
 Do not apply it mechanically to pure backend logic, database work, infrastructure, or non-visual scripts.
 
 ## Priority order
 
 1. Explicit user requirements.
-2. The active Skill's hard constraints.
-3. Product/domain and platform conventions.
-4. `ui-design/SKILL.md` for UI work.
-5. This shared design-intelligence layer.
-6. Examples and optional stylistic references.
+2. Active Skill hard constraints.
+3. Existing product identity and design system.
+4. Product / platform conventions and accessibility requirements.
+5. `ui-design/SKILL.md` for UI work.
+6. This shared layer.
+7. Optional stylistic references.
 
-When two rules conflict, preserve the more specific requirement and document the tradeoff when it materially affects the result.
+When rules conflict, preserve the more specific requirement and document a material tradeoff.
 
-## 1. Establish a visual thesis before implementation
+## 1. Context before aesthetics
 
-Before producing substantial visual output, define a compact thesis:
+Before substantial visual work, establish:
 
 ```text
-Purpose:
-Audience / primary user:
-Primary task or message:
-Visual personality:
-Interaction personality:
-Dominant composition:
-Typography roles:
-Semantic color roles:
-Spacing / geometry rhythm:
-Motion language:
+Product / purpose:
+Primary user:
+Primary task:
+Usage context:
+Content density:
+Existing identity:
+Supported locales:
+Primary input methods:
+Technical stack:
+Performance constraints:
 Accessibility baseline:
 ```
 
-The thesis should explain why the chosen system belongs to the product. Do not select fashionable effects merely because they are available.
+Do not let a fashionable visual pattern replace product understanding.
 
-## 2. Match style to the product
+## 2. One visual thesis
 
-Choose style from product context, audience, usage surface, and interaction needs. Treat style as a system rather than an isolated effect.
+Choose a coherent direction using product context rather than assembling isolated trends.
 
-Useful axes include:
+Useful axes:
 
-- Minimal ↔ expressive
-- Editorial ↔ technical
-- Formal ↔ playful
-- Organic ↔ geometric
-- Calm ↔ energetic
-- Flat ↔ dimensional
-- Dense ↔ spacious
+- minimal ↔ expressive
+- editorial ↔ technical
+- calm ↔ energetic
+- formal ↔ playful
+- organic ↔ geometric
+- flat ↔ dimensional
+- dense ↔ spacious
 
-Do not mix incompatible style vocabularies without a clear compositional reason.
+Use one primary direction and spend most visual boldness on one or two signature ideas.
 
-## 3. Build a coherent token system
+Reject generic convergence such as arbitrary purple-gradient SaaS layouts, interchangeable card grids, unmotivated glassmorphism, excessive pills, emoji iconography, and decoration without a communication job.
 
-Use a three-level mental model:
+## 3. System before detail
+
+Use:
 
 ```text
 Primitive → Semantic → Component → State
 ```
 
-Define reusable roles for color, typography, spacing, radius, stroke, elevation, and motion before scattering raw values.
+Build reusable tokens for color, typography, spacing, geometry, borders, elevation, and motion before scattering raw values.
 
-A token should solve a recurring design need. Avoid one-off token sprawl.
+For larger products, maintain one master source of truth with explicit page-level overrides. Never create parallel token systems for individual routes without a real boundary.
 
 ## 4. Composition before components
 
-Establish hierarchy and spatial relationships before filling the canvas with components.
+Start with task hierarchy, reading order, alignment, grouping, density, and focal points.
 
-Prefer purposeful composition patterns such as:
+Cards, pills, badges, and dividers are component primitives. They are not a page architecture by themselves.
 
-- Hero + focal visual
-- Asymmetric editorial split
-- Evidence + annotation
-- Timeline / process spine
-- Comparison matrix
-- System diagram
-- Full-bleed visual + typographic anchor
-- Quiet title-only composition
-
-Cards, pills, badges, and repeated grids are components, not a default layout strategy. Use them only when they clarify grouping or interaction.
+Useful composition patterns include hero + focal visual, asymmetric editorial split, evidence + annotation, timeline spine, comparison matrix, system diagram, full-bleed visual + typographic anchor, and content-first operational panels.
 
 ## 5. Typography is structural
 
-Treat typography as hierarchy, not decoration. Define explicit roles for:
+Typography defines hierarchy, density, and readability. Establish roles for display, heading, body, label, metadata, numeric data, and controls.
 
-- Display / primary statement
-- Heading / section
-- Body / explanation
-- Utility / metadata
-- Numeric / data
-- Control / label
+Verify font availability, fallback behavior, glyph coverage, line-height, wrapping, line length, and multilingual expansion.
 
-Protect readability through line length, line height, wrapping, contrast, optical alignment, and multilingual expansion.
-
-Do not solve density problems by shrinking typography until the artifact becomes difficult to read.
+Do not shrink type to conceal an overloaded information architecture.
 
 ## 6. Color is semantic
 
-Give each core color a purpose: background, surface, text, muted text, accent, status, focus, and selected-state roles.
+Give color explicit roles for canvas, surfaces, text, muted content, accent, focus, selection, and status.
 
-Always verify light and dark contexts independently. Theme changes should be driven by semantic tokens rather than arbitrary raw color swaps.
+Where the target browser baseline allows it, perceptually grounded color spaces such as OKLCH are useful for constructing consistent lightness/chroma relationships. The implementation should still expose semantic tokens rather than making components depend on raw coordinates.
 
-Never make color the sole carrier of critical meaning. Pair it with text, iconography, shape, position, or another redundant cue.
+Light and dark themes must be validated as separate contrast contexts.
 
-## 7. Surfaces, structure, and depth
+Never use color alone for critical state or meaning.
 
-Use borders for structure or state; use shadows for elevation.
+## 7. Modern CSS, used deliberately
 
-Nested surfaces should use concentric optical geometry: outer radius, padding, and inner radius should read as a coherent construction rather than repeated arbitrary rounding.
+When compatible with the project baseline, prefer native CSS capabilities that improve maintainability or component responsiveness:
 
-Do not stack border, shadow, blur, glow, glass, and gradients merely to signal "modernity." Depth should clarify hierarchy.
+- custom properties
+- cascade layers
+- native nesting
+- `:has()` for meaningful parent-aware states
+- container queries for component-driven responsiveness
+- subgrid for shared alignment
+- `aspect-ratio` for media geometry
+- `clamp()` for fluid sizing
+- logical properties for direction-aware layouts
 
-## 8. Interaction and accessibility are part of visual quality
+Modern CSS is a means, not a design goal. Preserve the project's compatibility and architecture instead of introducing technology for its own sake.
 
-For UI-like outputs:
+## 8. Responsive behavior is behavioral
 
-- Preserve visible keyboard focus.
-- Prefer native semantics before custom ARIA.
-- Give every pointer action a keyboard path.
-- Provide accessible names for icon-only controls.
-- Use real labels for form controls.
-- Give users static state feedback in addition to motion.
-- Do not rely on hover alone.
-- Keep touch targets practical; larger targets are preferable where density allows.
-- Respect reduced-motion preferences.
-- Preserve predictable navigation, back behavior, and focus restoration.
-- Avoid accidental horizontal overflow.
+For each component decide whether it stays anchored, compresses, wraps, reflows, collapses, scrolls, moves to secondary navigation, progressively discloses, or disappears only when genuinely non-essential.
 
-The current AzSkills UI baseline is defined more precisely in [`ui-design/SKILL.md`](ui-design/SKILL.md).
+Prefer content-driven or container-aware thresholds when the component's own width is the relevant constraint.
 
-## 9. Motion communicates meaning
+Check narrow, intermediate, and wide layouts rather than only desktop/mobile endpoints.
 
-Use animation for one or more of:
+## 9. Interaction is part of visual quality
 
-1. hierarchy
-2. action confirmation
-3. attention guidance
-4. continuity
-5. craft / polish
-
-If an animation serves none of these jobs, remove it.
-
-Use one coherent motion language rather than a collection of unrelated effects. Prefer reusable primitives such as fade+rise, scale+fade, slide, and measured shared-element transitions.
-
-Prefer transform and opacity. Avoid animating layout-heavy properties when a compositor-friendly alternative exists.
-
-## 10. Motion timing and choreography
-
-Use ranges rather than one universal duration:
-
-- micro interaction: roughly 120–200ms
-- UI state change: roughly 180–260ms
-- small overlay / toast: roughly 220–320ms
-- section entrance: roughly 400–800ms
-- hero / onboarding sequence: roughly 800–1600ms
-
-Use a small, reusable set of easing curves. Entering motion should generally ease out; exits should be faster and context-preserving. Avoid elastic or bouncy defaults unless the product is intentionally playful.
-
-For infrequent staged entrances, establish reading order: primary element first, supporting content second, primary action last. Typical stagger should remain small, roughly 40–90ms, and should be skipped for high-frequency interactions.
-
-Interactive motion should be interruptible. Never make the UI fight the user's next action.
-
-## 11. Micro-interactions and state design
-
-Model component states explicitly:
+Model:
 
 ```text
-rest → hover → focus → active/pressed → selected → disabled
+rest → hover → focus-visible → active → selected → disabled
 ```
 
-Where applicable also model:
+When applicable:
 
 ```text
 loading → success / error
 empty → populated
 collapsed → expanded
 open → closing
+offline → reconnecting
 ```
 
-Use motion as a reinforcing cue, not as the state itself. For tactile press feedback, a restrained scale around `0.96` is preferred; do not exaggerate it.
+Provide static feedback in addition to motion. Never make hover the only way to discover an action.
 
-Do not add custom animation to every hover, keystroke, or repeated list interaction. High-frequency motion carries attention cost.
+## 10. Accessibility baseline
 
-## 12. Responsive behavior and density
+Prefer native semantics before ARIA. Every pointer interaction needs a keyboard path.
 
-Responsive design is behavioral. For each breakpoint decide what stays anchored, compresses, wraps, collapses, scrolls, moves to secondary navigation, or becomes progressively disclosed.
+Preserve visible focus, descriptive names for icon-only controls, usable target sizes, predictable focus restoration, and non-color cues for important state.
 
-Classify the artifact as experiential or operational before tuning density.
+Treat reduced motion, zoom, text scaling, and high-contrast needs as design variants rather than post-hoc patches.
 
-Do not cure overcrowding by shrinking type and spacing until the result is technically complete but practically unreadable.
+The executable baseline is defined precisely in [`ui-design/SKILL.md`](ui-design/SKILL.md).
 
-## 13. Internationalization as design
+## 11. Motion as a system
 
-Localization is a layout and interaction concern.
+Motion should serve hierarchy, action confirmation, attention guidance, continuity, or intentional craft.
 
-Use stable message keys for application UI rather than using source-language sentences as the internal model.
+Prefer reusable primitives such as fade+rise, scale+fade, slide, and stable shared-element continuity. Prefer `transform` and `opacity` for animation.
 
-Test every supported locale on every route, including:
+Use short durations for frequent interactions and longer choreography only for infrequent entrances or onboarding. Keep motion interruptible and respect `prefers-reduced-motion`.
 
-- dynamically rendered content
-- placeholders
-- titles and tooltips
-- aria-labels
-- toasts and status messages
-- empty/error states
-- longer translated strings
-- number/date formatting where relevant
-- RTL behavior where relevant
+## 12. Performance is part of design
 
-Never translate user data, filenames, identifiers, or cultural names as though they were UI strings.
+Do not treat visual quality and runtime performance as separate concerns.
 
-## 14. Icons and visual language
+Avoid unnecessary layout animation, large-area blur, continuous decorative loops, uncontrolled parallax, repeated synchronous measurement, and gratuitous `will-change`.
 
-Use one coherent icon vocabulary per surface.
+Reserve media geometry, control layout shift, and keep high-density surfaces responsive on mid-range devices.
 
-Prefer semantic SVG icons using `currentColor`. Use outline as the default and filled variants only when they intentionally signal an active state.
+## 13. Internationalization is layout
 
-Match icon stroke weight to nearby typography and optically align asymmetric symbols.
+Use stable message keys. Test localized strings in controls, labels, placeholders, tooltips, toasts, validation errors, and dynamic states.
 
-Do not use emoji as a substitute for deliberate interface iconography unless explicitly requested.
+Account for text expansion, number/date formatting, and RTL where relevant. Prefer logical CSS properties when direction matters.
 
-## 15. Performance is visual quality
+Do not translate user data, IDs, filenames, or identifiers as though they were UI strings.
 
-Prefer compositor-friendly properties:
+## 14. Content clarity
 
-- `transform`
-- `opacity`
+Visual polish cannot compensate for ambiguous copy.
 
-Avoid repeated animation of:
+Action labels should describe outcomes. Important errors should communicate:
 
-- `width`
-- `height`
-- `top`
-- `left`
-- large-area filters or blur
+```text
+problem → impact → recovery action
+```
 
-Do not measure layout every frame. Use `will-change` only for a demonstrated rendering problem and only on properties that benefit from compositing.
+Use concise helper text only when it resolves a real ambiguity; do not use tiny type to save layout space.
 
-Keep simultaneous motion and expensive effects low enough for mid-range hardware and mobile devices.
+## 15. Hardening mindset
 
-## 16. Anti-pattern library
+A production interface must survive more than the happy path.
 
-Avoid these defaults unless the product specifically calls for them:
+Check long strings, empty datasets, large datasets, slow requests, failed submissions, duplicate actions, partial data, permission boundaries, offline states, narrow widths, dark mode, large text, and reduced motion.
 
-- Generic purple-gradient SaaS appearance.
-- Random glassmorphism, glow, bevel, chrome, or 3D decoration.
-- Overuse of cards and rounded containers.
-- Repeating identical dashboard cards as the primary composition.
-- Emoji used as substitute iconography.
-- Inconsistent corner radii, shadows, strokes, or spacing.
-- Tiny helper text used to cram in more content.
-- Gray-on-gray low-contrast text.
-- Hover-only interaction.
-- One animation duration for every state.
-- Animation on every element.
-- Decorative complexity that competes with the primary action or message.
-- Template-like layouts that could belong to any product.
+## 16. Visual QA
 
-## 17. Quality gate by artifact type
+Whenever rendered output is available, inspect the actual result rather than trusting source code alone.
 
-### UI / interaction
+Look for:
 
-Check accessibility, responsive behavior, interaction feedback, focus states, target sizes, dynamic states, i18n, content density, motion consistency, and state recovery.
+- hierarchy drift
+- inconsistent spacing or radii
+- token drift
+- weak focus visibility
+- awkward wrapping
+- clipping / overflow
+- bad dark-mode contrast
+- excessive decoration
+- icon misalignment
+- motion that feels slow or theatrical
 
-### README / documentation
+Fix systemic issues before isolated polish.
 
-Check first-screen clarity, proof placement, GitHub-safe SVG behavior, readable hierarchy, theme safety, and narrow-width resilience.
+## 17. Inheritance model
 
-### HTML presentation
+Visual and UI Skills should not require users to name an external methodology. Apply this layer silently whenever the active Skill is visual.
 
-Check fixed-stage geometry where required, hierarchy, spacing rhythm, motion, contrast, overflow, overlap, reduced motion, and rendered screenshots.
+Specific Skills remain authoritative about their own domain:
 
-### Logo / identity
+- `ui-design` owns frontend UI architecture, interaction, responsiveness, accessibility, motion, and QA.
+- `logo-generator` owns logo construction and identity-specific constraints.
+- `ip-as-logo` owns extreme character/IP simplification.
+- `frontend-slides` owns fixed-stage presentation implementation.
+- `readme-craft` owns GitHub-safe documentation composition.
+- `brotato-art` owns its game-art visual language.
 
-Check recognition, silhouette, construction logic, monochrome behavior, colorway discipline, theme variants, and small-size performance.
-
-## 18. Review workflow
-
-When auditing an existing UI:
-
-1. Walk the primary flow with a pointer.
-2. Repeat it keyboard-only.
-3. Inspect rest, hover, focus, active, loading, empty, and error states.
-4. Review motion at roughly 10% speed in browser tooling when animation is involved.
-5. Compare light and dark themes.
-6. Test narrow widths and large text / zoom.
-7. Look for token drift across repeated components.
-8. Remove unnecessary decoration before adding new effects.
-9. Separate systemic problems from isolated polish issues.
-10. Fix systemic rules first.
-
-The goal is not maximum visual novelty. The goal is a coherent, legible, responsive, accessible system whose details reinforce the product.
-
-## 19. Inheritance model
-
-Visual and UI Skills should not require the user to explicitly name an external methodology. Apply this layer silently whenever the active Skill falls into its scope.
-
-Specific Skills remain authoritative about their own domain. For example:
-
-- `ui-design` decides UI component, interaction, motion, accessibility, and responsive rules.
-- `logo-generator` decides logo construction and brand-mark rules.
-- `ip-as-logo` decides extreme character simplification.
-- `frontend-slides` decides fixed-stage presentation implementation.
-- `readme-craft` decides GitHub-safe README composition.
-- `brotato-art` decides its game-art-specific visual language.
-
-This layer supplies the shared reasoning: hierarchy, style selection, semantic tokens, typography, color, spacing, accessibility, motion, density, internationalization, performance, anti-pattern filtering, and quality control.
+This layer provides shared reasoning around hierarchy, visual thesis, semantic tokens, typography, color, responsiveness, accessibility, motion, density, internationalization, performance, anti-pattern filtering, and quality control.
 
 ## Provenance
 
-This file is an AzSkills synthesis informed by public material from:
+This layer is an original AzSkills synthesis informed by public material from:
 
-- https://www.ui-skills.com/skills
-- https://www.ui-skills.com/skills/visual
-- https://www.ui-skills.com/skills/interaction
-- https://www.ui-skills.com/skills/motion
-- https://www.ui-skills.com/skills/accessibility
-- https://www.ui-skills.com/skills/craft
-- https://www.ui-skills.com/skills/taste
+- https://github.com/anthropics/skills/tree/main/skills/frontend-design
 - https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+- https://github.com/aladicf/better-web-ui
+- https://github.com/kozz36/frontend-designer-skill
+- https://www.ui-skills.com/skills/frontend
 
-AzSkills does not vendor UI Skills, its repositories, private/internal material, generated databases, or generated assets. The purpose of this layer is to preserve transferable design reasoning in a smaller, maintainable form.
+AzSkills does not vendor these repositories, generated databases, private/internal material, or repository-specific implementation. Detailed attribution is maintained in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
