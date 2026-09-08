@@ -17,25 +17,32 @@ No upstream example asset library or repository-specific implementation is inclu
 
 ## `ui-design` and shared design intelligence
 
-The unified UI design layer is informed by public material from the UI Skills catalog:
+The frontend design layer is independently synthesized from public methodologies including:
 
-- https://www.ui-skills.com/skills
-- https://www.ui-skills.com/skills/visual
-- https://www.ui-skills.com/skills/interaction
-- https://www.ui-skills.com/skills/motion
-- https://www.ui-skills.com/skills/accessibility
-- https://www.ui-skills.com/skills/craft
-- https://www.ui-skills.com/skills/taste
+- Anthropic `frontend-design`: https://github.com/anthropics/skills/tree/main/skills/frontend-design
+- NextLevelBuilder `ui-ux-pro-max`: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+- `better-web-ui`: https://github.com/aladicf/better-web-ui
+- `frontend-designer-skill`: https://github.com/kozz36/frontend-designer-skill
+- UI Skills frontend catalog: https://www.ui-skills.com/skills/frontend
+- UI Skills public methodology catalog: https://www.ui-skills.com/skills
 
-Specific public entries cross-checked during synthesis include `better-ui`, `better-accessibility`, and `animation-systems`.
+The synthesis specifically informed:
 
-The broader shared layer is also informed by:
+- context-first visual direction and explicit aesthetic thesis
+- anti-generic / anti-AI-slop design review
+- design-system-first workflow
+- stack-aware implementation instead of hardcoded framework assumptions
+- design-system persistence and master/override thinking
+- typography, semantic color, spacing, density, and component hierarchy
+- modern CSS architecture and component-driven responsiveness
+- accessibility and interaction hardening
+- motion systems, reduced-motion handling, and performance-aware animation
+- internationalization, RTL, and text-expansion resilience
+- edge-case hardening and rendered visual QA
 
-- https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+AzSkills intentionally does not import or reproduce external searchable databases, generated outputs, repository-specific scripts, private/internal material, or large upstream skill packages. The implementation is maintained as original AzSkills text in [`ui-design/SKILL.md`](ui-design/SKILL.md) and [`design-intelligence.md`](design-intelligence.md).
 
-The transferable methodology is maintained in [`ui-design/SKILL.md`](ui-design/SKILL.md) for executable UI guidance and [`design-intelligence.md`](design-intelligence.md) for cross-Skill inheritance.
-
-AzSkills does not vendor UI Skills, the upstream UI/UX plugin, searchable design databases, generated examples, private/internal material, or repository-specific scripts.
+One caution from current public discussion is preserved in AzSkills' architecture: external tooling may ship much more data than an agent actually reads, and some combined modes can silently ignore options. AzSkills therefore prioritizes a compact contract with explicit trigger conditions and verification requirements over a large passive data bundle. See the public discussion around UI/UX Pro Max issue #484 for an example of this class of integration risk: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/issues/484
 
 ## `readme-craft`
 
