@@ -51,8 +51,14 @@ Informed by:
 - https://github.com/oil-oil/beautify-github-readme
 - https://github.com/zhangyu1818/appicon-forge
 - https://github.com/Nieobie/game-icon-pack
+- https://github.com/anthropics/skills/tree/main/skills/frontend-design
+- https://github.com/aladicf/better-web-ui
+- https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+- https://www.ui-skills.com/skills
 
-The AzSkills version integrates README-specific methodology with a project-native visual system, semantic icon selection, adaptive support CTAs, GitHub-safe SVG production, realistic render-size testing, and explicit source/deployment/download link semantics.
+The AzSkills version integrates README-specific methodology with a project-native visual system, semantic icon selection, adaptive support CTAs, GitHub-safe SVG production, realistic render-size testing, explicit source/deployment/download/support link semantics, evidence-first writing, mandatory light/dark theme verification, and preservation of canonical sponsorship/support destinations.
+
+The README workflow treats support/funding as information architecture rather than optional decoration: when a canonical support destination exists, a whole README redesign must preserve and surface it instead of silently dropping it.
 
 `appicon-forge` is used as a generation/customization reference for project-specific icons and compact identity assets. When its generated icons use Iconify, fonts, images, or other third-party inputs, their individual rights must be checked separately.
 
@@ -61,6 +67,31 @@ The AzSkills version integrates README-specific methodology with a project-nativ
 The AzSkills README also contains locally authored project-specific semantic icons under `assets/readme/icons/`. These are original local assets and do not require attribution to `game-icon-pack`.
 
 The integrated README reference remains [`readme-craft/references/beautify-github-readme.md`](readme-craft/references/beautify-github-readme.md). Upstream example assets and repository-specific implementations are not mechanically vendored.
+
+## `steam-mod-page`
+
+Informed by public Steam documentation and public community formatting references:
+
+- https://steamcommunity.com/comment/ForumTopic/formattinghelp
+- https://partner.steamgames.com/doc/features/workshop/implementation
+- https://partner.steamgames.com/doc/features/workshop
+- https://steamcommunity.com/sharedfiles/filedetails/?id=2807121939
+- https://steamcommunity.com/sharedfiles/filedetails/?id=812684948
+
+These references cover Steam's documented text formatting vocabulary, Workshop description handling, documentation expectations, image embedding, and known surface-specific parsing caveats.
+
+The AzSkills version independently rewrites those practices into a conservative workflow centered on:
+
+- Steam-BBCode-only final output;
+- explicit rejection of Markdown leakage;
+- separate Chinese and English deliverables;
+- documentation-first placement for developer-oriented Mods;
+- factual compatibility and dependency handling;
+- verified link and image destinations;
+- preserved sponsorship/support information when the Mod provides a real support destination;
+- final syntax and content linting.
+
+AzSkills does not copy Steam Community Guide text verbatim.
 
 ## `ip-as-logo`
 
