@@ -37,6 +37,7 @@ Each Skill lives in its own directory and is centered on a `SKILL.md` that defin
 
 | Your task | Start with |
 | :--- | :--- |
+| Design, audit, or refine a web/UI interface | [`ui-design`](ui-design/SKILL.md) |
 | Optimize or refactor AutoHotkey v2 | [`ahkv2-opt`](ahkv2-opt/SKILL.md) |
 | Work through a difficult engineering task | [`ultrathink`](ultrathink/SKILL.md) |
 | Build an HTML presentation | [`frontend-slides`](frontend-slides/SKILL.md) |
@@ -49,7 +50,7 @@ Each Skill lives in its own directory and is centered on a `SKILL.md` that defin
 | Write a Steam Workshop / Mod page | [`steam-mod-page`](steam-mod-page/SKILL.md) |
 | Translate Chinese chat into natural English | [`zh2en`](zh2en/SKILL.md) |
 
-> **Selection rule:** use the smallest Skill that completely covers the task. Compose Skills only when each adds a distinct responsibility.
+> **Selection rule:** use the smallest Skill that completely covers the task. UI/visual work automatically inherits the shared design intelligence; compose only when each Skill adds a distinct responsibility.
 
 ---
 
@@ -120,7 +121,13 @@ A rule-driven workflow for refactoring and reviewing AutoHotkey v2 code, coverin
 
 A methodology for complex engineering and refactoring: question assumptions, map architecture, design from the caller's perspective, inspect abstractions, consider edge cases, test alternatives, and simplify beyond the first working implementation.
 
-### <img src="assets/readme/icons/visual-design.svg" width="24" alt=""> Presentation & visual design
+### <img src="assets/readme/icons/visual-design.svg" width="24" alt=""> UI, presentation & visual design
+
+#### [`ui-design`](ui-design/SKILL.md)
+
+**Unified UI design, interaction, motion, accessibility, and responsive-quality engineering.**
+
+A cross-stack UI skill for production interfaces. It covers design-system tokens, hierarchy and composition, responsive behavior, typography, semantic color, surfaces and elevation, interaction states, micro-interactions, motion timing, performance, accessibility, reduced motion, dynamic content, internationalization, iconography, review workflow, and anti-generic visual quality.
 
 #### [`frontend-slides`](frontend-slides/SKILL.md)
 
@@ -188,18 +195,22 @@ Turns informal, slang-heavy, and context-dependent Chinese into natural English 
 
 [`design-intelligence.md`](design-intelligence.md) is a **shared reference layer**, not another Skill.
 
-Visual Skills inherit it when a task changes how an artifact looks, feels, moves, or is interacted with. It provides common guidance for visual thesis, style selection, typography, semantic color, composition, spacing, density, accessibility, motion, anti-pattern filtering, and visual QA.
+Visual and UI Skills inherit it when a task changes how an artifact looks, feels, moves, or is interacted with. It provides common guidance for visual thesis, style selection, semantic tokens, typography, color, composition, spacing, density, accessibility, interaction states, motion, responsive behavior, internationalization, performance, anti-pattern filtering, and visual QA.
+
+For executable UI work, [`ui-design`](ui-design/SKILL.md) is the primary UI Skill and the shared layer supplies inheritance for other visual Skills.
 
 Its precedence is:
 
 ```text
 1. User requirements
 2. Skill-specific hard constraints
-3. Shared design intelligence
-4. Referenced guidance and examples
+3. Product / platform conventions
+4. ui-design for UI work
+5. Shared design intelligence
+6. Referenced guidance and examples
 ```
 
-The layer is an AzSkills synthesis informed by the public methodology of [`nextlevelbuilder/ui-ux-pro-max-skill`](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill).
+The layer is an AzSkills synthesis informed by public design-engineering methodologies including [`nextlevelbuilder/ui-ux-pro-max-skill`](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) and the public [UI Skills](https://www.ui-skills.com/skills) catalog. Provenance is documented in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 ---
 
@@ -218,7 +229,7 @@ The layer is an AzSkills synthesis informed by the public methodology of [`nextl
 
 </div>
 
-Complex tasks can compose multiple Skills. A visual documentation task, for example, can use `readme-craft` while inheriting `design-intelligence.md`; a difficult implementation can pair `ultrathink` with a domain-specific Skill.
+Complex tasks can compose multiple Skills. A visual documentation task, for example, can use `readme-craft` while inheriting `design-intelligence.md`; a UI task can use `ui-design` directly and add a domain-specific Skill only when needed; a difficult implementation can pair `ultrathink` with a domain-specific Skill.
 
 ---
 
@@ -248,6 +259,7 @@ photo-abstract-editorial/
 readme-craft/
 steam-mod-page/
 ultrathink/
+ui-design/
 zh2en/
 ```
 
@@ -266,6 +278,7 @@ Use the narrowest capability first:
 ```text
 User task
    │
+   ├─ UI / web interface ──────────► ui-design
    ├─ AutoHotkey v2 ───────────────► ahkv2-opt
    ├─ Complex engineering ─────────► ultrathink + task Skill
    ├─ Presentation ────────────────► frontend-slides
@@ -278,7 +291,7 @@ User task
    └─ Steam Mod copy ───────────────► steam-mod-page
 ```
 
-Visual tasks inherit `design-intelligence.md` automatically.
+UI and other visual tasks inherit `design-intelligence.md` automatically.
 
 ---
 
@@ -315,6 +328,7 @@ AzSkills/
 ├── readme-craft/
 ├── steam-mod-page/SKILL.md
 ├── ultrathink/
+├── ui-design/SKILL.md
 ├── zh2en/SKILL.md
 ├── design-intelligence.md
 ├── THIRD_PARTY_NOTICES.md
@@ -344,7 +358,7 @@ AzSkills applies the same standards it teaches:
 
 **Conservative GitHub rendering.** Visual assets should survive realistic wide and narrow content widths, use repository-relative paths where possible, remain accessible, and avoid fragile browser-specific behavior.
 
-For the complete method, see [`readme-craft/SKILL.md`](readme-craft/SKILL.md), [`readme-craft/references/icon-selection.md`](readme-craft/references/icon-selection.md), and [`readme-craft/references/support-cta-auto-adapt.md`](readme-craft/references/support-cta-auto-adapt.md).
+For the complete README method, see [`readme-craft/SKILL.md`](readme-craft/SKILL.md), [`readme-craft/references/icon-selection.md`](readme-craft/references/icon-selection.md), and [`readme-craft/references/support-cta-auto-adapt.md`](readme-craft/references/support-cta-auto-adapt.md). For UI implementation and review, use [`ui-design/SKILL.md`](ui-design/SKILL.md).
 
 ---
 
