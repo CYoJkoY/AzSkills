@@ -1,6 +1,6 @@
 ---
 name: readme-craft
-description: Design, redesign, audit, and produce project-native GitHub README homepages with mandatory semantic heading icons, automatically adapted project-specific support CTAs, GitHub-safe assets, accessible proof, preserved action links, dynamic repository facts, and maintainable Markdown.
+description: Design, redesign, audit, and produce project-native GitHub README homepages with mandatory semantic heading icons, mandatory support/funding treatment when a canonical destination exists, automatically adapted project-specific support CTAs, GitHub-safe assets, accessible proof, preserved action links, dynamic repository facts, and maintainable Markdown.
 ---
 
 # README Craft
@@ -67,7 +67,23 @@ Minimum requirement:
 
 Before delivery, inspect the final Markdown and verify that headings actually contain the icon markup. Designing icon files without wiring them into headings is a failed implementation.
 
-### Gate C — Automatic project-native support CTA
+### Gate C — Support / sponsorship section
+
+For a **whole README redesign**, a dedicated **Support / Sponsor / Funding** section is mandatory whenever a canonical support destination can be identified from repository links, maintainer-owned project infrastructure, a payment page, a funding page, or another explicit support endpoint.
+
+The section must:
+
+- clearly communicate what support enables;
+- link directly to the canonical support destination;
+- appear in the README information architecture rather than only as a badge or header link;
+- preserve any already-valid support destination unless the user explicitly asks to replace it;
+- include a visual support CTA when a visual treatment improves hierarchy, subject to Gate D.
+
+Do not silently omit an identifiable support destination just because the previous README lacked a support section.
+
+When no canonical support destination exists, do not invent one. Record the support destination as unavailable during inspection and omit only the destination-dependent CTA/section requirement.
+
+### Gate D — Automatic project-native support CTA
 
 When a README contains a support / sponsor / donation / funding CTA, the support visual must be **derived from the target repository itself** unless the repository already provides a finished project-specific support asset.
 
@@ -95,9 +111,9 @@ For whole-readme and visual-refresh work:
 
 When the target project is visually weak, derive the fallback motif from the repository's own name, logo geometry, UI, domain, or technical artifacts. Do not revert to a cross-project generic donation banner.
 
-The implementation must be repository-native and zero-configuration. Do not ask the user to select colors, fonts, layouts, dimensions, illustration prompts, or light/dark variants when repository evidence is sufficient.
+The implementation must be repository-native and zero-configuration. Do not ask the user to select colors, fonts, layouts, dimensions, or light/dark variants when repository evidence is sufficient.
 
-### Gate D — Repository-specific visual evidence
+### Gate E — Repository-specific visual evidence
 
 For a whole README redesign, identify the evidence used for the visual system:
 
@@ -107,6 +123,7 @@ palette source:
 shape/stroke source:
 icon source:
 support CTA subject:
+support destination:
 ```
 
 If the final README contains a visual system that cannot be traced back to the repository, rework it.
@@ -252,7 +269,7 @@ Record reused third-party icon provenance in `THIRD_PARTY_NOTICES.md`.
 
 ## Adaptive Visual Support CTA
 
-Support CTA generation is **zero-configuration by default**, but project adaptation is mandatory for whole README redesigns whenever a support CTA exists.
+Support CTA generation is **zero-configuration by default**, but project adaptation is mandatory for whole README redesigns whenever a support CTA exists or Gate C requires one.
 
 Read `references/support-cta-auto-adapt.md` whenever support/sponsor/funding is present and no finished project-specific CTA already exists.
 
@@ -351,6 +368,8 @@ Download / release → installer / package / artifact
 
 Never invent or guess a deployment URL.
 
+Never invent a support destination. If an explicit support destination is discoverable, preserve and surface it. If not, mark it unavailable during inspection.
+
 ## Content vs Visual Layers
 
 Use Markdown for explanations, commands, links, configuration, API details, compatibility, limitations, security, contribution, and searchable/copyable information.
@@ -411,7 +430,9 @@ Default:
 4. Why it is different.
 5. How it works.
 6. How to use.
-7. Compatibility, limitations, security, contribution, license, and support when relevant.
+7. Compatibility, limitations, security, contribution, license, and support.
+
+When a canonical support destination exists, the support section is required even when the previous README omitted it.
 
 ### Step 5 — Choose composition
 
@@ -511,6 +532,7 @@ Do not create dozens of icons merely to appear varied. Create only the semantic 
 - Put semantic icons primarily on headings and deliberate visual components.
 - Do not place icons in arbitrary paragraph margins, between headings and prose, or beside code fences.
 - Do not turn every line into a decorated card.
+- When a canonical support destination exists, surface it through a dedicated Support / Sponsor / Funding section and preserve the destination outside any graphic.
 
 ## Verification
 
@@ -526,6 +548,7 @@ Before delivery, verify at realistic GitHub widths.
 - Critical instructions remain searchable/copyable.
 - Release, documentation, and support destinations remain usable.
 - Dynamic facts have a canonical source.
+- A canonical support destination, when found, is surfaced in a dedicated Support / Sponsor / Funding section.
 
 ### Visual
 
@@ -547,6 +570,7 @@ Before delivery, verify at realistic GitHub widths.
 
 - Every newly created heading icon is referenced by the README.
 - The support CTA asset is referenced by the README when a support visual is required.
+- A canonical support destination is present in Markdown when one was discovered.
 - No asset exists solely as an unused decorative artifact.
 - The final Markdown actually contains the intended image/icon markup rather than merely describing it in prose.
 
