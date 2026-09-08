@@ -4,7 +4,7 @@ Use this reference whenever a README needs semantic icons.
 
 ## Goal
 
-Icons must explain structure, not decorate empty space. A good icon should be immediately interpretable, visually compatible with the target repository, and distinct from neighboring icons.
+Icons must explain structure, not decorate empty space. A good icon should be immediately interpretable, visually compatible with the target repository, distinct from neighboring icons, and reliable on GitHub light and dark themes.
 
 ## Required implementation
 
@@ -94,7 +94,7 @@ search verified reusable icon sources
       ↓
 score candidates
       ↓
-adapt contrast / scale if needed
+adapt contrast / scale / theme strategy
       ↓
 place with local usage context
       ↓
@@ -114,6 +114,7 @@ Score each candidate from 0–2 on:
 | Visual fit | clashes | acceptable | same visual grammar |
 | Recognition | ambiguous | understandable | immediate |
 | Context | repeated/misleading | neutral | reinforces section meaning |
+| Theme safety | unreadable in a theme | acceptable | reliable in both themes |
 
 Prefer the highest total. If two candidates are close, choose the one that is less repetitive in the surrounding README.
 
@@ -165,6 +166,39 @@ A reusable icon may be recolored or wrapped for theme safety, but its semantic s
 
 When project-owned artwork already communicates the concept, use that evidence before introducing generic third-party iconography.
 
+## Theme adaptation
+
+A standalone heading icon does not inherit the surrounding GitHub Markdown text color. Before use, classify it as:
+
+```text
+theme-neutral
+        OR
+explicit light/dark pair
+        OR
+theme-aware wrapper such as <picture>
+```
+
+For icons with materially different contrast requirements, prefer a local pair:
+
+```text
+assets/readme/icons/installation.svg
+assets/readme/icons/installation-dark.svg
+```
+
+and wire them into the heading with:
+
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/readme/icons/installation-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/readme/icons/installation.svg">
+  <img src="assets/readme/icons/installation.svg" width="20" alt="">
+</picture>
+```
+
+Keep both variants semantically equivalent. Change palette, contrast, fills, and strokes rather than changing the meaning or silhouette.
+
+If a single asset is used, it must be visibly readable against both GitHub light and dark backgrounds without relying on inherited color.
+
 ## Adaptation rules
 
 Automatically adapt presentation without asking the user for micro-decisions:
@@ -185,9 +219,10 @@ Before delivery:
 1. Read each icon meaning beside its text without relying on color.
 2. Check placement hierarchy before checking icon variety.
 3. Check neighboring icons for accidental repetition.
-4. Check light and dark GitHub backgrounds.
-5. Check that the icon does not imply a different function than the text.
-6. Check that removing the icon would reduce scanning value; if not, remove it.
-7. Check that the icon set feels like a vocabulary rather than a four-icon template.
-8. Inspect the rendered Markdown source and confirm the intended H2/H3 headings contain the image references.
-9. Remove any icon that was added only to fill whitespace.
+4. Check GitHub light and dark backgrounds.
+5. Check that each theme-specific asset path exists exactly as referenced.
+6. Check that the icon does not imply a different function than the text.
+7. Check that removing the icon would reduce scanning value; if not, remove it.
+8. Check that the icon set feels like a vocabulary rather than a four-icon template.
+9. Inspect the rendered Markdown source and confirm the intended H2/H3 headings contain the image references.
+10. Remove any icon that was added only to fill whitespace.
