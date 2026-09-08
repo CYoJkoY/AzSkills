@@ -9,7 +9,7 @@ Use this Skill for Steam Community Workshop item descriptions, Steam Mod pages, 
 
 The target is not a GitHub README and not generic marketing copy. The target is a Steam-native page that is immediately understandable, easy to scan, safe to paste into the Steam editor, and faithful to the actual Mod.
 
-The current Steam text-formatting reference documents headings (`h1`/`h2`/`h3`), bold, underline, italic, strikethrough, lists, ordered lists, quotes, links, images, code, and other markup; availability can vary by Steam surface. Therefore the Skill deliberately prefers a conservative subset and requires final-output validation rather than assuming every tag works everywhere. citeturn709904search4turn709904search1
+The Steam text-formatting reference documents headings (`h1`/`h2`/`h3`), bold, underline, italic, strikethrough, lists, ordered lists, quotes, links, images, code, and other markup; availability can vary by Steam surface. Therefore the Skill deliberately prefers a conservative subset and requires final-output validation rather than assuming every tag works everywhere.
 
 ## 1. Automatic scope
 
@@ -193,7 +193,7 @@ Prefer only the tags that are documented or well-established on the target Steam
 [spoiler]...[/spoiler]
 ```
 
-Steam's own formatting help documents these families, while community documentation notes that availability and parsing can vary across Steam surfaces. Prefer the smallest safe subset needed for the target page. citeturn709904search4turn709904search1
+Use the smallest safe subset needed for the exact Steam page.
 
 Do not use obscure, undocumented, or surface-specific tags unless their behavior has been verified for the exact target page.
 
@@ -278,7 +278,7 @@ Changelog
 
 For a developer Mod, documentation is an action surface, not an afterthought. Place it near the top.
 
-Steam's Workshop documentation also emphasizes having useful external documentation available for tools used to create Workshop content. citeturn709904search5
+Steam Workshop guidance also recommends useful external documentation for tools used to create Workshop content.
 
 ## 8. First-screen rule
 
@@ -387,7 +387,7 @@ Prefer a short ordered flow:
 [/olist]
 ```
 
-If Steam's target description surface renders ordered lists reliably, use `[olist]`; otherwise use a plain numbered sequence.
+If the target Steam surface renders ordered lists inconsistently, use a plain numbered sequence.
 
 Do not paste shell commands, long directory trees, or full source files unless they are genuinely required for the Workshop user journey. Link to the full documentation when detail becomes large.
 
@@ -458,7 +458,7 @@ Avoid:
 - screenshots that contain no relevant state;
 - image-only explanations for important installation facts.
 
-For external images, use only verified URLs and the exact tag supported by the target Steam surface. Steam's formatting reference includes `[img]URL[/img]`, while practical guides document image embedding in Workshop descriptions. citeturn709904search4turn709904search7
+For external images, use only verified URLs and the exact tag supported by the target Steam surface. Steam's public formatting help documents `[img]URL[/img]` for image embedding.
 
 Critical information must remain in selectable text even when an image is present.
 
@@ -574,7 +574,7 @@ Only describe changes that actually occurred.
 
 Do not fabricate percentages, counts, compatibility improvements, or bug fixes.
 
-For recent versions, prefer the authoritative repository release notes when available rather than copying stale Workshop history.
+For recent versions, prefer authoritative repository release notes when available rather than copying stale Workshop history.
 
 ## 19. Credits, dependencies, and licensing
 
@@ -770,6 +770,6 @@ This Skill is informed by public Steam documentation and public community format
 - Community formatting reference: https://steamcommunity.com/sharedfiles/filedetails/?id=2807121939
 - Community image embedding guide: https://steamcommunity.com/sharedfiles/filedetails/?id=812684948
 
-Steam's own formatting page documents the core markup vocabulary, while community references highlight surface-specific differences and parsing caveats. Therefore this Skill intentionally uses conservative formatting and a strict final lint rather than assuming every BBCode tag behaves identically everywhere. citeturn709904search4turn709904search1
+Steam's own formatting documentation establishes the core markup vocabulary, while community references document surface-specific differences and parsing caveats. AzSkills therefore uses conservative formatting and a strict final lint rather than assuming every BBCode tag behaves identically everywhere.
 
 AzSkills does not copy upstream text or community page content verbatim. It synthesizes the transferable writing, formatting, documentation-first, and verification practices into an independent Skill.
