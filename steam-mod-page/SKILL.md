@@ -1,130 +1,180 @@
 ---
 name: steam-mod-page
-description: 为 Steam 创意工坊 / Steam Workshop Mod 页面生成可直接粘贴的高质量介绍文案。严格区分 Steam BBCode 与 Markdown，支持中文文件与英文文件完全分离，并优先将实际使用文档放在页面最显眼位置；根据 Mod 的真实功能、依赖、版本、安装方式和项目链接生成内容，禁止虚构信息。
+description: Design, rewrite, audit, and produce production-ready Steam Workshop / Steam Mod descriptions with strict BBCode-only final output, separated Chinese and English deliverables, documentation-first information architecture for developer mods, verified links and compatibility claims, controlled visual rhythm, image/embed discipline, changelog accuracy, and an explicit final syntax lint that rejects Markdown leakage.
 ---
 
 # Steam Mod Page
 
-## 1. Skill 定位
+Use this Skill for Steam Community Workshop item descriptions, Steam Mod pages, and closely related Steam Community guide-style promotional/documentation copy.
 
-本 Skill 用于为游戏 Mod，尤其是 Steam 创意工坊 / Steam Workshop Mod，生成可以直接粘贴到 Workshop Description 的正式介绍文案。
+The target is not a GitHub README and not generic marketing copy. The target is a Steam-native page that is immediately understandable, easy to scan, safe to paste into the Steam editor, and faithful to the actual Mod.
 
-目标不是生成普通 GitHub README，也不是生成一篇营销文章，而是生成符合 Steam Workshop 阅读习惯、视觉节奏和 BBCode 约束的 Mod 页面。
+The current Steam text-formatting reference documents headings (`h1`/`h2`/`h3`), bold, underline, italic, strikethrough, lists, ordered lists, quotes, links, images, code, and other markup; availability can vary by Steam surface. Therefore the Skill deliberately prefers a conservative subset and requires final-output validation rather than assuming every tag works everywhere. citeturn709904search4turn709904search1
 
-核心要求：
+## 1. Automatic scope
 
-- 内容必须建立在 Mod 的真实功能、真实仓库、真实文档和真实版本信息上。
-- 输出必须使用 Steam Workshop 支持的 BBCode 风格，而不是 Markdown。
-- 中文与英文必须视为两个独立的最终文案文件。
-- 当用户要求双语时，默认生成两个独立版本：一个完整中文版本，一个完整英文版本。
-- 使用文档、安装文档或开发手册是开发者型 Mod 的首要信息时，必须放在页面最顶部、最显眼的位置。
-- 文案应该首先帮助用户“正确使用 Mod”，其次才解释 Mod“是什么”。
-- 不得把不存在的功能、兼容性、性能提升、Bug 修复、版本号、联系方式或链接写进去。
+Apply this Skill when the task involves:
 
----
+- Steam Workshop descriptions
+- Steam Mod introductions
+- Mod installation / compatibility instructions intended for Steam
+- Steam Workshop update logs
+- Workshop feature lists
+- Workshop documentation links
+- Chinese/English Steam Mod copy
+- auditing existing Workshop BBCode
 
-## 2. 首要原则：先研究 Mod，再写页面
+Modes:
 
-不要直接套用模板。
+| Mode | Responsibility |
+| :--- | :--- |
+| `write` | Produce a complete new Workshop description |
+| `rewrite` | Rebuild an existing description while preserving verified facts and useful destinations |
+| `audit` | Diagnose content, structure, BBCode, link, localization, and visual-rhythm problems without editing |
+| `changelog` | Produce only a factual change log section |
+| `bilingual` | Produce two independent final language documents |
 
-在生成页面前，应优先收集以下信息：
+Use the narrowest mode that fully solves the task.
 
-1. Mod 的官方仓库或项目主页。
-2. README / 文档 / Usage / Installation 页面。
-3. manifest、project metadata、release 信息或其他可验证的版本信息。
-4. Mod 的真实功能列表。
-5. Mod 的依赖与兼容性要求。
-6. 实际安装方式。
-7. 用户需要特别注意的限制、迁移说明或兼容性警告。
-8. 作者明确提供的联系方式与赞助链接。
+## 2. Core priority order
 
-如果用户给出了 GitHub、GitLab、Steam Workshop、Wiki 等项目链接，应优先以这些一手资料为准。
+Resolve decisions in this order:
 
-如果某一信息无法确认：
+1. Explicit user requirements.
+2. First-party Mod information and actual repository files.
+3. Steam formatting constraints and platform behavior.
+4. This Skill.
+5. Shared AzSkills design intelligence for visual hierarchy and interaction reasoning.
+6. Optional stylistic references.
 
-- 不要猜测。
-- 不要沿用模板中的示例值。
-- 可以删除该内容。
-- 或使用明确占位符，例如 `[你的链接]`、`[你的邮箱]`。
+When facts conflict, use the newest verifiable first-party source and remove unsupported claims.
 
----
+## 3. Research before writing
 
-## 3. 最重要的输出约束：中文和英文必须分文件
+Before producing final copy, inspect the strongest available sources in this order:
 
-### 3.1 默认双语输出方式
+```text
+Steam Workshop item
+↓
+official repository
+↓
+official documentation / wiki
+↓
+release notes / changelog
+↓
+project metadata / manifest
+↓
+maintainer-provided links
+```
 
-当用户要求“中英双语”“中英文介绍”“双语页面”等内容时，不得把两个语言混在一个最终文案中。
+Collect:
 
-必须生成：
+```text
+Mod name
+one-sentence value
+actual features
+supported game version(s)
+required DLC(s)
+required Mod Loader / framework
+hard dependencies
+installation steps
+configuration steps
+documentation URL
+source URL
+release/download URL
+support/sponsorship URL
+known incompatibilities
+known limitations
+current version
+actual recent changes
+contact channels
+```
+
+Never invent:
+
+- compatibility;
+- performance improvements;
+- supported loaders;
+- bug counts;
+- version numbers;
+- links;
+- screenshots;
+- endorsements;
+- user counts;
+- roadmap promises;
+- sponsorship destinations.
+
+If a fact cannot be verified, omit it or use a clearly marked placeholder only when the user explicitly requested a template.
+
+## 4. Final-output language separation
+
+When bilingual output is requested, Chinese and English are two independent deliverables.
+
+Required model:
 
 ```text
 Steam Workshop Description — 中文
 Steam Workshop Description — English
 ```
 
-可以在聊天回复中分别展示，也可以分别保存为：
+Each language file must be complete and directly pasteable by itself.
+
+Chinese deliverable:
+
+- Chinese prose;
+- Chinese headings;
+- Chinese support/contact wording;
+- Chinese installation explanations;
+- English only where a technical identifier, file name, API name, official product name, proper noun, or code token must remain unchanged.
+
+English deliverable:
+
+- English prose;
+- English headings;
+- English support/contact wording;
+- English installation explanations;
+- Chinese only where a technical identifier, file name, API name, official product name, proper noun, or code token must remain unchanged.
+
+Do not produce a mixed sentence such as `中文说明 / English explanation` merely to demonstrate parity.
+
+The two files should be structurally equivalent, not line-by-line literal translations.
+
+## 5. BBCode-only final-output contract
+
+This is the most important implementation rule.
+
+The final Steam description must contain Steam-compatible markup, not Markdown.
+
+### Forbidden in final Workshop copy
+
+Reject all of the following as formatting syntax:
 
 ```text
-Steam-Workshop-CN.txt
-Steam-Workshop-EN.txt
+# Heading
+## Heading
+### Heading
+**bold**
+*italic*
+__underline__
+`inline code`
+```text
+code fence
+```
+> quote
+- bullet
+1. ordered item
+[link](https://example.com)
+![image](https://example.com/image.png)
+---
+***
+___
 ```
 
-每个文件都必须是完整、独立、可以单独粘贴到 Steam Workshop 的最终版本。
+Markdown may appear inside this Skill's documentation and examples only. It must never leak into the final Steam deliverable.
 
-### 3.2 每个语言文件内部禁止混用语言
+### Conservative supported subset
 
-中文文件：
-
-- 标题使用中文。
-- 正文使用中文。
-- 联系方式说明使用中文。
-- 赞助说明使用中文。
-- 不得为了所谓“双语一致”在每行后追加英文翻译。
-
-英文文件：
-
-- 标题使用英文。
-- 正文使用英文。
-- 联系方式说明使用英文。
-- 赞助说明使用英文。
-- 不得在英文正文中插入中文解释。
-
-代码、文件名、API 名称、游戏内专有名词以及官方项目名可以保留原文，因为它们属于技术标识而不是第二语言正文。
-
----
-
-## 4. Steam BBCode 与 Markdown 必须严格分离
-
-### 4.1 根本规则
-
-Steam Workshop Description 不是 GitHub Markdown。
-
-生成最终文案时：
-
-[b]禁止输出 Markdown 语法作为排版控制符。[/b]
-
-特别禁止：
-
-- `# 标题`
-- `## 标题`
-- `### 标题`
-- `**粗体**`
-- `*斜体*`
-- `` `inline code` ``
-- ` ``` ` 代码块
-- `> 引用`
-- Markdown 表格
-- `---` / `***` / `___` 作为水平线
-- Markdown 图片语法 `![alt](url)`
-- Markdown 链接 `[text](url)`
-- Markdown 无序列表 `- item`
-- Markdown 有序列表 `1. item`
-
-这些语法可以出现在 Skill 的说明或内部示例中，但绝不能出现在最终 Steam 文案里。
-
-### 4.2 默认允许使用的 Steam BBCode
-
-优先使用简单、稳定的 BBCode：
+Prefer only the tags that are documented or well-established on the target Steam surface:
 
 ```text
 [h1]...[/h1]
@@ -132,106 +182,246 @@ Steam Workshop Description 不是 GitHub Markdown。
 [h3]...[/h3]
 [b]...[/b]
 [i]...[/i]
-[list]
-[*]...
-[/list]
+[u]...[/u]
+[strike]...[/strike]
+[list][*]...[/list]
+[olist][*]...[/olist]
 [hr][/hr]
-[url=URL]文本[/url]
+[url=URL]Label[/url]
 [img]URL[/img]
+[code]...[/code]
+[spoiler]...[/spoiler]
 ```
 
-不要为了视觉效果大量嵌套标签。
+Steam's own formatting help documents these families, while community documentation notes that availability and parsing can vary across Steam surfaces. Prefer the smallest safe subset needed for the target page. citeturn709904search4turn709904search1
 
-### 4.3 代码与技术内容
+Do not use obscure, undocumented, or surface-specific tags unless their behavior has been verified for the exact target page.
 
-Steam 页面中如果需要展示路径、函数名、JSON、目录结构或代码：
+### Plain text is the fallback
 
-不要使用 Markdown 三反引号代码块。
+When uncertain whether a tag is safe, use plain text rather than experimental markup.
 
-优先选择：
+A readable plain-text sentence is preferable to a visually ambitious but broken BBCode block.
+
+## 6. BBCode nesting and syntax hygiene
+
+Keep nesting shallow.
+
+Preferred:
 
 ```text
-[b]manifest.json[/b]
-
+[h2]核心功能[/h2]
 [list]
-[*] dependencies
-[*] NewContentData.tres
+[*][b]内容注册：[/b] 将内容接入游戏已有系统。
+[*][b]配置：[/b] 提供可选配置项。
 [/list]
 ```
 
-对于必须展示的短代码，可直接使用普通文本 + `[b]` 强调关键字；不要依赖 Markdown code fence。
-
-如果一段原始代码必须完整展示，而 Steam 页面无法可靠提供代码块样式，则应优先提供 GitHub 文档链接，而不是在 Workshop 页面塞入大段源码。
-
----
-
-## 5. 页面结构：使用文档必须最显眼
-
-对于工具型、框架型、库型、开发基础设施型 Mod，推荐使用以下顺序：
-
-### 中文文件
-
-1. 使用文档 / 开发文档入口
-2. Mod 名称与一句话定位
-3. Mod 解决的问题
-4. 核心功能
-5. 快速开始 / 安装
-6. 依赖与兼容性
-7. 特殊限制 / 迁移 / 注意事项
-8. 更新日志
-9. 联系与反馈
-10. 赞助支持
-
-### 英文文件
-
-完全使用对应的英文结构。
-
-不要把“使用文档”埋在页面底部。
-
-推荐顶部视觉结构：
+Avoid deeply nested markup such as:
 
 ```text
-[h1]📖 使用文档[/h1]
-
-[b]⚠️ 开始使用前，请先阅读完整文档。[/b]
-
-[url=DOCUMENTATION_URL][b]👉 中文使用与开发手册 👈[/b][/url]
+[h1][b][u][i]...[/i][/u][/b][/h1]
 ```
 
-英文版本对应为：
+Rules:
+
+- every opened tag must be closed;
+- opening and closing tags must match;
+- do not place Markdown inside BBCode;
+- do not escape or stylize brackets unnecessarily;
+- do not put raw BBCode examples into final copy unless they are intended to render as text;
+- do not rely on unsupported HTML;
+- do not put Markdown URLs beside BBCode URLs for the same destination.
+
+For source-code text or literal BBCode examples that must remain visible, use a documented code or no-parse mechanism when verified; otherwise link to the authoritative documentation instead.
+
+## 7. Information architecture
+
+Steam readers scan quickly. Put the highest-value information first.
+
+### Player-facing Mod
+
+Recommended order:
 
 ```text
-[h1]📖 Documentation[/h1]
-
-[b]⚠️ Please read the complete documentation before getting started.[/b]
-
-[url=DOCUMENTATION_URL][b]👉 English Usage & Developer Guide 👈[/b][/url]
+Title / one-line promise
+Quick summary
+Key features
+Installation / requirements
+Compatibility
+How to use
+Known limitations
+Links
+Credits / contact
+Support
+Changelog
 ```
 
-链接文本必须明确告诉用户“这是使用文档”，不要只放一个裸 URL。
+### Developer / framework / infrastructure Mod
 
----
-
-## 6. 开发者型 Mod 的内容优先级
-
-如果目标 Mod 是框架、库、内容加载器、API、开发工具或基础设施，不要写成普通玩家 Mod 的宣传页。
-
-推荐重点解释：
-
-- 它是什么。
-- 它不是什么。
-- 它解决什么问题。
-- 它如何与目标游戏原有系统协作。
-- 新 Mod 如何接入。
-- 支持哪些内容或功能。
-- 依赖什么。
-- 与其他加载框架有什么区别。
-- 从哪里开始阅读开发文档。
-
-例如一个内容基础设施型 Mod，可以使用：
+Recommended order:
 
 ```text
-Godot Resource
+Documentation
+What it is
+What problem it solves
+Core capabilities
+Quick start
+Dependencies / compatibility
+How it integrates
+Configuration / API entry point
+Limitations / non-goals
+Source / issue reporting
+Support
+Changelog
+```
+
+For a developer Mod, documentation is an action surface, not an afterthought. Place it near the top.
+
+Steam's Workshop documentation also emphasizes having useful external documentation available for tools used to create Workshop content. citeturn709904search5
+
+## 8. First-screen rule
+
+The first visible block should answer at least three of these four questions:
+
+```text
+What is this Mod?
+Who is it for?
+What does it add or solve?
+Where do I go next?
+```
+
+Do not spend the first screen on:
+
+- a giant decorative separator;
+- a long author story;
+- a generic thank-you paragraph;
+- a full changelog;
+- repeated feature names without explanations.
+
+For developer Mods, the documentation link can be the primary first action.
+
+## 9. Documentation-first treatment
+
+If official usage, installation, API, or developer documentation exists, expose it clearly near the top.
+
+Preferred structure:
+
+```text
+[h1]Documentation[/h1]
+
+[b]Start here before installing or integrating the Mod.[/b]
+
+[url=DOCUMENTATION_URL][b]Open the Usage & Developer Documentation[/b][/url]
+```
+
+Chinese version:
+
+```text
+[h1]使用文档[/h1]
+
+[b]开始安装或开发前，请先阅读完整文档。[/b]
+
+[url=DOCUMENTATION_URL][b]打开使用与开发文档[/b][/url]
+```
+
+The visible link label must explain the destination. Avoid naked URLs when a descriptive label is practical.
+
+Do not copy an entire developer manual into the Workshop description simply because the manual exists. The Workshop page should route users to the authoritative document.
+
+## 10. Value proposition and feature writing
+
+A feature title alone is not a feature explanation.
+
+Use:
+
+```text
+capability → user consequence
+```
+
+Example:
+
+```text
+[h3]内容注册[/h3]
+[list]
+[*]将角色、武器与其他内容接入游戏现有系统，减少重复的手动注册工作。
+[/list]
+```
+
+Avoid vague promotional claims such as:
+
+```text
+强大
+革命性
+终极
+无缝
+全新体验
+顶级性能
+```
+
+unless the wording is supported by concrete evidence.
+
+## 11. Installation and quick start
+
+Installation should answer the minimum operational questions:
+
+```text
+What is required?
+Where does it go?
+What must be enabled?
+What version is required?
+How do I start it?
+How do I know it worked?
+```
+
+Prefer a short ordered flow:
+
+```text
+[h1]快速开始[/h1]
+
+[olist]
+[*]订阅并启用 Mod。
+[*]确认所需依赖已安装。
+[*]启动游戏并加载对应内容。
+[*]按文档中的步骤完成配置。
+[/olist]
+```
+
+If Steam's target description surface renders ordered lists reliably, use `[olist]`; otherwise use a plain numbered sequence.
+
+Do not paste shell commands, long directory trees, or full source files unless they are genuinely required for the Workshop user journey. Link to the full documentation when detail becomes large.
+
+## 12. Compatibility and dependencies
+
+Treat compatibility as its own information block.
+
+Recommended:
+
+```text
+[h1]Compatibility & Dependencies[/h1]
+
+[list]
+[*][b]Game:[/b] verified version
+[*][b]Loader:[/b] verified version
+[*][b]Dependencies:[/b] verified dependencies
+[*][b]DLC:[/b] verified requirement
+[/list]
+```
+
+State only what has been verified.
+
+If the Mod is not compatible with another framework, say so explicitly and near the installation section.
+
+Do not turn an assumption into a compatibility promise.
+
+## 13. Architecture / mechanism sections
+
+Developer-oriented Mods benefit from a compact conceptual model.
+
+Example:
+
+```text
+Game Resource
     ↓
 Content Data
     ↓
@@ -240,472 +430,346 @@ Loader / Registration Layer
 Game Runtime
 ```
 
-但这类架构图只能使用普通文本字符，不得使用 Markdown 代码块包裹。
+Use ordinary text, not Markdown code fences.
 
----
+If the diagram is long, replace it with a link to the official architecture documentation.
 
-## 7. 快速开始与安装
+The purpose is to explain the mental model, not to reproduce implementation details.
 
-如果 Mod 有明确安装步骤，必须让用户在页面中快速找到。
+## 14. Images, galleries, and visual rhythm
 
-推荐：
+Visuals should explain or prove something.
+
+Prefer:
 
 ```text
-[h1]⚡ 快速开始[/h1]
+real feature screenshot
+real UI state
+before / after
+workflow image
+architecture diagram
+configuration example
 ```
 
-或英文：
+Avoid:
+
+- unrelated stock art;
+- decorative images repeated between every section;
+- screenshots that contain no relevant state;
+- image-only explanations for important installation facts.
+
+For external images, use only verified URLs and the exact tag supported by the target Steam surface. Steam's formatting reference includes `[img]URL[/img]`, while practical guides document image embedding in Workshop descriptions. citeturn709904search4turn709904search7
+
+Critical information must remain in selectable text even when an image is present.
+
+## 15. Links and destination semantics
+
+Every link should have one clear purpose.
+
+Classify destinations:
 
 ```text
-[h1]⚡ Quick Start[/h1]
+Documentation → learn / configure / integrate
+Repository → inspect source / report issues
+Release → download / version information
+Workshop dependency → subscribe to prerequisite
+Support → sponsor / fund development
+Discord / contact → community or support channel
 ```
 
-安装部分应该回答：
+Never replace a canonical destination with a guessed mirror.
 
-1. 需要什么版本。
-2. 从哪里下载。
-3. 文件放到哪里。
-4. 是否需要额外 Mod / Loader。
-5. 是否需要手动配置。
-6. 启动后如何判断安装成功。
+Preserve valid existing URLs unless the user asks to change them or the destination is demonstrably obsolete.
 
-不要把 GitHub README 中的所有开发细节复制到 Steam 页面。
-
-Workshop 页面负责“快速正确使用”，完整开发细节交给文档。
-
----
-
-## 8. 兼容性和依赖必须显式说明
-
-如果 Mod 依赖：
-
-- 特定游戏版本。
-- 特定 Mod Loader。
-- 其他基础 Mod。
-- DLC。
-- 特定运行环境。
-
-应该单独建立：
+Prefer descriptive link labels:
 
 ```text
-[h1]⚠️ 兼容性与依赖[/h1]
+[url=https://example.com/docs]Documentation[/url]
 ```
 
-或英文：
+over:
 
 ```text
-[h1]⚠️ Compatibility & Dependencies[/h1]
+[url=https://example.com/docs]https://example.com/docs[/url]
 ```
 
-使用简洁列表：
+## 16. Support / sponsorship
+
+When the project has a real support destination, preserve it during a rewrite.
+
+Do not silently remove sponsorship, donation, GitHub Sponsors, Ko-fi, Patreon, or another maintainer-owned support channel that is already verified.
+
+If a support destination is explicitly provided by the project, use a dedicated block where appropriate:
 
 ```text
+[h1]Support[/h1]
+
+Your support helps maintain the Mod, documentation, compatibility work, and future updates.
+
+[url=SUPPORT_URL][b]Support the project[/b][/url]
+```
+
+Chinese:
+
+```text
+[h1]赞助与支持[/h1]
+
+你的支持可以用于维护 Mod、文档、兼容性工作以及后续更新。
+
+[url=SUPPORT_URL][b]支持项目[/b][/url]
+```
+
+Do not invent a support URL.
+
+Do not claim that donations are required.
+
+Do not put the only support destination inside an image.
+
+Keep payment identifiers and critical instructions as selectable text.
+
+## 17. Contact and feedback
+
+Only include channels that are actually provided by the project.
+
+Possible categories:
+
+```text
+GitHub issues
+Email
+Discord
+Steam discussion
+Community page
+```
+
+Do not manufacture a contact channel merely because it is conventional.
+
+For bug reports, tell the user what information is useful:
+
+```text
+Mod version
+Game version
+Loader version
+reproduction steps
+relevant log / error
+```
+
+## 18. Changelog
+
+A changelog is factual history, not a second marketing block.
+
+Recommended structure:
+
+```text
+[h1]Changelog[/h1]
+
+[h2]vX.Y.Z[/h2]
 [list]
-[*] [b]游戏：[/b] 实际版本
-[*] [b]Mod Loader：[/b] 实际版本
-[*] [b]依赖：[/b] 实际依赖
+[*]Added ...
+[*]Changed ...
+[*]Fixed ...
 [/list]
 ```
 
-只能写已经确认的信息。
+Only describe changes that actually occurred.
 
-如果存在“两个加载框架体系不同”之类的重要限制，应使用独立的警告小节，而不是埋在普通段落里。
+Do not fabricate percentages, counts, compatibility improvements, or bug fixes.
 
----
+For recent versions, prefer the authoritative repository release notes when available rather than copying stale Workshop history.
 
-## 9. 功能介绍的写法
+## 19. Credits, dependencies, and licensing
 
-功能介绍不是功能名称堆砌。
+Credit third-party libraries, authors, assets, and upstream projects when the project actually requires or provides such attribution.
 
-每一项应该回答：
+Do not add generic credits for tools merely used to write the page.
 
-“这个功能做了什么，以及用户因此得到了什么。”
+For dependencies, link to the actual Workshop item or official project when the user needs to subscribe, install, or learn more.
 
-推荐结构：
+For licensing, do not claim rights broader than the repository or asset license supports.
 
-```text
-[h3]📦 内容注册[/h3]
+## 20. Steam visual hierarchy
 
-[list]
-[*] [b]角色：[/b] 将角色内容接入游戏已有的角色系统。
-[*] [b]武器：[/b] 将武器内容接入游戏已有的武器系统。
-[/list]
-```
+Steam Workshop pages have less layout freedom than a normal website. Compensate with rhythm, not with markup overload.
 
-不要写：
+Recommended hierarchy:
 
 ```text
-角色
-武器
-道具
-Effect
-Zone
+[h1] major topic
+[h2] important subsection
+[h3] local subsection
+[b] inline emphasis
+[list] grouped facts
+[hr][/hr] rare major transition
 ```
 
-因为这只是分类名称，没有说明实际能力。
+Rules:
 
----
+- use headings for semantic grouping;
+- use bold for short labels, not entire paragraphs;
+- use lists for scan-friendly facts;
+- keep paragraphs short;
+- use horizontal rules sparingly;
+- do not make every sentence bold;
+- do not decorate headings with a random emoji inventory.
 
-## 10. 更新日志规则
+A few symbols may be acceptable as content when they serve the project's identity, but they are not a substitute for information hierarchy.
 
-更新日志是可选模块，不是页面的唯一主体。
+## 21. Language-specific tone
 
-它应该说明“改了什么”，而不是重新介绍 Mod。
+### Chinese
 
-推荐：
+Prefer natural Simplified Chinese suitable for a game community:
+
+- direct;
+- practical;
+- concise;
+- technically precise;
+- not overly corporate.
+
+Avoid literal English syntax and unnecessary formalism.
+
+### English
+
+Prefer natural Steam community English:
+
+- concise;
+- concrete;
+- technically accurate;
+- readable by international players;
+- not machine-translated word-for-word.
+
+Avoid exaggerated startup-style marketing language.
+
+## 22. Steam-specific output hygiene
+
+The final output should not contain internal authoring notes such as:
 
 ```text
-[h1]🛠️ 更新日志[/h1]
-
-[h3]🚀 基础设施与兼容性[/h3]
-[list]
-[*] [b]内容加载：[/b] 简短说明实际变更。
-[*] [b]兼容性：[/b] 简短说明实际变更。
-[/list]
+[Insert link here]
+TODO
+TODO: translate
+same as Chinese version
+placeholder screenshot
+AI-generated summary
 ```
 
-英文版本保持语义对应：
+unless the user explicitly requested a template.
+
+Do not put the Skill's own Markdown formatting around the final Steam description.
+
+Do not wrap the final BBCode in a Markdown code fence when the user asked for directly pasteable output; the contents themselves must be the pasteable document.
+
+When providing two final language files, show them as two clearly separated files in the chat or save them as separate `.txt` artifacts. Each file must contain only its own language's final Steam content.
+
+## 23. Final BBCode lint
+
+Before declaring the result complete, run a mental or programmatic syntax pass.
+
+### Syntax checks
 
 ```text
-[h1]🛠️ Change Log[/h1]
-
-[h3]🚀 Infrastructure & Compatibility[/h3]
-[list]
-[*] [b]Content Loading:[/b] Brief description of the actual change.
-[*] [b]Compatibility:[/b] Brief description of the actual change.
-[/list]
+[ ] no Markdown heading syntax
+[ ] no Markdown bold / italic syntax
+[ ] no Markdown code fences
+[ ] no Markdown links
+[ ] no Markdown image syntax
+[ ] no Markdown tables
+[ ] no fake HTML formatting
+[ ] every BBCode tag is paired
+[ ] list tags are correctly nested
+[ ] URL tags contain the intended destination
+[ ] image tags contain verified URLs
+[ ] no unsupported experimental tags
 ```
 
-禁止虚构：
-
-- 性能提升百分比。
-- Bug 修复数量。
-- “全面优化”等没有事实基础的描述。
-- 未发布版本中的功能。
-
----
-
-## 11. 联系方式与赞助
-
-只有用户提供或项目资料中明确存在的联系方式才可以使用。
-
-例如：
+### Content checks
 
 ```text
-[h1]🔗 联系与反馈[/h1]
-
-[i]如果你遇到 Bug、兼容性问题或开发问题，欢迎通过以下渠道联系作者。[/i]
-
-[list]
-[*] [b]GitHub：[/b] [url=https://github.com/OWNER/REPO]OWNER/REPO[/url]
-[*] [b]E-mail：[/b] example@example.com
-[/list]
+[ ] Mod identity is clear
+[ ] first-screen value is clear
+[ ] documentation is visible when applicable
+[ ] installation is actionable
+[ ] compatibility is explicit
+[ ] dependencies are accurate
+[ ] claims are evidence-based
+[ ] limitations are not hidden
+[ ] valid support destination is preserved
+[ ] changelog matches real releases
+[ ] no fabricated contact channel
 ```
 
-英文版本独立翻译，不要做中英文句子混排。
-
-没有邮箱就不要捏造邮箱。
-
-没有 Discord 就不要添加 Discord。
-
-没有赞助地址就使用明确占位符，或干脆删除赞助区；绝不能编造链接。
-
----
-
-## 12. 双语一致性不是“混写”，而是“结构对应”
-
-中文和英文两个文件应该在以下方面保持对应：
-
-- 页面结构。
-- 章节顺序。
-- 核心功能覆盖范围。
-- 警告与限制。
-- 链接目标。
-- 更新日志项目。
-- BBCode 层级。
-
-但语言本身必须完全分离。
-
-也就是说：
+### Bilingual checks
 
 ```text
-正确：
-CN.txt → 全中文
-EN.txt → 全英文
-
-错误：
-CN.txt → 中文 + 英文对照
-EN.txt → 英文 + 中文对照
+[ ] Chinese file is independently pasteable
+[ ] English file is independently pasteable
+[ ] structure is equivalent
+[ ] no accidental language mixing
+[ ] technical identifiers are preserved
+[ ] URLs match the intended destination
 ```
 
-翻译应该自然地适应 Steam / 游戏 Mod 语境，而不是机械逐字翻译。
+## 24. Review severity
 
----
-
-## 13. Steam BBCode 结构检查
-
-在交付最终内容前，必须检查：
-
-### 必须检查
-
-1. 所有打开的 BBCode 标签都有对应关闭标签。
-2. `[list]` 与 `[/list]` 成对出现。
-3. `[url=...]...[/url]` 具有有效 URL 和可读的链接文本。
-4. `[b]`、`[i]`、`[h1]`、`[h2]`、`[h3]` 没有遗漏闭合。
-5. `[hr][/hr]` 用于模块之间的明确分隔。
-6. 没有 Markdown 代码块。
-7. 没有 Markdown 标题。
-8. 没有 Markdown 粗体 / 斜体。
-9. 没有 Markdown 链接。
-10. 没有 Markdown 表格。
-11. 没有裸的 Markdown horizontal rule。
-12. 没有因为“技术感”而加入不必要的 HTML。
-
-### 强烈建议检查
-
-- 不要嵌套过深的 BBCode。
-- 不要把整段正文都加粗。
-- 不要让每一句话都使用 Emoji。
-- 不要连续创建大量 `[h1]`。
-- 不要用巨型列表替代正常说明。
-- 不要在 Steam 页面复制几十行源码。
-
----
-
-## 14. 内容真实性检查
-
-最终输出前逐项检查：
-
-### 功能真实性
-
-每一个功能都必须能在 Mod 当前版本、README、文档、源码或用户提供的信息中找到依据。
-
-### 版本真实性
-
-版本号必须有明确来源。
-
-### 兼容性真实性
-
-不能因为“看起来应该兼容”就写兼容。
-
-### 链接真实性
-
-所有 `[url=...]` 都必须来自用户、项目仓库或已验证的官方页面。
-
-### 联系信息真实性
-
-不得根据作者用户名推断邮箱或社交账号。
-
-### 更新日志真实性
-
-不要把“当前已有功能”伪装成“本次更新内容”。如果没有真实 changelog，可以使用“当前版本特性”模块，不要虚构更新历史。
-
----
-
-## 15. 推荐页面骨架
-
-以下只是结构骨架，不是要求每个 Mod 原样套用。
-
-### 中文文件
+Classify problems:
 
 ```text
-[h1]📖 使用文档[/h1]
-
-[b]⚠️ 开始使用前，请先阅读完整文档。[/b]
-
-[url=DOCUMENTATION_URL][b]👉 中文使用与开发手册 👈[/b][/url]
-
-[hr][/hr]
-
-[h1]🛠️ MOD 名称[/h1]
-
-[b]一句话定位[/b]
-
-Mod 简介。
-
-[h3]🎯 它解决什么问题？[/h3]
-
-实际问题说明。
-
-[h3]📦 核心功能[/h3]
-
-[list]
-[*] [b]功能一：[/b] 实际功能与用户价值。
-[*] [b]功能二：[/b] 实际功能与用户价值。
-[/list]
-
-[hr][/hr]
-
-[h1]⚡ 快速开始[/h1]
-
-实际安装与使用步骤。
-
-[hr][/hr]
-
-[h1]⚠️ 兼容性与依赖[/h1]
-
-实际兼容性说明。
-
-[hr][/hr]
-
-[h1]🛠️ 更新日志[/h1]
-
-实际版本变更。
-
-[hr][/hr]
-
-[h1]🔗 联系与反馈[/h1]
-
-实际联系方式。
-
-[hr][/hr]
-
-[h1]☕ 赞助支持[/h1]
-
-实际赞助信息。
+BLOCKER  → Markdown leakage, broken BBCode, wrong URL, fabricated fact, missing critical dependency
+HIGH     → documentation buried, broken installation flow, misleading compatibility, major language mismatch
+MEDIUM   → weak hierarchy, repetitive copy, excessive decoration, unclear link labels
+LOW      → isolated wording or spacing polish
 ```
 
-### English 文件
+Fix blockers and factual errors before styling.
+
+## 25. Anti-pattern filter
+
+Reject:
+
+- a GitHub README pasted directly into Steam;
+- Markdown headings inside a BBCode page;
+- a bilingual line-by-line hybrid document;
+- generic feature-adjective piles;
+- undocumented claims;
+- huge code dumps;
+- support information removed during rewriting;
+- generic donation language with invented payment links;
+- emoji used as a substitute for semantic hierarchy;
+- excessive `[b]` nesting;
+- every section separated by a decorative rule;
+- unrelated screenshots inserted only to make the page longer;
+- stale version numbers copied from an old template.
+
+## 26. Recommended authoring workflow
 
 ```text
-[h1]📖 Documentation[/h1]
-
-[b]⚠️ Please read the complete documentation before getting started.[/b]
-
-[url=DOCUMENTATION_URL][b]👉 English Usage & Developer Guide 👈[/b][/url]
-
-[hr][/hr]
-
-[h1]🛠️ MOD NAME[/h1]
-
-[b]One-line positioning statement[/b]
-
-Mod overview.
-
-[h3]🎯 What Problem Does It Solve?[/h3]
-
-Actual problem statement.
-
-[h3]📦 Core Features[/h3]
-
-[list]
-[*] [b]Feature One:[/b] Actual behavior and user value.
-[*] [b]Feature Two:[/b] Actual behavior and user value.
-[/list]
-
-[hr][/hr]
-
-[h1]⚡ Quick Start[/h1]
-
-Actual installation and usage steps.
-
-[hr][/hr]
-
-[h1]⚠️ Compatibility & Dependencies[/h1]
-
-Actual compatibility information.
-
-[hr][/hr]
-
-[h1]🛠️ Change Log[/h1]
-
-Actual version changes.
-
-[hr][/hr]
-
-[h1]🔗 Contact & Feedback[/h1]
-
-Actual contact information.
-
-[hr][/hr]
-
-[h1]☕ Support[/h1]
-
-Actual support information.
+1. Inspect first-party sources
+2. Inventory facts and destinations
+3. Identify audience: player / developer / mixed
+4. Choose information architecture
+5. Write the first-screen value proposition
+6. Write documentation / install path
+7. Add features with user consequences
+8. Add compatibility and dependencies
+9. Add links / contact / support
+10. Add changelog only when useful
+11. Convert every formatting decision to Steam BBCode
+12. Run BBCode lint
+13. Run factual and bilingual review
+14. Deliver only pasteable final language files
 ```
 
-注意：上述代码块只存在于 Skill 内部作为结构说明。最终生成的 Steam 文案绝不能包含这些三反引号。
+Do not skip the verification step because the page is short.
 
----
+## 27. Provenance
 
-## 16. 输出方式
+This Skill is informed by public Steam documentation and public community formatting references:
 
-当用户要求“直接给我 Steam 文案”时：
+- Steam Text Formatting: https://steamcommunity.com/comment/ForumTopic/formattinghelp
+- Steam Workshop Implementation Guide: https://partner.steamgames.com/doc/features/workshop/implementation
+- Steam Workshop documentation overview: https://partner.steamgames.com/doc/features/workshop
+- Community formatting reference: https://steamcommunity.com/sharedfiles/filedetails/?id=2807121939
+- Community image embedding guide: https://steamcommunity.com/sharedfiles/filedetails/?id=812684948
 
-- 不要输出长篇解释。
-- 直接给出最终可粘贴内容。
-- 双语任务使用两个明确分开的最终版本。
-- 如果同时生成文件，应输出两个独立文本文件。
+Steam's own formatting page documents the core markup vocabulary, while community references highlight surface-specific differences and parsing caveats. Therefore this Skill intentionally uses conservative formatting and a strict final lint rather than assuming every BBCode tag behaves identically everywhere. citeturn709904search4turn709904search1
 
-推荐文件命名：
-
-```text
-<Mod>-Steam-Workshop-CN.txt
-<Mod>-Steam-Workshop-EN.txt
-```
-
-不要创建一个 `Bilingual.txt` 把两种语言混在一起。
-
----
-
-## 17. 最终交付前检查清单
-
-### 数据
-
-- [ ] 所有功能都有真实依据。
-- [ ] 版本号经过确认。
-- [ ] 依赖经过确认。
-- [ ] 安装方式经过确认。
-- [ ] 所有链接真实有效或明确来自项目资料。
-- [ ] 联系方式没有猜测。
-
-### 结构
-
-- [ ] 使用文档位于最顶部。
-- [ ] 中文与英文分别存在于独立文件。
-- [ ] 两个文件结构对应。
-- [ ] 页面具有清晰的分隔区。
-- [ ] 更新日志没有喧宾夺主。
-
-### BBCode
-
-- [ ] 没有 Markdown 标题。
-- [ ] 没有 Markdown 粗体 / 斜体。
-- [ ] 没有反引号代码格式。
-- [ ] 没有 Markdown 三反引号。
-- [ ] 没有 Markdown 表格。
-- [ ] 没有 Markdown 链接。
-- [ ] 没有 Markdown 分隔线。
-- [ ] 所有 BBCode 标签正确闭合。
-- [ ] 所有 URL 使用 `[url=...]...[/url]`。
-
-### 双语
-
-- [ ] CN 文件完全使用中文。
-- [ ] EN 文件完全使用英文。
-- [ ] 没有逐句中英混排。
-- [ ] 功能和警告语义一一对应。
-- [ ] 英文不是机械直译。
-
----
-
-## 18. 禁止事项
-
-禁止：
-
-- 把 Steam Workshop 页面当成 GitHub README 写。
-- 把 Markdown 当 Steam BBCode 使用。
-- 在最终 Steam 文案里输出 ``` 代码围栏。
-- 在正文中大量使用反引号代码格式。
-- 把中英文混在一个最终语言文件中。
-- 虚构功能、兼容性、性能提升或版本信息。
-- 根据作者用户名猜邮箱、Discord、Twitter/X 等联系方式。
-- 凭空生成赞助链接。
-- 复制与目标 Mod 无关的示例机制。
-- 为了凑模板而强行加入“性能优化”“视觉自定义”等不存在的栏目。
-- 用大量营销术语替代真实的功能说明。
-- 在没有真实 changelog 时伪造更新历史。
-
-最终目标是：
-
-[b]用户复制生成的文案后，可以直接粘贴到 Steam Workshop，而不需要再次手动删除 Markdown、拆分语言、修复 BBCode 或清理虚假信息。[/b]
+AzSkills does not copy upstream text or community page content verbatim. It synthesizes the transferable writing, formatting, documentation-first, and verification practices into an independent Skill.
