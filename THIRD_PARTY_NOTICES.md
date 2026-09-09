@@ -40,6 +40,19 @@ The synthesis specifically informed:
 - internationalization, RTL, and text-expansion resilience
 - edge-case hardening and rendered visual QA
 
+### Semantic icon morphing integration
+
+The frontend motion layer also incorporates implementation guidance informed by:
+
+- `morphicons`: https://github.com/guillermolg00/morphicons
+- morphicons playground: https://www.morphicons.com
+
+`morphicons` is treated as an implementation reference rather than a vendored dependency. Its public project demonstrates framework-neutral, stroke-based SVG icon morphing with a DOM-free core, spring-driven motion, interruptible transitions, controlled progress, and framework bindings. AzSkills rewrites the transferable design rules into its own `ui-design` contract and keeps the detailed integration guidance in [`ui-design/icon-morphing.md`](ui-design/icon-morphing.md).
+
+The integration preserves AzSkills-specific priorities: existing icon systems take precedence, morphing is used only when semantic continuity justifies it, reduced-motion preferences remain authoritative, icon state must remain accessible without animation, and no animation library is introduced solely for visual novelty.
+
+The upstream repository declares the MIT License. AzSkills does not copy its source code, icon data, generated outputs, or repository-specific implementation into the project.
+
 AzSkills intentionally does not import or reproduce external searchable databases, generated outputs, repository-specific scripts, private/internal material, or large upstream skill packages. The implementation is maintained as original AzSkills text in [`ui-design/SKILL.md`](ui-design/SKILL.md) and [`design-intelligence.md`](design-intelligence.md).
 
 One caution from current public discussion is preserved in AzSkills' architecture: external tooling may ship much more data than an agent actually reads, and some combined modes can silently ignore options. AzSkills therefore prioritizes a compact contract with explicit trigger conditions and verification requirements over a large passive data bundle. See the public discussion around UI/UX Pro Max issue #484 for an example of this class of integration risk: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/issues/484
