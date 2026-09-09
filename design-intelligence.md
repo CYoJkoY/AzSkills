@@ -162,7 +162,51 @@ Prefer reusable primitives such as fade+rise, scale+fade, slide, and stable shar
 
 Use short durations for frequent interactions and longer choreography only for infrequent entrances or onboarding. Keep motion interruptible and respect `prefers-reduced-motion`.
 
-## 12. Performance is part of design
+## 12. Semantic icon morphing
+
+Icon animation is part of the frontend motion system, not a decorative afterthought.
+
+When two icons represent a meaningful state transition and their geometry can preserve continuity, prefer a semantic morph over an arbitrary fade, spin, or hard swap. Typical candidates include menu ↔ close, play ↔ pause, add ↔ check, expand ↔ collapse, visibility ↔ hidden, lock ↔ unlock, search ↔ cancel, and directional arrow changes.
+
+Use a morph only when the intermediate geometry remains legible. Unrelated concepts, incompatible shapes, filled glyph systems, or transitions where motion obscures meaning should use a normal icon swap.
+
+The semantic state remains owned by the product component. The animation implementation should remain an implementation detail:
+
+```text
+state → icon A / icon B → morph plan → interruptible motion → canonical target
+```
+
+For projects that need a reusable stroke-based SVG morph engine, `morphicons` is an approved implementation reference within `ui-design`. It provides a DOM-free morphing core, DOM driver, and bindings for React, Vue, Svelte, React Native, Astro, and custom elements. It can consume icon data or raw SVG `d` paths and supports uncontrolled state changes, controlled progress, and imperative sequences.
+
+Do not introduce `morphicons` when the project already has an equivalent icon-motion system. Extend the existing stack instead of creating a competing animation layer. Do not make a library dependency mandatory merely because the visual pattern is available.
+
+Geometry matters:
+
+- prefer stroke-centered SVG icons
+- prefer a shared coordinate system such as `24 × 24`
+- keep stroke width, caps, joins, and optical size consistent
+- normalize off-grid icon packs once before runtime when required
+- inspect actual SVG geometry rather than assuming compatibility from icon names
+
+Motion quality matters:
+
+- let rotation emerge from icon geometry when the shapes are congruent under rotation
+- avoid raw coordinate interpolation that collapses rotational motion into shrink/shear
+- make morphs interruptible so rapid state changes do not snap through stale endpoints
+- settle to the canonical target geometry
+- keep frequent control-state morphs brief and aligned with the product motion tokens
+
+Accessibility rules remain authoritative:
+
+- never make the morph the only signal for state
+- keep accessible labels and control semantics synchronized with the current state
+- preserve visible focus independently of icon motion
+- honor the project's reduced-motion policy
+- when using `morphicons`, opt into user preference behavior such as `reducedMotion="user"` where appropriate rather than silently ignoring `prefers-reduced-motion`
+
+For detailed implementation patterns and QA checks, see [`ui-design/icon-morphing.md`](ui-design/icon-morphing.md).
+
+## 13. Performance is part of design
 
 Do not treat visual quality and runtime performance as separate concerns.
 
@@ -170,7 +214,9 @@ Avoid unnecessary layout animation, large-area blur, continuous decorative loops
 
 Reserve media geometry, control layout shift, and keep high-density surfaces responsive on mid-range devices.
 
-## 13. Internationalization is layout
+For icon morphing specifically, prefer shared scheduling across active instances, avoid re-planning on every render, cache reusable normalized geometry where the implementation permits it, and stop work as soon as a morph settles.
+
+## 14. Internationalization is layout
 
 Use stable message keys. Test localized strings in controls, labels, placeholders, tooltips, toasts, validation errors, and dynamic states.
 
@@ -178,7 +224,7 @@ Account for text expansion, number/date formatting, and RTL where relevant. Pref
 
 Do not translate user data, IDs, filenames, or identifiers as though they were UI strings.
 
-## 14. Content clarity
+## 15. Content clarity
 
 Visual polish cannot compensate for ambiguous copy.
 
@@ -190,13 +236,13 @@ problem → impact → recovery action
 
 Use concise helper text only when it resolves a real ambiguity; do not use tiny type to save layout space.
 
-## 15. Hardening mindset
+## 16. Hardening mindset
 
 A production interface must survive more than the happy path.
 
 Check long strings, empty datasets, large datasets, slow requests, failed submissions, duplicate actions, partial data, permission boundaries, offline states, narrow widths, dark mode, large text, and reduced motion.
 
-## 16. Visual QA
+## 17. Visual QA
 
 Whenever rendered output is available, inspect the actual result rather than trusting source code alone.
 
@@ -213,22 +259,24 @@ Look for:
 - icon misalignment
 - motion that feels slow or theatrical
 
+For icon morphs, explicitly inspect the first frame, intermediate geometry, interruption behavior, settled canonical path, reduced-motion behavior, and visual consistency with static icons.
+
 Fix systemic issues before isolated polish.
 
-## 17. Inheritance model
+## 18. Inheritance model
 
 Visual and UI Skills should not require users to name an external methodology. Apply this layer silently whenever the active Skill is visual.
 
 Specific Skills remain authoritative about their own domain:
 
-- `ui-design` owns frontend UI architecture, interaction, responsiveness, accessibility, motion, and QA.
+- `ui-design` owns frontend UI architecture, interaction, responsiveness, accessibility, motion, iconography, and QA.
 - `logo-generator` owns logo construction and identity-specific constraints.
 - `ip-as-logo` owns extreme character/IP simplification.
 - `frontend-slides` owns fixed-stage presentation implementation.
 - `readme-craft` owns GitHub-safe documentation composition.
 - `brotato-art` owns its game-art visual language.
 
-This layer provides shared reasoning around hierarchy, visual thesis, semantic tokens, typography, color, responsiveness, accessibility, motion, density, internationalization, performance, anti-pattern filtering, and quality control.
+This layer provides shared reasoning around hierarchy, visual thesis, semantic tokens, typography, color, responsiveness, accessibility, motion, iconography, density, internationalization, performance, anti-pattern filtering, and quality control.
 
 ## Provenance
 
@@ -239,5 +287,10 @@ This layer is an original AzSkills synthesis informed by public material from:
 - https://github.com/aladicf/better-web-ui
 - https://github.com/kozz36/frontend-designer-skill
 - https://www.ui-skills.com/skills/frontend
+
+The semantic icon-morphing portion is additionally informed by the public `morphicons` project:
+
+- https://github.com/guillermolg00/morphicons
+- https://www.morphicons.com
 
 AzSkills does not vendor these repositories, generated databases, private/internal material, or repository-specific implementation. Detailed attribution is maintained in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
