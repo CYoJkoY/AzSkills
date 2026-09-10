@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 760" role="img" aria-labelledby="title desc">
   <title id="title">AzSkills — reusable AI behavior contracts</title>
-  <desc id="desc">A dark editorial system map for AzSkills, connecting a SKILL.md behavior contract through focused reusable skills to a checked task output.</desc>
+  <desc id="desc">A dark editorial system map for AzSkills, showing a reusable SKILL.md contract flowing through focused skills into a checked task output, with generous safe margins and clear text hierarchy.</desc>
 
   <rect width="1400" height="760" rx="34" fill="#0f1719"/>
   <rect x="28" y="28" width="1344" height="704" rx="28" fill="none" stroke="#34484a" stroke-width="2"/>
@@ -15,21 +15,20 @@
 
   <g font-family="Inter, Segoe UI, Arial, sans-serif">
     <!-- Header -->
-    <g font-family="Cascadia Code, Consolas, monospace" font-size="13" letter-spacing="2.6" fill="#839796">
+    <g font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2.4" fill="#839796">
       <text x="70" y="72">CYoJkoY / AZSKILLS</text>
       <text x="1330" y="72" text-anchor="end">MODULAR · REUSABLE · VERIFIED</text>
     </g>
 
     <!-- Left / identity -->
     <g transform="translate(70 132)">
-      <!-- AzSkills mark -->
-      <g transform="translate(0 0)">
+      <g>
         <path d="M0 34 L28 0 H70 L41 34 Z" fill="#9db9b4"/>
         <path d="M53 34 L74 4 L99 34 Z" fill="#d7a85a"/>
       </g>
       <text x="0" y="120" fill="#f2eee5" font-size="70" font-weight="760" letter-spacing="7">AZSKILLS</text>
-      <text x="0" y="161" fill="#d7d5cd" font-size="24">Reusable AI behavior contracts.</text>
-      <text x="0" y="193" fill="#91a5a3" font-size="16">Explicit rules for real work — inspectable, composable, reusable.</text>
+      <text x="0" y="161" fill="#d7d5cd" font-size="23">Reusable AI behavior contracts.</text>
+      <text x="0" y="190" fill="#91a5a3" font-size="15">Explicit rules for real work — inspectable, composable, reusable.</text>
 
       <!-- Contract specimen -->
       <g transform="translate(0 232)">
@@ -53,7 +52,6 @@
       <text x="0" y="0" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2.4">FOCUSED SKILLS</text>
       <text x="0" y="30" fill="#94a7a5" font-size="15">One responsibility at a time.</text>
 
-      <!-- spine -->
       <path d="M15 84 V526" fill="none" stroke="#385254" stroke-width="2"/>
       <circle cx="15" cy="84" r="5" fill="#d7a85a"/>
       <circle cx="15" cy="526" r="5" fill="#8fb6ad"/>
@@ -111,8 +109,8 @@
       <path d="M20 0 H288 L310 22 V336 H0 V22 Z" fill="#142123" stroke="#6d9894" stroke-width="2"/>
       <path d="M288 0 V22 H310" fill="none" stroke="#6d9894" stroke-width="2"/>
 
-      <text x="28" y="40" fill="#8ea5a2" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">TASK → OUTPUT</text>
-      <circle cx="273" cy="34" r="7" fill="#d7a85a"/>
+      <text x="28" y="40" fill="#8ea5a2" font-family="Cascadia Code, Consolas, monospace" font-size="11" letter-spacing="1.7">TASK → OUTPUT</text>
+      <circle cx="270" cy="34" r="7" fill="#d7a85a"/>
 
       <g transform="translate(88 82)">
         <circle cx="67" cy="67" r="56" fill="#1d3032" stroke="#87aaa5" stroke-width="2"/>
@@ -120,17 +118,21 @@
         <circle cx="67" cy="67" r="68" fill="none" stroke="#314a4c" stroke-width="1"/>
       </g>
 
-      <text x="155" y="236" text-anchor="middle" fill="#f2eee6" font-size="28" font-weight="750">Better results</text>
-      <text x="155" y="268" text-anchor="middle" fill="#c7ccc6" font-size="18">through explicit constraints.</text>
+      <text x="155" y="236" text-anchor="middle" fill="#f2eee6" font-size="27" font-weight="750">Better results</text>
+      <text x="155" y="266" text-anchor="middle" fill="#c7ccc6" font-size="17">through explicit constraints.</text>
       <line x1="35" y1="292" x2="275" y2="292" stroke="#32474a"/>
-      <text x="155" y="319" text-anchor="middle" fill="#91b5ad" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="1.8">CHECKED OUTPUT</text>
+      <text x="155" y="319" text-anchor="middle" fill="#91b5ad" font-family="Cascadia Code, Consolas, monospace" font-size="11" letter-spacing="1.6">CHECKED OUTPUT</text>
     </g>
 
     <!-- Bottom statement -->
     <line x1="70" y1="660" x2="1330" y2="660" stroke="#304446"/>
     <g transform="translate(70 694)">
-      <text x="0" y="0" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2.2">SMALL SKILLS · EXPLICIT CONSTRAINTS · BETTER WORK</text>
+      <text x="0" y="0" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="11" letter-spacing="1.8">SMALL SKILLS · EXPLICIT CONSTRAINTS</text>
+      <text x="0" y="22" fill="#849795" font-size="13">Better work through focused composition.</text>
     </g>
-    <text x="1330" y="694" text-anchor="end" fill="#718785" font-size="13">Inspectable · composable · versioned</text>
+    <g transform="translate(1330 694)">
+      <text x="0" y="0" text-anchor="end" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="11" letter-spacing="1.6">OPEN SOURCE</text>
+      <text x="0" y="22" text-anchor="end" fill="#718785" font-size="13">Inspectable · composable · versioned</text>
+    </g>
   </g>
 </svg>
