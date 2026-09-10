@@ -1,132 +1,136 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 760" role="img" aria-labelledby="title desc">
   <title id="title">AzSkills — reusable AI behavior contracts</title>
-  <desc id="desc">A refined modular diagram showing AzSkills at the center, focused skills as reusable modules, and verified task output as the result.</desc>
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#101719"/>
-      <stop offset="1" stop-color="#182225"/>
-    </linearGradient>
-    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1b2a2d"/>
-      <stop offset="1" stop-color="#152124"/>
-    </linearGradient>
-    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="18"/>
-    </filter>
-  </defs>
+  <desc id="desc">A dark editorial system map for AzSkills, connecting a SKILL.md behavior contract through focused reusable skills to a checked task output.</desc>
 
-  <rect width="1400" height="760" rx="34" fill="url(#bg)"/>
-  <rect x="28" y="28" width="1344" height="704" rx="28" fill="none" stroke="#34474a" stroke-width="2"/>
-  <circle cx="1190" cy="128" r="90" fill="#7faaa2" opacity="0.08" filter="url(#soft)"/>
-  <circle cx="240" cy="625" r="110" fill="#d7a85a" opacity="0.05" filter="url(#soft)"/>
+  <rect width="1400" height="760" rx="34" fill="#0f1719"/>
+  <rect x="28" y="28" width="1344" height="704" rx="28" fill="none" stroke="#34484a" stroke-width="2"/>
+
+  <!-- Project-native keyline motif -->
+  <g fill="none" stroke="#294043" stroke-width="2" opacity="0.9">
+    <path d="M68 112 H250 V126 H320"/>
+    <path d="M1080 104 H1330 V118"/>
+    <path d="M1160 646 H1330 V632"/>
+    <path d="M70 650 H230 V636 H300"/>
+  </g>
 
   <g font-family="Inter, Segoe UI, Arial, sans-serif">
-    <g font-family="Cascadia Code, Consolas, monospace" font-size="13" letter-spacing="2.4" fill="#839796">
-      <text x="68" y="70">CYoJkoY / AZSKILLS</text>
-      <text x="1332" y="70" text-anchor="end">BEHAVIOR CONTRACTS · COMPOSITION · QA</text>
+    <!-- Header -->
+    <g font-family="Cascadia Code, Consolas, monospace" font-size="13" letter-spacing="2.6" fill="#839796">
+      <text x="70" y="72">CYoJkoY / AZSKILLS</text>
+      <text x="1330" y="72" text-anchor="end">MODULAR · REUSABLE · VERIFIED</text>
     </g>
 
-    <g transform="translate(70 120)">
-      <g>
-        <path d="M0 28 L24 0 H55 L31 28 Z" fill="#9fbab5"/>
-        <path d="M41 28 L58 5 L77 28 Z" fill="#d7a85a"/>
+    <!-- Left / identity -->
+    <g transform="translate(70 132)">
+      <!-- AzSkills mark -->
+      <g transform="translate(0 0)">
+        <path d="M0 34 L28 0 H70 L41 34 Z" fill="#9db9b4"/>
+        <path d="M53 34 L74 4 L99 34 Z" fill="#d7a85a"/>
       </g>
-      <text x="0" y="116" fill="#f1ece3" font-size="68" font-weight="750" letter-spacing="8">AZSKILLS</text>
-      <text x="0" y="157" fill="#d8d6ce" font-size="23">Reusable AI behavior contracts.</text>
-      <text x="0" y="189" fill="#9aacab" font-size="16">Inspect · compose · execute · verify</text>
+      <text x="0" y="120" fill="#f2eee5" font-size="70" font-weight="760" letter-spacing="7">AZSKILLS</text>
+      <text x="0" y="161" fill="#d7d5cd" font-size="24">Reusable AI behavior contracts.</text>
+      <text x="0" y="193" fill="#91a5a3" font-size="16">Explicit rules for real work — inspectable, composable, reusable.</text>
 
-      <rect x="0" y="222" width="420" height="124" rx="18" fill="#162326" stroke="#33494b"/>
-      <text x="24" y="251" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">THE UNIT</text>
-      <text x="24" y="285" fill="#f0ede5" font-family="Cascadia Code, Consolas, monospace" font-size="21" font-weight="700">SKILL.md</text>
-      <text x="24" y="314" fill="#a9bab7" font-size="14">Triggers · rules · workflow · QA · output</text>
-      <line x1="24" y1="328" x2="396" y2="328" stroke="#2c4042"/>
-      <circle cx="31" cy="341" r="4" fill="#91b5ad"/>
-      <text x="45" y="346" fill="#859a98" font-size="12">Readable, versioned, reusable</text>
+      <!-- Contract specimen -->
+      <g transform="translate(0 232)">
+        <path d="M0 18 L18 0 H406 L430 24 V170 H0 Z" fill="#152224" stroke="#466063" stroke-width="2"/>
+        <path d="M386 0 L430 24 H386 Z" fill="#263638"/>
+        <text x="24" y="34" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">THE CONTRACT</text>
+        <text x="24" y="68" fill="#f1eee7" font-family="Cascadia Code, Consolas, monospace" font-size="24" font-weight="700">SKILL.md</text>
+        <line x1="24" y1="84" x2="406" y2="84" stroke="#33494c"/>
+        <g font-size="14" fill="#a7b7b4">
+          <text x="24" y="111"><tspan fill="#8fb6ad">01</tspan> trigger boundary</text>
+          <text x="24" y="134"><tspan fill="#8fb6ad">02</tspan> hard constraints</text>
+          <text x="216" y="111"><tspan fill="#d7a85a">03</tspan> workflow</text>
+          <text x="216" y="134"><tspan fill="#84a9bb">04</tspan> quality gates</text>
+          <text x="24" y="157"><tspan fill="#d7a85a">05</tspan> output contract</text>
+        </g>
+      </g>
     </g>
 
-    <g transform="translate(500 116)">
-      <text x="0" y="0" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2.2">SKILL CATALOG</text>
-      <text x="0" y="30" fill="#98aaa8" font-size="15">Focused modules, composed only when needed.</text>
+    <!-- Middle / skills -->
+    <g transform="translate(570 126)">
+      <text x="0" y="0" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2.4">FOCUSED SKILLS</text>
+      <text x="0" y="30" fill="#94a7a5" font-size="15">One responsibility at a time.</text>
 
-      <g transform="translate(0 54)">
-        <rect width="395" height="64" rx="16" fill="url(#panel)" stroke="#385153"/>
-        <circle cx="29" cy="32" r="10" fill="#8fb6ad"/>
-        <text x="54" y="29" fill="#e3e5df" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">application-architecture</text>
-        <text x="54" y="48" fill="#899d9b" font-size="12">runtime · process · persistence</text>
+      <!-- spine -->
+      <path d="M15 84 V526" fill="none" stroke="#385254" stroke-width="2"/>
+      <circle cx="15" cy="84" r="5" fill="#d7a85a"/>
+      <circle cx="15" cy="526" r="5" fill="#8fb6ad"/>
+
+      <g transform="translate(0 60)">
+        <circle cx="15" cy="24" r="10" fill="#8fb6ad" stroke="#102022" stroke-width="4"/>
+        <rect x="42" y="0" width="418" height="62" rx="16" fill="#172527" stroke="#385254"/>
+        <text x="66" y="28" fill="#e6e8e2" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">application-architecture</text>
+        <text x="66" y="47" fill="#859a98" font-size="12">runtime · process · persistence</text>
       </g>
-      <g transform="translate(0 132)">
-        <rect width="395" height="64" rx="16" fill="url(#panel)" stroke="#385153"/>
-        <circle cx="29" cy="32" r="10" fill="#84a9bb"/>
-        <text x="54" y="29" fill="#e3e5df" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">frontend-architecture</text>
-        <text x="54" y="48" fill="#899d9b" font-size="12">language · framework · boundaries</text>
+      <g transform="translate(0 136)">
+        <circle cx="15" cy="24" r="10" fill="#84a9bb" stroke="#102022" stroke-width="4"/>
+        <rect x="42" y="0" width="418" height="62" rx="16" fill="#172527" stroke="#385254"/>
+        <text x="66" y="28" fill="#e6e8e2" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">frontend-architecture</text>
+        <text x="66" y="47" fill="#859a98" font-size="12">language · framework · boundaries</text>
       </g>
-      <g transform="translate(0 210)">
-        <rect width="395" height="64" rx="16" fill="url(#panel)" stroke="#385153"/>
-        <circle cx="29" cy="32" r="10" fill="#d7a85a"/>
-        <text x="54" y="29" fill="#e3e5df" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">ui-design</text>
-        <text x="54" y="48" fill="#899d9b" font-size="12">visual · interaction · accessibility</text>
+      <g transform="translate(0 212)">
+        <circle cx="15" cy="24" r="10" fill="#d7a85a" stroke="#102022" stroke-width="4"/>
+        <rect x="42" y="0" width="418" height="62" rx="16" fill="#172527" stroke="#385254"/>
+        <text x="66" y="28" fill="#e6e8e2" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">ui-design</text>
+        <text x="66" y="47" fill="#859a98" font-size="12">visual · interaction · accessibility</text>
       </g>
       <g transform="translate(0 288)">
-        <rect width="395" height="64" rx="16" fill="url(#panel)" stroke="#385153"/>
-        <circle cx="29" cy="32" r="10" fill="#8aa9b5"/>
-        <text x="54" y="29" fill="#e3e5df" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">readme-craft</text>
-        <text x="54" y="48" fill="#899d9b" font-size="12">documentation · links · visual QA</text>
+        <circle cx="15" cy="24" r="10" fill="#8aa9b5" stroke="#102022" stroke-width="4"/>
+        <rect x="42" y="0" width="418" height="62" rx="16" fill="#172527" stroke="#385254"/>
+        <text x="66" y="28" fill="#e6e8e2" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">readme-craft</text>
+        <text x="66" y="47" fill="#859a98" font-size="12">documentation · links · visual QA</text>
       </g>
-      <g transform="translate(0 366)">
-        <rect width="395" height="64" rx="16" fill="url(#panel)" stroke="#385153"/>
-        <circle cx="29" cy="32" r="10" fill="#8fb6ad"/>
-        <text x="54" y="29" fill="#e3e5df" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">l13n / any2zh / zh2en</text>
-        <text x="54" y="48" fill="#899d9b" font-size="12">localization · translation</text>
+      <g transform="translate(0 364)">
+        <circle cx="15" cy="24" r="10" fill="#8fb6ad" stroke="#102022" stroke-width="4"/>
+        <rect x="42" y="0" width="418" height="62" rx="16" fill="#172527" stroke="#385254"/>
+        <text x="66" y="28" fill="#e6e8e2" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">l13n / any2zh / zh2en</text>
+        <text x="66" y="47" fill="#859a98" font-size="12">localization · translation</text>
       </g>
     </g>
 
-    <g fill="none" stroke="#637e7e" stroke-width="2" opacity="0.75">
-      <path d="M895 202 C930 202 940 210 966 210"/>
-      <path d="M895 280 C930 280 940 244 966 244"/>
-      <path d="M895 358 C930 358 940 278 966 278"/>
-      <path d="M895 436 C930 436 940 312 966 312"/>
-      <path d="M895 514 C930 514 940 346 966 346"/>
+    <!-- Connective beam -->
+    <g fill="none" stroke="#6b8785" stroke-width="2">
+      <path d="M1000 210 C1008 210 1012 210 1020 210"/>
+      <path d="M1000 286 C1008 286 1012 248 1020 248"/>
+      <path d="M1000 362 C1008 362 1012 286 1020 286"/>
+      <path d="M1000 438 C1008 438 1012 324 1020 324"/>
+      <path d="M1000 514 C1008 514 1012 362 1020 362"/>
     </g>
-    <g fill="#8eaaa5">
-      <circle cx="895" cy="202" r="3.5"/><circle cx="895" cy="280" r="3.5"/><circle cx="895" cy="358" r="3.5"/><circle cx="895" cy="436" r="3.5"/><circle cx="895" cy="514" r="3.5"/>
+    <g fill="#8fb6ad">
+      <circle cx="1000" cy="210" r="4"/>
+      <circle cx="1000" cy="286" r="4"/>
+      <circle cx="1000" cy="362" r="4"/>
+      <circle cx="1000" cy="438" r="4"/>
+      <circle cx="1000" cy="514" r="4"/>
     </g>
 
-    <g transform="translate(966 166)">
-      <rect width="350" height="316" rx="24" fill="#142024" stroke="#6f9b96" stroke-width="2"/>
-      <text x="28" y="38" fill="#8ea6a3" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">TASK → OUTPUT</text>
-      <circle cx="313" cy="31" r="7" fill="#d7a85a"/>
+    <!-- Right / result -->
+    <g transform="translate(1020 154)">
+      <path d="M20 0 H288 L310 22 V336 H0 V22 Z" fill="#142123" stroke="#6d9894" stroke-width="2"/>
+      <path d="M288 0 V22 H310" fill="none" stroke="#6d9894" stroke-width="2"/>
 
-      <g transform="translate(145 70)">
-        <circle cx="30" cy="30" r="30" fill="#203033" stroke="#739c96" stroke-width="2"/>
-        <path d="M15 30 l10 10 l21-23" fill="none" stroke="#d7a85a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="28" y="40" fill="#8ea5a2" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2">TASK → OUTPUT</text>
+      <circle cx="273" cy="34" r="7" fill="#d7a85a"/>
+
+      <g transform="translate(88 82)">
+        <circle cx="67" cy="67" r="56" fill="#1d3032" stroke="#87aaa5" stroke-width="2"/>
+        <path d="M40 68 L59 87 L98 43" fill="none" stroke="#d7a85a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="67" cy="67" r="68" fill="none" stroke="#314a4c" stroke-width="1"/>
       </g>
-      <text x="175" y="160" text-anchor="middle" fill="#f0ece4" font-size="27" font-weight="700">Better results</text>
-      <text x="175" y="191" text-anchor="middle" fill="#c6cbc5" font-size="18">through explicit constraints.</text>
-      <line x1="42" y1="217" x2="308" y2="217" stroke="#314547"/>
-      <text x="175" y="247" text-anchor="middle" fill="#91b5ad" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="1.8">CHECKED OUTPUT</text>
-      <text x="175" y="274" text-anchor="middle" fill="#778e8c" font-size="12">Factual · structured · maintainable</text>
+
+      <text x="155" y="236" text-anchor="middle" fill="#f2eee6" font-size="28" font-weight="750">Better results</text>
+      <text x="155" y="268" text-anchor="middle" fill="#c7ccc6" font-size="18">through explicit constraints.</text>
+      <line x1="35" y1="292" x2="275" y2="292" stroke="#32474a"/>
+      <text x="155" y="319" text-anchor="middle" fill="#91b5ad" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="1.8">CHECKED OUTPUT</text>
     </g>
 
-    <line x1="70" y1="620" x2="1330" y2="620" stroke="#304345"/>
-    <g transform="translate(70 650)">
-      <text x="0" y="0" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="11" letter-spacing="1.8">SMALL SKILLS</text>
-      <text x="0" y="24" fill="#849795" font-size="13">Focused responsibility</text>
+    <!-- Bottom statement -->
+    <line x1="70" y1="660" x2="1330" y2="660" stroke="#304446"/>
+    <g transform="translate(70 694)">
+      <text x="0" y="0" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="12" letter-spacing="2.2">SMALL SKILLS · EXPLICIT CONSTRAINTS · BETTER WORK</text>
     </g>
-    <g transform="translate(300 650)">
-      <text x="0" y="0" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="11" letter-spacing="1.8">COMPOSITION</text>
-      <text x="0" y="24" fill="#849795" font-size="13">Only what the task needs</text>
-    </g>
-    <g transform="translate(575 650)">
-      <text x="0" y="0" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="11" letter-spacing="1.8">DESIGN INTELLIGENCE</text>
-      <text x="0" y="24" fill="#849795" font-size="13">Shared visual reasoning</text>
-    </g>
-    <g transform="translate(900 650)">
-      <text x="0" y="0" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="11" letter-spacing="1.8">QUALITY GATES</text>
-      <text x="0" y="24" fill="#849795" font-size="13">Links · geometry · themes · output</text>
-    </g>
-    <g transform="translate(1180 650)">
-      <text x="0" y="0" fill="#d7a85a" font-family="Cascadia Code, Consolas, monospace" font-size="11" letter-spacing="1.8">OPEN SOURCE</text>
-      <text x="0" y="24" fill="#849795" font-size="13">Inspect · edit · version</text>
-    </g>
+    <text x="1330" y="694" text-anchor="end" fill="#718785" font-size="13">Inspectable · composable · versioned</text>
   </g>
 </svg>
