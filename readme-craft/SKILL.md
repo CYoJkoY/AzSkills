@@ -1,6 +1,6 @@
 ---
 name: readme-craft
-description: Design, rewrite, audit, and maintain project-native GitHub README homepages with evidence-first information architecture, mandatory support/funding delivery, default English output, explicit language locking, semantic SVG heading icons, mandatory SVG geometry and render QA, light/dark theme safety, accessible proof, stable internal navigation anchors, verified action links, dynamic repository facts, and GitHub-safe Markdown/SVG implementation.
+description: Design, rewrite, audit, and maintain project-native GitHub README homepages with evidence-first information architecture, support/funding discovery and delivery, default English output, explicit language locking, semantic SVG heading icons, mandatory SVG geometry and render QA, light/dark theme safety, accessible proof, stable internal navigation anchors, verified action links, dynamic repository facts, and GitHub-safe Markdown/SVG implementation.
 ---
 
 # README Craft
@@ -220,19 +220,19 @@ When a verified support destination exists:
 2. create or retain a dedicated Support / Sponsor / Funding section
 3. explain what support sustains
 4. provide a visible direct link
-5. create and place a project-native Support CTA
-6. keep the URL in searchable Markdown/HTML outside the graphic
+5. choose an appropriate support presentation for the project
+6. keep the URL in searchable Markdown/HTML outside any graphic
 ```
 
-Missing required support treatment is a **BLOCKER**.
+The required support treatment is the section, factual explanation, and direct canonical link. A graphic sponsorship CTA is optional, not mandatory.
 
-### Gate F — Project-native support CTA
+### Gate F — Optional project-native support CTA
 
-When a verified support destination exists, a project-native Support CTA is mandatory.
+A project-native graphical Support CTA is optional. It may be used when it materially improves discoverability, hierarchy, or project identity.
 
-The CTA must be visible, clearly recognizable, clickable, directly linked to the verified canonical destination, project-specific, readable in both GitHub light and dark themes, and pass the same geometry/render/accessibility/language/theme QA as other authored SVGs.
+When a graphical CTA is used, it must be visible, clearly recognizable, clickable, directly linked to the verified canonical destination, project-specific, readable in both GitHub light and dark themes, and pass the same geometry/render/accessibility/language/theme QA as other authored SVGs.
 
-Use at least two real project signals:
+Use at least two real project signals when a graphical CTA is created:
 
 ```text
 logo / icon / mascot
@@ -243,7 +243,7 @@ project typography treatment
 domain-specific imagery
 ```
 
-A text-only support link, GitHub Sponsor badge alone, generic donation graphic, unlinked graphic, or CTA with the wrong destination does not satisfy this gate.
+A text-only support link is valid when the canonical destination is visible and searchable in the README. A graphical CTA must never become the only place where the support destination is exposed.
 
 ### Gate G — SVG asset quality and render QA
 
@@ -295,7 +295,7 @@ When an SVG is embedded with `<img>`, do not assume `currentColor` inherits from
 
 #### G5 — Rendered screenshot inspection
 
-Inspect actual rendered previews of non-trivial SVGs. For heroes and support CTAs, verify overlap, centering, text placement, whitespace balance, button/frame alignment, hierarchy, theme artifacts, and language errors. Fix defects and render again.
+Inspect actual rendered previews of non-trivial SVGs. For heroes and graphical support CTAs, verify overlap, centering, text placement, whitespace balance, button/frame alignment, hierarchy, theme artifacts, and language errors. Fix defects and render again.
 
 ### Gate H — Light/dark README theme safety
 
@@ -551,11 +551,9 @@ Support / Sponsor / Funding section
 short factual explanation
 ↓
 direct canonical Markdown/HTML link
-↓
-visible clickable project-native Support CTA
 ```
 
-Avoid guilt-based language, exaggerated promises, or fake urgency. When no support destination can be verified, do not invent one.
+A graphical Support CTA may be added when it materially improves the presentation, but it is optional. When no support destination can be verified, do not invent one.
 
 ## 13. Workflow
 
@@ -591,7 +589,7 @@ Dark palette:
 Typography:
 Icon language:
 Support destination:
-Support CTA concept:
+Support CTA concept (optional):
 Theme strategy:
 Navigation strategy:
 ```
@@ -667,7 +665,7 @@ over adjective-heavy marketing language.
 
 ### Step 9 — Implement
 
-Wire every used asset, link, heading icon, explicit anchor, navigation link, support destination, support CTA, and theme variant into the final README.
+Wire every used asset, link, heading icon, explicit anchor, navigation link, support destination, optional support CTA, and theme variant into the final README.
 
 For heading icons and other `<img>` SVGs:
 
@@ -700,7 +698,7 @@ inspect dark mode
 ↓
 inspect authored SVG text language
 ↓
-inspect CTA link target
+inspect CTA link target when a graphical CTA is used
 ↓
 fix defects
 ↓
@@ -773,11 +771,10 @@ Perform the quality protocol below before declaring completion.
 
 - verified support destination is present when one exists;
 - Support / Sponsor / Funding section exists when required;
-- project-native Support CTA exists when required;
-- CTA is visible and clickable;
-- CTA points to the canonical destination;
-- CTA remains legible in both themes;
-- canonical support URL remains searchable outside the graphic.
+- direct canonical support link is visible and searchable outside graphics;
+- any graphical Support CTA used is visible and clickable;
+- any graphical Support CTA points to the canonical destination;
+- any graphical Support CTA remains legible in both themes.
 
 ### SVG geometry
 
@@ -793,7 +790,7 @@ Perform the quality protocol below before declaring completion.
 
 - every authored visual remains legible;
 - icons do not disappear;
-- support CTA remains readable;
+- any graphical support CTA remains readable;
 - screenshots retain useful contrast;
 - theme variants preserve meaning and hierarchy.
 
@@ -822,8 +819,8 @@ Perform the quality protocol below before declaring completion.
 - major claims have repository evidence;
 - links point to correct destinations;
 - support URL is present when one exists;
-- required support treatment exists;
-- required CTA exists;
+- required support section and direct link exist when applicable;
+- any used graphical CTA is correctly linked and maintained;
 - versions and counts are not stale duplicates;
 - generated assets are actually referenced;
 - manual navigation remains valid if heading text changes.
@@ -833,8 +830,8 @@ Perform the quality protocol below before declaring completion.
 Classify findings:
 
 ```text
-BLOCKER  → wrong information, broken destination, missing required support treatment, missing required H2 icon, language-lock violation, unreadable theme, broken SVG, unintended overlap, clipping, materially off-center primary element, missing/unlinked required CTA, dead internal navigation target, guessed fragment, duplicate anchor name, navigation target mismatch
-HIGH     → broken hierarchy, misleading proof, major responsive failure, serious accessibility issue, poor dark-mode hierarchy, SVG defects at actual display size, unsolicited language mixing, weak heading icon coverage below H2, fragile navigation implementation
+BLOCKER  → wrong information, broken destination, missing required support treatment, missing required H2 icon, language-lock violation, unreadable theme, broken SVG, unintended overlap, clipping, materially off-center primary element, dead internal navigation target, guessed fragment, duplicate anchor name, navigation target mismatch
+HIGH     → broken hierarchy, misleading proof, major responsive failure, serious accessibility issue, poor dark-mode hierarchy, SVG defects at actual display size, unsolicited language mixing, weak heading icon coverage below H2, fragile navigation implementation, broken graphical support CTA when one is used
 MEDIUM   → visual inconsistency, weak copy, token drift, excessive decoration, minor optical imbalance
 LOW      → isolated polish issue
 ```
@@ -849,7 +846,8 @@ Reject or reconsider:
 - a Hero that says only the project name and adjectives;
 - fake statistics or invented screenshots;
 - support information removed during redesign;
-- a verified support destination without a visible clickable project-native CTA;
+- a verified support destination with no visible direct link outside graphics;
+- a graphical Support CTA that hides the canonical URL or becomes the only support path;
 - generic donation banners copied across repositories;
 - defaulting to Chinese when the user did not request Chinese;
 - unsolicited language mixing;
@@ -884,8 +882,8 @@ The README is done only when:
 - H3+ headings use icons wherever meaningful and useful;
 - support/funding discovery has been explicitly completed;
 - the verified support destination is preserved and meaningfully presented when one exists;
-- the Support / Sponsor / Funding section is present when required;
-- the required project-native Support CTA is visible, clickable, canonical, and visually correct;
+- the Support / Sponsor / Funding section and direct link are present when required;
+- any graphical Support CTA used is visible, clickable, canonical, and visually correct;
 - all authored SVGs have passed geometry, size, render, and theme QA;
 - light and dark rendering are both intentional;
 - heading icons work in GitHub's actual image-rendering context;
