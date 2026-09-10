@@ -1,6 +1,6 @@
 ---
 name: readme-craft
-description: Design, rewrite, audit, and maintain project-native GitHub README homepages with evidence-first information architecture, mandatory support/funding delivery, default English output, explicit language locking, mandatory project-native support CTA, semantic SVG heading icons, mandatory SVG geometry and render QA, light/dark theme safety, accessible proof, stable action links, dynamic repository facts, and GitHub-safe Markdown/SVG implementation.
+description: Design, rewrite, audit, and maintain project-native GitHub README homepages with evidence-first information architecture, mandatory support/funding delivery, default English output, explicit language locking, semantic SVG heading icons, mandatory SVG geometry and render QA, light/dark theme safety, accessible proof, stable internal navigation anchors, verified action links, dynamic repository facts, and GitHub-safe Markdown/SVG implementation.
 ---
 
 # README Craft
@@ -19,17 +19,17 @@ Apply this Skill to:
 - documentation homepages;
 - project landing pages in `README.md`;
 - README audits and cleanup;
-- hero/banner, section graphics, diagrams, icons, showcase modules, or support CTA work that will appear in a README.
+- hero/banner, section graphics, diagrams, icons, showcase modules, support CTA, or in-page navigation work that will appear in a README.
 
 Use the narrowest mode that fully solves the request:
 
 | Mode | Responsibility |
 | :--- | :--- |
-| `audit` | Diagnose structure, copy, language, trust, links, support/funding, theme behavior, accessibility, visual hierarchy, SVG quality, and maintainability without editing |
-| `whole-readme` | Redesign information architecture, copy, language, visual system, assets, links, support treatment, and theme behavior |
-| `visual-refresh` | Preserve useful information architecture while improving visual direction, assets, hierarchy, support treatment, language consistency, and theme safety |
+| `audit` | Diagnose structure, copy, language, trust, links, navigation, support/funding, theme behavior, accessibility, visual hierarchy, SVG quality, and maintainability without editing |
+| `whole-readme` | Redesign information architecture, copy, language, visual system, assets, links, navigation, support treatment, and theme behavior |
+| `visual-refresh` | Preserve useful information architecture while improving visual direction, assets, hierarchy, navigation, support treatment, language consistency, and theme safety |
 | `asset-only` | Create or revise only explicitly requested README assets, including full SVG QA when the asset is SVG |
-| `maintenance` | Update existing README facts, links, screenshots, versions, support destinations, language consistency, or sections without unnecessary redesign |
+| `maintenance` | Update existing README facts, links, screenshots, versions, navigation targets, support destinations, language consistency, or sections without unnecessary redesign |
 
 Never turn `asset-only` or `maintenance` into a full rewrite unless the user explicitly requests it or the existing artifact cannot remain correct without structural change.
 
@@ -54,21 +54,11 @@ Do not replace an established project identity merely because another visual sty
 
 When the user does not explicitly request another language, the README copy, headings, tables, labels, CTA text, navigation, authored alt text, and authored visual text must be written in **English**.
 
-Do not infer Chinese, Japanese, or another language from:
-
-- the maintainer's identity;
-- the repository owner;
-- the source code language;
-- the language of an existing README;
-- comments or issue titles;
-- source assets;
-- the language used in a user message when the user did not request that language for the README.
+Do not infer Chinese, Japanese, or another language from the maintainer, repository owner, source code, existing README, comments, issue titles, source assets, or the language used in the user message unless the README language was explicitly requested.
 
 Technical identifiers, official product names, trademarks, commands, filenames, package names, API symbols, and unchanged UI literals may remain in their original form when needed for factual accuracy.
 
 ### 3.2 Explicit language requests override the default
-
-Use this decision table:
 
 | User instruction | Output language |
 | :--- | :--- |
@@ -83,7 +73,7 @@ Never add a second language merely because the repository contains bilingual mat
 
 When English output is selected, no unsolicited Chinese prose may appear in the final README or authored visual assets.
 
-This prohibition applies to:
+This prohibition includes:
 
 ```text
 headings
@@ -92,7 +82,6 @@ tables
 captions
 navigation labels
 CTA labels
-button labels
 image alt text
 figure descriptions
 SVG visible text
@@ -105,47 +94,21 @@ release labels
 authored badge labels
 ```
 
-Do not copy Chinese explanatory text from the repository into an English README. Keep Chinese only when it is an approved proper name, official literal, trademark, or another string that must remain unchanged.
+Keep Chinese only when it is an approved proper name, official literal, trademark, or another string that must remain unchanged. Apply the same rule symmetrically to Chinese-only output.
 
-The same rule applies symmetrically to Chinese-only output.
-
-### 3.4 Source-language inheritance is not permission to mix languages
-
-Repository content is evidence, not an instruction to reproduce every source language.
-
-For a single-language README:
-
-```text
-source content
-    ↓
-extract facts
-    ↓
-rewrite into target language
-    ↓
-retain only required names / literals
-    ↓
-run language audit
-```
-
-Do not alternate languages paragraph-by-paragraph unless explicitly requested.
-
-### 3.5 Language audit is a hard gate
+### 3.4 Language audit
 
 Before delivery, scan the rendered README and all authored visual assets against the language contract.
 
-For English-only output, unexpected Chinese prose or labels are a **BLOCKER**.
-
-For Chinese-only output, unexpected English prose outside approved names, literals, code, URLs, commands, and technical identifiers is a **BLOCKER**.
-
-For bilingual output, verify the requested language boundaries section-by-section and asset-by-asset.
+For English-only output, unexpected Chinese prose or labels are a **BLOCKER**. For Chinese-only output, unexpected English prose outside approved names, literals, code, URLs, commands, and technical identifiers is a **BLOCKER**.
 
 ## 4. Non-negotiable quality gates
 
-A whole README redesign is incomplete until all applicable gates pass. A visual asset is incomplete until its own asset QA gates pass. A single-language README is incomplete until its language audit passes.
+A whole README redesign is incomplete until all applicable gates pass. A visual asset is incomplete until its asset QA passes. A README with manual in-page navigation is incomplete until its navigation QA passes.
 
 ### Gate A — Evidence-first repository understanding
 
-Inspect the actual repository before writing the final structure or copy.
+Inspect the actual repository before writing final structure or copy.
 
 Collect, where available:
 
@@ -169,18 +132,7 @@ light/dark visual behavior
 existing documentation language(s)
 ```
 
-Do not invent:
-
-- features;
-- benchmarks;
-- user counts;
-- testimonials;
-- screenshots;
-- compatibility;
-- deployment URLs;
-- support links;
-- payment identifiers;
-- version claims.
+Do not invent features, benchmarks, user counts, testimonials, screenshots, compatibility, deployment URLs, support links, payment identifiers, or version claims.
 
 When a fact is uncertain, verify it from a first-party source or omit it.
 
@@ -199,11 +151,11 @@ Default narrative:
 
 `Value → Proof → Mechanism → First action → Detail`
 
-The exact ordering may change for developer tools, libraries, games, visual assets, and other domains, but the first screen must have one obvious primary job.
+The exact order may change for developer tools, libraries, games, visual assets, and other domains, but the first screen must have one obvious primary job.
 
 ### Gate C — Distinctive visual direction
 
-Do not produce a README that looks like a generic AI-generated SaaS template.
+Do not produce a generic AI-generated SaaS README.
 
 Before styling, establish:
 
@@ -222,41 +174,31 @@ light/dark strategy
 support visual strategy
 ```
 
-Make at least three deliberate choices that clearly come from the project rather than from a generic template, such as:
-
-- project-specific color relationships;
-- real product imagery or artwork;
-- project-derived geometric motif;
-- custom semantic icon treatment;
-- distinctive composition;
-- project-specific typographic pairing;
-- domain-specific visual metaphor.
-
-A README can be restrained, but it must still have a point of view.
+Make at least three deliberate choices that clearly come from the project, such as project-specific color relationships, real product imagery, a project-derived geometric motif, custom semantic icons, distinctive composition, project-specific typography, or a domain-specific visual metaphor.
 
 ### Gate D — Heading icon system
 
-**Every level-2 (`##`) heading must have a semantic repository-local SVG icon.** This is mandatory for `whole-readme`, `visual-refresh`, and any README presentation work that leaves level-2 headings in place.
+**Every level-2 (`##`) heading must have exactly one semantic repository-local SVG icon.**
 
-For level-3 (`###`) and deeper headings, use a semantic SVG icon whenever it improves scanability without creating visual noise. Prefer coverage over omission, but do not force a weak or meaningless icon solely to satisfy decoration.
+For level-3 (`###`) and deeper headings, use a semantic SVG icon whenever it improves scanability without creating visual noise.
 
 Rules:
 
-- every `##` heading must have exactly one semantic SVG icon immediately before the heading text;
-- `###` and deeper headings should have SVG icons whenever a meaningful icon can be designed without repetition or ambiguity;
+- every `##` heading has exactly one SVG icon immediately before the heading text;
+- `###` and deeper headings use SVG icons when meaningful and useful;
 - use repository-local assets, normally under `assets/readme/icons/`;
-- use project-owned or project-derived icons before generic library icons;
-- preserve a coherent stroke/fill vocabulary and icon scale;
-- never use emoji as a substitute for a required heading SVG;
+- prefer project-owned or project-derived icons over generic library icons;
+- preserve one coherent stroke/fill vocabulary and icon scale;
+- never use emoji as a substitute for a required heading icon;
 - never rely on SVG `currentColor` inheritance for Markdown/HTML `<img>` icons;
-- every heading icon must pass the SVG source, geometry, size, render, and theme QA defined below;
-- if an icon cannot be made both semantic and visually correct, redesign the icon rather than silently omitting the required level-2 icon.
+- every heading icon must pass source, geometry, size, render, and theme QA;
+- if an icon cannot be both semantic and visually correct, redesign it rather than omitting a required H2 icon.
 
-Do not add SVG icons to ordinary paragraphs, code blocks, or arbitrary whitespace merely for decoration.
+Do not place SVG icons in arbitrary paragraphs or whitespace merely for decoration.
 
 ### Gate E — Mandatory support / sponsorship discovery and delivery
 
-For `whole-readme`, `visual-refresh`, and any maintenance or asset task that changes README presentation, support/funding must be actively investigated and handled as a required deliverable whenever a verified support destination exists.
+For `whole-readme`, `visual-refresh`, and presentation-changing maintenance or asset work, support/funding must be actively investigated whenever a verified support destination exists.
 
 Inspect:
 
@@ -274,8 +216,6 @@ release or documentation pages that point to support
 When a verified support destination exists:
 
 ```text
-Support treatment is REQUIRED
-        ↓
 1. preserve / correct the canonical destination
 2. create or retain a dedicated Support / Sponsor / Funding section
 3. explain what support sustains
@@ -284,21 +224,13 @@ Support treatment is REQUIRED
 6. keep the URL in searchable Markdown/HTML outside the graphic
 ```
 
-A verified support destination without meaningful support treatment is a **BLOCKER**.
+Missing required support treatment is a **BLOCKER**.
 
 ### Gate F — Project-native support CTA
 
-When a verified support destination exists, a project-native Support CTA is **mandatory**.
+When a verified support destination exists, a project-native Support CTA is mandatory.
 
-The CTA must:
-
-- be visible in the rendered README;
-- be clearly recognizable as a support action;
-- be clickable;
-- link directly to the verified canonical support destination;
-- use project-specific visual signals rather than a generic donation banner;
-- remain understandable in both GitHub light and dark themes;
-- pass the same geometry, rendering, accessibility, language, and theme checks as every other authored SVG.
+The CTA must be visible, clearly recognizable, clickable, directly linked to the verified canonical destination, project-specific, readable in both GitHub light and dark themes, and pass the same geometry/render/accessibility/language/theme QA as other authored SVGs.
 
 Use at least two real project signals:
 
@@ -311,53 +243,19 @@ project typography treatment
 domain-specific imagery
 ```
 
-Do not satisfy the CTA requirement with:
-
-```text
-text-only support link
-GitHub Sponsor badge alone
-generic heart / coffee / donation graphic with no project identity
-unlinked CTA graphic
-CTA whose destination differs from the canonical support URL
-```
-
-Keep the canonical URL as actual Markdown/HTML link text outside the image as well.
-
-When no support destination can be verified:
-
-- do not invent one;
-- do not fabricate a payment address, username, QR code, or donation service;
-- do not imply that a funding channel exists;
-- record the absence during the internal audit.
+A text-only support link, GitHub Sponsor badge alone, generic donation graphic, unlinked graphic, or CTA with the wrong destination does not satisfy this gate.
 
 ### Gate G — SVG asset quality and render QA
 
 **An SVG is not finished because its source looks plausible. It must be rendered and visually inspected before delivery.**
 
-This gate applies to heroes, heading icons, support CTAs, diagrams, workflow graphics, logos, and other authored SVGs.
-
 #### G1 — Source integrity
 
-Verify:
-
-```text
-valid XML / SVG structure
-correct viewBox
-no accidental clipping
-no unused giant canvas
-no malformed path data
-no unintended filters or effects
-no embedded raster unless explicitly required
-no broken references
-```
-
-Prefer simple, inspectable SVGs. Remove construction artifacts and unused definitions before delivery.
+Verify valid XML/SVG structure, correct `viewBox`, no accidental clipping, no oversized unused canvas, no malformed path data, no unintended effects, no embedded raster unless required, and no broken references.
 
 #### G2 — Geometry QA
 
-Check the actual rendered geometry, not just source coordinates.
-
-Inspect:
+Inspect the rendered result for:
 
 ```text
 overlap between independent elements
@@ -368,115 +266,44 @@ stroke width consistency
 stroke cap / join consistency
 corner-radius consistency
 safe padding to the viewBox edges
-baseline / alignment when text or labels are present
+text / label alignment
 ```
 
-A visual is **BLOCKED** when:
+Block delivery when independent elements touch unintentionally, a centered symbol is visibly off-center, strokes collide, a decorative element looks attached when it should be separate, the viewBox clips artwork, or padding is materially unbalanced without a deliberate optical reason.
 
-- separate elements touch unintentionally;
-- a centered symbol is visibly off-center inside its frame;
-- strokes collide at small sizes;
-- a decorative element appears attached when it should be separate;
-- the viewBox clips a stroke, shadow, corner, or letter;
-- padding is materially unbalanced without a deliberate optical reason.
-
-### G3 — Multi-size QA
+#### G3 — Multi-size QA
 
 Render important SVGs at realistic sizes:
 
 ```text
-16 px / favicon-scale icon
-20–24 px / README heading icon
-32–48 px / compact icon
-64–128 px / extension or product icon when applicable
-320 px / narrow README visual
-768–900 px / normal README visual
-1200 px / hero or wide CTA when applicable
+16 px
+20–24 px
+32–48 px
+64–128 px
+320 px
+768–900 px
+1200 px when applicable
 ```
 
-At each size check:
+Check readability, collisions, disappearing strokes, collapsing gaps, text legibility, visual centering, and silhouette recognition.
 
-- readability;
-- collisions;
-- stroke disappearance;
-- tiny gaps collapsing;
-- text wrapping or illegibility;
-- visual centering;
-- silhouette recognition.
+#### G4 — Light / dark rendering QA
 
-### G4 — Light / dark rendering QA
+Evaluate every authored SVG against GitHub light and dark contexts. Use theme-neutral artwork, a tested `prefers-color-scheme` SVG, or explicit light/dark variants selected with `<picture>`.
 
-Every authored SVG must be evaluated against GitHub light and dark contexts.
+When an SVG is embedded with `<img>`, do not assume `currentColor` inherits from surrounding Markdown. Use explicit colors or a tested theme mechanism.
 
-Use one of:
+#### G5 — Rendered screenshot inspection
 
-1. theme-neutral artwork with sufficient contrast in both contexts;
-2. a tested `prefers-color-scheme` SVG implementation;
-3. explicit light/dark variants selected with `<picture>`.
-
-When an SVG is embedded with `<img>`, do not assume `currentColor` inherits the surrounding heading color. Use explicit colors or a tested theme-aware implementation.
-
-Check:
-
-```text
-foreground contrast
-accent contrast
-border visibility
-icon silhouette
-surface separation
-small details
-hierarchy
-project identity
-```
-
-A dark-mode asset that merely remains visible but loses hierarchy, detail, or identity does not pass.
-
-### G5 — Rendered screenshot inspection
-
-Before delivery, inspect an actual rendered preview of every non-trivial SVG.
-
-For composite assets such as heroes and support CTAs, inspect:
-
-```text
-unintended overlaps
-off-center groups
-crowded text
-unbalanced whitespace
-misaligned buttons or frames
-weak visual hierarchy
-theme-specific artifacts
-language-specific text errors
-```
-
-For simple icons, inspect the rasterized result at 16–48 px and at the actual README display size.
-
-If the first render reveals a defect, revise the geometry and render again. Do not ship a known imperfect first pass merely because the SVG is technically valid.
+Inspect actual rendered previews of non-trivial SVGs. For heroes and support CTAs, verify overlap, centering, text placement, whitespace balance, button/frame alignment, hierarchy, theme artifacts, and language errors. Fix defects and render again.
 
 ### Gate H — Light/dark README theme safety
 
-Every README visual must be evaluated against GitHub light and dark backgrounds, including:
-
-```text
-hero
-logo / marks
-section icons
-workflow graphics
-support CTA
-screenshots with framed presentation
-badges / authored visual modules
-```
-
-Use one of:
-
-1. genuinely theme-neutral artwork;
-2. explicit light/dark variants;
-3. theme-aware `<picture>` markup.
-
-Do not assume an SVG inherits GitHub's surrounding text color.
+Every README visual must be evaluated against GitHub light and dark backgrounds. The dark theme is a complete visual variant, not a blackened copy of the light theme.
 
 ### Gate I — Link correctness
 
-Inventory all important destinations before rewriting:
+Inventory all important destinations:
 
 ```text
 source repository
@@ -490,18 +317,100 @@ license / contribution
 security / privacy when applicable
 ```
 
-Keep destination semantics distinct:
+Keep destination semantics distinct and never replace an explicit destination with a guessed one.
 
-```text
-Source → inspect code / issues / history
-Documentation → learn / integrate / configure
-Demo → experience product
-Release → download / install
-Support → fund / sponsor / contribute financially
+### Gate J — In-page navigation correctness
+
+**Manual README navigation must use stable, explicit anchors. Do not guess GitHub's automatically generated heading slugs when the README contains authored navigation.**
+
+This gate exists because GitHub auto-generates heading anchors from rendered heading content, and those anchors can change when heading text or markup changes. GitHub also supports explicit custom anchors using `<a name="..."></a>`. citeturn320066search0
+
+#### J1 — Stable anchor rule
+
+Every manually authored internal navigation target must use an explicit custom anchor with a stable ASCII identifier:
+
+```html
+<a name="readme-overview"></a>
+## <img src="assets/readme/icons/overview.svg" width="22" height="22" alt=""> Overview
 ```
 
-Never replace an explicit destination with a guessed one.
-Never change a valid support destination to a more fashionable service without evidence.
+Use `name`, not a guessed heading slug. Keep the anchor on its own line immediately before the target heading.
+
+Recommended naming pattern:
+
+```text
+readme-overview
+readme-features
+readme-installation
+readme-architecture
+readme-development
+readme-support
+```
+
+Do not put the custom anchor inside the heading, inside the icon, or inside a link.
+
+#### J2 — Navigation link rule
+
+Every in-page navigation link must point exactly to an existing custom anchor:
+
+```markdown
+[Overview](#readme-overview)
+[Installation](#readme-installation)
+```
+
+Do not use forms such as:
+
+```markdown
+[Overview](#overview)
+[Overview](#<guessed-github-slug>)
+```
+
+unless the link is backed by a separately verified explicit anchor with that exact name.
+
+#### J3 — Coverage rule
+
+For every manually authored internal `href="#..."` or Markdown link target `(#...)`:
+
+```text
+navigation target
+      ↓
+exact matching <a name="..."></a>
+      ↓
+exact target heading immediately follows
+```
+
+Every explicit anchor intended as a navigation target must be used by at least one internal link, unless it is intentionally a non-navigation utility anchor and documented as such.
+
+#### J4 — Duplicate and collision rule
+
+No two custom anchors may share the same `name` value. Do not reuse a generic fragment name across unrelated sections.
+
+#### J5 — HTML safety rule
+
+Use GitHub-supported custom anchors in the form:
+
+```html
+<a name="unique-anchor-name"></a>
+```
+
+GitHub documents custom anchors as a supported way to link directly to arbitrary points in a Markdown document. Custom anchors do not appear in GitHub's automatic document outline, which is acceptable: the README's headings remain the semantic outline while the anchors provide stable manual navigation targets. citeturn320066search0
+
+#### J6 — Navigation QA is mandatory
+
+Before delivery, perform an explicit audit:
+
+```text
+extract all Markdown internal links: (#...)
+extract all HTML internal links: href="#..."
+extract all custom anchors: <a name="..."></a>
+normalize and compare exact identifiers
+verify each navigation target is present
+verify each target precedes the intended heading
+verify no duplicate anchor names
+verify there are no dead / guessed fragments
+```
+
+A missing target, typo, guessed GitHub slug, duplicate anchor, or navigation link that lands on the README root is a **BLOCKER**.
 
 ## 5. Information architecture
 
@@ -558,7 +467,7 @@ Credits
 Support
 ```
 
-### Project repository with existing strong docs
+### Existing strong docs
 
 Do not duplicate an entire manual. Use the README as an entry point and route readers to authoritative documents.
 
@@ -566,95 +475,34 @@ Do not duplicate an entire manual. Use the README as an entry point and route re
 
 Start with composition, not with cards.
 
-Useful README compositions include:
-
-```text
-integrated hero
-artifact-led hero
-split editorial hero
-before / after
-system map
-annotated specimen
-sequence strip
-feature matrix
-title-only / quiet documentation
-```
+Useful README compositions include integrated hero, artifact-led hero, split editorial hero, before/after, system map, annotated specimen, sequence strip, feature matrix, or quiet documentation.
 
 Cards, pills, badges, and repeated rounded containers are optional components, not the default layout.
 
-Avoid:
-
-- identical card grids for every feature;
-- excessive rounded panels;
-- large decorative gradients with no semantic job;
-- arbitrary glassmorphism;
-- giant empty banners that delay useful information;
-- visual repetition with no change in meaning.
+Avoid identical card grids for every feature, excessive rounded panels, decorative gradients without a semantic job, arbitrary glassmorphism, giant empty banners, and repetition with no change in meaning.
 
 ## 7. Typography
 
-Use typography as information architecture.
+Use typography as information architecture. Define roles for display, heading, body, utility, numeric, and code text.
 
-Define roles for:
-
-```text
-display / project statement
-heading / section
-body / explanation
-utility / metadata
-numeric / metrics
-code / technical examples
-```
-
-Protect:
-
-- line length;
-- line height;
-- contrast;
-- wrapping;
-- heading scale;
-- bilingual expansion only when explicitly requested;
-- code readability.
-
-Do not shrink body type simply to fit more content.
+Protect line length, line height, contrast, wrapping, heading scale, and code readability. Do not shrink body type simply to fit more content.
 
 For multilingual output, keep language boundaries structurally explicit and follow the language contract exactly.
 
 ## 8. Color system
 
-Derive colors from the project when possible.
-
-Use semantic roles, not scattered raw values:
+Derive colors from the project when possible and use semantic roles:
 
 ```text
-light.background
-light.surface
-light.foreground
-light.muted
-light.primary
-light.accent
-light.border
-light.focus
-
-dark.background
-dark.surface
-dark.foreground
-dark.muted
-dark.primary
-dark.accent
-dark.border
-dark.focus
+light.background / surface / foreground / muted / primary / accent / border / focus
+dark.background / surface / foreground / muted / primary / accent / border / focus
 ```
-
-The dark theme is a complete design variant, not a blackened copy of the light theme.
 
 Avoid low-contrast gray text, especially in screenshots, captions, badges, and metadata.
 
 ## 9. Images and proof
 
-Proof outranks decoration.
-
-Prefer, in order:
+Proof outranks decoration. Prefer:
 
 ```text
 real screenshot / real output
@@ -666,19 +514,11 @@ illustration
 abstract decoration
 ```
 
-Never fabricate proof.
-
-When screenshots are used:
-
-- show the useful state, not just an attractive screen;
-- crop deliberately;
-- preserve enough context to understand what is shown;
-- use captions when the screenshot needs interpretation;
-- avoid decorative browser chrome unless it contributes context.
+Never fabricate proof. Screenshots should show useful states, preserve enough context, use deliberate crops, and receive captions when interpretation is needed.
 
 ## 10. Markdown and HTML safety
 
-Keep searchable information in Markdown:
+Keep searchable information in Markdown or normal HTML text:
 
 - installation commands;
 - configuration;
@@ -688,47 +528,20 @@ Keep searchable information in Markdown:
 - limitations;
 - contribution instructions;
 - security/legal information;
-- direct support URLs.
+- direct support URLs;
+- in-page navigation targets and links.
 
-Use HTML only where GitHub rendering materially benefits, such as:
+Use HTML only where GitHub rendering materially benefits, such as `<picture>`, centered visual groups, controlled visual blocks, clickable image CTAs, and explicit custom anchors.
 
-- `<picture>` theme switching;
-- centered image groups;
-- controlled visual blocks;
-- clickable image CTAs.
-
-Do not convert the README into an image-based poster.
-
-Use repository-relative asset paths where practical.
-
-Use descriptive alt text for informative images. Decorative images should have empty or appropriately minimal alt text.
-
-Never put a critical support URL, payment identifier, or installation instruction only inside an image.
+Do not convert the README into an image-based poster. Never put a critical support URL, payment identifier, installation instruction, or navigation target only inside an image.
 
 ## 11. Dynamic repository facts
 
-Separate stable design from changing facts.
+Separate stable design from changing facts. Version, release status, counts, compatibility, and build facts should come from canonical sources when practical.
 
-Facts such as:
-
-```text
-version
-release status
-skill count
-supported engine version
-build status
-compatibility matrix
-```
-
-should come from a canonical source when practical.
-
-Do not duplicate a volatile fact in five different sections.
-
-A visual asset should not require redesign when a version or count changes.
+Do not duplicate volatile facts across many locations. A visual asset should not require redesign when a version or count changes.
 
 ## 12. Support / sponsorship writing standard
-
-Support copy must be factual and specific.
 
 When a verified support destination exists, the following output is mandatory:
 
@@ -742,21 +555,17 @@ direct canonical Markdown/HTML link
 visible clickable project-native Support CTA
 ```
 
-The CTA is mandatory whenever the destination exists; it is not optional even when the README already contains a text link or badge.
-
-Avoid guilt-based language, exaggerated promises, or fake urgency.
-
-When the repository already has established support language, preserve its factual meaning while translating it into the locked target language when required.
+Avoid guilt-based language, exaggerated promises, or fake urgency. When no support destination can be verified, do not invent one.
 
 ## 13. Workflow
 
 ### Step 1 — Inspect
 
-Read the repository and identify project facts, visual evidence, links, support destination, funding metadata, current README problems, existing assets, theme behavior, and existing documentation language(s).
+Read the repository and identify project facts, visual evidence, links, support destination, funding metadata, current README problems, existing assets, theme behavior, navigation structure, and documentation language(s).
 
 ### Step 2 — Lock the output language
 
-Write an internal language contract before drafting:
+Write an internal language contract:
 
 ```text
 Target language: English by default
@@ -764,8 +573,6 @@ Allowed secondary language(s): none unless explicitly requested
 Approved proper names / literals:
 Bilingual structure requested?: no unless explicitly requested
 ```
-
-Do not continue to final copy until the language contract is fixed.
 
 ### Step 3 — Establish the README thesis
 
@@ -786,51 +593,61 @@ Icon language:
 Support destination:
 Support CTA concept:
 Theme strategy:
+Navigation strategy:
 ```
 
 ### Step 4 — Plan the hierarchy
 
-Mark:
+Mark primary information, secondary information, reference information, and optional detail. Move high-value information upward.
 
-```text
-primary information
-secondary information
-reference information
-optional detail
-```
+### Step 5 — Plan headings and stable anchors
 
-Move high-value information upward.
-
-### Step 5 — Plan heading icons
-
-Before writing the final README, inventory all headings.
+Inventory all headings.
 
 Required:
 
 ```text
-H2 → SVG icon required
-H3+ → SVG icon preferred when meaningful
+H2 → exactly one semantic SVG icon
+H3+ → SVG icon when meaningful
 ```
 
-Build or reuse a coherent semantic icon set. Every icon must pass SVG QA and theme QA before integration.
+For every section that will be targeted by manual navigation, assign a stable custom anchor before drafting the final README:
 
-Do not finish the README with any level-2 heading lacking an icon.
+```text
+section name → stable ASCII anchor
+Overview     → readme-overview
+Features     → readme-features
+Install      → readme-installation
+```
 
-### Step 6 — Plan assets
+Do not invent navigation links from guessed heading slugs.
 
-Only create assets that are actually used.
+### Step 6 — Plan manual navigation
 
-Typical structure:
+When a README contains a hand-authored table of contents, hero navigation, section index, or “back to section” link:
+
+```text
+1. define stable anchor names
+2. place <a name="..."></a> immediately before target headings
+3. link to exact #anchor values
+4. keep heading text independent from anchor identifiers
+5. audit every href before delivery
+```
+
+Prefer stable anchors even when GitHub's auto-generated slug would currently appear to work. This avoids future breakage when heading wording or markup changes.
+
+### Step 7 — Plan assets
+
+Create only assets that are actually used. Typical structure:
 
 ```text
 assets/readme/
 ├── hero-light.svg
 ├── hero-dark.svg
-├── support-cta.svg
-├── support-cta-light.svg
-├── support-cta-dark.svg
+├── support-light.svg
+├── support-dark.svg
 └── icons/
-    ├── documentation.svg
+    ├── overview.svg
     ├── installation.svg
     ├── support.svg
     └── ...
@@ -838,11 +655,7 @@ assets/readme/
 
 Every authored visual must use the locked language unless the text is an approved proper name or literal.
 
-If a verified support destination exists, a project-native Support CTA must be planned here and must not be skipped later for convenience.
-
-Select the simplest theme strategy that remains reliable in GitHub rendering.
-
-### Step 7 — Write the copy
+### Step 8 — Write the copy
 
 Use concrete nouns and verbs. Prefer:
 
@@ -850,31 +663,29 @@ Use concrete nouns and verbs. Prefer:
 problem → capability → consequence
 ```
 
-over:
+over adjective-heavy marketing language.
 
-```text
-adjective → adjective → adjective
-```
+### Step 9 — Implement
 
-Avoid filler such as “powerful”, “next-generation”, “seamless”, or “revolutionary” unless the repository can substantiate the claim.
-
-Keep every authored sentence inside the language contract.
-
-### Step 8 — Implement
-
-Wire every used asset, link, heading icon, support destination, support CTA, and theme variant into the final README.
+Wire every used asset, link, heading icon, explicit anchor, navigation link, support destination, support CTA, and theme variant into the final README.
 
 For heading icons and other `<img>` SVGs:
 
 - do not rely on inherited `currentColor`;
-- verify the chosen theme mechanism actually renders in GitHub;
-- keep the visual language consistent across all icons;
+- verify the theme mechanism in GitHub;
+- keep one visual language;
 - ensure every H2 has exactly one icon;
-- ensure the icon remains semantically meaningful at the actual display size.
+- keep the icon meaningful at display size.
 
-### Step 9 — Render and QA assets
+For navigation:
 
-Before declaring the README complete:
+- use `<a name="..."></a>` for manual section targets;
+- keep identifiers stable and ASCII;
+- place anchors immediately before their headings;
+- link to exact custom anchors;
+- never depend on a guessed slug generated from HTML/SVG heading markup.
+
+### Step 10 — Render and QA assets
 
 ```text
 render SVGs
@@ -896,15 +707,27 @@ fix defects
 render again
 ```
 
-Never skip directly from “SVG source looks correct” to “done”.
+### Step 11 — Audit links and navigation
 
-### Step 10 — Audit
+Run both external-link and in-page-fragment audits.
+
+For in-page navigation, verify the exact correspondence:
+
+```text
+Markdown / HTML link fragment
+            ↕
+exact <a name="..."></a>
+            ↕
+intended section heading
+```
+
+Do not mark the README complete based only on visual inspection. Test the navigation targets themselves.
+
+### Step 12 — Final audit
 
 Perform the quality protocol below before declaring completion.
 
-## 14. Visual QA protocol
-
-Review the rendered README at realistic GitHub widths and inspect authored visuals at their real display sizes.
+## 14. Visual and navigation QA protocol
 
 ### First screen
 
@@ -915,21 +738,28 @@ Review the rendered README at realistic GitHub widths and inspect authored visua
 
 ### Language
 
-- the final output matches the locked language exactly;
+- output matches the locked language;
 - English is the default when no other language is explicitly requested;
-- no unsolicited Chinese appears in an English-only README;
-- no unsolicited English prose appears in a Chinese-only README;
-- bilingual structure is used only when requested;
-- proper names and technical literals are not incorrectly translated.
+- no unsolicited language mixing remains.
 
 ### Heading icons
 
-- every H2 has exactly one semantic SVG icon;
-- H3+ headings use SVG icons whenever a meaningful icon can be provided without noise;
-- icons are repository-local;
-- icons are visually coherent as one family;
-- no heading icon relies on untested `currentColor` inheritance;
-- every icon passes geometry, size, render, and theme QA.
+- every H2 has exactly one semantic local SVG icon;
+- H3+ headings use icons where meaningful;
+- icons are visually coherent;
+- icons do not rely on untested `currentColor` inheritance;
+- icons pass geometry, size, render, and theme QA.
+
+### Navigation
+
+- every manual navigation link has a matching explicit custom anchor;
+- every internal `href="#..."` has an exact `<a name="..."></a>` target;
+- every Markdown `(#...)` link has an exact matching anchor;
+- every navigation anchor sits immediately before the intended heading;
+- no duplicate custom anchor names exist;
+- no navigation target relies only on a guessed GitHub-generated slug;
+- no fragment typo or dead target remains;
+- navigation links were tested in the rendered GitHub context.
 
 ### Hierarchy
 
@@ -941,17 +771,15 @@ Review the rendered README at realistic GitHub widths and inspect authored visua
 
 ### Support
 
-- a verified support destination is present when one exists;
-- the Support / Sponsor / Funding section exists when required;
-- the project-native Support CTA exists when required;
-- the CTA is visible and clickable;
-- the CTA points to the canonical support destination;
-- the CTA remains legible in both themes;
-- the canonical support URL remains visible as searchable text outside the graphic.
+- verified support destination is present when one exists;
+- Support / Sponsor / Funding section exists when required;
+- project-native Support CTA exists when required;
+- CTA is visible and clickable;
+- CTA points to the canonical destination;
+- CTA remains legible in both themes;
+- canonical support URL remains searchable outside the graphic.
 
 ### SVG geometry
-
-For every non-trivial SVG:
 
 - no unintended overlaps;
 - intended groups are optically centered;
@@ -959,24 +787,14 @@ For every non-trivial SVG:
 - padding is balanced;
 - strokes and joins are consistent;
 - nothing is clipped;
-- no tiny details collapse at the actual display size;
-- there are no unexplained asymmetries.
-
-For composite heroes / CTAs, additionally check:
-
-- text block alignment;
-- image/frame alignment;
-- spacing between visual groups;
-- button alignment;
-- negative-space balance.
+- tiny details remain readable at actual display size.
 
 ### Light/dark
 
 - every authored visual remains legible;
 - icons do not disappear;
 - support CTA remains readable;
-- screenshots do not acquire broken borders;
-- dark surfaces do not become muddy;
+- screenshots retain useful contrast;
 - theme variants preserve meaning and hierarchy.
 
 ### Responsive / narrow width
@@ -987,7 +805,7 @@ For composite heroes / CTAs, additionally check:
 - headings wrap gracefully;
 - code blocks remain readable;
 - centered layouts do not collapse awkwardly;
-- SVGs preserve their intended visual center when reduced.
+- navigation links remain readable and clickable.
 
 ### Accessibility
 
@@ -996,32 +814,32 @@ For composite heroes / CTAs, additionally check:
 - links identify their destination;
 - heading hierarchy is logical;
 - color is not the only communication channel;
-- support links remain readable as text outside graphics;
-- authored visual metadata follows the target language unless a proper name or literal is required.
+- support URLs remain readable as text outside graphics;
+- authored visual metadata follows the target language.
 
 ### Trust / maintenance
 
-- every major claim is supported by repository evidence;
-- links point to the correct destinations;
-- the verified support URL is present when one exists;
-- the required Support / Sponsor / Funding section exists when applicable;
-- the required project-native CTA exists when applicable;
+- major claims have repository evidence;
+- links point to correct destinations;
+- support URL is present when one exists;
+- required support treatment exists;
+- required CTA exists;
 - versions and counts are not stale duplicates;
 - generated assets are actually referenced;
-- assets do not need manual repair after routine repository fact changes.
+- manual navigation remains valid if heading text changes.
 
 ## 15. Audit severity
 
 Classify findings:
 
 ```text
-BLOCKER  → wrong information, broken destination, missing required support treatment, missing required H2 icon, language-lock violation, unreadable theme, broken SVG, unintended overlap, clipping, materially off-center primary element, missing/unlinked required CTA
-HIGH     → broken hierarchy, misleading proof, major responsive failure, serious accessibility issue, poor dark-mode hierarchy, SVG defects at actual display size, unsolicited language mixing, weak heading icon coverage below H2
+BLOCKER  → wrong information, broken destination, missing required support treatment, missing required H2 icon, language-lock violation, unreadable theme, broken SVG, unintended overlap, clipping, materially off-center primary element, missing/unlinked required CTA, dead internal navigation target, guessed fragment, duplicate anchor name, navigation target mismatch
+HIGH     → broken hierarchy, misleading proof, major responsive failure, serious accessibility issue, poor dark-mode hierarchy, SVG defects at actual display size, unsolicited language mixing, weak heading icon coverage below H2, fragile navigation implementation
 MEDIUM   → visual inconsistency, weak copy, token drift, excessive decoration, minor optical imbalance
 LOW      → isolated polish issue
 ```
 
-Fix systemic, language, support, heading-icon, and trust failures before visual polish.
+Fix systemic, navigation, language, support, heading-icon, and trust failures before visual polish.
 
 ## 16. Anti-pattern filter
 
@@ -1031,27 +849,26 @@ Reject or reconsider:
 - a Hero that says only the project name and adjectives;
 - fake statistics or invented screenshots;
 - support information removed during redesign;
-- a verified support destination omitted because “README does not need sponsorship”;
 - a verified support destination without a visible clickable project-native CTA;
-- generic donation banner copied across repositories;
+- generic donation banners copied across repositories;
 - defaulting to Chinese when the user did not request Chinese;
-- unsolicited Chinese in an English-only README;
-- unsolicited English prose in a Chinese-only README;
-- bilingual prose added merely because the repository itself is bilingual;
+- unsolicited language mixing;
 - H2 headings without semantic SVG icons;
 - excessive H3+ icons that make hierarchy noisy;
-- heading icons that disappear or lose hierarchy in dark mode;
-- dark mode that is merely `filter: brightness(...)` or black backgrounds everywhere;
-- SVGs approved only from source inspection without a rendered preview;
-- SVGs whose mathematical center is correct but whose optical center is visibly wrong;
-- currentColor-dependent `<img>` SVGs that have not been explicitly tested in GitHub;
-- tiny SVG gaps that collapse at 16–24 px;
-- accidental stroke collisions or clipped viewBox edges;
+- heading icons that disappear in dark mode;
+- SVGs approved only from source inspection;
+- currentColor-dependent `<img>` SVGs that are not explicitly tested;
+- accidental SVG stroke collisions or clipping;
 - giant SVG posters replacing searchable documentation;
 - repeated emoji as pseudo-iconography;
 - every section wrapped in the same rounded card;
-- links whose destination semantics are unclear;
-- stale version numbers repeated in multiple places.
+- links with unclear destination semantics;
+- stale version numbers repeated in multiple places;
+- manually authored navigation links built from guessed GitHub heading slugs;
+- `href="#section"` links without a matching explicit `<a name="section"></a>` target;
+- anchors hidden inside headings or icons;
+- duplicate custom anchor names;
+- navigation links that look correct in source but were not tested in the rendered GitHub context.
 
 ## 17. Done standard
 
@@ -1072,6 +889,9 @@ The README is done only when:
 - all authored SVGs have passed geometry, size, render, and theme QA;
 - light and dark rendering are both intentional;
 - heading icons work in GitHub's actual image-rendering context;
+- every manual navigation target uses a stable explicit anchor;
+- every manual navigation link resolves to an exact anchor match;
+- no guessed or dead internal fragments remain;
 - links and facts are correct;
 - the page remains usable at narrow widths;
 - Markdown remains searchable and maintainable;
@@ -1086,5 +906,6 @@ This Skill is informed by public methodologies and documentation from:
 - `ui-ux-pro-max`
 - UI Skills catalog
 - README-focused practices already present in AzSkills
+- GitHub Markdown and section-link documentation
 
 AzSkills uses transferable design and documentation principles rather than copying upstream Skill text, databases, or repository-specific assets.
