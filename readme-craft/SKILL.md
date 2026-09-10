@@ -159,7 +159,7 @@ Do not force an icon onto every heading when it makes the hierarchy noisier. Sem
 
 ### Gate E — Mandatory support / sponsorship discovery and delivery
 
-For `whole-readme` and any mode that materially redesigns the README, **support/funding must be actively investigated and handled as a required deliverable, not an optional enhancement**.
+For `whole-readme`, `visual-refresh`, and any maintenance or asset task that changes README presentation, **support/funding must be actively investigated and handled as a required deliverable whenever a verified support destination exists**. It is never optional merely because the README can be considered visually complete without it.
 
 The workflow must inspect all applicable sources:
 
@@ -185,11 +185,20 @@ Support treatment is REQUIRED
 2. create or retain a dedicated Support / Sponsor / Funding section
 3. explain what support sustains
 4. provide a visible direct link
-5. create a project-native support CTA when visual assets are part of the README style
+5. create and place a project-native support CTA
 6. keep the URL in searchable Markdown/HTML outside the graphic
 ```
 
-This is a **BLOCKER** when a verified support destination exists but the final README omits meaningful support treatment.
+**CTA requirement:** when a verified support destination exists, the final README **MUST contain a visible project-native Support CTA** that links to that canonical destination. A text link, badge, or heading alone does not satisfy this requirement. The CTA may be an SVG, image, button-like HTML block, or another GitHub-safe visual component, but it must be visually identifiable as the support action and actually clickable.
+
+This is a **BLOCKER** when a verified support destination exists but any of the following is missing:
+
+```text
+Support / Sponsor / Funding section
+visible canonical support link
+project-native Support CTA
+CTA link wired to the canonical destination
+```
 
 When no support destination can be verified:
 
@@ -202,7 +211,16 @@ When the existing README contains a valid support destination, preserve it unles
 
 ### Gate F — Project-native support CTA
 
-When support treatment is required and a visual CTA is appropriate, the CTA must be project-native rather than a reusable generic donation banner.
+When a verified support destination exists, a project-native CTA is **mandatory**, not merely recommended.
+
+The CTA must:
+
+- be visible in the rendered README;
+- be clearly recognizable as a support action;
+- link directly to the verified canonical support destination;
+- use project-specific visual signals rather than a generic donation banner;
+- remain understandable in both light and dark GitHub themes;
+- pass the same geometry, rendering, accessibility, and theme checks as every other authored visual.
 
 Use at least two real project signals:
 
@@ -229,7 +247,15 @@ project-derived motif
 minimal support symbol with project-native treatment
 ```
 
-The CTA must pass the same geometry, rendering, accessibility, and theme checks as every other authored SVG.
+Do not satisfy the requirement with:
+
+```text
+text-only support link
+GitHub Sponsor badge alone
+generic heart / coffee / donation graphic with no project identity
+CTA text embedded only inside an inaccessible image
+CTA graphic that is not actually linked
+```
 
 Keep the canonical URL as actual Markdown/HTML link text outside the image as well. Critical payment or contact information must never exist only inside a graphic.
 
@@ -628,8 +654,6 @@ Use repository-relative asset paths where practical.
 
 Use descriptive alt text for informative images. Decorative images should have empty or appropriately minimal alt text.
 
-Never put a critical support URL, payment identifier, or installation instruction only inside an image.
-
 ## 10. Dynamic repository facts
 
 Separate stable design from changing facts.
@@ -655,30 +679,30 @@ A visual asset should not require redesign when a version or count changes.
 
 Support copy must be factual and specific.
 
-Good support copy explains:
+When a verified support destination exists, the Support section and project-native CTA are mandatory deliverables. The writing should explain:
 
 ```text
 what the maintainer is sustaining
 what support helps fund
 why contribution is optional
 where the canonical destination is
+what action the CTA performs
 ```
-
-When a verified support destination exists, the following output is mandatory for a redesigned README:
-
-```text
-Support / Sponsor / Funding section
-↓
-short factual explanation
-↓
-direct canonical Markdown/HTML link
-↓
-project-native support CTA when visual treatment is appropriate
-```
-
-The CTA is not a substitute for the textual destination.
 
 Avoid guilt-based language, exaggerated promises, or fake urgency.
+
+Preferred information architecture:
+
+```text
+## [support icon] Support
+
+A brief statement explaining what financial support helps sustain.
+
+[Project-native Support CTA]
+[Canonical Support URL]
+```
+
+The CTA should be visually prominent enough to recognize as an action, but it must not overwhelm the README's documentation hierarchy.
 
 When the repository already has established support language, preserve its factual meaning while improving presentation.
 
@@ -688,7 +712,7 @@ Do not place a payment address, account identifier, or critical support URL only
 
 ### Step 1 — Inspect
 
-Read the repository and identify project facts, visual evidence, links, support destination, funding metadata, current README problems, existing assets, and theme behavior.
+Read the repository and identify project facts, visual evidence, links, support destination, funding metadata, current README problems, and existing assets.
 
 ### Step 2 — Establish the README thesis
 
@@ -711,8 +735,6 @@ Support CTA concept:
 Theme strategy:
 ```
 
-Do not continue to final copy before support discovery has been completed.
-
 ### Step 3 — Plan the hierarchy
 
 Mark:
@@ -730,15 +752,13 @@ Move high-value information upward.
 
 Only create assets that are actually used.
 
-Typical structure:
+When support is available, reserve an explicit asset slot for the required CTA. Typical structure:
 
 ```text
 assets/readme/
 ├── hero.svg
-├── hero-light.svg
 ├── hero-dark.svg
 ├── support-cta.svg
-├── support-cta-light.svg
 ├── support-cta-dark.svg
 └── icons/
     ├── documentation.svg
@@ -746,8 +766,6 @@ assets/readme/
     ├── support.svg
     └── ...
 ```
-
-Select the simplest theme strategy that remains reliable in GitHub rendering.
 
 Do not generate an asset library for decoration alone.
 
@@ -769,43 +787,17 @@ Avoid filler such as “powerful”, “next-generation”, “seamless”, or �
 
 ### Step 6 — Implement
 
-Wire every used asset, link, heading icon, support destination, support CTA, and theme variant into the final README.
+Wire every used asset, link, heading icon, support destination, **required Support CTA**, and theme variant into the final README.
 
-For heading icons and other `<img>` SVGs:
+### Step 7 — Audit
 
-- do not rely on inherited `currentColor`;
-- verify the chosen theme mechanism actually renders in GitHub;
-- keep the visual language consistent across all icons.
-
-### Step 7 — Render and QA assets
-
-Before declaring the README complete:
-
-```text
-render SVGs
-↓
-inspect geometry
-↓
-inspect native / small / wide sizes
-↓
-inspect light mode
-↓
-inspect dark mode
-↓
-fix defects
-↓
-render again
-```
-
-Never skip directly from “SVG source looks correct” to “done”.
-
-### Step 8 — Audit
-
-Perform the quality protocol below before declaring completion.
+Perform the quality protocol below before declaring completion. A verified support destination without a required CTA is a failed README, not a stylistic variation.
 
 ## 13. Visual QA protocol
 
-Review the rendered README at realistic GitHub widths and inspect authored visuals at their real display sizes.
+Review the rendered README at realistic GitHub widths.
+
+Check:
 
 ### First screen
 
@@ -822,35 +814,26 @@ Review the rendered README at realistic GitHub widths and inspect authored visua
 - visual landmarks are meaningful;
 - repeated components do not dominate the page.
 
-### SVG geometry
+### Support
 
-For every non-trivial SVG:
+When a support destination exists:
 
-- no unintended overlaps;
-- intended groups are optically centered;
-- internal symbols are centered within their frames when appropriate;
-- padding is balanced;
-- strokes and joins are consistent;
-- nothing is clipped;
-- no tiny details collapse at the actual display size;
-- there are no unexplained asymmetries.
-
-For composite heroes / CTAs, additionally check:
-
-- text block alignment;
-- image/frame alignment;
-- spacing between visual groups;
-- button alignment;
-- negative-space balance.
+- Support / Sponsor / Funding section is present;
+- canonical support URL is visible as searchable link text;
+- project-native CTA is present;
+- CTA is actually clickable and points to the canonical destination;
+- CTA is visually recognizable as an action;
+- CTA does not replace or obscure searchable support information;
+- CTA passes the SVG/visual QA gates when it is an authored visual asset.
 
 ### Light/dark
 
-- every authored visual remains legible;
+- all authored visuals remain legible;
 - icons do not disappear;
-- support CTA remains readable;
 - screenshots do not acquire broken borders;
 - dark surfaces do not become muddy;
-- theme variants preserve meaning and hierarchy.
+- theme variants preserve meaning;
+- support CTA remains actionable and visually coherent in both themes.
 
 ### Responsive / narrow width
 
@@ -860,7 +843,7 @@ For composite heroes / CTAs, additionally check:
 - headings wrap gracefully;
 - code blocks remain readable;
 - centered layouts do not collapse awkwardly;
-- SVGs preserve their intended visual center when reduced.
+- support CTA remains readable and clickable.
 
 ### Accessibility
 
@@ -869,27 +852,26 @@ For composite heroes / CTAs, additionally check:
 - links identify their destination;
 - heading hierarchy is logical;
 - color is not the only communication channel;
-- support links remain readable as text outside graphics.
+- support CTA has an accessible name or nearby equivalent link text.
 
 ### Trust / maintenance
 
 - every major claim is supported by repository evidence;
 - links point to the correct destinations;
-- the verified support URL is present when one exists;
-- the Support / Sponsor / Funding section exists when required;
-- the support CTA, when used, points to the same canonical destination;
+- support URL is preserved and visible when it exists;
+- required CTA exists when support exists;
+- CTA is linked to the same canonical support destination;
 - versions and counts are not stale duplicates;
-- generated assets are actually referenced;
-- assets do not need manual repair after routine repository fact changes.
+- generated assets are actually referenced.
 
 ## 14. Audit severity
 
 Classify findings:
 
 ```text
-BLOCKER  → wrong information, broken destination, missing required support treatment, unreadable theme, broken SVG, unintended overlap, clipping, materially off-center primary element
-HIGH     → broken hierarchy, misleading proof, major responsive failure, serious accessibility issue, poor dark-mode hierarchy, SVG defects at actual display size
-MEDIUM   → visual inconsistency, weak copy, token drift, excessive decoration, minor optical imbalance
+BLOCKER  → wrong information, broken destination, unreadable theme, missing required support destination, missing required Support CTA, non-clickable CTA
+HIGH     → broken hierarchy, misleading proof, major responsive failure, serious accessibility issue, broken CTA presentation
+MEDIUM   → visual inconsistency, weak copy, token drift, excessive decoration
 LOW      → isolated polish issue
 ```
 
@@ -903,15 +885,10 @@ Reject or reconsider:
 - a Hero that says only the project name and adjectives;
 - fake statistics or invented screenshots;
 - support information removed during redesign;
-- a verified support destination omitted because “README does not need sponsorship”;
+- support section without the required CTA when a canonical support destination exists;
 - generic donation banner copied across repositories;
 - dark mode that is merely `filter: brightness(...)` or black backgrounds everywhere;
 - unreadable heading icons on one theme;
-- SVGs approved only from source inspection without a rendered preview;
-- SVGs whose mathematical center is correct but whose optical center is visibly wrong;
-- currentColor-dependent `<img>` SVGs that have not been explicitly tested in GitHub;
-- tiny SVG gaps that collapse at 16–24 px;
-- accidental stroke collisions or clipped viewBox edges;
 - giant SVG posters replacing searchable documentation;
 - repeated emoji as pseudo-iconography;
 - every section wrapped in the same rounded card;
@@ -920,19 +897,16 @@ Reject or reconsider:
 
 ## 16. Done standard
 
-The README is done only when:
+The README is done when:
 
 - the project can be understood quickly;
 - the first action is obvious;
 - proof is real and useful;
 - the visual system clearly belongs to the project;
-- support/funding discovery has been explicitly completed;
-- the verified support destination is preserved and meaningfully presented when one exists;
-- the Support / Sponsor / Funding section is present when required;
-- any project-native support CTA is rendered, inspected, and visually correct;
-- all authored SVGs have passed geometry, size, and theme QA;
+- support/sponsorship has been investigated;
+- a canonical support destination, when one exists, has a dedicated section, visible searchable link, and project-native CTA;
+- every authored SVG has passed source, geometry, multi-size, Light/Dark, and rendered-preview QA;
 - light and dark rendering are both intentional;
-- heading icons work in GitHub's actual image-rendering context;
 - links and facts are correct;
 - the page remains usable at narrow widths;
 - Markdown remains searchable and maintainable;
