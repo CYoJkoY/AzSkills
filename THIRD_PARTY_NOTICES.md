@@ -15,7 +15,7 @@ These public workflows overlap around logo ideation, prompt construction, SVG pr
 
 No upstream example asset library or repository-specific implementation is included.
 
-## `ui-design` and shared design intelligence
+## `ui-design`, `ui-aesthetics`, and shared design intelligence
 
 The frontend design layer is independently synthesized from public methodologies including:
 
@@ -25,8 +25,11 @@ The frontend design layer is independently synthesized from public methodologies
 - `frontend-designer-skill`: https://github.com/kozz36/frontend-designer-skill
 - UI Skills frontend catalog: https://www.ui-skills.com/skills/frontend
 - UI Skills public methodology catalog: https://www.ui-skills.com/skills
+- `ui-aesthetics-skill`: https://github.com/kasonye/ui-aesthetics-skill
 
-The synthesis specifically informed:
+`ui-aesthetics` specifically adds a focused visual-judgment layer informed by the upstream project's public concepts: explicit aesthetic thesis, composition-before-decoration, anti-generic review, component precision, state/motion discipline, depth/lighting restraint, and rendered-output self-critique. AzSkills rewrites these concepts into its own behavior contract and composes them with `ui-design` instead of replacing it.
+
+The broader synthesis informed:
 
 - context-first visual direction and explicit aesthetic thesis
 - anti-generic / anti-AI-slop design review
@@ -39,6 +42,8 @@ The synthesis specifically informed:
 - motion systems, reduced-motion handling, and performance-aware animation
 - internationalization, RTL, and text-expansion resilience
 - edge-case hardening and rendered visual QA
+
+AzSkills does not copy the upstream `ui-aesthetics-skill` repository's platform wrappers, assets, generated examples, scripts, or repository-specific reference corpus.
 
 ### Semantic icon morphing integration
 
@@ -53,7 +58,7 @@ The integration preserves AzSkills-specific priorities: existing icon systems ta
 
 The upstream repository declares the MIT License. AzSkills does not copy its source code, icon data, generated outputs, or repository-specific implementation into the project.
 
-AzSkills intentionally does not import or reproduce external searchable databases, generated outputs, repository-specific scripts, private/internal material, or large upstream skill packages. The implementation is maintained as original AzSkills text in [`ui-design/SKILL.md`](ui-design/SKILL.md) and [`design-intelligence.md`](design-intelligence.md).
+AzSkills intentionally does not import or reproduce external searchable databases, generated outputs, repository-specific scripts, private/internal material, or large upstream skill packages. The implementation is maintained as original AzSkills text in [`ui-design/SKILL.md`](ui-design/SKILL.md), [`ui-aesthetics/SKILL.md`](ui-aesthetics/SKILL.md), and [`design-intelligence.md`](design-intelligence.md).
 
 One caution from current public discussion is preserved in AzSkills' architecture: external tooling may ship much more data than an agent actually reads, and some combined modes can silently ignore options. AzSkills therefore prioritizes a compact contract with explicit trigger conditions and verification requirements over a large passive data bundle. See the public discussion around UI/UX Pro Max issue #484 for an example of this class of integration risk: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/issues/484
 
