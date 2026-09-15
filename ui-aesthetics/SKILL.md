@@ -204,7 +204,7 @@ border    → structure / state
 shadow    → elevation
 blur      → contextual depth
 highlight → material emphasis
- glow     → exceptional focus
+glow      → exceptional focus
 ```
 
 Do not stack every effect on every surface. In dark interfaces, establish separation through surface levels and edge definition before relying on blur or glow.
