@@ -259,6 +259,7 @@ AzSkills/
 ├── application-architecture/
 ├── frontend-architecture/
 ├── frontend-slides/
+├── ahkv2-opt/
 ├── ip-as-logo/
 ├── l13n/
 ├── logo-generator/
