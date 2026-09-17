@@ -1,0 +1,139 @@
+name: "New Skill Proposal"
+description: >
+  Propose a new SKILL.md behavior contract. A Skill must be a bounded,
+  composable capability — not a universal prompt.
+title: "[Proposal] <skill-directory-name>: <one-line capability summary>"
+labels:
+  - "type: proposal"
+  - "status: triage"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > **Before you submit**, please verify:
+        > 1. No existing Skill already covers this capability (check the
+        >    [repository structure](https://github.com/CYoJkoY/AzSkills#repository-structure)).
+        > 2. The proposed Skill has a **narrow, single responsibility**.
+        > 3. It can be **composed** with existing Skills rather than replacing them.
+
+  - type: input
+    id: directory
+    attributes:
+      label: Proposed Directory Name
+      description: >
+        Kebab-case directory name that will contain the SKILL.md
+        (e.g. `api-contract-review`, `motion-design-tokens`).
+      placeholder: my-new-skill
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: >
+        Define **when** this Skill applies and **when it should stay out
+        of the way**. Be as specific as possible.
+      placeholder: |
+        **Applies when:** …
+        **Does NOT apply when:** …
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      description: >
+        List the non-negotiable technical, visual, language, or process
+        rules the Skill must enforce.
+      placeholder: |
+        1. …
+        2. …
+    validations:
+      required: true
+
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Workflow Outline
+      description: >
+        Sketch the repeatable execution sequence (numbered steps).
+        This does not need to be final — a clear outline is sufficient.
+      placeholder: |
+        1. Gather …
+        2. Analyse …
+        3. Produce …
+        4. Verify …
+    validations:
+      required: true
+
+  - type: textarea
+    id: quality-gates
+    attributes:
+      label: Quality Gates
+      description: >
+        What must be checked before the Skill's output is considered complete?
+      placeholder: |
+        - [ ] …
+        - [ ] …
+    validations:
+      required: true
+
+  - type: textarea
+    id: output-contract
+    attributes:
+      label: Output Contract
+      description: >
+        Describe the expected artifact or response shape the Skill produces.
+      placeholder: >
+        A Markdown document containing sections A, B, C … / A JSON schema … /
+        A set of annotated screenshots …
+    validations:
+      required: true
+
+  - type: textarea
+    id: supporting-files
+    attributes:
+      label: Supporting Files (Optional)
+      description: >
+        Will this Skill need additional files alongside SKILL.md
+        (references, examples, templates, assets)?
+      placeholder: |
+        - references/example-input.md
+        - references/example-output.md
+    validations:
+      required: false
+
+  - type: dropdown
+    id: composition
+    attributes:
+      label: Related / Composable Skills
+      description: >
+        Which existing Skills could this new Skill compose with?
+      multiple: true
+      options:
+        - application-architecture
+        - frontend-architecture
+        - frontend-slides
+        - ui-aesthetics
+        - ui-design
+        - readme-craft
+        - l13n
+        - logo-generator
+        - photo-abstract-editorial
+        - steam-mod-page
+        - ultrathink
+        - None / Standalone
+    validations:
+      required: false
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation & Use Cases
+      description: >
+        Why is this Skill needed? Describe one or more concrete real-work
+        scenarios where it adds value over ad-hoc prompting.
+    validations:
+      required: true

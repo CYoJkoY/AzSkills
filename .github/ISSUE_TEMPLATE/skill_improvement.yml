@@ -1,0 +1,98 @@
+name: "Skill Improvement"
+description: >
+  Suggest an enhancement to an existing Skill — tighter scope, better
+  constraints, refined workflow, stronger quality gates, etc.
+title: "[Improvement] <skill-directory>: <one-line summary>"
+labels:
+  - "type: improvement"
+  - "status: triage"
+body:
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Target Skill
+      options:
+        - application-architecture
+        - frontend-architecture
+        - frontend-slides
+        - ahkv2-opt
+        - ip-as-logo
+        - l13n
+        - logo-generator
+        - photo-abstract-editorial
+        - readme-craft
+        - steam-mod-page
+        - ui-aesthetics
+        - ui-design
+        - ultrathink
+        - design-intelligence (root)
+        - Other / Multiple
+    validations:
+      required: true
+
+  - type: dropdown
+    id: element
+    attributes:
+      label: Contract Element to Improve
+      multiple: true
+      options:
+        - Scope
+        - Constraints
+        - Workflow
+        - Quality Gates
+        - Output Contract
+        - Supporting Files
+        - Cross-Skill Composition
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current State
+      description: >
+        Paste or reference the current SKILL.md excerpt you want to change.
+      placeholder: |
+        ```markdown
+        <current excerpt>
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed Change
+      description: >
+        Describe (or draft) the improved wording / structure.
+        A before → after diff is ideal.
+      placeholder: |
+        ```diff
+        - Old text …
+        + New text …
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: >
+        Explain why the change matters — e.g. reduces ambiguity, closes a
+        quality gap, aligns with a new runtime convention, etc.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: breaking
+    attributes:
+      label: Is this a breaking change?
+      description: >
+        Would existing users of this Skill need to update their workflows?
+      options:
+        - "No — purely additive / clarifying"
+        - "Possibly — behaviour may shift subtly"
+        - "Yes — contract semantics change"
+    validations:
+      required: true

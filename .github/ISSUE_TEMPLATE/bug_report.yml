@@ -1,0 +1,99 @@
+name: "Skill Defect Report"
+description: >
+  Report a defect in an existing Skill contract — e.g. ambiguous scope,
+  contradictory constraints, broken workflow steps, or missing quality gates.
+title: "[Defect] <skill-directory>: <one-line summary>"
+labels:
+  - "type: defect"
+  - "status: triage"
+body:
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Affected Skill
+      description: Which Skill directory does this defect belong to?
+      options:
+        - application-architecture
+        - frontend-architecture
+        - frontend-slides
+        - ahkv2-opt
+        - ip-as-logo
+        - l13n
+        - logo-generator
+        - photo-abstract-editorial
+        - readme-craft
+        - steam-mod-page
+        - ui-aesthetics
+        - ui-design
+        - ultrathink
+        - design-intelligence (root)
+        - Other / Multiple
+    validations:
+      required: true
+
+  - type: textarea
+    id: contract-element
+    attributes:
+      label: Contract Element(s) Affected
+      description: >
+        Which part(s) of the SKILL.md contract are defective?
+        Check all that apply and describe the problem for each.
+      value: |
+        - [ ] **Scope** — activation / exclusion conditions are unclear or wrong
+        - [ ] **Constraints** — non-negotiable rules are missing or contradictory
+        - [ ] **Workflow** — execution steps are ambiguous, incomplete, or out of order
+        - [ ] **Quality Gates** — verification criteria are insufficient or untestable
+        - [ ] **Output Contract** — expected artifact / response shape is undefined
+        - [ ] **Supporting Files** — referenced files are missing or inconsistent
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: >
+        What should the Skill contract specify? Reference the relevant
+        SKILL.md section(s) by heading or line number if possible.
+      placeholder: >
+        The Scope section should explicitly exclude …; the Workflow step 3
+        should require … before proceeding to step 4.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Observed / Actual Behavior
+      description: >
+        What does the contract currently say (or fail to say)?
+        Paste the problematic excerpt here.
+      placeholder: |
+        ```markdown
+        <paste the relevant SKILL.md excerpt>
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Context
+      description: >
+        Describe the AI agent runtime, model, and task that exposed the defect.
+        This project is runtime-agnostic, so the environment matters.
+      value: |
+        - **Agent / Runtime**: (e.g. Claude Code, Cursor, GitHub Copilot, custom)
+        - **Model**: (e.g. claude-sonnet-4, gpt-4o)
+        - **Task prompt** (redacted if sensitive):
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: >
+        Links, screenshots, related issues, or suggestions for a fix.
+    validations:
+      required: false

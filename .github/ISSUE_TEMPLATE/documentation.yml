@@ -1,0 +1,44 @@
+name: "Documentation"
+description: >
+  Report issues or suggest improvements for README.md,
+  THIRD_PARTY_NOTICES.md, design-intelligence.md, or any other
+  repository-level documentation.
+title: "[Docs] <file or area>: <one-line summary>"
+labels:
+  - "type: documentation"
+  - "status: triage"
+body:
+  - type: dropdown
+    id: doc-area
+    attributes:
+      label: Documentation Area
+      options:
+        - README.md
+        - THIRD_PARTY_NOTICES.md
+        - design-intelligence.md
+        - assets / images
+        - .github (templates, workflows)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: >
+        Describe the issue or improvement. Include a link to the specific
+        file / section if applicable.
+      placeholder: >
+        The "How to use → Register it with your environment" section does
+        not mention … It would help to add an example for …
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested Wording (Optional)
+      description: Provide replacement or additional text if you have it.
+    validations:
+      required: false
