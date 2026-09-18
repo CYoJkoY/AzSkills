@@ -1,9 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 720" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1760 800" role="img" aria-labelledby="title desc">
   <title id="title">AzSkills — reusable AI behavior contracts</title>
   <desc id="desc">A dark editorial hero for AzSkills showing a SKILL.md contract becoming focused Skills, design-system guidance, project context, and verified output.</desc>
 
-  <rect width="1600" height="720" rx="32" fill="#101719"/>
-  <rect x="24" y="24" width="1552" height="672" rx="24" fill="none" stroke="#314547" stroke-width="2"/>
+  <rect width="1760" height="800" rx="32" fill="#101719"/>
+  <g transform="translate(64 95)">
+    <rect x="24" y="24" width="1552" height="672" rx="24" fill="none" stroke="#314547" stroke-width="2"/>
 
   <g fill="none" stroke="#284043" stroke-width="2">
     <path d="M56 104 H206 V116 H270"/>
@@ -128,5 +129,6 @@
         <text x="95" y="0" fill="#768b89" font-size="12">QA before handoff</text>
       </g>
     </g>
+  </g>
   </g>
 </svg>
