@@ -1,0 +1,71 @@
+name: Validate Design Contracts
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "design-system/**"
+      - "design-intelligence.md"
+      - "README.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - ".github/ISSUE_TEMPLATE/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-design-contract:
+    name: Validate DESIGN.md Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate design-system Skill
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f design-system/SKILL.md
+          test -f design-system/references/design-md-adapter.md
+          test -f design-system/references/design-md-schema.md
+          test -f design-system/references/source-format-matrix.md
+
+          grep -q '^name: design-system$' design-system/SKILL.md
+          grep -q '^description:' design-system/SKILL.md
+          grep -q '^## Scope$' design-system/SKILL.md
+          grep -q '^## Precedence$' design-system/SKILL.md
+          grep -q '^## Normal form$' design-system/SKILL.md
+          grep -q '^## Provenance$' design-system/SKILL.md
+          grep -q '^## Quality gates$' design-system/SKILL.md
+          grep -q '^## Output contract$' design-system/SKILL.md
+
+      - name: Validate AzSkills integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'design-system/SKILL.md' README.md
+          grep -q 'DESIGN.md adaptation layer' design-intelligence.md
+          grep -q 'DESIGN.md integration' THIRD_PARTY_NOTICES.md
+          grep -q 'design-system' .github/ISSUE_TEMPLATE/new_skill.yml
+          grep -q 'design-system' .github/ISSUE_TEMPLATE/skill_improvement.yml
+          grep -q 'design-system' .github/ISSUE_TEMPLATE/bug_report.yml
+
+      - name: Reject stale skill count
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -Eiq '[0-9]+[[:space:]]+focused Skills' README.md; then
+            echo "README contains a hardcoded focused-Skill count."
+            exit 1
+          fi
+
+      - name: Validate source-format matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'HU-UH awesome-design-md' design-system/references/source-format-matrix.md
+          grep -q 'VoltAgent awesome-design-md' design-system/references/source-format-matrix.md
+          grep -q 'Google DESIGN.md specification' design-system/references/source-format-matrix.md
