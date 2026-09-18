@@ -1,25 +1,28 @@
+# AzSkills
+
 <div align="center">
 
-<img src="assets/azskills-hero.svg" alt="AzSkills — reusable AI skills for engineering, design, documentation, localization, and visual work" width="100%">
-
-# AzSkills
+<img src="assets/azskills-hero.svg" alt="AzSkills — reusable AI skills for engineering, design, documentation, localization, translation, and visual production" width="100%">
 
 **Reusable AI Skills for real work.**
 
-Repository-local `SKILL.md` behavior contracts for engineering, architecture, frontend systems, UI quality, presentations, documentation, localization, translation, and visual production.
+Repository-local `SKILL.md` behavior contracts for engineering, architecture, frontend systems, design systems, UI quality, presentations, documentation, localization, translation, and visual production.
 
 <p>
   <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/CYoJkoY/AzSkills/main/.github/badges/skills.json&style=flat-square" alt="Skill count">
   <img src="https://img.shields.io/badge/Format-SKILL.md-7A8E8E?style=flat-square" alt="SKILL.md format">
+  <img src="https://img.shields.io/github/actions/workflow/status/CYoJkoY/AzSkills/validate-design-contract.yml?branch=main&style=flat-square&label=Design%20contracts" alt="Design contract validation">
   <img src="https://img.shields.io/github/license/CYoJkoY/AzSkills?style=flat-square&color=9E8F7E" alt="MIT License">
   <a href="https://github.com/CYoJkoY/AzSkills/stargazers"><img src="https://img.shields.io/github/stars/CYoJkoY/AzSkills?style=flat-square" alt="GitHub stars"></a>
 </p>
 
 <p>
   <a href="#readme-overview">Overview</a> ·
+  <a href="#readme-architecture">Architecture</a> ·
   <a href="#readme-skills">Skills</a> ·
   <a href="#readme-choose">Choose</a> ·
   <a href="#readme-usage">Use</a> ·
+  <a href="#readme-quality">Quality</a> ·
   <a href="#readme-contributing">Contribute</a> ·
   <a href="#readme-support">Support</a>
 </p>
@@ -33,7 +36,9 @@ Repository-local `SKILL.md` behavior contracts for engineering, architecture, fr
 
 AzSkills is a **modular library of reusable AI behavior contracts**.
 
-A Skill is not a framework, runtime, or agent platform. It is a human-readable `SKILL.md` that defines a bounded capability with explicit rules for activation, execution, verification, and output.
+A Skill is not a framework, runtime, agent platform, or application. It is a human-readable `SKILL.md` that defines a bounded capability with explicit rules for activation, execution, verification, and output.
+
+The core model is deliberately small:
 
 ```text
 Task
@@ -49,7 +54,7 @@ Verify against the contract
 Return the checked result
 ```
 
-### Why this model
+### Why behavior contracts?
 
 Prompt fragments are easy to copy and hard to maintain. A Skill makes the important parts explicit:
 
@@ -57,54 +62,145 @@ Prompt fragments are easy to copy and hard to maintain. A Skill makes the import
 | :--- | :--- |
 | **Scope** | Defines when the Skill applies and when it should stay out of the way. |
 | **Constraints** | Records non-negotiable technical, visual, language, or process rules. |
-| **Workflow** | Turns experience into a repeatable sequence instead of ad-hoc prompting. |
-| **Quality gates** | Specifies what must be checked before work is considered complete. |
-| **Output contract** | Defines what the resulting artifact or response should contain. |
+| **Workflow** | Turns experience into a repeatable execution sequence. |
+| **Quality gates** | Defines what must be verified before work is considered complete. |
+| **Output contract** | Defines the expected artifact or response shape. |
 
-AzSkills favors **small responsibilities, composition, repository-native context, explicit verification, and maintainability** over one giant universal prompt.
+AzSkills therefore favors **small responsibilities, composition, repository-native context, explicit verification, and maintainability** over one giant universal prompt.
+
+---
+
+<a name="readme-architecture"></a>
+## <img src="assets/readme/icons/visual-design.svg" width="24" height="24" alt=""> Architecture
+
+AzSkills separates **behavior contracts**, **shared reasoning**, and **execution-specific Skills**.
+
+```text
+                         ┌──────────────────────┐
+                         │   Explicit request   │
+                         └──────────┬───────────┘
+                                    ↓
+                         ┌──────────────────────┐
+                         │   Skill selection    │
+                         │  narrowest capability│
+                         └──────────┬───────────┘
+                                    ↓
+                 ┌──────────────────┴──────────────────┐
+                 │                                     │
+                 ↓                                     ↓
+        Domain Skill contract                 design-system
+                 │                         DESIGN.md adapter
+                 │                                     │
+                 │                                     ↓
+                 │                            Primitive → Semantic
+                 │                                     ↓
+                 │                               Component → State
+                 │                                     │
+                 └──────────────────┬──────────────────┘
+                                    ↓
+                         ┌──────────────────────┐
+                         │  Project context +   │
+                         │ existing conventions │
+                         └──────────┬───────────┘
+                                    ↓
+                         ┌──────────────────────┐
+                         │      Execution       │
+                         │  implement / produce │
+                         └──────────┬───────────┘
+                                    ↓
+                         ┌──────────────────────┐
+                         │ Verification + QA    │
+                         │ render / test / audit│
+                         └──────────────────────┘
+```
+
+### Shared reasoning layer
+
+[`design-intelligence.md`](design-intelligence.md) is **not a Skill**. It is a cross-cutting reasoning layer for visual systems, interaction, composition, accessibility, motion, and visual QA.
+
+It is intentionally separate from implementation Skills so the same visual reasoning is not duplicated across UI, presentation, identity, and documentation workflows.
+
+### DESIGN.md integration
+
+[`design-system`](design-system/SKILL.md) is the boundary between external design-system documents and AzSkills.
+
+It supports three source forms:
+
+| Source form | Interpretation |
+| :--- | :--- |
+| **Token-bearing** | Machine-readable values are treated as exact source values; prose supplies intent and usage. |
+| **Prose-first** | Explicit values are retained as `verified-prose` evidence; missing tokens are never fabricated. |
+| **Mixed** | Token values supply exact data; prose supplies behavior, rationale, states, and responsive guidance. |
+
+The adapter then normalizes those sources into:
+
+```text
+Context
+  ↓
+Primitive
+  ↓
+Semantic
+  ↓
+Component
+  ↓
+State
+  ↓
+Responsive / Accessibility / Motion / QA
+```
+
+Multiple design references remain a **reference corpus**, not a system to average together. Source authority, inferred values, implementation choices, and unresolved assumptions are kept explicit.
+
+See:
+
+- [DESIGN.md adapter](design-system/references/design-md-adapter.md)
+- [DESIGN.md schema reference](design-system/references/design-md-schema.md)
+- [Source format matrix](design-system/references/source-format-matrix.md)
 
 ---
 
 <a name="readme-skills"></a>
 ## <img src="assets/readme/icons/engineering.svg" width="24" height="24" alt=""> Skill catalog
 
-The repository contains focused Skills. Pick the smallest one that fully owns the task, then compose additional Skills only when they contribute a separate responsibility.
+Choose the smallest Skill that fully owns the task. Compose additional Skills only when they contribute a separate responsibility.
 
 ### Engineering & architecture
 
 | Skill | Focus |
 | :--- | :--- |
-| [`application-architecture`](application-architecture/SKILL.md) | Choose the smallest maintainable runtime, process topology, persistence model, and application boundary before implementation. |
-| [`frontend-architecture`](frontend-architecture/SKILL.md) | Establish a maintainable frontend language, framework, styling, storage, and client/server boundary before substantial UI work. |
-| [`ahkv2-opt`](ahkv2-opt/SKILL.md) | Refactor and review AutoHotkey v2 code with explicit rules for control flow, state, hotkeys, timers, GUI behavior, performance, and testing. |
-| [`ultrathink`](ultrathink/SKILL.md) | Deep engineering methodology for difficult implementation and refactoring work: inspect, challenge assumptions, design boundaries, test alternatives, and simplify. |
+| [`application-architecture`](application-architecture/SKILL.md) | Runtime topology, persistence, process boundaries, and maintainable application structure. |
+| [`frontend-architecture`](frontend-architecture/SKILL.md) | Frontend language, framework, styling, storage, and client/server boundaries before substantial UI work. |
+| [`ahkv2-opt`](ahkv2-opt/SKILL.md) | AutoHotkey v2 control flow, state, hotkeys, timers, GUI behavior, performance, and testing. |
+| [`ultrathink`](ultrathink/SKILL.md) | Deep methodology for difficult implementation, refactoring, assumption testing, boundary design, and simplification. |
 
-### UI, visual design & presentation
+### Design systems, UI & visual production
 
 | Skill | Focus |
 | :--- | :--- |
-| [`ui-design`](ui-design/SKILL.md) | Production UI design and implementation quality: hierarchy, responsive behavior, accessibility, typography, color, motion, iconography, and visual QA. |
-| [`ui-aesthetics`](ui-aesthetics/SKILL.md) | Deliberate aesthetic judgment for visual refinement, composition, typography, surfaces, motion, and anti-generic / anti-AI-slop review. |
-| [`frontend-slides`](frontend-slides/SKILL.md) | Production HTML presentations with a fixed 1920×1080 canvas, deliberate art direction, animation, and presentation QA. |
-| [`design-system`](design-system/SKILL.md) | Consume, author, normalize, and verify DESIGN.md systems as AzSkills-native visual contracts with semantic mapping and provenance. |
-| [`logo-generator`](logo-generator/SKILL.md) | Professional logo, product-mark, wordmark, mascot, SVG, and identity-system development with iterative visual testing. |
-| [`ip-as-logo`](ip-as-logo/SKILL.md) | Simplified character-led IP and mascot marks designed for recognizability at very small sizes. |
-| [`photo-abstract-editorial`](photo-abstract-editorial/SKILL.md) | Turn one supplied photograph into a restrained editorial diptych while preserving the source image and deriving a sparse abstract companion panel. |
+| [`design-system`](design-system/SKILL.md) | DESIGN.md ingestion, normalization, source reconciliation, provenance, and executable design QA. |
+| [`ui-design`](ui-design/SKILL.md) | Production interface design and implementation: hierarchy, responsive behavior, accessibility, interaction, motion, and visual QA. |
+| [`ui-aesthetics`](ui-aesthetics/SKILL.md) | Composition-first visual critique, refinement, component craftsmanship, restrained depth, and anti-generic review. |
+| [`frontend-slides`](frontend-slides/SKILL.md) | Fixed-stage 1920×1080 HTML presentations with deliberate art direction, animation, and render QA. |
+| [`svg-animation`](svg-animation/SKILL.md) | SVG animation generation, optimization, accessibility, reduced-motion handling, and reusable single-file output. |
+| [`logo-generator`](logo-generator/SKILL.md) | Logo, product mark, wordmark, mascot, SVG, and identity-system development. |
+| [`ip-as-logo`](ip-as-logo/SKILL.md) | Character-led marks optimized for silhouette, recognition, and small-size use. |
+| [`photo-abstract-editorial`](photo-abstract-editorial/SKILL.md) | Restrained editorial image treatments derived from a supplied photograph. |
 
 ### Documentation & publishing
 
 | Skill | Focus |
 | :--- | :--- |
-| [`readme-craft`](readme-craft/SKILL.md) | Evidence-first GitHub README engineering: information architecture, stable navigation, semantic SVG headings, sponsorship, link verification, and visual QA. |
-| [`steam-mod-page`](steam-mod-page/SKILL.md) | Production-ready Steam Workshop / Mod Store descriptions and change logs with strict BBCode and feature-accuracy discipline. |
+| [`readme-craft`](readme-craft/SKILL.md) | Evidence-first GitHub README engineering, navigation, semantic SVG headings, support presentation, and visual QA. |
+| [`steam-mod-page`](steam-mod-page/SKILL.md) | Steam Workshop / Mod Store copy, formatting, compatibility, links, images, and factual change logs. |
 
 ### Localization
 
 | Skill | Focus |
 | :--- | :--- |
-| [`l13n`](l13n/SKILL.md) | Structured 13-language game CSV localization with terminology, BBCode, escaping, schema, and locale-completeness checks. |
+| [`l13n`](l13n/SKILL.md) | Structured 13-language game CSV localization with terminology, BBCode, escaping, schema, and completeness checks. |
 
-> `design-intelligence.md` is **not a standalone Skill**. It is a shared reasoning layer for visual systems, interaction, composition, accessibility, and visual QA.
+### Shared design reasoning
+
+[`design-intelligence.md`](design-intelligence.md) is intentionally listed outside the Skill catalog because it is inherited by applicable visual Skills rather than selected as a standalone Skill.
 
 ---
 
@@ -121,75 +217,53 @@ What are you doing?
 ├─ Complex engineering / refactoring ────► ultrathink + domain Skill
 ├─ AutoHotkey v2 ─────────────────────────► ahkv2-opt
 │
-├─ Consume / author / adapt a DESIGN.md ──► design-system + owning visual Skill
+├─ Consume / author / adapt DESIGN.md ───► design-system
+│   └─ then execute with the owning visual Skill
 ├─ Build / redesign a UI ─────────────────► ui-design
-├─ Make a UI feel more refined ───────────► ui-aesthetics + ui-design
+├─ Refine an existing interface ──────────► ui-aesthetics + ui-design
 ├─ Create an HTML presentation ───────────► frontend-slides
+├─ Create / animate SVG ──────────────────► svg-animation
 ├─ Create a logo / identity ──────────────► logo-generator
 ├─ Create a character-led symbol ─────────► ip-as-logo + logo-generator
 ├─ Create an editorial photo treatment ───► photo-abstract-editorial
 │
-├─ Write or rebuild a GitHub README ──────► readme-craft
+├─ Write / rebuild a GitHub README ───────► readme-craft
 ├─ Write a Steam Mod page ────────────────► steam-mod-page
 └─ Localize a 13-language game CSV ───────► l13n
 ```
 
-### Composition rule
+### Composition rules
 
 ```text
 New domain behavior       → new Skill
 Narrow variation          → mode inside an existing Skill
 Reusable cross-cutting    → shared reference
+DESIGN.md ingestion       → design-system
 Visual reasoning          → design-intelligence.md
-DESIGN.md adaptation       → design-system + the owning visual Skill
-Complex implementation    → ultrathink + the owning domain Skill
+Complex implementation    → ultrathink + owning domain Skill
 Frontend architecture     → frontend-architecture before substantial UI work
 Runtime architecture      → application-architecture before downstream UI choices
 ```
 
-Do not copy shared rules into multiple Skills just to make each file look self-contained.
+Do not duplicate shared rules merely to make each Skill look self-contained.
 
 ---
 
 <a name="readme-usage"></a>
-## <img src="assets/readme/icons/model.svg" width="24" height="24" alt=""> How to use
+## <img src="assets/readme/icons/model.svg" width="24" height="24" alt=""> Use
 
-AzSkills is deliberately runtime-agnostic. It is a collection of Markdown specifications and supporting files, so there is no repository-wide application to install or execute.
+AzSkills is runtime-agnostic. There is no repository-wide application to install; the deliverable is the Markdown contract itself plus any supporting references or assets.
 
-### 1. Clone the repository
+### 1. Clone
 
 ```bash
 git clone https://github.com/CYoJkoY/AzSkills.git
 cd AzSkills
 ```
 
-### 2. Select the Skill
+### 2. Select the narrowest Skill
 
-Start with the narrowest relevant directory and keep its support files together:
-
-```text
-design-system/
-├── SKILL.md
-└── references/
-
-ui-design/
-├── SKILL.md
-└── icon-morphing.md
-
-readme-craft/
-├── SKILL.md
-└── references/
-```
-
-Not every Skill has supporting files. The contract is always `SKILL.md`.
-
-### 3. Register it with your environment
-
-Copy, link, or register the selected Skill in the skill-discovery location used by your AI agent or development environment.
-
-AzSkills does not prescribe a universal installation directory because discovery conventions differ across agent runtimes.
-
-### 4. Add context only when it is owned by another capability
+Start with the smallest capability that fully owns the requested work.
 
 For example:
 
@@ -206,90 +280,68 @@ ui-design
 Or:
 
 ```text
-Complex UI refactor
+DESIGN.md + UI implementation
    ↓
-ultrathink + ui-design + ui-aesthetics
+design-system
+   ↓
+ui-design
+   ↓
+ui-aesthetics
 ```
 
-The goal is not to load the most Skills. The goal is to load the **right** Skills.
-
----
-
-<a name="readme-model"></a>
-## <img src="assets/readme/icons/read.svg" width="24" height="24" alt=""> Behavior model
-
-Skills act as **behavior contracts**, not static prompt snippets.
-
-### Precedence
-
-When multiple sources of guidance apply, use the following specificity order:
+For difficult work:
 
 ```text
-1. Explicit user requirements
-2. Skill-specific hard constraints
-3. Existing project identity and conventions
-4. Platform / product conventions
-5. More specific shared execution guidance
-6. Shared design intelligence
-7. Optional external references
+ultrathink
+   +
+the owning domain Skill
 ```
 
-A project-specific requirement wins over a generic preference.
+### 3. Read the contract and its references
 
-### DESIGN.md integration
+The contract is always [`SKILL.md`](./). Some Skills also contain reference documents, templates, assets, or specialized implementation guides.
 
-DESIGN.md files are design inputs, not alternate AzSkills behavior contracts. Route them through design-system, then pass the normalized result to the owning visual Skill.
+Do not assume a reference file is globally applicable. Read it only when the owning Skill points to it or the task requires it.
 
-Exact token values become implementation values; prose becomes usage/composition/exception guidance; responsive prose becomes executable behavior and QA; prompt summaries remain convenience material.
+### 4. Execute with repository context
 
-### Verification is part of the work
-
-A Skill is incomplete when the artifact only appears correct. The intended workflow is:
+Inspect the real project before implementing:
 
 ```text
-inspect → plan → implement → render / test → inspect again → correct → verify
+repository
+  ↓
+existing architecture
+  ↓
+existing conventions / identity
+  ↓
+active Skill contract
+  ↓
+task-specific changes
 ```
 
-For visual work, this includes rendered output, realistic display sizes, geometry, theme safety, hierarchy, and accessibility where applicable. For documentation work, it includes destinations, navigation anchors, repository facts, and searchable technical information.
+Preserve project-native APIs, configuration keys, defaults, component systems, and user-visible behavior unless the task explicitly changes them.
 
----
+### 5. Verify before returning the result
 
-<a name="readme-structure"></a>
-## <img src="assets/readme/icons/documentation.svg" width="24" height="24" alt=""> Repository structure
+The standard loop is:
 
 ```text
-AzSkills/
-├── .github/
-│   ├── badges/
-│   │   └── skills.json
-│   └── workflows/
-│       └── update-skill-badge.yml
-├── assets/
-│   ├── azskills-hero.svg
-│   └── readme/
-│       ├── support-cta.svg
-│       └── icons/
-├── application-architecture/
-├── frontend-architecture/
-├── frontend-slides/
-├── design-system/
-├── ahkv2-opt/
-├── ip-as-logo/
-├── l13n/
-├── logo-generator/
-├── photo-abstract-editorial/
-├── readme-craft/
-├── steam-mod-page/
-├── ui-aesthetics/
-├── ui-design/
-├── ultrathink/
-├── design-intelligence.md
-├── THIRD_PARTY_NOTICES.md
-├── LICENSE
-└── README.md
+inspect
+  ↓
+plan
+  ↓
+implement
+  ↓
+render / test
+  ↓
+inspect again
+  ↓
+correct
+  ↓
+verify
 ```
 
-The Skill-count badge is generated from the repository's `SKILL.md` files by [`update-skill-badge.yml`](.github/workflows/update-skill-badge.yml), so the badge count is not manually maintained in the README.
+For design-system work, verify both the source mapping and the rendered result.
 
 ---
 
@@ -298,19 +350,84 @@ The Skill-count badge is generated from the repository's `SKILL.md` files by [`u
 
 AzSkills is intentionally evidence-first.
 
-**Repository truth.** Do not invent features, benchmarks, screenshots, compatibility, versions, or destinations.
+**Repository truth.** Do not invent features, benchmarks, screenshots, compatibility, versions, URLs, or destinations.
 
-**Explicit behavior.** A Skill should define its scope, constraints, workflow, quality gates, and output expectations.
+**Explicit behavior.** A Skill should define scope, constraints, workflow, quality gates, and output expectations.
 
 **Project-native context.** Inspect the real repository before making architecture, UI, documentation, or visual decisions.
 
-**Searchable information.** Installation, configuration, limitations, legal information, important links, and canonical support URLs belong in searchable Markdown or normal HTML.
+**Composition over duplication.** Shared behavior belongs in shared references; distinct behavior belongs in focused Skills.
 
-**Visual verification.** Authored SVGs should be checked for valid structure, geometry, spacing, centering, realistic display size, and light/dark readability.
+**Design-system integrity.** Preserve exact source tokens, distinguish inference from fact, and never blend unrelated brand systems without an explicit synthesis requirement.
 
-**Stable navigation.** Manually authored README navigation should resolve to explicit custom anchors rather than guessed GitHub fragments.
+**Visual verification.** Authored SVGs, interfaces, and presentations should be inspected at realistic display sizes with attention to geometry, spacing, typography, themes, accessibility, and interaction states.
 
-**Composition over duplication.** Shared behavior belongs in a shared layer; distinct behavior belongs in a focused Skill.
+**Stable navigation.** Manually authored README navigation should use explicit custom anchors rather than guessed GitHub fragments.
+
+**Searchable documentation.** Installation, configuration, limitations, legal information, important links, and canonical support destinations belong in searchable Markdown or normal HTML.
+
+**Dynamic facts.** Repository-generated facts such as the Skill count should come from automation rather than becoming stale hardcoded prose.
+
+### CI quality gates
+
+The repository currently validates the DESIGN.md integration through [`validate-design-contract.yml`](.github/workflows/validate-design-contract.yml), while [`update-skill-badge.yml`](.github/workflows/update-skill-badge.yml) generates the Skill-count badge from actual `SKILL.md` files.
+
+---
+
+<a name="readme-repository"></a>
+## <img src="assets/readme/icons/documentation.svg" width="24" height="24" alt=""> Repository map
+
+```text
+AzSkills/
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.yml
+│   │   ├── config.yml
+│   │   ├── documentation.yml
+│   │   ├── new_skill.yml
+│   │   └── skill_improvement.yml
+│   ├── badges/
+│   │   └── skills.json
+│   └── workflows/
+│       ├── update-skill-badge.yml
+│       └── validate-design-contract.yml
+│
+├── assets/
+│   ├── azskills-hero.svg
+│   └── readme/
+│       ├── icons/
+│       └── support-cta.svg
+│
+├── application-architecture/
+├── ahkv2-opt/
+├── design-system/
+│   ├── SKILL.md
+│   └── references/
+├── frontend-architecture/
+├── frontend-slides/
+│   ├── DESIGN_SYSTEM.md
+│   ├── STYLE_PRESETS.md
+│   ├── animation-patterns.md
+│   ├── html-template.md
+│   ├── scripts/
+│   └── viewport-base.css
+├── ip-as-logo/
+├── l13n/
+├── logo-generator/
+├── photo-abstract-editorial/
+├── readme-craft/
+│   └── references/
+├── steam-mod-page/
+├── svg-animation/
+├── ui-aesthetics/
+├── ui-design/
+├── ultrathink/
+│
+├── design-intelligence.md
+├── THIRD_PARTY_NOTICES.md
+├── LICENSE
+└── README.md
+```
 
 ---
 
@@ -319,21 +436,22 @@ AzSkills is intentionally evidence-first.
 
 Good contributions add a clear capability, improve an existing workflow, fix a concrete defect, or remove unnecessary complexity.
 
-Before creating a new top-level Skill:
+Before creating a new Skill:
 
 1. Check whether the behavior already belongs in an existing Skill as a mode or narrow extension.
 2. Check whether it belongs in [`design-intelligence.md`](design-intelligence.md) as shared visual reasoning.
 3. Make sure the proposed Skill has a distinct scope, trigger boundary, workflow, QA contract, and output contract.
-4. Record provenance and applicable licensing information for imported public methodologies in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+4. Keep external methodologies as references or original syntheses rather than copying repositories wholesale.
+5. Record provenance and applicable licensing information in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
-Keep changes focused, inspectable, and easy to audit.
+For Skill proposals and improvements, use the repository's structured [Issue Forms](.github/ISSUE_TEMPLATE/).
 
 ---
 
 <a name="readme-support"></a>
 ## <img src="assets/readme/icons/heart.svg" width="24" height="24" alt=""> Support
 
-AzSkills is maintained as an open collection of reusable engineering, design, documentation, and language workflows. Support helps sustain the time required to maintain the Skills, references, assets, and repository infrastructure.
+AzSkills is maintained as an open collection of reusable engineering, design, documentation, localization, translation, and visual workflows. Support helps sustain the time required to maintain the Skills, references, assets, and repository infrastructure.
 
 <div align="center">
 
@@ -343,7 +461,7 @@ AzSkills is maintained as an open collection of reusable engineering, design, do
 
 **Direct support link:** https://cyojkoy.github.io/Payment/
 
-<sub>The CTA is authored for AzSkills and links directly to the project's support destination.</sub>
+<sub>The support CTA is authored for AzSkills and links directly to the project's support destination.</sub>
 
 </div>
 
@@ -356,4 +474,4 @@ AzSkills is released under the [MIT License](LICENSE).
 
 Some Skills incorporate or adapt ideas from public upstream projects and methodologies. Sources and applicable notices are documented in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
-Integrated Skills are rewritten to fit AzSkills' architecture rather than mechanically vendoring upstream repositories.
+Integrated Skills are rewritten to fit AzSkills' architecture rather than mechanically vendoring unrelated upstream repositories.
