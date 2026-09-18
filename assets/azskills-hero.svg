@@ -3,7 +3,7 @@
   <desc id="desc">A dark editorial hero for AzSkills showing a SKILL.md contract becoming focused Skills, design-system guidance, project context, and verified output.</desc>
 
   <rect width="1760" height="800" rx="32" fill="#101719"/>
-  <g transform="translate(64 95)">
+  <g transform="translate(80 40)">
     <rect x="24" y="24" width="1552" height="672" rx="24" fill="none" stroke="#314547" stroke-width="2"/>
 
   <g fill="none" stroke="#284043" stroke-width="2">
