@@ -62,6 +62,18 @@ AzSkills intentionally does not import or reproduce external searchable database
 
 One caution from current public discussion is preserved in AzSkills' architecture: external tooling may ship much more data than an agent actually reads, and some combined modes can silently ignore options. AzSkills therefore prioritizes a compact contract with explicit trigger conditions and verification requirements over a large passive data bundle. See the public discussion around UI/UX Pro Max issue #484 for an example of this class of integration risk: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/issues/484
 
+## DESIGN.md integration
+
+AzSkills' design-system Skill is informed by public references from:
+
+- Google Labs design.md: https://github.com/google-labs-code/design.md
+- HU-UH awesome-design-md: https://github.com/HU-UH/awesome-design-md
+- VoltAgent awesome-design-md: https://github.com/VoltAgent/awesome-design-md
+
+Google's specification contributes the token + Markdown rationale model, token references, and canonical section ordering. HU-UH contributes an extended analysis-oriented nine-section vocabulary and preview pairing. VoltAgent contributes extended per-brand analysis with token-bearing examples.
+
+AzSkills does not vendor these collections or copy their complete DESIGN.md files/preview assets. The adapter is original AzSkills text and normalizes evidence into Primitive → Semantic → Component → State.
+
 ## `readme-craft`
 
 Informed by:

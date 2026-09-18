@@ -68,7 +68,7 @@ AzSkills favors **small responsibilities, composition, repository-native context
 <a name="readme-skills"></a>
 ## <img src="assets/readme/icons/engineering.svg" width="24" height="24" alt=""> Skill catalog
 
-The repository currently contains **12 focused Skills**. Pick the smallest one that fully owns the task, then compose additional Skills only when they contribute a separate responsibility.
+The repository contains focused Skills. Pick the smallest one that fully owns the task, then compose additional Skills only when they contribute a separate responsibility.
 
 ### Engineering & architecture
 
@@ -86,6 +86,7 @@ The repository currently contains **12 focused Skills**. Pick the smallest one t
 | [`ui-design`](ui-design/SKILL.md) | Production UI design and implementation quality: hierarchy, responsive behavior, accessibility, typography, color, motion, iconography, and visual QA. |
 | [`ui-aesthetics`](ui-aesthetics/SKILL.md) | Deliberate aesthetic judgment for visual refinement, composition, typography, surfaces, motion, and anti-generic / anti-AI-slop review. |
 | [`frontend-slides`](frontend-slides/SKILL.md) | Production HTML presentations with a fixed 1920×1080 canvas, deliberate art direction, animation, and presentation QA. |
+| [`design-system`](design-system/SKILL.md) | Consume, author, normalize, and verify DESIGN.md systems as AzSkills-native visual contracts with semantic mapping and provenance. |
 | [`logo-generator`](logo-generator/SKILL.md) | Professional logo, product-mark, wordmark, mascot, SVG, and identity-system development with iterative visual testing. |
 | [`ip-as-logo`](ip-as-logo/SKILL.md) | Simplified character-led IP and mascot marks designed for recognizability at very small sizes. |
 | [`photo-abstract-editorial`](photo-abstract-editorial/SKILL.md) | Turn one supplied photograph into a restrained editorial diptych while preserving the source image and deriving a sparse abstract companion panel. |
@@ -120,6 +121,7 @@ What are you doing?
 ├─ Complex engineering / refactoring ────► ultrathink + domain Skill
 ├─ AutoHotkey v2 ─────────────────────────► ahkv2-opt
 │
+├─ Consume / author / adapt a DESIGN.md ──► design-system + owning visual Skill
 ├─ Build / redesign a UI ─────────────────► ui-design
 ├─ Make a UI feel more refined ───────────► ui-aesthetics + ui-design
 ├─ Create an HTML presentation ───────────► frontend-slides
@@ -139,6 +141,7 @@ New domain behavior       → new Skill
 Narrow variation          → mode inside an existing Skill
 Reusable cross-cutting    → shared reference
 Visual reasoning          → design-intelligence.md
+DESIGN.md adaptation       → design-system + the owning visual Skill
 Complex implementation    → ultrathink + the owning domain Skill
 Frontend architecture     → frontend-architecture before substantial UI work
 Runtime architecture      → application-architecture before downstream UI choices
@@ -165,6 +168,10 @@ cd AzSkills
 Start with the narrowest relevant directory and keep its support files together:
 
 ```text
+design-system/
+├── SKILL.md
+└── references/
+
 ui-design/
 ├── SKILL.md
 └── icon-morphing.md
@@ -229,6 +236,12 @@ When multiple sources of guidance apply, use the following specificity order:
 
 A project-specific requirement wins over a generic preference.
 
+### DESIGN.md integration
+
+DESIGN.md files are design inputs, not alternate AzSkills behavior contracts. Route them through design-system, then pass the normalized result to the owning visual Skill.
+
+Exact token values become implementation values; prose becomes usage/composition/exception guidance; responsive prose becomes executable behavior and QA; prompt summaries remain convenience material.
+
 ### Verification is part of the work
 
 A Skill is incomplete when the artifact only appears correct. The intended workflow is:
@@ -259,6 +272,7 @@ AzSkills/
 ├── application-architecture/
 ├── frontend-architecture/
 ├── frontend-slides/
+├── design-system/
 ├── ahkv2-opt/
 ├── ip-as-logo/
 ├── l13n/
