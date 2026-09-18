@@ -38,6 +38,16 @@ When rules conflict, use this order:
 
 Do not replace an established design system merely because a newer trend exists. New visual choices must earn their place through product fit, clarity, and implementation value.
 
+## DESIGN.md input contract
+
+When a project provides a DESIGN.md, route it through design-system/SKILL.md before substantial implementation. Use the normalized contract as the design-system input to this Skill.
+
+The downstream rule is:
+
+user requirements / local product identity → normalized DESIGN.md contract → ui-design implementation rules.
+
+Do not copy source tokens into scattered components. Keep semantic mapping, provenance, and unresolved assumptions in the design-system layer.
+
 ## 1. Context gathering before design
 
 Before writing substantial UI code, inspect the project rather than designing against assumptions.

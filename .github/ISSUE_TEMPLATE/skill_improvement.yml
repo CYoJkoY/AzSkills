@@ -25,6 +25,7 @@ body:
         - ui-aesthetics
         - ui-design
         - ultrathink
+        - design-system
         - design-intelligence (root)
         - Other / Multiple
     validations:

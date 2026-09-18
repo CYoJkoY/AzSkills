@@ -24,6 +24,20 @@ Do not apply it mechanically to pure backend logic, database work, infrastructur
 
 When rules conflict, preserve the more specific requirement and document a material tradeoff.
 
+## DESIGN.md adaptation layer
+
+DESIGN.md is a visual input format, not a substitute for an AzSkills behavior contract.
+
+Use design-system/SKILL.md for ingestion, normalization, reconciliation, and provenance. Keep this document as the shared visual-reasoning layer.
+
+Two-layer model: machine-readable tokens provide exact values; Markdown prose provides intent, hierarchy, usage, and exceptions.
+
+Canonical mapping: Overview/theme → visual thesis; Colors → semantic colors; Typography → roles; Layout → spacing/grid/composition; Elevation → surfaces; Shapes → geometry; Components → component/state; Responsive → executable QA; Agent Prompt Guide → convenience only.
+
+Evidence levels: verified-token, verified-prose, inferred-usage, implementation-choice, unresolved.
+
+A collection of design systems is a reference corpus, not a composite system. Do not mix unrelated brands without explicit user intent.
+
 ## 1. Context before aesthetics
 
 Before substantial visual work, establish:

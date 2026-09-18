@@ -124,6 +124,7 @@ body:
         - photo-abstract-editorial
         - steam-mod-page
         - ultrathink
+        - design-system
         - None / Standalone
     validations:
       required: false

@@ -33,6 +33,12 @@ For pure backend, data, infrastructure, or non-visual work, do not apply it mech
 
 Aesthetic preference never overrides a product requirement, established identity, accessibility need, or real technical constraint.
 
+## DESIGN.md input contract
+
+When DESIGN.md is part of the task, consume the normalized result from design-system rather than treating the raw document as an aesthetic checklist.
+
+Use the source to understand visual intent, constraints, and component relationships. Judge the adaptation against product fit, hierarchy, accessibility, and consistency. Do not silently replace a verified source token with an aesthetic preference; material deviations should be explicit.
+
 ## Aesthetic thesis before styling
 
 Before making substantial visual changes, establish four things:
