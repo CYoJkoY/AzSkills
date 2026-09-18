@@ -11,6 +11,12 @@ Before designing, automatically inherit [`../design-intelligence.md`](../design-
 
 This skill is deliberately inspired by the visual craft and fixed-stage workflow of `zarazhangrui/frontend-slides`, and by the design-system, token, accessibility, and visual-hierarchy discipline of `nextlevelbuilder/ui-ux-pro-max-skill`. Do not copy their templates mechanically. Extract the principles and apply them to the user's subject.
 
+## DESIGN.md input contract
+
+When a DESIGN.md is provided, adapt it through design-system before applying this Skill. The normalized contract supplies candidate visual tokens and design language; this Skill's fixed 1920×1080 stage, presentation-specific composition, motion, and render-QA rules remain authoritative.
+
+For a presentation, preserve the design language without importing web-page layout assumptions that conflict with the slide-stage model.
+
 ## Core Principles
 
 1. **Design system before markup** — establish a visual thesis, tokens, type pairing, spacing rhythm, contrast strategy, and component grammar before expanding the deck.
