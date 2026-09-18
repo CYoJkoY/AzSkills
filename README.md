@@ -397,7 +397,6 @@ AzSkills/
 │       └── support-cta.svg
 │
 ├── application-architecture/
-├── ahkv2-opt/
 ├── design-system/
 │   ├── SKILL.md
 │   └── references/
