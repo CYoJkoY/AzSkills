@@ -169,7 +169,6 @@ Choose the smallest Skill that fully owns the task. Compose additional Skills on
 | :--- | :--- |
 | [`application-architecture`](application-architecture/SKILL.md) | Runtime topology, persistence, process boundaries, and maintainable application structure. |
 | [`frontend-architecture`](frontend-architecture/SKILL.md) | Frontend language, framework, styling, storage, and client/server boundaries before substantial UI work. |
-| [`ahkv2-opt`](ahkv2-opt/SKILL.md) | AutoHotkey v2 control flow, state, hotkeys, timers, GUI behavior, performance, and testing. |
 | [`ultrathink`](ultrathink/SKILL.md) | Deep methodology for difficult implementation, refactoring, assumption testing, boundary design, and simplification. |
 
 ### Design systems, UI & visual production
@@ -215,7 +214,6 @@ What are you doing?
 ├─ Application / runtime architecture ───► application-architecture
 ├─ Frontend implementation architecture ─► frontend-architecture
 ├─ Complex engineering / refactoring ────► ultrathink + domain Skill
-├─ AutoHotkey v2 ─────────────────────────► ahkv2-opt
 │
 ├─ Consume / author / adapt DESIGN.md ───► design-system
 │   └─ then execute with the owning visual Skill
@@ -299,7 +297,7 @@ the owning domain Skill
 
 ### 3. Read the contract and its references
 
-The contract is always [`SKILL.md`](./). Some Skills also contain reference documents, templates, assets, or specialized implementation guides.
+The contract is always the Skill directory's `SKILL.md`. Some Skills also contain reference documents, templates, assets, or specialized implementation guides.
 
 Do not assume a reference file is globally applicable. Read it only when the owning Skill points to it or the task requires it.
 
@@ -444,7 +442,7 @@ Before creating a new Skill:
 4. Keep external methodologies as references or original syntheses rather than copying repositories wholesale.
 5. Record provenance and applicable licensing information in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
-For Skill proposals and improvements, use the repository's structured [Issue Forms](.github/ISSUE_TEMPLATE/).
+For Skill proposals and improvements, use the repository's structured [Issue Forms](https://github.com/CYoJkoY/AzSkills/issues/new/choose).
 
 ---
 
