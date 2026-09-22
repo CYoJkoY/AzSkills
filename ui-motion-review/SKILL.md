@@ -1,7 +1,6 @@
 ---
 name: ui-motion-review
 description: Review existing Web motion against the AzSkills motion quality bar. Use for animation-focused diffs, components, or implementations; report findings without changing source code.
-disable-model-invocation: true
 ---
 
 # UI Motion Review

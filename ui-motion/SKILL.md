@@ -207,6 +207,8 @@ Load `ui-motion/references/animation-standards.md` for exact reference curves, t
 
 Load `ui-motion/references/animation-vocabulary.md` when the task uses unfamiliar motion terminology or when naming a motion pattern precisely matters.
 
+Load `ui-motion/references/animation-recipes.md` when the requested interaction matches a common motion pattern; adapt the recipe to existing project tokens and component conventions.
+
 ## Composition with the UI system
 
 For production interface work, `ui-motion` is a focused implementation pass underneath `ui-design`. Let `ui-design` own hierarchy, component state, responsive behavior, and accessibility; let `ui-motion` own the concrete motion mechanism, timing, interruption, and rendered motion verification.

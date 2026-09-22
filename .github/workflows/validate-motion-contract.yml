@@ -34,6 +34,7 @@ jobs:
           test -f ui-motion/SKILL.md
           test -f ui-motion/references/animation-standards.md
           test -f ui-motion/references/animation-vocabulary.md
+          test -f ui-motion/references/animation-recipes.md
           test -f ui-motion-review/SKILL.md
           test -f ui-motion-audit/SKILL.md
           test -f ui-motion-audit/references/plan-template.md
@@ -75,6 +76,7 @@ jobs:
           grep -q 'cubic-bezier(0.77, 0, 0.175, 1)' ui-motion/references/animation-standards.md
           grep -q 'prefers-reduced-motion' ui-motion/references/animation-standards.md
           grep -q 'hover: hover' ui-motion/references/animation-standards.md
+          ! grep -Rni 'disable-model-invocation' ui-motion ui-motion-review ui-motion-audit
 
       - name: Reject mechanical upstream copy markers
         shell: bash

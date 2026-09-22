@@ -1,7 +1,6 @@
 ---
 name: ui-motion-audit
 description: Audit Web motion across a codebase and discover high-value places where motion should be removed, reduced, corrected, or introduced. Read-only; produce self-contained findings and implementation plans for later execution.
-disable-model-invocation: true
 ---
 
 # UI Motion Audit
