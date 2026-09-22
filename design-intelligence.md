@@ -260,7 +260,7 @@ ui-design
 
 `ui-aesthetics` remains the visual-judgment layer. When motion is the main defect, hand off implementation-level findings to `ui-motion-review`; for codebase-wide discovery use `ui-motion-audit`. `svg-animation` retains ownership of SVG-specific output constraints.
 
-Detailed values, recipes, terminology, and audit criteria live under `ui-motion/references/` so this shared layer remains cross-artifact rather than becoming a second motion Skill.
+Detailed values, recipes, terminology, and audit criteria live under [`ui-motion/references/animation-standards.md`](ui-motion/references/animation-standards.md) and [`ui-motion/references/animation-vocabulary.md`](ui-motion/references/animation-vocabulary.md) so this shared layer remains cross-artifact rather than becoming a second motion Skill.
 
 ## 12. Semantic icon morphing
 
