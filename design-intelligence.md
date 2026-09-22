@@ -170,11 +170,97 @@ The executable baseline is defined precisely in [`ui-design/SKILL.md`](ui-design
 
 ## 11. Motion as a system
 
-Motion should serve hierarchy, action confirmation, attention guidance, continuity, or intentional craft.
+Motion is a semantic layer of the design system, not a collection of decorative effects.
 
-Prefer reusable primitives such as fade+rise, scale+fade, slide, and stable shared-element continuity. Prefer `transform` and `opacity` for animation.
+Before implementing motion, pass this gate in order:
 
-Use short durations for frequent interactions and longer choreography only for infrequent entrances or onboarding. Keep motion interruptible and respect `prefers-reduced-motion`.
+```text
+Should it move?
+    ↓
+What user-facing purpose does motion serve?
+    ↓
+How frequently is this interaction encountered?
+    ↓
+What state, spatial relationship, or attention change does motion explain?
+    ↓
+What is the cheapest mechanism that preserves that intent?
+```
+
+A legitimate outcome is **no animation**. Remove motion when it adds delay or distraction without improving orientation, continuity, feedback, or intentional craft.
+
+### Motion token model
+
+Keep motion in the same hierarchy used for other design decisions:
+
+```text
+Primitive → Semantic → Component → State
+```
+
+For a maintained product, define a compact vocabulary for frequency tier, purpose, duration, easing, spring behavior, transform origin, and reduced-motion variant. Reuse the product's existing motion tokens first.
+
+### Mechanism selection
+
+Prefer the least powerful mechanism that remains correct for the interaction:
+
+```text
+CSS transition
+    ↓
+CSS @starting-style
+    ↓
+CSS animation
+    ↓
+WAAPI
+    ↓
+spring / framework motion system
+```
+
+This is a dependency-discipline ladder, not a claim that one mechanism always performs better. Use CSS for predetermined motion, WAAPI when script-level control is required without a new library, and a spring/framework system only when interruption, velocity, layout coordination, or gesture state genuinely requires it.
+
+### Core motion rules
+
+- UI entry and response motion should start decisively; avoid slow `ease-in` routine feedback.
+- Trigger-anchored surfaces should preserve a meaningful transform origin; centered origin is correct for genuinely centered overlays.
+- Avoid `scale(0)` entrances; retain a visible geometric seed and combine small scale changes with opacity where appropriate.
+- Prefer `transform` and `opacity` for routine UI motion, but verify actual frame behavior under realistic load.
+- Rapidly retriggerable state should be interruptible; transitions or springs are preferable to restarting keyframes.
+- Gesture motion should preserve continuity and, where appropriate, velocity rather than hard-stopping at arbitrary boundaries.
+- Enter and exit behavior should tell a coherent spatial story unless product semantics require otherwise.
+- Deliberate user-controlled phases may be slower than the system response that follows them.
+- Stagger is an optional narrative device for grouped entrances and must never block interaction.
+- Hover motion must be gated by actual pointer capability rather than inferred from viewport width.
+
+### Accessibility and platform capability
+
+Reduced motion is a behavior variant, not an afterthought. Preserve semantic feedback and useful opacity/color transitions while removing unnecessary movement.
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  /* preserve state feedback; reduce spatial movement */
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* hover-specific motion only */
+}
+```
+
+### Cross-Skill composition
+
+Use focused motion Skills only when their responsibility adds value:
+
+```text
+new / substantial UI
+    ↓
+frontend-architecture
+    ↓
+ui-design
+    ├── ui-motion          → construct motion
+    ├── ui-motion-review   → review existing motion
+    └── ui-motion-audit    → audit motion + find opportunities
+```
+
+`ui-aesthetics` remains the visual-judgment layer. When motion is the main defect, hand off implementation-level findings to `ui-motion-review`; for codebase-wide discovery use `ui-motion-audit`. `svg-animation` retains ownership of SVG-specific output constraints.
+
+Detailed values, recipes, terminology, and audit criteria live under [`ui-motion/references/animation-standards.md`](ui-motion/references/animation-standards.md) and [`ui-motion/references/animation-vocabulary.md`](ui-motion/references/animation-vocabulary.md) so this shared layer remains cross-artifact rather than becoming a second motion Skill.
 
 ## 12. Semantic icon morphing
 

@@ -472,44 +472,64 @@ Respect user font scaling and system contrast preferences where the platform exp
 
 ## 16. Reduced motion and motion sensitivity
 
-Treat reduced motion as a first-class design variant.
+Treat reduced motion as a first-class design variant and define it together with full-motion behavior.
 
 Under `prefers-reduced-motion: reduce`:
 
-- keep content visible
-- remove non-essential translation, scale, parallax, and continuous loops
-- prefer immediate state changes or subtle opacity transitions
-- disable autoplay-driven decorative motion
-- preserve task feedback through static cues
+- keep content and state changes immediately understandable
+- remove or reduce non-essential translation, scale, parallax, and continuous loops
+- preserve useful opacity or color feedback when it helps continuity
+- keep keyboard and pointer feedback independent of animation
+- never require an animation to complete before the user can continue
 
-Never let an essential state depend on an animation completing.
+```css
+@media (prefers-reduced-motion: reduce) {
+  /* preserve semantic feedback; remove unnecessary spatial travel */
+}
+```
 
 ## 17. Motion system
 
-Use a small reusable motion vocabulary.
-
-Recommended starting ranges:
+For substantial motion work, compose this Skill with `ui-motion` rather than duplicating motion-construction rules here.
 
 ```text
-micro interaction:       120–200ms
-UI state change:         180–260ms
-overlay / toast:         220–320ms
-section entrance:        400–800ms
-hero / onboarding:       800–1600ms
+ui-design
+   ↓
+visual hierarchy + interaction model
+   ↓
+ui-motion
+   ├── decide whether motion earns a place
+   ├── choose purpose and frequency
+   ├── reuse project motion tokens
+   ├── choose the smallest correct mechanism
+   ├── design properties, origin, timing, interruption, and exit
+   ├── integrate reduced-motion / pointer capability
+   └── verify the rendered behavior
 ```
 
-Use a small set of easing curves. Ease-out is generally suitable for entering and feedback; exits should be shorter and context-preserving.
+Use `ui-motion-review` for a motion-focused review of existing code or a diff. Use `ui-motion-audit` for a repository-wide audit or motion-opportunity discovery.
 
-Use:
+When the project has no established motion vocabulary, consult `ui-motion/references/animation-standards.md` for reference ranges rather than inventing parallel values.
 
-- fade + rise for infrequent entrances
-- scale + fade for compact overlays and emphasis
-- slide for drawers and local panel transitions
-- shared-element continuity only when stable geometry materially improves comprehension
+| Decision | Starting guidance |
+| :--- | :--- |
+| 100+ uses/day | no animation on the interaction itself |
+| tens/day | subtle or no motion |
+| occasional | standard UI motion when it communicates state or space |
+| rare / first-use | expressive motion may be justified |
+| mechanism | CSS transition → `@starting-style` → CSS animation → WAAPI → spring/framework system as needed |
+| properties | prefer `transform` / `opacity`; layout motion is an explicit exception |
+| origin | trigger-aware for anchored surfaces; centered for centered overlays |
+| accessibility | reduced-motion variant and input-capability gating ship with the animation |
 
-Stagger only infrequent, choreographed entrances. Do not animate every row, keystroke, or hover.
+### Motion-specific verification
 
-Motion must be interruptible. Prefer transitions that can reverse cleanly from the current state.
+1. Trigger the interaction repeatedly to test interruption and retargeting.
+2. Inspect entry and exit origins for spatially anchored components.
+3. Slow playback in browser tooling to expose easing, sequencing, and intermediate-state defects.
+4. Exercise reduced-motion preferences and confirm semantics remain intact.
+5. Test touch and coarse-pointer behavior when hover or gestures are involved.
+6. Prefer rendered evidence over source-code confidence for final motion sign-off.
 
 ## 18. Performance-aware visual engineering
 

@@ -105,7 +105,7 @@ Reject the following unless the product context specifically justifies them:
 - generic hero sections added to component-level requests
 - invented marketing copy, metrics, badges, or CTAs that inflate the requested scope
 - asymmetry or oversized contrast used only to appear distinctive
-- motion on every row, hover, or state change
+- motion on every row, hover, or state change; route systemic motion defects to `ui-motion-review` instead of masking them with decorative polish
 - selected states that look identical to pressed feedback
 - typography choices made from coding convention rather than product and language context
 - decorative elements with no communication, grouping, orientation, or identity role
@@ -197,6 +197,10 @@ offline → reconnecting
 ```
 
 Motion should explain a state change, preserve continuity, guide attention, or confirm an action. It should not become choreography.
+
+Run the shared motion decision gate before judging timing or effects: purpose first, frequency second, mechanism third. A high-frequency interaction may be better with no animation.
+
+When motion itself is the primary defect, keep this Skill focused on visual impact and hand off implementation-level findings to `ui-motion-review`. For repository-wide discovery, use `ui-motion-audit`.
 
 Keep frequent transitions brief, interruptible, and consistent. Respect `prefers-reduced-motion`; static feedback must remain sufficient without animation.
 

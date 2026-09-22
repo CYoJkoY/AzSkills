@@ -62,6 +62,28 @@ AzSkills intentionally does not import or reproduce external searchable database
 
 One caution from current public discussion is preserved in AzSkills' architecture: external tooling may ship much more data than an agent actually reads, and some combined modes can silently ignore options. AzSkills therefore prioritizes a compact contract with explicit trigger conditions and verification requirements over a large passive data bundle. See the public discussion around UI/UX Pro Max issue #484 for an example of this class of integration risk: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/issues/484
 
+## `ui-motion`, `ui-motion-review`, and `ui-motion-audit`
+
+The motion integration is informed by the public `emilkowalski/skills` repository, specifically the animation/design methodology current at the reviewed snapshot:
+
+- repository: https://github.com/emilkowalski/skills
+- reviewed source commit: `85e8e2363b713506e1d5b6e07a0eb2da66be1bc3`
+- relevant public areas: `emil-design-eng`, `animate`, `review-animations`, `improve-animations`, `find-animation-opportunities`, and `animation-vocabulary`
+
+AzSkills does not vendor the upstream `skills/` tree or copy its repository-specific wrappers, examples, provider integrations, or implementation files. Transferable principles are rewritten into AzSkills-native contracts:
+
+- `ui-motion` owns construction only;
+- `ui-motion-review` owns motion-focused read-only review;
+- `ui-motion-audit` owns codebase-wide audit and opportunity discovery;
+- `ui-motion/references/` supplies progressive-disclosure values and terminology;
+- `design-intelligence.md` owns cross-artifact motion reasoning;
+- `ui-design` remains the executable UI authority;
+- `ui-aesthetics` remains the visual-judgment authority.
+
+The source methodology's framework-specific and provider-specific assumptions are deliberately not made universal. Motion libraries remain optional and project-selected; existing product motion tokens and architecture take precedence.
+
+The upstream repository is MIT licensed. This provenance record documents methodology use; it does not grant permission to copy unrelated source, assets, examples, or generated material.
+
 ## DESIGN.md integration
 
 AzSkills' design-system Skill is informed by public references from:
