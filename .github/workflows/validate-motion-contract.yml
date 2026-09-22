@@ -1,0 +1,86 @@
+name: Validate Motion Contracts
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "ui-motion/**"
+      - "ui-motion-review/**"
+      - "ui-motion-audit/**"
+      - "design-intelligence.md"
+      - "ui-design/SKILL.md"
+      - "ui-aesthetics/SKILL.md"
+      - ".github/workflows/validate-motion-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-motion-contract:
+    name: Validate Motion Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate motion Skill contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f ui-motion/SKILL.md
+          test -f ui-motion/references/animation-standards.md
+          test -f ui-motion/references/animation-vocabulary.md
+          test -f ui-motion-review/SKILL.md
+          test -f ui-motion-audit/SKILL.md
+          test -f ui-motion-audit/references/plan-template.md
+
+          grep -q '^name: ui-motion$' ui-motion/SKILL.md
+          grep -q '^name: ui-motion-review$' ui-motion-review/SKILL.md
+          grep -q '^name: ui-motion-audit$' ui-motion-audit/SKILL.md
+
+          grep -q '^## Scope$' ui-motion/SKILL.md
+          grep -q '^## Construction workflow$' ui-motion/SKILL.md
+          grep -q '^## Quality gates$' ui-motion/SKILL.md
+
+          grep -q '^## Scope$' ui-motion-review/SKILL.md
+          grep -q '^## Review sequence$' ui-motion-review/SKILL.md
+          grep -q '^## Findings$' ui-motion-review/SKILL.md
+
+          grep -q '^## Scope$' ui-motion-audit/SKILL.md
+          grep -q '^## Modes$' ui-motion-audit/SKILL.md
+          grep -q '^## Findings contract$' ui-motion-audit/SKILL.md
+
+      - name: Validate cross-skill composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'ui-motion/references/animation-standards.md' design-intelligence.md
+          grep -q 'ui-motion-review' design-intelligence.md
+          grep -q 'ui-motion-audit' design-intelligence.md
+          grep -q 'ui-motion' ui-design/SKILL.md
+          grep -q 'ui-motion-review' ui-design/SKILL.md
+          grep -q 'ui-motion-audit' ui-design/SKILL.md
+          grep -q 'ui-motion-review' ui-aesthetics/SKILL.md
+
+      - name: Validate shared motion reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^# Animation Standards Reference$' ui-motion/references/animation-standards.md
+          grep -q 'cubic-bezier(0.23, 1, 0.32, 1)' ui-motion/references/animation-standards.md
+          grep -q 'cubic-bezier(0.77, 0, 0.175, 1)' ui-motion/references/animation-standards.md
+          grep -q 'prefers-reduced-motion' ui-motion/references/animation-standards.md
+          grep -q 'hover: hover' ui-motion/references/animation-standards.md
+
+      - name: Reject mechanical upstream copy markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RniE 'emilkowalski/skills|framer motion.*mandatory|install.*sonner' ui-motion ui-motion-review ui-motion-audit; then
+            echo "Motion Skills contain provider-specific integration markers that belong at the edge, not in core contracts."
+            exit 1
+          fi
