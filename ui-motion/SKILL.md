@@ -206,3 +206,7 @@ Do not turn a small animation implementation into a long design essay.
 Load `ui-motion/references/animation-standards.md` for exact reference curves, timing ranges, spring configurations, gesture rules, accessibility patterns, and QA heuristics.
 
 Load `ui-motion/references/animation-vocabulary.md` when the task uses unfamiliar motion terminology or when naming a motion pattern precisely matters.
+
+## Composition with the UI system
+
+For production interface work, `ui-motion` is a focused implementation pass underneath `ui-design`. Let `ui-design` own hierarchy, component state, responsive behavior, and accessibility; let `ui-motion` own the concrete motion mechanism, timing, interruption, and rendered motion verification.

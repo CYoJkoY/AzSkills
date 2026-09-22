@@ -24,6 +24,9 @@ body:
         - steam-mod-page
         - ui-aesthetics
         - ui-design
+        - ui-motion
+        - ui-motion-review
+        - ui-motion-audit
         - ultrathink
         - design-system
         - design-intelligence (root)

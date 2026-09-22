@@ -178,6 +178,9 @@ Choose the smallest Skill that fully owns the task. Compose additional Skills on
 | [`design-system`](design-system/SKILL.md) | DESIGN.md ingestion, normalization, source reconciliation, provenance, and executable design QA. |
 | [`ui-design`](ui-design/SKILL.md) | Production interface design and implementation: hierarchy, responsive behavior, accessibility, interaction, motion, and visual QA. |
 | [`ui-aesthetics`](ui-aesthetics/SKILL.md) | Composition-first visual critique, refinement, component craftsmanship, restrained depth, and anti-generic review. |
+| [`ui-motion`](ui-motion/SKILL.md) | Purposeful Web motion construction using project-native tokens, minimal mechanisms, accessibility variants, and rendered verification. |
+| [`ui-motion-review`](ui-motion-review/SKILL.md) | Read-only review of existing motion for timing, physicality, interruption, performance, accessibility, and cohesion. |
+| [`ui-motion-audit`](ui-motion-audit/SKILL.md) | Read-only codebase motion audit plus high-confidence discovery of places where motion should be removed, corrected, or introduced. |
 | [`frontend-slides`](frontend-slides/SKILL.md) | Fixed-stage 1920×1080 HTML presentations with deliberate art direction, animation, and render QA. |
 | [`svg-animation`](svg-animation/SKILL.md) | SVG animation generation, optimization, accessibility, reduced-motion handling, and reusable single-file output. |
 | [`logo-generator`](logo-generator/SKILL.md) | Logo, product mark, wordmark, mascot, SVG, and identity-system development. |
@@ -219,6 +222,9 @@ What are you doing?
 │   └─ then execute with the owning visual Skill
 ├─ Build / redesign a UI ─────────────────► ui-design
 ├─ Refine an existing interface ──────────► ui-aesthetics + ui-design
+├─ Add / redesign UI motion ──────────────► ui-motion + ui-design
+├─ Review existing motion ────────────────► ui-motion-review
+├─ Audit / discover motion across a repo ─► ui-motion-audit
 ├─ Create an HTML presentation ───────────► frontend-slides
 ├─ Create / animate SVG ──────────────────► svg-animation
 ├─ Create a logo / identity ──────────────► logo-generator
@@ -388,7 +394,8 @@ AzSkills/
 │   │   └── skills.json
 │   └── workflows/
 │       ├── update-skill-badge.yml
-│       └── validate-design-contract.yml
+│       ├── validate-design-contract.yml
+│       └── validate-motion-contract.yml
 │
 ├── assets/
 │   ├── azskills-hero.svg
@@ -418,6 +425,11 @@ AzSkills/
 ├── svg-animation/
 ├── ui-aesthetics/
 ├── ui-design/
+├── ui-motion/
+│   └── references/
+├── ui-motion-review/
+├── ui-motion-audit/
+│   └── references/
 ├── ultrathink/
 │
 ├── design-intelligence.md
