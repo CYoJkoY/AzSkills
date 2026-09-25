@@ -73,3 +73,49 @@ Recommendations should be actionable for developers:
 - Identify data or state changes
 - Consider backward compatibility
 - Avoid unnecessary redesigns when incremental improvement is sufficient
+
+## Decision Framework
+
+UX recommendations should separate observations from proposals:
+
+### Observation
+
+Describe the current behavior and the user impact without assuming the cause.
+
+### Analysis
+
+Explain the likely usability principle involved:
+
+- Discoverability
+- Consistency
+- Feedback
+- Error prevention
+- Cognitive load
+- Accessibility
+
+### Recommendation
+
+Provide an actionable improvement with:
+
+- Expected user benefit
+- Affected interface area
+- Implementation considerations
+- Possible trade-offs
+
+## Quality Requirements
+
+A UI/UX review should avoid generic visual comments. Prefer concrete analysis:
+
+- Do not only say that a layout is unclear; identify the information hierarchy problem.
+- Do not only suggest adding animations; explain whether motion improves feedback.
+- Do not only recommend consistency; identify the conflicting mental models.
+- Do not redesign working flows without identifying a measurable user problem.
+
+## Platform Awareness
+
+Recommendations must consider the target environment:
+
+- Desktop applications should respect keyboard workflows and window behavior.
+- Browser extensions should consider popup limitations and permission trust.
+- Developer tools should preserve information density and expert workflows.
+- Open-source utilities should balance simplicity with advanced configuration needs.
