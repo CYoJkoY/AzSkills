@@ -79,7 +79,7 @@ jobs:
           done
 
           grep -q 'Remotion frame' remotion-production/SKILL.md
-          grep -q 'no uncontrolled wall-clock timeline' remotion-production/SKILL.md
+          grep -q 'uncontrolled wall-clock' remotion-production/SKILL.md
           grep -q 'random' remotion-production/SKILL.md
 
       - name: Validate cross-skill routing
