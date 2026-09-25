@@ -98,6 +98,8 @@ jobs:
           done
 
           grep -q 'remotion-production' README.md
+          grep -q 'remotion-production' .github/ISSUE_TEMPLATE/new_skill.yml
+          grep -q 'remotion-production' .github/ISSUE_TEMPLATE/skill_improvement.yml
           grep -q 'design-intelligence.md' remotion-production/SKILL.md
           grep -q 'Remotion Production Contract' .github/workflows/validate-remotion-production-contract.yml
 
