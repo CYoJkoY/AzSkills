@@ -416,7 +416,7 @@ The policy is:
 4. The integration must survive scrubbing and repeated rendering.
 5. If the engine cannot satisfy those constraints, do not use it for the render-critical path.
 
-Current first-party Remotion integrations exist for technologies including GSAP, Lottie, Rive, and Three.js. Other libraries may require a frame-adapter pattern or may be better treated as conceptual influences rather than live animation clocks.
+Current first-party Remotion integrations exist for technologies including GSAP, Lottie, Rive, and Three.js. CSS Keyframes and WAAPI remain browser-native mechanisms and must not become a hidden render-time clock. Other libraries may require a frame-adapter pattern or may be better treated as conceptual influences rather than live animation clocks.
 
 ## Data visualization mode
 
