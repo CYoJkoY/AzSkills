@@ -107,7 +107,7 @@ jobs:
           set -euo pipefail
 
           if grep -RniE \
-            'copy.*Remotion documentation|verbatim.*Remotion|remotion-dev/remotion.*SKILL.md' \
+            'remotion-dev/remotion/blob/.*/packages/skills|packages/skills/skills/remotion/|verbatim.*upstream.*Remotion|copied.*from.*remotion-dev' \
             remotion-production; then
             echo "Remotion production references contain mechanical upstream-copy markers."
             exit 1
