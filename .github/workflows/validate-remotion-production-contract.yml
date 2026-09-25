@@ -1,0 +1,114 @@
+name: Validate Remotion Production Contract
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "remotion-production/**"
+      - "README.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - ".github/workflows/validate-remotion-production-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-remotion-production-contract:
+    name: Validate Remotion Production Skill
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Skill contract
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f remotion-production/SKILL.md
+
+          for reference in \
+            timeline-composition-patterns.md \
+            react-video-architecture.md \
+            animation-engine-selection.md \
+            asset-pipeline.md \
+            render-performance.md \
+            audio-video-production.md \
+            ai-video-workflow.md \
+            production-checklist.md \
+            visual-engine-matrix.md
+          do
+            test -f "remotion-production/references/$reference"
+          done
+
+          grep -q '^name: remotion-production$' remotion-production/SKILL.md
+          grep -q '^description:' remotion-production/SKILL.md
+          grep -q '^## Scope$' remotion-production/SKILL.md
+          grep -q '^## When not to use$' remotion-production/SKILL.md
+          grep -q '^## Decision framework$' remotion-production/SKILL.md
+          grep -q '^## Production workflow$' remotion-production/SKILL.md
+          grep -q '^## Quality gates$' remotion-production/SKILL.md
+          grep -q '^## Output contract$' remotion-production/SKILL.md
+          grep -q '^## Cross-Skill composition$' remotion-production/SKILL.md
+
+      - name: Validate engine coverage and deterministic timing
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for engine in \
+            "D3.js" \
+            "Three.js" \
+            "GSAP" \
+            "Anime.js" \
+            "Popmotion" \
+            "Framer Motion" \
+            "Rive" \
+            "Lottie" \
+            "CSS Keyframes" \
+            "WAAPI" \
+            "Flubber" \
+            "Canvas"
+          do
+            grep -q "$engine" remotion-production/SKILL.md
+            grep -q "$engine" remotion-production/references/animation-engine-selection.md
+            grep -q "$engine" remotion-production/references/visual-engine-matrix.md
+          done
+
+          grep -q 'Remotion frame' remotion-production/SKILL.md
+          grep -q 'no uncontrolled wall-clock timeline' remotion-production/SKILL.md
+          grep -q 'random' remotion-production/SKILL.md
+
+      - name: Validate cross-skill routing
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for skill in \
+            "ui-design" \
+            "ui-motion" \
+            "frontend-architecture" \
+            "frontend-slides" \
+            "svg-animation"
+          do
+            grep -q "$skill" remotion-production/SKILL.md
+          done
+
+          grep -q 'remotion-production' README.md
+          grep -q 'design-intelligence.md' remotion-production/SKILL.md
+          grep -q 'Remotion Production Contract' .github/workflows/validate-remotion-production-contract.yml
+
+      - name: Reject mechanical upstream-copy markers
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if grep -RniE \
+            'copy.*Remotion documentation|verbatim.*Remotion|remotion-dev/remotion.*SKILL.md' \
+            remotion-production; then
+            echo "Remotion production references contain mechanical upstream-copy markers."
+            exit 1
+          fi

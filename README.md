@@ -187,6 +187,12 @@ Choose the smallest Skill that fully owns the task. Compose additional Skills on
 | [`ip-as-logo`](ip-as-logo/SKILL.md) | Character-led marks optimized for silhouette, recognition, and small-size use. |
 | [`photo-abstract-editorial`](photo-abstract-editorial/SKILL.md) | Restrained editorial image treatments derived from a supplied photograph. |
 
+### Video & motion production
+
+| Skill | Focus |
+| :--- | :--- |
+| [`remotion-production`](remotion-production/SKILL.md) | Deterministic programmatic video and motion production with Remotion as the timeline/render coordination layer and specialized visual engines for data, 3D, choreography, authored assets, SVG geometry, and Canvas effects. |
+
 ### Documentation & publishing
 
 | Skill | Focus |
@@ -227,6 +233,12 @@ What are you doing?
 ├─ Audit / discover motion across a repo ─► ui-motion-audit
 ├─ Create an HTML presentation ───────────► frontend-slides
 ├─ Create / animate SVG ──────────────────► svg-animation
+│
+├─ Create a programmatic video / motion graphic ─────────► remotion-production
+├─ Create a data-driven visual story / chart video ──────► remotion-production + D3.js
+├─ Create a 3D showcase video ───────────────────────────► remotion-production + Three.js
+├─ Create a product / UI showcase video ────────────────► ui-design + remotion-production
+│
 ├─ Create a logo / identity ──────────────► logo-generator
 ├─ Create a character-led symbol ─────────► ip-as-logo + logo-generator
 ├─ Create an editorial photo treatment ───► photo-abstract-editorial
@@ -415,6 +427,9 @@ AzSkills/
 │   ├── html-template.md
 │   ├── scripts/
 │   └── viewport-base.css
+├── remotion-production/
+│   ├── SKILL.md
+│   └── references/
 ├── ip-as-logo/
 ├── l13n/
 ├── logo-generator/
