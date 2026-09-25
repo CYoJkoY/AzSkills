@@ -1,13 +1,13 @@
 ---
 name: ui-ux-design-intelligence
-description: Analyze, review, and improve software interfaces using Material Design philosophy, modern UX principles, accessibility standards, and localized product design patterns.
+description: Analyze, review, and improve software interfaces using Material Design philosophy, modern UX principles, accessibility standards, localized product design patterns, and implementation-aware workflows.
 ---
 
 # UI/UX Design Intelligence
 
 ## Purpose
 
-This skill provides product-level interface reasoning instead of simple visual styling suggestions.
+This skill provides product-level interface reasoning instead of simple visual styling suggestions. It connects user goals, interaction design, accessibility, and engineering constraints.
 
 ## Core Responsibilities
 
@@ -16,6 +16,7 @@ This skill provides product-level interface reasoning instead of simple visual s
 - Evaluate consistency with design systems
 - Identify accessibility problems
 - Recommend implementation-ready improvements
+- Detect UX regression risks during feature changes
 
 ## Design Philosophy Sources
 
@@ -38,13 +39,37 @@ Do not blindly copy Google visual language. Adapt recommendations for:
 - Developer tools
 - Chinese and international users
 
+Consider platform expectations, input methods, screen constraints, and user expertise.
+
+## Review Method
+
+Analyze interfaces through five layers:
+
+1. User goal
+2. Information architecture
+3. Interaction behavior
+4. Visual consistency
+5. Engineering feasibility
+
 ## Review Output
 
 When reviewing an interface, provide:
 
 1. User goal analysis
-2. Information hierarchy review
-3. Interaction problems
-4. Visual consistency issues
-5. Accessibility concerns
-6. Concrete implementation suggestions
+2. Current experience assessment
+3. Information hierarchy review
+4. Interaction problems
+5. Visual consistency issues
+6. Accessibility concerns
+7. Priority-ranked improvement suggestions
+8. Implementation considerations
+
+## Engineering Collaboration
+
+Recommendations should be actionable for developers:
+
+- Describe affected components
+- Explain required states
+- Identify data or state changes
+- Consider backward compatibility
+- Avoid unnecessary redesigns when incremental improvement is sufficient
