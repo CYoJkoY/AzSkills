@@ -166,3 +166,16 @@ The AzSkills version independently expresses the core workflow of preserving a s
 The integrated Skills are original AzSkills text written from observed public methodologies. They are not presented as verbatim copies of upstream repositories.
 
 For third-party assets that are actually copied into AzSkills, the applicable upstream license is recorded above. Tool/project licenses do not automatically grant rights to third-party materials selected or generated through those tools.
+
+
+## remotion-production
+
+The Remotion production workflow is an original AzSkills synthesis informed by the public Remotion documentation and project materials:
+
+- https://www.remotion.dev/docs
+- https://github.com/remotion-dev/remotion
+- https://github.com/remotion-dev/skills
+
+The review covered current public guidance around composition, frame-driven timing, calculateMetadata(), media, rendering APIs, Three.js, GSAP, Lottie, and Rive integrations. AzSkills does not vendor the Remotion documentation, the upstream Remotion repository, example assets, or the upstream Remotion Skill.
+
+The resulting contract deliberately adds AzSkills-specific behavior: explicit engine responsibility boundaries, deterministic timing rules, progressive-disclosure references, AI production workflow, cross-Skill routing, rendering QA, asset provenance, and performance gates.
