@@ -93,7 +93,7 @@ When the chosen first-screen composition is visually centered, the primary proje
 
 Do not duplicate authoritative manuals; use the README as an entry point.
 
-## 5.1 First-screen identity and title/Hero relationship
+### First-screen identity and title/Hero relationship
 
 The first-screen identity may be **centered, split, integrated, or title-first** depending on the repository's visual evidence and audience. Centering is a composition choice, not a universal template.
 
