@@ -73,6 +73,7 @@ General software structure:
 
 ```text
 Hero
+Identity / value
 Proof / real output
 Overview
 Features
@@ -86,7 +87,32 @@ Support / Sponsorship
 License
 ```
 
+Treat the Hero and primary project identity as one first-screen composition rather than unrelated blocks. A Hero is preferred when the repository contains honest visual evidence or a useful project-derived visual summary; use a title-first or title-only composition when a Hero would add decoration without useful information.
+
+When the chosen first-screen composition is visually centered, the primary project name should be centered as part of the composition, not merely centered inside an isolated line. Keep the identity zone, Hero/proof zone, and first-action zone separate enough that badges, navigation, or adjacent graphics do not pull the title off the visual center.
+
 Do not duplicate authoritative manuals; use the README as an entry point.
+
+### First-screen identity and title/Hero relationship
+
+The first-screen identity may be **centered, split, integrated, or title-first** depending on the repository's visual evidence and audience. Centering is a composition choice, not a universal template.
+
+When a centered identity is selected:
+
+- use a GitHub-safe Markdown / HTML structure that makes the title's alignment explicit;
+- center the primary project name relative to the Hero/proof composition when practical;
+- keep the title baseline, Hero width, and nearby badges/navigation on a shared composition grid;
+- avoid using independently centered child groups that create optical drift;
+- preserve a clear vertical rhythm between Hero, project name, value proposition, proof, and first action.
+
+When a Hero is used:
+
+- place it in the first-screen flow where it summarizes the project's real identity or mechanism;
+- make its visual hierarchy support the project name instead of competing with it;
+- keep essential copy searchable in Markdown or HTML;
+- give the Hero its own geometry and safe margin rather than allowing it to collide with the title or first-action area.
+
+A Hero may be omitted when no honest visual evidence exists. A centered title may be omitted when the project's strongest first-screen composition is split or artifact-led.
 
 ## 5. Heading icon system
 
@@ -274,6 +300,8 @@ weight
 contrast
 ```
 
+For the primary project name and Hero pairing, also define the shared composition center or split axis and the deliberate gap between the title and visual. The title should not be centered by character count alone when neighboring badges, artwork, or asymmetric proof changes the visual mass.
+
 Prefer two to four type levels rather than many tiny labels. Long SVG text should be shortened, explicitly split into lines, or moved back into Markdown.
 
 When a title and graphic are adjacent, measure their actual bounding boxes and maintain a clear visual gap. Never rely on approximate character counts.
@@ -449,6 +477,9 @@ Final trust / accessibility / responsive audit
 - identity is immediate;
 - value proposition is clear;
 - primary next action is obvious;
+- Hero is present when it provides useful project-specific visual proof or summary;
+- when a centered identity composition is chosen, the project name is optically centered relative to the Hero/proof system;
+- title, Hero, proof, and first action do not compete for the same visual space;
 - no decorative block pushes essential context away.
 
 ### Heading icons
