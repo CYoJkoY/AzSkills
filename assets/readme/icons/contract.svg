@@ -1,6 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title desc">
-<title id="title">Behavior contract</title>
-<desc id="desc">Material 3-inspired AzSkills icon for behavior contract.</desc>
-<rect x="3" y="3" width="42" height="42" rx="14" fill="#D3E3FD"/>
-<path d="M15 9h12l5 4v25H15z" fill="#FFFFFF" stroke="#74777F" stroke-width="2"/><path d="M27 9v6h6M19 21h10M19 26h10M19 31h7" fill="none" stroke="#44474F" stroke-width="2" stroke-linecap="round"/><path d="M30 30l2.5 2.5 5-6" fill="none" stroke="#0B57D0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc"><title id="title">Behavior contract</title><desc id="desc">Material 3-inspired AzSkills icon for a behavior contract.</desc><circle cx="12" cy="12" r="10" fill="#D3E3FD"/><path d="M8 6.5h6l2 2v9H8z" fill="#fff" stroke="#74777F" stroke-width="1.4" stroke-linejoin="round"/><path d="M14 6.5v2h2M10 11h4M10 13.8h4" fill="none" stroke="#44474F" stroke-width="1.25" stroke-linecap="round"/><path d="M10.5 16.4l1.4 1.4 2.8-3.2" fill="none" stroke="#0B57D0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>

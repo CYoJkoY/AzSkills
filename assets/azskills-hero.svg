@@ -18,23 +18,23 @@
 <g fill="#44474F" font-size="16"><text x="28" y="138">Scope</text><text x="28" y="170">Constraints</text><text x="28" y="202">Workflow</text><text x="218" y="138">Quality gates</text><text x="218" y="170">Output contract</text></g>
 <rect x="28" y="218" width="116" height="8" rx="4" fill="#0B57D0"/><rect x="152" y="218" width="92" height="8" rx="4" fill="#0F6B4F"/><rect x="252" y="218" width="76" height="8" rx="4" fill="#8A4A00"/>
 </g>
-<g transform="translate(622 292)">
+<g transform="translate(564 292)">
 <text x="0" y="0" fill="#0B57D0" font-size="14" font-weight="650">From request to checked result</text>
 <text x="0" y="30" fill="#44474F" font-size="15">Select the narrowest capability, then verify the result.</text>
 <g transform="translate(0 92)">
-<rect width="226" height="182" rx="20" fill="#F6F3FA"/><circle cx="36" cy="38" r="18" fill="#D3E3FD"/><text x="36" y="44" text-anchor="middle" fill="#0B57D0" font-size="16" font-weight="700">1</text><text x="24" y="86" fill="#1A1B20" font-size="22" font-weight="650">Request</text><text x="24" y="116" fill="#44474F" font-size="14">real task + context</text><rect x="24" y="142" width="122" height="10" rx="5" fill="#0B57D0"/>
+<rect width="210" height="182" rx="20" fill="#F6F3FA"/><circle cx="36" cy="38" r="18" fill="#D3E3FD"/><text x="36" y="44" text-anchor="middle" fill="#0B57D0" font-size="16" font-weight="700">1</text><text x="24" y="86" fill="#1A1B20" font-size="22" font-weight="650">Request</text><text x="24" y="116" fill="#44474F" font-size="14">real task + context</text><rect x="24" y="142" width="122" height="10" rx="5" fill="#0B57D0"/>
 </g>
-<path d="M246 182h34M272 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-<g transform="translate(296 92)">
+<path d="M230 182h34M256 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<g transform="translate(274 92)">
 <rect width="250" height="182" rx="20" fill="#F0ECF4"/><circle cx="36" cy="38" r="18" fill="#D3E3FD"/><text x="36" y="44" text-anchor="middle" fill="#0B57D0" font-size="16" font-weight="700">2</text><text x="24" y="86" fill="#1A1B20" font-size="22" font-weight="650">Skill contract</text><text x="24" y="116" fill="#44474F" font-size="14">focused behavior + rules</text><rect x="24" y="142" width="154" height="10" rx="5" fill="#0F6B4F"/>
 </g>
-<path d="M566 182h34M592 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-<g transform="translate(616 92)">
-<rect width="250" height="182" rx="20" fill="#F6F3FA"/><circle cx="36" cy="38" r="18" fill="#FFDCBE"/><text x="36" y="44" text-anchor="middle" fill="#8A4A00" font-size="16" font-weight="700">3</text><text x="24" y="86" fill="#1A1B20" font-size="22" font-weight="650">Project context</text><text x="24" y="116" fill="#44474F" font-size="14">existing APIs + conventions</text><rect x="24" y="142" width="166" height="10" rx="5" fill="#8A4A00"/>
+<path d="M520 182h34M546 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<g transform="translate(564 92)">
+<rect width="226" height="182" rx="20" fill="#F6F3FA"/><circle cx="36" cy="38" r="18" fill="#FFDCBE"/><text x="36" y="44" text-anchor="middle" fill="#8A4A00" font-size="16" font-weight="700">3</text><text x="24" y="86" fill="#1A1B20" font-size="22" font-weight="650">Project context</text><text x="24" y="116" fill="#44474F" font-size="14">existing APIs + conventions</text><rect x="24" y="142" width="166" height="10" rx="5" fill="#8A4A00"/>
 </g>
-<path d="M886 182h34M912 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-<g transform="translate(936 92)">
-<rect width="250" height="182" rx="20" fill="#D3E3FD"/><circle cx="36" cy="38" r="18" fill="#0B57D0"/><path d="M28 38l6 6 11-13" fill="none" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text x="24" y="86" fill="#041E49" font-size="22" font-weight="650">Checked result</text><text x="24" y="116" fill="#041E49" font-size="14">render · test · audit</text><rect x="24" y="142" width="142" height="10" rx="5" fill="#0B57D0"/>
+<path d="M810 182h34M836 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<g transform="translate(854 92)">
+<rect width="226" height="182" rx="20" fill="#D3E3FD"/><circle cx="36" cy="38" r="18" fill="#0B57D0"/><path d="M28 38l6 6 11-13" fill="none" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text x="24" y="86" fill="#041E49" font-size="22" font-weight="650">Checked result</text><text x="24" y="116" fill="#041E49" font-size="14">render · test · audit</text><rect x="24" y="142" width="142" height="10" rx="5" fill="#0B57D0"/>
 </g>
 </g>
 <g transform="translate(112 638)"><line x1="0" y1="0" x2="1536" y2="0" stroke="#C4C6D0" stroke-width="2"/><text x="0" y="36" fill="#44474F" font-size="14">Inspectable</text><text x="168" y="36" fill="#44474F" font-size="14">Composable</text><text x="328" y="36" fill="#44474F" font-size="14">Repository-native</text><text x="534" y="36" fill="#44474F" font-size="14">Verified</text><circle cx="146" cy="31" r="4" fill="#0B57D0"/><circle cx="306" cy="31" r="4" fill="#0F6B4F"/><circle cx="514" cy="31" r="4" fill="#8A4A00"/></g>

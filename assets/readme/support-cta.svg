@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 132" role="img" aria-labelledby="title desc">
 <title id="title">Support AzSkills</title>
 <desc id="desc">A Material 3-inspired support call to action for AzSkills.</desc>
-<rect x="2" y="2" width="636" height="128" rx="28" fill="#D3E3FD" stroke="#C4C6D0" stroke-width="2"/>
+<rect x="2" y="2" width="636" height="128" rx="24" fill="#F0ECF4" stroke="#C4C6D0" stroke-width="2"/>
 <circle cx="72" cy="66" r="28" fill="#0B57D0"/>
-<path d="M72 84c-1-.9-12-7-12-15 0-4.7 3-8.5 7.5-8.5 2.2 0 4 1 5 3 1-2 2.8-3 5-3 4.5 0 7.5 3.8 7.5 8.5 0 8-11 14.1-13 15z" fill="#FFF"/>
-<text x="118" y="57" fill="#041E49" font-family="'Google Sans Flex','Google Sans',Roboto,'Noto Sans','Segoe UI',Arial,sans-serif" font-size="24" font-weight="650">Support AzSkills</text>
-<text x="118" y="84" fill="#041E49" font-family="'Google Sans Flex','Google Sans',Roboto,'Noto Sans','Segoe UI',Arial,sans-serif" font-size="14">Help maintain the Skill library and its documentation infrastructure.</text>
+<path d="M72 75c-.8-.7-10.2-5.8-10.2-12 0-3.5 2.3-6.1 5.4-6.1 2 0 3.5 1 4.8 2.7 1.2-1.7 2.8-2.7 4.8-2.7 3.1 0 5.4 2.6 5.4 6.1 0 6.2-9.4 11.3-10.2 12z" fill="#D3E3FD"/>
+<text x="118" y="57" fill="#1A1B20" font-family="'Google Sans Flex','Google Sans',Roboto,'Noto Sans','Segoe UI',Arial,sans-serif" font-size="24" font-weight="650">Support AzSkills</text>
+<text x="118" y="84" fill="#44474F" font-family="'Google Sans Flex','Google Sans',Roboto,'Noto Sans','Segoe UI',Arial,sans-serif" font-size="14">Help maintain the Skill library and its documentation infrastructure.</text>
 <path d="M565 57h33M586 49l8 8-8 8" fill="none" stroke="#0B57D0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
