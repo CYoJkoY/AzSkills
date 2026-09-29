@@ -2,7 +2,11 @@
 
 <div align="center">
 
-<img src="assets/azskills-hero.svg" alt="AzSkills — reusable AI skills for engineering, design, documentation, localization, translation, and visual production" width="100%">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/azskills-hero-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/azskills-hero.svg">
+  <img src="assets/azskills-hero.svg" alt="AzSkills — reusable AI skills for engineering, design, documentation, localization, translation, and visual production" width="100%">
+</picture>
 
 **Reusable AI Skills for real work.**
 
@@ -35,7 +39,7 @@ The repository-owned visual language is documented in [`DESIGN.md`](DESIGN.md): 
 ---
 
 <a name="readme-overview"></a>
-## <img src="assets/readme/icons/contract.svg" width="24" height="24" alt=""> Overview
+## <img src="assets/readme/icons/contract.svg" width="20" height="20" alt=""> Overview
 
 AzSkills is a **modular library of reusable AI behavior contracts**.
 
@@ -74,7 +78,7 @@ AzSkills therefore favors **small responsibilities, composition, repository-nati
 ---
 
 <a name="readme-architecture"></a>
-## <img src="assets/readme/icons/visual-design.svg" width="24" height="24" alt=""> Architecture
+## <img src="assets/readme/icons/visual-design.svg" width="20" height="20" alt=""> Architecture
 
 AzSkills separates **behavior contracts**, **shared reasoning**, and **execution-specific Skills**.
 
@@ -168,14 +172,14 @@ See:
 ---
 
 <a name="readme-design-system"></a>
-## <img src="assets/readme/icons/visual-design.svg" width="24" height="24" alt=""> Design system
+## <img src="assets/readme/icons/visual-design.svg" width="20" height="20" alt=""> Design system
 
 AzSkills uses a repository-owned Material 3-inspired visual contract for its README visuals, authored SVG assets, and presentation defaults. Google Material 3 is the visual reference; Google brand assets and proprietary font files are not copied into the repository. See [`DESIGN.md`](DESIGN.md) for the executable token and QA contract.
 
 ---
 
 <a name="readme-skills"></a>
-## <img src="assets/readme/icons/engineering.svg" width="24" height="24" alt=""> Skill catalog
+## <img src="assets/readme/icons/engineering.svg" width="20" height="20" alt=""> Skill catalog
 
 Choose the smallest Skill that fully owns the task. Compose additional Skills only when they contribute a separate responsibility.
 
@@ -230,7 +234,7 @@ Choose the smallest Skill that fully owns the task. Compose additional Skills on
 ---
 
 <a name="readme-choose"></a>
-## <img src="assets/readme/icons/selection.svg" width="24" height="24" alt=""> Choose a Skill
+## <img src="assets/readme/icons/selection.svg" width="20" height="20" alt=""> Choose a Skill
 
 Use this routing map as the first decision point:
 
@@ -284,7 +288,7 @@ Do not duplicate shared rules merely to make each Skill look self-contained.
 ---
 
 <a name="readme-usage"></a>
-## <img src="assets/readme/icons/model.svg" width="24" height="24" alt=""> Use
+## <img src="assets/readme/icons/model.svg" width="20" height="20" alt=""> Use
 
 AzSkills is runtime-agnostic. There is no repository-wide application to install; the deliverable is the Markdown contract itself plus any supporting references or assets.
 
@@ -397,7 +401,7 @@ For design-system work, verify both the source mapping and the rendered result.
 ---
 
 <a name="readme-quality"></a>
-## <img src="assets/readme/icons/verification.svg" width="24" height="24" alt=""> Quality bar
+## <img src="assets/readme/icons/verification.svg" width="20" height="20" alt=""> Quality bar
 
 AzSkills is intentionally evidence-first.
 
@@ -426,7 +430,7 @@ The repository currently validates the DESIGN.md integration through [`validate-
 ---
 
 <a name="readme-repository"></a>
-## <img src="assets/readme/icons/documentation.svg" width="24" height="24" alt=""> Repository map
+## <img src="assets/readme/icons/documentation.svg" width="20" height="20" alt=""> Repository map
 
 ```text
 AzSkills/
@@ -447,9 +451,11 @@ AzSkills/
 │
 ├── assets/
 │   ├── azskills-hero.svg
+│   ├── azskills-hero-dark.svg
 │   └── readme/
 │       ├── icons/
-│       └── support-cta.svg
+│       ├── support-cta.svg
+│       └── support-cta-dark.svg
 │
 ├── application-architecture/
 ├── design-system/
@@ -495,7 +501,7 @@ AzSkills/
 ---
 
 <a name="readme-contributing"></a>
-## <img src="assets/readme/icons/contributing.svg" width="24" height="24" alt=""> Contributing
+## <img src="assets/readme/icons/contributing.svg" width="20" height="20" alt=""> Contributing
 
 Good contributions add a clear capability, improve an existing workflow, fix a concrete defect, or remove unnecessary complexity.
 
@@ -512,14 +518,18 @@ For Skill proposals and improvements, use the repository's structured [Issue For
 ---
 
 <a name="readme-support"></a>
-## <img src="assets/readme/icons/heart.svg" width="24" height="24" alt=""> Support
+## <img src="assets/readme/icons/heart.svg" width="20" height="20" alt=""> Support
 
 AzSkills is maintained as an open collection of reusable engineering, design, documentation, localization, translation, and visual workflows. Support helps sustain the time required to maintain the Skills, references, assets, and repository infrastructure.
 
 <div align="center">
 
 <a href="https://cyojkoy.github.io/Payment/">
-  <img src="assets/readme/support-cta.svg" alt="Support AzSkills" width="560">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/support-cta-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/support-cta.svg">
+    <img src="assets/readme/support-cta.svg" alt="Support AzSkills" width="560">
+  </picture>
 </a>
 
 **Direct support link:** https://cyojkoy.github.io/Payment/
@@ -531,7 +541,7 @@ AzSkills is maintained as an open collection of reusable engineering, design, do
 ---
 
 <a name="readme-license"></a>
-## <img src="assets/readme/icons/license.svg" width="24" height="24" alt=""> License & provenance
+## <img src="assets/readme/icons/license.svg" width="20" height="20" alt=""> License & provenance
 
 AzSkills is released under the [MIT License](LICENSE).
 

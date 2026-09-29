@@ -1,6 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title desc">
-<title id="title">Support</title>
-<desc id="desc">Material 3-inspired AzSkills icon for support.</desc>
-<rect x="3" y="3" width="42" height="42" rx="14" fill="#C6F1DD"/>
-<path d="M24 36c-1-.9-10-6.4-10-13 0-4 2.6-7 6.2-7 2.2 0 3.9 1.1 4.8 2.9C26 17.1 27.7 16 29.8 16c3.6 0 6.2 3 6.2 7 0 6.6-9 12.1-12 13z" fill="#C6F1DD" stroke="#0F6B4F" stroke-width="2.5" stroke-linejoin="round"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc"><title id="title">Support</title><desc id="desc">Material 3-inspired AzSkills icon for support.</desc><circle cx="12" cy="12" r="10" fill="#D3E3FD"/><path d="M12 17.1c-.7-.6-4.2-2.8-4.2-5.5 0-1.7 1.1-2.9 2.7-2.9.9 0 1.7.4 2.1 1.2.5-.8 1.2-1.2 2.1-1.2 1.6 0 2.7 1.2 2.7 2.9 0 2.7-3.5 4.9-5.4 5.5z" fill="#C6F1DD" stroke="#0F6B4F" stroke-width="1.35" stroke-linejoin="round"/></svg>

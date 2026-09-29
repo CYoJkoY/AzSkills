@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1760 800" role="img" aria-labelledby="title desc">
+<title id="title">AzSkills — reusable AI behavior contracts</title>
+<desc id="desc">A Material 3-inspired AzSkills overview showing a request flowing through a Skill contract and project context to a checked result.</desc>
+<rect width="1760" height="800" rx="32" fill="#141218"/>
+<rect x="52" y="52" width="1656" height="696" rx="28" fill="#1D1B20" stroke="#4A474F" stroke-width="2"/>
+<g font-family="'Google Sans Flex','Google Sans',Roboto,'Noto Sans','Segoe UI',Arial,sans-serif">
+<g transform="translate(112 92)">
+<path d="M0 34L28 0H73L42 34Z" fill="#A8C7FA"/><path d="M54 34L76 3L101 34Z" fill="#8BD5BA"/>
+<text x="0" y="108" fill="#E6E1E9" font-size="68" font-weight="650" letter-spacing="-1.4">AzSkills</text>
+<text x="0" y="148" fill="#CAC4D0" font-size="23">Reusable AI behavior contracts for real work.</text>
+<text x="0" y="180" fill="#CAC4D0" font-size="15">Small, inspectable rules. Composable by design. Verified before handoff.</text>
+</g>
+<g transform="translate(112 322)">
+<rect width="436" height="256" rx="24" fill="#2B2930"/>
+<text x="28" y="42" fill="#A8C7FA" font-size="14" font-weight="650">The contract</text>
+<text x="28" y="82" fill="#E6E1E9" font-size="29" font-weight="650">SKILL.md</text>
+<line x1="28" y1="106" x2="408" y2="106" stroke="#4A474F" stroke-width="2"/>
+<g fill="#CAC4D0" font-size="16"><text x="28" y="138">Scope</text><text x="28" y="170">Constraints</text><text x="28" y="202">Workflow</text><text x="218" y="138">Quality gates</text><text x="218" y="170">Output contract</text></g>
+<rect x="28" y="218" width="116" height="8" rx="4" fill="#A8C7FA"/><rect x="152" y="218" width="92" height="8" rx="4" fill="#8BD5BA"/><rect x="252" y="218" width="76" height="8" rx="4" fill="#FFB870"/>
+</g>
+<g transform="translate(564 292)">
+<text x="0" y="0" fill="#A8C7FA" font-size="14" font-weight="650">From request to checked result</text>
+<text x="0" y="30" fill="#CAC4D0" font-size="15">Select the narrowest capability, then verify the result.</text>
+<g transform="translate(0 92)">
+<rect width="210" height="182" rx="20" fill="#242127"/><circle cx="36" cy="38" r="18" fill="#394B63"/><text x="36" y="44" text-anchor="middle" fill="#A8C7FA" font-size="16" font-weight="700">1</text><text x="24" y="86" fill="#E6E1E9" font-size="22" font-weight="650">Request</text><text x="24" y="116" fill="#CAC4D0" font-size="14">real task + context</text><rect x="24" y="142" width="122" height="10" rx="5" fill="#A8C7FA"/>
+</g>
+<path d="M230 182h34M256 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<g transform="translate(274 92)">
+<rect width="250" height="182" rx="20" fill="#2B2930"/><circle cx="36" cy="38" r="18" fill="#394B63"/><text x="36" y="44" text-anchor="middle" fill="#A8C7FA" font-size="16" font-weight="700">2</text><text x="24" y="86" fill="#E6E1E9" font-size="22" font-weight="650">Skill contract</text><text x="24" y="116" fill="#CAC4D0" font-size="14">focused behavior + rules</text><rect x="24" y="142" width="154" height="10" rx="5" fill="#8BD5BA"/>
+</g>
+<path d="M520 182h34M546 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<g transform="translate(564 92)">
+<rect width="226" height="182" rx="20" fill="#242127"/><circle cx="36" cy="38" r="18" fill="#5A4632"/><text x="36" y="44" text-anchor="middle" fill="#FFB870" font-size="16" font-weight="700">3</text><text x="24" y="86" fill="#E6E1E9" font-size="22" font-weight="650">Project context</text><text x="24" y="116" fill="#CAC4D0" font-size="14">existing APIs + conventions</text><rect x="24" y="142" width="166" height="10" rx="5" fill="#FFB870"/>
+</g>
+<path d="M810 182h34M836 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<g transform="translate(854 92)">
+<rect width="226" height="182" rx="20" fill="#394B63"/><circle cx="36" cy="38" r="18" fill="#A8C7FA"/><path d="M28 38l6 6 11-13" fill="none" stroke="#003258" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text x="24" y="86" fill="#D1E4FF" font-size="22" font-weight="650">Checked result</text><text x="24" y="116" fill="#D1E4FF" font-size="14">render · test · audit</text><rect x="24" y="142" width="142" height="10" rx="5" fill="#A8C7FA"/>
+</g>
+</g>
+<g transform="translate(112 638)"><line x1="0" y1="0" x2="1536" y2="0" stroke="#4A474F" stroke-width="2"/><text x="0" y="36" fill="#CAC4D0" font-size="14">Inspectable</text><text x="168" y="36" fill="#CAC4D0" font-size="14">Composable</text><text x="328" y="36" fill="#CAC4D0" font-size="14">Repository-native</text><text x="534" y="36" fill="#CAC4D0" font-size="14">Verified</text><circle cx="146" cy="31" r="4" fill="#A8C7FA"/><circle cx="306" cy="31" r="4" fill="#8BD5BA"/><circle cx="514" cy="31" r="4" fill="#FFB870"/></g>
+</g></svg>
