@@ -117,6 +117,12 @@ AzSkills separates **behavior contracts**, **shared reasoning**, and **execution
                          └──────────────────────┘
 ```
 
+
+### Conditional style reservoir
+
+[`style-reservoir/SKILL.md`](style-reservoir/SKILL.md) is an optional visual-reference layer. It catalogs the current 148 StyleKit styles without vendoring the StyleKit application or turning the collection into a single composite design system.
+
+The reservoir is consulted only when a concrete visual decision is unresolved and the task contains enough product, surface, layout, density, platform, content, interaction, or visual-intent evidence to make selection meaningful. Explicit requirements and project-owned design systems remain authoritative. See [`style-reservoir/references/stylekit-selection.md`](style-reservoir/references/stylekit-selection.md).
 ### Shared reasoning layer
 
 [`design-intelligence.md`](design-intelligence.md) is **not a Skill**. It is a cross-cutting reasoning layer for visual systems, interaction, composition, accessibility, motion, and visual QA.
@@ -187,6 +193,7 @@ Choose the smallest Skill that fully owns the task. Compose additional Skills on
 | :--- | :--- |
 | [`design-system`](design-system/SKILL.md) | DESIGN.md ingestion, normalization, source reconciliation, provenance, and executable design QA. |
 | [`ui-design`](ui-design/SKILL.md) | Production interface design and implementation: hierarchy, responsive behavior, accessibility, interaction, motion, and visual QA. |
+| [`style-reservoir`](style-reservoir/SKILL.md) | Context-aware reference reservoir of StyleKit visual styles; progressive disclosure and fail-closed selection without overriding local design systems. |
 | [`ui-aesthetics`](ui-aesthetics/SKILL.md) | Composition-first visual critique, refinement, component craftsmanship, restrained depth, and anti-generic review. |
 | [`ui-motion`](ui-motion/SKILL.md) | Purposeful Web motion construction using project-native tokens, minimal mechanisms, accessibility variants, and rendered verification. |
 | [`ui-motion-review`](ui-motion-review/SKILL.md) | Read-only review of existing motion for timing, physicality, interruption, performance, accessibility, and cohesion. |
@@ -236,6 +243,7 @@ What are you doing?
 │
 ├─ Consume / author / adapt DESIGN.md ───► design-system
 │   └─ then execute with the owning visual Skill
+├─ Need a visual direction for an underspecified UI ─► style-reservoir → ui-design
 ├─ Build / redesign a UI ─────────────────► ui-design
 ├─ Refine an existing interface ──────────► ui-aesthetics + ui-design
 ├─ Add / redesign UI motion ──────────────► ui-motion + ui-design
@@ -286,6 +294,23 @@ AzSkills is runtime-agnostic. There is no repository-wide application to install
 git clone https://github.com/CYoJkoY/AzSkills.git
 cd AzSkills
 ```
+
+
+For visual work without an authoritative local direction:
+
+```text
+visual task
+   ↓
+style-reservoir
+   ↓
+context filter / compatibility check
+   ↓
+selected style reference (only when justified)
+   ↓
+ui-design / ui-aesthetics
+```
+
+`style-reservoir` is conditional. Existing `DESIGN.md`, product identity, component systems, explicit user direction, accessibility requirements, and platform constraints remain higher priority. It may also be skipped entirely when context is too weak to justify a style.
 
 ### 2. Select the narrowest Skill
 
@@ -417,6 +442,7 @@ AzSkills/
 │   └── workflows/
 │       ├── update-skill-badge.yml
 │       ├── validate-design-contract.yml
+│       ├── validate-style-reservoir.yml
 │       └── validate-motion-contract.yml
 │
 ├── assets/
@@ -427,6 +453,9 @@ AzSkills/
 │
 ├── application-architecture/
 ├── design-system/
+│   ├── SKILL.md
+│   └── references/
+├── style-reservoir/
 │   ├── SKILL.md
 │   └── references/
 ├── frontend-architecture/

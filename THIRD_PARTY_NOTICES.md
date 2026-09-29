@@ -62,6 +62,26 @@ AzSkills intentionally does not import or reproduce external searchable database
 
 One caution from current public discussion is preserved in AzSkills' architecture: external tooling may ship much more data than an agent actually reads, and some combined modes can silently ignore options. AzSkills therefore prioritizes a compact contract with explicit trigger conditions and verification requirements over a large passive data bundle. See the public discussion around UI/UX Pro Max issue #484 for an example of this class of integration risk: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/issues/484
 
+## `style-reservoir` and StyleKit catalog
+
+The Style Reservoir integrates a compact metadata projection from:
+
+- https://github.com/AnxForever/stylekit
+
+Reviewed upstream snapshot:
+
+- commit: 20e40320086bf21e92078eb8e1928b080ae96e77
+- metadata source: `lib/styles/meta-registry.ts`
+- catalog size: 148 styles
+- license: MIT
+- copyright: Copyright (c) 2026 AnxForever
+
+AzSkills stores only the searchable style metadata required for context-aware retrieval in `style-reservoir/references/stylekit-catalog.json`, together with pinned source URLs and provenance.
+
+AzSkills does not vendor StyleKit's application, framework wrappers, MCP server, generated assets, screenshots, preview images, tests, deployment configuration, or unrelated repository tooling.
+
+The reservoir is intentionally progressive-disclosure and conditional. Its presence does not make any StyleKit style mandatory. Explicit user requirements, the project-owned design system, and the owning AzSkills UI Skill remain higher-priority authorities.
+
 ## `ui-motion`, `ui-motion-review`, and `ui-motion-audit`
 
 The motion integration is informed by the public `emilkowalski/skills` repository, specifically the animation/design methodology current at the reviewed snapshot:
