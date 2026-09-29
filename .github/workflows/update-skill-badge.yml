@@ -41,7 +41,7 @@ jobs:
             "schemaVersion": 1,
             "label": "Skills",
             "message": "${{ steps.count.outputs.count }}",
-            "color": "8A9E8B"
+            "color": "0B57D0"
           }
           EOF
 
