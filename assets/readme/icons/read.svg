@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Read"><circle cx="24" cy="24" r="20" fill="#243235" stroke="#6F8D8C" stroke-width="2"/><path d="M12 15c4-3 8-3 12 0v20c-4-3-8-3-12 0zM36 15c-4-3-8-3-12 0v20c4-3 8-3 12 0z" fill="#DCE7E6"/><path d="M24 15v20M16 20h4M28 20h4" stroke="#4B6263" stroke-width="2" stroke-linecap="round"/><circle cx="33" cy="31" r="4" fill="#D7A85A"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title desc">
+<title id="title">Read</title>
+<desc id="desc">Material 3-inspired AzSkills icon for read.</desc>
+<rect x="3" y="3" width="42" height="42" rx="14" fill="#D3E3FD"/>
+<path d="M12 14c4-2 8-2 12 1v20c-4-3-8-3-12-1zM36 14c-4-2-8-2-12 1v20c4-3 8-3 12-1z" fill="#FFFFFF" stroke="#74777F" stroke-width="2" stroke-linejoin="round"/><path d="M24 15v20M16 21h4M28 21h4" stroke="#44474F" stroke-width="2" stroke-linecap="round"/>
+</svg>

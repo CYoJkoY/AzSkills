@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Behavior contract"><circle cx="24" cy="24" r="20" fill="#243235" stroke="#6F8D8C" stroke-width="2"/><path d="M15 11h13l5 5v21H15z" fill="#DCE7E6"/><path d="M28 11v7h7M19 23h10M19 28h10M19 33h6" fill="none" stroke="#4B6263" stroke-width="2" stroke-linecap="round"/><path d="M31 27l2 2 4-5" fill="none" stroke="#D7A85A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title desc">
+<title id="title">Behavior contract</title>
+<desc id="desc">Material 3-inspired AzSkills icon for behavior contract.</desc>
+<rect x="3" y="3" width="42" height="42" rx="14" fill="#D3E3FD"/>
+<path d="M15 9h12l5 4v25H15z" fill="#FFFFFF" stroke="#74777F" stroke-width="2"/><path d="M27 9v6h6M19 21h10M19 26h10M19 31h7" fill="none" stroke="#44474F" stroke-width="2" stroke-linecap="round"/><path d="M30 30l2.5 2.5 5-6" fill="none" stroke="#0B57D0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
