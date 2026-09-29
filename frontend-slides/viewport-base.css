@@ -9,14 +9,14 @@ body {
     height: 100%;
     margin: 0;
     overflow: hidden;
-    background: var(--stage-bg, #000);
+    background: var(--stage-bg, #F0ECF4);
 }
 
 .deck-viewport {
     position: fixed;
     inset: 0;
     overflow: hidden;
-    background: var(--stage-bg, #000);
+    background: var(--stage-bg, #F0ECF4);
 }
 
 .deck-stage {
@@ -27,7 +27,7 @@ body {
     height: 1080px;
     overflow: hidden;
     transform-origin: 0 0;
-    background: var(--slide-bg, #fff);
+    background: var(--slide-bg, #FBF8FF);
 }
 
 .slide {
@@ -40,7 +40,7 @@ body {
     visibility: hidden;
     opacity: 0;
     pointer-events: none;
-    background: var(--slide-bg, #fff);
+    background: var(--slide-bg, #FBF8FF);
 }
 
 .slide.active,
@@ -73,13 +73,13 @@ svg {
         width: 1920px;
         height: auto;
         overflow: visible;
-        background: #fff;
+        background: #FBF8FF;
     }
 
     .deck-viewport {
         position: static;
         overflow: visible;
-        background: #fff;
+        background: #FBF8FF;
     }
 
     .deck-stage {
