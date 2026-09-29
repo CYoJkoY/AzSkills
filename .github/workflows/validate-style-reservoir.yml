@@ -1,0 +1,70 @@
+name: Validate Style Reservoir
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "style-reservoir/**"
+      - "THIRD_PARTY_NOTICES.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-style-reservoir:
+    name: Validate Style Reservoir Contract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Skill contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f style-reservoir/SKILL.md
+          grep -q '^name: style-reservoir$' style-reservoir/SKILL.md
+          grep -q '^description:' style-reservoir/SKILL.md
+          grep -q '^## Scope$' style-reservoir/SKILL.md
+          grep -q '^## Precedence$' style-reservoir/SKILL.md
+          grep -q '^## Progressive disclosure$' style-reservoir/SKILL.md
+          grep -q '^## Automatic activation model$' style-reservoir/SKILL.md
+          grep -q '^## Selection procedure$' style-reservoir/SKILL.md
+          grep -q '^## Failure-closed behavior$' style-reservoir/SKILL.md
+          grep -q '^## Output contract$' style-reservoir/SKILL.md
+
+      - name: Validate complete StyleKit catalog
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          catalog_path = Path("style-reservoir/references/stylekit-catalog.json")
+          catalog_data = json.loads(catalog_path.read_text(encoding="utf-8"))
+          style_records = catalog_data["styles"]
+
+          assert catalog_data["source"]["repository"] == "AnxForever/stylekit"
+          assert catalog_data["source"]["license"] == "MIT"
+          assert catalog_data["source"]["styleCount"] == 148
+          assert len(style_records) == 148
+          slugs = [record["slug"] for record in style_records]
+          assert len(set(slugs)) == 148
+          required_fields = {"slug", "name", "nameEn", "description", "styleType", "category", "colors", "keywords", "sourceUrl"}
+          assert all(required_fields.issubset(record) for record in style_records)
+          assert all(record["sourceUrl"].startswith("https://github.com/AnxForever/stylekit/blob/") for record in style_records)
+          print("Validated 148 unique StyleKit style records.")
+          PY
+
+      - name: Validate provenance boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'AnxForever/stylekit' THIRD_PARTY_NOTICES.md
+          grep -q '20e40320086bf21e92078eb8e1928b080ae96e77' THIRD_PARTY_NOTICES.md
+          grep -q 'Copyright (c) 2026 AnxForever' THIRD_PARTY_NOTICES.md
+          grep -q 'style-reservoir/references/stylekit-catalog.json' THIRD_PARTY_NOTICES.md
+          grep -q 'does not vendor StyleKit' THIRD_PARTY_NOTICES.md
