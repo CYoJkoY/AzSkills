@@ -10,29 +10,39 @@ Reference architecture for production-quality fixed-stage HTML presentations. Au
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b0d10">
+  <meta name="theme-color" content="#FBF8FF">
   <title>Presentation</title>
   <style>
     :root {
-      /* Semantic design tokens: replace with the selected visual system. */
-      --stage-bg: #0b0d10;
-      --slide-bg: #0b0d10;
-      --color-text: #f5f7fa;
-      --color-text-muted: #9aa4b2;
-      --color-accent: #67e8f9;
-      --font-display: "Your Display Font", sans-serif;
-      --font-body: "Your Body Font", sans-serif;
-      --font-mono: "Your Utility Font", monospace;
-      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-      --duration-normal: 0.6s;
-      --stage-padding-x: 120px;
+      /* AzSkills Material 3 default visual system. */
+      --stage-bg: #F0ECF4;
+      --slide-bg: #FBF8FF;
+      --color-surface: #FFFFFF;
+      --color-surface-container: #F0ECF4;
+      --color-surface-container-high: #EAE6EF;
+      --color-text: #1A1B20;
+      --color-text-muted: #44474F;
+      --color-outline: #74777F;
+      --color-outline-variant: #C4C6D0;
+      --color-primary: #0B57D0;
+      --color-primary-container: #D3E3FD;
+      --color-secondary: #0F6B4F;
+      --color-secondary-container: #C6F1DD;
+      --color-tertiary: #8A4A00;
+      --color-tertiary-container: #FFDCBE;
+      --font-display: "Google Sans Flex", "Google Sans", Roboto, "Noto Sans", "Segoe UI", Arial, sans-serif;
+      --font-body: "Google Sans Flex", "Google Sans", Roboto, "Noto Sans", "Segoe UI", Arial, sans-serif;
+      --font-mono: "Roboto Mono", "SFMono-Regular", Consolas, monospace;
+      --ease-out-expo: cubic-bezier(0.23, 1, 0.32, 1);
+      --duration-normal: 0.42s;
+      --stage-padding-x: 112px;
       --stage-padding-y: 96px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { font-family: var(--font-body); }
     button, a { font: inherit; }
-    :focus-visible { outline: 3px solid var(--color-accent); outline-offset: 4px; }
+    :focus-visible { outline: 3px solid var(--color-primary); outline-offset: 4px; border-radius: 4px; }
 
     /* Paste the complete contents of viewport-base.css here. */
 
@@ -44,11 +54,12 @@ Reference architecture for production-quality fixed-stage HTML presentations. Au
     }
 
     .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 18px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 24px;
+      letter-spacing: 0.01em;
+      font-weight: 500;
+      color: var(--color-primary);
     }
 
     .display {
