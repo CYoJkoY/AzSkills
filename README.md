@@ -525,7 +525,7 @@ AzSkills is maintained as an open collection of reusable engineering, design, do
 <div align="center">
 
 <a href="https://cyojkoy.github.io/Payment/">
-<picture>
+  <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/readme/support-cta-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="assets/readme/support-cta.svg">
     <img src="assets/readme/support-cta.svg" alt="Support AzSkills" width="560">
