@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "DESIGN.md"
+      - ".github/badges/**"
       - "assets/**"
       - "frontend-slides/**"
       - "l13n/SKILL.md"
