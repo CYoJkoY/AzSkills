@@ -12,6 +12,22 @@ Curated visual systems for Frontend Slides. Presets are starting points, not tem
 4. Introduce variation through composition and narrative role, not by changing the entire style every slide.
 5. Refine after the first full pass; do not stop at the preset's default appearance.
 
+
+## AzSkills Default
+
+### Material 3 Calm Systems
+**Vibe:** clear, calm, systematic, lightly expressive
+
+**Composition:** light tonal surface + strong typographic anchor + evidence-led containers + generous 8px rhythm.
+
+**Typography:** Google Sans Flex / Google Sans / Roboto fallback stack
+
+**Signature:** blue primary actions, green secondary signal, amber tertiary emphasis, 16–28px container geometry, semantic separators, restrained elevation, and no terminal chrome.
+
+**Best for:** AzSkills-owned examples, documentation, system diagrams, Skill-library explainers, and general technical presentations where no stronger subject-specific art direction is required.
+
+**Token source:** [../DESIGN.md](../DESIGN.md)
+
 ## Dark Themes
 
 ### 1. Bold Signal

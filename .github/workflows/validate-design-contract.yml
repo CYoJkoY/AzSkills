@@ -5,6 +5,11 @@ on:
     branches:
       - main
     paths:
+      - "DESIGN.md"
+      - ".github/badges/**"
+      - "assets/**"
+      - "frontend-slides/**"
+      - "l13n/SKILL.md"
       - "design-system/**"
       - "design-intelligence.md"
       - "README.md"
@@ -23,6 +28,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Validate repository design contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f DESIGN.md
+          grep -q '^name: azskills-material-design$' DESIGN.md
+          grep -q '^## Visual thesis$' DESIGN.md
+          grep -q '^## Primitive tokens$' DESIGN.md
+          grep -q '^## Semantic component rules$' DESIGN.md
+          grep -q '^## Visual QA$' DESIGN.md
 
       - name: Validate design-system Skill
         shell: bash

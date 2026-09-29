@@ -8,17 +8,20 @@
 
 Repository-local `SKILL.md` behavior contracts for engineering, architecture, frontend systems, design systems, UI quality, presentations, documentation, localization, translation, and visual production.
 
+The repository-owned visual language is documented in [`DESIGN.md`](DESIGN.md): a Material 3-inspired system of tonal surfaces, semantic color roles, systematic typography, adaptive spacing, expressive shape, and restrained elevation.
+
 <p>
-  <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/CYoJkoY/AzSkills/main/.github/badges/skills.json&style=flat-square" alt="Skill count">
-  <img src="https://img.shields.io/badge/Format-SKILL.md-7A8E8E?style=flat-square" alt="SKILL.md format">
-  <img src="https://img.shields.io/github/actions/workflow/status/CYoJkoY/AzSkills/validate-design-contract.yml?branch=main&style=flat-square&label=Design%20contracts" alt="Design contract validation">
-  <img src="https://img.shields.io/github/license/CYoJkoY/AzSkills?style=flat-square&color=9E8F7E" alt="MIT License">
-  <a href="https://github.com/CYoJkoY/AzSkills/stargazers"><img src="https://img.shields.io/github/stars/CYoJkoY/AzSkills?style=flat-square" alt="GitHub stars"></a>
+  <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/CYoJkoY/AzSkills/main/.github/badges/skills.json&style=flat" alt="Skill count">
+  <img src="https://img.shields.io/badge/Format-SKILL.md-0B57D0?style=flat" alt="SKILL.md format">
+  <img src="https://img.shields.io/github/actions/workflow/status/CYoJkoY/AzSkills/validate-design-contract.yml?branch=main&style=flat&label=Design%20contracts" alt="Design contract validation">
+  <img src="https://img.shields.io/github/license/CYoJkoY/AzSkills?style=flat&color=0B57D0" alt="MIT License">
+  <a href="https://github.com/CYoJkoY/AzSkills/stargazers"><img src="https://img.shields.io/github/stars/CYoJkoY/AzSkills?style=flat" alt="GitHub stars"></a>
 </p>
 
 <p>
   <a href="#readme-overview">Overview</a> ·
   <a href="#readme-architecture">Architecture</a> ·
+  <a href="#readme-design-system">Design system</a> ·
   <a href="#readme-skills">Skills</a> ·
   <a href="#readme-choose">Choose</a> ·
   <a href="#readme-usage">Use</a> ·
@@ -155,6 +158,13 @@ See:
 - [DESIGN.md adapter](design-system/references/design-md-adapter.md)
 - [DESIGN.md schema reference](design-system/references/design-md-schema.md)
 - [Source format matrix](design-system/references/source-format-matrix.md)
+
+---
+
+<a name="readme-design-system"></a>
+## <img src="assets/readme/icons/visual-design.svg" width="24" height="24" alt=""> Design system
+
+AzSkills uses a repository-owned Material 3-inspired visual contract for its README visuals, authored SVG assets, and presentation defaults. Google Material 3 is the visual reference; Google brand assets and proprietary font files are not copied into the repository. See [`DESIGN.md`](DESIGN.md) for the executable token and QA contract.
 
 ---
 
@@ -480,7 +490,7 @@ AzSkills is maintained as an open collection of reusable engineering, design, do
 <div align="center">
 
 <a href="https://cyojkoy.github.io/Payment/">
-  <img src="assets/readme/support-cta.svg" alt="Support AzSkills" width="420">
+  <img src="assets/readme/support-cta.svg" alt="Support AzSkills" width="560">
 </a>
 
 **Direct support link:** https://cyojkoy.github.io/Payment/

@@ -34,6 +34,8 @@ Two-layer model: machine-readable tokens provide exact values; Markdown prose pr
 
 Canonical mapping: Overview/theme → visual thesis; Colors → semantic colors; Typography → roles; Layout → spacing/grid/composition; Elevation → surfaces; Shapes → geometry; Components → component/state; Responsive → executable QA; Agent Prompt Guide → convenience only.
 
+For AzSkills-owned visual surfaces, the repository root [`DESIGN.md`](DESIGN.md) is the local visual source of truth. Apply it before optional external style references to README assets, presentation defaults, shared examples, and project-authored banners. External design systems inform methodology; they do not override the repository-owned semantic token contract.
+
 Evidence levels: verified-token, verified-prose, inferred-usage, implementation-choice, unresolved.
 
 A collection of design systems is a reference corpus, not a composite system. Do not mix unrelated brands without explicit user intent.

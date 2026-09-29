@@ -1,6 +1,10 @@
 # Frontend Slides — Design System & Quality Gate
 
-This document turns the skill from a collection of implementation rules into a repeatable visual-design system. Use it before writing the full deck and again during refinement.
+This document turns the skill from a collection of implementation rules into a repeatable visual-design system. Use it before writing the full deck and again during refinement. Repository-owned AzSkills presentation defaults inherit the root [`DESIGN.md`](../DESIGN.md) contract.
+
+### AzSkills default visual contract
+
+The default presentation language is light-first Material 3-inspired: tonal surfaces instead of a dark terminal canvas, semantic blue/green/amber accents, Google Sans-family typography with robust fallbacks, an 8px spacing rhythm, 16–28px primary container radii, and restrained elevation. Alternative style presets remain explicit optional art directions rather than the AzSkills default identity.
 
 ## 1. Visual Thesis
 
@@ -20,47 +24,56 @@ Define tokens before building repeated components.
 
 ```css
 :root {
-  /* Color roles */
-  --color-bg: #0b0d10;
-  --color-surface: #14181d;
-  --color-surface-strong: #1b2128;
-  --color-text: #f5f7fa;
-  --color-text-muted: #9aa4b2;
-  --color-accent: #67e8f9;
-  --color-accent-strong: #22d3ee;
-  --color-positive: #86efac;
-  --color-negative: #fda4af;
+  /* AzSkills Material 3 semantic color roles. */
+  --color-bg: #FBF8FF;
+  --color-surface: #FFFFFF;
+  --color-surface-container: #F0ECF4;
+  --color-surface-container-high: #EAE6EF;
+  --color-text: #1A1B20;
+  --color-text-muted: #44474F;
+  --color-outline: #74777F;
+  --color-outline-variant: #C4C6D0;
+  --color-primary: #0B57D0;
+  --color-primary-container: #D3E3FD;
+  --color-secondary: #0F6B4F;
+  --color-secondary-container: #C6F1DD;
+  --color-tertiary: #8A4A00;
+  --color-tertiary-container: #FFDCBE;
+  --color-negative: #BA1A1A;
 
-  /* Typography roles */
-  --font-display: "Your Display Font", sans-serif;
-  --font-body: "Your Body Font", sans-serif;
-  --font-mono: "Your Utility Font", monospace;
+  /* Typography roles. */
+  --font-display: "Google Sans Flex", "Google Sans", Roboto, "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-body: "Google Sans Flex", "Google Sans", Roboto, "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-mono: "Roboto Mono", "SFMono-Regular", Consolas, monospace;
 
-  /* Stage rhythm */
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 32px;
-  --space-5: 48px;
-  --space-6: 64px;
-  --space-7: 96px;
-  --space-8: 128px;
+  /* 8px stage rhythm with 4px fine alignment. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
 
-  /* Shape */
+  /* Material-like shape hierarchy. */
+  --radius-xs: 4px;
   --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 28px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-xxl: 28px;
   --line: 1px;
 
-  /* Motion */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Compact motion vocabulary. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --duration-fast: 180ms;
-  --duration-normal: 480ms;
-  --duration-slow: 900ms;
-}
-```
-
-Do not blindly copy this palette. Replace values to fit the visual thesis.
+  --duration-normal: 420ms;
+  --duration-slow: 720ms;
+}Do not blindly copy this palette. Replace values to fit the visual thesis.
 
 ### Token rules
 
@@ -264,7 +277,7 @@ Do not call the deck finished until every item passes.
 
 ### Visual
 
-- [ ] visual thesis is consistent
+- [ ] visual thesis is consistent with the selected preset and the AzSkills default Material 3 contract
 - [ ] typography hierarchy is obvious within 1–2 seconds
 - [ ] color roles are consistent
 - [ ] major alignments repeat intentionally
