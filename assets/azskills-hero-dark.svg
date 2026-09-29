@@ -28,7 +28,7 @@
 <g transform="translate(274 92)">
 <rect width="250" height="182" rx="20" fill="#2B2930"/><circle cx="36" cy="38" r="18" fill="#394B63"/><text x="36" y="44" text-anchor="middle" fill="#A8C7FA" font-size="16" font-weight="700">2</text><text x="24" y="86" fill="#E6E1E9" font-size="22" font-weight="650">Skill contract</text><text x="24" y="116" fill="#CAC4D0" font-size="14">focused behavior + rules</text><rect x="24" y="142" width="154" height="10" rx="5" fill="#8BD5BA"/>
 </g>
-<path d="M520 182h34M546 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M536 182h18M548 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 <g transform="translate(564 92)">
 <rect width="226" height="182" rx="20" fill="#242127"/><circle cx="36" cy="38" r="18" fill="#5A4632"/><text x="36" y="44" text-anchor="middle" fill="#FFB870" font-size="16" font-weight="700">3</text><text x="24" y="86" fill="#E6E1E9" font-size="22" font-weight="650">Project context</text><text x="24" y="116" fill="#CAC4D0" font-size="14">existing APIs + conventions</text><rect x="24" y="142" width="166" height="10" rx="5" fill="#FFB870"/>
 </g>
