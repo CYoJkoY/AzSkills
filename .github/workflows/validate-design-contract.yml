@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - "DESIGN.md"
+      - "assets/**"
+      - "frontend-slides/**"
+      - "l13n/SKILL.md"
       - "design-system/**"
       - "design-intelligence.md"
       - "README.md"
