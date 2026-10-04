@@ -4,7 +4,7 @@ This document turns the skill from a collection of implementation rules into a r
 
 ### AzSkills default visual contract
 
-The default presentation language is light-first Material 3-inspired: tonal surfaces instead of a dark terminal canvas, semantic blue/green/amber accents, Google Sans-family typography with robust fallbacks, an 8px spacing rhythm, 16–28px primary container radii, and restrained elevation. Alternative style presets remain explicit optional art directions rather than the AzSkills default identity.
+The default presentation language is **Wabi-Press (侘寂刊本)**, defined by the root [`DESIGN.md`](../DESIGN.md) and executed from [`../design-system/wabi-press.css`](../design-system/wabi-press.css): washi canvas and pine-soot ink text instead of a dark terminal canvas, a single cinnabar seal accent with a secondary moss role, editorial serif display type at weight 500 with robust CJK/Latin fallbacks, an 8px spacing rhythm, 0–2px hand-cut corners, 1px hairline structure (no heavy shadow), and ink-absorption micro-states. Wabi-Press is the only AzSkills-owned art direction; it is not a preset among equals and no second palette may reappear.
 
 ## 1. Visual Thesis
 
@@ -24,27 +24,23 @@ Define tokens before building repeated components.
 
 ```css
 :root {
-  /* AzSkills Material 3 semantic color roles. */
-  --color-bg: #FBF8FF;
-  --color-surface: #FFFFFF;
-  --color-surface-container: #F0ECF4;
-  --color-surface-container-high: #EAE6EF;
-  --color-text: #1A1B20;
-  --color-text-muted: #44474F;
-  --color-outline: #74777F;
-  --color-outline-variant: #C4C6D0;
-  --color-primary: #0B57D0;
-  --color-primary-container: #D3E3FD;
-  --color-secondary: #0F6B4F;
-  --color-secondary-container: #C6F1DD;
-  --color-tertiary: #8A4A00;
-  --color-tertiary-container: #FFDCBE;
-  --color-negative: #BA1A1A;
+  /* Wabi-Press (侘寂刊本) stage tokens — light washi spectrum.
+     Values mirror design-system/wabi-press.css; do not fork them. */
+  --stage-bg: #F5F3EC;            /* washi canvas */
+  --slide-bg: #FAF9F5;            /* card & carrier surface */
+  --color-bg-overlay: #ECE8DC;    /* secondary blocks & hover states */
+  --color-hairline: rgba(40, 36, 32, 0.10);   /* 1px faded-ink rule */
+  --color-hairline-strong: rgba(40, 36, 32, 0.25); /* active & focus ink line */
+  --color-text: #1C1A17;          /* pine-soot ink */
+  --color-text-secondary: #524C44;
+  --color-text-muted: #878074;
+  --color-cinnabar: #A6382A;      /* primary action / core seal */
+  --color-moss: #3B5848;          /* success / secondary emphasis */
 
-  /* Typography roles. */
-  --font-display: "Google Sans Flex", "Google Sans", Roboto, "Noto Sans", "Segoe UI", Arial, sans-serif;
-  --font-body: "Google Sans Flex", "Google Sans", Roboto, "Noto Sans", "Segoe UI", Arial, sans-serif;
-  --font-mono: "Roboto Mono", "SFMono-Regular", Consolas, monospace;
+  /* Editorial type stacks. */
+  --font-display: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", Georgia, serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", SFMono-Regular, Menlo, monospace;
 
   /* 8px stage rhythm with 4px fine alignment. */
   --space-1: 4px;
@@ -59,27 +55,43 @@ Define tokens before building repeated components.
   --space-16: 64px;
   --space-20: 80px;
 
-  /* Material-like shape hierarchy. */
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-xxl: 28px;
+  /* Hand-cut paper geometry. */
+  --radius-cut: 2px;
   --line: 1px;
+  --shadow-press: 0 1px 2px rgba(40, 36, 32, 0.04);
 
-  /* Compact motion vocabulary. */
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --duration-fast: 180ms;
-  --duration-normal: 420ms;
-  --duration-slow: 720ms;
-}Do not blindly copy this palette. Replace values to fit the visual thesis.
+  /* Physical motion vocabulary. */
+  --ease-paper: cubic-bezier(0.25, 1, 0.4, 1);  /* slide reveals 240–320ms */
+  --ease-ink: cubic-bezier(0.16, 1, 0.3, 1);    /* micro feedback 120–150ms */
+  --duration-fast: 140ms;
+  --duration-normal: 280ms;
+  --duration-slow: 320ms;
+}
+
+[data-theme="dark"] {
+  /* Inkstone night spectrum for dark-intent decks. */
+  --stage-bg: #131416;
+  --slide-bg: #1B1C20;
+  --color-bg-overlay: #25272D;
+  --color-hairline: rgba(240, 235, 225, 0.08);
+  --color-hairline-strong: rgba(240, 235, 225, 0.18);
+  --color-text: #EDEAE2;
+  --color-text-secondary: #A39F95;
+  --color-text-muted: #68645C;
+  --color-cinnabar: #C84A3B;
+  --color-moss: #537B65;
+}
+```
+
+These values are the Wabi-Press contract, not a swappable palette. A deck may add content-specific data colors, but canvas, ink, hairline, cinnabar, and moss roles come from the tokens above and must never be replaced by another design language.
 
 ### Token rules
 
-- Colors have semantic roles, not decorative names.
-- Repeated spacing uses the same rhythm across the deck.
-- Repeated components share geometry and type treatment.
+- Colors have semantic roles (canvas, surface, ink text, hairline, cinnabar, moss), not decorative names.
+- Never use pure `#000000` or `#FFFFFF`; both spectra are already ink-warm and paper-warm.
+- Repeated spacing uses the same 8px rhythm across the deck.
+- Repeated components share 0–2px cut geometry and the same type treatment.
+- Hierarchy comes from 1px hairlines and lightness steps; `--shadow-press` is the only permitted shadow.
 - A new token must solve a recurring design need; avoid one-off token sprawl.
 
 ## 3. Typography System
@@ -194,16 +206,15 @@ For simple charts, inline SVG is preferred because it preserves the zero-depende
 
 ## 9. Motion System
 
-Every deck gets a motion language, not a pile of effects.
+Every deck gets a motion language, not a pile of effects. The AzSkills-owned motion vocabulary is Wabi-Press: slide reveals and surface transitions ride `--ease-paper` (240–320ms); micro feedback rides `--ease-ink` (120–150ms). Spring and bounce entrances are prohibited.
 
 Choose one primary entrance pattern and one secondary emphasis pattern.
 
 Examples:
 
-- editorial → fade + translate + stagger
-- cinematic → slow scale + opacity
-- technical → clip/reveal + precise line movement
-- playful → spring/bounce with restraint
+- editorial → fade + translate + stagger (Wabi-Press default)
+- cinematic → slow scale + opacity, paper curve only
+- technical → clip/reveal + precise hairline movement
 - calm → long fade with near-zero translation
 
 Keep motion purposeful. Avoid parallax or 3D tilt when they distract from reading.
@@ -235,6 +246,10 @@ Reject these unless the user explicitly requests them:
 - tiny text used to cram too much content
 - charts with default library styling
 - five unrelated visual styles in one deck
+- any palette other than Wabi-Press in an AzSkills-owned deck
+- pure `#000000` or `#FFFFFF` surfaces or text
+- broad blurred shadows used to create depth (hairlines + lightness steps only)
+- spring/bounce entrances or scale-pop micro-states
 - animations on every element
 - internal generation notes visible in the presentation
 
@@ -277,7 +292,7 @@ Do not call the deck finished until every item passes.
 
 ### Visual
 
-- [ ] visual thesis is consistent with the selected preset and the AzSkills default Material 3 contract
+- [ ] visual thesis is consistent with the Wabi-Press contract (the only AzSkills-owned art direction)
 - [ ] typography hierarchy is obvious within 1–2 seconds
 - [ ] color roles are consistent
 - [ ] major alignments repeat intentionally

@@ -1,11 +1,21 @@
 ---
 name: design-system
-description: Consume, author, normalize, adapt, and verify DESIGN.md files as AzSkills-native visual contracts. Use when a project provides DESIGN.md, a brand reference must become implementation rules, or a design contract needs validation.
+description: Consume, author, normalize, adapt, and verify DESIGN.md files as AzSkills-native visual contracts. The repository-owned canonical language is Wabi-Press (侘寂刊本), executed from design-system/wabi-press.css. Use when a project provides DESIGN.md, a brand reference must become implementation rules, an AzSkills-owned surface needs styling, or a design contract needs validation.
 ---
 
 # Design System
 
 This Skill is the boundary between external DESIGN.md systems and AzSkills. It does not replace ui-design, ui-aesthetics, or frontend-architecture; it converts design evidence into an AzSkills-native contract that those Skills can execute.
+
+## Repository-owned language
+
+AzSkills owns exactly one visual language: **Wabi-Press (侘寂刊本)**, documented in the root [`DESIGN.md`](../DESIGN.md) and executed from these artifacts:
+
+- [`wabi-press.css`](wabi-press.css) — the complete token set (washi light + inkstone dark spectra) and every primitive component (`.wabi-card`, `.wabi-meta-header`, `.seal-cinnabar`, `.editorial-prose`, `.wabi-button`, `.wabi-input`). It is the only CSS authority for AzSkills-owned surfaces.
+- [`wabi-press-theme.ts`](wabi-press-theme.ts) — native TypeScript theme controller (`localStorage` persistence, automatic `prefers-color-scheme` response, `[data-theme]` attribute).
+- [`preview/index.html`](preview/index.html) — semantic HTML verification surface mounting all tokens and primitives in both themes.
+
+For AzSkills-owned visual work (README assets, presentation defaults, generated demos, repository UI), apply Wabi-Press directly from these artifacts. Do not introduce a second palette, a heavy UI component library, or a JavaScript framework. The former Material 3-inspired `azskills-material-design` contract and the `style-reservoir` style catalog are retired; no parallel visual language may reappear.
 
 ## Core pipeline
 
@@ -214,6 +224,15 @@ Do not rewrite an external DESIGN.md merely to make it easier to consume.
 - [ ] contrast checked in each shipped theme;
 - [ ] interactive states remain coherent;
 - [ ] narrow, intermediate, and wide layouts inspected.
+
+### Wabi-Press conformance (AzSkills-owned surfaces)
+- [ ] all colors trace to `wabi-press.css` tokens; no pure `#000000`/`#FFFFFF`;
+- [ ] display type uses `--font-editorial` at weight 500; mono meta uses `tabular-nums` + `0.08em` tracking;
+- [ ] hierarchy uses 1px hairlines and lightness steps; the only shadow is `--shadow-press`;
+- [ ] active states use ink absorption (darken + ink line), never transform/scale/bounce;
+- [ ] prose measures hold 45–75ch (default 65ch) with 1.7–1.8 leading;
+- [ ] both `[data-theme]` spectra verified in `preview/index.html`;
+- [ ] reduced-motion behavior preserves state feedback.
 
 ### Provenance
 - [ ] material decisions identify evidence level;

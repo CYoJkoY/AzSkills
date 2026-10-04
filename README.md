@@ -12,13 +12,13 @@
 
 Repository-local `SKILL.md` behavior contracts for engineering, architecture, frontend systems, design systems, UI quality, presentations, documentation, localization, translation, and visual production.
 
-The repository-owned visual language is documented in [`DESIGN.md`](DESIGN.md): a Material 3-inspired system of tonal surfaces, semantic color roles, systematic typography, adaptive spacing, expressive shape, and restrained elevation.
+The repository-owned visual language is documented in [`DESIGN.md`](DESIGN.md): 侘寂刊本 Wabi-Press — a washi-paper and pine-soot-ink system of hairline structure, editorial serif typography, cinnabar seal marks, and ink-absorption micro-interactions, in light washi and dark inkstone spectra.
 
 <p>
   <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/CYoJkoY/AzSkills/main/.github/badges/skills.json&style=flat" alt="Skill count">
-  <img src="https://img.shields.io/badge/Format-SKILL.md-0B57D0?style=flat" alt="SKILL.md format">
+  <img src="https://img.shields.io/badge/Format-SKILL.md-A6382A?style=flat" alt="SKILL.md format">
   <img src="https://img.shields.io/github/actions/workflow/status/CYoJkoY/AzSkills/validate-design-contract.yml?branch=main&style=flat&label=Design%20contracts" alt="Design contract validation">
-  <img src="https://img.shields.io/github/license/CYoJkoY/AzSkills?style=flat&color=0B57D0" alt="MIT License">
+  <img src="https://img.shields.io/github/license/CYoJkoY/AzSkills?style=flat&color=A6382A" alt="MIT License">
   <a href="https://github.com/CYoJkoY/AzSkills/stargazers"><img src="https://img.shields.io/github/stars/CYoJkoY/AzSkills?style=flat" alt="GitHub stars"></a>
 </p>
 
@@ -122,11 +122,6 @@ AzSkills separates **behavior contracts**, **shared reasoning**, and **execution
 ```
 
 
-### Conditional style reservoir
-
-[`style-reservoir/SKILL.md`](style-reservoir/SKILL.md) is an optional visual-reference layer. It catalogs the current 148 StyleKit styles without vendoring the StyleKit application or turning the collection into a single composite design system.
-
-The reservoir is consulted only when a concrete visual decision is unresolved and the task contains enough product, surface, layout, density, platform, content, interaction, or visual-intent evidence to make selection meaningful. Explicit requirements and project-owned design systems remain authoritative. See [`style-reservoir/references/stylekit-selection.md`](style-reservoir/references/stylekit-selection.md).
 ### Shared reasoning layer
 
 [`design-intelligence.md`](design-intelligence.md) is **not a Skill**. It is a cross-cutting reasoning layer for visual systems, interaction, composition, accessibility, motion, and visual QA.
@@ -174,7 +169,15 @@ See:
 <a name="readme-design-system"></a>
 ## <img src="assets/readme/icons/visual-design.svg" width="20" height="20" alt=""> Design system
 
-AzSkills uses a repository-owned Material 3-inspired visual contract for its README visuals, authored SVG assets, and presentation defaults. Google Material 3 is the visual reference; Google brand assets and proprietary font files are not copied into the repository. See [`DESIGN.md`](DESIGN.md) for the executable token and QA contract.
+AzSkills uses **侘寂刊本 Wabi-Press** as its single repository-owned visual language for its README visuals, authored SVG assets, and presentation defaults. Washi-paper canvas, pine-soot ink text, cinnabar seal marks, 1px hairline structure, and ink-absorption micro-interactions — in light washi and dark inkstone spectra. No other design language coexists in the repository.
+
+Executable artifacts, all referenced by the contract in [`DESIGN.md`](DESIGN.md):
+
+| Artifact | Role |
+| :--- | :--- |
+| [`design-system/wabi-press.css`](design-system/wabi-press.css) | The only CSS authority: complete token set (both spectra) and every primitive component. |
+| [`design-system/wabi-press-theme.ts`](design-system/wabi-press-theme.ts) | Native TypeScript theme controller: `localStorage` persistence + automatic `prefers-color-scheme` response. |
+| [`design-system/preview/index.html`](design-system/preview/index.html) | Semantic HTML verification surface mounting all tokens and primitives in both themes. |
 
 ---
 
@@ -195,9 +198,8 @@ Choose the smallest Skill that fully owns the task. Compose additional Skills on
 
 | Skill | Focus |
 | :--- | :--- |
-| [`design-system`](design-system/SKILL.md) | DESIGN.md ingestion, normalization, source reconciliation, provenance, and executable design QA. |
+| [`design-system`](design-system/SKILL.md) | DESIGN.md ingestion, normalization, source reconciliation, provenance, and executable design QA. Owns the Wabi-Press artifacts. |
 | [`ui-design`](ui-design/SKILL.md) | Production interface design and implementation: hierarchy, responsive behavior, accessibility, interaction, motion, and visual QA. |
-| [`style-reservoir`](style-reservoir/SKILL.md) | Context-aware reference reservoir of StyleKit visual styles; progressive disclosure and fail-closed selection without overriding local design systems. |
 | [`ui-aesthetics`](ui-aesthetics/SKILL.md) | Composition-first visual critique, refinement, component craftsmanship, restrained depth, and anti-generic review. |
 | [`ui-motion`](ui-motion/SKILL.md) | Purposeful Web motion construction using project-native tokens, minimal mechanisms, accessibility variants, and rendered verification. |
 | [`ui-motion-review`](ui-motion-review/SKILL.md) | Read-only review of existing motion for timing, physicality, interruption, performance, accessibility, and cohesion. |
@@ -247,7 +249,6 @@ What are you doing?
 │
 ├─ Consume / author / adapt DESIGN.md ───► design-system
 │   └─ then execute with the owning visual Skill
-├─ Need a visual direction for an underspecified UI ─► style-reservoir → ui-design
 ├─ Build / redesign a UI ─────────────────► ui-design
 ├─ Refine an existing interface ──────────► ui-aesthetics + ui-design
 ├─ Add / redesign UI motion ──────────────► ui-motion + ui-design
@@ -299,22 +300,7 @@ git clone https://github.com/CYoJkoY/AzSkills.git
 cd AzSkills
 ```
 
-
-For visual work without an authoritative local direction:
-
-```text
-visual task
-   ↓
-style-reservoir
-   ↓
-context filter / compatibility check
-   ↓
-selected style reference (only when justified)
-   ↓
-ui-design / ui-aesthetics
-```
-
-`style-reservoir` is conditional. Existing `DESIGN.md`, product identity, component systems, explicit user direction, accessibility requirements, and platform constraints remain higher priority. It may also be skipped entirely when context is too weak to justify a style.
+For AzSkills-owned visual work, the direction is fixed: apply Wabi-Press from [`design-system/wabi-press.css`](design-system/wabi-press.css) (tokens + primitives) and [`design-system/wabi-press-theme.ts`](design-system/wabi-press-theme.ts) (theme controller). For external product work without an authoritative local direction, the priority order in [`design-intelligence.md`](design-intelligence.md) governs.
 
 ### 2. Select the narrowest Skill
 
@@ -446,7 +432,7 @@ AzSkills/
 │   └── workflows/
 │       ├── update-skill-badge.yml
 │       ├── validate-design-contract.yml
-│       ├── validate-style-reservoir.yml
+│       ├── validate-remotion-production-contract.yml
 │       └── validate-motion-contract.yml
 │
 ├── assets/
@@ -460,9 +446,9 @@ AzSkills/
 ├── application-architecture/
 ├── design-system/
 │   ├── SKILL.md
-│   └── references/
-├── style-reservoir/
-│   ├── SKILL.md
+│   ├── wabi-press.css
+│   ├── wabi-press-theme.ts
+│   ├── preview/
 │   └── references/
 ├── frontend-architecture/
 ├── frontend-slides/

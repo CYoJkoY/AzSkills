@@ -34,11 +34,20 @@ jobs:
         run: |
           set -euo pipefail
           test -f DESIGN.md
-          grep -q '^name: azskills-material-design$' DESIGN.md
+          grep -q '^name: azskills-wabi-press$' DESIGN.md
           grep -q '^## Visual thesis$' DESIGN.md
           grep -q '^## Primitive tokens$' DESIGN.md
           grep -q '^## Semantic component rules$' DESIGN.md
           grep -q '^## Visual QA$' DESIGN.md
+
+          # Wabi-Press token contract (light washi + dark inkstone spectra)
+          grep -q -- '--bg-canvas: #F5F3EC' DESIGN.md
+          grep -q -- '--bg-canvas: #131416' DESIGN.md
+          grep -q -- '--accent-cinnabar: #A6382A' DESIGN.md
+          grep -q -- '--accent-moss: #3B5848' DESIGN.md
+          grep -q -- '--ease-paper: cubic-bezier(0.25, 1, 0.4, 1)' DESIGN.md
+          grep -q -- '--ease-ink: cubic-bezier(0.16, 1, 0.3, 1)' DESIGN.md
+          grep -q 'data-theme="dark"' DESIGN.md
 
       - name: Validate design-system Skill
         shell: bash
@@ -57,6 +66,41 @@ jobs:
           grep -q '^## Provenance$' design-system/SKILL.md
           grep -q '^## Quality gates$' design-system/SKILL.md
           grep -q '^## Output contract$' design-system/SKILL.md
+
+      - name: Validate Wabi-Press executable artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f design-system/wabi-press.css
+          test -f design-system/wabi-press-theme.ts
+          test -f design-system/preview/index.html
+
+          # Tokens: both spectra present in the single CSS authority
+          grep -q -- '--bg-canvas: #F5F3EC' design-system/wabi-press.css
+          grep -q -- '--bg-canvas: #131416' design-system/wabi-press.css
+          grep -q -- '--accent-cinnabar: #A6382A' design-system/wabi-press.css
+          grep -q -- '--accent-cinnabar: #C84A3B' design-system/wabi-press.css
+          grep -q '\[data-theme="dark"\]' design-system/wabi-press.css
+          grep -q -- '--ease-paper: cubic-bezier(0.25, 1, 0.4, 1)' design-system/wabi-press.css
+          grep -q -- '--ease-ink: cubic-bezier(0.16, 1, 0.3, 1)' design-system/wabi-press.css
+          grep -q 'prefers-reduced-motion' design-system/wabi-press.css
+
+          # Primitive components
+          grep -q '\.wabi-card' design-system/wabi-press.css
+          grep -q '\.wabi-meta-header' design-system/wabi-press.css
+          grep -q '\.editorial-prose' design-system/wabi-press.css
+          grep -q '\.wabi-button' design-system/wabi-press.css
+          grep -q '\.wabi-input' design-system/wabi-press.css
+          grep -q '\.seal-cinnabar' design-system/wabi-press.css
+
+          # Theme controller: native TS, storage + system preference
+          grep -q 'localStorage' design-system/wabi-press-theme.ts
+          grep -q 'prefers-color-scheme' design-system/wabi-press-theme.ts
+          grep -q 'data-theme' design-system/wabi-press-theme.ts
+
+          # Preview mounts the CSS authority
+          grep -q 'wabi-press.css' design-system/preview/index.html
+          grep -q 'wabi-theme-toggle' design-system/preview/index.html
 
       - name: Validate AzSkills integration
         shell: bash

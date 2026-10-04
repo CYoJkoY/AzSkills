@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#F5F3EC">
+  <title>Wabi-Press · 侘寂刊本 — AzSkills 设计系统预览</title>
+  <link rel="stylesheet" href="../wabi-press.css">
+</head>
+<body>
+  <header class="wabi-container" style="padding-bottom: 24px;">
+    <div class="wabi-meta-header">
+      <span class="meta-index">VOL. 01 · 设计系统</span>
+      <span>AZSKILLS / WABI-PRESS</span>
+      <span class="meta-rule" aria-hidden="true"></span>
+      <span class="seal seal-cinnabar">契</span>
+      <button type="button" class="wabi-button wabi-button--ghost" data-wabi-theme-toggle data-wabi-theme-label aria-pressed="false" style="text-transform: none; letter-spacing: 0.02em;">夜间 · 砚石</button>
+    </div>
+    <h1>侘寂刊本 <span style="font-size: 1.1em; color: var(--text-muted);">Wabi-Press</span></h1>
+    <p class="editorial-prose prose-lede" style="max-width: 65ch;">
+      和纸为底，松烟墨为骨，朱砂落印，发丝定界。本页面挂载
+      <code>wabi-press.css</code> 全部令牌与原生组件，作为 AzSkills 自有视觉表面的唯一可执行对照。
+    </p>
+  </header>
+
+  <div class="hairline" role="presentation"></div>
+
+  <main class="wabi-container">
+    <!-- § 01 · 非对称栅格：5 列引索 + 7 列主阅读流 -->
+    <section class="ma-section" aria-labelledby="sec-grid">
+      <div class="lead-rule"><span class="meta-index">SEC. 01</span><span id="sec-grid" style="color: var(--text-muted);">栅格与留白 · Asymmetric grid &amp; 間</span></div>
+      <div class="ma-grid">
+        <div class="ma-5">
+          <div class="wabi-panel">
+            <div class="wabi-meta-header">
+              <span class="meta-index">SEC. 01 · A</span>
+              <span class="meta-rule" aria-hidden="true"></span>
+              <span class="seal seal-moss">目</span>
+            </div>
+            <h3>目录流 · Index rail</h3>
+            <div class="index-rail" style="margin-top: 16px;">
+              <p style="font-size: 0.875rem; margin-bottom: 8px;"><span class="footnote-mark">01</span> 令牌 · Tokens</p>
+              <p style="font-size: 0.875rem; margin-bottom: 8px;"><span class="footnote-mark">02</span> 组件 · Primitives</p>
+              <p style="font-size: 0.875rem; margin-bottom: 8px;"><span class="footnote-mark">03</span> 排版 · Editorial prose</p>
+              <p style="font-size: 0.875rem; margin-bottom: 0;"><span class="footnote-mark">04</span> 动效 · Motion</p>
+            </div>
+          </div>
+        </div>
+        <div class="ma-7">
+          <div class="wabi-card wabi-card--hoverable">
+            <div class="wabi-meta-header">
+              <span class="meta-index">SEC. 01 · B</span>
+              <span>主阅读流 · Primary flow</span>
+              <span class="meta-rule" aria-hidden="true"></span>
+              <span class="seal seal-cinnabar">阅</span>
+            </div>
+            <h3>阅览流 · Reading column</h3>
+            <div class="editorial-prose" style="margin-top: 16px;">
+              <p class="drop-cap">版面不追求对称的秩序，而追求呼吸的秩序。主容器留白取常规仪表盘的 1.5 倍，板块间距保持在 48–80px 之间；层级由 1px 发丝边框与背景明度阶梯承担，而非厚重阴影。金色分割被 5 列引索与 7 列阅读流取代，僵硬的五十对五十划分不再出现。</p>
+              <p>正文使用 <code>--font-sans</code>，行高 1.7–1.8，单行宽度严格限制在 65ch；ID、版本号、批次与时间戳一律等宽，开启 <code>tabular-nums</code>，字距 0.08em。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- § 02 · 卡片与印章 -->
+    <section class="ma-section" aria-labelledby="sec-card">
+      <div class="lead-rule"><span class="meta-index">SEC. 02</span><span id="sec-card" style="color: var(--text-muted);">卡片与印章 · Cards &amp; seals</span></div>
+      <div class="ma-grid">
+        <div class="ma-6">
+          <div class="wabi-card">
+            <div class="wabi-meta-header">
+              <span class="meta-index">BAT. 2026-1004-A</span>
+              <span>SKILL / DESIGN-SYSTEM</span>
+              <span class="meta-rule" aria-hidden="true"></span>
+              <span class="seal seal-cinnabar">朱</span>
+            </div>
+            <h3 style="margin-bottom: 8px;">刊本卡片</h3>
+            <p style="font-size: 0.9375rem;">发丝线边框、2px 裁切角、<code>--shadow-press</code> 极轻纸张贴合。悬停时背景抬至 <code>--bg-overlay</code> 并加深墨线。</p>
+          </div>
+        </div>
+        <div class="ma-6">
+          <div class="wabi-card wabi-card--hoverable">
+            <div class="wabi-meta-header">
+              <span class="meta-index">BAT. 2026-1004-B</span>
+              <span>SKILL / FRONTEND-SLIDES</span>
+              <span class="meta-rule" aria-hidden="true"></span>
+              <span class="seal seal-moss">苔</span>
+            </div>
+            <h3 style="margin-bottom: 8px;">可交互卡片</h3>
+            <p style="font-size: 0.9375rem;">次级强调使用铜绿苔色印章；成功态、次要徽章与引用标记共享同一苔色语义。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- § 03 · 刊本文本流 -->
+    <section class="ma-section" aria-labelledby="sec-prose">
+      <div class="lead-rule"><span class="meta-index">SEC. 03</span><span id="sec-prose" style="color: var(--text-muted);">刊本文本流 · Editorial prose</span></div>
+      <div class="ma-grid">
+        <div class="ma-7">
+          <article class="wabi-card">
+            <div class="wabi-meta-header">
+              <span class="meta-index">§ 4.2</span>
+              <span>引文与注脚 · Quotes &amp; footnotes</span>
+              <span class="meta-rule" aria-hidden="true"></span>
+              <span class="seal seal-cinnabar seal--solid">印</span>
+            </div>
+            <div class="editorial-prose">
+              <p class="pull-quote">
+                吸墨，而非弹跳。按下的一瞬，墨水已渗入纸纤维，背景暗一个层级，墨线深一道痕。
+                <span class="pull-quote-cite">— DESIGN.MD / 触觉动效</span>
+              </p>
+              <p>
+                页面切换与弹窗展开统一使用 <code>--ease-paper</code>（240–320ms），微互动使用
+                <code>--ease-ink</code>（120–150ms）。<span class="footnote-mark">1</span>
+                状态反馈必须伴随静态线索（墨线加深、层级变化），绝不以动效作为唯一信号。<span class="footnote-mark">2</span>
+              </p>
+            </div>
+            <div class="footnotes">
+              <p style="margin-bottom: 4px;"><span class="footnote-ref">[1]</span>禁用弹簧缩放（bounce）与 <code>scale()</code> 入场。</p>
+              <p style="margin-bottom: 0;"><span class="footnote-ref">[2]</span><code>prefers-reduced-motion: reduce</code> 时保留色彩与墨线反馈，移除空间位移。</p>
+            </div>
+          </article>
+        </div>
+        <div class="ma-5">
+          <div class="wabi-card">
+            <div class="wabi-meta-header">
+              <span class="meta-index">TABLE / 01</span>
+              <span>等宽元信息 · Tabular meta</span>
+              <span class="meta-rule" aria-hidden="true"></span>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.8125rem;">
+              <thead>
+                <tr>
+                  <th style="text-align: left; font-weight: 500; color: var(--text-muted); padding: 6px 0; border-bottom: 1px solid var(--border-subtle);">TOKEN</th>
+                  <th style="text-align: left; font-weight: 500; color: var(--text-muted); padding: 6px 0; border-bottom: 1px solid var(--border-subtle);">ROLE</th>
+                </tr>
+              </thead>
+              <tbody style="font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: 0.08em;">
+                <tr><td style="padding: 8px 0; border-bottom: 1px solid var(--border-subtle);">#A6382A</td><td style="padding: 8px 0; border-bottom: 1px solid var(--border-subtle);">朱砂 · 主操作</td></tr>
+                <tr><td style="padding: 8px 0; border-bottom: 1px solid var(--border-subtle);">#3B5848</td><td style="padding: 8px 0; border-bottom: 1px solid var(--border-subtle);">铜绿 · 成功态</td></tr>
+                <tr><td style="padding: 8px 0; border-bottom: 1px solid var(--border-subtle);">#F5F3EC</td><td style="padding: 8px 0; border-bottom: 1px solid var(--border-subtle);">和纸 · 画布</td></tr>
+                <tr><td style="padding: 8px 0; border-bottom: 1px solid var(--border-subtle);">#1C1A17</td><td style="padding: 8px 0; border-bottom: 1px solid var(--border-subtle);">松烟 · 主墨</td></tr>
+                <tr><td style="padding: 8px 0;">#131416</td><td style="padding: 8px 0;">砚石 · 夜墨</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- § 04 · 操作控件 -->
+    <section class="ma-section" aria-labelledby="sec-controls">
+      <div class="lead-rule"><span class="meta-index">SEC. 04</span><span id="sec-controls" style="color: var(--text-muted);">操作控件 · Controls</span></div>
+      <div class="ma-grid">
+        <div class="ma-6">
+          <div class="wabi-card" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+            <button type="button" class="wabi-button wabi-button--primary">提交印记</button>
+            <button type="button" class="wabi-button wabi-button--moss">确认批注</button>
+            <button type="button" class="wabi-button">保存草稿</button>
+            <button type="button" class="wabi-button wabi-button--ghost">弃置</button>
+            <button type="button" class="wabi-button" disabled>未就绪</button>
+          </div>
+        </div>
+        <div class="ma-6">
+          <div class="wabi-card">
+            <label for="input-line" style="display: block; font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.08em; font-family: var(--font-mono);">INPUT / 细线框</label>
+            <input id="input-line" class="wabi-input" type="text" placeholder="输入批注内容…">
+            <label for="input-underline" style="display: block; font-size: 0.8125rem; color: var(--text-muted); margin: 16px 0 8px; letter-spacing: 0.08em; font-family: var(--font-mono);">INPUT / 下划线</label>
+            <input id="input-underline" class="wabi-input wabi-input--underline wabi-input--mono" type="text" placeholder="BAT-2026-1004" value="BAT-2026-1004">
+            <p style="font-size: 0.8125rem; color: var(--text-muted); margin-top: 16px;">
+              快捷键 <span class="kbd">⌘</span><span class="kbd">K</span> 唤起检索 · <span class="kbd">T</span> 切换日/夜
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- § 05 · 动效 -->
+    <section class="ma-section" aria-labelledby="sec-motion">
+      <div class="lead-rule"><span class="meta-index">SEC. 05</span><span id="sec-motion" style="color: var(--text-muted);">动效 · Motion</span></div>
+      <div class="wabi-card" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">
+        <p style="font-size: 0.9375rem; margin: 0;">
+          点击右侧按钮触发 <code>.wabi-fade</code> 页面级转场（<code>--ease-paper</code> · 280ms）；
+          卡片与按钮的微反馈走 <code>--ease-ink</code>（140ms）。
+        </p>
+        <button type="button" class="wabi-button" id="fade-trigger">重放转场</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wabi-container" style="padding-top: 0; padding-bottom: 64px;">
+    <div class="hairline" role="presentation"></div>
+    <div class="wabi-meta-header" style="margin-top: 16px; margin-bottom: 0;">
+      <span>WABI-PRESS / 侘寂刊本</span>
+      <span>AZSKILLS · DESIGN-SYSTEM</span>
+      <span class="meta-rule" aria-hidden="true"></span>
+      <span>2026-10-04</span>
+      <span class="seal seal-cinnabar">终</span>
+    </div>
+  </footer>
+
+  <script type="module">
+    // Preview wiring only. The canonical, type-checked implementation lives in
+    // ../wabi-press-theme.ts (initWabiPressTheme / bindWabiThemeToggles); it is
+    // written for bundler/Deno/Bun/tsx runtimes, so this static preview mirrors
+    // its behavior with an inline module to stay dependency-free.
+    const STORAGE_KEY = "wabi-press:theme";
+    const QUERY = "(prefers-color-scheme: dark)";
+    const root = document.documentElement;
+    const toggle = document.querySelector("[data-wabi-theme-toggle]");
+    const isWabiTheme = (value) => value === "light" || value === "dark";
+    const readStored = () => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return isWabiTheme(raw) ? raw : null;
+      } catch {
+        return null;
+      }
+    };
+    const systemDark = () => window.matchMedia(QUERY).matches;
+    const apply = (theme) => root.setAttribute("data-theme", theme);
+    const syncButton = (theme) => {
+      if (toggle) {
+        toggle.setAttribute("aria-pressed", String(theme === "dark"));
+        toggle.textContent = theme === "dark" ? "日间 · 和纸" : "夜间 · 砚石";
+      }
+    };
+    let active = readStored() ?? (systemDark() ? "dark" : "light");
+    apply(active);
+    syncButton(active);
+
+    if (toggle) {
+      toggle.addEventListener("click", () => {
+        active = active === "dark" ? "light" : "dark";
+        try {
+          localStorage.setItem(STORAGE_KEY, active);
+        } catch {
+          // storage unavailable; session-only preference
+        }
+        apply(active);
+        syncButton(active);
+      });
+    }
+
+    window.matchMedia(QUERY).addEventListener("change", (event) => {
+      if (readStored() !== null) return;
+      active = event.matches ? "dark" : "light";
+      apply(active);
+      syncButton(active);
+    });
+
+    const fadeTargets = document.querySelectorAll(".wabi-card, .wabi-panel");
+    fadeTargets.forEach((node) => node.classList.add("wabi-fade", "is-in"));
+    document.getElementById("fade-trigger")?.addEventListener("click", () => {
+      fadeTargets.forEach((node) => node.classList.remove("is-in"));
+      // One frame so the transition can restart, paper curve takes over.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          fadeTargets.forEach((node) => node.classList.add("is-in"));
+        });
+      });
+    });
+  </script>
+</body>
+</html>

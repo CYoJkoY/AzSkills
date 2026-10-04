@@ -1,6 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title desc">
 <title id="title">Read</title>
-<desc id="desc">Material 3-inspired AzSkills icon for read.</desc>
-<rect x="3" y="3" width="42" height="42" rx="14" fill="#D3E3FD"/>
-<path d="M12 14c4-2 8-2 12 1v20c-4-3-8-3-12-1zM36 14c-4-2-8-2-12 1v20c4-3 8-3 12-1z" fill="#FFFFFF" stroke="#74777F" stroke-width="2" stroke-linejoin="round"/><path d="M24 15v20M16 21h4M28 21h4" stroke="#44474F" stroke-width="2" stroke-linecap="round"/>
+<desc id="desc">Wabi-Press AzSkills icon for read: washi ground, ink open book with cinnabar spine.</desc>
+<rect x="3" y="3" width="42" height="42" rx="4" fill="#FAF9F5" stroke="#282420" stroke-opacity="0.25" stroke-width="2"/>
+<path d="M12 14c4-2 8-2 12 1v20c-4-3-8-3-12-1zM36 14c-4-2-8-2-12 1v20c4-3 8-3 12-1z" fill="#F5F3EC" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
+<path d="M16 21h4M28 21h4" stroke="#524C44" stroke-width="2" stroke-linecap="round"/>
+<path d="M24 15v20" stroke="#A6382A" stroke-width="2" stroke-linecap="round"/>
 </svg>

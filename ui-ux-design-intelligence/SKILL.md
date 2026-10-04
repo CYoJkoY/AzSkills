@@ -1,6 +1,6 @@
 ---
 name: ui-ux-design-intelligence
-description: Analyze, review, and improve software interfaces using Material Design philosophy, modern UX principles, accessibility standards, localized product design patterns, and implementation-aware workflows.
+description: Analyze, review, and improve software interfaces using the repository-owned Wabi-Press (侘寂刊本) visual philosophy, modern UX principles, accessibility standards, localized product design patterns, and implementation-aware workflows.
 ---
 
 # UI/UX Design Intelligence
@@ -22,16 +22,18 @@ This skill provides product-level interface reasoning instead of simple visual s
 
 Integrate ideas from:
 
-- Google Material Design and Material 3
+- Wabi-Press (侘寂刊本) — the AzSkills-owned visual language; root [`DESIGN.md`](../DESIGN.md) and [`design-system/wabi-press.css`](../design-system/wabi-press.css) are the authority for any AzSkills-owned surface
 - Human-centered design principles
 - Accessibility-first practices
 - Desktop application UX patterns
 - Browser extension UX patterns
 - Developer tool workflows
 
+Material 3 survives in this Skill only as an archived analysis reference ([`philosophy/material3.md`](philosophy/material3.md)) for reviewing products that already use Material; it is not a visual direction AzSkills applies.
+
 ## Local Adaptation
 
-Do not blindly copy Google visual language. Adapt recommendations for:
+Do not blindly copy any external visual language, including the archived Material reference. Adapt recommendations for:
 
 - Windows applications
 - Browser extensions

@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 132" role="img" aria-labelledby="title desc">
 <title id="title">Support AzSkills</title>
-<desc id="desc">A Material 3-inspired support call to action for AzSkills.</desc>
-<rect x="2" y="2" width="636" height="128" rx="24" fill="#2B2930" stroke="#4A474F" stroke-width="2"/>
-<circle cx="72" cy="66" r="28" fill="#A8C7FA"/>
-<path d="M72 75c-.8-.7-10.2-5.8-10.2-12 0-3.5 2.3-6.1 5.4-6.1 2 0 3.5 1 4.8 2.7 1.2-1.7 2.8-2.7 4.8-2.7 3.1 0 5.4 2.6 5.4 6.1 0 6.2-9.4 11.3-10.2 12z" fill="#003258"/>
-<text x="118" y="57" fill="#E6E1E9" font-family="'Google Sans Flex','Google Sans',Roboto,'Noto Sans','Segoe UI',Arial,sans-serif" font-size="24" font-weight="650">Support AzSkills</text>
-<text x="118" y="84" fill="#CAC4D0" font-family="'Google Sans Flex','Google Sans',Roboto,'Noto Sans','Segoe UI',Arial,sans-serif" font-size="14">Help maintain the Skill library and its documentation infrastructure.</text>
-<path d="M565 57h33M586 49l8 8-8 8" fill="none" stroke="#A8C7FA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<desc id="desc">A Wabi-Press (侘寂刊本) support call to action in the dark inkstone spectrum: charcoal card, mica hairline, luminous cinnabar seal heart.</desc>
+<rect x="2" y="2" width="636" height="128" rx="2" fill="#1B1C20" stroke="#F0EBE1" stroke-opacity="0.18" stroke-width="1"/>
+<rect x="50" y="44" width="44" height="44" rx="2" fill="#C84A3B"/>
+<text x="72" y="76" text-anchor="middle" fill="#131416" font-family="'Source Han Serif SC','Noto Serif CJK SC','Songti SC',Georgia,serif" font-size="26" font-weight="500">心</text>
+<text x="118" y="59" fill="#EDEAE2" font-family="'Source Han Serif SC','Noto Serif CJK SC','Songti SC',Georgia,serif" font-size="25" font-weight="500">Support AzSkills</text>
+<text x="118" y="86" fill="#A39F95" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="14">Help maintain the Skill library and its documentation infrastructure.</text>
+<path d="M565 62h33M586 54l8 8-8 8" fill="none" stroke="#C84A3B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

@@ -1,7 +1,46 @@
 /* ===========================================
    FIXED 16:9 STAGE: MANDATORY BASE STYLES
    Slides are authored at 1920×1080 and scaled as a whole.
+   Visual system: Wabi-Press (侘寂刊本) — the only AzSkills-owned
+   art direction. Token source: ../design-system/wabi-press.css.
    =========================================== */
+
+:root {
+  /* Wabi-Press light · washi spectrum (stage mapping) */
+  --stage-bg: #F5F3EC;
+  --slide-bg: #FAF9F5;
+  --slide-overlay: #ECE8DC;
+  --hairline: rgba(40, 36, 32, 0.10);
+  --hairline-strong: rgba(40, 36, 32, 0.25);
+  --ink-text: #1C1A17;
+  --ink-text-secondary: #524C44;
+  --ink-text-muted: #878074;
+  --cinnabar: #A6382A;
+  --moss: #3B5848;
+
+  /* Wabi-Press editorial stacks */
+  --font-display: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", Georgia, serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", SFMono-Regular, Menlo, monospace;
+
+  /* Wabi-Press physical motion */
+  --ease-paper: cubic-bezier(0.25, 1, 0.4, 1);
+  --ease-ink: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] {
+  /* Wabi-Press dark · inkstone night spectrum (stage mapping) */
+  --stage-bg: #131416;
+  --slide-bg: #1B1C20;
+  --slide-overlay: #25272D;
+  --hairline: rgba(240, 235, 225, 0.08);
+  --hairline-strong: rgba(240, 235, 225, 0.18);
+  --ink-text: #EDEAE2;
+  --ink-text-secondary: #A39F95;
+  --ink-text-muted: #68645C;
+  --cinnabar: #C84A3B;
+  --moss: #537B65;
+}
 
 html,
 body {
@@ -9,14 +48,14 @@ body {
     height: 100%;
     margin: 0;
     overflow: hidden;
-    background: var(--stage-bg, #F0ECF4);
+    background: var(--stage-bg, #F5F3EC);
 }
 
 .deck-viewport {
     position: fixed;
     inset: 0;
     overflow: hidden;
-    background: var(--stage-bg, #F0ECF4);
+    background: var(--stage-bg, #F5F3EC);
 }
 
 .deck-stage {
@@ -27,7 +66,9 @@ body {
     height: 1080px;
     overflow: hidden;
     transform-origin: 0 0;
-    background: var(--slide-bg, #FBF8FF);
+    background: var(--slide-bg, #FAF9F5);
+    font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    color: var(--ink-text-secondary, #524C44);
 }
 
 .slide {
@@ -40,7 +81,8 @@ body {
     visibility: hidden;
     opacity: 0;
     pointer-events: none;
-    background: var(--slide-bg, #FBF8FF);
+    background: var(--slide-bg, #FAF9F5);
+    transition: opacity 280ms var(--ease-paper, cubic-bezier(0.25, 1, 0.4, 1));
 }
 
 .slide.active,
@@ -49,6 +91,25 @@ body {
     opacity: 1;
     pointer-events: auto;
     z-index: 1;
+}
+
+/* Editorial display default for authored slides: serif, weight 500, tight leading. */
+.slide h1,
+.slide h2,
+.slide h3 {
+    font-family: var(--font-display, "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", Georgia, serif);
+    font-weight: 500;
+    line-height: 1.28;
+    color: var(--ink-text, #1C1A17);
+}
+
+/* Technical meta default: mono, tabular figures, publication tracking. */
+.slide .meta,
+.slide .mono {
+    font-family: var(--font-mono, "JetBrains Mono", SFMono-Regular, Menlo, monospace);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em;
+    color: var(--ink-text-muted, #878074);
 }
 
 img,
@@ -65,6 +126,35 @@ svg {
     bottom: 22px;
     transform: translateX(-50%);
     z-index: 1000;
+    font-family: var(--font-mono, "JetBrains Mono", SFMono-Regular, Menlo, monospace);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em;
+    color: var(--ink-text-secondary, #524C44);
+}
+
+.deck-controls button {
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: 1px solid var(--hairline-strong, rgba(40, 36, 32, 0.25));
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 140ms var(--ease-ink, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.deck-controls button:hover {
+    background: var(--slide-overlay, #ECE8DC);
+}
+
+.deck-controls button:active {
+    /* ink absorption: darken one step + deepen the ink line; no bounce */
+    background: var(--slide-overlay, #ECE8DC);
+    border-color: var(--ink-text-secondary, #524C44);
+}
+
+.deck-controls button:focus-visible {
+    outline: 1px solid var(--hairline-strong, rgba(40, 36, 32, 0.25));
+    outline-offset: 2px;
 }
 
 @media print {
@@ -73,13 +163,13 @@ svg {
         width: 1920px;
         height: auto;
         overflow: visible;
-        background: #FBF8FF;
+        background: #FAF9F5;
     }
 
     .deck-viewport {
         position: static;
         overflow: visible;
-        background: #FBF8FF;
+        background: #FAF9F5;
     }
 
     .deck-stage {

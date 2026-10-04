@@ -80,6 +80,6 @@ keys,en,fr,zh,ja,ko,zh_TW,ru,pl,es,pt,de,tr,it
 HELLO_WORLD,"Hello, World!","Bonjour, le monde !","你好，世界！","こんにちは、世界！","안녕하세요, 세계!","你好，世界！","Привет, мир!","Cześć, świecie!","¡Hola, mundo!","Olá, mundo!","Hallo, Welt!","Merhaba Dünya!","Ciao, mondo!"
 ```
 ---
-<div align="center" style="background-color: #D3E3FD; padding: 20px; border: 1px solid #C4C6D0; border-radius: 28px;">
-  <p style="color: #041E49; font-size: 0.9em; font-weight: 500;">由 Game Localization Expert Skill 驱动 · 13 种语言一键覆盖</p>
+<div align="center" style="background-color: #FAF9F5; padding: 16px 24px; border: 1px solid rgba(40, 36, 32, 0.10); border-radius: 2px;">
+  <p style="color: #1C1A17; font-size: 0.9em; font-weight: 500; margin: 0;">由 <span style="color: #A6382A; letter-spacing: 0.08em; font-family: 'JetBrains Mono', SFMono-Regular, Menlo, monospace;">L13N</span> Skill 驱动 · 13 种语言一键覆盖</p>
 </div>

@@ -25,41 +25,14 @@ Do not apply it mechanically to pure backend logic, database work, infrastructur
 When rules conflict, preserve the more specific requirement and document a material tradeoff.
 
 
-### Conditional Style Reservoir
+### Single repository visual language
 
-When the current task is visual but its visual direction is absent or incomplete, consult [`style-reservoir/SKILL.md`](style-reservoir/SKILL.md) as an optional reference layer.
+AzSkills owns exactly one visual language: **Wabi-Press (侘寂刊本)**, defined by the root [`DESIGN.md`](DESIGN.md) and executed from [`design-system/wabi-press.css`](design-system/wabi-press.css), [`design-system/wabi-press-theme.ts`](design-system/wabi-press-theme.ts), and [`design-system/preview/index.html`](design-system/preview/index.html).
 
-The reservoir is **not** another always-on visual doctrine. Use it only after checking explicit user requirements and the project's local `DESIGN.md`, tokens, component system, identity, platform constraints, and accessibility requirements.
+For AzSkills-owned surfaces (README assets, presentation defaults, generated demos, repository UI), apply Wabi-Press directly; there is no secondary style catalog to consult. The former `style-reservoir` style catalog and the Material 3-inspired identity are retired.
 
-Route through the reservoir only when the context contains enough evidence to distinguish a useful style direction, such as the target product/application scenario, UI surface, layout model, density, platform, content type, interaction intensity, or intended visual character.
+For external product work where the user's project lacks a direction, the priority order above still governs: explicit user requirements and the project's own `DESIGN.md`/token system win. Do not export Wabi-Press onto foreign products without explicit user intent.
 
-Use progressive disclosure:
-
-```text
-visual task
-    ↓
-explicit / local visual authority?
-    ├─ yes → keep local direction
-    └─ no
-       ↓
-enough contextual evidence?
-    ├─ no → keep owning UI Skill direction
-    └─ yes
-       ↓
-style-reservoir catalog
-       ↓
-filter + compatibility check
-       ↓
-read only selected style detail
-       ↓
-adapt into local semantic tokens / components / states
-```
-
-Selection must fail closed. Weak matches, conflicting styles, inaccessible defining effects, and candidates that require replacing local architecture stay out of the implementation.
-
-The reservoir may provide one visual direction or, when independently justified, one layout reference plus one compatible visual reference. Do not combine styles merely for novelty.
-
-For the exact routing contract and 148-style catalog, see [`style-reservoir/SKILL.md`](style-reservoir/SKILL.md) and [`style-reservoir/references/stylekit-selection.md`](style-reservoir/references/stylekit-selection.md).
 ## DESIGN.md adaptation layer
 
 DESIGN.md is a visual input format, not a substitute for an AzSkills behavior contract.
