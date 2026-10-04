@@ -1,41 +1,65 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1760 800" role="img" aria-labelledby="title desc">
 <title id="title">AzSkills — reusable AI behavior contracts</title>
-<desc id="desc">A Material 3-inspired AzSkills overview showing a request flowing through a Skill contract and project context to a checked result.</desc>
-<rect width="1760" height="800" rx="32" fill="#FBF8FF"/>
-<rect x="52" y="52" width="1656" height="696" rx="28" fill="#FFFFFF" stroke="#C4C6D0" stroke-width="2"/>
-<g font-family="'Google Sans Flex','Google Sans',Roboto,'Noto Sans','Segoe UI',Arial,sans-serif">
+<desc id="desc">A Wabi-Press (侘寂刊本) AzSkills overview showing a request flowing through a Skill contract and project context to a checked result, on a washi canvas with hairline structure and a cinnabar seal mark.</desc>
+<rect width="1760" height="800" rx="2" fill="#F5F3EC"/>
+<rect x="52" y="52" width="1656" height="696" rx="2" fill="#FAF9F5" stroke="#282420" stroke-opacity="0.10" stroke-width="1"/>
+<g font-family="'Source Han Serif SC','Noto Serif CJK SC','Songti SC',Georgia,serif">
 <g transform="translate(112 92)">
-<path d="M0 34L28 0H73L42 34Z" fill="#0B57D0"/><path d="M54 34L76 3L101 34Z" fill="#0F6B4F"/>
-<text x="0" y="108" fill="#1A1B20" font-size="68" font-weight="650" letter-spacing="-1.4">AzSkills</text>
-<text x="0" y="148" fill="#44474F" font-size="23">Reusable AI behavior contracts for real work.</text>
-<text x="0" y="180" fill="#44474F" font-size="15">Small, inspectable rules. Composable by design. Verified before handoff.</text>
+<rect width="44" height="44" rx="2" fill="#A6382A"/>
+<text x="22" y="33" text-anchor="middle" fill="#F5F3EC" font-size="30" font-weight="500">A</text>
+<text x="64" y="40" fill="#1C1A17" font-size="68" font-weight="500">AzSkills</text>
+<text x="0" y="118" fill="#524C44" font-size="23" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">Reusable AI behavior contracts for real work.</text>
+<text x="0" y="152" fill="#878074" font-size="14" font-family="'JetBrains Mono',SFMono-Regular,Menlo,monospace" letter-spacing="2">SMALL, INSPECTABLE RULES · COMPOSABLE BY DESIGN · VERIFIED BEFORE HANDOFF</text>
 </g>
 <g transform="translate(112 322)">
-<rect width="436" height="256" rx="24" fill="#F0ECF4"/>
-<text x="28" y="42" fill="#0B57D0" font-size="14" font-weight="650">The contract</text>
-<text x="28" y="82" fill="#1A1B20" font-size="29" font-weight="650">SKILL.md</text>
-<line x1="28" y1="106" x2="408" y2="106" stroke="#C4C6D0" stroke-width="2"/>
-<g fill="#44474F" font-size="16"><text x="28" y="138">Scope</text><text x="28" y="170">Constraints</text><text x="28" y="202">Workflow</text><text x="218" y="138">Quality gates</text><text x="218" y="170">Output contract</text></g>
-<rect x="28" y="218" width="116" height="8" rx="4" fill="#0B57D0"/><rect x="152" y="218" width="92" height="8" rx="4" fill="#0F6B4F"/><rect x="252" y="218" width="76" height="8" rx="4" fill="#8A4A00"/>
+<rect width="436" height="256" rx="2" fill="#ECE8DC" stroke="#282420" stroke-opacity="0.10" stroke-width="1"/>
+<text x="28" y="46" fill="#A6382A" font-size="13" font-family="'JetBrains Mono',SFMono-Regular,Menlo,monospace" letter-spacing="2">SEC. 01 · THE CONTRACT</text>
+<rect x="380" y="24" width="28" height="28" rx="2" fill="#A6382A"/>
+<text x="394" y="44" text-anchor="middle" fill="#F5F3EC" font-size="17" font-weight="500">契</text>
+<text x="28" y="92" fill="#1C1A17" font-size="30" font-weight="500">SKILL.md</text>
+<line x1="28" y1="114" x2="408" y2="114" stroke="#282420" stroke-opacity="0.10" stroke-width="1"/>
+<g fill="#524C44" font-size="16" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif"><text x="28" y="146">Scope</text><text x="28" y="178">Constraints</text><text x="28" y="210">Workflow</text><text x="218" y="146">Quality gates</text><text x="218" y="178">Output contract</text></g>
+<rect x="28" y="228" width="116" height="8" rx="1" fill="#A6382A"/><rect x="152" y="228" width="92" height="8" rx="1" fill="#3B5848"/><rect x="252" y="228" width="76" height="8" rx="1" fill="#878074"/>
 </g>
 <g transform="translate(564 292)">
-<text x="0" y="0" fill="#0B57D0" font-size="14" font-weight="650">From request to checked result</text>
-<text x="0" y="30" fill="#44474F" font-size="15">Select the narrowest capability, then verify the result.</text>
+<text x="0" y="0" fill="#A6382A" font-size="13" font-family="'JetBrains Mono',SFMono-Regular,Menlo,monospace" letter-spacing="2">FROM REQUEST TO CHECKED RESULT</text>
+<text x="0" y="30" fill="#524C44" font-size="15" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">Select the narrowest capability, then verify the result.</text>
 <g transform="translate(0 92)">
-<rect width="210" height="182" rx="20" fill="#F6F3FA"/><circle cx="36" cy="38" r="18" fill="#D3E3FD"/><text x="36" y="44" text-anchor="middle" fill="#0B57D0" font-size="16" font-weight="700">1</text><text x="24" y="86" fill="#1A1B20" font-size="22" font-weight="650">Request</text><text x="24" y="116" fill="#44474F" font-size="14">real task + context</text><rect x="24" y="142" width="122" height="10" rx="5" fill="#0B57D0"/>
+<rect width="210" height="182" rx="2" fill="#FAF9F5" stroke="#282420" stroke-opacity="0.10" stroke-width="1"/>
+<rect x="24" y="22" width="22" height="22" rx="2" fill="#ECE8DC"/>
+<text x="35" y="38" text-anchor="middle" fill="#1C1A17" font-size="14" font-family="'JetBrains Mono',SFMono-Regular,Menlo,monospace">1</text>
+<text x="24" y="86" fill="#1C1A17" font-size="22" font-weight="500">Request</text>
+<text x="24" y="116" fill="#524C44" font-size="14" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">real task + context</text>
+<rect x="24" y="142" width="122" height="8" rx="1" fill="#A6382A"/>
 </g>
-<path d="M230 182h34M256 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M230 182h34M256 176l8 6-8 6" stroke="#878074" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 <g transform="translate(274 92)">
-<rect width="250" height="182" rx="20" fill="#F0ECF4"/><circle cx="36" cy="38" r="18" fill="#D3E3FD"/><text x="36" y="44" text-anchor="middle" fill="#0B57D0" font-size="16" font-weight="700">2</text><text x="24" y="86" fill="#1A1B20" font-size="22" font-weight="650">Skill contract</text><text x="24" y="116" fill="#44474F" font-size="14">focused behavior + rules</text><rect x="24" y="142" width="154" height="10" rx="5" fill="#0F6B4F"/>
+<rect width="250" height="182" rx="2" fill="#FAF9F5" stroke="#282420" stroke-opacity="0.10" stroke-width="1"/>
+<rect x="24" y="22" width="22" height="22" rx="2" fill="#ECE8DC"/>
+<text x="35" y="38" text-anchor="middle" fill="#1C1A17" font-size="14" font-family="'JetBrains Mono',SFMono-Regular,Menlo,monospace">2</text>
+<text x="24" y="86" fill="#1C1A17" font-size="22" font-weight="500">Skill contract</text>
+<text x="24" y="116" fill="#524C44" font-size="14" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">focused behavior + rules</text>
+<rect x="24" y="142" width="154" height="8" rx="1" fill="#3B5848"/>
 </g>
-<path d="M536 182h18M548 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M536 182h18M548 176l8 6-8 6" stroke="#878074" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 <g transform="translate(564 92)">
-<rect width="226" height="182" rx="20" fill="#F6F3FA"/><circle cx="36" cy="38" r="18" fill="#FFDCBE"/><text x="36" y="44" text-anchor="middle" fill="#8A4A00" font-size="16" font-weight="700">3</text><text x="24" y="86" fill="#1A1B20" font-size="22" font-weight="650">Project context</text><text x="24" y="116" fill="#44474F" font-size="14">existing APIs + conventions</text><rect x="24" y="142" width="166" height="10" rx="5" fill="#8A4A00"/>
+<rect width="226" height="182" rx="2" fill="#FAF9F5" stroke="#282420" stroke-opacity="0.10" stroke-width="1"/>
+<rect x="24" y="22" width="22" height="22" rx="2" fill="#ECE8DC"/>
+<text x="35" y="38" text-anchor="middle" fill="#1C1A17" font-size="14" font-family="'JetBrains Mono',SFMono-Regular,Menlo,monospace">3</text>
+<text x="24" y="86" fill="#1C1A17" font-size="22" font-weight="500">Project context</text>
+<text x="24" y="116" fill="#524C44" font-size="14" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">existing APIs + conventions</text>
+<rect x="24" y="142" width="166" height="8" rx="1" fill="#878074"/>
 </g>
-<path d="M810 182h34M836 176l8 6-8 6" stroke="#74777F" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M810 182h34M836 176l8 6-8 6" stroke="#878074" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 <g transform="translate(854 92)">
-<rect width="226" height="182" rx="20" fill="#D3E3FD"/><circle cx="36" cy="38" r="18" fill="#0B57D0"/><path d="M28 38l6 6 11-13" fill="none" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text x="24" y="86" fill="#041E49" font-size="22" font-weight="650">Checked result</text><text x="24" y="116" fill="#041E49" font-size="14">render · test · audit</text><rect x="24" y="142" width="142" height="10" rx="5" fill="#0B57D0"/>
+<rect width="226" height="182" rx="2" fill="#1C1A17"/>
+<rect x="24" y="22" width="22" height="22" rx="2" fill="#25272D"/>
+<text x="35" y="38" text-anchor="middle" fill="#EDEAE2" font-size="14" font-family="'JetBrains Mono',SFMono-Regular,Menlo,monospace">4</text>
+<text x="24" y="86" fill="#F5F3EC" font-size="22" font-weight="500">Checked result</text>
+<text x="24" y="116" fill="#A39F95" font-size="14" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">render · test · audit</text>
+<rect x="24" y="142" width="142" height="8" rx="1" fill="#C84A3B"/>
+<path d="M86 30l7 7 12-14" fill="none" stroke="#C84A3B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 </g>
 </g>
-<g transform="translate(112 638)"><line x1="0" y1="0" x2="1536" y2="0" stroke="#C4C6D0" stroke-width="2"/><text x="0" y="36" fill="#44474F" font-size="14">Inspectable</text><text x="168" y="36" fill="#44474F" font-size="14">Composable</text><text x="328" y="36" fill="#44474F" font-size="14">Repository-native</text><text x="534" y="36" fill="#44474F" font-size="14">Verified</text><circle cx="146" cy="31" r="4" fill="#0B57D0"/><circle cx="306" cy="31" r="4" fill="#0F6B4F"/><circle cx="514" cy="31" r="4" fill="#8A4A00"/></g>
+<g transform="translate(112 638)"><line x1="0" y1="0" x2="1536" y2="0" stroke="#282420" stroke-opacity="0.10" stroke-width="1"/><text x="0" y="36" fill="#878074" font-size="13" font-family="'JetBrains Mono',SFMono-Regular,Menlo,monospace" letter-spacing="2">INSPECTABLE</text><text x="168" y="36" fill="#878074" font-size="13" font-family="'JetBrains Mono',SFMono-Regular,Menlo,monospace" letter-spacing="2">COMPOSABLE</text><text x="328" y="36" fill="#878074" font-size="13" font-family="'JetBrains Mono',SFMono-Regular,Menlo,monospace" letter-spacing="2">REPOSITORY-NATIVE</text><text x="534" y="36" fill="#878074" font-size="13" font-family="'JetBrains Mono',SFMono-Regular,Menlo,monospace" letter-spacing="2">VERIFIED</text><rect x="150" y="26" width="7" height="7" fill="#A6382A"/><rect x="310" y="26" width="7" height="7" fill="#3B5848"/><rect x="516" y="26" width="7" height="7" fill="#1C1A17"/></g>
 </g></svg>

@@ -10,39 +10,49 @@ Reference architecture for production-quality fixed-stage HTML presentations. Au
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#FBF8FF">
+  <meta name="theme-color" content="#F5F3EC">
   <title>Presentation</title>
   <style>
     :root {
-      /* AzSkills Material 3 default visual system. */
-      --stage-bg: #F0ECF4;
-      --slide-bg: #FBF8FF;
-      --color-surface: #FFFFFF;
-      --color-surface-container: #F0ECF4;
-      --color-surface-container-high: #EAE6EF;
-      --color-text: #1A1B20;
-      --color-text-muted: #44474F;
-      --color-outline: #74777F;
-      --color-outline-variant: #C4C6D0;
-      --color-primary: #0B57D0;
-      --color-primary-container: #D3E3FD;
-      --color-secondary: #0F6B4F;
-      --color-secondary-container: #C6F1DD;
-      --color-tertiary: #8A4A00;
-      --color-tertiary-container: #FFDCBE;
-      --font-display: "Google Sans Flex", "Google Sans", Roboto, "Noto Sans", "Segoe UI", Arial, sans-serif;
-      --font-body: "Google Sans Flex", "Google Sans", Roboto, "Noto Sans", "Segoe UI", Arial, sans-serif;
-      --font-mono: "Roboto Mono", "SFMono-Regular", Consolas, monospace;
-      --ease-out-expo: cubic-bezier(0.23, 1, 0.32, 1);
-      --duration-normal: 0.42s;
+      /* AzSkills Wabi-Press (侘寂刊本) default visual system — light washi spectrum.
+         Token source: ../design-system/wabi-press.css. Do not fork. */
+      --stage-bg: #F5F3EC;
+      --slide-bg: #FAF9F5;
+      --color-surface-overlay: #ECE8DC;
+      --color-hairline: rgba(40, 36, 32, 0.10);
+      --color-hairline-strong: rgba(40, 36, 32, 0.25);
+      --color-text: #1C1A17;
+      --color-text-secondary: #524C44;
+      --color-text-muted: #878074;
+      --color-cinnabar: #A6382A;
+      --color-moss: #3B5848;
+      --font-display: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", Georgia, serif;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "JetBrains Mono", SFMono-Regular, Menlo, monospace;
+      --ease-paper: cubic-bezier(0.25, 1, 0.4, 1);
+      --ease-ink: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration-normal: 0.28s;
       --stage-padding-x: 112px;
       --stage-padding-y: 96px;
+    }
+
+    [data-theme="dark"] {
+      --stage-bg: #131416;
+      --slide-bg: #1B1C20;
+      --color-surface-overlay: #25272D;
+      --color-hairline: rgba(240, 235, 225, 0.08);
+      --color-hairline-strong: rgba(240, 235, 225, 0.18);
+      --color-text: #EDEAE2;
+      --color-text-secondary: #A39F95;
+      --color-text-muted: #68645C;
+      --color-cinnabar: #C84A3B;
+      --color-moss: #537B65;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { font-family: var(--font-body); }
     button, a { font: inherit; }
-    :focus-visible { outline: 3px solid var(--color-primary); outline-offset: 4px; border-radius: 4px; }
+    :focus-visible { outline: 1px solid var(--color-hairline-strong); outline-offset: 4px; border-radius: 2px; }
 
     /* Paste the complete contents of viewport-base.css here. */
 
@@ -54,28 +64,30 @@ Reference architecture for production-quality fixed-stage HTML presentations. Au
     }
 
     .eyebrow {
-      font-family: var(--font-body);
-      font-size: 16px;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 15px;
       line-height: 24px;
-      letter-spacing: 0.01em;
+      letter-spacing: 0.08em;
       font-weight: 500;
-      color: var(--color-primary);
+      color: var(--color-cinnabar);
     }
 
     .display {
       font-family: var(--font-display);
-      font-size: 96px;
-      line-height: 0.98;
-      letter-spacing: -0.025em;
+      font-weight: 500;
+      font-size: 92px;
+      line-height: 1.25;
+      letter-spacing: 0;
       color: var(--color-text);
     }
 
     .reveal {
       opacity: 0;
-      transform: translateY(28px);
+      transform: translateY(20px);
       transition:
-        opacity var(--duration-normal) var(--ease-out-expo),
-        transform var(--duration-normal) var(--ease-out-expo);
+        opacity var(--duration-normal) var(--ease-paper),
+        transform var(--duration-normal) var(--ease-paper);
     }
 
     .visible .reveal { opacity: 1; transform: translateY(0); }
