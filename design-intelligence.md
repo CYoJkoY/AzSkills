@@ -25,11 +25,11 @@ Do not apply it mechanically to pure backend logic, database work, infrastructur
 When rules conflict, preserve the more specific requirement and document a material tradeoff.
 
 
-### Single repository visual language
+### Repository-owned design contract
 
-AzSkills owns exactly one visual language: **Wabi-Press (侘寂刊本)**, defined by the root [`DESIGN.md`](DESIGN.md) and executed from [`design-system/wabi-press.css`](design-system/wabi-press.css), [`design-system/wabi-press-theme.ts`](design-system/wabi-press-theme.ts), and [`design-system/preview/index.html`](design-system/preview/index.html).
+AzSkills uses a practical, VSCodium-inspired Workbench contract for interface structure and interaction. The root [`DESIGN.md`](DESIGN.md) defines information density, compact navigation, command/search entry, keyboard-first operation, semantic states, responsive behavior, and accessible light/dark themes. [`design-system/wabi-press.css`](design-system/wabi-press.css) and [`design-system/preview/index.html`](design-system/preview/index.html) are the executable styling and verification surfaces.
 
-For AzSkills-owned surfaces (README assets, presentation defaults, generated demos, repository UI), apply Wabi-Press directly; there is no secondary style catalog to consult. The former `style-reservoir` style catalog and the Material 3-inspired identity are retired.
+For AzSkills-owned interfaces, prioritize task fit and workbench usability over editorial composition or decorative styling. External visual references must be adapted to the product rather than copied. The former `style-reservoir` catalog remains retired.
 
 For external product work where the user's project lacks a direction, the priority order above still governs: explicit user requirements and the project's own `DESIGN.md`/token system win. Do not export Wabi-Press onto foreign products without explicit user intent.
 
