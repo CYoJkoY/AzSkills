@@ -12,7 +12,7 @@
 
 Repository-local `SKILL.md` behavior contracts for engineering, architecture, frontend systems, design systems, UI quality, presentations, documentation, localization, translation, and visual production.
 
-The repository-owned visual language is documented in [`DESIGN.md`](DESIGN.md): 侘寂刊本 Wabi-Press — a washi-paper and pine-soot-ink system of hairline structure, editorial serif typography, cinnabar seal marks, and ink-absorption micro-interactions, in light washi and dark inkstone spectra.
+The repository-owned UI contract is documented in [`DESIGN.md`](DESIGN.md): a practical, VSCodium-inspired workbench model focused on compact navigation, discoverable search, technical-content readability, keyboard-first interaction, accessible states, responsive layout, and light/dark themes.
 
 <p>
   <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/CYoJkoY/AzSkills/main/.github/badges/skills.json&style=flat" alt="Skill count">

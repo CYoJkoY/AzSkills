@@ -48,6 +48,17 @@ user requirements / local product identity → normalized DESIGN.md contract →
 
 Do not copy source tokens into scattered components. Keep semantic mapping, provenance, and unresolved assumptions in the design-system layer.
 
+## Workbench and information-density contract
+
+For developer tools, technical libraries, dashboards, and multi-step workflows, evaluate a workbench shell before choosing an editorial or card-first layout. When appropriate, use a compact activity rail, contextual primary sidebar, content-first main region, optional secondary panel, and concise status bar. Keep every region task-driven; do not reproduce VSCodium chrome without a functional need.
+
+- Offer comfortable and compact density as explicit modes when repeated navigation or long lists justify it.
+- Prioritize search/command entry, selected-state visibility, contextual actions, keyboard navigation, and persistent view state.
+- Use system sans-serif for interface text and monospace for code, shortcuts, and technical metadata.
+- Treat VS Code/VSCodium as an interaction and information-architecture reference, not a requirement to copy brand styling.
+- Use responsive rails/drawers and stacked auxiliary panels; avoid horizontal overflow and preserve primary content.
+- Validate selected, focused, disabled, loading, empty, no-results, success, warning, and error states in both themes.
+
 ## 1. Context gathering before design
 
 Before writing substantial UI code, inspect the project rather than designing against assumptions.

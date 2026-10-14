@@ -1,6 +1,6 @@
 ---
 name: ui-ux-design-intelligence
-description: Analyze, review, and improve software interfaces using the repository-owned Wabi-Press (侘寂刊本) visual philosophy, modern UX principles, accessibility standards, localized product design patterns, and implementation-aware workflows.
+description: Analyze, review, and improve software interfaces using the repository-owned Workbench design contract, modern UX principles, accessibility standards, localized product design patterns, and implementation-aware workflows.
 ---
 
 # UI/UX Design Intelligence
@@ -22,7 +22,7 @@ This skill provides product-level interface reasoning instead of simple visual s
 
 Integrate ideas from:
 
-- Wabi-Press (侘寂刊本) — the AzSkills-owned visual language; root [`DESIGN.md`](../DESIGN.md) and [`design-system/wabi-press.css`](../design-system/wabi-press.css) are the authority for any AzSkills-owned surface
+- Workbench-first UX — root [`DESIGN.md`](../DESIGN.md) and [`design-system/wabi-press.css`](../design-system/wabi-press.css) define compact navigation, information density, keyboard-first interaction, semantic states, responsive behavior, and light/dark tokens
 - Human-centered design principles
 - Accessibility-first practices
 - Desktop application UX patterns
@@ -33,7 +33,7 @@ Material 3 survives in this Skill only as an archived analysis reference ([`phil
 
 ## Local Adaptation
 
-Do not blindly copy any external visual language, including the archived Material reference. Adapt recommendations for:
+Do not blindly copy any external visual language. Treat VSCodium / VS Code as a workbench interaction reference, not a visual clone target. Adapt recommendations for:
 
 - Windows applications
 - Browser extensions
@@ -42,6 +42,10 @@ Do not blindly copy any external visual language, including the archived Materia
 - Chinese and international users
 
 Consider platform expectations, input methods, screen constraints, and user expertise.
+
+## Workbench Usability Checks
+
+For developer tools and technical libraries, review navigation-rail usefulness, sidebar density, search/command entry, primary-content priority, optional panel behavior, status feedback, keyboard access, empty/loading/error states, and narrow-screen navigation. Do not add workbench regions unless they support a real task.
 
 ## Review Method
 
