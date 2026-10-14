@@ -8,5 +8,5 @@
 <text x="96" y="81" fill="#A9B4C3" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13.5">Help maintain the Skill library, references, and tooling.</text>
 <rect x="491" y="46" width="119" height="40" rx="8" fill="#79A7FF"/>
 <text x="510" y="70.5" fill="#14253F" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13.5" font-weight="700">Support</text>
-<path d="M574 58h17m-7-7 7 7-7 7" fill="none" stroke="#14253F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M574 66h17m-7-7 7 7-7 7" fill="none" stroke="#14253F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
