@@ -4,7 +4,7 @@ This document turns the skill from a collection of implementation rules into a r
 
 ### AzSkills default visual contract
 
-The default presentation language is **Wabi-Press (侘寂刊本)**, defined by the root [`DESIGN.md`](../DESIGN.md) and executed from [`../design-system/wabi-press.css`](../design-system/wabi-press.css): washi canvas and pine-soot ink text instead of a dark terminal canvas, a single cinnabar seal accent with a secondary moss role, editorial serif display type at weight 500 with robust CJK/Latin fallbacks, an 8px spacing rhythm, 0–2px hand-cut corners, 1px hairline structure (no heavy shadow), and ink-absorption micro-states. Wabi-Press is the only AzSkills-owned art direction; it is not a preset among equals and no second palette may reappear.
+AzSkills-owned presentation tooling inherits the root [`DESIGN.md`](../DESIGN.md) Workbench contract for UI chrome, navigation, density, semantic state, and accessibility. Presentation slides remain audience- and story-led rather than forcing a literal application workbench onto every deck. Use a system sans-serif hierarchy, clear contrast, restrained borders, and functional controls in interactive demos. Do not reintroduce Wabi-Press as a mandatory repository-wide art direction; explicit presentation requirements and subject-specific visual direction remain valid.
 
 ## 1. Visual Thesis
 
