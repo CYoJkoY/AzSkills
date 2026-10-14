@@ -595,3 +595,111 @@ var,
     transform: none;
   }
 }
+
+
+/* Workbench UX contract — supersedes editorial-only defaults above. */
+:root {
+  --wb-canvas: #F7F8FA;
+  --wb-surface: #FFFFFF;
+  --wb-surface-subtle: #F3F4F6;
+  --wb-surface-active: #E8F0FE;
+  --wb-border: #D9DDE3;
+  --wb-border-strong: #AEB6C2;
+  --wb-text: #202124;
+  --wb-text-secondary: #5F6368;
+  --wb-text-muted: #707782;
+  --wb-accent: #0B57D0;
+  --wb-accent-hover: #0842A0;
+  --wb-focus: #0B57D0;
+  --wb-success: #137333;
+  --wb-warning: #8A4B00;
+  --wb-danger: #B3261E;
+  --wb-row-height: 34px;
+  --wb-control-height: 32px;
+  --wb-content-gap: 16px;
+  --wb-rail-width: 48px;
+  --wb-sidebar-width: 260px;
+  --wb-radius: 6px;
+  --wb-transition: 140ms ease;
+  --bg-canvas: var(--wb-canvas);
+  --bg-surface: var(--wb-surface);
+  --bg-overlay: var(--wb-surface-subtle);
+  --border-subtle: var(--wb-border);
+  --border-strong: var(--wb-border-strong);
+  --text-primary: var(--wb-text);
+  --text-secondary: var(--wb-text-secondary);
+  --text-muted: var(--wb-text-muted);
+  --accent-cinnabar: var(--wb-accent);
+  --accent-moss: var(--wb-success);
+  --font-editorial: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --radius-subtle: var(--wb-radius);
+  --shadow-press: none;
+}
+[data-theme="dark"] {
+  --wb-canvas: #18191C;
+  --wb-surface: #202127;
+  --wb-surface-subtle: #282A30;
+  --wb-surface-active: #263B5E;
+  --wb-border: #383B43;
+  --wb-border-strong: #555B66;
+  --wb-text: #E6E8EC;
+  --wb-text-secondary: #B4BAC4;
+  --wb-text-muted: #9299A5;
+  --wb-accent: #A8C7FA;
+  --wb-accent-hover: #D3E3FD;
+  --wb-focus: #A8C7FA;
+  --wb-success: #81C995;
+  --wb-warning: #FDD663;
+  --wb-danger: #F2B8B5;
+}
+[data-density="compact"] {
+  --wb-row-height: 26px;
+  --wb-control-height: 26px;
+  --wb-content-gap: 8px;
+}
+[data-density="comfortable"] {
+  --wb-row-height: 34px;
+  --wb-control-height: 32px;
+  --wb-content-gap: 16px;
+}
+body { background: var(--wb-canvas); color: var(--wb-text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+:where(button, input, select, textarea, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--wb-focus);
+  outline-offset: 2px;
+}
+.wb-shell { display: grid; grid-template-columns: var(--wb-rail-width) minmax(200px, var(--wb-sidebar-width)) minmax(0, 1fr); min-height: 100vh; background: var(--wb-canvas); color: var(--wb-text); }
+.wb-activity-rail { display: flex; flex-direction: column; align-items: stretch; gap: 4px; padding: 8px 4px; background: var(--wb-surface-subtle); border-right: 1px solid var(--wb-border); }
+.wb-activity-button { min-height: var(--wb-row-height); border: 0; border-left: 2px solid transparent; border-radius: 0; background: transparent; color: var(--wb-text-secondary); }
+.wb-activity-button[aria-current="page"], .wb-activity-button[aria-pressed="true"] { border-left-color: var(--wb-accent); background: var(--wb-surface-active); color: var(--wb-text); }
+.wb-sidebar { min-width: 0; overflow: auto; border-right: 1px solid var(--wb-border); background: var(--wb-surface); }
+.wb-sidebar-header, .wb-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 36px; padding: 0 12px; border-bottom: 1px solid var(--wb-border); font-size: 12px; font-weight: 600; letter-spacing: .04em; }
+.wb-list { margin: 0; padding: 4px; list-style: none; }
+.wb-list-item { display: flex; align-items: center; gap: 8px; min-height: var(--wb-row-height); padding: 0 8px; border-radius: 4px; color: var(--wb-text-secondary); cursor: pointer; }
+.wb-list-item:hover { background: var(--wb-surface-subtle); color: var(--wb-text); }
+.wb-list-item[aria-current="true"], .wb-list-item[aria-selected="true"] { background: var(--wb-surface-active); color: var(--wb-text); }
+.wb-content { min-width: 0; padding: var(--wb-content-gap); }
+.wb-content-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
+.wb-content h1, .wb-content h2, .wb-content h3 { font-family: inherit; letter-spacing: normal; font-weight: 600; }
+.wb-content h1 { font-size: 1.5rem; line-height: 1.35; }
+.wb-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.wb-input { width: 100%; min-height: var(--wb-control-height); padding: 4px 8px; border: 1px solid var(--wb-border-strong); border-radius: 4px; background: var(--wb-surface); color: var(--wb-text); }
+.wb-button { min-height: var(--wb-control-height); padding: 4px 10px; border: 1px solid var(--wb-border); border-radius: 4px; background: var(--wb-surface); color: var(--wb-text); cursor: pointer; }
+.wb-button--primary { border-color: var(--wb-accent); background: var(--wb-accent); color: #fff; }
+[data-theme="dark"] .wb-button--primary { color: #18191C; }
+.wb-button:hover { border-color: var(--wb-border-strong); }
+.wb-button--primary:hover { background: var(--wb-accent-hover); border-color: var(--wb-accent-hover); }
+.wb-panel { min-width: 0; border-top: 1px solid var(--wb-border); background: var(--wb-surface); }
+.wb-statusbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 24px; padding: 2px 10px; background: var(--wb-surface-subtle); border-top: 1px solid var(--wb-border); color: var(--wb-text-secondary); font-size: 12px; }
+.wb-state { display: inline-flex; align-items: center; gap: 6px; }
+.wb-state--success { color: var(--wb-success); }
+.wb-state--warning { color: var(--wb-warning); }
+.wb-state--error { color: var(--wb-danger); }
+@media (max-width: 760px) {
+  .wb-shell { grid-template-columns: 44px minmax(0, 1fr); }
+  .wb-sidebar { display: none; }
+  .wb-sidebar[data-open="true"] { display: block; position: fixed; z-index: 10; inset: 0 auto 0 44px; width: min(320px, calc(100vw - 44px)); box-shadow: 0 0 0 100vmax rgb(0 0 0 / 35%); }
+  .wb-content { padding: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
