@@ -5,7 +5,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/azskills-hero-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/azskills-hero.svg">
-  <img src="assets/azskills-hero.svg" alt="AzSkills — reusable AI skills for engineering, design, documentation, localization, translation, and visual production" width="100%">
+  <img src="assets/azskills-hero.svg" alt="AzSkills workbench overview: discover, compose, and verify reusable AI skill contracts" width="100%">
 </picture>
 
 **Reusable AI Skills for real work.**
@@ -16,9 +16,9 @@ The repository-owned UI contract is documented in [`DESIGN.md`](DESIGN.md): a pr
 
 <p>
   <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/CYoJkoY/AzSkills/main/.github/badges/skills.json&style=flat" alt="Skill count">
-  <img src="https://img.shields.io/badge/Format-SKILL.md-A6382A?style=flat" alt="SKILL.md format">
+  <img src="https://img.shields.io/badge/Format-SKILL.md-0B57D0?style=flat" alt="SKILL.md format">
   <img src="https://img.shields.io/github/actions/workflow/status/CYoJkoY/AzSkills/validate-design-contract.yml?branch=main&style=flat&label=Design%20contracts" alt="Design contract validation">
-  <img src="https://img.shields.io/github/license/CYoJkoY/AzSkills?style=flat&color=A6382A" alt="MIT License">
+  <img src="https://img.shields.io/github/license/CYoJkoY/AzSkills?style=flat&color=0B57D0" alt="MIT License">
   <a href="https://github.com/CYoJkoY/AzSkills/stargazers"><img src="https://img.shields.io/github/stars/CYoJkoY/AzSkills?style=flat" alt="GitHub stars"></a>
 </p>
 
@@ -39,7 +39,7 @@ The repository-owned UI contract is documented in [`DESIGN.md`](DESIGN.md): a pr
 ---
 
 <a name="readme-overview"></a>
-## <img src="assets/readme/icons/contract.svg" width="20" height="20" alt=""> Overview
+## <img src="assets/readme/icons/contract.svg" width="20" height="20" align="middle" alt=""> Overview
 
 AzSkills is a **modular library of reusable AI behavior contracts**.
 
@@ -78,7 +78,7 @@ AzSkills therefore favors **small responsibilities, composition, repository-nati
 ---
 
 <a name="readme-architecture"></a>
-## <img src="assets/readme/icons/visual-design.svg" width="20" height="20" alt=""> Architecture
+## <img src="assets/readme/icons/visual-design.svg" width="20" height="20" align="middle" alt=""> Architecture
 
 AzSkills separates **behavior contracts**, **shared reasoning**, and **execution-specific Skills**.
 
@@ -167,22 +167,22 @@ See:
 ---
 
 <a name="readme-design-system"></a>
-## <img src="assets/readme/icons/visual-design.svg" width="20" height="20" alt=""> Design system
+## <img src="assets/readme/icons/visual-design.svg" width="20" height="20" align="middle" alt=""> Design system
 
-AzSkills uses **侘寂刊本 Wabi-Press** as its single repository-owned visual language for its README visuals, authored SVG assets, and presentation defaults. Washi-paper canvas, pine-soot ink text, cinnabar seal marks, 1px hairline structure, and ink-absorption micro-interactions — in light washi and dark inkstone spectra. No other design language coexists in the repository.
+AzSkills uses a **practical, workbench-oriented contract for interactive product UI**. The system takes cues from VSCodium / VS Code workbench conventions—compact navigation, content-first layout, search-led discovery, explicit selection and focus states, useful density, and keyboard access—without copying product branding or proprietary assets. It is a functional direction, not a mandatory visual skin for every artifact: README illustrations, logos, editorial documents, and slide decks should use an art direction suited to their content while respecting the repository’s accessibility and quality requirements.
 
 Executable artifacts, all referenced by the contract in [`DESIGN.md`](DESIGN.md):
 
 | Artifact | Role |
 | :--- | :--- |
-| [`design-system/wabi-press.css`](design-system/wabi-press.css) | The only CSS authority: complete token set (both spectra) and every primitive component. |
-| [`design-system/wabi-press-theme.ts`](design-system/wabi-press-theme.ts) | Native TypeScript theme controller: `localStorage` persistence + automatic `prefers-color-scheme` response. |
-| [`design-system/preview/index.html`](design-system/preview/index.html) | Semantic HTML verification surface mounting all tokens and primitives in both themes. |
+| [`design-system/wabi-press.css`](design-system/wabi-press.css) | Existing stylesheet entry point, retained at its historical path; includes the current `--wb-*` workbench tokens and primitives alongside compatibility rules. `DESIGN.md` defines the current interface contract. |
+| [`design-system/wabi-press-theme.ts`](design-system/wabi-press-theme.ts) | Existing native TypeScript theme controller for explicit light/dark choice and system `prefers-color-scheme` behavior. The filename is retained for compatibility. |
+| [`design-system/preview/index.html`](design-system/preview/index.html) | Dependency-free workbench preview for skill navigation/search, selection states, theme switching, density modes, and responsive layout. |
 
 ---
 
 <a name="readme-skills"></a>
-## <img src="assets/readme/icons/engineering.svg" width="20" height="20" alt=""> Skill catalog
+## <img src="assets/readme/icons/engineering.svg" width="20" height="20" align="middle" alt=""> Skill catalog
 
 Choose the smallest Skill that fully owns the task. Compose additional Skills only when they contribute a separate responsibility.
 
@@ -198,7 +198,7 @@ Choose the smallest Skill that fully owns the task. Compose additional Skills on
 
 | Skill | Focus |
 | :--- | :--- |
-| [`design-system`](design-system/SKILL.md) | DESIGN.md ingestion, normalization, source reconciliation, provenance, and executable design QA. Owns the Wabi-Press artifacts. |
+| [`design-system`](design-system/SKILL.md) | DESIGN.md ingestion, normalization, source reconciliation, provenance, and executable design QA. Maintains the repository-owned workbench tokens and preview. |
 | [`ui-design`](ui-design/SKILL.md) | Production interface design and implementation: hierarchy, responsive behavior, accessibility, interaction, motion, and visual QA. |
 | [`ui-aesthetics`](ui-aesthetics/SKILL.md) | Composition-first visual critique, refinement, component craftsmanship, restrained depth, and anti-generic review. |
 | [`ui-motion`](ui-motion/SKILL.md) | Purposeful Web motion construction using project-native tokens, minimal mechanisms, accessibility variants, and rendered verification. |
@@ -236,7 +236,7 @@ Choose the smallest Skill that fully owns the task. Compose additional Skills on
 ---
 
 <a name="readme-choose"></a>
-## <img src="assets/readme/icons/selection.svg" width="20" height="20" alt=""> Choose a Skill
+## <img src="assets/readme/icons/selection.svg" width="20" height="20" align="middle" alt=""> Choose a Skill
 
 Use this routing map as the first decision point:
 
@@ -289,7 +289,7 @@ Do not duplicate shared rules merely to make each Skill look self-contained.
 ---
 
 <a name="readme-usage"></a>
-## <img src="assets/readme/icons/model.svg" width="20" height="20" alt=""> Use
+## <img src="assets/readme/icons/model.svg" width="20" height="20" align="middle" alt=""> Use
 
 AzSkills is runtime-agnostic. There is no repository-wide application to install; the deliverable is the Markdown contract itself plus any supporting references or assets.
 
@@ -300,7 +300,7 @@ git clone https://github.com/CYoJkoY/AzSkills.git
 cd AzSkills
 ```
 
-For AzSkills-owned visual work, the direction is fixed: apply Wabi-Press from [`design-system/wabi-press.css`](design-system/wabi-press.css) (tokens + primitives) and [`design-system/wabi-press-theme.ts`](design-system/wabi-press-theme.ts) (theme controller). For external product work without an authoritative local direction, the priority order in [`design-intelligence.md`](design-intelligence.md) governs.
+For AzSkills-owned interactive UI, follow [`DESIGN.md`](DESIGN.md) and use the workbench tokens and primitives in [`design-system/wabi-press.css`](design-system/wabi-press.css); its historical filename is retained for compatibility. Do not force an application workbench onto slide decks, logos, editorial documents, or README illustrations. For those outputs—and for external product work without an authoritative local direction—use the context and style-selection rules in [`design-intelligence.md`](design-intelligence.md).
 
 ### 2. Select the narrowest Skill
 
@@ -387,7 +387,7 @@ For design-system work, verify both the source mapping and the rendered result.
 ---
 
 <a name="readme-quality"></a>
-## <img src="assets/readme/icons/verification.svg" width="20" height="20" alt=""> Quality bar
+## <img src="assets/readme/icons/verification.svg" width="20" height="20" align="middle" alt=""> Quality bar
 
 AzSkills is intentionally evidence-first.
 
@@ -416,7 +416,7 @@ The repository currently validates the DESIGN.md integration through [`validate-
 ---
 
 <a name="readme-repository"></a>
-## <img src="assets/readme/icons/documentation.svg" width="20" height="20" alt=""> Repository map
+## <img src="assets/readme/icons/documentation.svg" width="20" height="20" align="middle" alt=""> Repository map
 
 ```text
 AzSkills/
@@ -487,7 +487,7 @@ AzSkills/
 ---
 
 <a name="readme-contributing"></a>
-## <img src="assets/readme/icons/contributing.svg" width="20" height="20" alt=""> Contributing
+## <img src="assets/readme/icons/contributing.svg" width="20" height="20" align="middle" alt=""> Contributing
 
 Good contributions add a clear capability, improve an existing workflow, fix a concrete defect, or remove unnecessary complexity.
 
@@ -504,7 +504,7 @@ For Skill proposals and improvements, use the repository's structured [Issue For
 ---
 
 <a name="readme-support"></a>
-## <img src="assets/readme/icons/heart.svg" width="20" height="20" alt=""> Support
+## <img src="assets/readme/icons/heart.svg" width="20" height="20" align="middle" alt=""> Support
 
 AzSkills is maintained as an open collection of reusable engineering, design, documentation, localization, translation, and visual workflows. Support helps sustain the time required to maintain the Skills, references, assets, and repository infrastructure.
 
@@ -514,7 +514,7 @@ AzSkills is maintained as an open collection of reusable engineering, design, do
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/readme/support-cta-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="assets/readme/support-cta.svg">
-    <img src="assets/readme/support-cta.svg" alt="Support AzSkills" width="560">
+    <img src="assets/readme/support-cta.svg" alt="Support AzSkills" width="640">
   </picture>
 </a>
 
@@ -527,7 +527,7 @@ AzSkills is maintained as an open collection of reusable engineering, design, do
 ---
 
 <a name="readme-license"></a>
-## <img src="assets/readme/icons/license.svg" width="20" height="20" alt=""> License & provenance
+## <img src="assets/readme/icons/license.svg" width="20" height="20" align="middle" alt=""> License & provenance
 
 AzSkills is released under the [MIT License](LICENSE).
 

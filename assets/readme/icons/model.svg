@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc"><title id="title">Model</title><desc id="desc">Wabi-Press AzSkills icon for model: washi ground, three flat paper ledgers in cinnabar, moss, and faded ink.</desc><rect x="1" y="1" width="22" height="22" rx="2" fill="#FAF9F5" stroke="#282420" stroke-opacity="0.25" stroke-width="1"/><rect x="7.2" y="7.2" width="9.6" height="2.7" rx="1" fill="#A6382A"/><rect x="7.2" y="10.65" width="9.6" height="2.7" rx="1" fill="#3B5848"/><rect x="7.2" y="14.1" width="9.6" height="2.7" rx="1" fill="#878074"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc">
+<title id="title">Skill model</title>
+<desc id="desc">Three stacked layers representing composable behavior.</desc>
+<g fill="none" stroke="#4F7DCE" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3.7 8 4.1-8 4.1-8-4.1z"/><path d="m4 12 8 4.1 8-4.1M4 16.2l8 4.1 8-4.1"/></g>
+</svg>

@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc"><title id="title">Skill selection</title><desc id="desc">Wabi-Press AzSkills icon for skill selection: washi ground, ink arrow, cinnabar seal tick.</desc><rect x="1" y="1" width="22" height="22" rx="2" fill="#FAF9F5" stroke="#282420" stroke-opacity="0.25" stroke-width="1"/><path d="M8 7.3l4.1 8.5 1.5-3 3.6-1.6z" fill="#F5F3EC" stroke="#1C1A17" stroke-width="1.35" stroke-linejoin="round"/><path d="M14.3 15.2l2.7 2.7" fill="none" stroke="#A6382A" stroke-width="1.35" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc">
+<title id="title">Skill selection</title>
+<desc id="desc">A pointer selecting a task with a check mark.</desc>
+<g fill="none" stroke="#4F7DCE" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.2 3.7v12.1l3.6-3.2 2.5 5.4 2.7-1.2-2.5-5.2 5 .1z"/><path d="m15.8 17.1 1.5 1.5 3-3.2"/></g>
+</svg>
