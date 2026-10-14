@@ -1,8 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc">
 <title id="title">Read</title>
-<desc id="desc">Wabi-Press AzSkills icon for read: washi ground, ink open book with cinnabar spine.</desc>
-<rect x="3" y="3" width="42" height="42" rx="4" fill="#FAF9F5" stroke="#282420" stroke-opacity="0.25" stroke-width="2"/>
-<path d="M12 14c4-2 8-2 12 1v20c-4-3-8-3-12-1zM36 14c-4-2-8-2-12 1v20c4-3 8-3 12-1z" fill="#F5F3EC" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
-<path d="M16 21h4M28 21h4" stroke="#524C44" stroke-width="2" stroke-linecap="round"/>
-<path d="M24 15v20" stroke="#A6382A" stroke-width="2" stroke-linecap="round"/>
+<desc id="desc">An open book with two readable pages.</desc>
+<g fill="none" stroke="#4F7DCE" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.2C9.7 4.4 6.7 4 3.5 5v13.2c3.2-1 6.2-.6 8.5 1.2M12 6.2C14.3 4.4 17.3 4 20.5 5v13.2c-3.2-1-6.2-.6-8.5 1.2M12 6.2v13.2"/></g>
 </svg>
