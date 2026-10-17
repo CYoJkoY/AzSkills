@@ -310,7 +310,7 @@ ui-design + ui-aesthetics
 rendered visual QA
 ```
 
-Use `readme-craft`, `logo-generator`, `ip-as-logo`, `frontend-slides`, or other more specific visual Skills when their artifact-specific constraints apply. The more specific Skill owns its artifact contract; this Skill supplies aesthetic judgment around that contract.
+Use `rare-ui-motion` when a distinctive, motion-led interaction needs a pattern choice and host-native translation; use `ui-motion` for implementation mechanics. Use `readme-craft`, `logo-generator`, `ip-as-logo`, `frontend-slides`, or other more specific visual Skills when their artifact-specific constraints apply. The more specific Skill owns its artifact contract; this Skill supplies aesthetic judgment around that contract.
 
 ## Source boundary
 

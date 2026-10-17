@@ -264,12 +264,13 @@ new / substantial UI
 frontend-architecture
     ↓
 ui-design
-    ├── ui-motion          → construct motion
+    ├── rare-ui-motion     → choose and translate a distinctive interaction pattern
+    ├── ui-motion          → construct motion from the host motion system
     ├── ui-motion-review   → review existing motion
     └── ui-motion-audit    → audit motion + find opportunities
 ```
 
-`ui-aesthetics` remains the visual-judgment layer. When motion is the main defect, hand off implementation-level findings to `ui-motion-review`; for codebase-wide discovery use `ui-motion-audit`. `svg-animation` retains ownership of SVG-specific output constraints.
+`ui-aesthetics` remains the visual-judgment layer. Use `rare-ui-motion` only when a distinctive, motion-led pattern is a meaningful design choice; it adapts the idea to the host system rather than prescribing a brand theme or copying a component. When motion is the main defect, hand off implementation-level findings to `ui-motion-review`; for codebase-wide discovery use `ui-motion-audit`. `svg-animation` retains ownership of SVG-specific output constraints.
 
 Detailed values, recipes, terminology, and audit criteria live under [`ui-motion/references/animation-standards.md`](ui-motion/references/animation-standards.md) and [`ui-motion/references/animation-vocabulary.md`](ui-motion/references/animation-vocabulary.md) so this shared layer remains cross-artifact rather than becoming a second motion Skill.
 

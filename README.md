@@ -201,6 +201,7 @@ Choose the smallest Skill that fully owns the task. Compose additional Skills on
 | [`design-system`](design-system/SKILL.md) | DESIGN.md ingestion, normalization, source reconciliation, provenance, and executable design QA. Maintains the repository-owned workbench tokens and preview. |
 | [`ui-design`](ui-design/SKILL.md) | Production interface design and implementation: hierarchy, responsive behavior, accessibility, interaction, motion, and visual QA. |
 | [`ui-aesthetics`](ui-aesthetics/SKILL.md) | Composition-first visual critique, refinement, component craftsmanship, restrained depth, and anti-generic review. |
+| [`rare-ui-motion`](rare-ui-motion/SKILL.md) | Context-sensitive adaptation of expressive, motion-led component patterns inspired by Rare UI, without copying components or forcing its brand palette. |
 | [`ui-motion`](ui-motion/SKILL.md) | Purposeful Web motion construction using project-native tokens, minimal mechanisms, accessibility variants, and rendered verification. |
 | [`ui-motion-review`](ui-motion-review/SKILL.md) | Read-only review of existing motion for timing, physicality, interruption, performance, accessibility, and cohesion. |
 | [`ui-motion-audit`](ui-motion-audit/SKILL.md) | Read-only codebase motion audit plus high-confidence discovery of places where motion should be removed, corrected, or introduced. |
@@ -252,6 +253,7 @@ What are you doing?
 ├─ Build / redesign a UI ─────────────────► ui-design
 ├─ Refine an existing interface ──────────► ui-aesthetics + ui-design
 ├─ Add / redesign UI motion ──────────────► ui-motion + ui-design
+├─ Build a distinctive, motion-led component ► rare-ui-motion + ui-design + ui-motion
 ├─ Review existing motion ────────────────► ui-motion-review
 ├─ Audit / discover motion across a repo ─► ui-motion-audit
 ├─ Create an HTML presentation ───────────► frontend-slides
@@ -465,6 +467,9 @@ AzSkills/
 ├── l13n/
 ├── logo-generator/
 ├── photo-abstract-editorial/
+├── rare-ui-motion/
+│   ├── SKILL.md
+│   └── references/
 ├── readme-craft/
 │   └── references/
 ├── steam-mod-page/

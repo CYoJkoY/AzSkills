@@ -84,6 +84,16 @@ The source methodology's framework-specific and provider-specific assumptions ar
 
 The upstream repository is MIT licensed. This provenance record documents methodology use; it does not grant permission to copy unrelated source, assets, examples, or generated material.
 
+## Rare UI-inspired interaction craft
+
+The `rare-ui-motion` Skill studies public interaction patterns and the component gallery published by:
+
+- Source repository: https://github.com/swamimalode07/rare-ui
+- Public component gallery: https://rareui.com/components
+- Upstream license: https://github.com/swamimalode07/rare-ui/blob/main/LICENSE
+
+Rare UI's current license identifies itself as MIT + Commons Clause + Attribution. AzSkills credits Rare UI as a design reference and independently describes pattern families, decision rules, and native implementation guidance. This addition does not include Rare UI component source, registry payloads, screenshots, logos, other assets, or copied documentation. It does not purport to authorize redistribution or porting of the components themselves; any proposal to include component material must be reviewed against the upstream license at that time.
+
 ## DESIGN.md integration
 
 AzSkills' design-system Skill is informed by public references from:
