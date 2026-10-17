@@ -118,6 +118,7 @@ body:
         - frontend-slides
         - ui-aesthetics
         - ui-design
+        - rare-ui-motion
         - readme-craft
         - l13n
         - logo-generator

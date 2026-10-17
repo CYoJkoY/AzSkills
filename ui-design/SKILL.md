@@ -520,6 +520,8 @@ ui-motion
 
 Use `ui-motion-review` for a motion-focused review of existing code or a diff. Use `ui-motion-audit` for a repository-wide audit or motion-opportunity discovery.
 
+When a task needs a distinctive interaction pattern rather than only animation mechanics, consult `rare-ui-motion` to choose and adapt the visual idea. It does not replace this Skill's implementation rules or `ui-motion`'s motion-construction contract.
+
 When the project has no established motion vocabulary, consult `ui-motion/references/animation-standards.md` for reference ranges rather than inventing parallel values.
 
 | Decision | Starting guidance |
