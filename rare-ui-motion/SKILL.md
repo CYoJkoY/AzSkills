@@ -94,7 +94,7 @@ Define the canonical state and the transitions that can occur: idle, focus, poin
 
 ### 5. Translate to the host-native implementation
 
-For AzSkills-authored examples and framework-free targets, use semantic HTML, CSS, and native TypeScript. Do not import Rare UI's React components, Next.js conventions, Tailwind utilities, registry format, or third-party animation dependencies. Prefer CSS transitions for simple state changes and the Web Animations API when explicit playback control is needed; use native TypeScript only where state or geometry requires it. SVG can provide resolution-independent shape detail. Use Canvas or WebGL only when a pixel-level or procedural effect is essential and its runtime cost is justified.
+All implementations produced by this Skill must use semantic HTML, CSS, and native TypeScript. Do not introduce or require React, Next.js, Tailwind, or any other frontend framework, and do not import Rare UI's components, registry format, or third-party animation dependencies. Treat upstream framework-based examples as interaction references only, then reconstruct the behavior with native web primitives. Prefer CSS transitions for simple state changes and the Web Animations API when explicit playback control is needed; use native TypeScript only where state or geometry requires it. SVG can provide resolution-independent shape detail. Use Canvas or WebGL only when a pixel-level or procedural effect is essential and its runtime cost is justified.
 
 Do not transcribe an upstream component into another framework. Rebuild the behavior from its abstract interaction goal, the host's own markup, and project-specific tokens.
 
