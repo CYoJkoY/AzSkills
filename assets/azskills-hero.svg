@@ -1,117 +1,158 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1760 800" role="img" aria-labelledby="title desc">
 <title id="title">AzSkills — workbench for reusable AI skills</title>
 <desc id="desc">A light-mode developer workbench showing skill discovery, a structured catalog, a readable contract preview, and explicit quality checks.</desc>
-<rect width="1760" height="800" fill="#F2F5F9"/>
-<rect x="34" y="34" width="1692" height="732" rx="22" fill="#FFFFFF" stroke="#DCE2EA" stroke-width="1.5"/>
-<g font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
-  <g transform="translate(82 78)">
-    <rect width="38" height="38" rx="9" fill="#0B57D0"/>
-    <path d="M10 12h7v7h-7zM21 12h7v7h-7zM10 23h7v5h-7zM21 23h7v5h-7z" fill="#FFFFFF"/>
-    <text x="52" y="28" fill="#17202C" font-size="27" font-weight="700" letter-spacing="-.7">AzSkills</text>
-    <text x="167" y="27" fill="#667085" font-size="13" letter-spacing="1.4">REUSABLE AI SKILL CONTRACTS</text>
-  </g>
-  <g transform="translate(1300 83)">
-    <rect width="365" height="30" rx="15" fill="#EEF4FF" stroke="#DCE2EA"/>
-    <circle cx="17" cy="15" r="4" fill="#0B57D0"/>
-    <text x="29" y="19.5" fill="#566273" font-size="11.5" font-weight="600" letter-spacing="1">DISCOVER · COMPOSE · VERIFY</text>
-  </g>
-  <g transform="translate(88 198)">
-    <rect width="4" height="18" rx="2" fill="#0B57D0"/>
-    <text x="16" y="14" fill="#0B57D0" font-size="13" font-weight="700" letter-spacing="1.7">A PRACTICAL SKILL LIBRARY</text>
-  </g>
-  <text x="88" y="280" fill="#17202C" font-size="53" font-weight="750" letter-spacing="-2">Reusable AI skills.</text>
-  <text x="88" y="342" fill="#17202C" font-size="53" font-weight="750" letter-spacing="-2">Built for real work.</text>
-  <text x="90" y="391" fill="#566273" font-size="19">Small, readable contracts that help AI workflows</text>
-  <text x="90" y="420" fill="#566273" font-size="19">stay focused, composable, and verifiable.</text>
-  <g transform="translate(88 466)">
-    <rect width="158" height="46" rx="9" fill="#FFFFFF" stroke="#DCE2EA"/>
-    <circle cx="22" cy="23" r="10" fill="#EEF4FF"/>
-    <path d="M18 23h8M22 19v8" stroke="#0B57D0" stroke-width="1.8" stroke-linecap="round"/>
-    <text x="41" y="28" fill="#17202C" font-size="14" font-weight="600">Discover</text>
-  </g>
-  <g transform="translate(258 466)">
-    <rect width="158" height="46" rx="9" fill="#FFFFFF" stroke="#DCE2EA"/>
-    <circle cx="22" cy="23" r="10" fill="#EEF4FF"/>
-    <path d="M18 20h8M18 23h8M18 26h5" stroke="#0B57D0" stroke-width="1.6" stroke-linecap="round"/>
-    <text x="41" y="28" fill="#17202C" font-size="14" font-weight="600">Compose</text>
-  </g>
-  <g transform="translate(428 466)">
-    <rect width="158" height="46" rx="9" fill="#FFFFFF" stroke="#DCE2EA"/>
-    <circle cx="22" cy="23" r="10" fill="#EEF4FF"/>
-    <path d="m17.5 23 3 3 6-7" stroke="#0B57D0" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="41" y="28" fill="#17202C" font-size="14" font-weight="600">Verify</text>
-  </g>
-  <g transform="translate(88 542)">
-    <circle cx="7" cy="7" r="7" fill="#EEF4FF"/>
-    <path d="m4 7 2 2 4-4" stroke="#0B57D0" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="24" y="11" fill="#566273" font-size="14">Markdown-first</text>
-    <circle cx="171" cy="7" r="2.5" fill="#8793A4"/>
-    <text x="184" y="11" fill="#566273" font-size="14">Project-native</text>
-    <circle cx="319" cy="7" r="2.5" fill="#8793A4"/>
-    <text x="332" y="11" fill="#566273" font-size="14">Explicit QA</text>
-  </g>
-  <g transform="translate(88 614)">
-    <path d="M0 0h528" stroke="#E3E7EE" stroke-width="1"/>
-    <text x="0" y="25" fill="#667085" font-size="11.5" font-weight="600" letter-spacing="1.5">SMALL CONTRACTS</text>
-    <text x="180" y="25" fill="#667085" font-size="11.5" font-weight="600" letter-spacing="1.5">CLEAR BOUNDARIES</text>
-    <text x="375" y="25" fill="#667085" font-size="11.5" font-weight="600" letter-spacing="1.5">CHECKED RESULTS</text>
-  </g>
-  <g transform="translate(660 143)">
-    <rect width="1000" height="526" rx="12" fill="#FFFFFF" stroke="#DCE2EA" stroke-width="1.5"/>
-    <path d="M12 0h976a12 12 0 0 1 12 12v32H0V12A12 12 0 0 1 12 0z" fill="#F9FAFC"/>
-    <path d="M0 44h1000" stroke="#E3E7EE"/>
-    <circle cx="20" cy="22" r="4" fill="#8793A4" opacity=".7"/><circle cx="34" cy="22" r="4" fill="#8793A4" opacity=".7"/><circle cx="48" cy="22" r="4" fill="#8793A4" opacity=".7"/>
-    <rect x="262" y="9" width="462" height="26" rx="6" fill="#FFFFFF" stroke="#DCE2EA"/>
-    <circle cx="279" cy="22" r="4" fill="none" stroke="#667085" stroke-width="1.4"/><path d="m282 25 3 3" stroke="#667085" stroke-width="1.4" stroke-linecap="round"/>
-    <text x="293" y="26" fill="#667085" font-size="11.5">Search skills, files, and commands</text>
-    <text x="950" y="26" fill="#667085" font-size="11.5" text-anchor="end">AZSKILLS</text>
-    <rect x="0" y="44" width="48" height="456" fill="#F3F5F8"/><path d="M48 44v456" stroke="#E3E7EE"/>
-    <rect x="0" y="62" width="3" height="34" rx="1.5" fill="#0B57D0"/>
-    <g transform="translate(13 69)" stroke="#0B57D0" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2h13v12H3zM6 5h7M6 8h4"/></g>
-    <g transform="translate(13 119)" stroke="#667085" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="6"/><path d="m13.5 12.5 4 4"/></g>
-    <g transform="translate(13 169)" stroke="#667085" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h14v12H2zM5 7h8M5 10h6"/></g>
-    <g transform="translate(13 219)" stroke="#667085" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v13M4 10l5 5 5-5"/></g>
-    <circle cx="24" cy="460" r="3" fill="#18794E"/>
-    <rect x="48" y="44" width="220" height="456" fill="#F8FAFC"/><path d="M268 44v456" stroke="#E3E7EE"/>
-    <text x="66" y="71" fill="#566273" font-size="10.5" font-weight="700" letter-spacing="1.2">EXPLORER</text>
-    <path d="M245 65h8m-4-4v8" stroke="#667085" stroke-width="1.3" stroke-linecap="round"/>
-    <rect x="62" y="86" width="192" height="30" rx="6" fill="#FFFFFF" stroke="#DCE2EA"/>
-    <circle cx="77" cy="101" r="4" fill="none" stroke="#667085" stroke-width="1.3"/><path d="m80 104 3 3" stroke="#667085" stroke-width="1.3" stroke-linecap="round"/>
-    <text x="91" y="105" fill="#667085" font-size="11.5">Filter skills</text>
-    <text x="66" y="143" fill="#667085" font-size="10" font-weight="700" letter-spacing="1">SKILL CATALOG</text>
-    <g font-size="12.5">
-      <rect x="58" y="153" width="202" height="31" rx="5" fill="#E7F0FF"/><rect x="58" y="153" width="3" height="31" rx="1.5" fill="#0B57D0"/>
-      <path d="M73 165h8v8h-8z" fill="none" stroke="#0B57D0" stroke-width="1.3"/><text x="89" y="173" fill="#124EA8" font-weight="600">ui-design</text>
-      <path d="M73 197h8v8h-8z" fill="none" stroke="#667085" stroke-width="1.3"/><text x="89" y="205" fill="#566273">design-system</text>
-      <path d="M73 229h8v8h-8z" fill="none" stroke="#667085" stroke-width="1.3"/><text x="89" y="237" fill="#566273">ui-aesthetics</text>
-      <path d="M73 261h8v8h-8z" fill="none" stroke="#667085" stroke-width="1.3"/><text x="89" y="269" fill="#566273">frontend-slides</text>
-      <path d="M73 293h8v8h-8z" fill="none" stroke="#667085" stroke-width="1.3"/><text x="89" y="301" fill="#566273">readme-craft</text>
-    </g>
-    <path d="M62 324h192" stroke="#E3E7EE"/><text x="66" y="348" fill="#667085" font-size="10" font-weight="700" letter-spacing="1">WORKSPACE</text>
-    <text x="73" y="373" fill="#566273" font-size="12">References</text><text x="73" y="398" fill="#566273" font-size="12">Design tokens</text>
-    <rect x="268" y="44" width="732" height="456" fill="#FFFFFF"/><path d="M268 78h732" stroke="#E3E7EE"/>
-    <rect x="268" y="44" width="170" height="34" fill="#FFFFFF"/><path d="M268 77.5h170" stroke="#0B57D0" stroke-width="2"/>
-    <text x="284" y="65" fill="#17202C" font-size="11.5">ui-design / SKILL.md</text><text x="982" y="65" fill="#667085" font-size="11" text-anchor="end">×</text>
-    <text x="292" y="103" fill="#667085" font-size="10.5" letter-spacing=".7">SKILL CATALOG / DESIGN / UI-DESIGN</text>
-    <text x="292" y="139" fill="#17202C" font-size="26" font-weight="700" letter-spacing="-.5">UI Design</text>
-    <text x="292" y="163" fill="#566273" font-size="13">Design and implement interfaces that remain usable under real constraints.</text>
-    <rect x="860" y="119" width="115" height="25" rx="12.5" fill="#EEF4FF" stroke="#DCE2EA"/><circle cx="875" cy="131.5" r="3.5" fill="#18794E"/><text x="885" y="135.5" fill="#566273" font-size="10.5" font-weight="600">Contract ready</text>
-    <g transform="translate(292 185)">
-      <rect width="206" height="78" rx="7" fill="#F5F8FD" stroke="#D7E3F7"/><text x="13" y="23" fill="#0B57D0" font-size="10.5" font-weight="700" letter-spacing=".7">01 / SCOPE</text><text x="13" y="44" fill="#17202C" font-size="12.5" font-weight="600">Clear ownership</text><text x="13" y="62" fill="#566273" font-size="11">When the skill applies</text>
-    </g>
-    <g transform="translate(511 185)">
-      <rect width="206" height="78" rx="7" fill="#FFFFFF" stroke="#DCE2EA"/><text x="13" y="23" fill="#0B57D0" font-size="10.5" font-weight="700" letter-spacing=".7">02 / WORKFLOW</text><text x="13" y="44" fill="#17202C" font-size="12.5" font-weight="600">Repeatable steps</text><text x="13" y="62" fill="#566273" font-size="11">From inspect to verify</text>
-    </g>
-    <g transform="translate(730 185)">
-      <rect width="245" height="78" rx="7" fill="#FFFFFF" stroke="#DCE2EA"/><text x="13" y="23" fill="#0B57D0" font-size="10.5" font-weight="700" letter-spacing=".7">03 / QUALITY GATES</text><text x="13" y="44" fill="#17202C" font-size="12.5" font-weight="600">Evidence before handoff</text><text x="13" y="62" fill="#566273" font-size="11">Accessibility, layout, states</text>
-    </g>
-    <text x="292" y="292" fill="#667085" font-size="10.5" font-weight="700" letter-spacing="1">CONTRACT PREVIEW</text><path d="M292 303h682" stroke="#E3E7EE"/>
-    <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12.5">
-      <text x="300" y="328" fill="#0B57D0" font-weight="600">scope:</text><text x="318" y="350" fill="#344054">- high-frequency navigation</text><text x="318" y="371" fill="#344054">- keyboard-first interactions</text>
-      <text x="300" y="400" fill="#0B57D0" font-weight="600">quality_gates:</text><text x="318" y="422" fill="#344054">- responsive overflow check</text><text x="318" y="443" fill="#344054">- visible focus and readable states</text>
-    </g>
-    <rect x="0" y="500" width="1000" height="26" fill="#F9FAFC"/><path d="M0 500h1000" stroke="#E3E7EE"/>
-    <circle cx="16" cy="513" r="3" fill="#18794E"/><text x="26" y="517" fill="#566273" font-size="10.5">Ready</text><text x="105" y="517" fill="#667085" font-size="10.5">Markdown contract</text><text x="490" y="517" fill="#667085" font-size="10.5" text-anchor="middle">Light / dark</text><text x="982" y="517" fill="#667085" font-size="10.5" text-anchor="end">Keyboard-first · Responsive</text>
-  </g>
+<defs>
+<radialGradient id="wash" cx="0.74" cy="0.4" r="0.56">
+<stop offset="0" stop-color="#1A73E8" stop-opacity="0.10"/>
+<stop offset="1" stop-color="#1A73E8" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<rect width="1760" height="800" fill="#F7F8FA"/>
+<rect width="1760" height="800" fill="url(#wash)"/>
+<rect x="32" y="32" width="1696" height="736" rx="12" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<g font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+<g transform="translate(80 80)">
+<rect width="36" height="36" rx="6" fill="#0B57D0"/>
+<path d="M9.5 11.5h6.5v6.5h-6.5zM20 11.5h6.5v6.5H20zM9.5 21.5h6.5v4.5H9.5zM20 21.5h6.5v4.5H20z" fill="#FFFFFF"/>
+<text x="50" y="27" fill="#202124" font-size="27" font-weight="700" letter-spacing="-.7">AzSkills</text>
+<text x="165" y="27" fill="#707782" font-size="13" letter-spacing="1.4">REUSABLE AI SKILL CONTRACTS</text>
+</g>
+<g transform="translate(1314 86)">
+<rect width="366" height="30" rx="999" fill="#E8F0FE" stroke="#D3E3FD"/>
+<circle cx="18" cy="15" r="4" fill="#0B57D0"/>
+<text x="31" y="19.5" fill="#5F6368" font-size="11.5" font-weight="600" letter-spacing="1">DISCOVER · COMPOSE · VERIFY</text>
+</g>
+<g transform="translate(80 204)">
+<rect width="4" height="18" rx="2" fill="#0B57D0"/>
+<text x="16" y="14" fill="#0B57D0" font-size="13" font-weight="700" letter-spacing="1.7">A PRACTICAL SKILL LIBRARY</text>
+</g>
+<text x="80" y="288" fill="#202124" font-size="52" font-weight="750" letter-spacing="-2">Reusable AI skills.</text>
+<text x="80" y="350" fill="#202124" font-size="52" font-weight="750" letter-spacing="-2">Built for real work.</text>
+<text x="82" y="396" fill="#5F6368" font-size="19">Small, readable contracts that help AI workflows</text>
+<text x="82" y="425" fill="#5F6368" font-size="19">stay focused, composable, and verifiable.</text>
+<g transform="translate(80 466)">
+<rect width="152" height="44" rx="6" fill="#FFFFFF" stroke="#D9DDE3"/>
+<circle cx="22" cy="22" r="10" fill="#E8F0FE"/>
+<g transform="translate(12 12)" stroke="#0B57D0" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 10h5M10 7.5v5"/></g>
+<text x="41" y="27" fill="#202124" font-size="14" font-weight="600">Discover</text>
+</g>
+<g transform="translate(244 466)">
+<rect width="152" height="44" rx="6" fill="#FFFFFF" stroke="#D9DDE3"/>
+<circle cx="22" cy="22" r="10" fill="#E8F0FE"/>
+<g transform="translate(12 12)" stroke="#0B57D0" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h12M4 10h12M4 13.5h7"/></g>
+<text x="41" y="27" fill="#202124" font-size="14" font-weight="600">Compose</text>
+</g>
+<g transform="translate(408 466)">
+<rect width="152" height="44" rx="6" fill="#FFFFFF" stroke="#D9DDE3"/>
+<circle cx="22" cy="22" r="10" fill="#E8F0FE"/>
+<g transform="translate(12 12)" stroke="#0B57D0" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m5.5 10.5 3 3 6-7"/></g>
+<text x="41" y="27" fill="#202124" font-size="14" font-weight="600">Verify</text>
+</g>
+<g transform="translate(80 546)">
+<circle cx="7" cy="7" r="7" fill="#E8F0FE"/>
+<path d="m4 7 2 2 4-4" stroke="#0B57D0" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="24" y="11" fill="#5F6368" font-size="14">Markdown-first</text>
+<circle cx="140" cy="7" r="2.5" fill="#AEB6C2"/>
+<text x="153" y="11" fill="#5F6368" font-size="14">Project-native</text>
+<circle cx="269" cy="7" r="2.5" fill="#AEB6C2"/>
+<text x="282" y="11" fill="#5F6368" font-size="14">Explicit QA</text>
+</g>
+<g transform="translate(80 628)">
+<path d="M0 0h560" stroke="#D9DDE3" stroke-width="1"/>
+<text x="0" y="25" fill="#707782" font-size="11.5" font-weight="600" letter-spacing="1.5">SMALL CONTRACTS</text>
+<text x="180" y="25" fill="#707782" font-size="11.5" font-weight="600" letter-spacing="1.5">CLEAR BOUNDARIES</text>
+<text x="375" y="25" fill="#707782" font-size="11.5" font-weight="600" letter-spacing="1.5">CHECKED RESULTS</text>
+</g>
+<g transform="translate(672 144)">
+<rect y="10" width="1008" height="560" rx="12" fill="#202124" opacity="0.05"/>
+<rect y="4" width="1008" height="560" rx="12" fill="#202124" opacity="0.04"/>
+<rect width="1008" height="560" rx="12" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<path d="M12 0h984a12 12 0 0 1 12 12v32H0V12A12 12 0 0 1 12 0z" fill="#F3F4F6"/>
+<path d="M0 44h1008" stroke="#D9DDE3"/>
+<circle cx="20" cy="22" r="4" fill="#AEB6C2" opacity=".7"/><circle cx="34" cy="22" r="4" fill="#AEB6C2" opacity=".7"/><circle cx="48" cy="22" r="4" fill="#AEB6C2" opacity=".7"/>
+<rect x="304" y="9" width="400" height="26" rx="4" fill="#FFFFFF" stroke="#D9DDE3"/>
+<circle cx="321" cy="22" r="4" stroke="#707782" stroke-width="1.4" fill="none"/><path d="m324 25 3 3" stroke="#707782" stroke-width="1.4" stroke-linecap="round"/>
+<text x="335" y="26" fill="#707782" font-size="11.5">Search skills, files, and commands</text>
+<text x="984" y="26" fill="#707782" font-size="11.5" text-anchor="end">AZSKILLS</text>
+<rect y="44" width="48" height="490" fill="#F7F8FA"/>
+<path d="M48 44v490" stroke="#D9DDE3"/>
+<rect y="60" width="3" height="32" rx="1.5" fill="#0B57D0"/>
+<g transform="translate(14 62)" stroke="#0B57D0" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2h13v16H3zM6.5 6h6M6.5 9.5h6M6.5 13h4"/></g>
+<g transform="translate(14 110)" stroke="#707782" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="6"/><path d="m13.5 12.5 4 4"/></g>
+<g transform="translate(14 158)" stroke="#707782" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h14v12H2zM5 7h8M5 10h6M5 13h4"/></g>
+<g transform="translate(14 206)" stroke="#707782" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v13M4 10l5 5 5-5M2 18h14"/></g>
+<circle cx="24" cy="506" r="3" fill="#137333"/>
+<rect x="48" y="44" width="224" height="490" fill="#F3F4F6"/>
+<path d="M272 44v490" stroke="#D9DDE3"/>
+<text x="66" y="72" fill="#5F6368" font-size="10.5" font-weight="700" letter-spacing="1.2">EXPLORER</text>
+<path d="M245 66h8m-4-4v8" stroke="#707782" stroke-width="1.3" stroke-linecap="round"/>
+<rect x="62" y="86" width="196" height="30" rx="4" fill="#FFFFFF" stroke="#D9DDE3"/>
+<circle cx="78" cy="101" r="4" fill="none" stroke="#707782" stroke-width="1.4"/><path d="m81 104 3 3" stroke="#707782" stroke-width="1.4" stroke-linecap="round"/>
+<text x="92" y="105" fill="#707782" font-size="11.5">Filter skills</text>
+<text x="66" y="148" fill="#707782" font-size="10" font-weight="700" letter-spacing="1">SKILL CATALOG</text>
+<rect x="58" y="158" width="204" height="30" rx="4" fill="#E8F0FE"/>
+<rect x="58" y="158" width="3" height="30" rx="1.5" fill="#0B57D0"/>
+<path d="M73 169h8v8h-8z" fill="none" stroke="#0B57D0" stroke-width="1.5"/>
+<text x="89" y="177" fill="#0842A0" font-size="12.5" font-weight="600">ui-design</text>
+<path d="M73 201h8v8h-8z" fill="none" stroke="#707782" stroke-width="1.5"/>
+<text x="89" y="209" fill="#5F6368" font-size="12.5">design-system</text>
+<path d="M73 233h8v8h-8z" fill="none" stroke="#707782" stroke-width="1.5"/>
+<text x="89" y="241" fill="#5F6368" font-size="12.5">ui-aesthetics</text>
+<path d="M73 265h8v8h-8z" fill="none" stroke="#707782" stroke-width="1.5"/>
+<text x="89" y="273" fill="#5F6368" font-size="12.5">frontend-slides</text>
+<path d="M73 297h8v8h-8z" fill="none" stroke="#707782" stroke-width="1.5"/>
+<text x="89" y="305" fill="#5F6368" font-size="12.5">readme-craft</text>
+<path d="M62 326h196" stroke="#D9DDE3"/>
+<text x="66" y="352" fill="#707782" font-size="10" font-weight="700" letter-spacing="1">WORKSPACE</text>
+<text x="73" y="378" fill="#5F6368" font-size="12">References</text>
+<text x="73" y="404" fill="#5F6368" font-size="12">Design tokens</text>
+<rect x="272" y="44" width="736" height="490" fill="#FFFFFF"/>
+<path d="M272 78h736" stroke="#D9DDE3"/>
+<rect x="272" y="44" width="170" height="34" fill="#FFFFFF"/>
+<path d="M272 77.5h170" stroke="#0B57D0" stroke-width="2"/>
+<text x="288" y="66" fill="#202124" font-size="11.5">ui-design / SKILL.md</text>
+<text x="984" y="66" fill="#707782" font-size="11" text-anchor="end">×</text>
+<text x="296" y="108" fill="#707782" font-size="10.5" letter-spacing=".7">SKILL CATALOG / DESIGN / UI-DESIGN</text>
+<text x="296" y="146" fill="#202124" font-size="26" font-weight="700" letter-spacing="-.5">UI Design</text>
+<text x="296" y="170" fill="#5F6368" font-size="13">Design and implement interfaces that remain usable under real constraints.</text>
+<rect x="868" y="124" width="116" height="25" rx="999" fill="#E8F0FE" stroke="#D3E3FD"/>
+<circle cx="883" cy="136.5" r="3.5" fill="#137333"/>
+<text x="894" y="140.5" fill="#5F6368" font-size="10.5" font-weight="600">Contract ready</text>
+<g transform="translate(296 192)">
+<rect width="206" height="78" rx="6" fill="#E8F0FE" stroke="#D3E3FD"/>
+<text x="13" y="23" fill="#0B57D0" font-size="10.5" font-weight="700" letter-spacing=".7">01 / SCOPE</text>
+<text x="13" y="44" fill="#202124" font-size="12.5" font-weight="600">Clear ownership</text>
+<text x="13" y="62" fill="#5F6368" font-size="11">When the skill applies</text>
+</g>
+<g transform="translate(514 192)">
+<rect width="206" height="78" rx="6" fill="#FFFFFF" stroke="#D9DDE3"/>
+<text x="13" y="23" fill="#0B57D0" font-size="10.5" font-weight="700" letter-spacing=".7">02 / WORKFLOW</text>
+<text x="13" y="44" fill="#202124" font-size="12.5" font-weight="600">Repeatable steps</text>
+<text x="13" y="62" fill="#5F6368" font-size="11">From inspect to verify</text>
+</g>
+<g transform="translate(732 192)">
+<rect width="252" height="78" rx="6" fill="#FFFFFF" stroke="#D9DDE3"/>
+<text x="13" y="23" fill="#0B57D0" font-size="10.5" font-weight="700" letter-spacing=".7">03 / QUALITY GATES</text>
+<text x="13" y="44" fill="#202124" font-size="12.5" font-weight="600">Evidence before handoff</text>
+<text x="13" y="62" fill="#5F6368" font-size="11">Accessibility, layout, states</text>
+</g>
+<text x="296" y="300" fill="#707782" font-size="10.5" font-weight="700" letter-spacing="1">CONTRACT PREVIEW</text>
+<path d="M296 311h688" stroke="#D9DDE3"/>
+<g font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12.5">
+<text x="304" y="338" fill="#0B57D0" font-size="12.5" font-weight="600">scope:</text>
+<text x="322" y="360" fill="#3C4043" font-size="12.5">- high-frequency navigation</text>
+<text x="322" y="381" fill="#3C4043" font-size="12.5">- keyboard-first interactions</text>
+<text x="304" y="410" fill="#0B57D0" font-size="12.5" font-weight="600">quality_gates:</text>
+<text x="322" y="432" fill="#3C4043" font-size="12.5">- responsive overflow check</text>
+<text x="322" y="453" fill="#3C4043" font-size="12.5">- visible focus and readable states</text>
+</g>
+<rect y="534" width="1008" height="26" fill="#F3F4F6"/>
+<path d="M0 534h1008" stroke="#D9DDE3"/>
+<circle cx="20" cy="547" r="3" fill="#137333"/>
+<text x="30" y="551" fill="#5F6368" font-size="10.5">Ready</text>
+<text x="110" y="551" fill="#707782" font-size="10.5">Markdown contract</text>
+<text x="504" y="551" fill="#707782" font-size="10.5" text-anchor="middle">Light / dark</text>
+<text x="984" y="551" fill="#707782" font-size="10.5" text-anchor="end">Keyboard-first · Responsive</text>
+</g>
 </g>
 </svg>
