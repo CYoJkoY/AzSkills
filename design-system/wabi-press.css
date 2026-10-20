@@ -1162,8 +1162,9 @@ html[data-surface="editorial"] .wabi-input:focus {
   box-shadow: inset 0 0 0 1px var(--border-subtle);
 }
 
-/* Drop the ring for pointer focus only; keyboard focus keeps the ink line
-   declared with the other editorial :focus-visible rules. */
+/* Pointer focus drops the ring where the UA omits :focus-visible. Text
+   inputs match :focus-visible even on pointer focus in Chromium and
+   Firefox, so an editorial input keeps the ink line above. */
 html[data-surface="editorial"] .wabi-input:focus:not(:focus-visible) {
   outline: none;
 }
