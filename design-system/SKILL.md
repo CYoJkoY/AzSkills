@@ -1,6 +1,6 @@
 ---
 name: design-system
-description: Consume, author, normalize, adapt, and verify DESIGN.md files as AzSkills-native visual contracts. The repository-owned canonical language is Wabi-Press (侘寂刊本), executed from design-system/wabi-press.css. Use when a project provides DESIGN.md, a brand reference must become implementation rules, an AzSkills-owned surface needs styling, or a design contract needs validation.
+description: Consume, author, normalize, adapt, and verify DESIGN.md files as AzSkills-native visual contracts. The repository-owned canonical language is the workbench layer, with Wabi-Press (侘寂刊本) as its opt-in editorial reading surface; both execute from design-system/wabi-press.css. Use when a project provides DESIGN.md, a brand reference must become implementation rules, an AzSkills-owned surface needs styling, or a design contract needs validation.
 ---
 
 # Design System
@@ -20,9 +20,9 @@ Layer scope is normative:
 | Surface | Layer | Attribute |
 |---|---|---|
 | Repository UI, README art, demos, slide chrome | Workbench | none (default) |
-| Long-form article or reading surface | Editorial | `data-surface="editorial"` |
+| Standalone long-form reading document | Editorial | `data-surface="editorial"` on `<html>` |
 
-`data-surface` belongs on the document or article root, never on a tool shell that also renders workbench chrome. A component reads tokens from its own layer only.
+`data-surface` belongs on the `<html>` root of a standalone reading document, never on a tool shell or on one article inside a workbench page; the editorial layer does not provide article-level isolation. A component reads tokens from its own layer only.
 
 For AzSkills-owned visual work, apply the workbench layer by default and the editorial layer only when the deliverable is prose-first. Do not introduce a second palette, a heavy UI component library, or a JavaScript framework. The former Material 3-inspired `azskills-material-design` contract and the `style-reservoir` style catalog are retired; no parallel visual language may reappear.
 
@@ -236,8 +236,8 @@ Do not rewrite an external DESIGN.md merely to make it easier to consume.
 - [ ] interactive states remain coherent;
 - [ ] narrow, intermediate, and wide layouts inspected.
 
-### Wabi-Press conformance (AzSkills-owned surfaces)
-- [ ] all colors trace to `wabi-press.css` tokens; no pure `#000000`/`#FFFFFF`;
+### Editorial conformance (surfaces that opt into `data-surface=editorial`)
+- [ ] all colors trace to `wabi-press.css` editorial tokens; no pure `#000000`/`#FFFFFF`;
 - [ ] display type uses `--font-editorial` at weight 500; mono meta uses `tabular-nums` + `0.08em` tracking;
 - [ ] hierarchy uses 1px hairlines and lightness steps; the only shadow is `--shadow-press`;
 - [ ] active states use ink absorption (darken + ink line), never transform/scale/bounce;

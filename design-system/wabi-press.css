@@ -12,8 +12,8 @@
                                       spacing module, measure, easing curves.
 
    A component reads tokens from its own layer only. Set data-surface="editorial"
-   on an article surface, never on a tool shell. Layer scope is normative in
-   DESIGN.md.
+   on the root of a standalone reading document, never on a tool shell or on one
+   article inside a workbench page. Layer scope is normative in DESIGN.md.
    ============================================================================ */
 
 /* ============================================================================
@@ -60,7 +60,7 @@
   --wb-border-strong: #AEB6C2;
   --wb-text: #202124;
   --wb-text-secondary: #5F6368;
-  --wb-text-muted: #707782;
+  --wb-text-muted: #666C78;
 
   /* [Accent ramp · suffix = lightness step] */
   --wb-accent-50: #E8F0FE;
@@ -501,6 +501,11 @@ a {
   background: var(--wb-surface-subtle);
   color: var(--wb-text-muted);
   cursor: not-allowed;
+}
+
+/* A select in a toolbar sizes to its options; text inputs stay full width. */
+.wb-select {
+  width: auto;
 }
 
 .wb-button {

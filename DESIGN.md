@@ -81,7 +81,7 @@ The CSS file is the executable source of truth. These semantic roles are normati
   --wb-border-strong: #AEB6C2;
   --wb-text: #202124;
   --wb-text-secondary: #5F6368;
-  --wb-text-muted: #707782;
+  --wb-text-muted: #666C78;
   --wb-accent: #0B57D0;
   --wb-accent-hover: #0842A0;
   --wb-focus: #0B57D0;
@@ -184,7 +184,7 @@ Radius communicates surface role, not taste.
 
 - Use a native system sans-serif stack for UI labels and body text. Reserve monospace for code, shortcuts, IDs, and technical metadata.
 - Comfortable density is the default for first-use clarity; compact density is an explicit mode for repeated technical work.
-- Comfortable row height: 32–36px. Compact row height: 24–28px. Standard controls: 28–36px. Touch targets on touch-first surfaces should approach 44px.
+- Comfortable rows are 34px with 32px controls; compact rows and controls are 26px. Touch targets on touch-first surfaces should approach 44px.
 - Use the spacing ramp in [Spacing scale](#spacing-scale). Prefer 12–24px content gutters over oversized editorial whitespace.
 - Use [Radius tiers](#radius-tiers) for corners. Use borders and surface contrast for grouping; avoid heavy shadows and ornamental cards.
 
@@ -249,7 +249,7 @@ Colour      currentColor in source; README exports pin accent step 500 (#1A73E8)
 Sizes       16px dense rows | 20px toolbar and list | 24px headers and empty states
 ```
 
-- Stroke weight compensates for size: 1.75 at 24px, 1.6 at 20px, 1.5 at 16px. Render at the target size instead of scaling with `transform`, so optical weight stays constant.
+- Stroke weight is authored on the 24 grid. Inline icons carry the optical target directly: 1.75 at 24px, 1.6 at 20px, 1.5 at 16px. An exported file scales its stroke with `width`/`height`, so the shipped README assets — drawn at 1.75 and displayed at 20px — render at about 1.46px; that is the accepted heading weight. For a size-specific export, raise the grid stroke instead of scaling a 24px file: 1.92 for 1.6px at 20, 2.25 for 1.5px at 16. Set `width`/`height`; never fake size with `transform: scale()`.
 - Standalone SVGs loaded through `<img>` inherit no `currentColor`, so README assets set `color` on the root. Step 500 is used there because it holds at least 4:1 against both the light and dark README canvas; workbench components still read the semantic accent token.
 - Do not mix filled and outlined icons in one toolbar. A filled variant means on or selected, and it must also flip the accessible name or `aria-pressed`.
 - An icon that needs sub-pixel nudges to look right is mis-drawn, not mis-tuned. Redraw it on the grid.
@@ -304,8 +304,10 @@ Shared            Type stacks, the 8px editorial spacing module, measure, and ea
 ```
 
 - Set `data-surface=editorial` only on a long-form reading surface that benefits from the washi treatment. Never on a tool shell.
+- `data-surface=editorial` is a document-level switch on `<html>`. It does not isolate one article inside a workbench page: tokens, the body background, headings, and focus rules all key off the root element.
 - Do not add a third layer. A new surface either uses the workbench tokens, opts into the editorial layer, or is covered by the scenario matrix.
 - A component may reference semantic tokens from its own layer only. Cross-layer token use is drift.
+- The workbench uses a 2px focus ring. The editorial layer keeps its 1px ink line because its material rules forbid glow-like rings; both stay visible and offset.
 
 ## External reference
 
