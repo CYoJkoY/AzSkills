@@ -34,10 +34,11 @@
 .editorial-prose p{margin:0 0 var(--space-2)}
 .preview-help{margin:var(--wb-space-4) 0 0;font-size:12px;color:var(--wb-danger)}
 .preview-is-focus{outline:2px solid var(--wb-focus);outline-offset:2px}
-.preview-view[hidden]{display:none}
+.preview-empty{display:grid;gap:var(--wb-space-8);margin-top:var(--wb-space-8)}
+.preview-drawer-toggle{display:none}
 .preview-editorial{padding-block:var(--wb-space-40);background:var(--bg-canvas)}
 .preview-editorial .wabi-container{padding-block:0}
-@media (max-width:760px){.preview-topbar{padding:var(--wb-space-8) var(--wb-space-12)}}
+@media (max-width:760px){.preview-topbar{padding:var(--wb-space-8) var(--wb-space-12)}.preview-drawer-toggle{display:inline-flex}}
 </style>
 </head>
 <body>
@@ -61,29 +62,32 @@
 <div id="workbench-view" class="preview-view">
 <div class="wb-shell">
   <nav class="wb-activity-rail" aria-label="Global navigation">
-    <button class="wb-activity-button" type="button" aria-current="page" aria-label="Skills">
+    <button class="wb-activity-button" type="button" id="rail-skills" aria-current="page" aria-label="Skills">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
     </button>
-    <button class="wb-activity-button" type="button" aria-label="Search">
+    <button class="wb-activity-button" type="button" id="rail-search" aria-label="Search">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4.5 4.5"/></svg>
     </button>
-    <button class="wb-activity-button" type="button" aria-label="Validation">
+    <button class="wb-activity-button" type="button" id="rail-validation" aria-label="Validation">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
     </button>
   </nav>
 
-  <aside class="wb-sidebar" aria-label="Skill navigation">
+  <aside class="wb-sidebar" id="skill-sidebar" aria-label="Skill navigation">
     <div class="wb-sidebar-header"><span>EXPLORER</span><span class="wb-badge">6</span></div>
     <div style="padding:var(--wb-space-8)">
       <label class="preview-label" for="skill-search">Search skills</label>
       <input class="wb-input" id="skill-search" type="search" placeholder="Search skills…" style="margin-top:var(--wb-space-4)">
       <ul class="wb-list" id="skill-list" role="listbox" aria-label="Skills" style="padding:var(--wb-space-4) 0 0">
         <li class="wb-list-item" role="option" tabindex="0" aria-selected="true">UI Design</li>
-        <li class="wb-list-item" role="option" tabindex="0" aria-selected="false">Design System</li>
-        <li class="wb-list-item" role="option" tabindex="0" aria-selected="false">Frontend Architecture</li>
-        <li class="wb-list-item" role="option" tabindex="0" aria-selected="false">Documentation</li>
+        <li class="wb-list-item" role="option" tabindex="-1" aria-selected="false">Design System</li>
+        <li class="wb-list-item" role="option" tabindex="-1" aria-selected="false">Frontend Architecture</li>
+        <li class="wb-list-item" role="option" tabindex="-1" aria-selected="false">Documentation</li>
       </ul>
-      <p id="no-results" hidden class="preview-label">No matching skills.</p>
+      <div id="no-results" class="preview-empty" role="status" hidden>
+        <p class="preview-label" style="margin:0">No matching skills.</p>
+        <button class="wb-button" type="button" id="clear-search">Clear search</button>
+      </div>
     </div>
   </aside>
 
@@ -95,6 +99,7 @@
         <p class="wb-prose" style="margin:0;color:var(--wb-text-secondary)">Production interface design and implementation guidance.</p>
       </div>
       <div class="wb-toolbar">
+        <button class="wb-button preview-drawer-toggle" type="button" id="sidebar-toggle" aria-expanded="false" aria-controls="skill-sidebar">Skills</button>
         <button class="wb-button" type="button">Copy path</button>
         <button class="wb-button wb-button--primary" type="button">Open skill</button>
       </div>
@@ -251,27 +256,164 @@
   </article>
 </div>
 
-<footer class="wb-statusbar">
+<footer class="wb-statusbar" id="status-bar">
   <span>AzSkills</span><span>Branch: workbench-ux</span><span>Design contract preview</span><span id="surface-status">Surface: workbench</span>
 </footer>
 
 <script>
-const themeButton=document.querySelector("#theme-toggle");
-const densitySelect=document.querySelector("#density");
-const searchInput=document.querySelector("#skill-search");
-const skillItems=[...document.querySelectorAll("#skill-list .wb-list-item")];
-const noResults=document.querySelector("#no-results");
-const surfaceButtons=[...document.querySelectorAll("[data-surface-option]")];
-const workbenchView=document.querySelector("#workbench-view");
-const editorialView=document.querySelector("#editorial-view");
-const surfaceStatus=document.querySelector("#surface-status");
-const root=document.documentElement;
+const root = document.documentElement;
+const themeButton = document.querySelector("#theme-toggle");
+const densitySelect = document.querySelector("#density");
+const searchInput = document.querySelector("#skill-search");
+const skillItems = [...document.querySelectorAll("#skill-list .wb-list-item")];
+const noResults = document.querySelector("#no-results");
+const clearSearch = document.querySelector("#clear-search");
+const sidebar = document.querySelector("#skill-sidebar");
+const sidebarToggle = document.querySelector("#sidebar-toggle");
+const surfaceButtons = [...document.querySelectorAll("[data-surface-option]")];
+const workbenchView = document.querySelector("#workbench-view");
+const editorialView = document.querySelector("#editorial-view");
+const statusBar = document.querySelector("#status-bar");
+const surfaceStatus = document.querySelector("#surface-status");
 
-themeButton.addEventListener("click",()=>{const dark=root.dataset.theme!=="dark";root.dataset.theme=dark?"dark":"light";themeButton.setAttribute("aria-pressed",String(dark));themeButton.textContent=dark?"Switch to light":"Switch to dark";});
-densitySelect.addEventListener("change",()=>{root.dataset.density=densitySelect.value;});
-for(const button of surfaceButtons){button.addEventListener("click",()=>{const next=button.dataset.surfaceOption;root.dataset.surface=next;for(const sibling of surfaceButtons)sibling.setAttribute("aria-pressed",String(sibling===button));workbenchView.hidden=next==="editorial";editorialView.hidden=next!=="editorial";surfaceStatus.textContent="Surface: "+next;window.scrollTo(0,0);});}
-searchInput.addEventListener("input",()=>{const query=searchInput.value.trim().toLocaleLowerCase();let visibleCount=0;for(const item of skillItems){const visible=item.textContent.toLocaleLowerCase().includes(query);item.hidden=!visible;if(visible)visibleCount+=1;}noResults.hidden=visibleCount>0;});
-for(const item of skillItems){item.addEventListener("click",()=>{for(const sibling of skillItems)sibling.setAttribute("aria-selected",String(sibling===item));});item.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();item.click();}});}
+const narrowViewport = window.matchMedia("(max-width: 760px)");
+
+/* Roving selection: the list is one tab stop; arrow keys walk visible options. */
+const selectSkill = (item) => {
+  for (const sibling of skillItems) {
+    const selected = sibling === item;
+    sibling.setAttribute("aria-selected", String(selected));
+    sibling.tabIndex = selected ? 0 : -1;
+  }
+};
+
+const visibleSkills = () => skillItems.filter((item) => !item.hidden);
+
+const setSidebarOpen = (open) => {
+  sidebar.dataset.open = String(open);
+  sidebarToggle.setAttribute("aria-expanded", String(open));
+};
+
+const commitSkill = (item) => {
+  selectSkill(item);
+  if (narrowViewport.matches) {
+    setSidebarOpen(false);
+    sidebarToggle.focus();
+    return;
+  }
+  item.focus();
+};
+
+themeButton.addEventListener("click", () => {
+  const dark = root.dataset.theme !== "dark";
+  root.dataset.theme = dark ? "dark" : "light";
+  themeButton.setAttribute("aria-pressed", String(dark));
+  themeButton.textContent = dark ? "Switch to light" : "Switch to dark";
+});
+
+densitySelect.addEventListener("change", () => {
+  root.dataset.density = densitySelect.value;
+});
+
+for (const button of surfaceButtons) {
+  button.addEventListener("click", () => {
+    const next = button.dataset.surfaceOption;
+    const editorial = next === "editorial";
+    root.dataset.surface = next;
+    for (const sibling of surfaceButtons) {
+      sibling.setAttribute("aria-pressed", String(sibling === button));
+    }
+    workbenchView.hidden = editorial;
+    editorialView.hidden = !editorial;
+    statusBar.hidden = editorial;
+    surfaceStatus.textContent = "Surface: " + next;
+    window.scrollTo(0, 0);
+  });
+}
+
+const applyFilter = () => {
+  const query = searchInput.value.trim().toLocaleLowerCase();
+  let visibleCount = 0;
+  for (const item of skillItems) {
+    const visible = item.textContent.toLocaleLowerCase().includes(query);
+    item.hidden = !visible;
+    if (visible) visibleCount += 1;
+  }
+  noResults.hidden = visibleCount > 0;
+  const pool = visibleSkills();
+  if (pool.length > 0 && !pool.some((item) => item.tabIndex === 0)) {
+    pool[0].tabIndex = 0;
+  }
+};
+searchInput.addEventListener("input", applyFilter);
+
+clearSearch.addEventListener("click", () => {
+  searchInput.value = "";
+  applyFilter();
+  searchInput.focus();
+});
+
+for (const item of skillItems) {
+  item.addEventListener("click", () => commitSkill(item));
+  item.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      commitSkill(item);
+      return;
+    }
+    const pool = visibleSkills();
+    if (pool.length === 0) return;
+    const index = pool.indexOf(item);
+    const target = {
+      ArrowDown: pool[(index + 1) % pool.length],
+      ArrowUp: pool[(index - 1 + pool.length) % pool.length],
+      Home: pool[0],
+      End: pool[pool.length - 1],
+    }[event.key];
+    if (!target) return;
+    event.preventDefault();
+    selectSkill(target);
+    target.focus();
+  });
+}
+
+sidebarToggle.addEventListener("click", () => {
+  const open = sidebar.dataset.open !== "true";
+  setSidebarOpen(open);
+  if (open) searchInput.focus();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && sidebar.dataset.open === "true") {
+    setSidebarOpen(false);
+    sidebarToggle.focus();
+  }
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+    event.preventDefault();
+    document.querySelector("#command").focus();
+  }
+});
+
+document.addEventListener("click", (event) => {
+  if (sidebar.dataset.open !== "true") return;
+  if (sidebar.contains(event.target) || sidebarToggle.contains(event.target)) return;
+  setSidebarOpen(false);
+});
+
+document.querySelector("#rail-skills").addEventListener("click", () => {
+  if (narrowViewport.matches) setSidebarOpen(true);
+  const pool = visibleSkills();
+  if (pool.length > 0) pool[0].focus();
+});
+
+document.querySelector("#rail-search").addEventListener("click", () => {
+  if (narrowViewport.matches) setSidebarOpen(true);
+  searchInput.focus();
+});
+
+document.querySelector("#rail-validation").addEventListener("click", () => {
+  document.querySelector("#state-heading").scrollIntoView({ block: "start" });
+});
 </script>
 </body>
 </html>

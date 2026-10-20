@@ -185,6 +185,13 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* The hidden attribute must beat component display rules. `.wb-list-item` and
+   `.wb-statusbar` set display, which would otherwise keep filtered or hidden
+   regions visible even though the attribute is present. */
+[hidden] {
+  display: none !important;
+}
+
 a {
   color: var(--wb-accent);
   text-underline-offset: 2px;
