@@ -349,7 +349,14 @@ const applyFilter = () => {
   }
   noResults.hidden = visibleCount > 0;
   const pool = visibleSkills();
-  if (pool.length === 0) return;
+  if (pool.length === 0) {
+    /* No match: leave the list with no tab stop so focus never lands on a
+       hidden row when the query is cleared. */
+    for (const item of skillItems) {
+      item.tabIndex = -1;
+    }
+    return;
+  }
   /* Exactly one visible tab stop. Filtering keeps the selection; the stop
      follows it while it is visible and falls back to the first match. */
   const selected = pool.find((item) => item.getAttribute("aria-selected") === "true");

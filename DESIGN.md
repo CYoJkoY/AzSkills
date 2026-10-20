@@ -9,7 +9,7 @@ AzSkills uses a **workbench-first** interface model inspired by the information 
 
 The system is designed for a technical Skill library: frequent navigation, discovery, reading long instructions, comparing related capabilities, and moving between tasks. Aesthetic polish must not reduce scan speed, usable content area, keyboard access, or information density.
 
-The executable authority is `design-system/wabi-press.css`, `design-system/wabi-press-theme.ts`, and `design-system/preview/index.html`. These artifacts must express the same workbench contract. The stylesheet carries two layers with different scopes: the workbench layer applies by default, and the historical washi editorial layer applies only to an explicit `data-surface="editorial"` region. See [Layer scope](#layer-scope).
+The executable authority is `design-system/wabi-press.css`, `design-system/wabi-press-theme.ts`, and `design-system/preview/index.html`. These artifacts must express the same workbench contract. The stylesheet carries two layers with different scopes: the workbench layer applies by default, and the historical washi editorial layer applies only when `data-surface="editorial"` is set on the `<html>` root. See [Layer scope](#layer-scope).
 
 ## Visual thesis
 
@@ -249,7 +249,7 @@ Colour      currentColor in source; README exports pin accent step 500 (#1A73E8)
 Sizes       16px dense rows | 20px toolbar and list | 24px headers and empty states
 ```
 
-- Stroke weight is authored on the 24 grid. Inline icons carry the optical target directly: 1.75 at 24px, 1.6 at 20px, 1.5 at 16px. An exported file scales its stroke with `width`/`height`, so the shipped README assets — drawn at 1.75 and displayed at 20px — render at about 1.46px; that is the accepted heading weight. For a size-specific export, raise the grid stroke instead of scaling a 24px file: 1.92 for 1.6px at 20, 2.25 for 1.5px at 16. Set `width`/`height`; never fake size with `transform: scale()`.
+- Stroke weight is authored on the 24 grid. Inline icons carry the optical target directly: 1.75 at 24px, 1.6 at 20px, 1.5 at 16px. An exported file scales its stroke with the box it is rendered into, so set `width`/`height` on the embedding `<img>` instead of faking a size with `transform: scale()`. The shipped README assets — drawn at 1.75 and displayed at 20px — therefore render at about 1.46px; that is the accepted heading weight. For a size-specific export, raise the grid stroke instead of scaling a 24px file: 1.92 for 1.6px at 20, 2.25 for 1.5px at 16.
 - Standalone SVGs loaded through `<img>` inherit no `currentColor`, so README assets set `color` on the root. Step 500 is used there because it holds at least 4:1 against both the light and dark README canvas; workbench components still read the semantic accent token.
 - Do not mix filled and outlined icons in one toolbar. A filled variant means on or selected, and it must also flip the accessible name or `aria-pressed`.
 - An icon that needs sub-pixel nudges to look right is mis-drawn, not mis-tuned. Redraw it on the grid.
