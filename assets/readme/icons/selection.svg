@@ -1,5 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc" style="color:#1A73E8">
 <title id="title">Skill selection</title>
 <desc id="desc">A pointer selecting a task with a check mark.</desc>
-<g fill="none" stroke="#4F7DCE" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.2 3.7v12.1l3.6-3.2 2.5 5.4 2.7-1.2-2.5-5.2 5 .1z"/><path d="m15.8 17.1 1.5 1.5 3-3.2"/></g>
+<g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M5 3v15.8l4-3.8 2.5 5.6 2.8-1.2-2.5-5.5 5.7-.4z"/>
+  <path d="m15.8 18.9 1.5 1.5 3.2-3.6"/>
+</g>
 </svg>

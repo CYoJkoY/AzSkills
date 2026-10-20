@@ -245,11 +245,12 @@ Stroke      1.75px on the 24 grid; round caps and joins; no mitred corners
 Corners     1.5px radius on every rectangular joint
 Geometry    orthogonal and 45° only; round only where the object is round
 Fill        none by default; a solid fill marks a resolved state, never decoration
-Colour      currentColor in source; README exports pin the accent (600)
+Colour      currentColor in source; README exports pin accent step 500 (#1A73E8)
 Sizes       16px dense rows | 20px toolbar and list | 24px headers and empty states
 ```
 
 - Stroke weight compensates for size: 1.75 at 24px, 1.6 at 20px, 1.5 at 16px. Render at the target size instead of scaling with `transform`, so optical weight stays constant.
+- Standalone SVGs loaded through `<img>` inherit no `currentColor`, so README assets set `color` on the root. Step 500 is used there because it holds at least 4:1 against both the light and dark README canvas; workbench components still read the semantic accent token.
 - Do not mix filled and outlined icons in one toolbar. A filled variant means on or selected, and it must also flip the accessible name or `aria-pressed`.
 - An icon that needs sub-pixel nudges to look right is mis-drawn, not mis-tuned. Redraw it on the grid.
 - Icon-only controls carry an accessible name and a visible tooltip. Pair every status icon with text.

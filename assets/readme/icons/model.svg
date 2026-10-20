@@ -1,5 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc" style="color:#1A73E8">
 <title id="title">Skill model</title>
 <desc id="desc">Three stacked layers representing composable behavior.</desc>
-<g fill="none" stroke="#4F7DCE" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3.7 8 4.1-8 4.1-8-4.1z"/><path d="m4 12 8 4.1 8-4.1M4 16.2l8 4.1 8-4.1"/></g>
+<g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <path d="m12 3 9 4.75L12 12.5 3 7.75z"/>
+  <path d="m3 12 9 4.75L21 12"/>
+  <path d="m3 16.25 9 4.75 9-4.75"/>
+</g>
 </svg>
