@@ -9,13 +9,24 @@ This Skill is the boundary between external DESIGN.md systems and AzSkills. It d
 
 ## Repository-owned language
 
-AzSkills owns exactly one visual language: **Wabi-Press (侘寂刊本)**, documented in the root [`DESIGN.md`](../DESIGN.md) and executed from these artifacts:
+AzSkills owns one system with two scoped layers. The **workbench layer** is the default for every AzSkills-owned surface; the **Wabi-Press editorial layer** (侘寂刊本) is an opt-in reading surface for long-form prose. Both are documented in the root [`DESIGN.md`](../DESIGN.md) and executed from these artifacts:
 
-- [`wabi-press.css`](wabi-press.css) — the complete token set (washi light + inkstone dark spectra) and every primitive component (`.wabi-card`, `.wabi-meta-header`, `.seal-cinnabar`, `.editorial-prose`, `.wabi-button`, `.wabi-input`). It is the only CSS authority for AzSkills-owned surfaces.
-- [`wabi-press-theme.ts`](wabi-press-theme.ts) — native TypeScript theme controller (`localStorage` persistence, automatic `prefers-color-scheme` response, `[data-theme]` attribute).
-- [`preview/index.html`](preview/index.html) — semantic HTML verification surface mounting all tokens and primitives in both themes.
+- [`wabi-press.css`](wabi-press.css) — the complete token set: the `--wb-*` workbench palette with its accent ramp and spacing tiers, the `.wb-shell`, `.wb-sidebar`, `.wb-statusbar`, list, chip, button, and input primitives, and the `--bg-*`, `--text-*`, `--accent-cinnabar`, and `--accent-moss` washi tokens behind `html[data-surface="editorial"]`. It is the only CSS authority for AzSkills-owned surfaces.
+- [`wabi-press-theme.ts`](wabi-press-theme.ts) — native TypeScript theme controller (`localStorage` persistence, automatic `prefers-color-scheme` response, `[data-theme]` attribute). It drives both layers.
+- [`preview/index.html`](preview/index.html) — semantic HTML verification surface. It mounts the workbench shell by default and swaps to a standalone editorial view, so both layers, both themes, and both densities can be checked without a build step.
 
-For AzSkills-owned visual work (README assets, presentation defaults, generated demos, repository UI), apply Wabi-Press directly from these artifacts. Do not introduce a second palette, a heavy UI component library, or a JavaScript framework. The former Material 3-inspired `azskills-material-design` contract and the `style-reservoir` style catalog are retired; no parallel visual language may reappear.
+Layer scope is normative:
+
+| Surface | Layer | Attribute |
+|---|---|---|
+| Repository UI, README art, demos, slide chrome | Workbench | none (default) |
+| Long-form article or reading surface | Editorial | `data-surface="editorial"` |
+
+`data-surface` belongs on the document or article root, never on a tool shell that also renders workbench chrome. A component reads tokens from its own layer only.
+
+For AzSkills-owned visual work, apply the workbench layer by default and the editorial layer only when the deliverable is prose-first. Do not introduce a second palette, a heavy UI component library, or a JavaScript framework. The former Material 3-inspired `azskills-material-design` contract and the `style-reservoir` style catalog are retired; no parallel visual language may reappear.
+
+New or changed AzSkills UI must pass the conformance gate in [`DESIGN.md`](../DESIGN.md#visual-qa): token-only spacing, the 24px icon grid, explicit state layering, a non-colour selection cue, and no horizontal overflow at 320 CSS px. A surface that fails an item is not ready for review.
 
 ## Core pipeline
 
