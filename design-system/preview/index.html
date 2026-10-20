@@ -1,21 +1,277 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light" data-density="comfortable" data-surface="workbench">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
-<title>AzSkills Workbench Design System</title><link rel="stylesheet" href="../wabi-press.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>AzSkills Workbench Design System</title>
+<link rel="stylesheet" href="../wabi-press.css">
 <style>
-body{margin:0;min-height:100vh}.preview-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;padding:0 16px;border-bottom:1px solid var(--wb-border);background:var(--wb-surface)}.preview-layout{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:calc(100vh - 45px)}.preview-sidebar{padding:12px 8px;border-right:1px solid var(--wb-border);background:var(--wb-surface)}.preview-main{min-width:0;padding:20px}.preview-card{margin:12px 0;padding:16px;border:1px solid var(--wb-border);border-radius:var(--wb-radius);background:var(--wb-surface)}.preview-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}.preview-label{color:var(--wb-text-secondary);font-size:12px}@media(max-width:640px){.preview-layout{grid-template-columns:1fr}.preview-sidebar{border-right:0;border-bottom:1px solid var(--wb-border)}.preview-main{padding:12px}}
-</style></head>
-<body data-theme="light" data-density="comfortable">
-<header class="preview-topbar"><strong>AzSkills / Workbench</strong><div class="preview-row"><label class="preview-label" for="density">Density</label><select id="density" class="wb-input" style="width:auto" aria-label="Density"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select><button id="theme-toggle" class="wb-button" type="button" aria-pressed="false">Switch theme</button></div></header>
-<div class="preview-layout"><aside class="preview-sidebar" aria-label="Skill navigation"><label class="preview-label" for="skill-search">SEARCH SKILLS</label><input class="wb-input" id="skill-search" type="search" placeholder="Search skills…" style="margin:8px 0 12px"><ul class="wb-list" id="skill-list"><li class="wb-list-item" tabindex="0" aria-selected="true">UI Design</li><li class="wb-list-item" tabindex="0">Design System</li><li class="wb-list-item" tabindex="0">Frontend Architecture</li><li class="wb-list-item" tabindex="0">Documentation</li></ul><p id="no-results" hidden class="preview-label">No matching skills.</p></aside>
-<main class="preview-main"><div class="wb-content-header"><div><p class="preview-label">SKILL / DESIGN</p><h1 style="margin:4px 0">UI Design</h1><p style="margin:0;color:var(--wb-text-secondary)">Production interface design and implementation guidance.</p></div><div class="wb-toolbar"><button class="wb-button" type="button">Copy path</button><button class="wb-button wb-button--primary" type="button">Open skill</button></div></div>
-<section class="preview-card"><h2 style="margin-top:0;font-size:1rem">Overview</h2><p>Workbench layout puts navigation and discovery close to content while keeping the main reading surface available for technical material.</p><div class="preview-row"><span class="wb-state wb-state--success">● Validated</span><span class="preview-label">Updated recently · 8 min read</span></div></section>
-<section class="preview-card"><h2 style="margin-top:0;font-size:1rem">Interaction states</h2><div class="preview-row"><button class="wb-button" type="button">Default</button><button class="wb-button" type="button" disabled>Disabled</button><span class="wb-state wb-state--warning">● Needs review</span><span class="wb-state wb-state--error">● Error state</span></div><label for="command" class="preview-label">COMMAND / SEARCH ENTRY</label><input id="command" class="wb-input" placeholder="Search skills or actions… (Ctrl+K)" style="margin-top:6px"></section><footer class="wb-statusbar"><span>AzSkills</span><span>Branch: workbench-ux</span><span>Design contract preview</span><span>Keyboard accessible</span></footer></main></div>
+.preview-topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--wb-gap-inline);min-height:48px;padding:var(--wb-space-8) var(--wb-space-16);border-bottom:1px solid var(--wb-border);background:var(--wb-surface)}
+.preview-main{min-width:0}
+.preview-section{margin:0 0 var(--wb-section-gap)}
+.preview-section h2{font-size:1rem;margin:0 0 var(--wb-gap-stack)}
+.preview-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--wb-gap-inline);margin:var(--wb-space-8) 0}
+.preview-label{margin:0;color:var(--wb-text-secondary);font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:var(--wb-space-12)}
+.preview-card{margin:0;padding:var(--wb-inset-panel);border:1px solid var(--wb-border);border-radius:var(--wb-radius-md);background:var(--wb-surface)}
+.preview-ramp{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:var(--wb-space-8);padding:0;margin:0;list-style:none}
+.preview-ramp-step{min-width:0;font-size:11px;color:var(--wb-text-secondary);font-variant-numeric:tabular-nums}
+.preview-swatch{display:block;height:44px;margin-bottom:var(--wb-space-4);border:1px solid var(--wb-border);border-radius:var(--wb-radius-sm);background:var(--preview-swatch)}
+.preview-spacing{display:flex;flex-direction:column;gap:var(--wb-space-8);margin:0;padding:0;list-style:none}
+.preview-spacing li{display:grid;grid-template-columns:56px minmax(0,1fr);align-items:center;gap:var(--wb-gap-inline);font-size:11px;color:var(--wb-text-secondary);font-variant-numeric:tabular-nums}
+.preview-bar{height:8px;border-radius:var(--wb-radius-sm);background:var(--wb-accent-200);width:var(--preview-bar)}
+.preview-radii{display:flex;flex-wrap:wrap;gap:var(--wb-space-12)}
+.preview-radius{width:64px;font-size:11px;color:var(--wb-text-secondary);text-align:center}
+.preview-radius span{display:block;height:48px;margin-bottom:var(--wb-space-4);border:1px solid var(--wb-accent);background:var(--wb-accent-selected);border-radius:var(--preview-radius)}
+.preview-icons{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--wb-space-20)}
+.preview-icon{display:flex;flex-direction:column;align-items:center;gap:var(--wb-space-6);color:var(--wb-text)}
+.preview-icon span{font-size:11px;color:var(--wb-text-muted);font-variant-numeric:tabular-nums}
+.preview-icon svg{display:block}
+.preview-is-hover{background:var(--wb-accent-hover);border-color:var(--wb-accent-hover);color:var(--wb-on-accent)}
+.preview-is-active{background:var(--wb-accent-active);border-color:var(--wb-accent-active);color:var(--wb-on-accent)}
+.preview-state-note{margin:var(--wb-space-8) 0 0;font-size:11px;color:var(--wb-text-muted)}
+.editorial-prose p{margin:0 0 var(--space-2)}
+.preview-help{margin:var(--wb-space-4) 0 0;font-size:12px;color:var(--wb-danger)}
+.preview-is-focus{outline:2px solid var(--wb-focus);outline-offset:2px}
+.preview-view[hidden]{display:none}
+.preview-editorial{padding-block:var(--wb-space-40);background:var(--bg-canvas)}
+.preview-editorial .wabi-container{padding-block:0}
+@media (max-width:760px){.preview-topbar{padding:var(--wb-space-8) var(--wb-space-12)}}
+</style>
+</head>
+<body>
+<header class="preview-topbar">
+  <strong>AzSkills / Workbench</strong>
+  <div class="preview-row">
+    <span class="preview-label" id="surface-label">Surface</span>
+    <div role="group" aria-labelledby="surface-label">
+      <button class="wb-button" type="button" id="surface-workbench" data-surface-option="workbench" aria-pressed="true">Workbench</button>
+      <button class="wb-button" type="button" id="surface-editorial" data-surface-option="editorial" aria-pressed="false">Editorial</button>
+    </div>
+    <label class="preview-label" for="density">Density</label>
+    <select id="density" class="wb-input" aria-label="Density">
+      <option value="comfortable">Comfortable</option>
+      <option value="compact">Compact</option>
+    </select>
+    <button id="theme-toggle" class="wb-button" type="button" aria-pressed="false">Switch theme</button>
+  </div>
+</header>
+
+<div id="workbench-view" class="preview-view">
+<div class="wb-shell">
+  <nav class="wb-activity-rail" aria-label="Global navigation">
+    <button class="wb-activity-button" type="button" aria-current="page" aria-label="Skills">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
+    </button>
+    <button class="wb-activity-button" type="button" aria-label="Search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4.5 4.5"/></svg>
+    </button>
+    <button class="wb-activity-button" type="button" aria-label="Validation">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
+    </button>
+  </nav>
+
+  <aside class="wb-sidebar" aria-label="Skill navigation">
+    <div class="wb-sidebar-header"><span>EXPLORER</span><span class="wb-badge">6</span></div>
+    <div style="padding:var(--wb-space-8)">
+      <label class="preview-label" for="skill-search">Search skills</label>
+      <input class="wb-input" id="skill-search" type="search" placeholder="Search skills…" style="margin-top:var(--wb-space-4)">
+      <ul class="wb-list" id="skill-list" role="listbox" aria-label="Skills" style="padding:var(--wb-space-4) 0 0">
+        <li class="wb-list-item" role="option" tabindex="0" aria-selected="true">UI Design</li>
+        <li class="wb-list-item" role="option" tabindex="0" aria-selected="false">Design System</li>
+        <li class="wb-list-item" role="option" tabindex="0" aria-selected="false">Frontend Architecture</li>
+        <li class="wb-list-item" role="option" tabindex="0" aria-selected="false">Documentation</li>
+      </ul>
+      <p id="no-results" hidden class="preview-label">No matching skills.</p>
+    </div>
+  </aside>
+
+  <main class="wb-content preview-main">
+    <div class="wb-content-header">
+      <div>
+        <p class="preview-label">Skill / Design</p>
+        <h1 style="margin:var(--wb-space-4) 0">UI Design</h1>
+        <p class="wb-prose" style="margin:0;color:var(--wb-text-secondary)">Production interface design and implementation guidance.</p>
+      </div>
+      <div class="wb-toolbar">
+        <button class="wb-button" type="button">Copy path</button>
+        <button class="wb-button wb-button--primary" type="button">Open skill</button>
+      </div>
+    </div>
+
+    <section class="preview-section" aria-labelledby="ramp-heading">
+      <h2 id="ramp-heading">Accent ramp and state layering</h2>
+      <p class="preview-label">default 600 · hover 700 · active 800 · selected 50 plus a marker</p>
+      <ul class="preview-ramp" id="accent-ramp">
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-50)"><span class="preview-swatch"></span>50 #E8F0FE</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-100)"><span class="preview-swatch"></span>100 #D3E3FD</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-200)"><span class="preview-swatch"></span>200 #A8C7FA</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-300)"><span class="preview-swatch"></span>300 #7CACF8</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-400)"><span class="preview-swatch"></span>400 #4C8DF6</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-500)"><span class="preview-swatch"></span>500 #1A73E8</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-600)"><span class="preview-swatch"></span>600 #0B57D0</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-700)"><span class="preview-swatch"></span>700 #0842A0</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-800)"><span class="preview-swatch"></span>800 #062E6F</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-900)"><span class="preview-swatch"></span>900 #041E49</li>
+      </ul>
+      <div class="preview-row">
+        <button class="wb-button wb-button--primary" type="button">Primary default</button>
+        <button class="wb-button wb-button--primary preview-is-hover" type="button">Primary hover</button>
+        <button class="wb-button wb-button--primary preview-is-active" type="button">Primary active</button>
+        <button class="wb-button" type="button">Secondary</button>
+        <button class="wb-button preview-is-focus" type="button">Focus ring</button>
+        <button class="wb-button" type="button" disabled>Disabled</button>
+      </div>
+      <p class="preview-state-note">States are forced with preview-only classes so each step stays visible without a pointer.</p>
+    </section>
+
+    <section class="preview-section" aria-labelledby="space-heading">
+      <h2 id="space-heading">Spacing ramp and radius tiers</h2>
+      <div class="preview-grid">
+        <div class="preview-card">
+          <p class="preview-label">Primitive ramp · suffix equals px</p>
+          <ul class="preview-spacing">
+            <li><span>4</span><span class="preview-bar" style="--preview-bar:var(--wb-space-4)"></span></li>
+            <li><span>8</span><span class="preview-bar" style="--preview-bar:var(--wb-space-8)"></span></li>
+            <li><span>12</span><span class="preview-bar" style="--preview-bar:var(--wb-space-12)"></span></li>
+            <li><span>16</span><span class="preview-bar" style="--preview-bar:var(--wb-space-16)"></span></li>
+            <li><span>24</span><span class="preview-bar" style="--preview-bar:var(--wb-space-24)"></span></li>
+            <li><span>32</span><span class="preview-bar" style="--preview-bar:var(--wb-space-32)"></span></li>
+            <li><span>48</span><span class="preview-bar" style="--preview-bar:var(--wb-space-48)"></span></li>
+            <li><span>80</span><span class="preview-bar" style="--preview-bar:var(--wb-space-80)"></span></li>
+          </ul>
+        </div>
+        <div class="preview-card">
+          <p class="preview-label">Radius · surface role</p>
+          <div class="preview-radii">
+            <div class="preview-radius"><span style="--preview-radius:var(--wb-radius-sm)"></span>sm 4</div>
+            <div class="preview-radius"><span style="--preview-radius:var(--wb-radius-md)"></span>md 6</div>
+            <div class="preview-radius"><span style="--preview-radius:var(--wb-radius-lg)"></span>lg 12</div>
+            <div class="preview-radius"><span style="--preview-radius:var(--wb-radius-pill)"></span>pill</div>
+          </div>
+          <p class="preview-state-note" style="margin-top:var(--wb-gap-stack)">Pill is reserved for one standalone action or a count chip.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="preview-section" aria-labelledby="icon-heading">
+      <h2 id="icon-heading">Icon grid</h2>
+      <p class="preview-label">24 grid · inset 2 · stroke 1.75 at 24, 1.6 at 20, 1.5 at 16 · currentColor</p>
+      <div class="preview-icons">
+        <div class="preview-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Document"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h4"/></svg>
+          <span>24</span>
+        </div>
+        <div class="preview-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Search"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4.5 4.5"/></svg>
+          <span>20</span>
+        </div>
+        <div class="preview-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Verified"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
+          <span>16</span>
+        </div>
+        <div class="preview-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Group"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/><path d="M11 7h4a2 2 0 0 1 2 2v4"/></svg>
+          <span>24 grouped</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="preview-section" aria-labelledby="selection-heading">
+      <h2 id="selection-heading">Selection tiers</h2>
+      <div class="preview-grid">
+        <div class="preview-card">
+          <p class="preview-label">Simple · rail, outline, check</p>
+          <ul class="wb-list" role="listbox" aria-label="Simple selection example" style="padding:0">
+            <li class="wb-list-item" role="option" tabindex="0" aria-selected="true">ui-design</li>
+            <li class="wb-list-item" role="option" tabindex="0" aria-selected="false">design-system</li>
+          </ul>
+        </div>
+        <div class="preview-card">
+          <p class="preview-label">Grouped · outline, child handles, count</p>
+          <div class="wb-group" role="group" data-selected="true" aria-label="Quality bundle, 3 skills selected">
+            <div class="preview-row" style="margin:0 0 var(--wb-space-8)">
+              <strong>Quality bundle</strong>
+              <span class="wb-count">3</span>
+            </div>
+            <div class="preview-row" style="margin:0">
+              <span class="wb-group-child">ui-design</span>
+              <span class="wb-group-child">readme-craft</span>
+              <span class="wb-group-child">frontend-slides</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="preview-section" aria-labelledby="state-heading">
+      <h2 id="state-heading">Status and feedback</h2>
+      <div class="preview-row">
+        <span class="wb-chip wb-chip--success">Validated</span>
+        <span class="wb-chip wb-chip--warning">Needs review</span>
+        <span class="wb-chip wb-chip--error">Error</span>
+        <span class="wb-chip wb-chip--neutral">Draft</span>
+        <span class="wb-chip wb-chip--neutral">Validating…</span>
+      </div>
+      <div class="preview-row">
+        <label class="preview-label" for="command">Command entry</label>
+        <input id="command" class="wb-input" placeholder="Search skills or actions…" style="max-width:280px">
+        <span class="wb-kbd">Ctrl</span><span class="wb-kbd">K</span>
+      </div>
+      <div class="preview-row">
+        <label class="preview-label" for="skill-name">Skill name</label>
+        <input id="skill-name" class="wb-input" value="ui-design" aria-invalid="true" aria-describedby="skill-name-error" style="max-width:220px">
+        <p id="skill-name-error" class="preview-help">A skill with this name already exists.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+</div>
+
+<div id="editorial-view" class="preview-view preview-editorial" hidden>
+  <article class="wabi-container" aria-labelledby="editorial-heading">
+    <p class="preview-label" style="margin:0;color:var(--text-muted)">Surface / Editorial</p>
+    <h1 id="editorial-heading" style="margin:var(--wb-space-8) 0 var(--wb-space-12)">Two layers, one system</h1>
+    <p style="max-width:var(--measure-prose);margin:0;color:var(--text-secondary);font-size:1.125rem;line-height:1.7">The washi layer applies only when the document sets <span class="mono">data-surface="editorial"</span>. Tool chrome above keeps the workbench tokens.</p>
+    <div class="wabi-card" style="margin-top:var(--wb-space-32)">
+      <div class="wabi-meta-header"><span class="meta-index">SEC. 01</span><span>Washi surface</span><span class="meta-rule"></span><span class="seal seal-cinnabar">刊</span></div>
+      <h2 style="margin:0 0 var(--space-2)">Opt-in, never the default</h2>
+      <div class="editorial-prose">
+        <p>Long-form reading benefits from a warmer canvas, a serif display stack, and a 65ch measure. A reading surface never inherits status-bar language.</p>
+        <blockquote class="pull-quote">Two layers, one system.<cite class="pull-quote-cite">DESIGN.md · Layer scope</cite></blockquote>
+      </div>
+      <div class="preview-row" style="margin-bottom:0">
+        <button class="wabi-button" type="button">Secondary</button>
+        <button class="wabi-button wabi-button--primary" type="button">Primary</button>
+        <input class="wabi-input" placeholder="Search the archive">
+      </div>
+    </div>
+  </article>
+</div>
+
+<footer class="wb-statusbar">
+  <span>AzSkills</span><span>Branch: workbench-ux</span><span>Design contract preview</span><span id="surface-status">Surface: workbench</span>
+</footer>
+
 <script>
-const themeButton=document.querySelector("#theme-toggle");const densitySelect=document.querySelector("#density");const searchInput=document.querySelector("#skill-search");const skillItems=[...document.querySelectorAll("#skill-list .wb-list-item")];const noResults=document.querySelector("#no-results");
-themeButton.addEventListener("click",()=>{const dark=document.body.dataset.theme!=="dark";document.body.dataset.theme=dark?"dark":"light";themeButton.setAttribute("aria-pressed",String(dark));themeButton.textContent=dark?"Switch to light":"Switch to dark";});
-densitySelect.addEventListener("change",()=>{document.body.dataset.density=densitySelect.value;});
+const themeButton=document.querySelector("#theme-toggle");
+const densitySelect=document.querySelector("#density");
+const searchInput=document.querySelector("#skill-search");
+const skillItems=[...document.querySelectorAll("#skill-list .wb-list-item")];
+const noResults=document.querySelector("#no-results");
+const surfaceButtons=[...document.querySelectorAll("[data-surface-option]")];
+const workbenchView=document.querySelector("#workbench-view");
+const editorialView=document.querySelector("#editorial-view");
+const surfaceStatus=document.querySelector("#surface-status");
+const root=document.documentElement;
+
+themeButton.addEventListener("click",()=>{const dark=root.dataset.theme!=="dark";root.dataset.theme=dark?"dark":"light";themeButton.setAttribute("aria-pressed",String(dark));themeButton.textContent=dark?"Switch to light":"Switch to dark";});
+densitySelect.addEventListener("change",()=>{root.dataset.density=densitySelect.value;});
+for(const button of surfaceButtons){button.addEventListener("click",()=>{const next=button.dataset.surfaceOption;root.dataset.surface=next;for(const sibling of surfaceButtons)sibling.setAttribute("aria-pressed",String(sibling===button));workbenchView.hidden=next==="editorial";editorialView.hidden=next!=="editorial";surfaceStatus.textContent="Surface: "+next;window.scrollTo(0,0);});}
 searchInput.addEventListener("input",()=>{const query=searchInput.value.trim().toLocaleLowerCase();let visibleCount=0;for(const item of skillItems){const visible=item.textContent.toLocaleLowerCase().includes(query);item.hidden=!visible;if(visible)visibleCount+=1;}noResults.hidden=visibleCount>0;});
 for(const item of skillItems){item.addEventListener("click",()=>{for(const sibling of skillItems)sibling.setAttribute("aria-selected",String(sibling===item));});item.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();item.click();}});}
-</script></body></html>
+</script>
+</body>
+</html>
