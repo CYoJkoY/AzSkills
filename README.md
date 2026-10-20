@@ -171,6 +171,8 @@ See:
 
 AzSkills uses a **practical, workbench-oriented contract for interactive product UI**. The system takes cues from VSCodium / VS Code workbench conventions—compact navigation, content-first layout, search-led discovery, explicit selection and focus states, useful density, and keyboard access—without copying product branding or proprietary assets. It is a functional direction, not a mandatory visual skin for every artifact: README illustrations, logos, editorial documents, and slide decks should use an art direction suited to their content while respecting the repository’s accessibility and quality requirements.
 
+The workbench layer is the default. The washi editorial layer is opt-in: set `data-surface="editorial"` on the `<html>` root of a standalone reading document. A surface that relied on the older washi defaults needs that attribute to keep its treatment.
+
 Executable artifacts, all referenced by the contract in [`DESIGN.md`](DESIGN.md):
 
 | Artifact | Role |

@@ -1,41 +1,32 @@
 /* ============================================================================
-   Wabi-Press · 侘寂刊本 — AzSkills canonical design system
+   AzSkills design system
    ----------------------------------------------------------------------------
-   Material: washi paper (和纸) + pine-soot ink (松烟墨).
-   Prohibited: pure #000000, pure #FFFFFF, heavy shadows, spring/bounce motion.
-   Depth comes from 1px hairline borders + background lightness steps only.
-   Single source of truth for every AzSkills-owned visual surface.
+   Two layers, one system:
+
+     :root                            workbench layer, the default surface.
+                                      Owns the --wb-* tokens and .wb-* primitives.
+     html[data-surface="editorial"]   washi editorial layer, opt-in on long-form
+                                      reading surfaces. Owns --bg-*, --border-*,
+                                      --text-*, --accent-cinnabar/moss, .wabi-*.
+     :root (shared block)             type stacks, the legacy 8px editorial
+                                      spacing module, measure, easing curves.
+
+   A component reads tokens from its own layer only. Set data-surface="editorial"
+   on the root of a standalone reading document, never on a tool shell or on one
+   article inside a workbench page. Layer scope is normative in DESIGN.md.
+   ============================================================================ */
+
+/* ============================================================================
+   1 · Shared structural tokens
    ============================================================================ */
 
 :root {
-  /* [Light · washi tone spectrum 和纸鸟子谱] */
-  --bg-canvas: #F5F3EC;                              /* warm washi base */
-  --bg-surface: #FAF9F5;                             /* cards & carriers */
-  --bg-overlay: #ECE8DC;                             /* overlays, hover, secondary blocks */
-  --border-subtle: rgba(40, 36, 32, 0.10);           /* 1px hairline impression */
-  --border-strong: rgba(40, 36, 32, 0.25);           /* active & focus ink line */
-
-  --text-primary: #1C1A17;                           /* pine-soot ink */
-  --text-secondary: #524C44;                         /*熟褐灰 body & descriptions */
-  --text-muted: #878074;                             /* faded ink, meta & footnotes */
-
-  --accent-cinnabar: #A6382A;                        /* cinnabar seal · primary action */
-  --accent-moss: #3B5848;                            /* patina moss · success / secondary */
-
-  /* [Editorial type stacks 排印字体栈] */
+  /* [Type stacks 排印字体栈] */
   --font-editorial: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", Georgia, serif;
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", SFMono-Regular, Menlo, monospace;
 
-  /* [Space & geometry 空间与几何] */
-  --radius-subtle: 2px;                              /* hand-cut paper corner */
-  --shadow-press: 0 1px 2px rgba(40, 36, 32, 0.04);  /* near-zero paper seating */
-
-  /* [Physical motion curves 物理动效曲线] */
-  --ease-paper: cubic-bezier(0.25, 1, 0.4, 1);       /* page & surface transitions 240–320ms */
-  --ease-ink: cubic-bezier(0.16, 1, 0.3, 1);         /* micro-interactions 120–150ms */
-
-  /* [Spacing module · 8px grid, 間-friendly scale] */
+  /* [Legacy editorial spacing module · the 8px subset of the --wb-space-* ramp] */
   --space-1: 8px;
   --space-2: 16px;
   --space-3: 24px;
@@ -49,10 +40,674 @@
   --measure-prose: 65ch;
   --line-height-prose: 1.75;
   --line-height-display: 1.28;
+
+  /* [Physical motion curves 物理动效曲线] */
+  --ease-paper: cubic-bezier(0.25, 1, 0.4, 1);       /* page & surface transitions 240–320ms */
+  --ease-ink: cubic-bezier(0.16, 1, 0.3, 1);         /* micro-interactions 120–150ms */
+}
+
+/* ============================================================================
+   2 · Workbench layer · default surface
+   ============================================================================ */
+
+:root {
+  /* [Surface & text roles] */
+  --wb-canvas: #F7F8FA;
+  --wb-surface: #FFFFFF;
+  --wb-surface-subtle: #F3F4F6;
+  --wb-surface-active: #E8F0FE;
+  --wb-border: #D9DDE3;
+  --wb-border-strong: #AEB6C2;
+  --wb-text: #202124;
+  --wb-text-secondary: #5F6368;
+  --wb-text-muted: #666C78;
+
+  /* [Accent ramp · suffix = lightness step] */
+  --wb-accent-50: #E8F0FE;
+  --wb-accent-100: #D3E3FD;
+  --wb-accent-200: #A8C7FA;
+  --wb-accent-300: #7CACF8;
+  --wb-accent-400: #4C8DF6;
+  --wb-accent-500: #1A73E8;
+  --wb-accent-600: #0B57D0;
+  --wb-accent-700: #0842A0;
+  --wb-accent-800: #062E6F;
+  --wb-accent-900: #041E49;
+
+  /* [Accent interaction states · one step per state, never a raw ramp step] */
+  --wb-accent: #0B57D0;                              /* default · step 600 */
+  --wb-accent-hover: #0842A0;                        /* hover · step 700 */
+  --wb-accent-active: #062E6F;                       /* active · step 800 */
+  --wb-accent-selected: var(--wb-accent-50);
+  --wb-on-accent: #FFFFFF;
+  --wb-focus: #0B57D0;
+
+  /* [Status roles · keep their own ramps] */
+  --wb-success: #137333;
+  --wb-warning: #8A4B00;
+  --wb-danger: #B3261E;
+
+  /* [Spacing ramp · Tier 1 primitive, suffix = px] */
+  --wb-space-2: 2px;
+  --wb-space-4: 4px;
+  --wb-space-6: 6px;
+  --wb-space-8: 8px;
+  --wb-space-12: 12px;
+  --wb-space-16: 16px;
+  --wb-space-20: 20px;
+  --wb-space-24: 24px;
+  --wb-space-32: 32px;
+  --wb-space-40: 40px;
+  --wb-space-48: 48px;
+  --wb-space-56: 56px;
+  --wb-space-64: 64px;
+  --wb-space-80: 80px;
+
+  /* [Spacing Tier 2 · grouping roles] */
+  --wb-gap-inline: var(--wb-space-8);                /* icon to label, chip to chip */
+  --wb-gap-stack: var(--wb-space-12);                /* fields inside one group */
+  --wb-gap-group: var(--wb-space-24);                /* groups inside one section */
+  --wb-inset-control: var(--wb-space-4) var(--wb-space-12);
+  --wb-inset-panel: var(--wb-space-16);
+
+  /* [Spacing Tier 3 · layout] */
+  --wb-section-gap: var(--wb-space-48);
+
+  /* [Radius tiers · surface role, not taste] */
+  --wb-radius-sm: 4px;
+  --wb-radius-md: 6px;
+  --wb-radius-lg: 12px;
+  --wb-radius-pill: 999px;
+
+  /* [Chrome geometry] */
+  --wb-rail-width: 48px;
+  --wb-sidebar-width: 260px;
+  --wb-row-height: 34px;
+  --wb-control-height: 32px;
+  --wb-content-gap: var(--wb-space-16);
+  --wb-transition: 140ms var(--ease-ink);
 }
 
 [data-theme="dark"] {
-  /* [Dark · inkstone night spectrum 砚石夜墨谱] */
+  --wb-canvas: #18191C;
+  --wb-surface: #202127;
+  --wb-surface-subtle: #282A30;
+  --wb-surface-active: #263B5E;
+  --wb-border: #383B43;
+  --wb-border-strong: #555B66;
+  --wb-text: #E6E8EC;
+  --wb-text-secondary: #B4BAC4;
+  --wb-text-muted: #9299A5;
+  --wb-accent: #A8C7FA;                              /* dark remaps the accent; ramp steps stay light-theme */
+  --wb-accent-hover: #D3E3FD;
+  --wb-accent-active: #E8F0FE;
+  --wb-accent-selected: #263B5E;
+  --wb-on-accent: #18191C;
+  --wb-focus: #A8C7FA;
+  --wb-success: #81C995;
+  --wb-warning: #FDD663;
+  --wb-danger: #F2B8B5;
+}
+
+[data-density="comfortable"] {
+  --wb-row-height: 34px;
+  --wb-control-height: 32px;
+  --wb-content-gap: 16px;
+}
+
+[data-density="compact"] {
+  --wb-row-height: 26px;
+  --wb-control-height: 26px;
+  --wb-content-gap: 8px;
+}
+
+/* ============================================================================
+   Workbench base
+   ============================================================================ */
+
+html {
+  background: var(--wb-canvas);
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--wb-canvas);
+  color: var(--wb-text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* The hidden attribute must beat component display rules. `.wb-list-item` and
+   `.wb-statusbar` set display, which would otherwise keep filtered or hidden
+   regions visible even though the attribute is present. */
+[hidden] {
+  display: none !important;
+}
+
+a {
+  color: var(--wb-accent);
+  text-underline-offset: 2px;
+}
+
+::selection {
+  background: var(--wb-accent-100);
+  color: var(--wb-text);
+}
+
+:where(button, input, select, textarea, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--wb-focus);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   Workbench shell · regions
+   ============================================================================ */
+
+.wb-shell {
+  display: grid;
+  grid-template-columns: var(--wb-rail-width) minmax(200px, var(--wb-sidebar-width)) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--wb-canvas);
+  color: var(--wb-text);
+}
+
+.wb-activity-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--wb-space-4);
+  padding: var(--wb-space-8) var(--wb-space-4);
+  background: var(--wb-surface-subtle);
+  border-right: 1px solid var(--wb-border);
+}
+
+.wb-activity-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--wb-row-height);
+  padding: 0 var(--wb-space-4);
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--wb-text-secondary);
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--wb-transition), color var(--wb-transition);
+}
+
+.wb-activity-button:hover {
+  background: var(--wb-surface);
+  color: var(--wb-text);
+}
+
+.wb-activity-button[aria-current="page"],
+.wb-activity-button[aria-pressed="true"] {
+  border-left-color: var(--wb-accent);
+  background: var(--wb-surface-active);
+  color: var(--wb-text);
+}
+
+.wb-sidebar {
+  min-width: 0;
+  overflow: auto;
+  border-right: 1px solid var(--wb-border);
+  background: var(--wb-surface);
+}
+
+.wb-sidebar-header,
+.wb-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wb-gap-inline);
+  min-height: 36px;
+  padding: 0 var(--wb-space-12);
+  border-bottom: 1px solid var(--wb-border);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.wb-content {
+  min-width: 0;
+  padding: var(--wb-content-gap);
+}
+
+.wb-content-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wb-gap-inline);
+  margin-bottom: var(--wb-gap-group);
+}
+
+.wb-content h1,
+.wb-content h2,
+.wb-content h3 {
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.wb-content h1 {
+  font-size: 1.5rem;
+  line-height: 1.35;
+}
+
+.wb-content h2 {
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+
+.wb-prose {
+  max-width: var(--measure-prose);
+}
+
+.wb-panel {
+  min-width: 0;
+  border-top: 1px solid var(--wb-border);
+  background: var(--wb-surface);
+}
+
+.wb-statusbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--wb-space-12);
+  min-height: 24px;
+  padding: var(--wb-space-2) var(--wb-space-12);
+  background: var(--wb-surface-subtle);
+  border-top: 1px solid var(--wb-border);
+  color: var(--wb-text-secondary);
+  font-size: 12px;
+}
+
+/* ============================================================================
+   Workbench lists & selection · two tiers, colour plus a non-colour cue
+   ============================================================================ */
+
+.wb-list {
+  margin: 0;
+  padding: var(--wb-space-4);
+  list-style: none;
+}
+
+.wb-list-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--wb-gap-inline);
+  min-height: var(--wb-row-height);
+  padding: 0 var(--wb-space-8);
+  border-radius: var(--wb-radius-sm);
+  color: var(--wb-text-secondary);
+  cursor: pointer;
+  transition: background var(--wb-transition), color var(--wb-transition);
+}
+
+.wb-list-item:hover {
+  background: var(--wb-surface-subtle);
+  color: var(--wb-text);
+}
+
+.wb-list-item[aria-current="true"],
+.wb-list-item[aria-selected="true"] {
+  background: var(--wb-accent-selected);
+  color: var(--wb-text);
+  box-shadow: inset 0 0 0 1px var(--wb-accent-100);
+}
+
+.wb-list-item[aria-current="true"]::before,
+.wb-list-item[aria-selected="true"]::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--wb-space-4);
+  inset-inline-start: 0;
+  width: 2px;
+  border-radius: var(--wb-radius-pill);
+  background: var(--wb-accent);
+}
+
+.wb-list-item[aria-current="true"]::after,
+.wb-list-item[aria-selected="true"]::after {
+  content: "✓";
+  margin-inline-start: auto;
+  color: var(--wb-accent);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.wb-list-item .wb-badge {
+  margin-inline-start: auto;
+}
+
+/* Grouped selection: container outline, child handles, and a count badge. */
+.wb-group {
+  position: relative;
+  padding: var(--wb-space-8);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-md);
+  background: var(--wb-surface);
+}
+
+.wb-group[aria-selected="true"],
+.wb-group[data-selected="true"] {
+  border-color: var(--wb-accent);
+  box-shadow: 0 0 0 1px var(--wb-accent);
+}
+
+.wb-group-child {
+  position: relative;
+  padding: var(--wb-space-4) var(--wb-space-8);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-sm);
+  background: var(--wb-surface-subtle);
+}
+
+.wb-group[aria-selected="true"] .wb-group-child,
+.wb-group[data-selected="true"] .wb-group-child {
+  border-color: var(--wb-accent-200);
+}
+
+.wb-group[aria-selected="true"] .wb-group-child::before,
+.wb-group[data-selected="true"] .wb-group-child::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -3px;
+  inset-inline-start: -3px;
+  width: 6px;
+  height: 6px;
+  background: var(--wb-accent);
+}
+
+.wb-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 var(--wb-space-6);
+  border-radius: var(--wb-radius-pill);
+  background: var(--wb-accent);
+  color: var(--wb-on-accent);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.wb-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 var(--wb-space-6);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-pill);
+  background: var(--wb-surface-subtle);
+  color: var(--wb-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================================
+   Workbench controls
+   ============================================================================ */
+
+.wb-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--wb-space-4);
+}
+
+.wb-input {
+  width: 100%;
+  min-height: var(--wb-control-height);
+  padding: var(--wb-inset-control);
+  border: 1px solid var(--wb-border-strong);
+  border-radius: var(--wb-radius-sm);
+  background: var(--wb-surface);
+  color: var(--wb-text);
+  font: inherit;
+  transition: border-color var(--wb-transition), background var(--wb-transition);
+}
+
+.wb-input::placeholder {
+  color: var(--wb-text-muted);
+}
+
+.wb-input:hover {
+  border-color: var(--wb-text-muted);
+}
+
+.wb-input[aria-invalid="true"] {
+  border-color: var(--wb-danger);
+}
+
+.wb-input:disabled {
+  background: var(--wb-surface-subtle);
+  color: var(--wb-text-muted);
+  cursor: not-allowed;
+}
+
+/* A select sizes to its options; text inputs stay full width. */
+.wb-select {
+  width: auto;
+}
+
+.wb-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--wb-gap-inline);
+  min-height: var(--wb-control-height);
+  padding: var(--wb-inset-control);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-sm);
+  background: var(--wb-surface);
+  color: var(--wb-text);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--wb-transition), border-color var(--wb-transition), color var(--wb-transition);
+}
+
+.wb-button:hover {
+  border-color: var(--wb-border-strong);
+  background: var(--wb-surface-subtle);
+}
+
+.wb-button:active {
+  border-color: var(--wb-border-strong);
+  background: var(--wb-surface-active);
+}
+
+.wb-button--primary {
+  border-color: var(--wb-accent);
+  background: var(--wb-accent);
+  color: var(--wb-on-accent);
+}
+
+.wb-button--primary:hover {
+  border-color: var(--wb-accent-hover);
+  background: var(--wb-accent-hover);
+}
+
+.wb-button--primary:active {
+  border-color: var(--wb-accent-active);
+  background: var(--wb-accent-active);
+}
+
+.wb-button--ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--wb-text-secondary);
+}
+
+.wb-button--ghost:hover {
+  border-color: var(--wb-border);
+  background: var(--wb-surface-subtle);
+  color: var(--wb-text);
+}
+
+.wb-button[disabled],
+.wb-button:disabled {
+  border-color: var(--wb-border);
+  background: var(--wb-surface-subtle);
+  color: var(--wb-text-muted);
+  cursor: not-allowed;
+}
+
+.wb-button[aria-pressed="true"] {
+  border-color: var(--wb-accent);
+  background: var(--wb-accent-selected);
+  color: var(--wb-text);
+}
+
+.wb-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wb-gap-inline);
+  min-height: 36px;
+  padding: 0 var(--wb-space-20);
+  border: 1px solid var(--wb-accent);
+  border-radius: var(--wb-radius-pill);
+  background: var(--wb-accent);
+  color: var(--wb-on-accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wb-kbd {
+  display: inline-block;
+  min-width: 20px;
+  padding: var(--wb-space-2) var(--wb-space-6);
+  border: 1px solid var(--wb-border);
+  border-bottom-width: 2px;
+  border-radius: var(--wb-radius-sm);
+  background: var(--wb-surface);
+  color: var(--wb-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* ============================================================================
+   Workbench states
+   ============================================================================ */
+
+.wb-state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wb-space-6);
+  font-size: 12px;
+}
+
+.wb-state--success { color: var(--wb-success); }
+.wb-state--warning { color: var(--wb-warning); }
+.wb-state--error { color: var(--wb-danger); }
+
+.wb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wb-space-6);
+  min-height: 22px;
+  padding: 0 var(--wb-space-8);
+  border: 1px solid color-mix(in srgb, currentColor 35%, var(--wb-border));
+  border-radius: var(--wb-radius-pill);
+  background: var(--wb-surface);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.wb-chip::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: var(--wb-radius-pill);
+  background: currentColor;
+}
+
+.wb-chip--success { color: var(--wb-success); }
+.wb-chip--warning { color: var(--wb-warning); }
+.wb-chip--error { color: var(--wb-danger); }
+.wb-chip--neutral { color: var(--wb-text-secondary); }
+
+/* ============================================================================
+   Workbench responsiveness
+   ============================================================================ */
+
+@media (max-width: 760px) {
+  .wb-shell {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .wb-sidebar {
+    display: none;
+  }
+
+  .wb-sidebar[data-open="true"] {
+    display: block;
+    position: fixed;
+    z-index: 10;
+    inset: 0 auto 0 44px;
+    width: min(320px, calc(100vw - 44px));
+    box-shadow: 0 0 0 100vmax rgb(0 0 0 / 35%);
+  }
+
+  .wb-content {
+    padding: var(--wb-space-12);
+  }
+}
+
+/* ============================================================================
+   3 · Editorial layer · opt-in washi surface
+   ----------------------------------------------------------------------------
+   Material: washi paper (和纸) + pine-soot ink (松烟墨).
+   Prohibited: pure #000000, pure #FFFFFF, heavy shadows, spring/bounce motion.
+   Depth comes from 1px hairline borders + background lightness steps only.
+   ============================================================================ */
+
+html[data-surface="editorial"] {
+  color-scheme: light;
+
+  /* [Washi tone spectrum 和纸鸟子谱] */
+  --bg-canvas: #F5F3EC;                              /* warm washi base */
+  --bg-surface: #FAF9F5;                             /* cards & carriers */
+  --bg-overlay: #ECE8DC;                             /* overlays, hover, secondary blocks */
+  --border-subtle: rgba(40, 36, 32, 0.10);           /* 1px hairline impression */
+  --border-strong: rgba(40, 36, 32, 0.25);           /* active & focus ink line */
+
+  --text-primary: #1C1A17;                           /* pine-soot ink */
+  --text-secondary: #524C44;                         /* 熟褐灰 body & descriptions */
+  --text-muted: #878074;                             /* faded ink, meta & footnotes */
+
+  --accent-cinnabar: #A6382A;                        /* cinnabar seal · primary action */
+  --accent-moss: #3B5848;                            /* patina moss · success / secondary */
+
+  /* [Paper geometry] */
+  --radius-subtle: 2px;                              /* hand-cut paper corner */
+  --shadow-press: 0 1px 2px rgba(40, 36, 32, 0.04);  /* near-zero paper seating */
+}
+
+html[data-surface="editorial"][data-theme="dark"] {
+  color-scheme: dark;
+
+  /* [Inkstone night spectrum 砚石夜墨谱] */
   --bg-canvas: #131416;                              /* inkstone black, never pure black */
   --bg-surface: #1B1C20;                             /* lifted charcoal carrier */
   --bg-overlay: #25272D;                             /* floating panels & active background */
@@ -67,12 +722,8 @@
   --accent-moss: #537B65;                            /* valley moss */
 }
 
-/* ============================================================================
-   Base reset & editorial defaults
-   ============================================================================ */
-
-html,
-body {
+html[data-surface="editorial"],
+html[data-surface="editorial"] body {
   background: var(--bg-canvas);
   color: var(--text-secondary);
   font-family: var(--font-sans);
@@ -82,25 +733,25 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-h1,
-h2,
-h3,
-h4 {
+html[data-surface="editorial"] h1,
+html[data-surface="editorial"] h2,
+html[data-surface="editorial"] h3,
+html[data-surface="editorial"] h4 {
   font-family: var(--font-editorial);
   font-weight: 500;                                   /* medium only — no bold bloat */
   line-height: var(--line-height-display);            /* 1.2–1.35 */
   color: var(--text-primary);
 }
 
-h1 { font-size: 2.5rem; }
-h2 { font-size: 1.75rem; }
-h3 { font-size: 1.25rem; }
+html[data-surface="editorial"] h1 { font-size: 2.5rem; }
+html[data-surface="editorial"] h2 { font-size: 1.75rem; }
+html[data-surface="editorial"] h3 { font-size: 1.25rem; }
 
-p {
+html[data-surface="editorial"] p {
   max-width: var(--measure-prose);                    /* 45–75ch discipline, 65ch default */
 }
 
-a {
+html[data-surface="editorial"] a {
   color: var(--accent-cinnabar);
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -109,37 +760,28 @@ a {
   transition: text-decoration-color 140ms var(--ease-ink), color 140ms var(--ease-ink);
 }
 
-a:hover {
+html[data-surface="editorial"] a:hover {
   text-decoration-color: var(--accent-cinnabar);
 }
 
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-[tabindex]:focus-visible {
+html[data-surface="editorial"] a:focus-visible,
+html[data-surface="editorial"] button:focus-visible,
+html[data-surface="editorial"] input:focus-visible,
+html[data-surface="editorial"] select:focus-visible,
+html[data-surface="editorial"] textarea:focus-visible,
+html[data-surface="editorial"] [tabindex]:focus-visible {
   outline: 1px solid var(--border-strong);            /* hairline ink focus, not a glow */
   outline-offset: 2px;
   border-radius: var(--radius-subtle);
 }
 
-code,
-kbd,
-samp,
-var,
-.mono,
-.meta,
-.meta-index,
-.wabi-meta-header,
-.kbd,
-.seal {
+html[data-surface="editorial"] :is(code, kbd, samp, var, .mono, .meta, .meta-index, .wabi-meta-header, .kbd, .seal) {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;                 /* tabular figures for all technical text */
   letter-spacing: 0.08em;
 }
 
-::selection {
+html[data-surface="editorial"] ::selection {
   background: var(--bg-overlay);
   color: var(--text-primary);
 }
@@ -148,27 +790,27 @@ var,
    Chapter hairlines · 章节引线
    ============================================================================ */
 
-.hairline {
+html[data-surface="editorial"] .hairline {
   height: 1px;
   border: 0;
   background: var(--border-subtle);
 }
 
-.hairline-strong {
+html[data-surface="editorial"] .hairline-strong {
   height: 1px;
   border: 0;
   background: var(--border-strong);
 }
 
 /* Thin editorial lead-in rule prefixed by a mono marker, e.g. "SEC. 02 ─────" */
-.lead-rule {
+html[data-surface="editorial"] .lead-rule {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   margin: var(--space-6) 0 var(--space-3);
 }
 
-.lead-rule::after {
+html[data-surface="editorial"] .lead-rule::after {
   content: "";
   flex: 1;
   height: 1px;
@@ -180,7 +822,7 @@ var,
    Hairline frame, 2px cut corners, faint paper seating. No heavy shadow.
    ============================================================================ */
 
-.wabi-card {
+html[data-surface="editorial"] .wabi-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-subtle);
@@ -188,26 +830,22 @@ var,
   padding: var(--space-3);
 }
 
-.wabi-card:hover {
-  /* reserved for interactive cards only; see .wabi-card--hoverable */
-}
-
-.wabi-card--hoverable {
+html[data-surface="editorial"] .wabi-card--hoverable {
   transition: background 140ms var(--ease-ink), border-color 140ms var(--ease-ink);
 }
 
-.wabi-card--hoverable:hover {
+html[data-surface="editorial"] .wabi-card--hoverable:hover {
   background: var(--bg-overlay);
   border-color: var(--border-strong);
 }
 
-.wabi-card--raised {
+html[data-surface="editorial"] .wabi-card--raised {
   background: var(--bg-surface);
   border-color: var(--border-strong);
 }
 
 /* Secondary block sitting directly on the canvas (no card chrome) */
-.wabi-panel {
+html[data-surface="editorial"] .wabi-panel {
   background: var(--bg-overlay);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-subtle);
@@ -219,7 +857,7 @@ var,
    Monospace batch identifiers, section numbers, and seal badges.
    ============================================================================ */
 
-.wabi-meta-header {
+html[data-surface="editorial"] .wabi-meta-header {
   display: flex;
   align-items: baseline;
   gap: var(--space-2);
@@ -229,11 +867,11 @@ var,
   margin-bottom: var(--space-2);
 }
 
-.wabi-meta-header .meta-index {
+html[data-surface="editorial"] .wabi-meta-header .meta-index {
   color: var(--accent-cinnabar);
 }
 
-.wabi-meta-header .meta-rule {
+html[data-surface="editorial"] .wabi-meta-header .meta-rule {
   flex: 1;
   height: 1px;
   align-self: center;
@@ -245,7 +883,7 @@ var,
    Publication stamp marks in place of generic icon chips.
    ============================================================================ */
 
-.seal {
+html[data-surface="editorial"] .seal {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -262,15 +900,15 @@ var,
   user-select: none;
 }
 
-.seal-cinnabar {
+html[data-surface="editorial"] .seal-cinnabar {
   color: var(--accent-cinnabar);
 }
 
-.seal-moss {
+html[data-surface="editorial"] .seal-moss {
   color: var(--accent-moss);
 }
 
-.seal--solid {
+html[data-surface="editorial"] .seal--solid {
   background: var(--accent-cinnabar);
   border-color: var(--accent-cinnabar);
   color: var(--bg-canvas);
@@ -281,25 +919,25 @@ var,
    Body measure, pull quotes, footnotes, index connectors.
    ============================================================================ */
 
-.editorial-prose {
+html[data-surface="editorial"] .editorial-prose {
   font-family: var(--font-sans);
   line-height: var(--line-height-prose);              /* 1.7–1.8 */
   max-width: var(--measure-prose);
   color: var(--text-secondary);
 }
 
-.editorial-prose p + p {
+html[data-surface="editorial"] .editorial-prose p + p {
   margin-top: var(--space-2);
 }
 
-.editorial-prose .prose-lede {
+html[data-surface="editorial"] .editorial-prose .prose-lede {
   color: var(--text-primary);
   font-size: 1.125rem;
   line-height: 1.7;
 }
 
 /* First-letter settlement · 首字沉降 */
-.editorial-prose .drop-cap::first-letter {
+html[data-surface="editorial"] .editorial-prose .drop-cap::first-letter {
   float: left;
   font-family: var(--font-editorial);
   font-weight: 500;
@@ -310,7 +948,7 @@ var,
 }
 
 /* Pull quote bound by a 1px ink rule, never a box */
-.editorial-prose .pull-quote {
+html[data-surface="editorial"] .editorial-prose .pull-quote {
   margin: var(--space-4) 0;
   padding-left: var(--space-3);
   border-left: 1px solid var(--border-strong);
@@ -321,7 +959,7 @@ var,
   color: var(--text-primary);
 }
 
-.editorial-prose .pull-quote .pull-quote-cite {
+html[data-surface="editorial"] .editorial-prose .pull-quote .pull-quote-cite {
   display: block;
   margin-top: var(--space-1);
   font-family: var(--font-mono);
@@ -333,7 +971,7 @@ var,
 }
 
 /* Footnotes · 注脚 */
-.footnotes {
+html[data-surface="editorial"] .footnotes {
   margin-top: var(--space-4);
   padding-top: var(--space-2);
   border-top: 1px solid var(--border-subtle);
@@ -341,12 +979,12 @@ var,
   color: var(--text-muted);
 }
 
-.footnotes .footnote-ref {
+html[data-surface="editorial"] .footnotes .footnote-ref {
   color: var(--accent-cinnabar);
   margin-right: 0.5em;
 }
 
-.footnote-mark {
+html[data-surface="editorial"] .footnote-mark {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: 0.75em;
@@ -356,7 +994,7 @@ var,
 }
 
 /* Index connector column (left rail of a directory flow) */
-.index-rail {
+html[data-surface="editorial"] .index-rail {
   border-left: 1px solid var(--border-subtle);
   padding-left: var(--space-2);
 }
@@ -365,14 +1003,14 @@ var,
    Layout & 間 — asymmetric grids and measured container
    ============================================================================ */
 
-.wabi-container {
+html[data-surface="editorial"] .wabi-container {
   max-width: 1088px;                                   /* 12 × 8 + generous 間 */
   margin-inline: auto;
   padding-inline: var(--space-6);                      /* 1.5× a dense dashboard gutter */
   padding-block: var(--space-8);
 }
 
-.ma-grid {
+html[data-surface="editorial"] .ma-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: var(--space-3);
@@ -380,23 +1018,23 @@ var,
 }
 
 /* 5/7 golden split — index & meta rail + primary reading flow */
-.ma-grid .ma-5 { grid-column: span 5; }
-.ma-grid .ma-7 { grid-column: span 7; }
+html[data-surface="editorial"] .ma-grid .ma-5 { grid-column: span 5; }
+html[data-surface="editorial"] .ma-grid .ma-7 { grid-column: span 7; }
 
 /* 3/6/3 three-column ledger */
-.ma-grid .ma-3 { grid-column: span 3; }
-.ma-grid .ma-6 { grid-column: span 6; }
+html[data-surface="editorial"] .ma-grid .ma-3 { grid-column: span 3; }
+html[data-surface="editorial"] .ma-grid .ma-6 { grid-column: span 6; }
 
 /* Section breathing: 48–80px between blocks */
-.ma-section {
+html[data-surface="editorial"] .ma-section {
   margin-block: var(--space-6) var(--space-10);
 }
 
 @media (max-width: 720px) {
-  .ma-grid .ma-3,
-  .ma-grid .ma-5,
-  .ma-grid .ma-6,
-  .ma-grid .ma-7 {
+  html[data-surface="editorial"] .ma-grid .ma-3,
+  html[data-surface="editorial"] .ma-grid .ma-5,
+  html[data-surface="editorial"] .ma-grid .ma-6,
+  html[data-surface="editorial"] .ma-grid .ma-7 {
     grid-column: span 12;
   }
 }
@@ -408,7 +1046,7 @@ var,
    No transform, no scale, no bounce.
    ============================================================================ */
 
-.wabi-button {
+html[data-surface="editorial"] .wabi-button {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -425,66 +1063,66 @@ var,
   transition: background 140ms var(--ease-ink), border-color 140ms var(--ease-ink), color 140ms var(--ease-ink);
 }
 
-.wabi-button:hover {
+html[data-surface="editorial"] .wabi-button:hover {
   background: var(--bg-overlay);
 }
 
-.wabi-button:active {
+html[data-surface="editorial"] .wabi-button:active {
   /* ink absorption: one step darker + deepened ink line, zero bounce */
   background: var(--bg-overlay);
   border-color: var(--text-secondary);
   box-shadow: inset 0 1px 0 rgba(40, 36, 32, 0.06);
 }
 
-.wabi-button--primary {
+html[data-surface="editorial"] .wabi-button--primary {
   background: var(--accent-cinnabar);
   border-color: var(--accent-cinnabar);
   color: var(--bg-canvas);
 }
 
-.wabi-button--primary:hover {
+html[data-surface="editorial"] .wabi-button--primary:hover {
   background: color-mix(in srgb, var(--accent-cinnabar) 88%, var(--text-primary));
 }
 
-.wabi-button--primary:active {
+html[data-surface="editorial"] .wabi-button--primary:active {
   background: color-mix(in srgb, var(--accent-cinnabar) 78%, var(--text-primary));
   border-color: color-mix(in srgb, var(--accent-cinnabar) 70%, var(--text-primary));
 }
 
-.wabi-button--moss {
+html[data-surface="editorial"] .wabi-button--moss {
   background: var(--accent-moss);
   border-color: var(--accent-moss);
   color: var(--bg-canvas);
 }
 
-.wabi-button--moss:hover {
+html[data-surface="editorial"] .wabi-button--moss:hover {
   background: color-mix(in srgb, var(--accent-moss) 88%, var(--text-primary));
 }
 
-.wabi-button--moss:active {
+html[data-surface="editorial"] .wabi-button--moss:active {
   background: color-mix(in srgb, var(--accent-moss) 78%, var(--text-primary));
 }
 
-.wabi-button--ghost {
+html[data-surface="editorial"] .wabi-button--ghost {
   background: transparent;
   border-color: var(--border-subtle);
   color: var(--text-secondary);
 }
 
-.wabi-button--ghost:hover {
+html[data-surface="editorial"] .wabi-button--ghost:hover {
   background: var(--bg-overlay);
   border-color: var(--border-strong);
   color: var(--text-primary);
 }
 
-.wabi-button[disabled],
-.wabi-button:disabled {
+html[data-surface="editorial"] .wabi-button[disabled],
+html[data-surface="editorial"] .wabi-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
 /* Keyboard affordance, publication keycap */
-.kbd {
+html[data-surface="editorial"] .kbd {
   display: inline-block;
   padding: 0.05em 0.45em;
   border: 1px solid var(--border-subtle);
@@ -495,7 +1133,7 @@ var,
   color: var(--text-secondary);
 }
 
-.wabi-input {
+html[data-surface="editorial"] .wabi-input {
   width: 100%;
   max-width: 320px;
   padding: var(--space-1) 0.75em;
@@ -509,24 +1147,30 @@ var,
   transition: border-color 140ms var(--ease-ink), background 140ms var(--ease-ink);
 }
 
-.wabi-input::placeholder {
+html[data-surface="editorial"] .wabi-input::placeholder {
   color: var(--text-muted);
   letter-spacing: 0.02em;
 }
 
-.wabi-input:hover {
+html[data-surface="editorial"] .wabi-input:hover {
   border-color: var(--border-strong);
 }
 
-.wabi-input:focus {
-  outline: none;
+html[data-surface="editorial"] .wabi-input:focus {
   border-color: var(--border-strong);
   background: var(--bg-surface);
   box-shadow: inset 0 0 0 1px var(--border-subtle);
 }
 
+/* Pointer focus drops the ring where the UA omits :focus-visible. Text
+   inputs match :focus-visible even on pointer focus in Chromium and
+   Firefox, so an editorial input keeps the ink line above. */
+html[data-surface="editorial"] .wabi-input:focus:not(:focus-visible) {
+  outline: none;
+}
+
 /* Minimal underline variant */
-.wabi-input--underline {
+html[data-surface="editorial"] .wabi-input--underline {
   padding-inline: 0.25em;
   background: transparent;
   border: 0;
@@ -534,17 +1178,17 @@ var,
   border-radius: 0;
 }
 
-.wabi-input--underline:hover {
+html[data-surface="editorial"] .wabi-input--underline:hover {
   border-bottom-color: var(--border-strong);
   background: transparent;
 }
 
-.wabi-input--underline:focus {
+html[data-surface="editorial"] .wabi-input--underline:focus {
   box-shadow: none;
   border-bottom: 1px solid var(--border-strong);
 }
 
-.wabi-input--mono {
+html[data-surface="editorial"] .wabi-input--mono {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.08em;
@@ -555,7 +1199,7 @@ var,
    Page & surface transitions · 平缓转场
    ============================================================================ */
 
-.wabi-fade {
+html[data-surface="editorial"] .wabi-fade {
   opacity: 0;
   transform: translateY(8px);
   transition:
@@ -563,13 +1207,13 @@ var,
     transform 280ms var(--ease-paper);
 }
 
-.wabi-fade.is-in {
+html[data-surface="editorial"] .wabi-fade.is-in {
   opacity: 1;
   transform: translateY(0);
 }
 
 /* Micro states (hover fills, seal stamps) ride the ink curve */
-.wabi-micro {
+html[data-surface="editorial"] .wabi-micro {
   transition:
     background 140ms var(--ease-ink),
     color 140ms var(--ease-ink),
@@ -578,128 +1222,21 @@ var,
 }
 
 /* ============================================================================
-   Reduced motion — preserve state feedback, remove spatial movement
+   4 · Reduced motion · preserve state feedback, remove spatial movement
    ============================================================================ */
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    transition-duration: 1ms !important;
-    animation-duration: 1ms !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
 
-  .wabi-fade {
+  html[data-surface="editorial"] .wabi-fade {
     opacity: 1;
     transform: none;
   }
-}
-
-
-/* Workbench UX contract — supersedes editorial-only defaults above. */
-:root {
-  --wb-canvas: #F7F8FA;
-  --wb-surface: #FFFFFF;
-  --wb-surface-subtle: #F3F4F6;
-  --wb-surface-active: #E8F0FE;
-  --wb-border: #D9DDE3;
-  --wb-border-strong: #AEB6C2;
-  --wb-text: #202124;
-  --wb-text-secondary: #5F6368;
-  --wb-text-muted: #707782;
-  --wb-accent: #0B57D0;
-  --wb-accent-hover: #0842A0;
-  --wb-focus: #0B57D0;
-  --wb-success: #137333;
-  --wb-warning: #8A4B00;
-  --wb-danger: #B3261E;
-  --wb-row-height: 34px;
-  --wb-control-height: 32px;
-  --wb-content-gap: 16px;
-  --wb-rail-width: 48px;
-  --wb-sidebar-width: 260px;
-  --wb-radius: 6px;
-  --wb-transition: 140ms ease;
-  --bg-canvas: var(--wb-canvas);
-  --bg-surface: var(--wb-surface);
-  --bg-overlay: var(--wb-surface-subtle);
-  --border-subtle: var(--wb-border);
-  --border-strong: var(--wb-border-strong);
-  --text-primary: var(--wb-text);
-  --text-secondary: var(--wb-text-secondary);
-  --text-muted: var(--wb-text-muted);
-  --accent-cinnabar: var(--wb-accent);
-  --accent-moss: var(--wb-success);
-  --font-editorial: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --radius-subtle: var(--wb-radius);
-  --shadow-press: none;
-}
-[data-theme="dark"] {
-  --wb-canvas: #18191C;
-  --wb-surface: #202127;
-  --wb-surface-subtle: #282A30;
-  --wb-surface-active: #263B5E;
-  --wb-border: #383B43;
-  --wb-border-strong: #555B66;
-  --wb-text: #E6E8EC;
-  --wb-text-secondary: #B4BAC4;
-  --wb-text-muted: #9299A5;
-  --wb-accent: #A8C7FA;
-  --wb-accent-hover: #D3E3FD;
-  --wb-focus: #A8C7FA;
-  --wb-success: #81C995;
-  --wb-warning: #FDD663;
-  --wb-danger: #F2B8B5;
-}
-[data-density="compact"] {
-  --wb-row-height: 26px;
-  --wb-control-height: 26px;
-  --wb-content-gap: 8px;
-}
-[data-density="comfortable"] {
-  --wb-row-height: 34px;
-  --wb-control-height: 32px;
-  --wb-content-gap: 16px;
-}
-body { background: var(--wb-canvas); color: var(--wb-text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-:where(button, input, select, textarea, a, [tabindex]):focus-visible {
-  outline: 2px solid var(--wb-focus);
-  outline-offset: 2px;
-}
-.wb-shell { display: grid; grid-template-columns: var(--wb-rail-width) minmax(200px, var(--wb-sidebar-width)) minmax(0, 1fr); min-height: 100vh; background: var(--wb-canvas); color: var(--wb-text); }
-.wb-activity-rail { display: flex; flex-direction: column; align-items: stretch; gap: 4px; padding: 8px 4px; background: var(--wb-surface-subtle); border-right: 1px solid var(--wb-border); }
-.wb-activity-button { min-height: var(--wb-row-height); border: 0; border-left: 2px solid transparent; border-radius: 0; background: transparent; color: var(--wb-text-secondary); }
-.wb-activity-button[aria-current="page"], .wb-activity-button[aria-pressed="true"] { border-left-color: var(--wb-accent); background: var(--wb-surface-active); color: var(--wb-text); }
-.wb-sidebar { min-width: 0; overflow: auto; border-right: 1px solid var(--wb-border); background: var(--wb-surface); }
-.wb-sidebar-header, .wb-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 36px; padding: 0 12px; border-bottom: 1px solid var(--wb-border); font-size: 12px; font-weight: 600; letter-spacing: .04em; }
-.wb-list { margin: 0; padding: 4px; list-style: none; }
-.wb-list-item { display: flex; align-items: center; gap: 8px; min-height: var(--wb-row-height); padding: 0 8px; border-radius: 4px; color: var(--wb-text-secondary); cursor: pointer; }
-.wb-list-item:hover { background: var(--wb-surface-subtle); color: var(--wb-text); }
-.wb-list-item[aria-current="true"], .wb-list-item[aria-selected="true"] { background: var(--wb-surface-active); color: var(--wb-text); }
-.wb-content { min-width: 0; padding: var(--wb-content-gap); }
-.wb-content-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
-.wb-content h1, .wb-content h2, .wb-content h3 { font-family: inherit; letter-spacing: normal; font-weight: 600; }
-.wb-content h1 { font-size: 1.5rem; line-height: 1.35; }
-.wb-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
-.wb-input { width: 100%; min-height: var(--wb-control-height); padding: 4px 8px; border: 1px solid var(--wb-border-strong); border-radius: 4px; background: var(--wb-surface); color: var(--wb-text); }
-.wb-button { min-height: var(--wb-control-height); padding: 4px 10px; border: 1px solid var(--wb-border); border-radius: 4px; background: var(--wb-surface); color: var(--wb-text); cursor: pointer; }
-.wb-button--primary { border-color: var(--wb-accent); background: var(--wb-accent); color: #fff; }
-[data-theme="dark"] .wb-button--primary { color: #18191C; }
-.wb-button:hover { border-color: var(--wb-border-strong); }
-.wb-button--primary:hover { background: var(--wb-accent-hover); border-color: var(--wb-accent-hover); }
-.wb-panel { min-width: 0; border-top: 1px solid var(--wb-border); background: var(--wb-surface); }
-.wb-statusbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 24px; padding: 2px 10px; background: var(--wb-surface-subtle); border-top: 1px solid var(--wb-border); color: var(--wb-text-secondary); font-size: 12px; }
-.wb-state { display: inline-flex; align-items: center; gap: 6px; }
-.wb-state--success { color: var(--wb-success); }
-.wb-state--warning { color: var(--wb-warning); }
-.wb-state--error { color: var(--wb-danger); }
-@media (max-width: 760px) {
-  .wb-shell { grid-template-columns: 44px minmax(0, 1fr); }
-  .wb-sidebar { display: none; }
-  .wb-sidebar[data-open="true"] { display: block; position: fixed; z-index: 10; inset: 0 auto 0 44px; width: min(320px, calc(100vw - 44px)); box-shadow: 0 0 0 100vmax rgb(0 0 0 / 35%); }
-  .wb-content { padding: 12px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

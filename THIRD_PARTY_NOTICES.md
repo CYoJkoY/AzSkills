@@ -2,6 +2,15 @@
 
 AzSkills includes Skills that were independently rewritten or synthesized after studying public third-party methodologies, plus a small set of reusable visual assets. These notices make provenance explicit without mechanically vendoring unrelated repositories.
 
+## Workbench design references
+
+The repository's interface contract (`DESIGN.md` and `design-system/`) was informed by two publicly documented products:
+
+- **VSCodium / VS Code** — layout regions, navigation and search conventions, list density, and the keyboard model. AzSkills adopts the structural model only; no product icons, themes, screenshots, or source code are copied.
+- **BioRender** (https://www.biorender.com, https://app.biorender.com) — spacing discipline, semantic colour layering with explicit interaction states, icon grouping conventions, and per-scenario adaptation between a marketing surface and a dense product UI. AzSkills treats these as structural evidence, then maps them onto its own accent, type stack, radii, and workbench layout.
+
+AzSkills is not affiliated with or endorsed by either project. Values were read from publicly served stylesheets and observed interface behaviour at the time of review. Third-party colour aggregators disagree with the target stylesheet on BioRender's primary blue (`#2571B7` and `#0373DF` both appear); those readings are marked **待确认** in `DESIGN.md` and are not used as tokens. No BioRender artwork, icon library, illustration, template, or copy is included in this repository.
+
 ## Unified `logo-generator`
 
 Informed by:

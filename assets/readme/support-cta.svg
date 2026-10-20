@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 132" role="img" aria-labelledby="title desc">
 <title id="title">Support AzSkills</title>
 <desc id="desc">A restrained project support call to action with a clear label and arrow, in light mode.</desc>
-<rect x="1" y="1" width="638" height="130" rx="13" fill="#FFFFFF" stroke="#DCE2EA" stroke-width="1.5"/>
-<rect x="28" y="42" width="48" height="48" rx="11" fill="#0B57D0"/>
+<rect x="1" y="1" width="638" height="130" rx="12" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<rect x="28" y="42" width="48" height="48" rx="12" fill="#0B57D0"/>
 <path d="M52 76s-13-7.2-13-15.1c0-4 2.5-6.8 6.3-6.8 2.9 0 4.9 1.8 6.7 4.2 1.8-2.4 3.8-4.2 6.7-4.2 3.8 0 6.3 2.8 6.3 6.8C65 68.8 52 76 52 76z" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="96" y="56" fill="#17202C" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="23" font-weight="700">Support AzSkills</text>
-<text x="96" y="81" fill="#596579" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13.5">Help maintain the Skill library, references, and tooling.</text>
-<rect x="491" y="46" width="119" height="40" rx="8" fill="#0B57D0"/>
-<text x="510" y="70.5" fill="#FFFFFF" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13.5" font-weight="700">Support</text>
+<text x="96" y="56" fill="#202124" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="23" font-weight="700">Support AzSkills</text>
+<text x="96" y="81" fill="#5F6368" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="13.5">Help maintain the Skill library, references, and tooling.</text>
+<rect x="491" y="46" width="119" height="40" rx="6" fill="#0B57D0"/>
+<text x="510" y="70.5" fill="#FFFFFF" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="13.5" font-weight="700">Support</text>
 <path d="M574 66h17m-7-7 7 7-7 7" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

@@ -1,5 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc" style="color:#1A73E8">
 <title id="title">License</title>
 <desc id="desc">A shield with a check mark.</desc>
-<g fill="none" stroke="#4F7DCE" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19 6v5.1c0 4.2-2.8 7.6-7 9.7-4.2-2.1-7-5.5-7-9.7V6z"/><path d="m8.8 11.9 2.1 2.1 4.4-4.5"/></g>
+<g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 3 19.5 6v5.5c0 4.1-2.9 7.4-7.5 9.4-4.6-2-7.5-5.3-7.5-9.4V6z"/>
+  <path d="m8.3 11.8 2.4 2.4 5.3-5.6"/>
+</g>
 </svg>

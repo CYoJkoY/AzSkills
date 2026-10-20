@@ -1,5 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc" style="color:#1A73E8">
 <title id="title">Contributing</title>
 <desc id="desc">A user silhouette with an addition mark.</desc>
-<g fill="none" stroke="#4F7DCE" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3"/><path d="M4.5 19c.3-3.1 2.1-5 5.5-5s5.2 1.9 5.5 5"/><path d="M18 5.5v6M15 8.5h6"/></g>
+<g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="9.5" cy="8" r="3.25"/>
+  <path d="M3.5 20c.2-3.6 2.4-5.6 6-5.6 2.3 0 4 1 5 2.6"/>
+  <path d="M18 3.5v6M15 6.5h6"/>
+</g>
 </svg>
