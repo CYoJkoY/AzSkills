@@ -9,6 +9,7 @@ on:
       - "ui-motion-review/**"
       - "ui-motion-audit/**"
       - "rare-ui-motion/**"
+      - "svg-animation/**"
       - "design-intelligence.md"
       - "ui-design/SKILL.md"
       - "ui-aesthetics/SKILL.md"
@@ -36,48 +37,64 @@ jobs:
           test -f ui-motion/references/animation-standards.md
           test -f ui-motion/references/animation-vocabulary.md
           test -f ui-motion/references/animation-recipes.md
-          test -f ui-motion-review/SKILL.md
-          test -f ui-motion-audit/SKILL.md
-          test -f ui-motion-audit/references/plan-template.md
-          test -f rare-ui-motion/SKILL.md
-          test -f rare-ui-motion/references/pattern-catalog.md
+          test -f ui-motion/references/review.md
+          test -f ui-motion/references/audit.md
+          test -f ui-motion/references/plan-template.md
+          test -f ui-motion/references/rare-interactions.md
+          test -f ui-motion/references/rare-patterns.md
+          test -f ui-motion/references/svg-animation.md
+          test -f ui-motion/references/icon-morphing.md
 
           grep -q '^name: ui-motion$' ui-motion/SKILL.md
-          grep -q '^name: ui-motion-review$' ui-motion-review/SKILL.md
-          grep -q '^name: ui-motion-audit$' ui-motion-audit/SKILL.md
-          grep -q '^name: rare-ui-motion$' rare-ui-motion/SKILL.md
-
-          grep -q '^## Scope$' ui-motion/SKILL.md
-          grep -q '^## Construction workflow$' ui-motion/SKILL.md
+          grep -q '^## Contract$' ui-motion/SKILL.md
+          grep -q '^## Modes$' ui-motion/SKILL.md
+          grep -q '^## Workflow$' ui-motion/SKILL.md
           grep -q '^## Quality gates$' ui-motion/SKILL.md
+          grep -q '^## Output contract$' ui-motion/SKILL.md
+          grep -q '^## References$' ui-motion/SKILL.md
 
-          grep -q '^## Scope$' ui-motion-review/SKILL.md
-          grep -q '^## Review sequence$' ui-motion-review/SKILL.md
-          grep -q '^## Findings$' ui-motion-review/SKILL.md
+          grep -q '^# Motion Review Reference$' ui-motion/references/review.md
+          grep -q '^## Review sequence$' ui-motion/references/review.md
+          grep -q '^## Findings$' ui-motion/references/review.md
+          grep -q '^# Motion Audit Reference$' ui-motion/references/audit.md
+          grep -q '^## Modes$' ui-motion/references/audit.md
+          grep -q '^## Implementation plans$' ui-motion/references/audit.md
+          grep -q '^# Rare Interaction Pattern Reference$' ui-motion/references/rare-interactions.md
+          grep -q '^## Pattern selection$' ui-motion/references/rare-interactions.md
+          grep -q '^## Selection workflow$' ui-motion/references/rare-interactions.md
+          grep -q '^# SVG Animation Reference$' ui-motion/references/svg-animation.md
+          grep -q '^## Patterns$' ui-motion/references/svg-animation.md
+          grep -q '^# Icon Morphing Reference$' ui-motion/references/icon-morphing.md
+          grep -q '^## Interruptibility$' ui-motion/references/icon-morphing.md
 
-          grep -q '^## Scope$' ui-motion-audit/SKILL.md
-          grep -q '^## Modes$' ui-motion-audit/SKILL.md
-          grep -q '^## Findings contract$' ui-motion-audit/SKILL.md
-          grep -q '^## Selection workflow$' rare-ui-motion/SKILL.md
-          grep -q '^## Quality gates$' rare-ui-motion/SKILL.md
-          grep -q 'pattern catalog' rare-ui-motion/SKILL.md
-          grep -q 'prefers-reduced-motion' rare-ui-motion/SKILL.md
+          for entry in \
+            "ui-motion-review:review" \
+            "ui-motion-audit:audit" \
+            "rare-ui-motion:pattern" \
+            "svg-animation:svg"
+          do
+            alias=${entry%%:*}
+            mode=${entry##*:}
+            test -f "$alias/SKILL.md"
+            grep -q "^name: $alias$" "$alias/SKILL.md"
+            grep -q '^canonical: ui-motion$' "$alias/SKILL.md"
+            grep -q "^mode: $mode$" "$alias/SKILL.md"
+          done
 
       - name: Validate cross-skill composition
         shell: bash
         run: |
           set -euo pipefail
-          grep -q 'ui-motion/references/animation-standards.md' design-intelligence.md
-          grep -q 'ui-motion-review' design-intelligence.md
-          grep -q 'ui-motion-audit' design-intelligence.md
-          grep -q 'rare-ui-motion' design-intelligence.md
-          grep -q 'rare-ui-motion' ui-design/SKILL.md
-          grep -q 'rare-ui-motion' ui-aesthetics/SKILL.md
+          grep -q 'ui-motion' design-intelligence.md
           grep -q 'Rare UI-inspired interaction craft' THIRD_PARTY_NOTICES.md
           grep -q 'ui-motion' ui-design/SKILL.md
-          grep -q 'ui-motion-review' ui-design/SKILL.md
-          grep -q 'ui-motion-audit' ui-design/SKILL.md
-          grep -q 'ui-motion-review' ui-aesthetics/SKILL.md
+          grep -q 'references/review.md' ui-motion/SKILL.md
+          grep -q 'references/audit.md' ui-motion/SKILL.md
+          grep -q 'references/rare-interactions.md' ui-motion/SKILL.md
+          grep -q 'references/svg-animation.md' ui-motion/SKILL.md
+          grep -q 'references/icon-morphing.md' ui-motion/SKILL.md
+          ! grep -q 'icon-morphing' ui-design/SKILL.md
+          ! grep -nE 'ui-motion-review|ui-motion-audit|rare-ui-motion|svg-animation' design-intelligence.md ui-design/SKILL.md
 
       - name: Validate shared motion reference
         shell: bash
@@ -88,13 +105,13 @@ jobs:
           grep -q 'cubic-bezier(0.77, 0, 0.175, 1)' ui-motion/references/animation-standards.md
           grep -q 'prefers-reduced-motion' ui-motion/references/animation-standards.md
           grep -q 'hover: hover' ui-motion/references/animation-standards.md
-          ! grep -Rni 'disable-model-invocation' ui-motion ui-motion-review ui-motion-audit rare-ui-motion
+          ! grep -Rni 'disable-model-invocation' ui-motion ui-motion-review ui-motion-audit rare-ui-motion svg-animation
 
       - name: Reject mechanical upstream copy markers
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RniE 'emilkowalski/skills|framer motion.*mandatory|install.*sonner' ui-motion ui-motion-review ui-motion-audit; then
+          if grep -RniE 'emilkowalski/skills|framer motion.*mandatory|install.*sonner' ui-motion ui-motion-review ui-motion-audit rare-ui-motion svg-animation; then
             echo "Motion Skills contain provider-specific integration markers that belong at the edge, not in core contracts."
             exit 1
           fi

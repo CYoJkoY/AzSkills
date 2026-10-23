@@ -1,214 +1,212 @@
 ---
 name: ui-motion
-description: Construct purposeful, performant, accessible motion for Web interfaces using the project's existing design system and the smallest mechanism that fully satisfies the interaction. Use for adding transitions, entrances, gesture motion, state changes, and other UI animation work; do not use for motion-only review or codebase-wide audits.
+description: Construct, review, audit, and adapt UI motion using the smallest correct mechanism, host tokens, full interruption and accessibility behavior, and rendered verification. Also owns SVG animation and expressive interaction patterns.
+version: 2.0.0
+status: canonical
+family: interface
+modes: [build, review, audit, pattern, svg]
 ---
 
 # UI Motion
 
-A construction Skill for Web UI motion. Its job is to turn a motion request into an implementation that fits the host project's architecture, interaction model, visual language, accessibility policy, and performance constraints.
+Turn a motion request into an implementation, a review, an audit, a pattern
+choice, or an SVG animation. This Skill owns motion purpose, mechanism, timing,
+physicality, interruption, accessibility, performance, and verification. It does
+not own general layout, visual hierarchy, or runtime selection.
 
-It composes with `ui-design` rather than replacing it.
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../design-intelligence.md).
 
-## Scope
+## Contract
 
-Use when the task asks to:
+- Use when: a task adds, changes, reviews, or audits UI motion, chooses a motion-led interaction pattern, or authors SVG animation.
+- Do not use when: the task is general interface design (`ui-design`), a runtime or framework decision (`architecture`), or static identity work (`logo-generator`).
+- Owns: whether motion earns a place, which mechanism is smallest, timing, origin, interruption, reduced-motion parity, performance, and motion findings.
+- Inputs: host motion tokens, component frequency, interaction purpose, current mechanism, browser baseline, input model, reduced-motion policy, and rendered evidence.
+- Outputs: implemented motion, review findings, audit inventory and plan, pattern adaptation, or standalone SVG animation.
+- Compose with: `ui-design` for the static interface; `design-system` for motion tokens; load `references/animation-standards.md` for exact values.
+- Gates: motion has a named purpose and frequency fit; reduced motion preserves meaning; the interaction is interruptible; the rendered result is verified.
 
-- add or redesign a UI transition
-- animate an overlay, drawer, toast, menu, tooltip, control, or state change
-- design gesture-driven or spring-based UI motion
-- make a component feel responsive or physically coherent
-- choose animation properties, timing, easing, interruption, or exit behavior
+## Modes
 
-Do not use this Skill as the primary owner for:
+| Mode | Use when | Workflow | Output |
+| :--- | :--- | :--- | :--- |
+| `build` | Add or change motion | Purpose, mechanism, geometry, timing, interruption, accessibility, verify | Implemented motion |
+| `review` | Review a diff, component, or implementation | Context, gate, inspect, rank leverage | Read-only findings |
+| `audit` | Audit a codebase or find opportunities | Inventory, frequency map, audit categories, opportunity gates | Read-only plan |
+| `pattern` | A distinctive interaction is the product idea | Context, pattern family, static state, interaction contract, translate | Pattern adaptation |
+| `svg` | Author or optimize SVG animation | Scope, mechanism, geometry, accessibility, performance, verify | Single-file SVG |
 
-- reviewing existing motion → `ui-motion-review`
-- auditing an entire codebase or discovering motion opportunities → `ui-motion-audit`
-- React Native / Expo motion → a platform-specific mobile motion Skill
-- SVG-only animation authoring → `svg-animation`
+## Workflow
 
-## Precedence
+### 1. Establish context and frequency
 
-Use this order:
-
-1. explicit user requirements
-2. existing product identity and motion tokens
-3. accessibility and platform constraints
-4. `ui-design` and `design-intelligence.md`
-5. `ui-motion/references/animation-standards.md`
-6. optional examples
-
-Never replace an established motion library or token system just to match a reference methodology.
-
-## Construction workflow
-
-### 1. Decide whether motion earns a place
+```text
+runtime and browser baseline
+existing motion tokens and library
+component frequency
+interaction purpose
+pointer, touch, and keyboard model
+reduced-motion policy
+performance-sensitive surfaces
+```
 
 | Frequency | Motion posture |
 | :--- | :--- |
-| 100+ times/day | do not animate the interaction itself |
-| Tens/day | near-imperceptible motion only when it improves communication |
-| Occasional | standard UI motion when it communicates state or space |
-| Rare / first-use | more expressive craft may be justified |
+| 100+ times/day, including keyboard actions | Do not animate the interaction itself |
+| Tens/day | Remove or drastically reduce; keep only subtle communication |
+| Occasional | Standard UI motion may be appropriate |
+| Rare or first-use | Deliberate expressive motion may be appropriate |
 
-Keyboard-initiated actions are normally high-frequency. Do not add open/close choreography merely because the surface is visually prominent.
+### 2. Gate the motion
 
-### 2. Name the purpose
+Choose one purpose: feedback, spatial consistency, state indication,
+continuity, explanation, or deliberate delight. If none applies, do not animate.
+Do not animate text the user is actively reading. Do not add open/close
+choreography to a keyboard-initiated action merely because it is visible.
 
-Choose one primary purpose:
+### 3. Inspect the host system
 
-```text
-feedback
-spatial consistency
-state indication
-continuity / preventing a jarring change
-explanation
-deliberate delight
-```
+Read semantic motion tokens, easing and duration scales, component transitions,
+reduced-motion handling, pointer and hover gates, the installed motion library,
+and the browser baseline. Extend the host vocabulary; do not create a parallel
+ease-1/ease-2 scale.
 
-If none applies, do not animate. Do not animate information the user is actively reading merely to make it feel alive.
-
-### 3. Inspect the host motion system
-
-Before choosing values, inspect:
-
-- semantic motion tokens
-- easing and duration scales
-- existing component transitions
-- reduced-motion implementation
-- pointer / hover gates
-- animation library and version
-- browser and device baseline
-
-Extend existing conventions. Do not create a parallel `ease-1/ease-2` vocabulary because it is convenient.
-
-### 4. Choose the cheapest correct mechanism
-
-Use this ladder:
+### 4. Choose the smallest mechanism
 
 ```text
 CSS transition
-  → CSS @starting-style
-  → CSS animation
-  → WAAPI
-  → spring / framework motion system
+  -> CSS @starting-style
+    -> CSS animation
+      -> Web Animations API
+        -> spring or framework motion system
 ```
 
-Choose the first mechanism that supports the required state model.
+Use a library only when it buys interruptible spring behavior, gesture
+coordination, layout coordination, or existing project infrastructure. A fade is
+not a reason for a dependency.
 
-Use a library only when it buys something concrete such as interruptible spring behavior, gesture coordination, layout coordination, or existing project-level motion infrastructure. A fade is not a reason to add a dependency.
+### 5. Choose geometry and properties
 
-### 5. Choose properties and geometry
-
-Prefer `transform` and `opacity` for routine UI motion.
-
-Treat layout-affecting animation as an explicit exception. If it is required, justify the tradeoff and verify the resulting frame behavior.
-
-For anchored overlays, derive `transform-origin` from the trigger or placement relationship. A centered origin is appropriate for genuinely centered overlays such as modals.
-
-Do not start entrances at `scale(0)`. A small initial scale such as `scale(0.95)` with opacity reduction is a reference starting point.
-
-Prefer percentage translations when they express an element-relative relationship more robustly than hardcoded pixels.
+- Prefer `transform` and `opacity` for routine UI motion.
+- Treat layout-affecting animation as an explicit exception with measured verification.
+- Derive `transform-origin` from the trigger or placement relationship.
+- Do not enter from `scale(0)`; use a small scale such as `0.95` with opacity reduction.
+- Use element-relative translations when travel should scale with the element.
+- Use `clip-path` only for intentional reveal or mask interactions.
 
 ### 6. Choose timing
 
-Use project tokens first. When no project vocabulary exists, use the approved reference ranges:
+Use project tokens first. When none exist:
 
 | Interaction | Starting range |
 | :--- | :--- |
-| press feedback | 100–160ms |
-| tooltip / small popover | 125–200ms |
-| dropdown / select | 150–250ms |
-| modal / drawer | 200–500ms |
-| explanatory / marketing motion | may exceed UI budgets when motion is the subject |
+| Press feedback | 100-160ms |
+| Tooltip or small popover | 125-200ms |
+| Dropdown or select | 150-250ms |
+| Modal or drawer | 200-500ms |
+| Explanatory or marketing | Longer may be justified |
 
-General defaults are entering/exiting → ease-out, on-screen movement → ease-in-out, hover/color changes → ease, constant motion → linear. Avoid `ease-in` for routine UI response.
-
-Use springs for gesture continuity, velocity-sensitive interruption, or genuinely physical interactions. Reference spring configurations live in the shared standards.
+Use `ease-out` for entering and exiting, `ease-in-out` for on-screen movement,
+`ease` for hover and color, and `linear` for constant motion. Avoid `ease-in` for
+ordinary UI response. Routine motion normally stays below 300ms.
 
 ### 7. Design interruption and exit
 
-Rapidly retriggerable UI must be interruptible. Prefer transitions that retarget from the current value or springs that preserve useful velocity.
-
-Keep the spatial story coherent:
-
-```text
-enter → settle → interrupt → retarget
-enter → settle → exit
-```
-
-Unless product semantics require otherwise, an element should leave through the same spatial relationship through which it entered.
-
-For deliberate phases such as hold-to-confirm, the user-controlled phase may be slow while the resulting system response is quick.
+Transitions retarget from the current value and suit rapidly retriggered state.
+Springs suit gesture velocity and physical continuity. Avoid restarting
+keyframes for toasts, toggles, expandable controls, drag, scrub, and changing
+view state. Define the exit relationship before implementation.
 
 ### 8. Add accessibility and capability variants
 
-Ship these with the implementation:
-
-```css
-@media (prefers-reduced-motion: reduce) {
-  /* preserve semantic feedback; reduce unnecessary movement */
-}
-
-@media (hover: hover) and (pointer: fine) {
-  /* hover-specific motion */
-}
-```
-
-Do not use viewport width as a proxy for pointer capability.
+- Preserve opacity, color, or text feedback under `prefers-reduced-motion: reduce`; remove unnecessary travel.
+- Gate hover-only behavior behind `hover: hover` and `pointer: fine` where appropriate.
+- Keep focus visible and do not delay critical feedback.
+- Provide a static or reduced variant for looping or decorative motion.
+- Verify keyboard and touch paths, not only pointer hover.
 
 ### 9. Implement and verify
 
-Verify the actual rendered result:
+Inspect the real component at real sizes. Check entry, exit, interruption,
+rapid retrigger, reduced motion, light and dark themes, and realistic load. A
+motion that only works in isolation is not finished.
 
-- normal state and rapid retriggering
-- first frame, intermediate state, and final state
-- anchored origin when applicable
-- reduced-motion variant
-- keyboard and touch behavior
-- narrow and wide layouts
-- performance under realistic page load
+### 10. Review or audit without editing
 
-When feel is uncertain, inspect at 2–5× playback speed or frame-by-frame in browser tooling. Use a real touch device for gesture interactions.
+For `review`, report context, gate result, implementation findings, and the
+leverage order: delete, reduce, correct timing, correct geometry, add
+interruption, move work to compositor-friendly properties, then add polish.
+
+For `audit`, inventory at least transitions, animations, keyframes, motion
+libraries, `transition: all`, `scale(0)`, `prefers-reduced-motion`,
+`transform-origin`, and `clip-path`. Build a frequency map, audit purpose,
+timing, physicality, interruption, performance, accessibility, cohesion, and
+missed opportunities. Propose only high-confidence opportunities.
+
+### 11. Pattern mode
+
+Choose one pattern family that solves a real user problem. Establish the static
+silhouette, spacing, and readable state first. Define the interaction contract,
+then translate it into host-native geometry and tokens. Keep one signature per
+surface. Do not copy a catalog component pixel-for-pixel or force a foreign brand
+palette.
+
+### 12. SVG mode
+
+Prefer CSS animation, then SMIL when CSS cannot express the relationship, then a
+minimal JavaScript driver. Keep the output single-file and self-contained unless
+the host requires otherwise. Animate transforms and opacity; avoid layout and
+large filter regions. Provide `prefers-reduced-motion` behavior and a static
+fallback. For standalone SVG, declare the namespace, `viewBox`, title, and
+description. For `<img>` embedding, keep animation internal and avoid external
+script dependencies.
 
 ## Quality gates
 
-Do not ship motion that contains any of these without an explicit documented reason:
-
-- `transition: all`
-- `scale(0)` entrance
-- `ease-in` on routine UI feedback or entry
-- animation attached to a keyboard / high-frequency interaction
-- trigger-anchored popover scaling from the center
-- non-interruptible keyframes for rapidly retriggerable UI
-- movement without a reduced-motion strategy
-- ungated hover-only motion
-- unnecessary layout animation
-- a new motion dependency that duplicates an installed capability
+- [ ] Motion has a named purpose and a frequency-appropriate posture.
+- [ ] The smallest mechanism that satisfies the interaction is used.
+- [ ] Timing and easing reuse host tokens when they exist.
+- [ ] Origin, entry, exit, and interruption preserve spatial continuity.
+- [ ] Reduced motion and input-capability variants preserve meaning.
+- [ ] No layout-affecting or large paint operation is hidden behind routine polish.
+- [ ] The interaction is verified at real size, under load, and on rapid retrigger.
+- [ ] Reviews and audits do not edit production source.
+- [ ] Pattern adaptations use host tokens and one signature per surface.
+- [ ] SVG output is accessible, self-contained, and fallback-safe.
 
 ## Output contract
 
-Return the implementation plus a compact verification note:
+For implementation:
 
 ```text
-Gate:
-Purpose:
-Mechanism:
-Properties:
-Timing:
-Accessibility:
-Feel-check:
+Purpose and frequency:
+Mechanism and properties:
+Timing and origin:
+Interruption and exit:
+Accessibility variants:
+Verification:
+Unverified items:
 ```
 
-Do not turn a small animation implementation into a long design essay.
+For review or audit:
 
-## Reference loading
+```text
+Scope:
+Verdict:
+Findings ranked by leverage:
+Smallest corrective action per finding:
+Unverified items:
+```
 
-Load `ui-motion/references/animation-standards.md` for exact reference curves, timing ranges, spring configurations, gesture rules, accessibility patterns, and QA heuristics.
+## References
 
-Load `ui-motion/references/animation-vocabulary.md` when the task uses unfamiliar motion terminology or when naming a motion pattern precisely matters.
-
-Load `ui-motion/references/animation-recipes.md` when the requested interaction matches a common motion pattern; adapt the recipe to existing project tokens and component conventions.
-
-## Composition with the UI system
-
-For production interface work, `ui-motion` is a focused implementation pass underneath `ui-design`. Let `ui-design` own hierarchy, component state, responsive behavior, and accessibility; let `ui-motion` own the concrete motion mechanism, timing, interruption, and rendered motion verification.
+- `references/animation-standards.md` - exact easing, duration, spring, performance, and accessibility reference.
+- `references/animation-recipes.md` - implementation recipes and component patterns.
+- `references/animation-vocabulary.md` - motion terms and intent vocabulary.
+- `references/review.md` - detailed read-only review sequence and findings contract.
+- `references/audit.md` - detailed codebase inventory, opportunity gates, and plan format.
+- `references/plan-template.md` - implementation plan template for audit findings.
+- `references/rare-interactions.md` - pattern-selection and adaptation contract.
+- `references/rare-patterns.md` - pattern catalog.
+- `references/svg-animation.md` - SVG-specific construction and optimization guide.
+- `references/icon-morphing.md` - semantic SVG icon morphing, geometry, interruption, and QA.

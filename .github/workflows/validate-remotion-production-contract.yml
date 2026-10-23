@@ -46,13 +46,14 @@ jobs:
 
           grep -q '^name: remotion-production$' remotion-production/SKILL.md
           grep -q '^description:' remotion-production/SKILL.md
-          grep -q '^## Scope$' remotion-production/SKILL.md
-          grep -q '^## When not to use$' remotion-production/SKILL.md
-          grep -q '^## Decision framework$' remotion-production/SKILL.md
-          grep -q '^## Production workflow$' remotion-production/SKILL.md
+          grep -q '^## Contract$' remotion-production/SKILL.md
+          grep -q '^## Modes$' remotion-production/SKILL.md
+          grep -q '^## Workflow$' remotion-production/SKILL.md
+          grep -q '^## Determinism rules$' remotion-production/SKILL.md
           grep -q '^## Quality gates$' remotion-production/SKILL.md
           grep -q '^## Output contract$' remotion-production/SKILL.md
-          grep -q '^## Cross-Skill composition$' remotion-production/SKILL.md
+          grep -q '^## Failure handling$' remotion-production/SKILL.md
+          grep -q '^## References$' remotion-production/SKILL.md
 
       - name: Validate engine coverage and deterministic timing
         shell: bash
@@ -73,14 +74,13 @@ jobs:
             "Flubber" \
             "Canvas"
           do
-            grep -q "$engine" remotion-production/SKILL.md
             grep -q "$engine" remotion-production/references/animation-engine-selection.md
             grep -q "$engine" remotion-production/references/visual-engine-matrix.md
           done
 
-          grep -q 'Remotion frame' remotion-production/SKILL.md
-          grep -q 'uncontrolled wall-clock' remotion-production/SKILL.md
-          grep -q 'random' remotion-production/SKILL.md
+          grep -q 'Frame number is the only authoritative time input.' remotion-production/SKILL.md
+          grep -q 'Randomness is seeded and stable across renders.' remotion-production/SKILL.md
+          grep -q 'Any wall-clock or network-dependent path is isolated' remotion-production/SKILL.md
 
       - name: Validate cross-skill routing
         shell: bash
@@ -90,9 +90,9 @@ jobs:
           for skill in \
             "ui-design" \
             "ui-motion" \
-            "frontend-architecture" \
             "frontend-slides" \
-            "svg-animation"
+            "logo-generator" \
+            "ultrathink"
           do
             grep -q "$skill" remotion-production/SKILL.md
           done
@@ -100,7 +100,7 @@ jobs:
           grep -q 'remotion-production' README.md
           grep -q 'remotion-production' .github/ISSUE_TEMPLATE/new_skill.yml
           grep -q 'remotion-production' .github/ISSUE_TEMPLATE/skill_improvement.yml
-          grep -q 'design-intelligence.md' remotion-production/SKILL.md
+          grep -q 'design-intelligence.md' remotion-production/references/visual-engine-matrix.md
           grep -q 'Remotion Production Contract' .github/workflows/validate-remotion-production-contract.yml
 
       - name: Reject mechanical upstream-copy markers

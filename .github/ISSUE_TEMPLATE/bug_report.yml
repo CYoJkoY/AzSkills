@@ -1,6 +1,6 @@
 name: "Skill Defect Report"
 description: >
-  Report a defect in an existing Skill contract — e.g. ambiguous scope,
+  Report a defect in an existing Skill contract - e.g. ambiguous scope,
   contradictory constraints, broken workflow steps, or missing quality gates.
 title: "[Defect] <skill-directory>: <one-line summary>"
 labels:
@@ -11,23 +11,23 @@ body:
     id: skill
     attributes:
       label: Affected Skill
-      description: Which Skill directory does this defect belong to?
+      description: Which canonical Skill or shared system surface does this defect belong to?
       options:
-        - application-architecture
-        - frontend-architecture
-        - frontend-slides
-        - ahkv2-opt
-        - ip-as-logo
-        - l13n
+        - architecture
+        - design-system
+        - ui-design
+        - ui-motion
         - logo-generator
         - photo-abstract-editorial
+        - frontend-slides
+        - remotion-production
         - readme-craft
         - steam-mod-page
-        - ui-aesthetics
-        - ui-design
+        - localization
         - ultrathink
-        - design-system
         - design-intelligence (root)
+        - Compatibility alias path
+        - Shared system file (SKILL-SYSTEM.md or skills.json)
         - Other / Multiple
     validations:
       required: true
@@ -40,12 +40,12 @@ body:
         Which part(s) of the SKILL.md contract are defective?
         Check all that apply and describe the problem for each.
       value: |
-        - [ ] **Scope** — activation / exclusion conditions are unclear or wrong
-        - [ ] **Constraints** — non-negotiable rules are missing or contradictory
-        - [ ] **Workflow** — execution steps are ambiguous, incomplete, or out of order
-        - [ ] **Quality Gates** — verification criteria are insufficient or untestable
-        - [ ] **Output Contract** — expected artifact / response shape is undefined
-        - [ ] **Supporting Files** — referenced files are missing or inconsistent
+        - [ ] **Contract** - applicability, ownership, inputs, or gates are unclear or wrong
+        - [ ] **Modes** - mode selection or workflow boundaries are unclear
+        - [ ] **Workflow** - execution steps are ambiguous, incomplete, or out of order
+        - [ ] **Quality gates** - verification criteria are insufficient or untestable
+        - [ ] **Output contract** - expected artifact / response shape is undefined
+        - [ ] **References** - supporting material is missing, stale, or contradictory
     validations:
       required: true
 
@@ -57,8 +57,8 @@ body:
         What should the Skill contract specify? Reference the relevant
         SKILL.md section(s) by heading or line number if possible.
       placeholder: >
-        The Scope section should explicitly exclude …; the Workflow step 3
-        should require … before proceeding to step 4.
+        The Scope section should explicitly exclude ...; the Workflow step 3
+        should require ... before proceeding to step 4.
     validations:
       required: true
 

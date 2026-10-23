@@ -1,156 +1,125 @@
 ---
 name: photo-abstract-editorial
-description: >
-  Transform one uploaded photograph into a restrained vertical editorial diptych:
-  preserve the photograph faithfully and derive a sparse abstract memory panel from
-  its observed spatial, tonal, and color relationships. Use for photo-plus-abstraction
-  compositions, minimalist archival posters, visual memory panels, and editorial photo
-  transformations that must not redraw the source photograph.
+description: Turn one supplied photograph into a restrained vertical editorial diptych. The photograph stays faithful; a sparse abstract panel derives only its spatial, tonal, and color relationships.
+version: 2.0.0
+status: canonical
+family: visual
+modes: [treatment, audit]
 ---
 
 # Photo Abstract Editorial
 
-Create one finished vertical editorial composition from one supplied photograph.
-The photograph remains the factual source; the lower panel translates its visual
-relationships into an original abstract language.
+Create one finished vertical composition from one photograph. The photograph is
+the factual source; the abstract panel is a memory of its relationships, not a
+second artwork. This Skill does not redraw, illustrate, or stylize the source.
+
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../design-intelligence.md).
+
+## Contract
+
+- Use when: a task supplies one photograph and needs a photo-plus-abstraction diptych, archival poster, or visual memory panel.
+- Do not use when: the task is a logo or identity system (`logo-generator`), a general interface (`ui-design`), or an illustration that may invent scene content.
+- Owns: source observation, photograph preservation, relationship abstraction, diptych composition, and editorial typography.
+- Inputs: the photograph, desired output locale, aspect ratio, copy constraints, and any supplied palette or type direction.
+- Outputs: one vertical composition or a rendered audit of an existing treatment.
+- Compose with: `logo-generator` only when the abstraction must become an identity mark; `ui-design` only when the composition is placed into a larger interface.
+- Gates: the photograph remains faithful; every abstract mark traces to a visible source fact; the abstraction does not overpower the photograph.
+
+## Modes
+
+| Mode | Use when | Workflow | Output |
+| :--- | :--- | :--- | :--- |
+| `treatment` | One photograph becomes a finished diptych | Observe, preserve, abstract, compose, verify | Final composition |
+| `audit` | An existing treatment needs review | Compare source, trace marks, rank defects | Findings and smallest corrections |
 
 ## Workflow
 
-### 1. Observe before designing
+### 1. Observe the source
 
-Inspect the supplied photograph and identify 3–6 decisive facts such as:
-
-- Subject relationships.
-- Scale hierarchy.
-- Major axes and direction.
-- Intervals and rhythm.
-- Overlap and depth.
-- Dominant shapes.
-- Negative space.
-- Light distribution.
-- Color roles.
-
-Do not begin with a generic editorial template.
+Identify three to six decisive facts: subject relationships, scale hierarchy,
+major axes, intervals, overlap, depth, dominant shapes, negative space, light
+distribution, and color roles. Do not start from a generic template.
 
 ### 2. Preserve the photograph
 
-Keep the source photograph faithful. Permit proportional scaling and only the minor crop
-necessary to fit the composition.
+Keep the photograph faithful. Permit proportional scaling and only the minor
+crop needed to fit the composition. Do not redraw, extend the scene, replace
+subjects, apply stylizing filters, retouch defining information, or turn the
+photograph into an illustration.
 
-Do not:
+### 3. Translate relationships, not outlines
 
-- Redraw the photograph.
-- Extend or invent scene content.
-- Replace subjects.
-- Apply stylizing filters.
-- Retouch away defining visual information.
-- Turn the photograph into an illustration.
-
-### 3. Translate relationships into abstraction
-
-Create the lower memory panel from the observed relationships rather than tracing the
-source literally.
-
-Prefer:
-
-- Position relationships.
-- Scale ratios.
-- Directional axes.
-- Repeated intervals.
-- Overlap.
-- One or two distinctive recognition cues.
-
-Avoid making a thumbnail, vector trace, silhouette sheet, or literal illustration.
-
-Every abstract mark should be explainable by a visible fact in the source photograph.
+Build the abstract panel from position, scale ratio, direction, repeated
+interval, overlap, and one or two recognition cues. Do not trace a thumbnail,
+silhouette sheet, or literal illustration. Every abstract mark must be
+explainable by a visible fact in the source.
 
 ### 4. Compose the diptych
 
-Use a vertical composition. Keep the photograph as the upper/principal section and the
-abstract memory panel below it.
-
-- The split does not have to be exactly 50/50.
-- Adapt the proportions to the visual density of the photograph.
-- Join the two sections directly.
-- Do not add frames, borders, tape, drop shadows, collage edges, or mockup devices.
-- Keep the abstract panel background uniform and neutral ivory unless the user specifies
-  another neutral background.
+Use a vertical composition with the photograph as the principal upper section and
+the abstract panel below. The split need not be 50/50; adapt it to density. Join
+the sections directly. Do not add frames, borders, tape, shadows, collage edges,
+or mockup devices. Keep the abstract panel background uniform and neutral unless
+the brief specifies otherwise.
 
 ### 5. Control the abstract language
 
-Use one primary mark family and no more than two supporting families.
+Use one primary mark family and at most two supporting families. Derive the muted
+palette from the photograph. Do not invent decorative colors or symbols. Favor
+asymmetry and whitespace when the source supports them.
 
-Use a muted palette derived only from the photograph. Do not invent decorative colors or
-symbols simply to make the panel more interesting.
+For people, suggest the figure with irregular short vertical marks or tapered
+blocks. Do not draw faces, limbs, clothing, or anatomy. For architecture, keep at
+most one to three identity cues and omit surface detail.
 
-Favor generous whitespace and asymmetry when the source supports it. Do not impose
-symmetry mechanically.
+### 6. Set the type
 
-For people, preserve the concept of the figure with irregular continuous short vertical
-marks or gently tapered blocks. Do not draw faces, limbs, clothing, or anatomy.
+Write one original title of two to five words, grounded in something visibly
+present in the photograph. Use the requested output locale; default to English
+only when no locale is supplied. Place the title in the abstract panel and use a
+restrained editorial serif direction. Add a subtitle only when it carries real
+meaning. Do not add dates, unrelated captions, logos, watermarks, or multiple
+title options.
 
-For landmark architecture, retain at most 1–3 identity cues and omit surface detail.
+### 7. Verify
 
-### 6. Typography
+Check source fidelity, mark traceability, panel balance, title legibility, color
+separation, and output dimensions. If the abstraction competes with the
+photograph, remove marks before adding detail.
 
-Create one original English title of 2–5 words grounded in something visibly present in
-the photograph.
+## Prompt discipline
 
-Place the title only in the abstract panel. Use a restrained editorial serif direction.
-Add a short subtitle only when it provides actual semantic value.
-
-Do not add:
-
-- Dates.
-- Captions unrelated to the image.
-- Logos.
-- Watermarks.
-- Multiple title options.
-
-### 7. Final-output discipline
-
-Return only the completed composition when this skill is explicitly used for generation.
-Do not expose an analysis of the source photograph unless the user asks for it.
-
-## Guardrails
-
-The uploaded photograph is the sole content source. The abstract panel may reinterpret
-relationships but must not import unrelated visual objects.
-
-Keep the lower panel flat and clean. Exclude gradients, paper grain, scan artifacts,
-glow, vignette, stains, fake aging, collage effects, and decorative noise unless the
-user explicitly requests a controlled exception.
-
-Do not let the abstraction overwhelm the photograph. The lower panel is a visual memory
-of the photograph, not a second unrelated artwork.
-
-## Prompt construction
-
-When an image-generation model is available, build one complete prompt from the workflow
-above. Describe the actual visual result and its constraints.
-
-For models with a documented dedicated negative prompt, use the model's supported field.
-For single-prompt models, use one concise `Constraints:` line.
-
-Recommended exclusions:
-
-`do not redraw or stylize the photograph, no invented objects, no unrelated symbols, no frame, no tape, no collage effect, no heavy shadow, no gradient, no paper texture, no grain, no watermark, no decorative clutter`
-
-## Relationship to other AzSkills
-
-Use `photo-abstract-editorial` for transformations where the photograph itself must remain
-faithful and the abstraction is derived from it.
-
-Use `logo-generator` when the task is to design a brand/logo system rather than preserve
-a photograph.
-
-Use `ip-as-logo` for simplified character/IP marks.
+When an image model is available, build one complete prompt from the observed
+facts. Describe the result and its constraints. Use the model's supported
+negative-prompt field when it exists; otherwise add one concise `Constraints:`
+line. Exclude redrawing, invented objects, unrelated symbols, frames, collage,
+heavy shadow, gradients, texture, grain, watermarks, and decorative clutter.
 
 ## Provenance
 
-This skill is an original AzSkills implementation informed by the public methodology in:
+This contract is an original AzSkills implementation informed by
+https://github.com/ZzzLc0405/photo-abstract-editorial. No upstream artwork,
+template, or repository text is copied.
 
-- https://github.com/ZzzLc0405/photo-abstract-editorial
+## Quality gates
 
-The upstream repository was not copied wholesale; the useful workflow principles were
-re-expressed for AzSkills' modular skill conventions.
+- [ ] The photograph is faithful and uncropped beyond the composition need.
+- [ ] Every abstract mark maps to a visible source relationship.
+- [ ] The abstract panel uses one primary and at most two supporting mark families.
+- [ ] The palette derives from the photograph, not an unrelated theme.
+- [ ] The photograph remains the dominant element.
+- [ ] The title is grounded, legible, and in the requested locale.
+- [ ] No decorative frame, texture, gradient, watermark, or mockup device is present.
+- [ ] The final artifact is inspected at output size.
+
+## Output contract
+
+For `treatment`, return only the completed composition unless the user asks for
+the source analysis. For `audit`, return:
+
+```text
+Verdict:
+Findings ranked by source fidelity:
+Source fact -> abstract mark -> correction:
+Unverified items:
+```

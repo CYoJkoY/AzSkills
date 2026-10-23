@@ -8,72 +8,97 @@
  */
 
 import process from "node:process";
+import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 const SKILLS = [
   {
-    name: "ui-design",
-    group: "DESIGN",
-    purpose: "Production interface systems, responsive behavior, accessibility, and visual QA.",
-    when: "Use when an interface needs hierarchy, states, responsive rules, or review.",
-    contract: "Token-only spacing. One icon grid. Keyboard-first states. No framework.",
+    name: "ultrathink",
+    group: "CORE",
+    purpose: "Deep reasoning overlay for ambiguous or high-risk work.",
+    when: "Use when assumptions, alternatives, or failure modes need explicit analysis.",
+    contract: "State assumptions. Compare alternatives. Record the decision.",
+  },
+  {
+    name: "architecture",
+    group: "ARCH",
+    purpose: "Choose the smallest runtime, frontend, persistence, and process boundary.",
+    when: "Use when a stack, runtime, or boundary is unresolved.",
+    contract: "Native first. Explicit boundaries. The heavier runtime needs evidence.",
   },
   {
     name: "design-system",
-    group: "DESIGN",
-    purpose: "Consume, normalize, and verify DESIGN.md contracts.",
-    when: "Use when a design source must become executable tokens and rules.",
-    contract: "Source integrity, semantic mapping, provenance, render verification.",
+    group: "INTERFACE",
+    purpose: "Consume, normalize, and verify DESIGN.md visual contracts.",
+    when: "Use when design evidence must become executable tokens and rules.",
+    contract: "Source integrity. Semantic mapping. Provenance. Render verification.",
   },
   {
-    name: "readme-craft",
-    group: "DOCS",
-    purpose: "Structure, illustrate, and verify repository landing pages.",
-    when: "Use when a README must be readable, accurate, and theme-safe.",
-    contract: "Information architecture first. SVG parity. No broken anchors.",
-  },
-  {
-    name: "frontend-architecture",
-    group: "ENG",
-    purpose: "Choose boundaries, rendering strategy, and runtime constraints.",
-    when: "Use when the architecture is unclear or a framework is proposed.",
-    contract: "Native first. Explicit boundaries. No framework by default.",
+    name: "ui-design",
+    group: "INTERFACE",
+    purpose: "Production interface hierarchy, states, responsive behavior, and visual QA.",
+    when: "Use when an interface needs structure, implementation, refinement, or review.",
+    contract: "One thesis. Token-only spacing. Every state. Rendered verification.",
   },
   {
     name: "ui-motion",
-    group: "MOTION",
+    group: "INTERFACE",
     purpose: "Design state transitions that preserve meaning and accessibility.",
     when: "Use when interaction needs motion or an existing motion needs review.",
-    contract: "Short state transitions. Reduced-motion parity. No decorative loops.",
+    contract: "Named purpose. Smallest mechanism. Interruptible. Reduced-motion parity.",
   },
   {
-    name: "application-architecture",
-    group: "ENG",
-    purpose: "Select application boundaries for CLI, TUI, native, or web products.",
-    when: "Use when deciding how a product should be assembled and deployed.",
-    contract: "Document the heavier runtime. Keep domain logic independent.",
+    name: "logo-generator",
+    group: "VISUAL",
+    purpose: "Develop logos, product marks, character marks, and identity systems.",
+    when: "Use when a product needs a recognizable mark and identity rules.",
+    contract: "Original geometry. Small-size proof. One identity system.",
   },
   {
-    name: "l13n",
-    group: "DOCS",
-    purpose: "Plan localization and translation without losing technical meaning.",
-    when: "Use when text expands, languages change, or mixed-script content must fit.",
-    contract: "Preserve identifiers. Test expansion. Avoid fixed label widths.",
+    name: "photo-abstract-editorial",
+    group: "VISUAL",
+    purpose: "Turn one supplied photograph into a restrained editorial diptych.",
+    when: "Use when a photograph needs a faithful abstract companion panel.",
+    contract: "Keep the source faithful. Derive only spatial and tonal relationships.",
   },
-  { name: "frontend-slides", group: "BUILD" },
-  { name: "ip-as-logo", group: "LOGO" },
-  { name: "logo-generator", group: "LOGO" },
-  { name: "photo-abstract-editorial", group: "IMAGE" },
-  { name: "rare-ui-motion", group: "MOTION" },
-  { name: "remotion-production", group: "VIDEO" },
-  { name: "steam-mod-page", group: "WEB" },
-  { name: "svg-animation", group: "MOTION" },
-  { name: "ui-aesthetics", group: "DESIGN" },
-  { name: "ui-motion-audit", group: "MOTION" },
-  { name: "ui-motion-review", group: "MOTION" },
-  { name: "ui-ux-design-intelligence", group: "DESIGN" },
-  { name: "ultrathink", group: "META" },
+  {
+    name: "frontend-slides",
+    group: "PROD",
+    purpose: "Build fixed-stage HTML presentations with authored assets and rendered QA.",
+    when: "Use when content must become a designed 1920x1080 deck.",
+    contract: "One narrative argument. Fixed stage. No overflow. Render every slide.",
+  },
+  {
+    name: "remotion-production",
+    group: "PROD",
+    purpose: "Build deterministic programmatic video with Remotion as the time authority.",
+    when: "Use when the deliverable is a rendered time-based artifact.",
+    contract: "Frame is time. One visual owner per concern. Reproducible renders.",
+  },
+  {
+    name: "readme-craft",
+    group: "PUBLISH",
+    purpose: "Design, rewrite, and audit evidence-first GitHub README pages.",
+    when: "Use when a repository needs a readable and verifiable landing page.",
+    contract: "Information architecture first. Verified links. Theme-safe SVG.",
+  },
+  {
+    name: "steam-mod-page",
+    group: "PUBLISH",
+    purpose: "Write and audit Steam Workshop descriptions as clean BBCode.",
+    when: "Use when a Mod needs a player-first or developer-first Workshop page.",
+    contract: "BBCode only. Bilingual separation. Verified facts. Final lint.",
+  },
+  {
+    name: "localization",
+    group: "PUBLISH",
+    purpose: "Translate game CSV rows with intact markup and clean escaping.",
+    when: "Use when a localization batch or locale audit is requested.",
+    contract: "Preserve schema. Protect BBCode. Complete every locale.",
+  },
 ];
+
+const DEFAULT_SELECTED = "ui-design";
 
 const THEMES = {
   light: {
@@ -555,10 +580,10 @@ function statusLine(width, options, style, glyph) {
 
 function renderNarrow(options) {
   const width = Math.max(24, Math.min(39, Number(options.width) || 40));
-  const requestedSelected = sanitize(options.selected || "ui-design");
+  const requestedSelected = sanitize(options.selected || DEFAULT_SELECTED);
   const selected = SKILLS.some((item) => item.name === requestedSelected)
     ? requestedSelected
-    : SKILLS[0].name;
+    : DEFAULT_SELECTED;
   const lines = [
     "AzSkills",
     SKILLS.length + " skills",
@@ -595,10 +620,10 @@ export function renderTui(options = {}) {
   const color = requestedColor === "auto" ? detectColor(environment, isTTY) : requestedColor;
   const style = makeStyle(color, theme);
   const glyph = glyphs(ascii);
-  const requestedSelected = sanitize(options.selected || "ui-design");
+  const requestedSelected = sanitize(options.selected || DEFAULT_SELECTED);
   const selected = SKILLS.some((item) => item.name === requestedSelected)
     ? requestedSelected
-    : SKILLS[0].name;
+    : DEFAULT_SELECTED;
   const resolved = { width, rows, theme, density, selected, plain, ascii, color };
   const lines = [];
 
@@ -758,6 +783,14 @@ function checkFrame(width, color, theme, density) {
 function runCheck() {
   const issues = [];
   let frames = 0;
+  try {
+    const registry = JSON.parse(readFileSync(new URL("../../skills.json", import.meta.url), "utf8"));
+    const registered = registry.skills.map((skill) => skill.id).join(",");
+    const rendered = SKILLS.map((skill) => skill.name).join(",");
+    if (registered !== rendered) issues.push("preview skill list drifted from skills.json");
+  } catch (error) {
+    issues.push("cannot read skills.json: " + error.message);
+  }
   const widths = [40, 60, 80, 100, 120, 140, 160];
   for (const width of widths) {
     for (const color of ["truecolor", "256", "16", "none"]) {

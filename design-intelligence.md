@@ -1,408 +1,86 @@
-# AzSkills Design Intelligence Layer
+# AzSkills Design Intelligence
 
-This is a cross-cutting reference layer, not a standalone Skill. Visual and UI Skills inherit these rules unless explicit user requirements or a more specific Skill rule takes precedence.
+This is a visual extension layer, not a Skill. [`SKILL-SYSTEM.md`](SKILL-SYSTEM.md)
+owns the shared rules R01-R12 and precedence. This file adds only visual
+judgment not already owned by a canonical Skill. The active Skill owns workflow,
+quality gates, and output.
 
-The layer is an AzSkills synthesis informed by public frontend design methodologies, including Anthropic's `frontend-design`, NextLevelBuilder's UI/UX Pro Max, `better-web-ui`, the framework-agnostic `frontend-designer-skill`, and the public UI Skills catalog. It intentionally keeps the architecture modular rather than importing an external skill wholesale.
+## Visual extensions
 
-## Automatic application
+### Typography is structural
 
-Apply this layer whenever a task changes how an artifact looks, feels, moves, or is interacted with. This includes interfaces, dashboards, web apps, settings, forms, component libraries, icons, logos, SVG identity assets, README visuals, HTML presentations, banners, and other visual deliverables.
+Define roles for display, heading, body, label, metadata, numeric data, and
+controls. Verify font availability, fallback, glyph coverage, line height,
+measure, and multilingual expansion. Do not shrink type to hide an overloaded
+structure.
 
-For executable UI work, automatically inherit [`ui-design/SKILL.md`](ui-design/SKILL.md). The shared layer supplies cross-artifact reasoning; `ui-design` supplies the executable frontend workflow and audit contract.
+### Color is semantic
 
-Do not apply it mechanically to pure backend logic, database work, infrastructure, or non-visual scripts.
+Give color explicit roles for canvas, surface, text, muted content, accent,
+focus, selection, and status. Validate light and dark themes separately. Color
+never carries critical meaning alone.
 
-## Priority order
+### Composition is not a component library
 
-1. Explicit user requirements.
-2. Active Skill hard constraints.
-3. Existing product identity and design system.
-4. Product / platform conventions and accessibility requirements.
-5. `ui-design/SKILL.md` for UI work.
-6. This shared layer.
-7. Optional stylistic references.
+Use a focal point, a clear reading order, and a small set of recurring
+structures. Prefer asymmetry, editorial splits, timelines, comparison matrices,
+and annotated evidence when the content supports them. Do not assemble a page
+from unrelated section templates.
 
-When rules conflict, preserve the more specific requirement and document a material tradeoff.
+### Motion is owned by `ui-motion`
 
+Motion purpose, mechanism, timing, review, audit, patterns, and SVG output
+belong to [`ui-motion`](ui-motion/SKILL.md). Visual composition may reserve a
+motion role; it does not define duration, easing, or a second motion gate.
 
-### Repository-owned design contract
+### Visual evidence
 
-AzSkills uses a practical, VSCodium-inspired Workbench contract for interface structure and interaction. The root [`DESIGN.md`](DESIGN.md) defines information density, compact navigation, command/search entry, keyboard-first operation, semantic states, responsive behavior, and accessible light/dark themes. [`design-system/wabi-press.css`](design-system/wabi-press.css) and [`design-system/preview/index.html`](design-system/preview/index.html) are the executable styling and verification surfaces.
+Apply R11 with visual checks: hierarchy in grayscale, real sizes, both themes,
+density modes, long text, CJK and RTL, zoom, keyboard focus, and narrow width.
+A result that only works in the author's viewport is unfinished.
 
-For AzSkills-owned interfaces, prioritize task fit and workbench usability over editorial composition or decorative styling. External visual references must be adapted to the product rather than copied. The former `style-reservoir` catalog remains retired.
+## DESIGN.md adaptation
 
-For external product work where the user's project lacks a direction, the priority order above still governs: explicit user requirements and the project's own `DESIGN.md`/token system win. Do not export Wabi-Press onto foreign products without explicit user intent.
-
-## DESIGN.md adaptation layer
-
-DESIGN.md is a visual input format, not a substitute for an AzSkills behavior contract.
-
-Use design-system/SKILL.md for ingestion, normalization, reconciliation, and provenance. Keep this document as the shared visual-reasoning layer.
-
-Two-layer model: machine-readable tokens provide exact values; Markdown prose provides intent, hierarchy, usage, and exceptions.
-
-Canonical mapping: Overview/theme → visual thesis; Colors → semantic colors; Typography → roles; Layout → spacing/grid/composition; Elevation → surfaces; Shapes → geometry; Components → component/state; Responsive → executable QA; Agent Prompt Guide → convenience only.
-
-For AzSkills-owned visual surfaces, the repository root [`DESIGN.md`](DESIGN.md) is the local visual source of truth. Apply it before optional external style references to README assets, presentation defaults, shared examples, and project-authored banners. External design systems inform methodology; they do not override the repository-owned semantic token contract.
-
-Evidence levels: verified-token, verified-prose, inferred-usage, implementation-choice, unresolved.
-
-A collection of design systems is a reference corpus, not a composite system. Do not mix unrelated brands without explicit user intent.
-
-## 1. Context before aesthetics
-
-Before substantial visual work, establish:
+DESIGN.md is a visual input format, not a behavior contract. Use
+[`design-system`](design-system/SKILL.md) for ingestion, normalization,
+reconciliation, and provenance.
 
 ```text
-Product / purpose:
-Primary user:
-Primary task:
-Usage context:
-Content density:
-Existing identity:
-Supported locales:
-Primary input methods:
-Technical stack:
-Performance constraints:
-Accessibility baseline:
+Overview -> visual thesis
+Colors -> semantic color roles
+Typography -> type roles
+Layout -> spacing and composition
+Elevation -> surfaces
+Shapes -> geometry
+Components -> component and state matrix
+Do's and Don'ts -> guardrails
+Responsive -> executable QA
+Agent Prompt Guide -> non-normative convenience
 ```
 
-Do not let a fashionable visual pattern replace product understanding.
-
-## 2. One visual thesis
-
-Choose a coherent direction using product context rather than assembling isolated trends.
-
-Useful axes:
-
-- minimal ↔ expressive
-- editorial ↔ technical
-- calm ↔ energetic
-- formal ↔ playful
-- organic ↔ geometric
-- flat ↔ dimensional
-- dense ↔ spacious
-
-Use one primary direction and spend most visual boldness on one or two signature ideas.
-
-Reject generic convergence such as arbitrary purple-gradient SaaS layouts, interchangeable card grids, unmotivated glassmorphism, excessive pills, emoji iconography, and decoration without a communication job.
-
-## 3. System before detail
-
-Use:
-
-```text
-Primitive → Semantic → Component → State
-```
-
-Build reusable tokens for color, typography, spacing, geometry, borders, elevation, and motion before scattering raw values.
-
-For larger products, maintain one master source of truth with explicit page-level overrides. Never create parallel token systems for individual routes without a real boundary.
-
-## 4. Composition before components
-
-Start with task hierarchy, reading order, alignment, grouping, density, and focal points.
-
-Cards, pills, badges, and dividers are component primitives. They are not a page architecture by themselves.
-
-Useful composition patterns include hero + focal visual, asymmetric editorial split, evidence + annotation, timeline spine, comparison matrix, system diagram, full-bleed visual + typographic anchor, and content-first operational panels.
-
-## 5. Typography is structural
-
-Typography defines hierarchy, density, and readability. Establish roles for display, heading, body, label, metadata, numeric data, and controls.
-
-Verify font availability, fallback behavior, glyph coverage, line-height, wrapping, line length, and multilingual expansion.
-
-Do not shrink type to conceal an overloaded information architecture.
-
-## 6. Color is semantic
-
-Give color explicit roles for canvas, surfaces, text, muted content, accent, focus, selection, and status.
-
-Where the target browser baseline allows it, perceptually grounded color spaces such as OKLCH are useful for constructing consistent lightness/chroma relationships. The implementation should still expose semantic tokens rather than making components depend on raw coordinates.
-
-Light and dark themes must be validated as separate contrast contexts.
-
-Never use color alone for critical state or meaning.
-
-## 7. Modern CSS, used deliberately
-
-When compatible with the project baseline, prefer native CSS capabilities that improve maintainability or component responsiveness:
-
-- custom properties
-- cascade layers
-- native nesting
-- `:has()` for meaningful parent-aware states
-- container queries for component-driven responsiveness
-- subgrid for shared alignment
-- `aspect-ratio` for media geometry
-- `clamp()` for fluid sizing
-- logical properties for direction-aware layouts
-
-Modern CSS is a means, not a design goal. Preserve the project's compatibility and architecture instead of introducing technology for its own sake.
-
-## 8. Responsive behavior is behavioral
-
-For each component decide whether it stays anchored, compresses, wraps, reflows, collapses, scrolls, moves to secondary navigation, progressively discloses, or disappears only when genuinely non-essential.
-
-Prefer content-driven or container-aware thresholds when the component's own width is the relevant constraint.
-
-Check narrow, intermediate, and wide layouts rather than only desktop/mobile endpoints.
-
-## 9. Interaction is part of visual quality
-
-Model:
-
-```text
-rest → hover → focus-visible → active → selected → disabled
-```
-
-When applicable:
-
-```text
-loading → success / error
-empty → populated
-collapsed → expanded
-open → closing
-offline → reconnecting
-```
-
-Provide static feedback in addition to motion. Never make hover the only way to discover an action.
-
-## 10. Accessibility baseline
-
-Prefer native semantics before ARIA. Every pointer interaction needs a keyboard path.
-
-Preserve visible focus, descriptive names for icon-only controls, usable target sizes, predictable focus restoration, and non-color cues for important state.
-
-Treat reduced motion, zoom, text scaling, and high-contrast needs as design variants rather than post-hoc patches.
-
-The executable baseline is defined precisely in [`ui-design/SKILL.md`](ui-design/SKILL.md).
-
-## 11. Motion as a system
-
-Motion is a semantic layer of the design system, not a collection of decorative effects.
-
-Before implementing motion, pass this gate in order:
-
-```text
-Should it move?
-    ↓
-What user-facing purpose does motion serve?
-    ↓
-How frequently is this interaction encountered?
-    ↓
-What state, spatial relationship, or attention change does motion explain?
-    ↓
-What is the cheapest mechanism that preserves that intent?
-```
-
-A legitimate outcome is **no animation**. Remove motion when it adds delay or distraction without improving orientation, continuity, feedback, or intentional craft.
-
-### Motion token model
-
-Keep motion in the same hierarchy used for other design decisions:
-
-```text
-Primitive → Semantic → Component → State
-```
-
-For a maintained product, define a compact vocabulary for frequency tier, purpose, duration, easing, spring behavior, transform origin, and reduced-motion variant. Reuse the product's existing motion tokens first.
-
-### Mechanism selection
-
-Prefer the least powerful mechanism that remains correct for the interaction:
-
-```text
-CSS transition
-    ↓
-CSS @starting-style
-    ↓
-CSS animation
-    ↓
-WAAPI
-    ↓
-spring / framework motion system
-```
-
-This is a dependency-discipline ladder, not a claim that one mechanism always performs better. Use CSS for predetermined motion, WAAPI when script-level control is required without a new library, and a spring/framework system only when interruption, velocity, layout coordination, or gesture state genuinely requires it.
-
-### Core motion rules
-
-- UI entry and response motion should start decisively; avoid slow `ease-in` routine feedback.
-- Trigger-anchored surfaces should preserve a meaningful transform origin; centered origin is correct for genuinely centered overlays.
-- Avoid `scale(0)` entrances; retain a visible geometric seed and combine small scale changes with opacity where appropriate.
-- Prefer `transform` and `opacity` for routine UI motion, but verify actual frame behavior under realistic load.
-- Rapidly retriggerable state should be interruptible; transitions or springs are preferable to restarting keyframes.
-- Gesture motion should preserve continuity and, where appropriate, velocity rather than hard-stopping at arbitrary boundaries.
-- Enter and exit behavior should tell a coherent spatial story unless product semantics require otherwise.
-- Deliberate user-controlled phases may be slower than the system response that follows them.
-- Stagger is an optional narrative device for grouped entrances and must never block interaction.
-- Hover motion must be gated by actual pointer capability rather than inferred from viewport width.
-
-### Accessibility and platform capability
-
-Reduced motion is a behavior variant, not an afterthought. Preserve semantic feedback and useful opacity/color transitions while removing unnecessary movement.
-
-```css
-@media (prefers-reduced-motion: reduce) {
-  /* preserve state feedback; reduce spatial movement */
-}
-
-@media (hover: hover) and (pointer: fine) {
-  /* hover-specific motion only */
-}
-```
-
-### Cross-Skill composition
-
-Use focused motion Skills only when their responsibility adds value:
-
-```text
-new / substantial UI
-    ↓
-frontend-architecture
-    ↓
-ui-design
-    ├── rare-ui-motion     → choose and translate a distinctive interaction pattern
-    ├── ui-motion          → construct motion from the host motion system
-    ├── ui-motion-review   → review existing motion
-    └── ui-motion-audit    → audit motion + find opportunities
-```
-
-`ui-aesthetics` remains the visual-judgment layer. Use `rare-ui-motion` only when a distinctive, motion-led pattern is a meaningful design choice; it adapts the idea to the host system rather than prescribing a brand theme or copying a component. When motion is the main defect, hand off implementation-level findings to `ui-motion-review`; for codebase-wide discovery use `ui-motion-audit`. `svg-animation` retains ownership of SVG-specific output constraints.
-
-Detailed values, recipes, terminology, and audit criteria live under [`ui-motion/references/animation-standards.md`](ui-motion/references/animation-standards.md) and [`ui-motion/references/animation-vocabulary.md`](ui-motion/references/animation-vocabulary.md) so this shared layer remains cross-artifact rather than becoming a second motion Skill.
-
-## 12. Semantic icon morphing
-
-Icon animation is part of the frontend motion system, not a decorative afterthought.
-
-When two icons represent a meaningful state transition and their geometry can preserve continuity, prefer a semantic morph over an arbitrary fade, spin, or hard swap. Typical candidates include menu ↔ close, play ↔ pause, add ↔ check, expand ↔ collapse, visibility ↔ hidden, lock ↔ unlock, search ↔ cancel, and directional arrow changes.
-
-Use a morph only when the intermediate geometry remains legible. Unrelated concepts, incompatible shapes, filled glyph systems, or transitions where motion obscures meaning should use a normal icon swap.
-
-The semantic state remains owned by the product component. The animation implementation should remain an implementation detail:
-
-```text
-state → icon A / icon B → morph plan → interruptible motion → canonical target
-```
-
-For projects that need a reusable stroke-based SVG morph engine, `morphicons` is an approved implementation reference within `ui-design`. It provides a DOM-free morphing core, DOM driver, and bindings for React, Vue, Svelte, React Native, Astro, and custom elements. It can consume icon data or raw SVG `d` paths and supports uncontrolled state changes, controlled progress, and imperative sequences.
-
-Do not introduce `morphicons` when the project already has an equivalent icon-motion system. Extend the existing stack instead of creating a competing animation layer. Do not make a library dependency mandatory merely because the visual pattern is available.
-
-Geometry matters:
-
-- prefer stroke-centered SVG icons
-- prefer a shared coordinate system such as `24 × 24`
-- keep stroke width, caps, joins, and optical size consistent
-- normalize off-grid icon packs once before runtime when required
-- inspect actual SVG geometry rather than assuming compatibility from icon names
-
-Motion quality matters:
-
-- let rotation emerge from icon geometry when the shapes are congruent under rotation
-- avoid raw coordinate interpolation that collapses rotational motion into shrink/shear
-- make morphs interruptible so rapid state changes do not snap through stale endpoints
-- settle to the canonical target geometry
-- keep frequent control-state morphs brief and aligned with the product motion tokens
-
-Accessibility rules remain authoritative:
-
-- never make the morph the only signal for state
-- keep accessible labels and control semantics synchronized with the current state
-- preserve visible focus independently of icon motion
-- honor the project's reduced-motion policy
-- when using `morphicons`, opt into user preference behavior such as `reducedMotion="user"` where appropriate rather than silently ignoring `prefers-reduced-motion`
-
-For detailed implementation patterns and QA checks, see [`ui-design/icon-morphing.md`](ui-design/icon-morphing.md).
-
-## 13. Performance is part of design
-
-Do not treat visual quality and runtime performance as separate concerns.
-
-Avoid unnecessary layout animation, large-area blur, continuous decorative loops, uncontrolled parallax, repeated synchronous measurement, and gratuitous `will-change`.
-
-Reserve media geometry, control layout shift, and keep high-density surfaces responsive on mid-range devices.
-
-For icon morphing specifically, prefer shared scheduling across active instances, avoid re-planning on every render, cache reusable normalized geometry where the implementation permits it, and stop work as soon as a morph settles.
-
-## 14. Internationalization is layout
-
-Use stable message keys. Test localized strings in controls, labels, placeholders, tooltips, toasts, validation errors, and dynamic states.
-
-Account for text expansion, number/date formatting, and RTL where relevant. Prefer logical CSS properties when direction matters.
-
-Do not translate user data, IDs, filenames, or identifiers as though they were UI strings.
-
-## 15. Content clarity
-
-Visual polish cannot compensate for ambiguous copy.
-
-Action labels should describe outcomes. Important errors should communicate:
-
-```text
-problem → impact → recovery action
-```
-
-Use concise helper text only when it resolves a real ambiguity; do not use tiny type to save layout space.
-
-## 16. Hardening mindset
-
-A production interface must survive more than the happy path.
-
-Check long strings, empty datasets, large datasets, slow requests, failed submissions, duplicate actions, partial data, permission boundaries, offline states, narrow widths, dark mode, large text, and reduced motion.
-
-## 17. Visual QA
-
-Whenever rendered output is available, inspect the actual result rather than trusting source code alone.
-
-Look for:
-
-- hierarchy drift
-- inconsistent spacing or radii
-- token drift
-- weak focus visibility
-- awkward wrapping
-- clipping / overflow
-- bad dark-mode contrast
-- excessive decoration
-- icon misalignment
-- motion that feels slow or theatrical
-
-For icon morphs, explicitly inspect the first frame, intermediate geometry, interruption behavior, settled canonical path, reduced-motion behavior, and visual consistency with static icons.
-
-Fix systemic issues before isolated polish.
-
-## 18. Inheritance model
-
-Visual and UI Skills should not require users to name an external methodology. Apply this layer silently whenever the active Skill is visual.
-
-Specific Skills remain authoritative about their own domain:
-
-- `ui-design` owns frontend UI architecture, interaction, responsiveness, accessibility, motion, iconography, and QA.
-- `logo-generator` owns logo construction and identity-specific constraints.
-- `ip-as-logo` owns extreme character/IP simplification.
-- `frontend-slides` owns fixed-stage presentation implementation.
-- `readme-craft` owns GitHub-safe documentation composition.
-- `brotato-art` owns its game-art visual language.
-
-This layer provides shared reasoning around hierarchy, visual thesis, semantic tokens, typography, color, responsiveness, accessibility, motion, iconography, density, internationalization, performance, anti-pattern filtering, and quality control.
-
-## Provenance
-
-This layer is an original AzSkills synthesis informed by public material from:
-
-- https://github.com/anthropics/skills/tree/main/skills/frontend-design
-- https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
-- https://github.com/aladicf/better-web-ui
-- https://github.com/kozz36/frontend-designer-skill
-- https://www.ui-skills.com/skills/frontend
-
-The semantic icon-morphing portion is additionally informed by the public `morphicons` project:
-
-- https://github.com/guillermolg00/morphicons
-- https://www.morphicons.com
-
-AzSkills does not vendor these repositories, generated databases, private/internal material, or repository-specific implementation. Detailed attribution is maintained in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+Evidence levels are `verified-token`, `verified-prose`, `inferred-usage`,
+`implementation-choice`, and `unresolved`. Never present an inference as a
+source fact.
+
+## Visual owner map
+
+The complete registry is [`skills.json`](skills.json). This map names only the
+owners that inherit this visual layer:
+
+| Decision | Owner |
+| :--- | :--- |
+| DESIGN.md source, tokens, semantics, provenance | `design-system` |
+| Interface hierarchy, components, states, responsive behavior | `ui-design` |
+| Motion construction, review, audit, SVG | `ui-motion` |
+| Identity, logo, character mark | `logo-generator` |
+| Photograph-derived abstract editorial treatment | `photo-abstract-editorial` |
+| Fixed-stage slide narrative and composition | `frontend-slides` |
+| Programmatic video and frame determinism | `remotion-production` |
+| GitHub README | `readme-craft` |
+| Steam Workshop page | `steam-mod-page` |
+
+## Inheritance
+
+Visual Skills load this layer when they need visual judgment. Never copy these
+paragraphs into another Skill. Do not apply this layer to backend, data,
+infrastructure, or non-visual scripting work.

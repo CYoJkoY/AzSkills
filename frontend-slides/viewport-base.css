@@ -1,8 +1,10 @@
 /* ===========================================
    FIXED 16:9 STAGE: MANDATORY BASE STYLES
    Slides are authored at 1920×1080 and scaled as a whole.
-   Visual system: Wabi-Press (侘寂刊本) — the only AzSkills-owned
-   art direction. Token source: ../design-system/wabi-press.css.
+   Visual system: Wabi-Press is the default AzSkills-owned art direction.
+   The palette and type tokens below are defaults; a documented one-off
+   direction may override them while keeping the stage and accessibility
+   rules. Token source: ../design-system/wabi-press.css.
    =========================================== */
 
 :root {
@@ -26,6 +28,7 @@
   /* Wabi-Press physical motion */
   --ease-paper: cubic-bezier(0.25, 1, 0.4, 1);
   --ease-ink: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-normal: 280ms;
 }
 
 [data-theme="dark"] {

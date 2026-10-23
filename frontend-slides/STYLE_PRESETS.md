@@ -2,17 +2,17 @@
 
 Curated art directions for Frontend Slides. A preset is a starting point, not a template to copy mechanically. The deck's subject, audience, and visual thesis always outrank the preset.
 
-**Mandatory base:** include the complete [viewport-base.css](viewport-base.css) in every generated presentation.
+**Base scaffold:** include the complete [viewport-base.css](viewport-base.css) in every generated presentation. It supplies the fixed stage, reduced-motion, and accessibility scaffold plus the Wabi-Press default tokens; a documented direction may override palette and type without replacing the scaffold.
 
-## The Single AzSkills Art Direction
+## Default Art Direction
 
-AzSkills owns exactly one visual language. All AzSkills-owned decks — examples, documentation, system diagrams, Skill-library explainers, and any presentation without a stronger subject-specific requirement — are built from **Wabi-Press (侘寂刊本)**. There is no preset catalog of alternative styles: the former preset collection was retired together with the Material 3-inspired identity, and no other palette may reappear in owned surfaces.
+AzSkills-owned decks are subject-led. Use **Wabi-Press** as the default editorial direction for narrative, research, and documentation decks when the brief does not establish a stronger visual thesis. It is not a mandatory skin for every presentation. Interactive chrome follows the Workbench contract in the root [DESIGN.md](../DESIGN.md); external brand decks follow their own identity. Do not mix unrelated palettes inside one deck.
 
-### Wabi-Press · 侘寂刊本
+### Wabi-Press
 
 **Vibe:** paper-warm, ink-graded, quietly authoritative — a printed folio rather than a dashboard.
 
-**Composition:** washi canvas (light `#F5F3EC` stage / `#FAF9F5` slide, or inkstone `#131416` / `#1B1C20` for dark-intent decks) + serif display anchor + hairline-bound blocks + generous 間 (whitespace as an active element). Asymmetric 5/7 or 3/6/3 structure preferred over 50/50 splits.
+**Composition:** washi canvas (light `#F5F3EC` stage / `#FAF9F5` slide, or inkstone `#131416` / `#1B1C20` for dark-intent decks) + serif display anchor + hairline-bound blocks + generous ma (whitespace as an active element). Asymmetric 5/7 or 3/6/3 structure preferred over 50/50 splits.
 
 **Typography:**
 - Display: `"Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", Georgia, serif` — weight 500 only, line-height 1.2–1.35, no bold bloat.
@@ -23,11 +23,11 @@ AzSkills owns exactly one visual language. All AzSkills-owned decks — examples
 
 **Best for:** every AzSkills-owned presentation by default; research, documentation, and narrative talks are especially well served.
 
-**Token source:** [../DESIGN.md](../DESIGN.md), executed from [../design-system/wabi-press.css](../design-system/wabi-press.css). Stage-mapped tokens live in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) §2 and [viewport-base.css](viewport-base.css).
+**Token source:** interactive chrome follows [../DESIGN.md](../DESIGN.md). Slide tokens live in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) §2 and [viewport-base.css](viewport-base.css), executing the palette in [../design-system/wabi-press.css](../design-system/wabi-press.css).
 
 ### When a subject genuinely requires another direction
 
-Only when the user explicitly requests a non-Wabi-Press direction, or the subject's evidence makes Wabi-Press incoherent (for example, a deck that must mimic an external brand the user provides), a custom direction may be designed. In that case it is a one-off art direction for that deck: document the thesis, keep the fixed-stage and accessibility contracts, and never register it as an AzSkills preset or let it leak into owned repository surfaces.
+When the user requests another direction, or the subject's evidence makes Wabi-Press incoherent (for example, a deck that must mimic an external brand the user provides), design a custom direction. In that case it is a one-off art direction for that deck: document the thesis, keep the fixed-stage and accessibility contracts, and never register it as an AzSkills preset or let it leak into owned repository surfaces.
 
 ## Font Pairing (Wabi-Press)
 
@@ -69,7 +69,7 @@ When producing style previews for a user, keep Wabi-Press as the default and dif
 
 Do not use Inter/Roboto/Arial/system fonts as expressive headline faces (the body stack is not a display face), purple-gradient-on-white clichés, decorative blobs without purpose, all-centered layouts, excessive glassmorphism, default chart styling, spring/bounce motion, or motion on every element.
 
-The final question is not "does this look stylish?" It is "does every visual decision support the deck's message, and does it read as Wabi-Press?"
+The final question is not "does this look stylish?" It is "does every visual decision support the deck's message, and does it read as the chosen direction?" Wabi-Press is the answer unless a stronger brief establishes a documented one-off direction.
 
 ## CSS Gotcha
 
