@@ -5,8 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "**/SKILL.md"
-      - "*/references/**"
+      - "**/*.md"
       - "skills.json"
       - "SKILL-SYSTEM.md"
       - "design-intelligence.md"

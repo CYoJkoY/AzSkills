@@ -14,6 +14,7 @@ const root = process.cwd();
 const registryPath = path.join(root, "skills.json");
 const readmePath = path.join(root, "README.md");
 const errors = [];
+const checkedFiles = new Set();
 let registry;
 
 const fail = (message) => errors.push(message);
@@ -148,6 +149,12 @@ async function checkLinks(file, text) {
       await assertTargetExists(file, match[2]);
     }
   }
+}
+
+async function scanLinks(file, text) {
+  if (checkedFiles.has(file)) return;
+  checkedFiles.add(file);
+  await checkLinks(file, text);
 }
 
 async function main() {
@@ -337,7 +344,7 @@ async function main() {
       }
     }
 
-    await checkLinks(file, text);
+    await scanLinks(file, text);
   }
 
   let readme = "";
@@ -347,7 +354,7 @@ async function main() {
     fail("README.md: missing");
   }
   if (readme) {
-    await checkLinks(readmePath, readme);
+    await scanLinks(readmePath, readme);
     const catalog = readme.split("<!-- SKILL-CATALOG:START -->")[1]?.split("<!-- SKILL-CATALOG:END -->")[0];
     const aliases = readme.split("<!-- SKILL-ALIASES:START -->")[1]?.split("<!-- SKILL-ALIASES:END -->")[0];
     if (!catalog) fail("README.md: missing SKILL-CATALOG block");
@@ -441,7 +448,7 @@ async function main() {
   for (const name of ["SKILL-SYSTEM.md", "design-intelligence.md", "THIRD_PARTY_NOTICES.md", "DESIGN.md"]) {
     const file = path.join(root, name);
     try {
-      await checkLinks(file, await readFile(file, "utf8"));
+      await scanLinks(file, await readFile(file, "utf8"));
     } catch {
       fail(name + ": missing");
     }
@@ -456,8 +463,12 @@ async function main() {
     const { body } = parseFrontmatter(text, skill.path);
     if (!hasSection(body, "References")) fail(skill.path + ": references directory exists but section is missing");
     for (const reference of files.filter((item) => item.startsWith(refDir + path.sep) && item.endsWith(".md"))) {
-      await checkLinks(reference, await readFile(reference, "utf8"));
+      await scanLinks(reference, await readFile(reference, "utf8"));
     }
+  }
+
+  for (const file of files.filter((item) => item.endsWith(".md"))) {
+    await scanLinks(file, await readFile(file, "utf8"));
   }
 
   finish();
