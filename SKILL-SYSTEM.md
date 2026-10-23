@@ -218,11 +218,13 @@ The validator enforces the machine-checkable part of this document:
 - canonical and alias line budgets;
 - relative link integrity across every Markdown file, including reference-index paths and HTML asset sources;
 - catalog, alias, mode, and issue-template parity;
-- TUI preview parity with the canonical registry, checked by `design-system/tui/preview.mjs --check`;
 - no unregistered `SKILL.md` files;
 - ASCII-only Skill metadata, canonical contracts, and aliases;
 - link integrity in the root system, design, and provenance documents.
 - canonical Skill choices in issue templates.
+
+CI also runs `node design-system/tui/preview.mjs --check`, which fails when the
+terminal preview drifts from the registry.
 
 Passing validation does not prove design quality. It proves the assembly is
 coherent enough for human review.

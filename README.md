@@ -502,7 +502,7 @@ Before creating a new Skill:
 4. Use the contract template; keep the canonical file at or below 280 lines.
 5. Put depth in a reference and link it from `## References`.
 6. Record provenance and licensing in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
-7. Run `node scripts/validate-skills.mjs` before opening the PR.
+7. Run `node scripts/validate-skills.mjs` and `node design-system/tui/preview.mjs --check` before opening the PR.
 
 For Skill proposals and improvements, use the repository's structured [Issue Forms](https://github.com/CYoJkoY/AzSkills/issues/new/choose).
 

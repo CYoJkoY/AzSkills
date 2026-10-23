@@ -2,7 +2,7 @@
 
 Curated art directions for Frontend Slides. A preset is a starting point, not a template to copy mechanically. The deck's subject, audience, and visual thesis always outrank the preset.
 
-**Base scaffold:** include the complete [viewport-base.css](viewport-base.css) in every generated presentation. It supplies the fixed stage, reduced-motion, and accessibility scaffold, not an art direction.
+**Base scaffold:** include the complete [viewport-base.css](viewport-base.css) in every generated presentation. It supplies the fixed stage, reduced-motion, and accessibility scaffold plus the Wabi-Press default tokens; a documented direction may override palette and type without replacing the scaffold.
 
 ## Default Art Direction
 
@@ -69,7 +69,7 @@ When producing style previews for a user, keep Wabi-Press as the default and dif
 
 Do not use Inter/Roboto/Arial/system fonts as expressive headline faces (the body stack is not a display face), purple-gradient-on-white clichés, decorative blobs without purpose, all-centered layouts, excessive glassmorphism, default chart styling, spring/bounce motion, or motion on every element.
 
-The final question is not "does this look stylish?" It is "does every visual decision support the deck's message, and does it read as Wabi-Press?"
+The final question is not "does this look stylish?" It is "does every visual decision support the deck's message, and does it read as the chosen direction?" Wabi-Press is the answer unless a stronger brief establishes a documented one-off direction.
 
 ## CSS Gotcha
 
