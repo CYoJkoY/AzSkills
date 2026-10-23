@@ -265,8 +265,8 @@ function makeStyle(colorMode, theme) {
     }
 
     if (colorMode === "256") {
-      if (role === "muted") return ["38;5;244"];
-      if (role === "border") return ["38;5;240"];
+      if (role === "muted") return ["38;5;" + (theme === "dark" ? "246" : "244")];
+      if (role === "border") return ["38;5;" + (theme === "dark" ? "238" : "240")];
       if (role === "accent") return ["38;5;" + (theme === "dark" ? "153" : "26")];
       if (role === "accentBold") {
         return ["38;5;" + (theme === "dark" ? "153" : "26"), "1"];
@@ -801,16 +801,26 @@ function runCheck() {
   auditSafety(unicodeFrame, "unicode sample", issues);
 
   for (const color of ["truecolor", "256", "16", "none"]) {
-    frames += 1;
-    const fixture = stateFixture(color, "dark", false);
-    const glyph = glyphs(false);
-    for (const cue of [glyph.marker, "[", glyph.check, "!", glyph.cross]) {
-      if (!fixture.includes(cue)) {
-        issues.push("state cue " + cue + " missing in " + color);
+    for (const theme of ["light", "dark"]) {
+      frames += 1;
+      const fixture = stateFixture(color, theme, false);
+      const glyph = glyphs(false);
+      for (const cue of [glyph.marker, "[", glyph.check, "!", glyph.cross]) {
+        if (!fixture.includes(cue)) {
+          issues.push("state cue " + cue + " missing in " + color + "/" + theme);
+        }
       }
-    }
-    if (color === "none" && fixture.includes("\x1b")) {
-      issues.push("ANSI in no-colour state fixture");
+      if (color !== "none") {
+        if (!fixture.includes("\x1b[1m")) {
+          issues.push("selection bold missing in " + color + "/" + theme);
+        }
+        if (!fixture.includes("\x1b[4m")) {
+          issues.push("focus underline missing in " + color + "/" + theme);
+        }
+      }
+      if (color === "none" && fixture.includes("\x1b")) {
+        issues.push("ANSI in no-colour state fixture");
+      }
     }
   }
   frames += 1;
