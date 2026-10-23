@@ -1,6 +1,6 @@
 ---
 name: azskills-workbench
-description: Repository-owned interface design contract for AzSkills. A practical, VSCodium-inspired workbench system prioritizing navigation, search, dense technical content, keyboard operation, responsive layouts, and accessible states. Defines one 4px spacing ramp, one icon grid, explicit colour-state layering, and per-surface adaptation rules so the workbench does not leak into slides, identity, or editorial output.
+description: Repository-owned interface design contract for AzSkills. A practical, VSCodium-inspired workbench system prioritizing navigation, search, dense technical content, keyboard operation, responsive layouts, and accessible states. Defines one 4px spacing ramp, one icon grid, a cell-based terminal rendering target, explicit colour-state layering, and per-surface adaptation rules so the workbench does not leak into slides, identity, or editorial output.
 ---
 
 # AzSkills Workbench Design System
@@ -9,7 +9,7 @@ AzSkills uses a **workbench-first** interface model inspired by the information 
 
 The system is designed for a technical Skill library: frequent navigation, discovery, reading long instructions, comparing related capabilities, and moving between tasks. Aesthetic polish must not reduce scan speed, usable content area, keyboard access, or information density.
 
-The executable authority is `design-system/wabi-press.css`, `design-system/wabi-press-theme.ts`, and `design-system/preview/index.html`. These artifacts must express the same workbench contract. The stylesheet carries two layers with different scopes: the workbench layer applies by default, and the historical washi editorial layer applies only when `data-surface="editorial"` is set on the `<html>` root. See [Layer scope](#layer-scope).
+The executable authority is `design-system/wabi-press.css`, `design-system/wabi-press-theme.ts`, `design-system/preview/index.html`, and `design-system/tui/preview.mjs`. These artifacts must express the same workbench contract. The stylesheet carries two layers with different scopes: the workbench layer applies by default, and the historical washi editorial layer applies only when `data-surface="editorial"` is set on the `<html>` root. See [Layer scope](#layer-scope).
 
 ## Visual thesis
 
@@ -17,7 +17,7 @@ The executable authority is `design-system/wabi-press.css`, `design-system/wabi-
 Purpose: make technical capabilities discoverable and usable with minimal navigation cost.
 Model: workbench shell + contextual navigation + focused content + optional auxiliary panel.
 Tone: quiet, precise, neutral, information-dense; functional before decorative.
-Signature: compact chrome, clear active rail, readable content canvas, keyboard-first command/search entry, and persistent status feedback.
+Signature: compact chrome, clear active rail, readable content canvas, keyboard-first command/search entry, persistent status feedback, and a terminal rendering that preserves the same information hierarchy.
 ```
 
 ## Reference provenance
@@ -64,6 +64,18 @@ Use only regions justified by the task; do not add empty chrome for visual imita
 - **Status bar:** concise current context such as selected skill, validation state, or workspace scope. Do not use it for marketing copy.
 
 A single-column content view is preferred on narrow screens. Collapse the activity rail to a compact navigation control, convert sidebars to drawers, and move auxiliary panels below or behind tabs. No horizontal page overflow at 320 CSS px.
+
+## Render targets
+
+The workbench contract has two rendering targets. They share information architecture, semantic roles, state names, and keyboard expectations.
+
+```text
+GUI   CSS/HTML. Pixel layout, 4px spacing ramp, radius tiers, 2px focus ring, theme tokens.
+TUI   ANSI text. Cell grid, row-based spacing, 1-cell glyphs, reverse or bracketed focus,
+      terminal-owned background and font.
+```
+
+Render target is orthogonal to the two CSS layers. The editorial layer is a GUI reading surface; it has no TUI counterpart. A terminal implementation maps the workbench layer. It does not add a third palette or a third CSS layer.
 
 ## Primitive tokens
 
@@ -265,6 +277,150 @@ Grouped selection   accent outline on the container, a marker on each editable c
 
 A group outline with no visible children is a bug: if the parts are not independently actionable, it is a simple selection. Colour never carries the difference alone.
 
+## Terminal / TUI contract
+
+The terminal target reuses the workbench vocabulary. It does not simulate a GUI: no pixel dimensions, rounded corners, shadows, hover, or font choice. A TUI is successful when a keyboard user can identify context, move, filter, read, and act without colour or a mouse.
+
+Executable preview: `node design-system/tui/preview.mjs --width 120 --color truecolor`. The renderer accepts 24-240 columns; the `--check` matrix covers 40-160 columns, and plain narrow output covers 24-39 columns. It fails on width overflow, ANSI leakage, missing state cues, or missing required labels.
+
+### Cell grid and width classes
+
+```text
+< 40 cells    Refuse full-screen mode. Print plain text, one action per line.
+40-59         Single pane. Show list or detail; Enter opens, Esc returns.
+60-99         Two panes. List plus detail. No activity rail.
+100-139       Three panes. 4-cell activity rail, list, detail.
+140+          Three panes. Widen detail; cap prose at 100 cells.
+```
+
+- Layout uses integer cells and rows only. A blank row is a layout unit, not padding.
+- Size classes use terminal columns, not window pixels. Reflow on resize.
+- Preserve selection, focus, query, and scroll anchor across a resize.
+- At any width, critical content wraps or truncates inside the frame. Horizontal scrolling is not a fallback.
+
+### Terminal layout
+
+| Region | Extent | Rule |
+| :--- | :--- | :--- |
+| Header | 1 row | Product and current context left; theme, density, or job state right. |
+| Rule | 1 row | Optional single hairline. Never stack rules. |
+| Workspace | Remaining rows | Rail, list, and detail according to the width class. |
+| Prompt | 1 row, while active | Search or command input with a visible label and cursor. |
+| Status | 1 row | Context and operation state left; 3-5 contextual keys right. |
+
+- Do not draw a full outer frame. It costs two columns and two rows and adds no hierarchy. A modal overlay may use one single-line frame.
+- Give the detail pane the flexible width. Cap rail at 4 cells and the list at 24-32 cells.
+- Right-align counts and numeric columns. Keep labels left-aligned.
+- A pane that has no content is omitted; do not reserve an empty column.
+
+### Terminal colour and attributes
+
+| Role | 16-colour | 256 light / dark | Truecolor light | Truecolor dark | Plain fallback |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Text | terminal default | terminal default | terminal default | terminal default | same text |
+| Muted | bright black (90) | 244 / 246 | `#666C78` | `#9299A5` | text plus label |
+| Accent | blue (34) | 26 / 153 | `#0B57D0` | `#A8C7FA` | marker |
+| Border | bright black (90) | 240 / 238 | `#D9DDE3` | `#383B43` | ASCII rule |
+| Selection | accent marker + bold | marker + bold | marker + bold | marker + bold | `>` marker |
+| Focus | reverse or underline plus brackets | same | same | same | `[ ]` brackets |
+| Success | green (32) | 28 / 114 | `#137333` | `#81C995` | `OK` |
+| Warning | yellow (33) | 130 / 221 | `#8A4B00` | `#FDD663` | `WARN` |
+| Danger | red (31) | 160 / 217 | `#B3261E` | `#F2B8B5` | `ERR` |
+
+- Default to 16 colours. Use 256 or truecolor only when the terminal advertises support and the user has not disabled colour. The truecolor columns are evaluation targets for a terminal with a known light or dark palette; brand fidelity is not required.
+- Never paint the full canvas background. Let the terminal own background, foreground defaults, font, cursor, and selection colours.
+- Pair every attribute with a glyph or word. Bold, dim, underline, and reverse are reinforcement, not the state.
+- `NO_COLOR`, `CLICOLOR=0`, or `TERM=dumb` disables ANSI colour, including when a colour mode is requested explicitly. Plain output must remain complete.
+- Do not use dim as the only disabled signal, and do not use blink.
+- Test the interface against a light terminal palette and a dark terminal palette. A TUI that only works on the author's theme is not finished.
+
+### Terminal spacing and typography
+
+```text
+Inline gap       1 cell
+List or menu     1 row per item, no blank rows inside
+Group gap        1 blank row, detail pane only
+Section gap      1 blank row compact; 2 blank rows comfortable, detail at 100+
+Pane gutter      2 cells at 60+ columns: one rule plus one space
+```
+
+- Body measure is 72-100 cells in the wide class. Below that, the detail pane sets the measure; at 100 columns it is 64 cells. Long prose wraps at word and grapheme boundaries; never break a wide glyph.
+- Use bold for the title and the active item. Use underline for links only. Avoid italics for critical text because terminal italic support is inconsistent.
+- Short section labels may use uppercase. Sentences use sentence case. Do not uppercase prose.
+- Right-align numbers in tables. Keep names and prose left-aligned.
+- Truncate with `…` in Unicode mode and `...` in ASCII mode. Middle-truncate paths so the filename stays visible.
+- East Asian wide characters occupy two cells; combining marks occupy zero. Wrap and truncate by grapheme, not by code unit.
+- Ambiguous-width glyphs such as `─`, `│`, `▌`, `…`, `✓`, `×`, and `•` depend on terminal configuration. ASCII mode is the portable path; never use an ambiguous glyph as the only alignment device.
+
+### Terminal glyphs
+
+```text
+Required ASCII   >  v  -  *  +  x  !  ?  OK  ERR  ...
+Optional Unicode  ▌  ›  ✓  ×  …  ─  │
+```
+
+- Every functional glyph fits one cell. Do not use emoji, Nerd Font icons, Private Use Area characters, or double-width symbols for alignment.
+- Every glyph has a text label nearby or in the status/help area.
+- Selection uses a marker plus emphasis. A filled glyph means resolved or complete, never decoration.
+- The optional Unicode set is an enhancement. The ASCII set must render the same states.
+
+### Terminal components
+
+```text
+Header bar      product, breadcrumb, state; one row
+Activity rail   four cells, one-letter destinations, active marker
+List            one item per row; marker, label, secondary metadata
+Detail          heading, metadata, prose, next actions
+Prompt          label, input, cursor, validation message
+Status bar      context left, contextual keys right
+Help overlay    keyboard map; close hint; at most 60% of width
+Table           header rule only; no vertical grid
+Progress        percent text plus a 10-cell bar
+Empty state     reason plus one next action
+```
+
+- Selected and focused are different states. Selection persists while focus moves; show both.
+- Focus uses reverse video or underline plus brackets. Selection uses a marker plus bold. Neither relies on colour.
+- Show at most five context keys in the status bar. Put the full map behind `?`.
+- Use a single-line frame only for a modal. Do not nest boxes.
+- When a list is longer than its viewport, expose position (`10/20`) or a scroll marker in the list header or status bar.
+- A terminal narrower than 40 columns uses the narrow plain formatter: one action per line, no frame, no horizontal rules, no ANSI.
+
+### Keyboard and focus
+
+- `/` opens search, `:` opens command entry, `?` opens help.
+- Arrow keys and `j`/`k` move; `g`/`G` jump to start/end; `Tab` moves focus; `Enter` opens; `Esc` goes back or cancels; `q` quits; `Ctrl+C` cancels the current operation.
+- One region owns focus at a time. The focused region exposes a visible boundary; the selected item remains marked when focus leaves.
+- Document every shortcut in help and show the context-relevant subset in the status bar.
+- Mouse support is optional. No action may require a pointer or hover.
+
+### Redraw, motion, and resize
+
+- Redraw by diffing the frame. Do not clear the screen on every keystroke. Restore the cursor on exit and on error.
+- No decorative motion. State changes are immediate. A spinner is allowed only for an operation longer than 150ms, in a TTY, at no more than 10 frames per second.
+- `NO_MOTION` or a reduced-motion preference replaces the spinner with static progress text and leaves the value visible.
+- Coalesce resize events and repaint once. Never write a frame wider than the current column count.
+
+### Terminal accessibility and safety
+
+- Provide `--plain` output: no ANSI, ASCII glyphs, stable line order, no cursor addressing. It must remain usable in logs, pipes, and screen readers.
+- Sanitize untrusted text before writing it to the terminal. Strip C0/C1 controls, ESC, OSC, BEL, and non-application CSI sequences. Never pass a skill file's escape sequences through to the terminal.
+- Do not emit OSC 8 hyperlinks from repository content. Show a URL as text, or emit a link only from trusted application chrome after an explicit opt-in.
+- Test at 40, 80, and 120 columns, with colour disabled, and with a light and a dark terminal palette.
+- Support localized labels and wide characters. Do not hard-code English label widths into column math.
+
+### GUI to TUI mapping
+
+| GUI expression | Terminal expression |
+| :--- | :--- |
+| Canvas and surface fills | Terminal default background; no full-screen fill |
+| 2px focus ring | Reverse video or underline plus brackets |
+| 4/6/12px radius | No radius; single-cell rules and spacing |
+| 4px spacing ramp | 1-cell inline gap; 1-2 row group gap |
+| 24px icon grid | 1-cell glyph with an ASCII fallback |
+| 34/26px row height | One terminal row |
+| Hover and pointer affordances | Focus and selection; mouse optional |
+
 ## Accessibility and responsiveness
 
 - Use semantic HTML and native TypeScript/CSS/HTML; no frontend framework or runtime dependency is required by this contract.
@@ -286,6 +442,7 @@ The workbench contract governs interactive, repository-owned UI. It does not gov
 | Logo and identity | Contrast discipline, single accent, grid construction | Own geometry system | 24px icon grid | Stroke weight, pill radius, UI tokens |
 | Hero and illustration art | Palette family, radius tiers, spacing rhythm | Decorative density, perspective, depth | Colour ramp values | Interactive state semantics |
 | Motion | 100–180ms state transitions, reduced-motion parity | Expressive motion for narrative surfaces | Easing tokens | Continuous decorative motion on tool surfaces |
+| Terminal UI | Cell grid, pane priorities, semantic roles, keyboard model, plain mode | One-cell glyphs with ASCII fallback; ANSI 16/256/truecolor | Pixel spacing, radius, shadows, hover | Full-screen paint, emoji, Nerd Font or PUA dependency |
 
 - A surface outside the first row still has to pass the accessibility and visual-QA requirements; it may set its own art direction.
 - Adaptation changes composition and emphasis. It never changes what a state colour means or how focus behaves.
@@ -306,6 +463,7 @@ Shared            Type stacks, the 8px editorial spacing module, measure, and ea
 - Set `data-surface=editorial` only on a long-form reading surface that benefits from the washi treatment. Never on a tool shell.
 - `data-surface=editorial` is a document-level switch on `<html>`. It does not isolate one article inside a workbench page: tokens, the body background, headings, and focus rules all key off the root element.
 - Do not add a third layer. A new surface either uses the workbench tokens, opts into the editorial layer, or is covered by the scenario matrix.
+- A terminal implementation is a render target of the workbench layer, not a CSS layer. Map the semantic roles in [Terminal colour and attributes](#terminal-colour-and-attributes); do not invent a second palette.
 - A component may reference semantic tokens from its own layer only. Cross-layer token use is drift.
 - The workbench uses a 2px focus ring. The editorial layer keeps its 1px ink line because its material rules forbid glow-like rings; both stay visible and offset.
 
@@ -332,3 +490,8 @@ The reference contributes proven workbench structure and interaction patterns. A
 - [ ] Selection exposes a non-colour cue; grouped selection shows child markers and a count.
 - [ ] The scenario matrix was applied: no workbench chrome reached slides, identity, or editorial surfaces.
 - [ ] The default surface renders the workbench layer; `data-surface="editorial"` renders the washi layer.
+- [ ] The TUI preview passes `node design-system/tui/preview.mjs --check` across 40-160 columns.
+- [ ] TUI plain mode contains no ANSI sequences and no non-ASCII glyphs; critical state remains readable.
+- [ ] TUI selection, focus, success, warning, and error survive `NO_COLOR` and a light or dark terminal palette.
+- [ ] CJK width, grapheme-safe truncation, and escape-sequence sanitization are covered.
+- [ ] No TUI surface paints the full background, uses emoji, or depends on Nerd Font or Private Use Area glyphs.

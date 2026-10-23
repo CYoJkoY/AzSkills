@@ -174,6 +174,8 @@ platform UI toolkit
 
 Do not introduce a WebView merely because the team is comfortable with frontend technologies.
 
+For an AzSkills-owned terminal interface, use the Terminal / TUI contract in [`DESIGN.md`](../DESIGN.md#terminal--tui-contract). It defines the cell grid, width classes, ANSI role mapping, keyboard model, and plain-mode fallback.
+
 ## 4. Decision tree
 
 Use this routing model:

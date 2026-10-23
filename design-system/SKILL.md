@@ -1,6 +1,6 @@
 ---
 name: design-system
-description: Consume, author, normalize, adapt, and verify DESIGN.md files as AzSkills-native visual contracts. The repository-owned canonical language is the workbench layer, with Wabi-Press (侘寂刊本) as its opt-in editorial reading surface; both execute from design-system/wabi-press.css. Use when a project provides DESIGN.md, a brand reference must become implementation rules, an AzSkills-owned surface needs styling, or a design contract needs validation.
+description: Consume, author, normalize, adapt, and verify DESIGN.md files as AzSkills-native visual contracts. The repository-owned canonical language is the workbench layer, with Wabi-Press as its opt-in editorial reading surface and a cell-based terminal target that shares the workbench semantics. Use when a project provides DESIGN.md, a brand reference must become implementation rules, an AzSkills-owned surface needs styling, or a design contract needs validation.
 ---
 
 # Design System
@@ -9,11 +9,12 @@ This Skill is the boundary between external DESIGN.md systems and AzSkills. It d
 
 ## Repository-owned language
 
-AzSkills owns one system with two scoped layers. The **workbench layer** is the default for every AzSkills-owned surface; the **Wabi-Press editorial layer** (侘寂刊本) is an opt-in reading surface for long-form prose. Both are documented in the root [`DESIGN.md`](../DESIGN.md) and executed from these artifacts:
+AzSkills owns one system with two scoped layers and two rendering targets. The **workbench layer** is the default for every AzSkills-owned surface; the **Wabi-Press editorial layer** is an opt-in reading surface for long-form prose. GUI output uses CSS; terminal output maps the workbench layer to a cell grid and ANSI attributes. Both layers and both targets are documented in the root [`DESIGN.md`](../DESIGN.md) and executed from these artifacts:
 
 - [`wabi-press.css`](wabi-press.css) — the complete token set: the `--wb-*` workbench palette with its accent ramp and spacing tiers, the `.wb-shell`, `.wb-sidebar`, `.wb-statusbar`, list, chip, button, and input primitives, and the `--bg-*`, `--text-*`, `--accent-cinnabar`, and `--accent-moss` washi tokens behind `html[data-surface="editorial"]`. It is the only CSS authority for AzSkills-owned surfaces.
 - [`wabi-press-theme.ts`](wabi-press-theme.ts) — native TypeScript theme controller (`localStorage` persistence, automatic `prefers-color-scheme` response, `[data-theme]` attribute). It drives both layers.
 - [`preview/index.html`](preview/index.html) — semantic HTML verification surface. It mounts the workbench shell by default and swaps to a standalone editorial view, so both layers, both themes, and both densities can be checked without a build step.
+- [`tui/preview.mjs`](tui/preview.mjs) - dependency-free terminal preview and conformance check. It renders 24-240 columns (CI matrix 40-160) in truecolor, 256-colour, 16-colour, and plain modes, and verifies cell width, state cues, ASCII fallback, and ANSI hygiene.
 
 Layer scope is normative:
 
@@ -21,12 +22,15 @@ Layer scope is normative:
 |---|---|---|
 | Repository UI, README art, demos, slide chrome | Workbench | none (default) |
 | Standalone long-form reading document | Editorial | `data-surface="editorial"` on `<html>` |
+| Terminal application or CLI surface | Workbench (TUI target) | none; ANSI generated at runtime |
 
 `data-surface` belongs on the `<html>` root of a standalone reading document, never on a tool shell or on one article inside a workbench page; the editorial layer does not provide article-level isolation. A component reads tokens from its own layer only.
 
+A terminal target is not a third CSS layer. It reuses the workbench information architecture and semantic roles, then expresses them as cells, rows, ANSI attributes, and ASCII fallbacks. Terminal implementations must pass the TUI checks in [`DESIGN.md`](../DESIGN.md#visual-qa); they must not invent a separate palette or assume a light terminal background.
+
 For AzSkills-owned visual work, apply the workbench layer by default and the editorial layer only when the deliverable is prose-first. Do not introduce a second palette, a heavy UI component library, or a JavaScript framework. The former Material 3-inspired `azskills-material-design` contract and the `style-reservoir` style catalog are retired; no parallel visual language may reappear.
 
-New or changed AzSkills UI must pass the conformance gate in [`DESIGN.md`](../DESIGN.md#visual-qa): token-only spacing, the 24px icon grid, explicit state layering, a non-colour selection cue, and no horizontal overflow at 320 CSS px. A surface that fails an item is not ready for review.
+New or changed AzSkills UI must pass the conformance gate in [`DESIGN.md`](../DESIGN.md#visual-qa): token-only spacing, the 24px icon grid, explicit state layering, a non-colour selection cue, and no horizontal overflow at 320 CSS px. A terminal surface adds cell-width fit, ASCII fallback, `NO_COLOR` parity, and escape-sequence hygiene. A surface that fails an item is not ready for review.
 
 ## Core pipeline
 
