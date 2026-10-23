@@ -114,6 +114,7 @@ const WIDE = [
 
 const ANSI_RE = /\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07]*(?:\x07|\x1b\\))/g;
 const ZERO_RE = /\p{Mn}|\p{Me}|\p{Cf}/u;
+const COLOR_MODES = new Set(["auto", "truecolor", "256", "16", "none"]);
 const segmenter =
   typeof Intl.Segmenter === "function"
     ? new Intl.Segmenter("en", { granularity: "grapheme" })
@@ -156,8 +157,7 @@ function sanitize(text) {
   return String(text)
     .replace(/\x1b\][^\x07]*(?:\x07|\x1b\\)/g, "")
     .replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, "")
-    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/g, "")
-    .replace(/\r/g, "");
+    .replace(/[\u0000-\u001f\u007f-\u009f]/g, "");
 }
 
 function truncate(text, maxWidth, ellipsis) {
@@ -322,7 +322,7 @@ function glyphs(ascii) {
 }
 
 function segmentWidth(segments) {
-  return segments.reduce((total, item) => total + stringWidth(item.t || ""), 0);
+  return segments.reduce((total, item) => total + stringWidth(sanitize(item.t || "")), 0);
 }
 
 function renderSegments(segments, width, style, ellipsis) {
@@ -330,7 +330,7 @@ function renderSegments(segments, width, style, ellipsis) {
   let used = 0;
   for (const item of segments) {
     if (used >= width) break;
-    const text = String(item.t || "");
+    const text = sanitize(item.t || "");
     if (!text) continue;
     const room = width - used;
     const textWidth = stringWidth(text);
@@ -357,12 +357,15 @@ function fitPair(left, right, width, style, ellipsis) {
 }
 
 function segmentText(segments) {
-  return segments.map((item) => String(item.t || "")).join("");
+  return segments.map((item) => sanitize(item.t || "")).join("");
 }
 
 function padDisplay(text, width) {
   const used = stringWidth(text);
-  return used >= width ? text : text + " ".repeat(width - used);
+  if (used > width) {
+    throw new RangeError("pane line exceeds " + width + " cells");
+  }
+  return used === width ? text : text + " ".repeat(width - used);
 }
 
 function headerLine(width, options, style, glyph) {
@@ -412,11 +415,18 @@ function buildRail(height, style, glyph) {
 function buildList(width, height, options, style, glyph) {
   const lines = [];
   const searchText = width >= 28 ? "Search skills" : "Search";
-  const visible = Math.min(SKILLS.length, Math.max(0, height - 2));
+  const visible = Math.min(SKILLS.length, Math.max(1, height - 2));
+  const selectedIndex = SKILLS.findIndex((item) => item.name === options.selected);
+  const start =
+    selectedIndex >= visible
+      ? Math.min(selectedIndex - visible + 1, SKILLS.length - visible)
+      : 0;
+  const end = start + visible;
+  const range = start + 1 + "-" + end + "/" + SKILLS.length;
   lines.push(
     fitPair(
       [{ t: "SKILLS", r: "textBold" }],
-      [{ t: "ALL " + visible + "/" + SKILLS.length, r: "muted" }],
+      [{ t: "ALL " + range, r: "muted" }],
       width,
       style,
       glyph.ellipsis,
@@ -427,7 +437,7 @@ function buildList(width, height, options, style, glyph) {
       [
         { t: "[", r: "accent" },
         { t: " / ", r: "accentBold" },
-        { t: searchText, r: "muted" },
+        { t: searchText, r: "underline" },
         { t: " ]", r: "accent" },
       ],
       width,
@@ -437,7 +447,7 @@ function buildList(width, height, options, style, glyph) {
   );
 
   const showCategory = width >= 28;
-  for (const skill of SKILLS) {
+  for (const skill of SKILLS.slice(start, end)) {
     if (lines.length >= height) break;
     const selected = skill.name === options.selected;
     const maxName = width - 2 - (showCategory ? stringWidth(skill.group) + 2 : 0);
@@ -474,7 +484,14 @@ function buildDetail(width, height, options, style, glyph) {
     skill.purpose || "Repository-local behavior contract for " + skill.name + ".";
   const when = skill.when || "Use when this capability owns the task.";
   const contract = skill.contract || "Read scope, constraints, workflow, and quality gates.";
+  const measure = Math.min(width, 100);
+  const sectionGap = width >= 100 && options.density === "comfortable" ? 2 : 1;
   const lines = [];
+  const addGap = () => {
+    for (let index = 0; index < sectionGap && lines.length < height; index += 1) {
+      lines.push("");
+    }
+  };
   lines.push(
     fitPair(
       [{ t: skill.name, r: "textBold" }],
@@ -484,28 +501,37 @@ function buildDetail(width, height, options, style, glyph) {
       glyph.ellipsis,
     ),
   );
-  lines.push(style("muted", skill.group + " / core / verified"));
+  lines.push(style("muted", truncate(skill.group + " / core / verified", width, glyph.ellipsis)));
   lines.push(style("border", glyph.h.repeat(width)));
-  for (const line of wrapText(purpose, Math.min(width, 100))) {
+  for (const line of wrapText(purpose, measure)) {
     lines.push(truncate(line, width, glyph.ellipsis));
   }
 
-  if (options.density === "comfortable") lines.push("");
-  if (lines.length < height) lines.push(style("textBold", "WHEN TO USE"));
+  addGap();
   if (lines.length < height) {
-    pushWrapped(lines, when, width, glyph.bullet + " ", "  ", style, glyph);
+    lines.push(style("textBold", truncate("WHEN TO USE", width, glyph.ellipsis)));
+  }
+  if (lines.length < height) {
+    pushWrapped(lines, when, measure, glyph.bullet + " ", "  ", style, glyph);
   }
 
-  if (options.density === "comfortable") lines.push("");
-  if (lines.length < height) lines.push(style("textBold", "CONTRACT"));
+  addGap();
   if (lines.length < height) {
-    pushWrapped(lines, contract, width, glyph.bullet + " ", "  ", style, glyph);
+    lines.push(style("textBold", truncate("CONTRACT", width, glyph.ellipsis)));
+  }
+  if (lines.length < height) {
+    pushWrapped(lines, contract, measure, glyph.bullet + " ", "  ", style, glyph);
   }
 
-  if (width >= 70 && lines.length + 2 < height) {
-    if (options.density === "comfortable") lines.push("");
-    lines.push(style("textBold", "NEXT"));
-    lines.push(style("muted", "[Enter] Open  [Tab] Focus  [?] Help"));
+  if (width >= 70 && lines.length + sectionGap + 2 <= height) {
+    addGap();
+    lines.push(style("textBold", truncate("NEXT", width, glyph.ellipsis)));
+    lines.push(
+      style(
+        "muted",
+        truncate("[Enter] Open  [Tab] Focus  [?] Help", width, glyph.ellipsis),
+      ),
+    );
   }
 
   while (lines.length < height) lines.push("");
@@ -515,8 +541,7 @@ function buildDetail(width, height, options, style, glyph) {
 function statusLine(width, options, style, glyph) {
   const selected = options.selected;
   const left = width >= 52 ? selected + "  selected" : selected;
-  let right = width >= 52 ? "? help  / search  q quit" : "? help  Enter open";
-  if (width < 40) right = "? help";
+  const right = width >= 52 ? "? help  / search  q quit" : "? help  / search  Enter";
   return fitPair(
     [{ t: left, r: "muted" }],
     [{ t: right, r: "muted" }],
@@ -526,17 +551,36 @@ function statusLine(width, options, style, glyph) {
   );
 }
 
+function renderNarrow(options) {
+  const width = Math.max(24, Math.min(39, Number(options.width) || 40));
+  const selected = sanitize(options.selected || "ui-design");
+  const lines = [
+    "AzSkills",
+    SKILLS.length + " skills",
+    "Selected: " + selected,
+    "Enter open",
+    "/ search",
+    "? help",
+  ];
+  return lines.map((line) => truncate(line, width, "...")).join("\n") + "\n";
+}
+
 export function renderTui(options = {}) {
-  const width = Math.max(24, Math.min(240, Number(options.width) || 80));
+  const requestedWidth = Number(options.width);
+  const width = Number.isFinite(requestedWidth)
+    ? Math.max(24, Math.min(240, Math.trunc(requestedWidth)))
+    : 80;
   const rows = Math.max(8, Math.min(60, Number(options.rows) || 18));
   const plain = Boolean(options.plain);
-  if (width < 40 && !plain) {
-    throw new RangeError("TUI needs at least 40 columns. Use --plain for narrow output.");
-  }
+  if (width < 40) return renderNarrow({ ...options, width });
   const theme = options.theme === "light" ? "light" : "dark";
   const density = options.density === "comfortable" ? "comfortable" : "compact";
   const ascii = Boolean(options.ascii || plain);
-  const color = options.color || "auto";
+  const requestedColor = plain ? "none" : options.color || "auto";
+  if (!COLOR_MODES.has(requestedColor)) {
+    throw new RangeError("Unsupported colour mode: " + requestedColor);
+  }
+  const color = requestedColor === "auto" ? detectColor() : requestedColor;
   const style = makeStyle(color, theme);
   const glyph = glyphs(ascii);
   const selected = options.selected || "ui-design";
@@ -563,7 +607,7 @@ export function renderTui(options = {}) {
     }
   } else if (width >= 60) {
     const gutter = 2;
-    const listWidth = Math.max(22, Math.min(34, Math.floor(width * 0.4)));
+    const listWidth = Math.max(24, Math.min(32, Math.floor(width * 0.4)));
     const detailWidth = width - listWidth - gutter;
     const list = buildList(listWidth, rows, resolved, style, glyph);
     const detail = buildDetail(detailWidth, rows, resolved, style, glyph).map((line) =>
@@ -583,20 +627,45 @@ export function renderTui(options = {}) {
   return lines.join("\n") + "\n";
 }
 
-function detectColor() {
+function detectColor(environment = process.env, isTTY = process.stdout.isTTY) {
   if (
-    process.env.NO_COLOR !== undefined ||
-    process.env.CLICOLOR === "0" ||
-    process.env.TERM === "dumb" ||
-    !process.stdout.isTTY
+    environment.NO_COLOR !== undefined ||
+    environment.CLICOLOR === "0" ||
+    environment.TERM === "dumb" ||
+    !isTTY
   ) {
     return "none";
   }
-  if (String(process.env.COLORTERM || "").toLowerCase() === "truecolor") {
+  if (String(environment.COLORTERM || "").toLowerCase() === "truecolor") {
     return "truecolor";
   }
-  if (String(process.env.TERM || "").includes("256color")) return "256";
+  if (String(environment.TERM || "").includes("256color")) return "256";
   return "16";
+}
+
+function auditSafety(output, label, issues) {
+  if (/[\u{1f300}-\u{1faff}\u{e000}-\u{f8ff}]/u.test(output)) {
+    issues.push("emoji or Private Use Area glyph at " + label);
+  }
+  if (/\x1b\[[0-9;]*48;/.test(output)) {
+    issues.push("terminal background colour at " + label);
+  }
+  if (output.includes("\x1b]")) {
+    issues.push("OSC sequence at " + label);
+  }
+}
+
+function stateFixture(color, theme, ascii) {
+  const style = makeStyle(color, theme);
+  const glyph = glyphs(ascii);
+  const line = (segments) => renderSegments(segments, 40, style, glyph.ellipsis);
+  return [
+    line([{ t: glyph.marker, r: "accent" }, { t: " selected", r: "textBold" }]),
+    line([{ t: "[", r: "accent" }, { t: " focus ", r: "underline" }, { t: "]", r: "accent" }]),
+    line([{ t: glyph.check, r: "success" }, { t: " success", r: "text" }]),
+    line([{ t: "!", r: "warning" }, { t: " warning", r: "text" }]),
+    line([{ t: glyph.cross, r: "danger" }, { t: " error", r: "text" }]),
+  ].join("\n");
 }
 
 function checkFrame(width, color, theme, density) {
@@ -630,6 +699,16 @@ function checkFrame(width, color, theme, density) {
   if (output.includes("\x1b]")) {
     issues.push("OSC sequence at " + width + "/" + color);
   }
+  auditSafety(output, width + "/" + color, issues);
+  if (color === "truecolor" && !output.includes("38;2;")) {
+    issues.push("truecolor SGR missing at " + width);
+  }
+  if (color === "256" && !output.includes("38;5;")) {
+    issues.push("256-colour SGR missing at " + width);
+  }
+  if (color === "16" && !output.includes("\x1b[34")) {
+    issues.push("16-colour accent SGR missing at " + width);
+  }
   for (const required of ["AzSkills", "SKILLS", "ui-design"]) {
     if (!output.includes(required)) {
       issues.push("missing " + required + " at " + width + "/" + color);
@@ -641,7 +720,7 @@ function checkFrame(width, color, theme, density) {
 function runCheck() {
   const issues = [];
   let frames = 0;
-  const widths = [40, 60, 80, 100, 120, 160];
+  const widths = [40, 60, 80, 100, 120, 140, 160];
   for (const width of widths) {
     for (const color of ["truecolor", "256", "16", "none"]) {
       for (const theme of ["light", "dark"]) {
@@ -676,6 +755,26 @@ function runCheck() {
     if (output.includes("\x1b")) issues.push("ANSI in plain frame at " + width);
   }
 
+  const narrowWidths = [24, 30, 39];
+  for (const width of narrowWidths) {
+    frames += 1;
+    let output = "";
+    try {
+      output = renderTui({ width, plain: true, rows: 18 });
+    } catch (error) {
+      issues.push("narrow render failed at " + width + ": " + error.message);
+      continue;
+    }
+    const lines = output.split("\n").filter((line) => line.length > 0);
+    if (/[^\x00-\x7f]/.test(output)) issues.push("non-ASCII in narrow frame at " + width);
+    if (output.includes("\x1b")) issues.push("ANSI in narrow frame at " + width);
+    if (lines.some((line) => stringWidth(line) > width)) {
+      issues.push("narrow line overflow at " + width);
+    }
+    if (output.includes("---")) issues.push("narrow frame still draws a rule at " + width);
+    if (!output.includes("Enter open")) issues.push("narrow action missing at " + width);
+  }
+
   const hostile = "A\x1b]0;title\x07B\x1b[31mC\x9b";
   if (sanitize(hostile) !== "ABC") {
     issues.push("sanitize did not strip terminal control sequences");
@@ -699,17 +798,67 @@ function runCheck() {
     density: "compact",
     rows: 18,
   });
-  if (/[\u{1f300}-\u{1faff}\u{e000}-\u{f8ff}]/u.test(unicodeFrame)) {
-    issues.push("emoji or Private Use Area glyph emitted");
+  auditSafety(unicodeFrame, "unicode sample", issues);
+
+  for (const color of ["truecolor", "256", "16", "none"]) {
+    frames += 1;
+    const fixture = stateFixture(color, "dark", false);
+    const glyph = glyphs(false);
+    for (const cue of [glyph.marker, "[", glyph.check, "!", glyph.cross]) {
+      if (!fixture.includes(cue)) {
+        issues.push("state cue " + cue + " missing in " + color);
+      }
+    }
+    if (color === "none" && fixture.includes("\x1b")) {
+      issues.push("ANSI in no-colour state fixture");
+    }
   }
-  if (/\x1b\[[0-9;]*48;/.test(unicodeFrame)) {
-    issues.push("terminal background colour emitted");
+  frames += 1;
+  const asciiFixture = stateFixture("none", "dark", true);
+  for (const cue of [">", "OK", "x"]) {
+    if (!asciiFixture.includes(cue)) {
+      issues.push("ASCII state cue " + cue + " missing");
+    }
+  }
+
+  const colorCases = [
+    [{ NO_COLOR: "1" }, true, "none"],
+    [{ CLICOLOR: "0" }, true, "none"],
+    [{ TERM: "dumb" }, true, "none"],
+    [{ TERM: "xterm-256color" }, true, "256"],
+    [{ TERM: "xterm", COLORTERM: "truecolor" }, true, "truecolor"],
+    [{}, false, "none"],
+  ];
+  for (const [environment, tty, expected] of colorCases) {
+    if (detectColor(environment, tty) !== expected) {
+      issues.push("colour detection mismatch for " + JSON.stringify(environment));
+    }
+  }
+
+  frames += 1;
+  const hostileSelected = renderTui({
+    width: 80,
+    plain: true,
+    selected: "A\x1b[31mRED\nFORGED",
+  });
+  if (hostileSelected.includes("\x1b") || hostileSelected.includes("FORGED\n")) {
+    issues.push("hostile selected label reached the terminal");
+  }
+  if (hostileSelected.split("\n").length !== 23) {
+    issues.push("hostile selected label changed the frame line count");
+  }
+
+  frames += 1;
+  const plainApi = renderTui({ width: 80, plain: true, rows: 18 });
+  if (plainApi.includes("\x1b")) {
+    issues.push("plain API emitted ANSI");
   }
 
   return {
     ok: issues.length === 0,
     frames,
     widths,
+    narrowWidths,
     issues: issues.slice(0, 20),
   };
 }
@@ -721,7 +870,7 @@ function usage() {
     "Usage: node design-system/tui/preview.mjs [options]",
     "",
     "Options:",
-    "  --width <cols>       Columns, 40-240 (default 80)",
+    "  --width <cols>       Columns, 24-240; CI matrix covers 40-160 (default 80)",
     "  --rows <count>       Body rows, 8-60 (default 18)",
     "  --theme <name>       light or dark (default dark)",
     "  --density <name>     compact or comfortable (default compact)",
@@ -733,6 +882,14 @@ function usage() {
     "  --help               Show this message",
     "",
   ].join("\n");
+}
+
+function parseNumber(value, name, min, max) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
+    throw new Error("Invalid " + name + ": " + value);
+  }
+  return Math.trunc(parsed);
 }
 
 function parseArgs(args) {
@@ -759,14 +916,14 @@ function parseArgs(args) {
     } else if (arg === "--plain") {
       options.plain = true;
     } else if (arg.startsWith("--width=")) {
-      options.width = Number(arg.slice(8));
+      options.width = parseNumber(arg.slice(8), "width", 24, 240);
     } else if (arg === "--width") {
-      options.width = Number(args[index + 1]);
+      options.width = parseNumber(args[index + 1], "width", 24, 240);
       index += 1;
     } else if (arg.startsWith("--rows=")) {
-      options.rows = Number(arg.slice(7));
+      options.rows = parseNumber(arg.slice(7), "rows", 8, 60);
     } else if (arg === "--rows") {
-      options.rows = Number(args[index + 1]);
+      options.rows = parseNumber(args[index + 1], "rows", 8, 60);
       index += 1;
     } else if (arg.startsWith("--theme=")) {
       options.theme = arg.slice(8);
@@ -791,6 +948,15 @@ function parseArgs(args) {
     } else {
       throw new Error("Unknown argument: " + arg);
     }
+  }
+  if (!["light", "dark"].includes(options.theme)) {
+    throw new Error("Invalid theme: " + options.theme);
+  }
+  if (!["compact", "comfortable"].includes(options.density)) {
+    throw new Error("Invalid density: " + options.density);
+  }
+  if (!COLOR_MODES.has(options.color)) {
+    throw new Error("Invalid colour mode: " + options.color);
   }
   return options;
 }

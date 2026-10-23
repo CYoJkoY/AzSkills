@@ -180,7 +180,7 @@ Executable artifacts, all referenced by the contract in [`DESIGN.md`](DESIGN.md)
 | [`design-system/wabi-press.css`](design-system/wabi-press.css) | Existing stylesheet entry point, retained at its historical path; includes the current `--wb-*` workbench tokens and primitives alongside compatibility rules. `DESIGN.md` defines the current interface contract. |
 | [`design-system/wabi-press-theme.ts`](design-system/wabi-press-theme.ts) | Existing native TypeScript theme controller for explicit light/dark choice and system `prefers-color-scheme` behavior. The filename is retained for compatibility. |
 | [`design-system/preview/index.html`](design-system/preview/index.html) | Dependency-free workbench preview for skill navigation/search, selection states, theme switching, density modes, and responsive layout. |
-| [`design-system/tui/preview.mjs`](design-system/tui/preview.mjs) | Dependency-free terminal preview for 40-160 columns, truecolor/256/16/plain modes, keyboard states, and a `--check` conformance gate used by CI. |
+| [`design-system/tui/preview.mjs`](design-system/tui/preview.mjs) | Dependency-free terminal preview for 24-240 columns (CI matrix 40-160), truecolor/256/16/plain modes, keyboard states, and a `--check` conformance gate used by CI. |
 
 ---
 

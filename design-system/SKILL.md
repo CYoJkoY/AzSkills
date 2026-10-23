@@ -1,6 +1,6 @@
 ---
 name: design-system
-description: Consume, author, normalize, adapt, and verify DESIGN.md files as AzSkills-native visual contracts. The repository-owned canonical language is the workbench layer, with Wabi-Press (侘寂刊本) as its opt-in editorial reading surface and a cell-based terminal target that shares the workbench semantics. Use when a project provides DESIGN.md, a brand reference must become implementation rules, an AzSkills-owned surface needs styling, or a design contract needs validation.
+description: Consume, author, normalize, adapt, and verify DESIGN.md files as AzSkills-native visual contracts. The repository-owned canonical language is the workbench layer, with Wabi-Press as its opt-in editorial reading surface and a cell-based terminal target that shares the workbench semantics. Use when a project provides DESIGN.md, a brand reference must become implementation rules, an AzSkills-owned surface needs styling, or a design contract needs validation.
 ---
 
 # Design System
@@ -9,12 +9,12 @@ This Skill is the boundary between external DESIGN.md systems and AzSkills. It d
 
 ## Repository-owned language
 
-AzSkills owns one system with two scoped layers and two rendering targets. The **workbench layer** is the default for every AzSkills-owned surface; the **Wabi-Press editorial layer** (侘寂刊本) is an opt-in reading surface for long-form prose. GUI output uses CSS; terminal output maps the workbench layer to a cell grid and ANSI attributes. Both layers and both targets are documented in the root [`DESIGN.md`](../DESIGN.md) and executed from these artifacts:
+AzSkills owns one system with two scoped layers and two rendering targets. The **workbench layer** is the default for every AzSkills-owned surface; the **Wabi-Press editorial layer** is an opt-in reading surface for long-form prose. GUI output uses CSS; terminal output maps the workbench layer to a cell grid and ANSI attributes. Both layers and both targets are documented in the root [`DESIGN.md`](../DESIGN.md) and executed from these artifacts:
 
 - [`wabi-press.css`](wabi-press.css) — the complete token set: the `--wb-*` workbench palette with its accent ramp and spacing tiers, the `.wb-shell`, `.wb-sidebar`, `.wb-statusbar`, list, chip, button, and input primitives, and the `--bg-*`, `--text-*`, `--accent-cinnabar`, and `--accent-moss` washi tokens behind `html[data-surface="editorial"]`. It is the only CSS authority for AzSkills-owned surfaces.
 - [`wabi-press-theme.ts`](wabi-press-theme.ts) — native TypeScript theme controller (`localStorage` persistence, automatic `prefers-color-scheme` response, `[data-theme]` attribute). It drives both layers.
 - [`preview/index.html`](preview/index.html) — semantic HTML verification surface. It mounts the workbench shell by default and swaps to a standalone editorial view, so both layers, both themes, and both densities can be checked without a build step.
-- [`tui/preview.mjs`](tui/preview.mjs) — dependency-free terminal preview and conformance check. It renders 40-160 columns in truecolor, 256-colour, 16-colour, and plain modes, and verifies cell width, ASCII fallback, and ANSI hygiene.
+- [`tui/preview.mjs`](tui/preview.mjs) - dependency-free terminal preview and conformance check. It renders 24-240 columns (CI matrix 40-160) in truecolor, 256-colour, 16-colour, and plain modes, and verifies cell width, state cues, ASCII fallback, and ANSI hygiene.
 
 Layer scope is normative:
 

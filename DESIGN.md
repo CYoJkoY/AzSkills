@@ -281,7 +281,7 @@ A group outline with no visible children is a bug: if the parts are not independ
 
 The terminal target reuses the workbench vocabulary. It does not simulate a GUI: no pixel dimensions, rounded corners, shadows, hover, or font choice. A TUI is successful when a keyboard user can identify context, move, filter, read, and act without colour or a mouse.
 
-Executable preview: `node design-system/tui/preview.mjs --width 120 --color truecolor`. The `--check` mode renders 40-160 columns in truecolor, 256-colour, 16-colour, and plain modes and fails on width overflow, ANSI leakage, or missing required labels.
+Executable preview: `node design-system/tui/preview.mjs --width 120 --color truecolor`. The renderer accepts 24-240 columns; the `--check` matrix covers 40-160 columns, and plain narrow output covers 24-39 columns. It fails on width overflow, ANSI leakage, missing state cues, or missing required labels.
 
 ### Cell grid and width classes
 
@@ -315,17 +315,17 @@ Executable preview: `node design-system/tui/preview.mjs --width 120 --color true
 
 ### Terminal colour and attributes
 
-| Role | 16-colour | 256-colour | Truecolor light | Truecolor dark | Plain fallback |
+| Role | 16-colour | 256 light / dark | Truecolor light | Truecolor dark | Plain fallback |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Text | terminal default | terminal default | terminal default | terminal default | same text |
-| Muted | bright black (90) | 244 | `#666C78` | `#9299A5` | text plus label |
-| Accent | blue (34) | 26 | `#0B57D0` | `#A8C7FA` | marker |
-| Border | bright black (90) | 240 | `#D9DDE3` | `#383B43` | ASCII rule |
-| Selection | reverse plus accent marker | reverse plus marker | reverse plus marker | reverse plus marker | `>` marker |
+| Muted | bright black (90) | 244 / 246 | `#666C78` | `#9299A5` | text plus label |
+| Accent | blue (34) | 26 / 153 | `#0B57D0` | `#A8C7FA` | marker |
+| Border | bright black (90) | 240 / 238 | `#D9DDE3` | `#383B43` | ASCII rule |
+| Selection | accent marker + bold | marker + bold | marker + bold | marker + bold | `>` marker |
 | Focus | reverse or underline plus brackets | same | same | same | `[ ]` brackets |
-| Success | green (32) | 28 | `#137333` | `#81C995` | `OK` |
-| Warning | yellow (33) | 130 | `#8A4B00` | `#FDD663` | `WARN` |
-| Danger | red (31) | 160 | `#B3261E` | `#F2B8B5` | `ERR` |
+| Success | green (32) | 28 / 114 | `#137333` | `#81C995` | `OK` |
+| Warning | yellow (33) | 130 / 221 | `#8A4B00` | `#FDD663` | `WARN` |
+| Danger | red (31) | 160 / 217 | `#B3261E` | `#F2B8B5` | `ERR` |
 
 - Default to 16 colours. Use 256 or truecolor only when the terminal advertises support and the user has not disabled colour. The truecolor columns are evaluation targets for a terminal with a known light or dark palette; brand fidelity is not required.
 - Never paint the full canvas background. Let the terminal own background, foreground defaults, font, cursor, and selection colours.
@@ -340,7 +340,7 @@ Executable preview: `node design-system/tui/preview.mjs --width 120 --color true
 Inline gap       1 cell
 List or menu     1 row per item, no blank rows inside
 Group gap        1 blank row, detail pane only
-Section gap      2 blank rows, detail pane at 100+ columns
+Section gap      1 blank row compact; 2 blank rows comfortable, detail at 100+
 Pane gutter      2 cells at 60+ columns: one rule plus one space
 ```
 
@@ -383,6 +383,7 @@ Empty state     reason plus one next action
 - Show at most five context keys in the status bar. Put the full map behind `?`.
 - Use a single-line frame only for a modal. Do not nest boxes.
 - When a list is longer than its viewport, expose position (`10/20`) or a scroll marker in the list header or status bar.
+- A terminal narrower than 40 columns uses the narrow plain formatter: one action per line, no frame, no horizontal rules, no ANSI.
 
 ### Keyboard and focus
 

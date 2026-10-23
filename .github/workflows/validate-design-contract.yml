@@ -9,6 +9,7 @@ on:
       - ".github/badges/**"
       - "assets/**"
       - "frontend-slides/**"
+      - "application-architecture/**"
       - "l13n/SKILL.md"
       - "design-system/**"
       - "design-intelligence.md"
