@@ -157,7 +157,9 @@ function sanitize(text) {
   return String(text)
     .replace(/\x1b\][^\x07]*(?:\x07|\x1b\\)/g, "")
     .replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, "")
-    .replace(/[\u0000-\u001f\u007f-\u009f]/g, "");
+    .replace(/[\u0000-\u001f\u007f-\u009f]/g, "")
+    .replace(/[\u{e000}-\u{f8ff}\u{f0000}-\u{ffffd}\u{100000}-\u{10fffd}]/gu, "")
+    .replace(/[\p{Extended_Pictographic}\u{1f1e6}-\u{1f1ff}\u{20e3}\u{fe0f}]/gu, "");
 }
 
 function truncate(text, maxWidth, ellipsis) {
@@ -553,7 +555,10 @@ function statusLine(width, options, style, glyph) {
 
 function renderNarrow(options) {
   const width = Math.max(24, Math.min(39, Number(options.width) || 40));
-  const selected = sanitize(options.selected || "ui-design");
+  const requestedSelected = sanitize(options.selected || "ui-design");
+  const selected = SKILLS.some((item) => item.name === requestedSelected)
+    ? requestedSelected
+    : SKILLS[0].name;
   const lines = [
     "AzSkills",
     SKILLS.length + " skills",
@@ -576,14 +581,24 @@ export function renderTui(options = {}) {
   const theme = options.theme === "light" ? "light" : "dark";
   const density = options.density === "comfortable" ? "comfortable" : "compact";
   const ascii = Boolean(options.ascii || plain);
-  const requestedColor = plain ? "none" : options.color || "auto";
-  if (!COLOR_MODES.has(requestedColor)) {
-    throw new RangeError("Unsupported colour mode: " + requestedColor);
+  const rawColor = options.color || "auto";
+  if (!COLOR_MODES.has(rawColor)) {
+    throw new RangeError("Unsupported colour mode: " + rawColor);
   }
-  const color = requestedColor === "auto" ? detectColor() : requestedColor;
+  const environment = options.environment || process.env;
+  const isTTY = options.isTTY === undefined ? process.stdout.isTTY : Boolean(options.isTTY);
+  const environmentDisablesColor =
+    environment.NO_COLOR !== undefined ||
+    environment.CLICOLOR === "0" ||
+    environment.TERM === "dumb";
+  const requestedColor = plain || environmentDisablesColor ? "none" : rawColor;
+  const color = requestedColor === "auto" ? detectColor(environment, isTTY) : requestedColor;
   const style = makeStyle(color, theme);
   const glyph = glyphs(ascii);
-  const selected = options.selected || "ui-design";
+  const requestedSelected = sanitize(options.selected || "ui-design");
+  const selected = SKILLS.some((item) => item.name === requestedSelected)
+    ? requestedSelected
+    : SKILLS[0].name;
   const resolved = { width, rows, theme, density, selected, plain, ascii, color };
   const lines = [];
 
@@ -644,10 +659,10 @@ function detectColor(environment = process.env, isTTY = process.stdout.isTTY) {
 }
 
 function auditSafety(output, label, issues) {
-  if (/[\u{1f300}-\u{1faff}\u{e000}-\u{f8ff}]/u.test(output)) {
+  if (/[\p{Extended_Pictographic}\u{1f1e6}-\u{1f1ff}\u{20e3}\u{fe0f}\u{e000}-\u{f8ff}\u{f0000}-\u{ffffd}\u{100000}-\u{10fffd}]/u.test(output)) {
     issues.push("emoji or Private Use Area glyph at " + label);
   }
-  if (/\x1b\[[0-9;]*48;/.test(output)) {
+  if (/\x1b\[[0-9;:]*48(?:[:;][0-9;:]*)?m/.test(output)) {
     issues.push("terminal background colour at " + label);
   }
   if (output.includes("\x1b]")) {
@@ -672,7 +687,7 @@ function checkFrame(width, color, theme, density) {
   const issues = [];
   let output = "";
   try {
-    output = renderTui({ width, color, theme, density, rows: 18 });
+    output = renderTui({ width, color, theme, density, rows: 18, environment: {} });
   } catch (error) {
     issues.push("render failed at " + width + "/" + color + ": " + error.message);
     return { issues, output };
@@ -775,7 +790,7 @@ function runCheck() {
     if (!output.includes("Enter open")) issues.push("narrow action missing at " + width);
   }
 
-  const hostile = "A\x1b]0;title\x07B\x1b[31mC\x9b";
+  const hostile = "A\x1b]0;title\x07B\x1b[31mC\x9b\u2705";
   if (sanitize(hostile) !== "ABC") {
     issues.push("sanitize did not strip terminal control sequences");
   }
@@ -816,6 +831,30 @@ function runCheck() {
         }
         if (!fixture.includes("\x1b[4m")) {
           issues.push("focus underline missing in " + color + "/" + theme);
+        }
+      }
+      const roleCodes =
+        color === "16"
+          ? ["\x1b[32", "\x1b[33", "\x1b[31"]
+          : color === "256"
+            ? [
+                "38;5;" + (theme === "dark" ? "114" : "28"),
+                "38;5;" + (theme === "dark" ? "221" : "130"),
+                "38;5;" + (theme === "dark" ? "217" : "160"),
+              ]
+            : color === "truecolor"
+              ? [
+                  "38;2;" +
+                    (theme === "dark" ? "129;201;149" : "19;115;51"),
+                  "38;2;" +
+                    (theme === "dark" ? "253;214;99" : "138;75;0"),
+                  "38;2;" +
+                    (theme === "dark" ? "242;184;181" : "179;38;30"),
+                ]
+              : [];
+      for (const code of roleCodes) {
+        if (!fixture.includes(code)) {
+          issues.push("state colour " + code + " missing in " + color + "/" + theme);
         }
       }
       if (color === "none" && fixture.includes("\x1b")) {
@@ -862,6 +901,37 @@ function runCheck() {
   const plainApi = renderTui({ width: 80, plain: true, rows: 18 });
   if (plainApi.includes("\x1b")) {
     issues.push("plain API emitted ANSI");
+  }
+
+  frames += 1;
+  const envNoColor = renderTui({
+    width: 80,
+    color: "truecolor",
+    environment: { NO_COLOR: "1" },
+  });
+  if (envNoColor.includes("\x1b")) {
+    issues.push("NO_COLOR did not override explicit colour");
+  }
+  frames += 1;
+  const envColor = renderTui({ width: 80, color: "truecolor", environment: {} });
+  if (!envColor.includes("\x1b")) {
+    issues.push("explicit truecolor was suppressed without NO_COLOR");
+  }
+
+  frames += 1;
+  const puaSelected = renderTui({
+    width: 80,
+    plain: true,
+    selected: "ui-design \u{e000}",
+  });
+  if (/[\u{e000}-\u{f8ff}]/u.test(puaSelected)) {
+    issues.push("Private Use Area label reached the terminal");
+  }
+
+  frames += 1;
+  const unknownSelected = renderTui({ width: 80, plain: true, selected: "not-a-skill" });
+  if (!/ui-design\s+selected/u.test(unknownSelected)) {
+    issues.push("unknown selection was not normalized");
   }
 
   return {

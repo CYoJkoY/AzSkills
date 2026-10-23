@@ -330,7 +330,7 @@ Executable preview: `node design-system/tui/preview.mjs --width 120 --color true
 - Default to 16 colours. Use 256 or truecolor only when the terminal advertises support and the user has not disabled colour. The truecolor columns are evaluation targets for a terminal with a known light or dark palette; brand fidelity is not required.
 - Never paint the full canvas background. Let the terminal own background, foreground defaults, font, cursor, and selection colours.
 - Pair every attribute with a glyph or word. Bold, dim, underline, and reverse are reinforcement, not the state.
-- `NO_COLOR`, `CLICOLOR=0`, or `TERM=dumb` disables ANSI colour. Plain output must remain complete.
+- `NO_COLOR`, `CLICOLOR=0`, or `TERM=dumb` disables ANSI colour, including when a colour mode is requested explicitly. Plain output must remain complete.
 - Do not use dim as the only disabled signal, and do not use blink.
 - Test the interface against a light terminal palette and a dark terminal palette. A TUI that only works on the author's theme is not finished.
 
@@ -344,12 +344,13 @@ Section gap      1 blank row compact; 2 blank rows comfortable, detail at 100+
 Pane gutter      2 cells at 60+ columns: one rule plus one space
 ```
 
-- Body measure is 72-100 cells. Long prose wraps at word and grapheme boundaries; never break a wide glyph.
+- Body measure is 72-100 cells in the wide class. Below that, the detail pane sets the measure; at 100 columns it is 64 cells. Long prose wraps at word and grapheme boundaries; never break a wide glyph.
 - Use bold for the title and the active item. Use underline for links only. Avoid italics for critical text because terminal italic support is inconsistent.
 - Short section labels may use uppercase. Sentences use sentence case. Do not uppercase prose.
 - Right-align numbers in tables. Keep names and prose left-aligned.
 - Truncate with `…` in Unicode mode and `...` in ASCII mode. Middle-truncate paths so the filename stays visible.
 - East Asian wide characters occupy two cells; combining marks occupy zero. Wrap and truncate by grapheme, not by code unit.
+- Ambiguous-width glyphs such as `─`, `│`, `▌`, `…`, `✓`, `×`, and `•` depend on terminal configuration. ASCII mode is the portable path; never use an ambiguous glyph as the only alignment device.
 
 ### Terminal glyphs
 
