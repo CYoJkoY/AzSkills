@@ -55,6 +55,7 @@ For developer tools, technical libraries, dashboards, and multi-step workflows, 
 - Offer comfortable and compact density as explicit modes when repeated navigation or long lists justify it.
 - Prioritize search/command entry, selected-state visibility, contextual actions, keyboard navigation, and persistent view state.
 - Use system sans-serif for interface text and monospace for code, shortcuts, and technical metadata.
+- For CLI or TUI surfaces, follow the Terminal / TUI contract in [`DESIGN.md`](../DESIGN.md#terminal--tui-contract): integer cell geometry, ANSI semantic roles, one-cell glyphs with ASCII fallbacks, and `NO_COLOR` parity. Do not translate pixel spacing, radius, shadows, or hover into terminal output.
 - Treat VS Code/VSCodium as an interaction and information-architecture reference, not a requirement to copy brand styling.
 - Use responsive rails/drawers and stacked auxiliary panels; avoid horizontal overflow and preserve primary content.
 - Validate selected, focused, disabled, loading, empty, no-results, success, warning, and error states in both themes.

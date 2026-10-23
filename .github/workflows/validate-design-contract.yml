@@ -71,3 +71,17 @@ jobs:
           grep -q 'Workbench and information-density contract' ui-design/SKILL.md
           grep -q 'Workbench Usability Checks' ui-ux-design-intelligence/SKILL.md
           grep -q 'VSCodium-inspired workbench model' README.md
+
+      - name: Validate terminal contract and preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f design-system/tui/preview.mjs
+          grep -q '^## Terminal / TUI contract$' DESIGN.md
+          grep -q '^### Cell grid and width classes$' DESIGN.md
+          grep -q '^### Terminal colour and attributes$' DESIGN.md
+          grep -q 'NO_COLOR' DESIGN.md
+          grep -q 'grapheme' DESIGN.md
+          grep -q 'design-system/tui/preview.mjs' README.md
+          grep -q 'tui/preview.mjs' design-system/SKILL.md
+          node design-system/tui/preview.mjs --check
