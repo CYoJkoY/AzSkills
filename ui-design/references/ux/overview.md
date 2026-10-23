@@ -41,15 +41,14 @@ naming the feedback or continuity it improves.
 
 ## Review output
 
+Use the canonical `ui-design` review contract. This reference adds UX
+evidence to it:
+
 ```text
-User goal:
-Current experience:
-Information hierarchy:
-Interaction problems:
-Visual consistency:
-Accessibility:
-Prioritized recommendations:
-Implementation notes:
+Verdict:
+Findings ranked by user impact:
+Observation -> principle -> recommendation -> tradeoff:
+UX evidence: user goal, information architecture, interaction feedback, accessibility
 Unverified items:
 ```
 

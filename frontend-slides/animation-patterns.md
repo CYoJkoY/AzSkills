@@ -1,152 +1,85 @@
 # Animation Patterns Reference
 
-Motion is part of the design system. Use it to reveal hierarchy, signal state, and establish pacing. Do not animate simply because an element can move.
+Deck motion is placement and pacing. Mechanism, easing, timing, interruption,
+reduced-motion parity, and motion gates belong to
+[`ui-motion`](../../ui-motion/SKILL.md). Read
+[`../../ui-motion/references/animation-standards.md`](../../ui-motion/references/animation-standards.md)
+before choosing a mechanism, and use the deck tokens registered in
+[`DESIGN_SYSTEM.md`](../DESIGN_SYSTEM.md) section 2.
 
-## Motion Budget
+## Motion budget
 
 Each slide should normally use:
 
 - one primary entrance pattern
 - zero or one secondary emphasis pattern
-- one optional background/atmospheric loop
+- one optional background or atmospheric loop
 
 Avoid giving every element a different animation.
 
-## Effect-to-Feeling Guide
+## Effect to feeling
 
-| Feeling | Useful animation patterns |
-|---|---|
-| Dramatic / Cinematic | slow fade, large-scale reveal, restrained parallax |
-| Techy / Futuristic | clip reveal, line sweep, subtle glow, grid reveal |
-| Playful / Friendly | soft spring/bounce, floating, short stagger |
-| Professional / Corporate | 180–300ms opacity/translation, minimal easing |
-| Calm / Minimal | slow fades, almost no translation |
-| Editorial / Magazine | staggered text, image reveal, rule/column motion |
+| Feeling | Deck-level pattern |
+| :--- | :--- |
+| Dramatic / cinematic | slow fade, large-scale reveal, restrained parallax |
+| Technical / futuristic | clip reveal, line sweep, grid reveal |
+| Playful / friendly | short stagger, light scale, floating accents |
+| Professional / corporate | opacity and translation only, minimal easing |
+| Calm / minimal | slow fades, almost no translation |
+| Editorial / magazine | staggered text, image reveal, rule and column motion |
 
-## Entrance Patterns
+These are compositions, not curves or durations. Take both from the motion
+standards, then register the adopted values once in the deck token layer.
+
+## Entrance patterns
+
+Use the token layer from [`html-template.md`](../html-template.md):
 
 ```css
 .reveal {
-    opacity: 0;
-    transform: translateY(28px);
-    transition:
-        opacity 600ms var(--ease-out-expo),
-        transform 600ms var(--ease-out-expo);
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity var(--duration-normal) var(--ease-paper),
+    transform var(--duration-normal) var(--ease-paper);
 }
 
 .visible .reveal {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.reveal-left {
-    opacity: 0;
-    transform: translateX(-40px);
-    transition: opacity 520ms var(--ease-out-expo),
-                transform 520ms var(--ease-out-expo);
-}
-
-.reveal-scale {
-    opacity: 0;
-    transform: scale(0.96);
-    transition: opacity 700ms var(--ease-out-expo),
-                transform 700ms var(--ease-out-expo);
-}
-
-.reveal-clip {
-    clip-path: inset(0 100% 0 0);
-    transition: clip-path 800ms var(--ease-out-expo);
-}
-
-.visible .reveal-clip {
-    clip-path: inset(0 0 0 0);
+  opacity: 1;
+  transform: translateY(0);
 }
 ```
+
+Direction, distance, and scale are deck composition choices. Duration and
+easing come from the tokens; never inline a second curve.
 
 ## Staggering
 
-Use small, deliberate delays to create reading order. A typical rhythm is 70–120ms between major elements.
+Use small, deliberate delays to create reading order. A typical deck rhythm is
+70 to 120 milliseconds between major elements.
 
-Do not create a long chain of tiny delays for every child node. The viewer should perceive one composition entering, not a queue of independent animations.
+Do not create a long chain of tiny delays for every child node. The viewer
+should perceive one composition entering, not a queue of independent
+animations.
 
-## Slide Transitions
+## Slide transitions
 
-Prefer a unified deck transition. Use a stronger transition only for section boundaries.
+Prefer one unified deck transition. Use a stronger transition only for section
+boundaries: full-field color shift, large title fade, rule expansion, or a
+controlled scale into a new composition. Avoid page turns, elastic wipes, and
+random 3D rotations unless the subject calls for them.
 
-Good section transitions:
+## Background motion
 
-- full-field color shift
-- large title fade/slide
-- rule expansion
-- controlled scale into a new composition
+Atmospheric loops may use slow radial drift, subtle grid movement, or restrained
+particle drift at low opacity, so background motion never competes with text.
 
-Avoid flashy page-turns, elastic wipes, and random 3D rotations unless the subject explicitly calls for them.
+## Reduced motion
 
-## Background Motion
+Under `prefers-reduced-motion: reduce`, keep the final state and drop the
+movement. Do not replace one animation with another.
 
-Atmospheric loops can use:
+## Final check
 
-- slow radial drift
-- subtle grid movement
-- restrained particle drift
-- very slow noise/grain shimmer
-
-Keep opacity low enough that background motion never competes with text.
-
-## Interactive Motion
-
-Micro-interactions are useful for controls and emphasis. Prefer transform/opacity. Avoid continuous per-frame effects when a state transition is sufficient.
-
-A restrained tilt can be used on a single focal panel, but never make the whole deck behave like a 3D demo.
-
-```javascript
-class TiltEffect {
-    constructor(element) {
-        this.element = element;
-        this.onMove = this.onMove.bind(this);
-        element.addEventListener('pointermove', this.onMove);
-        element.addEventListener('pointerleave', () => {
-            element.style.transform = '';
-        });
-    }
-
-    onMove(event) {
-        const rect = this.element.getBoundingClientRect();
-        const x = (event.clientX - rect.left) / rect.width - 0.5;
-        const y = (event.clientY - rect.top) / rect.height - 0.5;
-        this.element.style.transform =
-            `perspective(1000px) rotateY(${x * 3}deg) rotateX(${-y * 3}deg)`;
-    }
-}
-```
-
-## Animation Safety
-
-Support reduced motion:
-
-```css
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-}
-```
-
-## Troubleshooting
-
-Fonts not loading: verify the font URL and exact family name.
-
-Animations not triggering: confirm the slide receives `.visible` and the animation selectors depend on that state.
-
-Unexpectedly heavy motion: remove effects before increasing performance complexity. Prefer fewer effects with better timing.
-
-Mobile issues: preserve the 16:9 stage; optimize expensive effects rather than reflowing slide content.
-
-Performance issues: favor transform/opacity, use `will-change` sparingly, and avoid unnecessary pointer/scroll loops.
-
-## Final Motion Check
-
-Before delivery, ask whether the animation improves comprehension, hierarchy, or pacing. If the answer is no, remove it.
+Before delivery, ask whether the motion improves comprehension, hierarchy, or
+pacing. If it does not, remove it.

@@ -37,16 +37,15 @@ Apply when consuming, authoring, migrating, reconciling, or auditing DESIGN.md. 
 
 ## Source precedence
 
-1. Explicit user requirements.
-2. Active Skill hard constraints.
-3. Existing product identity and authoritative local design system.
-4. Platform, accessibility, and domain requirements.
-5. AzSkills-normalized DESIGN.md contract.
-6. Owning implementation Skill such as ui-design or frontend-slides.
-7. ui-design refine and review judgment.
-8. Raw external inspiration.
+1. Explicit user and repository instructions.
+2. The active Skill contract and shared rules R01-R12.
+3. Platform, accessibility, safety, and domain requirements.
+4. The normalized DESIGN.md and the existing product identity.
+5. Project-native conventions not captured by the contract.
+6. Reference detail loaded for the active mode.
+7. Optional stylistic examples and inspiration.
 
-A DESIGN.md is an input protocol, not unconditional authority.
+This order mirrors [`SKILL-SYSTEM.md`](../../SKILL-SYSTEM.md#precedence). A DESIGN.md is an input protocol, not unconditional authority.
 
 ## Source classes
 

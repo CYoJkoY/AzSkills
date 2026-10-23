@@ -89,4 +89,4 @@ Severity is descriptive:
 - MEDIUM — noticeable quality defect with a practical workaround
 - LOW — refinement or consistency issue
 
-Do not produce an overall score or verdict about the product.
+Return the canonical output: scope, verdict, findings ranked by leverage, the smallest correction for each finding, and unverified items. The verdict is `ship`, `fix`, or `rethink` for the reviewed motion only. Never produce a numeric score or a verdict about the whole product.

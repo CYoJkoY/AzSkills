@@ -75,22 +75,15 @@ Check:
 
 ## AI Review Output Format
 
+Use the canonical `ui-design` review contract. This workflow adds
+screenshot evidence to it:
+
 ```markdown
-Screenshot Context:
-
-Observed Pattern:
-
-Potential UX Issue:
-
-User Impact:
-
-Design Principle:
-
-Recommended Change:
-
-Implementation Considerations:
-
-Risk Assessment:
+Verdict:
+Findings ranked by impact:
+Observation -> principle -> recommendation -> tradeoff:
+Screenshot evidence: context, observable pattern, runtime checks still required
+Unverified items:
 ```
 
 ## Limitations

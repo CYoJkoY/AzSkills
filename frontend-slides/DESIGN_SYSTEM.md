@@ -83,7 +83,7 @@ Define tokens before building repeated components.
 }
 ```
 
-These values are the Wabi-Press contract, not a swappable palette. A deck may add content-specific data colors, but canvas, ink, hairline, cinnabar, and moss roles come from the tokens above and must never be replaced by another design language.
+When Wabi-Press is the chosen direction, these values are its contract, and a deck may add content-specific data colors. Canvas, ink, hairline, cinnabar, and moss roles then come from the tokens above. A brief that establishes a stronger direction uses [`STYLE_PRESETS.md`](STYLE_PRESETS.md) instead, and one deck never mixes two directions.
 
 ### Token rules
 
@@ -206,7 +206,7 @@ For simple charts, inline SVG is preferred because it preserves the zero-depende
 
 ## 9. Motion System
 
-Every deck gets a motion language, not a pile of effects. The AzSkills-owned motion vocabulary is Wabi-Press: slide reveals and surface transitions ride `--ease-paper` (240–320ms); micro feedback rides `--ease-ink` (120–150ms). Spring and bounce entrances are prohibited.
+Every deck gets a motion language, not a pile of effects. Wabi-Press registers `--ease-paper` for slide reveals and surface transitions and `--ease-ink` for micro feedback, with the durations in section 2. Motion mechanism, timing rules, interruption, reduced-motion parity, and motion gates belong to [`ui-motion`](../ui-motion/SKILL.md); these tokens are the deck defaults those rules operate on. Spring and bounce entrances sit outside the Wabi-Press direction.
 
 Choose one primary entrance pattern and one secondary emphasis pattern.
 
@@ -246,7 +246,7 @@ Reject these unless the user explicitly requests them:
 - tiny text used to cram too much content
 - charts with default library styling
 - five unrelated visual styles in one deck
-- any palette other than Wabi-Press in an AzSkills-owned deck
+- a palette mixed with the chosen direction inside one deck
 - pure `#000000` or `#FFFFFF` surfaces or text
 - broad blurred shadows used to create depth (hairlines + lightness steps only)
 - spring/bounce entrances or scale-pop micro-states
@@ -292,7 +292,7 @@ Do not call the deck finished until every item passes.
 
 ### Visual
 
-- [ ] visual thesis is consistent with the Wabi-Press contract (the only AzSkills-owned art direction)
+- [ ] visual thesis is consistent with the chosen art direction; Wabi-Press when no stronger brief exists
 - [ ] typography hierarchy is obvious within 1–2 seconds
 - [ ] color roles are consistent
 - [ ] major alignments repeat intentionally

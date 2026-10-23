@@ -6,7 +6,7 @@ This reference supplies depth only. If it conflicts with the canonical frontend-
 
 Create presentation-grade, zero-dependency HTML decks that feel designed rather than generated. The default quality bar is a polished editorial or product-design artifact: clear hierarchy, deliberate composition, cohesive typography, controlled motion, and no accidental visual noise.
 
-Before designing, automatically inherit [`../../design-intelligence.md`](../../design-intelligence.md). This shared layer supplies contextual style selection, semantic color and typography roles, spacing rhythm, accessibility, interaction quality, motion discipline, anti-pattern filtering, and the final visual-quality mindset. This is automatic; the user does not need to name the external methodology.
+Before designing, automatically inherit [`../../design-intelligence.md`](../../design-intelligence.md). This shared layer supplies contextual style selection, semantic color and typography roles, spacing rhythm, composition, accessibility evidence, anti-pattern filtering, and the final visual-quality mindset. Motion mechanism, timing, and motion gates belong to `ui-motion`. This is automatic; the user does not need to name the external methodology.
 
 This skill is deliberately inspired by the visual craft and fixed-stage workflow of `zarazhangrui/frontend-slides`, and by the design-system, token, accessibility, and visual-hierarchy discipline of `nextlevelbuilder/ui-ux-pro-max-skill`. Do not copy their templates mechanically. Extract the principles and apply them to the user's subject.
 

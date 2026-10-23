@@ -9,55 +9,12 @@ A production Skill for AI-assisted, code-driven visual production. Remotion owns
 
 This Skill is a workflow contract, not a copy of Remotion documentation and not a requirement to use every listed visual technology.
 
-## Reference scope
+## Scope
 
-Use this Skill when the primary deliverable is a rendered visual artifact such as:
-
-- programmatic video
-- motion graphics
-- data-driven video or animated chart
-- product or UI showcase video
-- 3D product or scene showcase
-- educational or explainer sequence
-- social-media video variant
-- templated or parameterized video generation
-- mixed-media composition containing UI, SVG, Canvas, WebGL, audio, captions, and authored animation assets
-
-Compose it with other Skills when the task has a separate responsibility:
-
-- ui-design → interface hierarchy, states, accessibility, and product UI semantics
-- ui-motion → Web UI motion language that must be adapted into a video-safe frame model
-- architecture (runtime) → application architecture around a Remotion-based product
-- frontend-slides → HTML presentation structure or slide art direction; Remotion owns the render only when the requested deliverable is video
-- ui-motion (svg) → SVG-specific construction, optimization, accessibility, and standalone animation
-- design-intelligence.md → shared visual reasoning, hierarchy, composition, typography, color, motion, accessibility, and visual QA
-- ultrathink → unusually difficult decomposition, trade-off analysis, or architecture work
-
-## Routing exclusions
-
-Do not activate this Skill as the primary owner when:
-
-- the output is an ordinary interactive Web UI → use ui-design / ui-motion
-- the output is a standalone SVG asset → use ui-motion in svg mode
-- the output is a fixed-stage HTML presentation rather than a video → use frontend-slides
-- the task is only about backend, persistence, or non-visual infrastructure
-- the requested visual can be produced as a static image and no time-based deliverable is required
-
-A project containing React does not automatically make Remotion the right tool.
-
-## Production precedence
-
-Apply rules in this order:
-
-1. explicit user requirements
-2. existing project architecture and supported runtime
-3. asset licensing and delivery constraints
-4. deterministic rendering requirements
-5. this Skill
-6. design-intelligence.md shared visual reasoning
-7. specialized reference files selected by the workflow
-
-Do not replace an existing project animation or rendering system merely because a library appears in the engine matrix.
+The canonical `remotion-production` contract owns activation, exclusions,
+composition, and gates. This reference supplies production detail only.
+Shared precedence comes from [`SKILL-SYSTEM.md`](../../SKILL-SYSTEM.md);
+nothing in this file reorders it.
 
 ## Core operating model
 

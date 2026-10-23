@@ -42,6 +42,7 @@ may not silently weaken one.
 | Layer | Owns | May change | Must not do |
 | :--- | :--- | :--- | :--- |
 | Shared rules | Cross-Skill invariants | Never | Duplicate domain workflow |
+| Visual extension | Shared visual judgment | Extensions an owner links | Restate shared rules or own motion |
 | Canonical Skill | One decision class | Contract, modes, gates | Absorb a second owner |
 | Mode | Workflow variant | Sequence, gates, output shape | Redefine shared rules |
 | Reference | Depth | Examples, matrices, detailed procedures | Add scope or a new owner |
@@ -151,7 +152,10 @@ request
 
 - Choose one canonical owner. Add a second canonical Skill only when it owns a
   separate artifact or a separate decision class.
- - In `skills.json`, `composes` is the exact set of canonical IDs named in the
+- `design-intelligence.md` is the visual extension layer, not a canonical owner.
+  A visual Skill may load it; it adds visual judgment inside that owner's
+  contract and cannot change scope, gates, or motion ownership.
+- In `skills.json`, `composes` is the exact set of canonical IDs named in the
    contract's `Compose with` bullet. It describes allowed invocation, not a
    dependency DAG. A self-reference is invalid.
 - Prefer a mode over a new Skill. Prefer a reference over a new mode. Prefer a
@@ -212,8 +216,9 @@ The validator enforces the machine-checkable part of this document:
 - registry paths, IDs, families, modes, and aliases;
 - frontmatter and contract keys;
 - canonical and alias line budgets;
-- relative link integrity;
-- catalog and routing parity;
+- relative link integrity, including reference-index paths and HTML asset sources;
+- catalog, alias, mode, and issue-template parity;
+- TUI preview parity with the canonical registry;
 - no unregistered `SKILL.md` files;
 - ASCII-only Skill metadata, canonical contracts, and aliases;
 - link integrity in the root system, design, and provenance documents.

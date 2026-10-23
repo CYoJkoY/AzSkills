@@ -76,20 +76,15 @@ Consider:
 
 ## Review Output Template
 
+Use the canonical `ui-design` review contract. This workflow adds
+accessibility evidence to it:
+
 ```markdown
-Area:
-
-Current Behavior:
-
-Accessibility Risk:
-
-User Impact:
-
-Recommended Improvement:
-
-Implementation Notes:
-
-Compatibility Considerations:
+Verdict:
+Findings ranked by impact:
+Observation -> principle -> recommendation -> tradeoff:
+Accessibility evidence: keyboard, focus, contrast, semantics, reduced motion, localization
+Unverified items:
 ```
 
 ## Integration With PR Review

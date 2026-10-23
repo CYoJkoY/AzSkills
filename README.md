@@ -101,7 +101,7 @@ one mode; it cannot add rules.
 
 ### Shared reasoning layer
 
-[`design-intelligence.md`](design-intelligence.md) is **not a Skill**. It is a cross-cutting reasoning layer for visual systems, interaction, composition, accessibility, motion, and visual QA.
+[`design-intelligence.md`](design-intelligence.md) is **not a Skill**. It is a visual extension layer for typography, color, composition, and visual QA.
 
 It is intentionally separate from implementation Skills so the same visual reasoning is not duplicated across UI, presentation, identity, and documentation workflows.
 
@@ -209,8 +209,8 @@ does not own rules.
 
 ### Shared design reasoning
 
-[`design-intelligence.md`](design-intelligence.md) is a cross-artifact layer, not
-a Skill. It supplies only rules shared by visual Skills.
+[`design-intelligence.md`](design-intelligence.md) is a visual extension layer, not
+a Skill. It supplies only visual judgment shared by visual Skills.
 
 ---
 
@@ -497,7 +497,7 @@ Good contributions add a clear capability, improve an existing workflow, fix a c
 Before creating a new Skill:
 
 1. Check whether the behavior belongs in an existing Skill as a mode.
-2. Check whether it is a cross-artifact rule for [`SKILL-SYSTEM.md`](SKILL-SYSTEM.md) or [`design-intelligence.md`](design-intelligence.md).
+2. Check whether it is a cross-Skill rule for [`SKILL-SYSTEM.md`](SKILL-SYSTEM.md) or visual judgment for [`design-intelligence.md`](design-intelligence.md).
 3. Register the canonical Skill or alias in [`skills.json`](skills.json).
 4. Use the contract template; keep the canonical file at or below 280 lines.
 5. Put depth in a reference and link it from `## References`.
