@@ -13,6 +13,7 @@ on:
       - "design-system/**"
       - "design-intelligence.md"
       - "ui-design/**"
+      - "skills.json"
       - "README.md"
       - "THIRD_PARTY_NOTICES.md"
       - ".github/ISSUE_TEMPLATE/**"
@@ -75,14 +76,12 @@ jobs:
           grep -q '^## Scenario adaptation$' DESIGN.md
           grep -q 'VSCodium-inspired workbench model' README.md
 
-          if test -f design-system/tui/preview.mjs; then
-            test -f design-system/tui/preview.mjs
-            grep -q '^## Terminal / TUI contract$' DESIGN.md
-            grep -q 'NO_COLOR' DESIGN.md
-            grep -q 'grapheme' DESIGN.md
-            grep -q 'Terminal / TUI contract' ui-design/SKILL.md
-            grep -q 'Terminal / TUI contract' architecture/references/runtime-selection.md
-            grep -q 'design-system/tui/preview.mjs' README.md
-            grep -q 'tui/preview.mjs' design-system/SKILL.md
-            node design-system/tui/preview.mjs --check
-          fi
+          test -f design-system/tui/preview.mjs
+          grep -q '^## Terminal / TUI contract$' DESIGN.md
+          grep -q 'NO_COLOR' DESIGN.md
+          grep -q 'grapheme' DESIGN.md
+          grep -q 'Terminal / TUI contract' ui-design/SKILL.md
+          grep -q 'Terminal / TUI contract' architecture/references/runtime-selection.md
+          grep -q 'design-system/tui/preview.mjs' README.md
+          grep -q 'tui/preview.mjs' design-system/SKILL.md
+          node design-system/tui/preview.mjs --check

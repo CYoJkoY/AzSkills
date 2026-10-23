@@ -50,7 +50,7 @@ function parseFrontmatter(text, file) {
         .filter(Boolean);
     } else if (value.startsWith("\"") && value.endsWith("\"")) {
       data[key] = value.slice(1, -1);
-    } else if (value === ">" || value === "|") {
+    } else if (/^[>|][+-]?\d*$/.test(value)) {
       const parts = [];
       while (index + 1 < raw.length) {
         const next = raw[index + 1];
@@ -58,7 +58,7 @@ function parseFrontmatter(text, file) {
         parts.push(next.trim());
         index += 1;
       }
-      data[key] = value === ">" ? parts.filter(Boolean).join(" ") : parts.join("\n").trim();
+      data[key] = value.startsWith(">") ? parts.filter(Boolean).join(" ") : parts.join("\n").trim();
     } else {
       data[key] = value;
     }
@@ -138,15 +138,17 @@ async function checkLinks(file, text) {
   for (const match of scannable.replace(/`[^`\n]*`/g, "").matchAll(markdown)) {
     await assertTargetExists(file, match[1]);
   }
-  const assets = /<(?:img|source)\b[^>]*?\b(src|srcset)\s*=\s*"([^"]*)"/gi;
-  for (const match of scannable.matchAll(assets)) {
+  const assetText = scannable.replace(/`[^`\n]*`/g, "");
+  const assets = /<(?:img|source)\b[^>]*?\b(src|srcset)\s*=\s*(?:"([^"]*)"|'([^']*)')/gi;
+  for (const match of assetText.matchAll(assets)) {
+    const value = match[2] ?? match[3] ?? "";
     if (match[1].toLowerCase() === "srcset") {
-      for (const candidate of match[2].split(",")) {
+      for (const candidate of value.split(",")) {
         const url = candidate.trim().split(/\s+/)[0];
         if (url) await assertTargetExists(file, url);
       }
     } else {
-      await assertTargetExists(file, match[2]);
+      await assertTargetExists(file, value);
     }
   }
 }
@@ -279,6 +281,19 @@ async function main() {
         .filter((heading) => requiredHeadings.includes(heading));
       if (seenHeadings.join(",") !== requiredHeadings.join(",")) {
         fail(entry.path + ": required sections out of order: " + seenHeadings.join(", "));
+      }
+      const allHeadings = body
+        .split("\n")
+        .filter((line) => /^## /.test(line))
+        .map((line) => line.slice(3));
+      const modesAt = allHeadings.indexOf("Modes");
+      const gatesAt = allHeadings.indexOf("Quality gates");
+      for (const heading of allHeadings) {
+        if (requiredHeadings.includes(heading) || heading === "References") continue;
+        const at = allHeadings.indexOf(heading);
+        if (at < modesAt || at > gatesAt) {
+          fail(entry.path + ": domain section must sit between Modes and Quality gates: " + heading);
+        }
       }
       const contract = sectionBody(body, "Contract");
       if (contract) {
