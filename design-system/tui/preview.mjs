@@ -1,0 +1,833 @@
+#!/usr/bin/env node
+/*
+ * AzSkills terminal preview.
+ *
+ * Dependency-free renderer for the Terminal / TUI contract in DESIGN.md.
+ * It is a verification artifact, not a framework: one cell grid, ANSI roles,
+ * ASCII fallbacks, and a deterministic --check mode for CI.
+ */
+
+import process from "node:process";
+import { pathToFileURL } from "node:url";
+
+const SKILLS = [
+  {
+    name: "ui-design",
+    group: "DESIGN",
+    purpose: "Production interface systems, responsive behavior, accessibility, and visual QA.",
+    when: "Use when an interface needs hierarchy, states, responsive rules, or review.",
+    contract: "Token-only spacing. One icon grid. Keyboard-first states. No framework.",
+  },
+  {
+    name: "design-system",
+    group: "DESIGN",
+    purpose: "Consume, normalize, and verify DESIGN.md contracts.",
+    when: "Use when a design source must become executable tokens and rules.",
+    contract: "Source integrity, semantic mapping, provenance, render verification.",
+  },
+  {
+    name: "readme-craft",
+    group: "DOCS",
+    purpose: "Structure, illustrate, and verify repository landing pages.",
+    when: "Use when a README must be readable, accurate, and theme-safe.",
+    contract: "Information architecture first. SVG parity. No broken anchors.",
+  },
+  {
+    name: "frontend-architecture",
+    group: "ENG",
+    purpose: "Choose boundaries, rendering strategy, and runtime constraints.",
+    when: "Use when the architecture is unclear or a framework is proposed.",
+    contract: "Native first. Explicit boundaries. No framework by default.",
+  },
+  {
+    name: "ui-motion",
+    group: "MOTION",
+    purpose: "Design state transitions that preserve meaning and accessibility.",
+    when: "Use when interaction needs motion or an existing motion needs review.",
+    contract: "Short state transitions. Reduced-motion parity. No decorative loops.",
+  },
+  {
+    name: "application-architecture",
+    group: "ENG",
+    purpose: "Select application boundaries for CLI, TUI, native, or web products.",
+    when: "Use when deciding how a product should be assembled and deployed.",
+    contract: "Document the heavier runtime. Keep domain logic independent.",
+  },
+  {
+    name: "l13n",
+    group: "DOCS",
+    purpose: "Plan localization and translation without losing technical meaning.",
+    when: "Use when text expands, languages change, or mixed-script content must fit.",
+    contract: "Preserve identifiers. Test expansion. Avoid fixed label widths.",
+  },
+  { name: "frontend-slides", group: "BUILD" },
+  { name: "ip-as-logo", group: "LOGO" },
+  { name: "logo-generator", group: "LOGO" },
+  { name: "photo-abstract-editorial", group: "IMAGE" },
+  { name: "rare-ui-motion", group: "MOTION" },
+  { name: "remotion-production", group: "VIDEO" },
+  { name: "steam-mod-page", group: "WEB" },
+  { name: "svg-animation", group: "MOTION" },
+  { name: "ui-aesthetics", group: "DESIGN" },
+  { name: "ui-motion-audit", group: "MOTION" },
+  { name: "ui-motion-review", group: "MOTION" },
+  { name: "ui-ux-design-intelligence", group: "DESIGN" },
+  { name: "ultrathink", group: "META" },
+];
+
+const THEMES = {
+  light: {
+    accent: [11, 87, 208],
+    muted: [102, 108, 120],
+    border: [217, 221, 227],
+    success: [19, 115, 51],
+    warning: [138, 75, 0],
+    danger: [179, 38, 30],
+  },
+  dark: {
+    accent: [168, 199, 250],
+    muted: [146, 153, 165],
+    border: [56, 59, 67],
+    success: [129, 201, 149],
+    warning: [253, 214, 99],
+    danger: [242, 184, 181],
+  },
+};
+
+const WIDE = [
+  [0x1100, 0x115f],
+  [0x2e80, 0x303e],
+  [0x3041, 0x33ff],
+  [0x3400, 0x4dbf],
+  [0x4e00, 0x9fff],
+  [0xa000, 0xa4cf],
+  [0xa960, 0xa97f],
+  [0xac00, 0xd7a3],
+  [0xf900, 0xfaff],
+  [0xfe10, 0xfe19],
+  [0xfe30, 0xfe6f],
+  [0xff00, 0xff60],
+  [0xffe0, 0xffe6],
+  [0x1f300, 0x1faff],
+  [0x20000, 0x3fffd],
+];
+
+const ANSI_RE = /\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07]*(?:\x07|\x1b\\))/g;
+const ZERO_RE = /\p{Mn}|\p{Me}|\p{Cf}/u;
+const segmenter =
+  typeof Intl.Segmenter === "function"
+    ? new Intl.Segmenter("en", { granularity: "grapheme" })
+    : null;
+
+function isWide(codePoint) {
+  return WIDE.some(([start, end]) => codePoint >= start && codePoint <= end);
+}
+
+function codePointWidth(codePoint) {
+  if (codePoint === 0) return 0;
+  if (codePoint < 32 || (codePoint >= 0x7f && codePoint < 0xa0)) return 0;
+  const character = String.fromCodePoint(codePoint);
+  if (ZERO_RE.test(character)) return 0;
+  return isWide(codePoint) ? 2 : 1;
+}
+
+function graphemes(text) {
+  if (segmenter) {
+    return Array.from(segmenter.segment(text), (part) => part.segment);
+  }
+  return Array.from(text);
+}
+
+function stripAnsi(text) {
+  return String(text).replace(ANSI_RE, "");
+}
+
+function stringWidth(text) {
+  let width = 0;
+  for (const grapheme of graphemes(stripAnsi(text))) {
+    for (const character of grapheme) {
+      width += codePointWidth(character.codePointAt(0));
+    }
+  }
+  return width;
+}
+
+function sanitize(text) {
+  return String(text)
+    .replace(/\x1b\][^\x07]*(?:\x07|\x1b\\)/g, "")
+    .replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, "")
+    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/g, "")
+    .replace(/\r/g, "");
+}
+
+function truncate(text, maxWidth, ellipsis) {
+  const clean = sanitize(text);
+  if (maxWidth <= 0) return "";
+  if (stringWidth(clean) <= maxWidth) return clean;
+  const ellipsisWidth = stringWidth(ellipsis);
+  if (maxWidth <= ellipsisWidth) return ".".repeat(maxWidth);
+  let output = "";
+  let used = 0;
+  for (const grapheme of graphemes(clean)) {
+    const width = stringWidth(grapheme);
+    if (used + width + ellipsisWidth > maxWidth) break;
+    output += grapheme;
+    used += width;
+  }
+  return output + ellipsis;
+}
+
+function truncateMiddle(text, maxWidth, ellipsis) {
+  const clean = sanitize(text);
+  if (stringWidth(clean) <= maxWidth) return clean;
+  const ellipsisWidth = stringWidth(ellipsis);
+  if (maxWidth <= ellipsisWidth + 2) return truncate(clean, maxWidth, ellipsis);
+  const available = maxWidth - ellipsisWidth;
+  const headWidth = Math.max(1, Math.floor(available * 0.55));
+  const tailWidth = Math.max(1, available - headWidth);
+  const parts = graphemes(clean);
+  let head = "";
+  let used = 0;
+  for (const grapheme of parts) {
+    const width = stringWidth(grapheme);
+    if (used + width > headWidth) break;
+    head += grapheme;
+    used += width;
+  }
+  let tail = "";
+  used = 0;
+  for (let index = parts.length - 1; index >= 0; index -= 1) {
+    const grapheme = parts[index];
+    const width = stringWidth(grapheme);
+    if (used + width > tailWidth) break;
+    tail = grapheme + tail;
+    used += width;
+  }
+  return head + ellipsis + tail;
+}
+
+function wrapText(text, maxWidth) {
+  const clean = sanitize(text).replace(/\s+/g, " ").trim();
+  if (!clean) return [""];
+  const words = clean.split(" ");
+  const lines = [];
+  let current = "";
+
+  for (const word of words) {
+    const candidate = current ? current + " " + word : word;
+    if (stringWidth(candidate) <= maxWidth) {
+      current = candidate;
+      continue;
+    }
+    if (current) {
+      lines.push(current);
+      current = "";
+    }
+    if (stringWidth(word) <= maxWidth) {
+      current = word;
+      continue;
+    }
+    let part = "";
+    for (const grapheme of graphemes(word)) {
+      if (stringWidth(part + grapheme) > maxWidth) {
+        if (part) lines.push(part);
+        part = grapheme;
+      } else {
+        part += grapheme;
+      }
+    }
+    current = part;
+  }
+
+  if (current) lines.push(current);
+  return lines.length ? lines : [""];
+}
+
+function makeStyle(colorMode, theme) {
+  const palette = THEMES[theme];
+  const fg = (rgb) => "38;2;" + rgb.join(";");
+
+  function codes(role) {
+    if (role === "text") return [];
+    if (role === "textBold") return [1];
+    if (role === "underline") return [4];
+    if (role === "reverse") return [7];
+    if (colorMode === "none") return [];
+
+    if (colorMode === "16") {
+      if (role === "muted" || role === "border") return [90];
+      if (role === "accent") return [34];
+      if (role === "accentBold") return [34, 1];
+      if (role === "success") return [32];
+      if (role === "warning") return [33];
+      if (role === "danger") return [31];
+      return [];
+    }
+
+    if (colorMode === "256") {
+      if (role === "muted") return ["38;5;244"];
+      if (role === "border") return ["38;5;240"];
+      if (role === "accent") return ["38;5;" + (theme === "dark" ? "153" : "26")];
+      if (role === "accentBold") {
+        return ["38;5;" + (theme === "dark" ? "153" : "26"), "1"];
+      }
+      if (role === "success") return ["38;5;" + (theme === "dark" ? "114" : "28")];
+      if (role === "warning") return ["38;5;" + (theme === "dark" ? "221" : "130")];
+      if (role === "danger") return ["38;5;" + (theme === "dark" ? "217" : "160")];
+      return [];
+    }
+
+    if (role === "muted") return [fg(palette.muted)];
+    if (role === "border") return [fg(palette.border)];
+    if (role === "accent") return [fg(palette.accent)];
+    if (role === "accentBold") return [fg(palette.accent), "1"];
+    if (role === "success") return [fg(palette.success)];
+    if (role === "warning") return [fg(palette.warning)];
+    if (role === "danger") return [fg(palette.danger)];
+    return [];
+  }
+
+  return function style(role, text) {
+    const value = String(text);
+    if (colorMode === "none" || role === "text" || !value) return value;
+    const sequence = codes(role);
+    if (!sequence.length) return value;
+    return "\x1b[" + sequence.join(";") + "m" + value + "\x1b[0m";
+  };
+}
+
+function glyphs(ascii) {
+  if (ascii) {
+    return {
+      marker: ">",
+      chevron: ">",
+      check: "OK",
+      cross: "x",
+      ellipsis: "...",
+      h: "-",
+      v: "|",
+      bullet: "*",
+    };
+  }
+  return {
+    marker: "\u258c",
+    chevron: "\u203a",
+    check: "\u2713",
+    cross: "\u00d7",
+    ellipsis: "\u2026",
+    h: "\u2500",
+    v: "\u2502",
+    bullet: "\u2022",
+  };
+}
+
+function segmentWidth(segments) {
+  return segments.reduce((total, item) => total + stringWidth(item.t || ""), 0);
+}
+
+function renderSegments(segments, width, style, ellipsis) {
+  let output = "";
+  let used = 0;
+  for (const item of segments) {
+    if (used >= width) break;
+    const text = String(item.t || "");
+    if (!text) continue;
+    const room = width - used;
+    const textWidth = stringWidth(text);
+    if (textWidth > room) {
+      const cut = truncate(text, room, ellipsis);
+      output += style(item.r || "text", cut);
+      used += stringWidth(cut);
+      break;
+    }
+    output += style(item.r || "text", text);
+    used += textWidth;
+  }
+  return output + " ".repeat(Math.max(0, width - used));
+}
+
+function fitPair(left, right, width, style, ellipsis) {
+  const rightWidth = Math.min(stringWidth(segmentText(right)), width);
+  const leftLimit = Math.max(0, width - rightWidth - (rightWidth ? 1 : 0));
+  const leftWidth = Math.min(segmentWidth(left), leftLimit);
+  const leftText = renderSegments(left, leftWidth, style, ellipsis);
+  const rightText = renderSegments(right, rightWidth, style, ellipsis);
+  const gap = Math.max(0, width - leftWidth - rightWidth);
+  return leftText + " ".repeat(gap) + rightText;
+}
+
+function segmentText(segments) {
+  return segments.map((item) => String(item.t || "")).join("");
+}
+
+function padDisplay(text, width) {
+  const used = stringWidth(text);
+  return used >= width ? text : text + " ".repeat(width - used);
+}
+
+function headerLine(width, options, style, glyph) {
+  const left = [
+    { t: "AzSkills", r: "textBold" },
+    { t: " / ", r: "muted" },
+    { t: "Skills", r: "muted" },
+  ];
+  let right = SKILLS.length + " skills";
+  if (width >= 80) right += " / " + options.theme;
+  if (width >= 100) right += " / " + options.density;
+  if (stringWidth(right) > Math.floor(width * 0.5)) right = SKILLS.length + " skills";
+  return fitPair(left, [{ t: right, r: "muted" }], width, style, glyph.ellipsis);
+}
+
+function buildRail(height, style, glyph) {
+  const items = [
+    ["S", "Skills"],
+    ["/", "Search"],
+    ["V", "Validate"],
+    ["?", "Help"],
+  ];
+  const lines = [];
+  for (let index = 0; index < height; index += 1) {
+    const item = items[index];
+    if (!item) {
+      lines.push(" ".repeat(4));
+      continue;
+    }
+    const active = index === 0;
+    const marker = active ? glyph.marker : " ";
+    lines.push(
+      renderSegments(
+        [
+          { t: marker, r: active ? "accent" : "muted" },
+          { t: item[0], r: active ? "textBold" : "muted" },
+        ],
+        4,
+        style,
+        glyph.ellipsis,
+      ),
+    );
+  }
+  return lines;
+}
+
+function buildList(width, height, options, style, glyph) {
+  const lines = [];
+  const searchText = width >= 28 ? "Search skills" : "Search";
+  const visible = Math.min(SKILLS.length, Math.max(0, height - 2));
+  lines.push(
+    fitPair(
+      [{ t: "SKILLS", r: "textBold" }],
+      [{ t: "ALL " + visible + "/" + SKILLS.length, r: "muted" }],
+      width,
+      style,
+      glyph.ellipsis,
+    ),
+  );
+  lines.push(
+    renderSegments(
+      [
+        { t: "[", r: "accent" },
+        { t: " / ", r: "accentBold" },
+        { t: searchText, r: "muted" },
+        { t: " ]", r: "accent" },
+      ],
+      width,
+      style,
+      glyph.ellipsis,
+    ),
+  );
+
+  const showCategory = width >= 28;
+  for (const skill of SKILLS) {
+    if (lines.length >= height) break;
+    const selected = skill.name === options.selected;
+    const maxName = width - 2 - (showCategory ? stringWidth(skill.group) + 2 : 0);
+    const name = truncate(skill.name, Math.max(6, maxName), glyph.ellipsis);
+    const segments = [
+      { t: selected ? glyph.marker : " ", r: selected ? "accent" : "text" },
+      { t: " ", r: "text" },
+      { t: name, r: selected ? "textBold" : "text" },
+    ];
+    if (showCategory) {
+      const gap = Math.max(2, width - 2 - stringWidth(name) - stringWidth(skill.group));
+      segments.push({ t: " ".repeat(gap), r: "text" });
+      segments.push({ t: skill.group, r: "muted" });
+    }
+    lines.push(renderSegments(segments, width, style, glyph.ellipsis));
+  }
+
+  while (lines.length < height) lines.push(" ".repeat(width));
+  return lines;
+}
+
+function pushWrapped(lines, text, width, firstPrefix, restPrefix, style, glyph) {
+  const bodyWidth = Math.max(8, width - stringWidth(firstPrefix));
+  const wrapped = wrapText(text, bodyWidth);
+  for (let index = 0; index < wrapped.length; index += 1) {
+    const prefix = index === 0 ? firstPrefix : restPrefix;
+    lines.push(prefix + wrapped[index]);
+  }
+}
+
+function buildDetail(width, height, options, style, glyph) {
+  const skill = SKILLS.find((item) => item.name === options.selected) || SKILLS[0];
+  const purpose =
+    skill.purpose || "Repository-local behavior contract for " + skill.name + ".";
+  const when = skill.when || "Use when this capability owns the task.";
+  const contract = skill.contract || "Read scope, constraints, workflow, and quality gates.";
+  const lines = [];
+  lines.push(
+    fitPair(
+      [{ t: skill.name, r: "textBold" }],
+      [{ t: glyph.check, r: "success" }],
+      width,
+      style,
+      glyph.ellipsis,
+    ),
+  );
+  lines.push(style("muted", skill.group + " / core / verified"));
+  lines.push(style("border", glyph.h.repeat(width)));
+  for (const line of wrapText(purpose, Math.min(width, 100))) {
+    lines.push(truncate(line, width, glyph.ellipsis));
+  }
+
+  if (options.density === "comfortable") lines.push("");
+  if (lines.length < height) lines.push(style("textBold", "WHEN TO USE"));
+  if (lines.length < height) {
+    pushWrapped(lines, when, width, glyph.bullet + " ", "  ", style, glyph);
+  }
+
+  if (options.density === "comfortable") lines.push("");
+  if (lines.length < height) lines.push(style("textBold", "CONTRACT"));
+  if (lines.length < height) {
+    pushWrapped(lines, contract, width, glyph.bullet + " ", "  ", style, glyph);
+  }
+
+  if (width >= 70 && lines.length + 2 < height) {
+    if (options.density === "comfortable") lines.push("");
+    lines.push(style("textBold", "NEXT"));
+    lines.push(style("muted", "[Enter] Open  [Tab] Focus  [?] Help"));
+  }
+
+  while (lines.length < height) lines.push("");
+  return lines.slice(0, height);
+}
+
+function statusLine(width, options, style, glyph) {
+  const selected = options.selected;
+  const left = width >= 52 ? selected + "  selected" : selected;
+  let right = width >= 52 ? "? help  / search  q quit" : "? help  Enter open";
+  if (width < 40) right = "? help";
+  return fitPair(
+    [{ t: left, r: "muted" }],
+    [{ t: right, r: "muted" }],
+    width,
+    style,
+    glyph.ellipsis,
+  );
+}
+
+export function renderTui(options = {}) {
+  const width = Math.max(24, Math.min(240, Number(options.width) || 80));
+  const rows = Math.max(8, Math.min(60, Number(options.rows) || 18));
+  const plain = Boolean(options.plain);
+  if (width < 40 && !plain) {
+    throw new RangeError("TUI needs at least 40 columns. Use --plain for narrow output.");
+  }
+  const theme = options.theme === "light" ? "light" : "dark";
+  const density = options.density === "comfortable" ? "comfortable" : "compact";
+  const ascii = Boolean(options.ascii || plain);
+  const color = options.color || "auto";
+  const style = makeStyle(color, theme);
+  const glyph = glyphs(ascii);
+  const selected = options.selected || "ui-design";
+  const resolved = { width, rows, theme, density, selected, plain, ascii, color };
+  const lines = [];
+
+  lines.push(headerLine(width, resolved, style, glyph));
+  lines.push(style("border", glyph.h.repeat(width)));
+
+  let body = [];
+  if (width >= 100) {
+    const railWidth = 4;
+    const gutter = 2;
+    const listWidth = Math.max(24, Math.min(32, Math.floor(width * 0.28)));
+    const detailWidth = width - railWidth - gutter - listWidth - gutter;
+    const rail = buildRail(rows, style, glyph);
+    const list = buildList(listWidth, rows, resolved, style, glyph);
+    const detail = buildDetail(detailWidth, rows, resolved, style, glyph).map((line) =>
+      padDisplay(line, detailWidth),
+    );
+    const separator = style("border", glyph.v) + " ";
+    for (let index = 0; index < rows; index += 1) {
+      body.push(rail[index] + separator + list[index] + separator + detail[index]);
+    }
+  } else if (width >= 60) {
+    const gutter = 2;
+    const listWidth = Math.max(22, Math.min(34, Math.floor(width * 0.4)));
+    const detailWidth = width - listWidth - gutter;
+    const list = buildList(listWidth, rows, resolved, style, glyph);
+    const detail = buildDetail(detailWidth, rows, resolved, style, glyph).map((line) =>
+      padDisplay(line, detailWidth),
+    );
+    const separator = style("border", glyph.v) + " ";
+    for (let index = 0; index < rows; index += 1) {
+      body.push(list[index] + separator + detail[index]);
+    }
+  } else {
+    body = buildList(width, rows, resolved, style, glyph);
+  }
+
+  lines.push(...body);
+  lines.push(style("border", glyph.h.repeat(width)));
+  lines.push(statusLine(width, resolved, style, glyph));
+  return lines.join("\n") + "\n";
+}
+
+function detectColor() {
+  if (
+    process.env.NO_COLOR !== undefined ||
+    process.env.CLICOLOR === "0" ||
+    process.env.TERM === "dumb" ||
+    !process.stdout.isTTY
+  ) {
+    return "none";
+  }
+  if (String(process.env.COLORTERM || "").toLowerCase() === "truecolor") {
+    return "truecolor";
+  }
+  if (String(process.env.TERM || "").includes("256color")) return "256";
+  return "16";
+}
+
+function checkFrame(width, color, theme, density) {
+  const issues = [];
+  let output = "";
+  try {
+    output = renderTui({ width, color, theme, density, rows: 18 });
+  } catch (error) {
+    issues.push("render failed at " + width + "/" + color + ": " + error.message);
+    return { issues, output };
+  }
+  const lines = output.split("\n");
+  if (lines.length && lines[lines.length - 1] === "") lines.pop();
+  if (lines.length !== 22) {
+    issues.push("unexpected line count at " + width + "/" + color + ": " + lines.length);
+  }
+  for (let index = 0; index < lines.length; index += 1) {
+    const measured = stringWidth(lines[index]);
+    if (measured !== width) {
+      issues.push(
+        "width mismatch at " + width + "/" + color + " line " + (index + 1) + ": " + measured,
+      );
+    }
+    if (lines[index].includes("\t")) {
+      issues.push("tab at " + width + "/" + color + " line " + (index + 1));
+    }
+  }
+  if (color === "none" && output.includes("\x1b")) {
+    issues.push("ANSI in no-colour frame at " + width);
+  }
+  if (output.includes("\x1b]")) {
+    issues.push("OSC sequence at " + width + "/" + color);
+  }
+  for (const required of ["AzSkills", "SKILLS", "ui-design"]) {
+    if (!output.includes(required)) {
+      issues.push("missing " + required + " at " + width + "/" + color);
+    }
+  }
+  return { issues, output };
+}
+
+function runCheck() {
+  const issues = [];
+  let frames = 0;
+  const widths = [40, 60, 80, 100, 120, 160];
+  for (const width of widths) {
+    for (const color of ["truecolor", "256", "16", "none"]) {
+      for (const theme of ["light", "dark"]) {
+        for (const density of ["compact", "comfortable"]) {
+          frames += 1;
+          issues.push(...checkFrame(width, color, theme, density).issues);
+        }
+      }
+    }
+  }
+
+  for (const width of [40, 80, 120]) {
+    frames += 1;
+    let output = "";
+    try {
+      output = renderTui({
+        width,
+        color: "none",
+        ascii: true,
+        plain: true,
+        theme: "light",
+        density: "comfortable",
+        rows: 18,
+      });
+    } catch (error) {
+      issues.push("plain render failed at " + width + ": " + error.message);
+      continue;
+    }
+    if (/[^\x00-\x7f]/.test(output)) {
+      issues.push("non-ASCII in plain frame at " + width);
+    }
+    if (output.includes("\x1b")) issues.push("ANSI in plain frame at " + width);
+  }
+
+  const hostile = "A\x1b]0;title\x07B\x1b[31mC\x9b";
+  if (sanitize(hostile) !== "ABC") {
+    issues.push("sanitize did not strip terminal control sequences");
+  }
+
+  if (stringWidth("\u6280\u80fd") !== 4) {
+    issues.push("CJK width is not two cells per ideograph");
+  }
+  if (stringWidth("e\u0301") !== 1) {
+    issues.push("combining mark width is not zero");
+  }
+  if (stringWidth(truncate("\u6280\u80fd", 3, "\u2026")) !== 3) {
+    issues.push("wide-character truncation exceeds its budget");
+  }
+
+  frames += 1;
+  const unicodeFrame = renderTui({
+    width: 80,
+    color: "truecolor",
+    theme: "dark",
+    density: "compact",
+    rows: 18,
+  });
+  if (/[\u{1f300}-\u{1faff}\u{e000}-\u{f8ff}]/u.test(unicodeFrame)) {
+    issues.push("emoji or Private Use Area glyph emitted");
+  }
+  if (/\x1b\[[0-9;]*48;/.test(unicodeFrame)) {
+    issues.push("terminal background colour emitted");
+  }
+
+  return {
+    ok: issues.length === 0,
+    frames,
+    widths,
+    issues: issues.slice(0, 20),
+  };
+}
+
+function usage() {
+  return [
+    "AzSkills terminal preview",
+    "",
+    "Usage: node design-system/tui/preview.mjs [options]",
+    "",
+    "Options:",
+    "  --width <cols>       Columns, 40-240 (default 80)",
+    "  --rows <count>       Body rows, 8-60 (default 18)",
+    "  --theme <name>       light or dark (default dark)",
+    "  --density <name>     compact or comfortable (default compact)",
+    "  --color <mode>       auto, truecolor, 256, 16, none (default auto)",
+    "  --ascii              ASCII glyphs; colour still follows --color",
+    "  --plain              No ANSI, ASCII glyphs, logs and screen readers",
+    "  --selected <name>    Selected skill row (default ui-design)",
+    "  --check              Run the conformance matrix and print JSON",
+    "  --help               Show this message",
+    "",
+  ].join("\n");
+}
+
+function parseArgs(args) {
+  const options = {
+    width: 80,
+    rows: 18,
+    theme: "dark",
+    density: "compact",
+    color: "auto",
+    ascii: false,
+    plain: false,
+    selected: "ui-design",
+    check: false,
+    help: false,
+  };
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--help" || arg === "-h") {
+      options.help = true;
+    } else if (arg === "--check") {
+      options.check = true;
+    } else if (arg === "--ascii") {
+      options.ascii = true;
+    } else if (arg === "--plain") {
+      options.plain = true;
+    } else if (arg.startsWith("--width=")) {
+      options.width = Number(arg.slice(8));
+    } else if (arg === "--width") {
+      options.width = Number(args[index + 1]);
+      index += 1;
+    } else if (arg.startsWith("--rows=")) {
+      options.rows = Number(arg.slice(7));
+    } else if (arg === "--rows") {
+      options.rows = Number(args[index + 1]);
+      index += 1;
+    } else if (arg.startsWith("--theme=")) {
+      options.theme = arg.slice(8);
+    } else if (arg === "--theme") {
+      options.theme = args[index + 1];
+      index += 1;
+    } else if (arg.startsWith("--density=")) {
+      options.density = arg.slice(10);
+    } else if (arg === "--density") {
+      options.density = args[index + 1];
+      index += 1;
+    } else if (arg.startsWith("--color=")) {
+      options.color = arg.slice(8);
+    } else if (arg === "--color") {
+      options.color = args[index + 1];
+      index += 1;
+    } else if (arg.startsWith("--selected=")) {
+      options.selected = arg.slice(11);
+    } else if (arg === "--selected") {
+      options.selected = args[index + 1];
+      index += 1;
+    } else {
+      throw new Error("Unknown argument: " + arg);
+    }
+  }
+  return options;
+}
+
+function main() {
+  let options;
+  try {
+    options = parseArgs(process.argv.slice(2));
+  } catch (error) {
+    process.stderr.write(error.message + "\n");
+    process.exitCode = 2;
+    return;
+  }
+  if (options.help) {
+    process.stdout.write(usage());
+    return;
+  }
+  if (options.check) {
+    const result = runCheck();
+    process.stdout.write(JSON.stringify(result) + "\n");
+    process.exitCode = result.ok ? 0 : 1;
+    return;
+  }
+  if (options.plain) {
+    options.ascii = true;
+    options.color = "none";
+  } else if (options.color === "auto") {
+    options.color = detectColor();
+  }
+  try {
+    process.stdout.write(renderTui(options));
+  } catch (error) {
+    process.stderr.write(error.message + "\n");
+    process.exitCode = 2;
+  }
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
+}
