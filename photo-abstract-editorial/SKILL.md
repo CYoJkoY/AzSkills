@@ -87,6 +87,20 @@ Check source fidelity, mark traceability, panel balance, title legibility, color
 separation, and output dimensions. If the abstraction competes with the
 photograph, remove marks before adding detail.
 
+## Prompt discipline
+
+When an image model is available, build one complete prompt from the observed
+facts. Describe the result and its constraints. Use the model's supported
+negative-prompt field when it exists; otherwise add one concise `Constraints:`
+line. Exclude redrawing, invented objects, unrelated symbols, frames, collage,
+heavy shadow, gradients, texture, grain, watermarks, and decorative clutter.
+
+## Provenance
+
+This contract is an original AzSkills implementation informed by
+https://github.com/ZzzLc0405/photo-abstract-editorial. No upstream artwork,
+template, or repository text is copied.
+
 ## Quality gates
 
 - [ ] The photograph is faithful and uncropped beyond the composition need.
@@ -109,17 +123,3 @@ Findings ranked by source fidelity:
 Source fact -> abstract mark -> correction:
 Unverified items:
 ```
-
-## Prompt discipline
-
-When an image model is available, build one complete prompt from the observed
-facts. Describe the result and its constraints. Use the model's supported
-negative-prompt field when it exists; otherwise add one concise `Constraints:`
-line. Exclude redrawing, invented objects, unrelated symbols, frames, collage,
-heavy shadow, gradients, texture, grain, watermarks, and decorative clutter.
-
-## Provenance
-
-This contract is an original AzSkills implementation informed by
-https://github.com/ZzzLc0405/photo-abstract-editorial. No upstream artwork,
-template, or repository text is copied.

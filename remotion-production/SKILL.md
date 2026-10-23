@@ -133,6 +133,14 @@ limitations and the environment used for the final render.
 - Repeated renders of the same input produce the same visual state.
 - Any wall-clock or network-dependent path is isolated from render-critical code.
 
+## Failure handling
+
+Classify a failed render before changing code: composition or metadata, asset
+loading, timing or synchronization, browser or WebGL, memory or concurrency,
+encoding, or packaging. For a visual mismatch, find the earliest incorrect state
+in the frame chain and fix that state. Do not replace animation libraries at
+random.
+
 ## Quality gates
 
 - [ ] The deliverable is genuinely time-based and rendered.
@@ -163,14 +171,6 @@ Known limitations:
 
 For review, group findings by contract, timeline, visual systems,
 synchronization, assets, performance, and delivery.
-
-## Failure handling
-
-Classify a failed render before changing code: composition or metadata, asset
-loading, timing or synchronization, browser or WebGL, memory or concurrency,
-encoding, or packaging. For a visual mismatch, find the earliest incorrect state
-in the frame chain and fix that state. Do not replace animation libraries at
-random.
 
 ## References
 

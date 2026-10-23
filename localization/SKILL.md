@@ -110,6 +110,12 @@ ranked by import risk, then corrected rows or a patch.
 - Use formal or informal address consistently per locale and game tone.
 - Do not add lore, features, numbers, or claims absent from the source.
 
+## Failure handling
+
+Stop and report the exact row when the input has a broken header, an unparseable
+quote, a missing key, conflicting source meaning that cannot be resolved, or
+markup that cannot be preserved. Do not invent a repaired file silently.
+
 ## Quality gates
 
 - [ ] Header order matches the active schema exactly.
@@ -135,9 +141,3 @@ Problem:
 Correction:
 Unverified items:
 ```
-
-## Failure handling
-
-Stop and report the exact row when the input has a broken header, an unparseable
-quote, a missing key, conflicting source meaning that cannot be resolved, or
-markup that cannot be preserved. Do not invent a repaired file silently.
