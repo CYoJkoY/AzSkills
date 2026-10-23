@@ -159,7 +159,7 @@ function sanitize(text) {
     .replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, "")
     .replace(/[\u0000-\u001f\u007f-\u009f]/g, "")
     .replace(/[\u{e000}-\u{f8ff}\u{f0000}-\u{ffffd}\u{100000}-\u{10fffd}]/gu, "")
-    .replace(/[\p{Extended_Pictographic}\u{1f1e6}-\u{1f1ff}\u{20e3}\u{fe0f}]/gu, "");
+    .replace(/[\p{Extended_Pictographic}\p{Emoji_Modifier}\u{1f1e6}-\u{1f1ff}\u{20e3}\u{fe0f}]/gu, "");
 }
 
 function truncate(text, maxWidth, ellipsis) {
@@ -658,11 +658,34 @@ function detectColor(environment = process.env, isTTY = process.stdout.isTTY) {
   return "16";
 }
 
+function hasBackgroundColor(output) {
+  const pattern = /\x1b\[([0-9;:]*)m/g;
+  let match = pattern.exec(output);
+  while (match) {
+    const params = match[1].split(";");
+    for (let index = 0; index < params.length; index += 1) {
+      const head = params[index].split(":")[0];
+      const code = Number(head);
+      if (head === "48" || (code >= 40 && code <= 47) || (code >= 100 && code <= 107)) {
+        return true;
+      }
+      if (head === "38" || head === "48" || head === "58") {
+        if (params[index].includes(":")) continue;
+        const mode = params[index + 1];
+        if (mode === "5") index += 2;
+        else if (mode === "2") index += 4;
+      }
+    }
+    match = pattern.exec(output);
+  }
+  return false;
+}
+
 function auditSafety(output, label, issues) {
-  if (/[\p{Extended_Pictographic}\u{1f1e6}-\u{1f1ff}\u{20e3}\u{fe0f}\u{e000}-\u{f8ff}\u{f0000}-\u{ffffd}\u{100000}-\u{10fffd}]/u.test(output)) {
+  if (/[\p{Extended_Pictographic}\p{Emoji_Modifier}\u{1f1e6}-\u{1f1ff}\u{20e3}\u{fe0f}\u{e000}-\u{f8ff}\u{f0000}-\u{ffffd}\u{100000}-\u{10fffd}]/u.test(output)) {
     issues.push("emoji or Private Use Area glyph at " + label);
   }
-  if (/\x1b\[[0-9;:]*48(?:[:;][0-9;:]*)?m/.test(output)) {
+  if (hasBackgroundColor(output)) {
     issues.push("terminal background colour at " + label);
   }
   if (output.includes("\x1b]")) {
@@ -790,9 +813,24 @@ function runCheck() {
     if (!output.includes("Enter open")) issues.push("narrow action missing at " + width);
   }
 
-  const hostile = "A\x1b]0;title\x07B\x1b[31mC\x9b\u2705";
+  const hostile = "A\x1b]0;title\x07B\x1b[31mC\x9b\u2705\u{1f3fb}";
   if (sanitize(hostile) !== "ABC") {
     issues.push("sanitize did not strip terminal control sequences");
+  }
+
+  const backgroundCases = [
+    ["\x1b[48mX", true],
+    ["\x1b[48;5;17mX", true],
+    ["\x1b[48:2:1:2:3mX", true],
+    ["\x1b[41mX", true],
+    ["\x1b[104mX", true],
+    ["\x1b[38;5;48mX", false],
+    ["\x1b[38;2;48;1;2mX", false],
+  ];
+  for (const [sequence, expected] of backgroundCases) {
+    if (hasBackgroundColor(sequence) !== expected) {
+      issues.push("background detection failed for " + JSON.stringify(sequence));
+    }
   }
 
   if (stringWidth("\u6280\u80fd") !== 4) {
