@@ -15,6 +15,7 @@ on:
       - ".github/ISSUE_TEMPLATE/**"
       - "scripts/**"
       - "README.md"
+      - "assets/**"
       - ".github/workflows/validate-skills.yml"
   workflow_dispatch:
 

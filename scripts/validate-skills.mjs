@@ -31,7 +31,8 @@ function parseFrontmatter(text, file) {
   }
   const raw = normalized.slice(4, end).split("\n");
   const data = {};
-  for (const line of raw) {
+  for (let index = 0; index < raw.length; index += 1) {
+    const line = raw[index];
     if (!line.trim() || line.trimStart().startsWith("#")) continue;
     const match = /^([A-Za-z][A-Za-z0-9_-]*):\s*(.*)$/.exec(line);
     if (!match) {
@@ -39,7 +40,7 @@ function parseFrontmatter(text, file) {
       continue;
     }
     const key = match[1];
-    let value = match[2].trim();
+    const value = match[2].trim();
     if (value.startsWith("[") && value.endsWith("]")) {
       data[key] = value
         .slice(1, -1)
@@ -49,7 +50,14 @@ function parseFrontmatter(text, file) {
     } else if (value.startsWith("\"") && value.endsWith("\"")) {
       data[key] = value.slice(1, -1);
     } else if (value === ">" || value === "|") {
-      data[key] = "";
+      const parts = [];
+      while (index + 1 < raw.length) {
+        const next = raw[index + 1];
+        if (next.trim() && !/^\s/.test(next)) break;
+        parts.push(next.trim());
+        index += 1;
+      }
+      data[key] = value === ">" ? parts.filter(Boolean).join(" ") : parts.join("\n").trim();
     } else {
       data[key] = value;
     }
@@ -88,43 +96,57 @@ function asciiOnly(text) {
   return !/[^\x00-\x7F]/.test(text);
 }
 
+function resolveTarget(file, target) {
+  const trimmed = target.trim().replace(/^<|>$/g, "");
+  if (
+    !trimmed ||
+    trimmed.startsWith("#") ||
+    /^[a-z][a-z0-9+.-]*:/i.test(trimmed) ||
+    trimmed.startsWith("//")
+  ) {
+    return null;
+  }
+  let decoded = trimmed;
+  try {
+    decoded = decodeURIComponent(trimmed.split("#")[0]);
+  } catch {
+    fail(relative(file) + ": malformed link encoding: " + trimmed);
+    return null;
+  }
+  const resolved = path.resolve(path.dirname(file), decoded);
+  if (!resolved.startsWith(root + path.sep) && resolved !== root) {
+    fail(relative(file) + ": link escapes repository: " + decoded);
+    return null;
+  }
+  return { resolved, target: decoded };
+}
+
+async function assertTargetExists(file, target) {
+  const hit = resolveTarget(file, target);
+  if (!hit) return;
+  try {
+    await stat(hit.resolved);
+  } catch {
+    fail(relative(file) + ": broken local link: " + hit.target);
+  }
+}
+
 async function checkLinks(file, text) {
-  const pattern = /!?\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
-  const scannable = text
-    .replace(/```[\s\S]*?```/g, "")
-    .replace(/<!--[\s\S]*?-->/g, "")
-    .replace(/`[^`\n]*`/g, "");
-  let match = pattern.exec(scannable);
-  while (match) {
-    let target = match[1].trim().replace(/^<|>$/g, "");
-    if (
-      !target ||
-      target.startsWith("#") ||
-      /^[a-z][a-z0-9+.-]*:/i.test(target) ||
-      target.startsWith("//")
-    ) {
-      match = pattern.exec(scannable);
-      continue;
+  const scannable = text.replace(/```[\s\S]*?```/g, "").replace(/<!--[\s\S]*?-->/g, "");
+  const markdown = /!?\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+  for (const match of scannable.replace(/`[^`\n]*`/g, "").matchAll(markdown)) {
+    await assertTargetExists(file, match[1]);
+  }
+  const assets = /<(?:img|source)\b[^>]*?\b(src|srcset)\s*=\s*"([^"]*)"/gi;
+  for (const match of scannable.matchAll(assets)) {
+    if (match[1].toLowerCase() === "srcset") {
+      for (const candidate of match[2].split(",")) {
+        const url = candidate.trim().split(/\s+/)[0];
+        if (url) await assertTargetExists(file, url);
+      }
+    } else {
+      await assertTargetExists(file, match[2]);
     }
-    try {
-      target = decodeURIComponent(target.split("#")[0]);
-    } catch {
-      fail(relative(file) + ": malformed link encoding: " + match[1]);
-      match = pattern.exec(scannable);
-      continue;
-    }
-    const resolved = path.resolve(path.dirname(file), target);
-    if (!resolved.startsWith(root + path.sep) && resolved !== root) {
-      fail(relative(file) + ": link escapes repository: " + target);
-      match = pattern.exec(scannable);
-      continue;
-    }
-    try {
-      await stat(resolved);
-    } catch {
-      fail(relative(file) + ": broken local link: " + target);
-    }
-    match = pattern.exec(scannable);
   }
 }
 
@@ -239,8 +261,17 @@ async function main() {
         fail(entry.path + ": modes must match registry order: " + entry.modes.join(", "));
       }
       if (!data.version) fail(entry.path + ": version is required");
-      for (const heading of ["Contract", "Modes", "Workflow", "Quality gates", "Output contract"]) {
+      const requiredHeadings = ["Contract", "Modes", "Workflow", "Quality gates", "Output contract"];
+      for (const heading of requiredHeadings) {
         if (!hasSection(body, heading)) fail(entry.path + ": missing section ## " + heading);
+      }
+      const seenHeadings = body
+        .split("\n")
+        .filter((line) => /^## /.test(line))
+        .map((line) => line.slice(3))
+        .filter((heading) => requiredHeadings.includes(heading));
+      if (seenHeadings.join(",") !== requiredHeadings.join(",")) {
+        fail(entry.path + ": required sections out of order: " + seenHeadings.join(", "));
       }
       const contract = sectionBody(body, "Contract");
       if (contract) {
@@ -261,13 +292,37 @@ async function main() {
         }
         const named = new Set();
         for (const match of (values.get("Compose with") || "").matchAll(/`([a-z0-9-]+)`/g)) {
-          if (canonical.has(match[1]) && match[1] !== entry.id) named.add(match[1]);
+          const id = match[1];
+          if (id === entry.id) {
+            fail(entry.path + ": Compose with references itself");
+            continue;
+          }
+          if (!canonical.has(id)) {
+            fail(entry.path + ": Compose with names unknown canonical Skill " + id);
+            continue;
+          }
+          named.add(id);
         }
         const declared = new Set(entry.composes || []);
         const missing = [...named].filter((id) => !declared.has(id)).sort();
         const extra = [...declared].filter((id) => !named.has(id)).sort();
         if (missing.length) fail(entry.path + ": composes is missing " + missing.join(", "));
         if (extra.length) fail(entry.path + ": composes has undeclared " + extra.join(", "));
+      }
+
+      const referenceLines = sectionBody(body, "References") || [];
+      for (const line of referenceLines) {
+        for (const match of line.matchAll(/`([^`]+\.md)`/g)) {
+          const target = match[1];
+          if (/^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith("/")) continue;
+          const resolved = path.resolve(path.dirname(file), target);
+          if (!resolved.startsWith(root + path.sep)) {
+            fail(entry.path + ": reference path escapes repository: " + target);
+            continue;
+          }
+          const exists = await stat(resolved).then(() => true).catch(() => false);
+          if (!exists) fail(entry.path + ": broken reference path: " + target);
+        }
       }
       if (entry.modes.length !== new Set(entry.modes).size) fail(entry.id + ": duplicate mode");
       if (!entry.role) fail(entry.id + ": role is required");
@@ -276,7 +331,10 @@ async function main() {
       if (data.status !== "alias") fail(entry.path + ": status must be alias");
       if (data.canonical !== entry.canonical) fail(entry.path + ": canonical must be " + entry.canonical);
       if (data.mode !== entry.mode) fail(entry.path + ": mode must be " + entry.mode);
-      if (hasSection(body, "Contract")) fail(entry.path + ": alias must not restate a Contract section");
+      const aliasSections = body.split("\n").filter((line) => /^## /.test(line));
+      if (aliasSections.length) {
+        fail(entry.path + ": alias must not define level-2 sections: " + aliasSections.join(", "));
+      }
     }
 
     await checkLinks(file, text);
@@ -314,6 +372,13 @@ async function main() {
         if (cells[1] !== "[`" + skill.id + "`](" + skill.path + ")") fail("README catalog link mismatch for " + skill.id);
         if (cells[2] !== skill.modes.join(", ")) fail("README catalog mode mismatch for " + skill.id + ": " + cells[2]);
         if (!cells[3]) fail("README catalog focus is empty for " + skill.id);
+      }
+      const ordered = rows
+        .map((line) => registry.skills.find((skill) => line.includes("](" + skill.path + ")"))?.id)
+        .filter(Boolean);
+      const expected = registry.skills.map((skill) => skill.id);
+      if (ordered.length === expected.length && ordered.join(",") !== expected.join(",")) {
+        fail("README catalog order must follow skills.json: " + expected.join(", "));
       }
     }
     if (aliases) {

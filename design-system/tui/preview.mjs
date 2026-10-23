@@ -8,6 +8,7 @@
  */
 
 import process from "node:process";
+import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 const SKILLS = [
@@ -782,6 +783,14 @@ function checkFrame(width, color, theme, density) {
 function runCheck() {
   const issues = [];
   let frames = 0;
+  try {
+    const registry = JSON.parse(readFileSync(new URL("../../skills.json", import.meta.url), "utf8"));
+    const registered = registry.skills.map((skill) => skill.id).join(",");
+    const rendered = SKILLS.map((skill) => skill.name).join(",");
+    if (registered !== rendered) issues.push("preview skill list drifted from skills.json");
+  } catch (error) {
+    issues.push("cannot read skills.json: " + error.message);
+  }
   const widths = [40, 60, 80, 100, 120, 140, 160];
   for (const width of widths) {
     for (const color of ["truecolor", "256", "16", "none"]) {
