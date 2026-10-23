@@ -1,3 +1,8 @@
+<!-- Loaded by ui-design. The canonical SKILL.md owns scope, modes, gates, and output. -->
+
+This reference supplies handoff detail only. If it conflicts with the canonical
+ui-design contract, the contract wins.
+
 # Developer Handoff Workflow
 
 ## Purpose
@@ -110,16 +115,16 @@ Provide:
 
 ## Output Format
 
+Use the canonical `ui-design` build output. This workflow adds handoff evidence
+to it:
+
 ```markdown
-UX Context:
-
-Implementation Goal:
-
-Affected Components:
-
-Technical Constraints:
-
-Validation Plan:
-
-Regression Considerations:
+Visual thesis:
+System and token changes:
+Components and states:
+Responsive behavior:
+Accessibility and theme checks:
+Verification evidence:
+Handoff evidence: affected components, technical constraints, validation plan, regression risks
+Unverified items:
 ```

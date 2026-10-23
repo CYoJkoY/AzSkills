@@ -2,7 +2,7 @@
 
 Curated art directions for Frontend Slides. A preset is a starting point, not a template to copy mechanically. The deck's subject, audience, and visual thesis always outrank the preset.
 
-**Mandatory base:** include the complete [viewport-base.css](viewport-base.css) in every generated presentation.
+**Base scaffold:** include the complete [viewport-base.css](viewport-base.css) in every generated presentation. It supplies the fixed stage, reduced-motion, and accessibility scaffold, not an art direction.
 
 ## Default Art Direction
 
@@ -23,11 +23,11 @@ AzSkills-owned decks are subject-led. Use **Wabi-Press** as the default editoria
 
 **Best for:** every AzSkills-owned presentation by default; research, documentation, and narrative talks are especially well served.
 
-**Token source:** [../DESIGN.md](../DESIGN.md), executed from [../design-system/wabi-press.css](../design-system/wabi-press.css). Stage-mapped tokens live in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) §2 and [viewport-base.css](viewport-base.css).
+**Token source:** interactive chrome follows [../DESIGN.md](../DESIGN.md). Slide tokens live in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) §2 and [viewport-base.css](viewport-base.css), executing the palette in [../design-system/wabi-press.css](../design-system/wabi-press.css).
 
 ### When a subject genuinely requires another direction
 
-Only when the user explicitly requests a non-Wabi-Press direction, or the subject's evidence makes Wabi-Press incoherent (for example, a deck that must mimic an external brand the user provides), a custom direction may be designed. In that case it is a one-off art direction for that deck: document the thesis, keep the fixed-stage and accessibility contracts, and never register it as an AzSkills preset or let it leak into owned repository surfaces.
+When the user requests another direction, or the subject's evidence makes Wabi-Press incoherent (for example, a deck that must mimic an external brand the user provides), design a custom direction. In that case it is a one-off art direction for that deck: document the thesis, keep the fixed-stage and accessibility contracts, and never register it as an AzSkills preset or let it leak into owned repository surfaces.
 
 ## Font Pairing (Wabi-Press)
 

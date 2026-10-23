@@ -91,9 +91,9 @@ Reference architecture for production-quality fixed-stage HTML presentations. Au
     }
 
     .visible .reveal { opacity: 1; transform: translateY(0); }
-    .visible .reveal:nth-child(2) { transition-delay: 90ms; }
-    .visible .reveal:nth-child(3) { transition-delay: 160ms; }
-    .visible .reveal:nth-child(4) { transition-delay: 230ms; }
+    .visible .reveal:nth-child(2) { transition-delay: 60ms; }
+    .visible .reveal:nth-child(3) { transition-delay: 120ms; }
+    .visible .reveal:nth-child(4) { transition-delay: 180ms; }
 
     @media (prefers-reduced-motion: reduce) {
       .reveal { opacity: 1; transform: none; transition: none; }

@@ -83,7 +83,7 @@ Define tokens before building repeated components.
 }
 ```
 
-When Wabi-Press is the chosen direction, these values are its contract, and a deck may add content-specific data colors. Canvas, ink, hairline, cinnabar, and moss roles then come from the tokens above. A brief that establishes a stronger direction uses [`STYLE_PRESETS.md`](STYLE_PRESETS.md) instead, and one deck never mixes two directions.
+When Wabi-Press is the chosen direction, these values are its contract, and a deck may add content-specific data colors. Canvas, ink, hairline, cinnabar, and moss roles then come from the tokens above. A brief that establishes a stronger direction may use a documented one-off direction, as described in [`STYLE_PRESETS.md`](STYLE_PRESETS.md); one deck never mixes two directions.
 
 ### Token rules
 

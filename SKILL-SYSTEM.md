@@ -206,7 +206,7 @@ shorten a rule until it becomes ambiguous.
 2. Add the Skill or mode to the registry.
 3. Write or update the contract and references.
 4. Update routing, catalog, and notices.
-5. Run `node scripts/validate-skills.mjs`.
+5. Run `node scripts/validate-skills.mjs` and `node design-system/tui/preview.mjs --check`.
 6. Wait for CI. Do not merge without manual review.
 
 ## Validation
@@ -216,9 +216,9 @@ The validator enforces the machine-checkable part of this document:
 - registry paths, IDs, families, modes, and aliases;
 - frontmatter and contract keys;
 - canonical and alias line budgets;
-- relative link integrity, including reference-index paths and HTML asset sources;
+- relative link integrity across every Markdown file, including reference-index paths and HTML asset sources;
 - catalog, alias, mode, and issue-template parity;
-- TUI preview parity with the canonical registry;
+- TUI preview parity with the canonical registry, checked by `design-system/tui/preview.mjs --check`;
 - no unregistered `SKILL.md` files;
 - ASCII-only Skill metadata, canonical contracts, and aliases;
 - link integrity in the root system, design, and provenance documents.

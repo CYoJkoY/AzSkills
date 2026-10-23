@@ -1,15 +1,10 @@
----
-name: remotion-production
-description: Build deterministic programmatic video, motion graphics, data stories, 3D showcases, and UI showcases by using Remotion as the timeline and rendering coordination layer and composing specialized visual systems for data, 3D, choreography, authored assets, vector geometry, and custom raster effects.
----
-
 # Remotion Production Workflow
 
-A production Skill for AI-assisted, code-driven visual production. Remotion owns the composition contract, timeline, frame state, scene orchestration, media synchronization, and final rendering boundary. Specialized systems solve specialized visual problems without becoming competing time authorities.
+Production detail for the canonical `remotion-production` workflow. Remotion owns the composition contract, timeline, frame state, scene orchestration, media synchronization, and final rendering boundary. Specialized systems solve specialized visual problems without becoming competing time authorities.
 
-This Skill is a workflow contract, not a copy of Remotion documentation and not a requirement to use every listed visual technology.
+This reference documents that workflow. It is not a copy of Remotion documentation and not a requirement to use every listed visual technology.
 
-## Scope
+## How to use this reference
 
 The canonical `remotion-production` contract owns activation, exclusions,
 composition, and gates. This reference supplies production detail only.

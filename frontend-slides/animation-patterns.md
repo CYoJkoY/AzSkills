@@ -2,10 +2,10 @@
 
 Deck motion is placement and pacing. Mechanism, easing, timing, interruption,
 reduced-motion parity, and motion gates belong to
-[`ui-motion`](../../ui-motion/SKILL.md). Read
-[`../../ui-motion/references/animation-standards.md`](../../ui-motion/references/animation-standards.md)
+[`ui-motion`](../ui-motion/SKILL.md). Read
+[`../ui-motion/references/animation-standards.md`](../ui-motion/references/animation-standards.md)
 before choosing a mechanism, and use the deck tokens registered in
-[`DESIGN_SYSTEM.md`](../DESIGN_SYSTEM.md) section 2.
+[`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) section 2.
 
 ## Motion budget
 
@@ -13,7 +13,6 @@ Each slide should normally use:
 
 - one primary entrance pattern
 - zero or one secondary emphasis pattern
-- one optional background or atmospheric loop
 
 Avoid giving every element a different animation.
 
@@ -33,7 +32,7 @@ standards, then register the adopted values once in the deck token layer.
 
 ## Entrance patterns
 
-Use the token layer from [`html-template.md`](../html-template.md):
+Use the token layer from [`html-template.md`](html-template.md):
 
 ```css
 .reveal {
@@ -55,8 +54,10 @@ easing come from the tokens; never inline a second curve.
 
 ## Staggering
 
-Use small, deliberate delays to create reading order. A typical deck rhythm is
-70 to 120 milliseconds between major elements.
+Use small, deliberate delays to create reading order. The motion standards
+define 30 to 80 milliseconds between items; a deck may widen the gap for major
+sections when it documents that exception. [`html-template.md`](html-template.md)
+shows the default step.
 
 Do not create a long chain of tiny delays for every child node. The viewer
 should perceive one composition entering, not a queue of independent
@@ -68,11 +69,6 @@ Prefer one unified deck transition. Use a stronger transition only for section
 boundaries: full-field color shift, large title fade, rule expansion, or a
 controlled scale into a new composition. Avoid page turns, elastic wipes, and
 random 3D rotations unless the subject calls for them.
-
-## Background motion
-
-Atmospheric loops may use slow radial drift, subtle grid movement, or restrained
-particle drift at low opacity, so background motion never competes with text.
 
 ## Reduced motion
 

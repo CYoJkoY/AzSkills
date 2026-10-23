@@ -281,7 +281,7 @@ git clone https://github.com/CYoJkoY/AzSkills.git
 cd AzSkills
 ```
 
-For AzSkills-owned interactive UI, follow [`DESIGN.md`](DESIGN.md) and use the workbench tokens and primitives in [`design-system/wabi-press.css`](design-system/wabi-press.css); its historical filename is retained for compatibility. Do not force an application workbench onto slide decks, logos, editorial documents, or README illustrations. For those outputs—and for external product work without an authoritative local direction—use the context and style-selection rules in [`design-intelligence.md`](design-intelligence.md).
+For AzSkills-owned interactive UI, follow [`DESIGN.md`](DESIGN.md) and use the workbench tokens and primitives in [`design-system/wabi-press.css`](design-system/wabi-press.css); its historical filename is retained for compatibility. Do not force an application workbench onto slide decks, logos, editorial documents, or README illustrations. For those outputs—and for external product work without an authoritative local direction—use the visual judgment in [`design-intelligence.md`](design-intelligence.md).
 
 ### 2. Select the narrowest Skill
 
