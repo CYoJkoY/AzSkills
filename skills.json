@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "system": "SKILL-SYSTEM.md",
+  "families": {
+    "core": {
+      "label": "Core",
+      "purpose": "Reasoning method that improves other Skill work."
+    },
+    "architecture": {
+      "label": "Architecture",
+      "purpose": "Runtime, frontend, persistence, and process boundaries."
+    },
+    "interface": {
+      "label": "Interface",
+      "purpose": "Design contracts, interface execution, and motion."
+    },
+    "visual": {
+      "label": "Visual",
+      "purpose": "Identity and image-led artifacts."
+    },
+    "production": {
+      "label": "Production",
+      "purpose": "Timed or staged visual production."
+    },
+    "publishing": {
+      "label": "Publishing",
+      "purpose": "Repository, storefront, and locale delivery."
+    }
+  },
+  "skills": [
+    {
+      "id": "ultrathink",
+      "path": "ultrathink/SKILL.md",
+      "status": "canonical",
+      "family": "core",
+      "modes": ["deep", "rescue"],
+      "role": "Deep reasoning overlay for ambiguous or high-risk work.",
+      "composes": []
+    },
+    {
+      "id": "architecture",
+      "path": "architecture/SKILL.md",
+      "status": "canonical",
+      "family": "architecture",
+      "modes": ["runtime", "frontend", "migration", "review"],
+      "role": "Runtime, frontend stack, persistence, and process boundaries.",
+      "composes": ["design-system", "ui-design", "ultrathink"]
+    },
+    {
+      "id": "design-system",
+      "path": "design-system/SKILL.md",
+      "status": "canonical",
+      "family": "interface",
+      "modes": ["ingest", "author", "migrate", "audit"],
+      "role": "DESIGN.md ingestion, normalization, provenance, and verification.",
+      "composes": ["architecture", "frontend-slides", "ui-design", "ui-motion"]
+    },
+    {
+      "id": "ui-design",
+      "path": "ui-design/SKILL.md",
+      "status": "canonical",
+      "family": "interface",
+      "modes": ["build", "refine", "review", "system"],
+      "role": "Interface hierarchy, components, states, responsive behavior, and visual QA.",
+      "composes": ["architecture", "design-system", "ui-motion"]
+    },
+    {
+      "id": "ui-motion",
+      "path": "ui-motion/SKILL.md",
+      "status": "canonical",
+      "family": "interface",
+      "modes": ["build", "review", "audit", "pattern", "svg"],
+      "role": "Motion construction, review, audit, patterns, and SVG animation.",
+      "composes": ["design-system", "ui-design"]
+    },
+    {
+      "id": "logo-generator",
+      "path": "logo-generator/SKILL.md",
+      "status": "canonical",
+      "family": "visual",
+      "modes": ["mark", "character", "system"],
+      "role": "Logos, product marks, character marks, and identity systems.",
+      "composes": ["design-system", "ui-design", "ui-motion"]
+    },
+    {
+      "id": "photo-abstract-editorial",
+      "path": "photo-abstract-editorial/SKILL.md",
+      "status": "canonical",
+      "family": "visual",
+      "modes": ["treatment", "audit"],
+      "role": "Photograph-preserving abstract editorial diptychs.",
+      "composes": ["logo-generator", "ui-design"]
+    },
+    {
+      "id": "frontend-slides",
+      "path": "frontend-slides/SKILL.md",
+      "status": "canonical",
+      "family": "production",
+      "modes": ["new", "convert", "enhance"],
+      "role": "Fixed-stage HTML presentations and deck QA.",
+      "composes": ["design-system", "logo-generator", "ui-motion"]
+    },
+    {
+      "id": "remotion-production",
+      "path": "remotion-production/SKILL.md",
+      "status": "canonical",
+      "family": "production",
+      "modes": ["video", "data", "3d", "ui-showcase", "motion", "av"],
+      "role": "Deterministic programmatic video and render delivery.",
+      "composes": ["logo-generator", "ui-design", "ui-motion", "ultrathink"]
+    },
+    {
+      "id": "readme-craft",
+      "path": "readme-craft/SKILL.md",
+      "status": "canonical",
+      "family": "publishing",
+      "modes": ["build", "rewrite", "audit"],
+      "role": "GitHub README architecture, visuals, links, and QA.",
+      "composes": ["logo-generator", "ui-design"]
+    },
+    {
+      "id": "steam-mod-page",
+      "path": "steam-mod-page/SKILL.md",
+      "status": "canonical",
+      "family": "publishing",
+      "modes": ["player", "developer", "audit"],
+      "role": "Steam Workshop BBCode pages and bilingual delivery.",
+      "composes": ["localization", "ui-design"]
+    },
+    {
+      "id": "localization",
+      "path": "localization/SKILL.md",
+      "status": "canonical",
+      "family": "publishing",
+      "modes": ["translate", "audit"],
+      "role": "Game CSV localization with locale completeness and markup safety.",
+      "composes": ["readme-craft", "steam-mod-page"]
+    }
+  ],
+  "aliases": [
+    {
+      "id": "application-architecture",
+      "path": "application-architecture/SKILL.md",
+      "status": "alias",
+      "canonical": "architecture",
+      "mode": "runtime"
+    },
+    {
+      "id": "frontend-architecture",
+      "path": "frontend-architecture/SKILL.md",
+      "status": "alias",
+      "canonical": "architecture",
+      "mode": "frontend"
+    },
+    {
+      "id": "ui-aesthetics",
+      "path": "ui-aesthetics/SKILL.md",
+      "status": "alias",
+      "canonical": "ui-design",
+      "mode": "refine"
+    },
+    {
+      "id": "ui-ux-design-intelligence",
+      "path": "ui-ux-design-intelligence/SKILL.md",
+      "status": "alias",
+      "canonical": "ui-design",
+      "mode": "review"
+    },
+    {
+      "id": "ui-motion-review",
+      "path": "ui-motion-review/SKILL.md",
+      "status": "alias",
+      "canonical": "ui-motion",
+      "mode": "review"
+    },
+    {
+      "id": "ui-motion-audit",
+      "path": "ui-motion-audit/SKILL.md",
+      "status": "alias",
+      "canonical": "ui-motion",
+      "mode": "audit"
+    },
+    {
+      "id": "rare-ui-motion",
+      "path": "rare-ui-motion/SKILL.md",
+      "status": "alias",
+      "canonical": "ui-motion",
+      "mode": "pattern"
+    },
+    {
+      "id": "svg-animation",
+      "path": "svg-animation/SKILL.md",
+      "status": "alias",
+      "canonical": "ui-motion",
+      "mode": "svg"
+    },
+    {
+      "id": "ip-as-logo",
+      "path": "ip-as-logo/SKILL.md",
+      "status": "alias",
+      "canonical": "logo-generator",
+      "mode": "character"
+    },
+    {
+      "id": "l13n",
+      "path": "l13n/SKILL.md",
+      "status": "alias",
+      "canonical": "localization",
+      "mode": "translate"
+    }
+  ]
+}

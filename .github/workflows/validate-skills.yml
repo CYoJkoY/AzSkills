@@ -1,0 +1,41 @@
+name: Validate Skill System
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**/SKILL.md"
+      - "*/references/**"
+      - "skills.json"
+      - "SKILL-SYSTEM.md"
+      - "design-intelligence.md"
+      - "DESIGN.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - ".github/ISSUE_TEMPLATE/**"
+      - "scripts/**"
+      - "README.md"
+      - ".github/workflows/validate-skills.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-skills:
+    name: Validate Skill Registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check validator syntax
+        run: node --check scripts/validate-skills.mjs
+
+      - name: Validate registry and contracts
+        run: node scripts/validate-skills.mjs

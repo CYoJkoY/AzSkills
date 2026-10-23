@@ -48,17 +48,14 @@ A Skill is not a framework, runtime, agent platform, or application. It is a hum
 The core model is deliberately small:
 
 ```text
-Task
-  ↓
-Select the narrowest Skill
-  ↓
-Read the contract
-  ↓
-Execute with project context
-  ↓
-Verify against the contract
-  ↓
-Return the checked result
+request
+  -> family
+    -> one canonical Skill
+      -> one mode
+        -> named references
+          -> execute
+            -> quality gates
+              -> artifact + evidence
 ```
 
 ### Why behavior contracts?
@@ -67,11 +64,13 @@ Prompt fragments are easy to copy and hard to maintain. A Skill makes the import
 
 | Contract element | Purpose |
 | :--- | :--- |
-| **Scope** | Defines when the Skill applies and when it should stay out of the way. |
-| **Constraints** | Records non-negotiable technical, visual, language, or process rules. |
+| **Family** | Groups related capabilities without merging their responsibilities. |
+| **Contract** | Names applicability, ownership, inputs, outputs, composition, and gates. |
+| **Modes** | Changes the workflow and gates inside one owner. |
 | **Workflow** | Turns experience into a repeatable execution sequence. |
 | **Quality gates** | Defines what must be verified before work is considered complete. |
 | **Output contract** | Defines the expected artifact or response shape. |
+| **References** | Supplies depth without creating a hidden second contract. |
 
 AzSkills therefore favors **small responsibilities, composition, repository-native context, explicit verification, and maintainability** over one giant universal prompt.
 
@@ -80,46 +79,24 @@ AzSkills therefore favors **small responsibilities, composition, repository-nati
 <a name="readme-architecture"></a>
 ## <img src="assets/readme/icons/visual-design.svg" width="20" height="20" alt=""> Architecture
 
-AzSkills separates **behavior contracts**, **shared reasoning**, and **execution-specific Skills**.
+AzSkills separates **shared rules**, **canonical contracts**, **modes**, and
+**references**. The registry is the source of truth; the README and aliases are
+checked against it.
 
 ```text
-                         ┌──────────────────────┐
-                         │   Explicit request   │
-                         └──────────┬───────────┘
-                                    ↓
-                         ┌──────────────────────┐
-                         │   Skill selection    │
-                         │  narrowest capability│
-                         └──────────┬───────────┘
-                                    ↓
-                 ┌──────────────────┴──────────────────┐
-                 │                                     │
-                 ↓                                     ↓
-        Domain Skill contract                 design-system
-                 │                         DESIGN.md adapter
-                 │                                     │
-                 │                                     ↓
-                 │                            Primitive → Semantic
-                 │                                     ↓
-                 │                               Component → State
-                 │                                     │
-                 └──────────────────┬──────────────────┘
-                                    ↓
-                         ┌──────────────────────┐
-                         │  Project context +   │
-                         │ existing conventions │
-                         └──────────┬───────────┘
-                                    ↓
-                         ┌──────────────────────┐
-                         │      Execution       │
-                         │  implement / produce │
-                         └──────────┬───────────┘
-                                    ↓
-                         ┌──────────────────────┐
-                         │ Verification + QA    │
-                         │ render / test / audit│
-                         └──────────────────────┘
+SKILL-SYSTEM.md          shared rules and contract template
+    |
+skills.json              canonical owners, modes, aliases, families
+    |
+<skill>/SKILL.md         one decision class, at most 280 lines
+    |
+<skill>/references/      depth loaded only when the mode names it
+    |
+CI                       registry, frontmatter, budgets, links, catalog parity
 ```
+
+A caller may still use an old path. The alias forwards to one canonical Skill and
+one mode; it cannot add rules.
 
 
 ### Shared reasoning layer
@@ -144,15 +121,15 @@ The adapter then normalizes those sources into:
 
 ```text
 Context
-  ↓
+  ->
 Primitive
-  ↓
+  ->
 Semantic
-  ↓
+  ->
 Component
-  ↓
+  ->
 State
-  ↓
+  ->
 Responsive / Accessibility / Motion / QA
 ```
 
@@ -187,55 +164,53 @@ Executable artifacts, all referenced by the contract in [`DESIGN.md`](DESIGN.md)
 <a name="readme-skills"></a>
 ## <img src="assets/readme/icons/engineering.svg" width="20" height="20" alt=""> Skill catalog
 
-Choose the smallest Skill that fully owns the task. Compose additional Skills only when they contribute a separate responsibility.
+The registry defines canonical Skills in six families. Choose one canonical owner,
+then choose a mode. Deep detail lives in references and does not expand the owner.
 
-### Engineering & architecture
+The assembly rules are in [`SKILL-SYSTEM.md`](SKILL-SYSTEM.md); the machine-readable
+registry is [`skills.json`](skills.json).
 
-| Skill | Focus |
-| :--- | :--- |
-| [`application-architecture`](application-architecture/SKILL.md) | Runtime topology, persistence, process boundaries, and maintainable application structure. |
-| [`frontend-architecture`](frontend-architecture/SKILL.md) | Frontend language, framework, styling, storage, and client/server boundaries before substantial UI work. |
-| [`ultrathink`](ultrathink/SKILL.md) | Deep methodology for difficult implementation, refactoring, assumption testing, boundary design, and simplification. |
+<!-- SKILL-CATALOG:START -->
+| Family | Canonical Skill | Modes | Focus |
+| :--- | :--- | :--- | :--- |
+| Core | [`ultrathink`](ultrathink/SKILL.md) | deep, rescue | Assumptions, alternatives, failure analysis, and the decision record. |
+| Architecture | [`architecture`](architecture/SKILL.md) | runtime, frontend, migration, review | Runtime, stack, persistence, and process boundaries. |
+| Interface | [`design-system`](design-system/SKILL.md) | ingest, author, migrate, audit | DESIGN.md evidence, tokens, semantics, provenance, and QA. |
+| Interface | [`ui-design`](ui-design/SKILL.md) | build, refine, review, system | Interface hierarchy, components, states, responsive behavior, and visual QA. |
+| Interface | [`ui-motion`](ui-motion/SKILL.md) | build, review, audit, pattern, svg | Motion construction, review, audit, expressive patterns, and SVG. |
+| Visual | [`logo-generator`](logo-generator/SKILL.md) | mark, character, system | Logos, product marks, character marks, and identity systems. |
+| Visual | [`photo-abstract-editorial`](photo-abstract-editorial/SKILL.md) | treatment, audit | Photograph-preserving abstract editorial diptychs. |
+| Production | [`frontend-slides`](frontend-slides/SKILL.md) | new, convert, enhance | Fixed-stage 1920x1080 HTML presentations. |
+| Production | [`remotion-production`](remotion-production/SKILL.md) | video, data, 3d, ui-showcase, motion, av | Deterministic programmatic video and render delivery. |
+| Publishing | [`readme-craft`](readme-craft/SKILL.md) | build, rewrite, audit | GitHub README architecture, visuals, links, and QA. |
+| Publishing | [`steam-mod-page`](steam-mod-page/SKILL.md) | player, developer, audit | Steam Workshop BBCode pages and bilingual delivery. |
+| Publishing | [`localization`](localization/SKILL.md) | translate, audit | Game CSV localization with locale and markup safety. |
+<!-- SKILL-CATALOG:END -->
 
-### Design systems, UI & visual production
+### Compatibility aliases
 
-| Skill | Focus |
-| :--- | :--- |
-| [`design-system`](design-system/SKILL.md) | DESIGN.md ingestion, normalization, source reconciliation, provenance, and executable design QA. Maintains the repository-owned workbench tokens and preview. |
-| [`ui-design`](ui-design/SKILL.md) | Production interface design and implementation: hierarchy, responsive behavior, accessibility, interaction, motion, and visual QA. |
-| [`ui-aesthetics`](ui-aesthetics/SKILL.md) | Composition-first visual critique, refinement, component craftsmanship, restrained depth, and anti-generic review. |
-| [`rare-ui-motion`](rare-ui-motion/SKILL.md) | Context-sensitive adaptation of expressive, motion-led component patterns inspired by Rare UI, without copying components or forcing its brand palette. |
-| [`ui-motion`](ui-motion/SKILL.md) | Purposeful Web motion construction using project-native tokens, minimal mechanisms, accessibility variants, and rendered verification. |
-| [`ui-motion-review`](ui-motion-review/SKILL.md) | Read-only review of existing motion for timing, physicality, interruption, performance, accessibility, and cohesion. |
-| [`ui-motion-audit`](ui-motion-audit/SKILL.md) | Read-only codebase motion audit plus high-confidence discovery of places where motion should be removed, corrected, or introduced. |
-| [`frontend-slides`](frontend-slides/SKILL.md) | Fixed-stage 1920×1080 HTML presentations with deliberate art direction, animation, and render QA. |
-| [`svg-animation`](svg-animation/SKILL.md) | SVG animation generation, optimization, accessibility, reduced-motion handling, and reusable single-file output. |
-| [`logo-generator`](logo-generator/SKILL.md) | Logo, product mark, wordmark, mascot, SVG, and identity-system development. |
-| [`ip-as-logo`](ip-as-logo/SKILL.md) | Character-led marks optimized for silhouette, recognition, and small-size use. |
-| [`photo-abstract-editorial`](photo-abstract-editorial/SKILL.md) | Restrained editorial image treatments derived from a supplied photograph. |
+Old paths still work. Each alias points to one canonical Skill and one mode; it
+does not own rules.
 
-### Video & motion production
-
-| Skill | Focus |
-| :--- | :--- |
-| [`remotion-production`](remotion-production/SKILL.md) | Deterministic programmatic video and motion production with Remotion as the timeline/render coordination layer and specialized visual engines for data, 3D, choreography, authored assets, SVG geometry, and Canvas effects. |
-
-### Documentation & publishing
-
-| Skill | Focus |
-| :--- | :--- |
-| [`readme-craft`](readme-craft/SKILL.md) | Evidence-first GitHub README engineering, navigation, semantic SVG headings, support presentation, and visual QA. |
-| [`steam-mod-page`](steam-mod-page/SKILL.md) | Steam Workshop / Mod Store copy, formatting, compatibility, links, images, and factual change logs. |
-
-### Localization
-
-| Skill | Focus |
-| :--- | :--- |
-| [`l13n`](l13n/SKILL.md) | Structured 13-language game CSV localization with terminology, BBCode, escaping, schema, and completeness checks. |
+<!-- SKILL-ALIASES:START -->
+| Alias | Canonical | Mode |
+| :--- | :--- | :--- |
+| `application-architecture` | [`architecture`](architecture/SKILL.md) | runtime |
+| `frontend-architecture` | [`architecture`](architecture/SKILL.md) | frontend |
+| `ui-aesthetics` | [`ui-design`](ui-design/SKILL.md) | refine |
+| `ui-ux-design-intelligence` | [`ui-design`](ui-design/SKILL.md) | review |
+| `ui-motion-review` | [`ui-motion`](ui-motion/SKILL.md) | review |
+| `ui-motion-audit` | [`ui-motion`](ui-motion/SKILL.md) | audit |
+| `rare-ui-motion` | [`ui-motion`](ui-motion/SKILL.md) | pattern |
+| `svg-animation` | [`ui-motion`](ui-motion/SKILL.md) | svg |
+| `ip-as-logo` | [`logo-generator`](logo-generator/SKILL.md) | character |
+| `l13n` | [`localization`](localization/SKILL.md) | translate |
+<!-- SKILL-ALIASES:END -->
 
 ### Shared design reasoning
 
-[`design-intelligence.md`](design-intelligence.md) is intentionally listed outside the Skill catalog because it is inherited by applicable visual Skills rather than selected as a standalone Skill.
+[`design-intelligence.md`](design-intelligence.md) is a cross-artifact layer, not
+a Skill. It supplies only rules shared by visual Skills.
 
 ---
 
@@ -246,50 +221,51 @@ Use this routing map as the first decision point:
 
 ```text
 What are you doing?
-│
-├─ Application / runtime architecture ───► application-architecture
-├─ Frontend implementation architecture ─► frontend-architecture
-├─ Complex engineering / refactoring ────► ultrathink + domain Skill
-│
-├─ Consume / author / adapt DESIGN.md ───► design-system
-│   └─ then execute with the owning visual Skill
-├─ Build / redesign a UI ─────────────────► ui-design
-├─ Refine an existing interface ──────────► ui-aesthetics + ui-design
-├─ Add / redesign UI motion ──────────────► ui-motion + ui-design
-├─ Build a distinctive, motion-led component ► rare-ui-motion + ui-design + ui-motion
-├─ Review existing motion ────────────────► ui-motion-review
-├─ Audit / discover motion across a repo ─► ui-motion-audit
-├─ Create an HTML presentation ───────────► frontend-slides
-├─ Create / animate SVG ──────────────────► svg-animation
-│
-├─ Create a programmatic video / motion graphic ─────────► remotion-production
-├─ Create a data-driven visual story / chart video ──────► remotion-production + D3.js
-├─ Create a 3D showcase video ───────────────────────────► remotion-production + Three.js
-├─ Create a product / UI showcase video ────────────────► ui-design + remotion-production
-│
-├─ Create a logo / identity ──────────────► logo-generator
-├─ Create a character-led symbol ─────────► ip-as-logo + logo-generator
-├─ Create an editorial photo treatment ───► photo-abstract-editorial
-│
-├─ Write / rebuild a GitHub README ───────► readme-craft
-├─ Write a Steam Mod page ────────────────► steam-mod-page
-└─ Localize a 13-language game CSV ───────► l13n
+|
++-- Runtime, stack, persistence, boundaries --> architecture
+|     +-- runtime | frontend | migration | review
+|
++-- Consume or author DESIGN.md ---------------> design-system
+|     +-- ingest | author | migrate | audit
+|
++-- Build or change an interface --------------> ui-design
+|     +-- build | refine | review | system
+|
++-- Add, review, audit, or adapt motion -------> ui-motion
+|     +-- build | review | audit | pattern | svg
+|
++-- Create a logo or character mark -----------> logo-generator
+|     +-- mark | character | system
+|
++-- Treat one photograph ---------------------> photo-abstract-editorial
+|     +-- treatment | audit
+|
++-- Create an HTML deck ----------------------> frontend-slides
+|     +-- new | convert | enhance
+|
++-- Create a rendered video ------------------> remotion-production
+|     +-- video | data | 3d | ui-showcase | motion | av
+|
++-- Write a GitHub README ---------------------> readme-craft
++-- Write a Steam Workshop page ---------------> steam-mod-page
++-- Translate a game CSV ----------------------> localization
++-- Difficult or high-risk reasoning ----------> ultrathink + domain Skill
 ```
 
 ### Composition rules
 
 ```text
-New domain behavior       → new Skill
-Narrow variation          → mode inside an existing Skill
-Reusable cross-cutting    → shared reference
-DESIGN.md ingestion       → design-system
-Visual reasoning          → design-intelligence.md
-Complex implementation    → ultrathink + owning domain Skill
-Frontend architecture     → frontend-architecture before substantial UI work
-Runtime architecture      → application-architecture before downstream UI choices
+New domain behavior    -> new canonical Skill
+Narrow variation       -> mode inside an existing Skill
+Reusable depth         -> reference inside the owning Skill
+Cross-artifact rule    -> shared rule in SKILL-SYSTEM.md
+DESIGN.md ingestion    -> design-system
+Deep reasoning         -> ultrathink + one owning domain Skill
+Runtime decision       -> architecture before downstream UI choices
 ```
 
-Do not duplicate shared rules merely to make each Skill look self-contained.
+Do not duplicate a shared rule merely to make a Skill look self-contained. An
+alias forwards; it does not add a second contract.
 
 ---
 
@@ -315,32 +291,25 @@ For example:
 
 ```text
 New application
-   ↓
-application-architecture
-   ↓
-frontend-architecture
-   ↓
-ui-design
+   -> architecture (runtime)
+   -> architecture (frontend)
+   -> ui-design (build)
 ```
 
 Or:
 
 ```text
 DESIGN.md + UI implementation
-   ↓
-design-system
-   ↓
-ui-design
-   ↓
-ui-aesthetics
+   -> design-system (ingest)
+   -> ui-design (build)
+   -> ui-design (refine) when visual polish is needed
 ```
 
 For difficult work:
 
 ```text
-ultrathink
-   +
-the owning domain Skill
+ultrathink (deep)
+   + one canonical owner
 ```
 
 ### 3. Read the contract and its references
@@ -355,13 +324,13 @@ Inspect the real project before implementing:
 
 ```text
 repository
-  ↓
+  ->
 existing architecture
-  ↓
+  ->
 existing conventions / identity
-  ↓
+  ->
 active Skill contract
-  ↓
+  ->
 task-specific changes
 ```
 
@@ -373,17 +342,17 @@ The standard loop is:
 
 ```text
 inspect
-  ↓
+  ->
 plan
-  ↓
+  ->
 implement
-  ↓
+  ->
 render / test
-  ↓
+  ->
 inspect again
-  ↓
+  ->
 correct
-  ↓
+  ->
 verify
 ```
 
@@ -416,7 +385,10 @@ AzSkills is intentionally evidence-first.
 
 ### CI quality gates
 
-The repository currently validates the DESIGN.md integration through [`validate-design-contract.yml`](.github/workflows/validate-design-contract.yml), while [`update-skill-badge.yml`](.github/workflows/update-skill-badge.yml) generates the Skill-count badge from actual `SKILL.md` files.
+[`validate-skills.yml`](.github/workflows/validate-skills.yml) checks the registry,
+contract blocks, line budgets, aliases, links, and catalog parity. The DESIGN.md
+and motion contracts have their own workflows. [`update-skill-badge.yml`](.github/workflows/update-skill-badge.yml)
+counts canonical Skills from `skills.json`, not every directory.
 
 ---
 
@@ -438,7 +410,8 @@ AzSkills/
 │       ├── update-skill-badge.yml
 │       ├── validate-design-contract.yml
 │       ├── validate-remotion-production-contract.yml
-│       └── validate-motion-contract.yml
+│       ├── validate-motion-contract.yml
+│       └── validate-skills.yml
 │
 ├── assets/
 │   ├── azskills-hero.svg
@@ -448,7 +421,9 @@ AzSkills/
 │       ├── support-cta.svg
 │       └── support-cta-dark.svg
 │
-├── application-architecture/
+├── architecture/
+│   ├── SKILL.md
+│   └── references/
 ├── design-system/
 │   ├── SKILL.md
 │   ├── wabi-press.css
@@ -456,37 +431,56 @@ AzSkills/
 │   ├── preview/
 │   ├── tui/
 │   └── references/
-├── frontend-architecture/
+├── localization/
+│   └── SKILL.md
+├── logo-generator/
+│   ├── SKILL.md
+│   └── references/
+├── photo-abstract-editorial/
+│   └── SKILL.md
 ├── frontend-slides/
 │   ├── DESIGN_SYSTEM.md
 │   ├── STYLE_PRESETS.md
 │   ├── animation-patterns.md
 │   ├── html-template.md
 │   ├── scripts/
-│   └── viewport-base.css
+│   ├── viewport-base.css
+│   └── references/
 ├── remotion-production/
 │   ├── SKILL.md
 │   └── references/
-├── ip-as-logo/
-├── l13n/
-├── logo-generator/
-├── photo-abstract-editorial/
-├── rare-ui-motion/
+├── readme-craft/
 │   ├── SKILL.md
 │   └── references/
-├── readme-craft/
-│   └── references/
 ├── steam-mod-page/
-├── svg-animation/
-├── ui-aesthetics/
-├── ui-design/
-├── ui-motion/
+│   ├── SKILL.md
 │   └── references/
-├── ui-motion-review/
-├── ui-motion-audit/
+├── ui-design/
+│   ├── SKILL.md
+│   └── references/
+├── ui-motion/
+│   ├── SKILL.md
 │   └── references/
 ├── ultrathink/
+│   ├── SKILL.md
+│   └── references/
 │
+├── application-architecture/   # alias -> architecture/runtime
+├── frontend-architecture/      # alias -> architecture/frontend
+├── ui-aesthetics/              # alias -> ui-design/refine
+├── ui-ux-design-intelligence/  # alias -> ui-design/review
+├── ui-motion-review/           # alias -> ui-motion/review
+├── ui-motion-audit/            # alias -> ui-motion/audit
+├── rare-ui-motion/             # alias -> ui-motion/pattern
+├── svg-animation/              # alias -> ui-motion/svg
+├── ip-as-logo/                 # alias -> logo-generator/character
+├── l13n/                       # alias -> localization/translate
+│
+├── scripts/
+│   └── validate-skills.mjs
+├── skills.json
+├── SKILL-SYSTEM.md
+├── DESIGN.md
 ├── design-intelligence.md
 ├── THIRD_PARTY_NOTICES.md
 ├── LICENSE
@@ -502,11 +496,13 @@ Good contributions add a clear capability, improve an existing workflow, fix a c
 
 Before creating a new Skill:
 
-1. Check whether the behavior already belongs in an existing Skill as a mode or narrow extension.
-2. Check whether it belongs in [`design-intelligence.md`](design-intelligence.md) as shared visual reasoning.
-3. Make sure the proposed Skill has a distinct scope, trigger boundary, workflow, QA contract, and output contract.
-4. Keep external methodologies as references or original syntheses rather than copying repositories wholesale.
-5. Record provenance and applicable licensing information in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+1. Check whether the behavior belongs in an existing Skill as a mode.
+2. Check whether it is a cross-artifact rule for [`SKILL-SYSTEM.md`](SKILL-SYSTEM.md) or [`design-intelligence.md`](design-intelligence.md).
+3. Register the canonical Skill or alias in [`skills.json`](skills.json).
+4. Use the contract template; keep the canonical file at or below 280 lines.
+5. Put depth in a reference and link it from `## References`.
+6. Record provenance and licensing in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+7. Run `node scripts/validate-skills.mjs` before opening the PR.
 
 For Skill proposals and improvements, use the repository's structured [Issue Forms](https://github.com/CYoJkoY/AzSkills/issues/new/choose).
 

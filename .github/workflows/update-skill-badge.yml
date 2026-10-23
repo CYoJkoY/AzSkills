@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "**/SKILL.md"
+      - "skills.json"
   workflow_dispatch:
 
 permissions:
@@ -27,9 +28,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          count="$(find . -type f -name 'SKILL.md' -not -path './.git/*' | wc -l | tr -d ' ')"
+          count="$(node -e "const r=require('./skills.json'); process.stdout.write(String(r.skills.filter((s)=>s.status==='canonical').length))")"
           echo "count=${count}" >> "$GITHUB_OUTPUT"
-          echo "Detected ${count} skill(s)."
+          echo "Detected ${count} canonical skill(s)."
 
       - name: Write badge endpoint
         shell: bash

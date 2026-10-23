@@ -9,7 +9,7 @@ The repository's interface contract (`DESIGN.md` and `design-system/`) was infor
 - **VSCodium / VS Code** — layout regions, navigation and search conventions, list density, and the keyboard model. AzSkills adopts the structural model only; no product icons, themes, screenshots, or source code are copied.
 - **BioRender** (https://www.biorender.com, https://app.biorender.com) — spacing discipline, semantic colour layering with explicit interaction states, icon grouping conventions, and per-scenario adaptation between a marketing surface and a dense product UI. AzSkills treats these as structural evidence, then maps them onto its own accent, type stack, radii, and workbench layout.
 
-AzSkills is not affiliated with or endorsed by either project. Values were read from publicly served stylesheets and observed interface behaviour at the time of review. Third-party colour aggregators disagree with the target stylesheet on BioRender's primary blue (`#2571B7` and `#0373DF` both appear); those readings are marked **待确认** in `DESIGN.md` and are not used as tokens. No BioRender artwork, icon library, illustration, template, or copy is included in this repository.
+AzSkills is not affiliated with or endorsed by either project. Values were read from publicly served stylesheets and observed interface behaviour at the time of review. Third-party colour aggregators disagree with the target stylesheet on BioRender's primary blue (`#2571B7` and `#0373DF` both appear); those readings are marked **unconfirmed** in `DESIGN.md` and are not used as tokens. No BioRender artwork, icon library, illustration, template, or copy is included in this repository.
 
 ## Unified `logo-generator`
 
@@ -24,7 +24,7 @@ These public workflows overlap around logo ideation, prompt construction, SVG pr
 
 No upstream example asset library or repository-specific implementation is included.
 
-## `ui-design`, `ui-aesthetics`, and shared design intelligence
+## `ui-design` and shared design intelligence
 
 The frontend design layer is independently synthesized from public methodologies including:
 
@@ -36,7 +36,7 @@ The frontend design layer is independently synthesized from public methodologies
 - UI Skills public methodology catalog: https://www.ui-skills.com/skills
 - `ui-aesthetics-skill`: https://github.com/kasonye/ui-aesthetics-skill
 
-`ui-aesthetics` specifically adds a focused visual-judgment layer informed by the upstream project's public concepts: explicit aesthetic thesis, composition-before-decoration, anti-generic review, component precision, state/motion discipline, depth/lighting restraint, and rendered-output self-critique. AzSkills rewrites these concepts into its own behavior contract and composes them with `ui-design` instead of replacing it.
+The former `ui-aesthetics` entry is now the visual-critique reference inside `ui-design`. It keeps the upstream project's public concepts: explicit aesthetic thesis, composition-before-decoration, anti-generic review, component precision, state/motion discipline, depth/lighting restraint, and rendered-output self-critique. AzSkills rewrites these concepts into its own contract instead of replacing `ui-design`.
 
 The broader synthesis informed:
 
@@ -61,17 +61,17 @@ The frontend motion layer also incorporates implementation guidance informed by:
 - `morphicons`: https://github.com/guillermolg00/morphicons
 - morphicons playground: https://www.morphicons.com
 
-`morphicons` is treated as an implementation reference rather than a vendored dependency. Its public project demonstrates framework-neutral, stroke-based SVG icon morphing with a DOM-free core, spring-driven motion, interruptible transitions, controlled progress, and framework bindings. AzSkills rewrites the transferable design rules into its own `ui-design` contract and keeps the detailed integration guidance in [`ui-design/icon-morphing.md`](ui-design/icon-morphing.md).
+`morphicons` is treated as an implementation reference rather than a vendored dependency. Its public project demonstrates framework-neutral, stroke-based SVG icon morphing with a DOM-free core, spring-driven motion, interruptible transitions, controlled progress, and framework bindings. AzSkills keeps icon semantics with `ui-design` and motion construction with `ui-motion`; the detailed integration guidance is in [`ui-motion/references/icon-morphing.md`](ui-motion/references/icon-morphing.md).
 
 The integration preserves AzSkills-specific priorities: existing icon systems take precedence, morphing is used only when semantic continuity justifies it, reduced-motion preferences remain authoritative, icon state must remain accessible without animation, and no animation library is introduced solely for visual novelty.
 
 The upstream repository declares the MIT License. AzSkills does not copy its source code, icon data, generated outputs, or repository-specific implementation into the project.
 
-AzSkills intentionally does not import or reproduce external searchable databases, generated outputs, repository-specific scripts, private/internal material, or large upstream skill packages. The implementation is maintained as original AzSkills text in [`ui-design/SKILL.md`](ui-design/SKILL.md), [`ui-aesthetics/SKILL.md`](ui-aesthetics/SKILL.md), and [`design-intelligence.md`](design-intelligence.md).
+AzSkills intentionally does not import or reproduce external searchable databases, generated outputs, repository-specific scripts, private/internal material, or large upstream skill packages. The implementation is maintained as original AzSkills text in [`ui-design/SKILL.md`](ui-design/SKILL.md), [`ui-design/references/aesthetics.md`](ui-design/references/aesthetics.md), and [`design-intelligence.md`](design-intelligence.md).
 
 One caution from current public discussion is preserved in AzSkills' architecture: external tooling may ship much more data than an agent actually reads, and some combined modes can silently ignore options. AzSkills therefore prioritizes a compact contract with explicit trigger conditions and verification requirements over a large passive data bundle. See the public discussion around UI/UX Pro Max issue #484 for an example of this class of integration risk: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/issues/484
 
-## `ui-motion`, `ui-motion-review`, and `ui-motion-audit`
+## `ui-motion` modes
 
 The motion integration is informed by the public `emilkowalski/skills` repository, specifically the animation/design methodology current at the reviewed snapshot:
 
@@ -81,13 +81,11 @@ The motion integration is informed by the public `emilkowalski/skills` repositor
 
 AzSkills does not vendor the upstream `skills/` tree or copy its repository-specific wrappers, examples, provider integrations, or implementation files. Transferable principles are rewritten into AzSkills-native contracts:
 
-- `ui-motion` owns construction only;
-- `ui-motion-review` owns motion-focused read-only review;
-- `ui-motion-audit` owns codebase-wide audit and opportunity discovery;
+- `ui-motion` owns construction, read-only review, audit and opportunity discovery, pattern selection, and SVG animation;
 - `ui-motion/references/` supplies progressive-disclosure values and terminology;
-- `design-intelligence.md` owns cross-artifact motion reasoning;
-- `ui-design` remains the executable UI authority;
-- `ui-aesthetics` remains the visual-judgment authority.
+- `design-intelligence.md` supplies no motion rules and routes motion work to `ui-motion`;
+- `ui-design` remains the executable authority for the static interface;
+- `ui-design` refine and review modes own visual judgment.
 
 The source methodology's framework-specific and provider-specific assumptions are deliberately not made universal. Motion libraries remain optional and project-selected; existing product motion tokens and architecture take precedence.
 
@@ -95,7 +93,7 @@ The upstream repository is MIT licensed. This provenance record documents method
 
 ## Rare UI-inspired interaction craft
 
-The `rare-ui-motion` Skill studies public interaction patterns and the component gallery published by:
+The `ui-motion` pattern mode studies public interaction patterns and the component gallery published by:
 
 - Source repository: https://github.com/swamimalode07/rare-ui
 - Public component gallery: https://rareui.com/components
@@ -164,7 +162,7 @@ The AzSkills version independently rewrites those practices into a conservative 
 
 AzSkills does not copy Steam Community Guide text verbatim.
 
-## `ip-as-logo`
+## `logo-generator` character mode
 
 Informed by:
 

@@ -5,6 +5,9 @@
 **Target:** `CYoJkoY/AzSkills`  
 **Date:** 2026-09-17
 
+> Historical design record. Paths and Skill names below describe the pre-v2
+> layout. The current system is defined by `skills.json` and `SKILL-SYSTEM.md`.
+
 ## 1. Purpose
 
 Integrate the transferable engineering and design methodology from `emilkowalski/skills` into AzSkills as native capabilities.

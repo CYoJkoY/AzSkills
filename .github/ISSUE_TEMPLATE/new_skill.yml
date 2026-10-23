@@ -1,7 +1,7 @@
 name: "New Skill Proposal"
 description: >
   Propose a new SKILL.md behavior contract. A Skill must be a bounded,
-  composable capability — not a universal prompt.
+  composable capability - not a universal prompt.
 title: "[Proposal] <skill-directory-name>: <one-line capability summary>"
 labels:
   - "type: proposal"
@@ -11,84 +11,98 @@ body:
     attributes:
       value: |
         > **Before you submit**, please verify:
-        > 1. No existing Skill already covers this capability (check the
-        >    [repository structure](https://github.com/CYoJkoY/AzSkills#repository-structure)).
-        > 2. The proposed Skill has a **narrow, single responsibility**.
+        > 1. No existing canonical Skill or mode already covers this capability
+        >    (check [`skills.json`](https://github.com/CYoJkoY/AzSkills/blob/main/skills.json)).
+        > 2. The proposal is one decision class, not a workflow bundle.
         > 3. It can be **composed** with existing Skills rather than replacing them.
 
   - type: input
     id: directory
     attributes:
-      label: Proposed Directory Name
+      label: Target Directory
       description: >
-        Kebab-case directory name that will contain the SKILL.md
-        (e.g. `api-contract-review`, `motion-design-tokens`).
+        For a new canonical Skill, use a kebab-case directory that will contain
+        SKILL.md. For a mode, reference, or alias, name the existing canonical
+        Skill directory and the target file or mode.
       placeholder: my-new-skill
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Proposal Type
+      description: Prefer a mode or reference over a new canonical Skill.
+      options:
+        - New canonical Skill
+        - New mode on an existing Skill
+        - New reference for an existing Skill
+        - Compatibility alias for an existing Skill
     validations:
       required: true
 
   - type: textarea
     id: scope
     attributes:
-      label: Scope
+      label: Use when / Do not use when
       description: >
         Define **when** this Skill applies and **when it should stay out
         of the way**. Be as specific as possible.
       placeholder: |
-        **Applies when:** …
-        **Does NOT apply when:** …
+        **Applies when:** ...
+        **Does NOT apply when:** ...
     validations:
       required: true
 
   - type: textarea
     id: constraints
     attributes:
-      label: Constraints
+      label: Owns, inputs, outputs, and gates
       description: >
         List the non-negotiable technical, visual, language, or process
         rules the Skill must enforce.
       placeholder: |
-        1. …
-        2. …
+        1. ...
+        2. ...
     validations:
       required: true
 
   - type: textarea
     id: workflow
     attributes:
-      label: Workflow Outline
+      label: Workflow
       description: >
         Sketch the repeatable execution sequence (numbered steps).
-        This does not need to be final — a clear outline is sufficient.
+        This does not need to be final - a clear outline is sufficient.
       placeholder: |
-        1. Gather …
-        2. Analyse …
-        3. Produce …
-        4. Verify …
+        1. Gather ...
+        2. Analyse ...
+        3. Produce ...
+        4. Verify ...
     validations:
       required: true
 
   - type: textarea
     id: quality-gates
     attributes:
-      label: Quality Gates
+      label: Quality gates
       description: >
         What must be checked before the Skill's output is considered complete?
       placeholder: |
-        - [ ] …
-        - [ ] …
+        - [ ] ...
+        - [ ] ...
     validations:
       required: true
 
   - type: textarea
     id: output-contract
     attributes:
-      label: Output Contract
+      label: Output contract
       description: >
         Describe the expected artifact or response shape the Skill produces.
       placeholder: >
-        A Markdown document containing sections A, B, C … / A JSON schema … /
-        A set of annotated screenshots …
+        A Markdown document containing sections A, B, C ... / A JSON schema ... /
+        A set of annotated screenshots ...
     validations:
       required: true
 
@@ -113,20 +127,18 @@ body:
         Which existing Skills could this new Skill compose with?
       multiple: true
       options:
-        - application-architecture
-        - frontend-architecture
-        - frontend-slides
-        - ui-aesthetics
+        - architecture
+        - design-system
         - ui-design
-        - rare-ui-motion
-        - readme-craft
-        - l13n
+        - ui-motion
         - logo-generator
         - photo-abstract-editorial
-        - steam-mod-page
-        - ultrathink
-        - design-system
+        - frontend-slides
         - remotion-production
+        - readme-craft
+        - steam-mod-page
+        - localization
+        - ultrathink
         - None / Standalone
     validations:
       required: false

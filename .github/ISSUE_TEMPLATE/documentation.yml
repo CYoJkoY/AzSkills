@@ -30,8 +30,8 @@ body:
         Describe the issue or improvement. Include a link to the specific
         file / section if applicable.
       placeholder: >
-        The "How to use → Register it with your environment" section does
-        not mention … It would help to add an example for …
+        The "How to use -> Register it with your environment" section does
+        not mention ... It would help to add an example for ...
     validations:
       required: true
 

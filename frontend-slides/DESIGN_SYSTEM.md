@@ -24,7 +24,7 @@ Define tokens before building repeated components.
 
 ```css
 :root {
-  /* Wabi-Press (侘寂刊本) stage tokens — light washi spectrum.
+  /* Wabi-Press stage tokens - light washi spectrum.
      Values mirror design-system/wabi-press.css; do not fork them. */
   --stage-bg: #F5F3EC;            /* washi canvas */
   --slide-bg: #FAF9F5;            /* card & carrier surface */

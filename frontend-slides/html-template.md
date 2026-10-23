@@ -14,7 +14,7 @@ Reference architecture for production-quality fixed-stage HTML presentations. Au
   <title>Presentation</title>
   <style>
     :root {
-      /* AzSkills Wabi-Press (侘寂刊本) default visual system — light washi spectrum.
+      /* AzSkills Wabi-Press default visual system - light washi spectrum.
          Token source: ../design-system/wabi-press.css. Do not fork. */
       --stage-bg: #F5F3EC;
       --slide-bg: #FAF9F5;

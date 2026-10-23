@@ -50,7 +50,7 @@ implementation-choice
 
 The reference is internally inconsistent, and that inconsistency is instructive: its marketing surface runs pill buttons, 12px card radii, and generous section gaps, while its product app runs 4–6px control radii at a denser type scale. AzSkills resolves the same tension the same way: radius and spacing follow surface role, never one global value.
 
-Third-party colour aggregators disagree with the target stylesheet on the primary value (`#2571B7` and `#0373DF` both appear). Those readings are **待确认** and are not used above; only values captured from the target's own CSS were adopted.
+Third-party colour aggregators disagree with the target stylesheet on the primary value (`#2571B7` and `#0373DF` both appear). Those readings are **unconfirmed** and are not used above; only values captured from the target's own CSS were adopted.
 
 ## Workbench layout
 

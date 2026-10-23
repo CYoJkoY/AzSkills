@@ -4,15 +4,15 @@ Curated art directions for Frontend Slides. A preset is a starting point, not a 
 
 **Mandatory base:** include the complete [viewport-base.css](viewport-base.css) in every generated presentation.
 
-## The Single AzSkills Art Direction
+## Default Art Direction
 
-AzSkills owns exactly one visual language. All AzSkills-owned decks — examples, documentation, system diagrams, Skill-library explainers, and any presentation without a stronger subject-specific requirement — are built from **Wabi-Press (侘寂刊本)**. There is no preset catalog of alternative styles: the former preset collection was retired together with the Material 3-inspired identity, and no other palette may reappear in owned surfaces.
+AzSkills-owned decks are subject-led. Use **Wabi-Press** as the default editorial direction for narrative, research, and documentation decks when the brief does not establish a stronger visual thesis. It is not a mandatory skin for every presentation. Interactive chrome follows the Workbench contract in the root [DESIGN.md](../DESIGN.md); external brand decks follow their own identity. Do not mix unrelated palettes inside one deck.
 
-### Wabi-Press · 侘寂刊本
+### Wabi-Press
 
 **Vibe:** paper-warm, ink-graded, quietly authoritative — a printed folio rather than a dashboard.
 
-**Composition:** washi canvas (light `#F5F3EC` stage / `#FAF9F5` slide, or inkstone `#131416` / `#1B1C20` for dark-intent decks) + serif display anchor + hairline-bound blocks + generous 間 (whitespace as an active element). Asymmetric 5/7 or 3/6/3 structure preferred over 50/50 splits.
+**Composition:** washi canvas (light `#F5F3EC` stage / `#FAF9F5` slide, or inkstone `#131416` / `#1B1C20` for dark-intent decks) + serif display anchor + hairline-bound blocks + generous ma (whitespace as an active element). Asymmetric 5/7 or 3/6/3 structure preferred over 50/50 splits.
 
 **Typography:**
 - Display: `"Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", Georgia, serif` — weight 500 only, line-height 1.2–1.35, no bold bloat.
