@@ -184,6 +184,28 @@ The integrated Skills are original AzSkills text written from observed public me
 
 For third-party assets that are actually copied into AzSkills, the applicable upstream license is recorded above. Tool/project licenses do not automatically grant rights to third-party materials selected or generated through those tools.
 
+## resume-evidence-workflow
+
+Source repository: https://github.com/Elowwwen/resume-evidence-workflow
+
+Reviewed source commit: `e2175dc3217c9d09e2af41a113182ef148d86a5a`
+
+The upstream workflow is MIT licensed with the notice "Copyright (c) 2026 Resume Evidence Workflow contributors". The upstream license text is included at `resume-evidence-workflow/LICENSE`.
+
+AzSkills carries the upstream behavior test forward unchanged, adapts the HTML
+template, and rewrites the rest:
+
+| Upstream path | Treatment in AzSkills |
+| :--- | :--- |
+| `assets/editable-resume-base.html` | Adapted as `resume-evidence-workflow/assets/editable-resume-base.html`. The editing, copy, fitting, and print logic is preserved; the editor chrome uses AzSkills semantic token roles, grouped controls, and explicit focus, pressed, and disabled states. Resume paper styles are unchanged. |
+| `tests/copy-description.test.cjs` | Copied unchanged as `resume-evidence-workflow/tests/copy-description.test.cjs`. |
+| `SKILL.md` and `references/` | Rewritten as one canonical contract with reference modules, modes, gates, and an output contract that match the AzSkills Skill system. |
+| `README.md`, `agents/openai.yaml`, and the support images | Not carried over. The upstream README is a standalone project page, the agent manifest is runtime-specific, and the donation QR images and promotional calls to action are excluded. |
+
+The upstream material supplied the evidence-bank method, the selective career deep dive, the reusable base-resume workspace, the requirement-to-evidence mapping, the visible alignment review, and the editable HTML behavior. AzSkills rewrote these into a mode-based contract, moved long procedures into references, added shared-rule precedence, review-mode boundaries, and explicit gates against invented claims. The editor chrome adaptation follows the repository UI contract; it changes no resume paper style and adds no runtime dependency.
+
+No upstream donation image, promotional text, or external payment destination appears in the integrated Skill.
+
 
 ## remotion-production
 

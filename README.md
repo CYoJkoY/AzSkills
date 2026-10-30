@@ -10,7 +10,7 @@
 
 **Reusable AI Skills for real work.**
 
-Repository-local `SKILL.md` behavior contracts for engineering, architecture, frontend systems, design systems, UI quality, presentations, documentation, localization, translation, and visual production.
+Repository-local `SKILL.md` behavior contracts for engineering, architecture, frontend systems, design systems, UI quality, presentations, documentation, localization, translation, career evidence, and visual production.
 
 The repository-owned UI contract is documented in [`DESIGN.md`](DESIGN.md): a practical, VSCodium-inspired workbench model focused on compact navigation, discoverable search, technical-content readability, keyboard-first interaction, accessible states, responsive layout, and light/dark themes. The same contract has a terminal target: cell-based layout, ANSI semantic roles, ASCII fallbacks, and plain mode for logs and screen readers.
 
@@ -164,7 +164,7 @@ Executable artifacts, all referenced by the contract in [`DESIGN.md`](DESIGN.md)
 <a name="readme-skills"></a>
 ## <img src="assets/readme/icons/engineering.svg" width="20" height="20" alt=""> Skill catalog
 
-The registry defines canonical Skills in six families. Choose one canonical owner,
+The registry defines canonical Skills in seven families. Choose one canonical owner,
 then choose a mode. Deep detail lives in references and does not expand the owner.
 
 The assembly rules are in [`SKILL-SYSTEM.md`](SKILL-SYSTEM.md); the machine-readable
@@ -185,6 +185,7 @@ registry is [`skills.json`](skills.json).
 | Publishing | [`readme-craft`](readme-craft/SKILL.md) | build, rewrite, audit | GitHub README architecture, visuals, links, and QA. |
 | Publishing | [`steam-mod-page`](steam-mod-page/SKILL.md) | player, developer, audit | Steam Workshop BBCode pages and bilingual delivery. |
 | Publishing | [`localization`](localization/SKILL.md) | translate, audit | Game CSV localization with locale and markup safety. |
+| Career | [`resume-evidence-workflow`](resume-evidence-workflow/SKILL.md) | evidence, tailor, review | Career evidence bank, requirement-to-evidence mapping, and editable resume delivery. |
 <!-- SKILL-CATALOG:END -->
 
 ### Compatibility aliases
@@ -249,6 +250,8 @@ What are you doing?
 +-- Write a GitHub README ---------------------> readme-craft
 +-- Write a Steam Workshop page ---------------> steam-mod-page
 +-- Translate a game CSV ----------------------> localization
++-- Build evidence and tailor a resume --------> resume-evidence-workflow
+|     +-- evidence | tailor | review
 +-- Difficult or high-risk reasoning ----------> ultrathink + domain Skill
 ```
 
@@ -262,6 +265,7 @@ Cross-artifact rule    -> shared rule in SKILL-SYSTEM.md
 DESIGN.md ingestion    -> design-system
 Deep reasoning         -> ultrathink + one owning domain Skill
 Runtime decision       -> architecture before downstream UI choices
+Resume fact and claim  -> resume-evidence-workflow (never ui-design)
 ```
 
 Do not duplicate a shared rule merely to make a Skill look self-contained. An
@@ -311,6 +315,20 @@ For difficult work:
 ultrathink (deep)
    + one canonical owner
 ```
+
+For a job application:
+
+```text
+career material
+   -> resume-evidence-workflow (evidence)
+   -> base resume and layout profile
+   -> resume-evidence-workflow (tailor) with the complete job description
+   -> editable HTML master or the renderer the channel requires
+   -> resume-evidence-workflow (review) before sending
+```
+
+The resume paper keeps the source design. Compose with `ui-design` only when the
+editor chrome itself needs construction or a visual review.
 
 ### 3. Read the contract and its references
 
@@ -452,6 +470,12 @@ AzSkills/
 ├── readme-craft/
 │   ├── SKILL.md
 │   └── references/
+├── resume-evidence-workflow/
+│   ├── SKILL.md
+│   ├── assets/
+│   ├── references/
+│   ├── tests/
+│   └── LICENSE
 ├── steam-mod-page/
 │   ├── SKILL.md
 │   └── references/
@@ -511,7 +535,7 @@ For Skill proposals and improvements, use the repository's structured [Issue For
 <a name="readme-support"></a>
 ## <img src="assets/readme/icons/heart.svg" width="20" height="20" alt=""> Support
 
-AzSkills is maintained as an open collection of reusable engineering, design, documentation, localization, translation, and visual workflows. Support helps sustain the time required to maintain the Skills, references, assets, and repository infrastructure.
+AzSkills is maintained as an open collection of reusable engineering, design, documentation, localization, translation, career, and visual workflows. Support helps sustain the time required to maintain the Skills, references, assets, and repository infrastructure.
 
 <div align="center">
 

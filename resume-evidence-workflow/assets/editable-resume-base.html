@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>可编辑单页简历</title>
+<style>
+:root{--body-size:10.5pt;--line:1.4;--section-gap:10px;--item-gap:5px;--paragraph-gap:5px;--page-pad:12mm;--ink:#202124;--accent:#263d63;
+  /* Editor chrome only. The printed resume paper keeps its own design below. */
+  --wb-canvas:#eceff3;--wb-surface:#fff;--wb-surface-subtle:#f3f4f6;--wb-surface-active:#e8f0fe;--wb-border:#d9dde3;--wb-border-strong:#aeb6c2;--wb-text:#202124;--wb-text-secondary:#5f6368;--wb-accent:#0b57d0;--wb-accent-hover:#0842a0;--wb-accent-active:#062e6f;--wb-accent-50:#e8f0fe;--wb-accent-100:#d3e3fd;--wb-accent-300:#7cacf8;--wb-focus:#0b57d0;--wb-warning-bg:#fff1c7;--wb-warning-ink:#6a4b00;--wb-warning-border:#e0bd53;--wb-radius-sm:4px;--wb-radius-md:6px;--wb-space-4:4px;--wb-space-6:6px;--wb-space-8:8px;--wb-space-12:12px;--wb-space-16:16px;--wb-control-height:32px}
+*{box-sizing:border-box}body{margin:0;background:var(--wb-canvas);color:var(--ink);font-family:Arial,"PingFang SC","Microsoft YaHei",sans-serif}
+.toolbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:var(--wb-space-6);align-items:center;padding:var(--wb-space-8) var(--wb-space-12);background:var(--wb-surface);color:var(--wb-text);border-bottom:1px solid var(--wb-border);box-shadow:0 1px 3px #00000014;font-family:"Segoe UI",system-ui,-apple-system,"Microsoft YaHei",sans-serif}
+.toolbar-group{display:flex;flex-wrap:wrap;gap:var(--wb-space-4);align-items:center;padding-right:var(--wb-space-8);border-right:1px solid var(--wb-border)}
+.toolbar-group--end{border-right:0;padding-right:0}
+.toolbar button,.toolbar input{height:var(--wb-control-height);border:1px solid var(--wb-border);border-radius:var(--wb-radius-sm);padding:0 var(--wb-space-12);background:var(--wb-surface);color:var(--wb-text);font:inherit;font-size:13px}
+.toolbar button{cursor:pointer;white-space:nowrap}
+.toolbar button:hover:not(:disabled){background:var(--wb-surface-subtle);border-color:var(--wb-border-strong)}
+.toolbar button:active:not(:disabled){background:var(--wb-surface-active)}
+.toolbar button[aria-pressed="true"]{background:var(--wb-accent-50);border-color:var(--wb-accent-100);color:var(--wb-accent-active);font-weight:600}
+.toolbar button:disabled{background:var(--wb-surface-subtle);border-color:var(--wb-border);color:var(--wb-text-secondary);cursor:not-allowed}
+.toolbar .primary{background:var(--wb-accent);border-color:var(--wb-accent);color:#fff}
+.toolbar .primary:hover:not(:disabled){background:var(--wb-accent-hover);border-color:var(--wb-accent-hover)}
+.toolbar .primary:active:not(:disabled){background:var(--wb-accent-active);border-color:var(--wb-accent-active)}
+.toolbar input#color{width:44px;padding:2px}
+.toolbar :focus-visible,#copyPanel :focus-visible{outline:2px solid var(--wb-focus);outline-offset:2px}
+.toolbar small{color:var(--wb-text-secondary);font-size:12px}.toolbar-status{display:flex;flex-wrap:wrap;gap:var(--wb-space-8);align-items:center;margin-left:auto}.toolbar-status #fitStatus{white-space:nowrap;font-variant-numeric:tabular-nums}
+#warning{display:none;max-width:210mm;margin:8px auto;padding:var(--wb-space-8) var(--wb-space-12);background:var(--wb-warning-bg);color:var(--wb-warning-ink);border:1px solid var(--wb-warning-border);border-radius:var(--wb-radius-sm);font-family:"Segoe UI",system-ui,sans-serif}
+.page{width:210mm;height:296mm;margin:12px auto;background:#fff;padding:var(--page-pad);overflow:visible;box-shadow:0 3px 18px #0002;font-size:var(--body-size);line-height:var(--line)}
+.page h1{margin:0;color:var(--accent);font-size:22pt}.page h2{margin:var(--section-gap) 0 5px;border-bottom:1px solid var(--accent);color:var(--accent);font-size:12pt}.page p{margin:var(--paragraph-gap) 0}.page ul{margin:var(--item-gap) 0;padding-left:18px}.page li{margin:2px 0}.row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.row-main{flex:1;min-width:0;white-space:pre-wrap}.row-date{flex:0 0 auto;white-space:nowrap}.skills{display:block}.skills>*{display:block;margin:var(--paragraph-gap) 0}.muted{color:#555}
+.edit-block{white-space:pre-wrap;min-height:1em}.edit-block:focus{outline:1px dashed var(--wb-focus);background:var(--wb-accent-50)}.edit-block:empty:before{content:'输入内容';color:#a6adb5}.selected-block{outline:2px solid var(--wb-accent-300)!important}
+body.print-preflight{background:#fff}body.print-preflight .page{margin:0;box-shadow:none;width:210mm;height:295.5mm;max-height:295.5mm}body.print-preflight .toolbar,body.print-preflight #warning{display:none!important}
+@media print{html,body{width:210mm;height:auto;margin:0!important;padding:0!important;background:#fff}.toolbar,#warning{display:none!important}.page{display:block;margin:0!important;box-shadow:none;width:210mm;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible;break-after:avoid-page;page-break-after:avoid}.edit-block:empty:before{content:''}@page{size:A4;margin:0}}
+/* Screen editing uses fixed A4; printed sheets use natural height. */
+.page{height:297mm}
+#copyPanel{max-width:210mm;margin:12px auto;background:var(--wb-surface);color:var(--wb-text);padding:var(--wb-space-16);border:1px solid var(--wb-border);border-radius:var(--wb-radius-md);box-shadow:0 1px 3px #00000014;font:14px/1.5 "Segoe UI",system-ui,-apple-system,"Microsoft YaHei",sans-serif}
+#copyPanel[hidden]{display:none!important}
+.copy-card{margin:14px 0;padding-top:10px;border-top:1px solid var(--wb-border)}
+.copy-card h3{font-size:14px;margin:0 0 6px}
+.copy-card textarea{display:block;width:100%;min-height:130px;padding:var(--wb-space-8);font:14px/1.5 Arial,"Microsoft YaHei",sans-serif;resize:vertical;box-sizing:border-box;border:1px solid var(--wb-border);border-radius:var(--wb-radius-sm);background:var(--wb-surface-subtle);color:var(--wb-text)}
+.copy-card button{margin-top:6px;height:30px;padding:0 var(--wb-space-12);cursor:pointer;border:1px solid var(--wb-border-strong);border-radius:var(--wb-radius-sm);background:var(--wb-surface);color:var(--wb-text);font:inherit;font-size:13px}
+.copy-card button:hover{background:var(--wb-surface-subtle)}
+.copy-card button:active{background:var(--wb-surface-active)}
+.copy-result{display:inline-block;margin-left:10px;color:var(--wb-accent-active);font-size:13px}
+@media print{
+ html,body{width:210mm;height:auto!important;min-height:0!important;margin:0!important;padding:0!important}
+ .toolbar,#warning,#copyPanel{display:none!important}
+ .page{box-sizing:border-box;width:210mm;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important;padding-top:var(--page-pad);padding-bottom:0!important;overflow:visible!important;break-before:auto;break-after:auto;page-break-before:auto;page-break-after:auto}
+ .page~.page{break-before:page;page-break-before:always}
+ .page>:last-child{margin-bottom:0!important}
+ @page{size:A4;margin:0}
+}
+/* Must override print height:auto while measuring in beforeprint. */
+body.print-preflight .page{height:295.5mm!important;min-height:295.5mm!important;max-height:295.5mm!important;margin:0!important;padding-bottom:var(--page-pad)!important}
+
+</style>
+</head>
+<body>
+<div class="toolbar" role="group" aria-label="简历编辑工具栏">
+  <div class="toolbar-group" role="group" aria-label="字号">
+    <button type="button" onclick="size(-.25)">字号−</button><button type="button" onclick="size(.25)">字号＋</button>
+  </div>
+  <div class="toolbar-group" role="group" aria-label="文字样式">
+    <input id="color" type="color" value="#202124" title="字体颜色" aria-label="字体颜色">
+    <button id="btnBold" type="button" aria-pressed="false" onmousedown="event.preventDefault()" onclick="toggleBold()"><b>加粗</b></button>
+  </div>
+  <div class="toolbar-group" role="group" aria-label="对齐">
+    <button type="button" data-align="justifyLeft" aria-pressed="false" onmousedown="event.preventDefault()" onclick="align('justifyLeft')">左对齐</button><button type="button" data-align="justifyCenter" aria-pressed="false" onmousedown="event.preventDefault()" onclick="align('justifyCenter')">居中</button>
+    <button type="button" data-align="justifyRight" aria-pressed="false" onmousedown="event.preventDefault()" onclick="align('justifyRight')">右对齐</button><button type="button" data-align="justifyFull" aria-pressed="false" onmousedown="event.preventDefault()" onclick="align('justifyFull')">两端对齐</button>
+  </div>
+  <div class="toolbar-group" role="group" aria-label="历史">
+    <button id="btnUndo" type="button" onclick="historyStep('undo')">撤销</button><button id="btnRedo" type="button" onclick="historyStep('redo')">恢复</button>
+  </div>
+  <div class="toolbar-group" role="group" aria-label="段落">
+    <button type="button" onclick="spacing(-1)">段距−</button><button type="button" onclick="spacing(1)">段距＋</button>
+    <button type="button" onclick="insertBlock()">插入段落</button><button id="btnDeleteBlock" type="button" onclick="deleteBlock()" disabled>删除当前段落</button>
+  </div>
+  <div class="toolbar-group" role="group" aria-label="页面">
+    <button class="primary" type="button" onclick="fitOnePage()">自动适配一页</button>
+    <button type="button" onclick="saveDraft()">保存修改</button><button type="button" onclick="downloadHTML()">下载 HTML</button>
+  </div>
+  <div class="toolbar-group toolbar-group--end" role="group" aria-label="导出与应用">
+    <button class="primary" type="button" onclick="printResume()">生成 PDF</button>
+    <button type="button" onclick="toggleCopyPanel()">网申正文复制</button>
+  </div>
+  <div class="toolbar-status"><small>点击简历文字即可编辑</small><small id="fitStatus" role="status">页面占比：待检测</small></div>
+</div>
+<div id="warning">内容仍超过一页安全范围。请先确认内容或布局调整方案，不要继续缩小字体。</div>
+<aside id="copyPanel" hidden></aside>
+<main id="page" class="page">
+  <h1 class="edit-block">姓名</h1><p class="muted edit-block">联系方式｜目标岗位</p>
+  <h2 class="edit-block">教育背景</h2><div class="row"><b class="row-main edit-block">学校名称<br>硕士专业／学位</b><span class="row-date edit-block">时间</span></div>
+  <h2 class="edit-block">工作经历</h2><div class="row"><b class="row-main edit-block"><span data-copy-field="company">完整公司名称</span><br><span data-copy-field="role">职位名称</span></b><span class="row-date edit-block" data-copy-field="dates">时间</span></div><ul><li class="edit-block">用经验证据替换此处内容。</li></ul>
+  <h2 class="edit-block">项目经历</h2><div class="row"><b class="row-main edit-block">项目名称</b><span class="row-date edit-block">时间</span></div><ul><li class="edit-block">保留原始数据和职责边界。</li></ul>
+  <h2 class="edit-block">技能</h2><div class="skills"><p class="edit-block">内容策划｜用户研究｜数据分析</p><p class="edit-block">语言与工具</p></div>
+</main>
+<script>
+const root=document.documentElement,page=document.getElementById('page'),warning=document.getElementById('warning'),colorPicker=document.getElementById('color'),fitStatus=document.getElementById('fitStatus'),boldButton=document.getElementById('btnBold'),deleteButton=document.getElementById('btnDeleteBlock'),undoButton=document.getElementById('btnUndo'),redoButton=document.getElementById('btnRedo'),alignButtons=[...document.querySelectorAll('[data-align]')];
+let savedTextRange=null,currentBlock=null;
+document.querySelectorAll('.edit-block').forEach(el=>el.setAttribute('contenteditable','true'));
+function commandState(command){try{return document.queryCommandState(command)}catch(error){return false}}
+function commandEnabled(command){try{return document.queryCommandEnabled(command)}catch(error){return true}}
+function syncEditorState(){
+  const active=document.activeElement;
+  const inPage=Boolean(selectionInsidePage()||(active&&active.closest&&active.closest('.page')));
+  boldButton.setAttribute('aria-pressed',String(inPage&&commandState('bold')));
+  for(const button of alignButtons)button.setAttribute('aria-pressed',String(inPage&&commandState(button.dataset.align)));
+  deleteButton.disabled=!currentBlock;
+  undoButton.disabled=!commandEnabled('undo');
+  redoButton.disabled=!commandEnabled('redo');
+}
+function toggleBold(){document.execCommand('styleWithCSS',false,false);document.execCommand('bold');syncEditorState()}
+function historyStep(command){document.execCommand(command);syncEditorState()}
+page.addEventListener('focusin',event=>{const block=event.target.closest('.edit-block');if(!block)return;if(currentBlock)currentBlock.classList.remove('selected-block');currentBlock=block;currentBlock.classList.add('selected-block');syncEditorState()});
+page.addEventListener('keyup',syncEditorState);page.addEventListener('input',syncEditorState);document.addEventListener('selectionchange',()=>{if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.page'))syncEditorState()});
+page.addEventListener('keydown',event=>{const block=event.target.closest('.edit-block');if(!block)return;if(event.key==='Enter'){event.preventDefault();if(event.shiftKey||block.matches('.row-main,.row-date,h1,h2')){document.execCommand('insertLineBreak');return}splitEditableBlock(block);return}if((event.key==='Backspace'||event.key==='Delete')&&block.textContent.trim()===''&&block.matches('p.edit-block,li.edit-block')){event.preventDefault();const next=block.nextElementSibling||block.previousElementSibling;block.remove();if(next){next.focus();currentBlock=next}}});
+function splitEditableBlock(block){const selection=window.getSelection(),next=document.createElement(block.tagName.toLowerCase());next.className=block.className;next.contentEditable='true';if(selection&&selection.rangeCount&&block.contains(selection.anchorNode)){const tail=document.createRange();tail.setStart(selection.anchorNode,selection.anchorOffset);tail.setEndAfter(block.lastChild||block);const fragment=tail.extractContents();next.append(fragment)}if(!next.hasChildNodes())next.innerHTML='<br>';block.parentElement.insertBefore(next,block.nextSibling);next.focus();const caret=document.createRange();caret.selectNodeContents(next);caret.collapse(true);selection.removeAllRanges();selection.addRange(caret);currentBlock=next}
+function selectionInsidePage(){
+  const selection=window.getSelection();
+  if(!selection||selection.rangeCount===0||selection.isCollapsed)return null;
+  const range=selection.getRangeAt(0);
+  const ancestor=range.commonAncestorContainer.nodeType===Node.TEXT_NODE?range.commonAncestorContainer.parentElement:range.commonAncestorContainer;
+  return ancestor&&page.contains(ancestor)?range.cloneRange():null;
+}
+function saveTextSelection(){const range=selectionInsidePage();if(range)savedTextRange=range}
+function restoreTextSelection(){
+  if(!savedTextRange)return false;
+  const selection=window.getSelection();selection.removeAllRanges();selection.addRange(savedTextRange);return true;
+}
+function applyTextColor(value){
+  if(!restoreTextSelection())return;
+  document.execCommand('styleWithCSS',false,true);
+  document.execCommand('foreColor',false,value);
+  saveTextSelection();
+}
+document.addEventListener('selectionchange',()=>{if(document.activeElement!==colorPicker)saveTextSelection()});
+colorPicker.addEventListener('pointerdown',saveTextSelection);
+colorPicker.addEventListener('input',event=>applyTextColor(event.target.value));
+function n(v){return parseFloat(getComputedStyle(root).getPropertyValue(v))}
+function set(v,x,u=''){root.style.setProperty(v,x+u)}
+function size(d){set('--body-size',Math.max(9.5,Math.min(12,n('--body-size')+d)),'pt')}
+function spacing(d){set('--paragraph-gap',Math.max(0,Math.min(16,n('--paragraph-gap')+d)),'px');set('--item-gap',Math.max(0,Math.min(16,n('--item-gap')+d)),'px');updateFitStatus(contentMetrics())}
+function align(command){document.execCommand('styleWithCSS',false,false);document.execCommand(command,false,null);syncEditorState()}
+function insertBlock(){const anchor=currentBlock||page.lastElementChild,isList=anchor.matches('li'),block=document.createElement(isList?'li':'p');block.className='edit-block';block.contentEditable='true';block.innerHTML='<br>';anchor.parentElement.insertBefore(block,anchor.nextSibling);block.focus();currentBlock=block}
+function deleteBlock(){if(!currentBlock)return;if(currentBlock.matches('h1,h2,.row-date')){warning.textContent='标题、姓名和日期字段请直接修改文字，不建议整块删除。';warning.style.display='block';return}const next=currentBlock.nextElementSibling||currentBlock.previousElementSibling;currentBlock.remove();currentBlock=next;if(next&&next.focus)next.focus();syncEditorState();updateFitStatus(contentMetrics())}
+function contentMetrics(sheet=page){
+  const page=sheet;
+  const pageBox=page.getBoundingClientRect(),style=getComputedStyle(page),topPad=parseFloat(style.paddingTop),bottomPad=parseFloat(style.paddingBottom);
+  const children=[...page.children].filter(el=>getComputedStyle(el).display!=='none');
+  const available=Math.max(1,page.clientHeight-topPad-bottomPad);
+  if(!children.length)return{used:0,available,innerRatio:0,ratio:0,overflow:false};
+  const bottom=Math.max(...children.map(el=>{const box=el.getBoundingClientRect(),s=getComputedStyle(el);return box.bottom+parseFloat(s.marginBottom||0)}));
+  const used=Math.max(0,bottom-(pageBox.top+topPad));
+  const innerRatio=used/available;
+  const pageRatio=(topPad+used)/(297*96/25.4);
+  return{used,available,innerRatio,ratio:pageRatio,overflow:page.scrollHeight>page.clientHeight+1||used>available+1};
+}
+const measureSheet=contentMetrics;
+function usedRatio(){return contentMetrics().ratio}
+function overflow(){return contentMetrics().overflow}
+const fitSpecs=[
+  {name:'--line',min:1.25,max:1.52,step:.005,unit:''},
+  {name:'--paragraph-gap',min:1,max:10,step:.125,unit:'px'},
+  {name:'--item-gap',min:2,max:8,step:.125,unit:'px'},
+  {name:'--section-gap',min:6,max:16,step:.125,unit:'px'},
+  {name:'--body-size',min:9.5,max:11.5,step:.025,unit:'pt'},
+  {name:'--page-pad',min:8,max:15,step:.125,unit:'mm'}
+];
+function fitSnapshot(){return Object.fromEntries(fitSpecs.map(spec=>[spec.name,n(spec.name)]))}
+function restoreFit(state){fitSpecs.forEach(spec=>set(spec.name,state[spec.name],spec.unit))}
+function updateFitStatus(value){const metrics=typeof value==='number'?{ratio:value,overflow:value>1}:value;fitStatus.textContent=`整页内容占比：${(metrics.ratio*100).toFixed(1)}%｜打印预计：${metrics.overflow?'2页或更多':'1页'}`}
+function fitOnePage(target=.97,compressOnly=false,sheet=page){
+  const contentMetrics=()=>measureSheet(sheet);
+  warning.style.display='none';
+  const lower=.95,settled=Math.max(lower,target-.003);
+  let metrics=contentMetrics(),best=metrics.ratio<=target&&!metrics.overflow?fitSnapshot():null,bestDistance=best?target-metrics.ratio:Infinity;
+  const direction=metrics.ratio>target||metrics.overflow?-1:(compressOnly?0:1);
+  if(direction===0){updateFitStatus(metrics);return metrics}
+  outer:for(const spec of fitSpecs){
+    for(let i=0;i<240;i++){
+      const current=n(spec.name),next=Math.round((current+direction*spec.step)*10000)/10000;
+      if(next<spec.min-1e-6||next>spec.max+1e-6)break;
+      set(spec.name,next,spec.unit);metrics=contentMetrics();
+      if(direction>0&&(metrics.overflow||metrics.ratio>target)){
+        set(spec.name,current,spec.unit);break;
+      }
+      if(!metrics.overflow&&metrics.ratio<=target){
+        const distance=target-metrics.ratio;
+        if(distance<bestDistance){best=fitSnapshot();bestDistance=distance}
+        if(metrics.ratio>=settled)break outer;
+      }
+      if(direction<0&&!metrics.overflow&&metrics.ratio<=target)break outer;
+    }
+  }
+  if(best)restoreFit(best);
+  metrics=contentMetrics();updateFitStatus(metrics);
+  if(metrics.overflow||metrics.ratio>1){warning.textContent='内容在安全字号、间距和页边距下仍超过一页。请先批准内容或结构调整方案。';warning.style.display='block'}
+  else if(metrics.ratio<lower){warning.textContent='页面内容占比低于参考范围。可检查相关素材与模块间距；可读且无溢出的页面仍可打印。';warning.style.display='block'}
+  else if(metrics.ratio>target){warning.textContent='页面内容仍高于当前安全目标，请检查打印预览或进一步调整内容。';warning.style.display='block'}
+  return metrics;
+}
+function storageKey(){return `editable-resume:${document.title}:${location.pathname}`}
+function saveDraft(){localStorage.setItem(storageKey(),page.innerHTML);warning.textContent='修改已保存在此浏览器中。';warning.style.display='block'}
+function downloadHTML(){if(currentBlock)currentBlock.classList.remove('selected-block');const html='<!doctype html>\n'+document.documentElement.outerHTML;const blob=new Blob([html],{type:'text/html;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(document.title||'简历')+'.html';a.click();URL.revokeObjectURL(a.href)}
+function preparePrint(){
+ document.body.classList.add('print-preflight');if(currentBlock)currentBlock.classList.remove('selected-block');
+ const results=[...document.querySelectorAll('.page')].map(sheet=>fitOnePage(.97,true,sheet));
+ // Shared page settings can affect earlier sheets; remeasure every page after fitting.
+ const metrics=[...document.querySelectorAll('.page')].map(sheet=>contentMetrics(sheet));
+ const safe=metrics.every(m=>!m.overflow&&m.ratio<=.98);
+ document.body.classList.toggle('print-ready',safe);document.body.classList.remove('print-preflight');updateFitStatus(metrics[0]);return{safe,metrics};
+}
+function finishPrint(){document.body.classList.remove('print-preflight','print-ready');updateFitStatus(contentMetrics())}
+function printGuide(){
+  const ua=navigator.userAgent;
+  if(/Chrome|Chromium|Edg\//.test(ua)&&!/CriOS/.test(ua))return 'Chrome / Edge 导出提示：\n\n1. 在打印窗口展开“更多设置”\n2. 取消勾选“页眉和页脚”\n3. 纸张选择 A4，边距选择“无”，缩放保持默认或 100%\n4. 确认预览只有一页再保存\n\n网页无法代替你关闭浏览器添加的页眉和页脚。是否继续？';
+  if(/Safari/.test(ua)&&!/Chrome|Chromium|CriOS|Edg\//.test(ua))return 'Safari 导出提示：\n\n1. 在打印窗口点击“显示详细信息”\n2. 取消勾选“打印页眉和页脚”\n3. 纸张选择 A4，确认预览只有一页再保存\n\n否则 PDF 可能带有日期、网页标题或本地 HTML 路径。是否继续？';
+  return '导出提示：\n\n请在浏览器打印设置中关闭“页眉和页脚”，选择 A4，并确认预览只有一页。否则 PDF 可能带有日期、网页标题、本地路径或页码。是否继续？';
+}
+function printResume(){if(!window.confirm(printGuide()))return;const result=preparePrint();if(!result.safe){finishPrint();warning.textContent='打印预检仍检测到内容溢出，已暂停生成 PDF。请继续调整内容或版式。';warning.style.display='block';return}window.print()}
+window.addEventListener('beforeprint',()=>{if(!document.body.classList.contains('print-ready'))preparePrint()});window.addEventListener('afterprint',finishPrint);
+window.addEventListener('load',()=>{const saved=localStorage.getItem(storageKey());if(saved){page.innerHTML=saved;page.querySelectorAll('.edit-block').forEach(el=>el.setAttribute('contenteditable','true'))}syncEditorState();document.fonts.ready.then(()=>updateFitStatus(contentMetrics()))});
+/* Application forms: independently copy employer, role, dates and description. */
+function collectCopyEntries(resumePage){
+ const records=[];let record=null,section='';
+ for(const el of resumePage.children){
+  if(el.matches('h2')){section=el.innerText.trim();record=null;continue}
+  if(el.matches('.row')&&el.querySelector('b.row-main')){
+   const main=el.querySelector('.row-main');
+   const company=main.querySelector('[data-copy-field="company"]')||el.querySelector('[data-copy-field="company"]');
+   const role=el.querySelector('[data-copy-field="role"]');
+   const dates=el.querySelector('[data-copy-field="dates"]');
+   const lines=main.innerText.trim().split('\n').map(t=>t.trim()).filter(Boolean);
+   const legacy=(lines[0]||'').split(/\s*[｜|]\s*/);
+   record={label:main.innerText.trim(),section,company:company?company.innerText.trim():legacy[0],role:role?role.innerText.trim():(legacy.slice(1).join('｜')||lines.slice(1).join('\n')),dates:dates?dates.innerText.trim():(el.querySelector('.row-date')?.innerText.trim()||''),parts:[]};records.push(record);continue;
+  }
+  if(!record)continue;
+  if(el.matches('p')){
+   if(el.dataset.copyField==='role'){record.role=el.innerText.trim();continue}
+   // Standalone role/department metadata is not part of the description.
+   if(el.dataset.copyExclude==='true')continue;
+   if(el.innerText.trim())record.parts.push(el.innerText.trim());
+  }else if(el.matches('ul,ol')){
+   for(const item of el.children)if(item.innerText.trim())record.parts.push(item.innerText.trim());
+  }
+ }
+ return records.filter(r=>r.parts.length);
+}
+function buildCopyPanel(){
+ const panel=document.getElementById('copyPanel');panel.replaceChildren();
+ const title=document.createElement('h2');title.textContent='网申正文复制';panel.append(title);
+ const hint=document.createElement('p');hint.textContent='每段经历提供完整公司名、职位名、日期三个独立方框，以及一个工作内容框，可分别复制。内容同步自当前简历；如自动复制不可用，可在框内全选复制。';panel.append(hint);
+ document.querySelectorAll('.page').forEach((resumePage,index)=>{
+  const lang=(resumePage.lang||document.documentElement.lang).startsWith('en')?'English':'中文';
+  for(const entry of collectCopyEntries(resumePage)){
+   const card=document.createElement('section');card.className='copy-card';
+   const heading=document.createElement('h3');heading.textContent=lang+' · '+entry.label;
+   card.append(heading);
+   for(const [label,value] of [['公司名',entry.company],['职位名',entry.role],['日期',entry.dates],['工作内容',entry.parts.join('\n')]]){
+    const wrapper=document.createElement('div');
+    const caption=document.createElement('label');caption.textContent=label;
+    const field=document.createElement('textarea');field.readOnly=true;field.value=value;field.rows=label==='工作内容'?6:2;field.style.minHeight=label==='工作内容'?'130px':'48px';field.setAttribute('aria-label',heading.textContent+' '+label);
+    caption.append(field);
+    const button=document.createElement('button');button.type='button';button.textContent='复制'+label;
+    const status=document.createElement('span');status.className='copy-result';status.setAttribute('role','status');
+    button.addEventListener('click',async()=>{field.focus();field.select();try{if(!navigator.clipboard?.writeText)throw Error('unavailable');await navigator.clipboard.writeText(field.value);status.textContent='已复制'+label}catch(error){status.textContent=label+'已选中，请按 Cmd+C / Ctrl+C'}});
+    wrapper.append(caption,button,status);card.append(wrapper);
+   }
+   panel.append(card);
+  }
+ });
+}
+function toggleCopyPanel(){const panel=document.getElementById('copyPanel');if(panel.hidden){buildCopyPanel();panel.hidden=false;const reduceMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;panel.scrollIntoView({block:'start',behavior:reduceMotion?'auto':'smooth'})}else panel.hidden=true}
+document.addEventListener('input',event=>{if(event.target.closest('.page')&&!document.getElementById('copyPanel').hidden)buildCopyPanel()});
+</script>
+</body></html>

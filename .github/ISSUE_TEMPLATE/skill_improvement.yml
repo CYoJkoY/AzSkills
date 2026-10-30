@@ -23,6 +23,7 @@ body:
         - readme-craft
         - steam-mod-page
         - localization
+        - resume-evidence-workflow
         - ultrathink
         - application-architecture (alias)
         - frontend-architecture (alias)
