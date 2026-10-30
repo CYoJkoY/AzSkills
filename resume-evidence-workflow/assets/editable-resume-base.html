@@ -102,6 +102,7 @@ function commandEnabled(command){try{return document.queryCommandEnabled(command
 function syncEditorState(){
   const active=document.activeElement;
   const inPage=Boolean(selectionInsidePage()||(active&&active.closest&&active.closest('.page')));
+  if(currentBlock&&!page.contains(currentBlock))currentBlock=null;
   boldButton.setAttribute('aria-pressed',String(inPage&&commandState('bold')));
   for(const button of alignButtons)button.setAttribute('aria-pressed',String(inPage&&commandState(button.dataset.align)));
   deleteButton.disabled=!currentBlock;
@@ -141,7 +142,7 @@ function size(d){set('--body-size',Math.max(9.5,Math.min(12,n('--body-size')+d))
 function spacing(d){set('--paragraph-gap',Math.max(0,Math.min(16,n('--paragraph-gap')+d)),'px');set('--item-gap',Math.max(0,Math.min(16,n('--item-gap')+d)),'px');updateFitStatus(contentMetrics())}
 function align(command){document.execCommand('styleWithCSS',false,false);document.execCommand(command,false,null);syncEditorState()}
 function insertBlock(){const anchor=currentBlock||page.lastElementChild,isList=anchor.matches('li'),block=document.createElement(isList?'li':'p');block.className='edit-block';block.contentEditable='true';block.innerHTML='<br>';anchor.parentElement.insertBefore(block,anchor.nextSibling);block.focus();currentBlock=block}
-function deleteBlock(){if(!currentBlock)return;if(currentBlock.matches('h1,h2,.row-date')){warning.textContent='标题、姓名和日期字段请直接修改文字，不建议整块删除。';warning.style.display='block';return}const next=currentBlock.nextElementSibling||currentBlock.previousElementSibling;currentBlock.remove();currentBlock=next;if(next&&next.focus)next.focus();syncEditorState();updateFitStatus(contentMetrics())}
+function deleteBlock(){if(currentBlock&&!page.contains(currentBlock))currentBlock=null;if(!currentBlock)return;if(currentBlock.matches('h1,h2,.row-date')){warning.textContent='标题、姓名和日期字段请直接修改文字，不建议整块删除。';warning.style.display='block';return}const next=currentBlock.nextElementSibling||currentBlock.previousElementSibling;currentBlock.remove();currentBlock=next;if(next&&next.focus)next.focus();syncEditorState();updateFitStatus(contentMetrics())}
 function contentMetrics(sheet=page){
   const page=sheet;
   const pageBox=page.getBoundingClientRect(),style=getComputedStyle(page),topPad=parseFloat(style.paddingTop),bottomPad=parseFloat(style.paddingBottom);
