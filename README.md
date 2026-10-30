@@ -265,7 +265,7 @@ Cross-artifact rule    -> shared rule in SKILL-SYSTEM.md
 DESIGN.md ingestion    -> design-system
 Deep reasoning         -> ultrathink + one owning domain Skill
 Runtime decision       -> architecture before downstream UI choices
-Resume fact and claim  -> resume-evidence-workflow (never ui-design)
+Resume fact and claim  -> resume-evidence-workflow
 ```
 
 Do not duplicate a shared rule merely to make a Skill look self-contained. An
