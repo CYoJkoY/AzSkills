@@ -178,6 +178,7 @@ request
 | visual | `logo-generator`, `photo-abstract-editorial` | Identity and image-led artifacts. |
 | production | `frontend-slides`, `remotion-production` | Timed or staged visual production. |
 | publishing | `readme-craft`, `steam-mod-page`, `localization` | Repository, storefront, and locale delivery. |
+| career | `resume-evidence-workflow` | Career evidence, requirement alignment, and resume delivery. |
 
 ## Sizes and progressive disclosure
 

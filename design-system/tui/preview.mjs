@@ -96,6 +96,13 @@ const SKILLS = [
     when: "Use when a localization batch or locale audit is requested.",
     contract: "Preserve schema. Protect BBCode. Complete every locale.",
   },
+  {
+    name: "resume-evidence-workflow",
+    group: "CAREER",
+    purpose: "Build a career evidence bank and tailor a resume to one requirement.",
+    when: "Use when career material must become an evidence-backed application.",
+    contract: "Confirmed evidence. Explicit gaps. Approved removals. Print-verified artifact.",
+  },
 ];
 
 const DEFAULT_SELECTED = "ui-design";

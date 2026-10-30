@@ -25,6 +25,10 @@
     "publishing": {
       "label": "Publishing",
       "purpose": "Repository, storefront, and locale delivery."
+    },
+    "career": {
+      "label": "Career",
+      "purpose": "Career evidence, requirement alignment, and resume delivery."
     }
   },
   "skills": [
@@ -135,6 +139,15 @@
       "modes": ["translate", "audit"],
       "role": "Game CSV localization with locale completeness and markup safety.",
       "composes": ["readme-craft", "steam-mod-page"]
+    },
+    {
+      "id": "resume-evidence-workflow",
+      "path": "resume-evidence-workflow/SKILL.md",
+      "status": "canonical",
+      "family": "career",
+      "modes": ["evidence", "tailor", "review"],
+      "role": "Career evidence, requirement alignment, and editable resume delivery.",
+      "composes": ["ui-design"]
     }
   ],
   "aliases": [
