@@ -74,7 +74,7 @@ owners that inherit this visual layer:
 | Motion construction, review, audit, SVG | `ui-motion` |
 | Identity, logo, character mark | `logo-generator` |
 | Photograph-derived abstract editorial treatment | `photo-abstract-editorial` |
-| Fixed-stage slide narrative and composition | `frontend-slides` |
+| Slide narrative, responsive HTML reports and composition | `frontend-slides` |
 | Programmatic video and frame determinism | `remotion-production` |
 | GitHub README | `readme-craft` |
 | Steam Workshop page | `steam-mod-page` |

@@ -1,15 +1,15 @@
 ---
 name: frontend-slides
-description: Build or convert fixed-stage 1920x1080 HTML presentations with a deliberate visual thesis, readable density, authored assets, and rendered slide QA. Use for new decks, PowerPoint conversion, and existing HTML deck refinement.
-version: 2.0.0
+description: Build responsive page-by-page HTML reports or fixed-stage 1920x1080 presentations with deliberate typography and rendered QA. Use for reading-first reports, new decks, PowerPoint conversion, and HTML deck refinement.
+version: 2.1.0
 status: canonical
 family: production
-modes: [new, convert, enhance]
+modes: [new, convert, enhance, report]
 ---
 
 # Frontend Slides
 
-Turn source content into a fixed-stage HTML presentation that reads as one
+Turn source content into an HTML report or presentation that reads as one
 designed argument. This Skill owns deck narrative, stage geometry, typography,
 layout, authored visual assets, and rendered slide QA. It does not own video
 production or general application UI.
@@ -18,13 +18,13 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual e
 
 ## Contract
 
-- Use when: a task needs a new HTML deck, a PowerPoint-to-HTML conversion, or a substantial visual rebuild of an existing deck.
-- Do not use when: the output is a video (`remotion-production`), a product interface (`ui-design`), or a single static document.
-- Owns: narrative structure, fixed-stage composition, slide density, typography, color, imagery, deck-level motion placement, and slide-level verification. Motion mechanism, timing, interruption, and motion gates belong to `ui-motion`.
+- Use when: a task needs a page-by-page HTML report, a new HTML deck, a PowerPoint-to-HTML conversion, or a substantial visual rebuild of an existing deck.
+- Do not use when: the output is a video (`remotion-production`), a product interface (`ui-design`), or a document without report-page structure.
+- Owns: narrative structure, report reflow, stage composition, density, typography, color, imagery, deck-level motion placement, and rendered verification. Motion mechanism, timing, interruption, and motion gates belong to `ui-motion`.
 - Inputs: source content, audience, occasion, duration, brand or design contract, required assets, and delivery format.
 - Outputs: self-contained HTML deck, converted deck, PDF/PNG export when requested, and rendered verification.
 - Compose with: `design-system` when a DESIGN.md governs the deck; `ui-motion` for slide transitions; `logo-generator` for identity assets.
-- Gates: every slide fits 1920x1080 without overflow; the narrative is legible without narration; text, contrast, and assets are verified in rendered output.
+- Gates: reports reflow on phones without clipping or unreadably scaled text; presentation slides fit 1920x1080; narrative, text, contrast, and assets are verified in rendered output.
 
 ## Modes
 
@@ -33,6 +33,23 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual e
 | `new` | Content must become a new deck | Narrative, thesis, composition, build, render QA | HTML deck |
 | `convert` | PowerPoint or outline must become HTML | Extract, normalize, restyle, verify | HTML deck plus source map |
 | `enhance` | Existing deck needs visual or structural repair | Audit, rank, smallest change, verify | Revised deck |
+| `report` | Reading-first report with PPT-like pages, including phone readers | Wabi-Press, Maple Mono NF CN, responsive flow, rendered QA | Self-contained HTML report |
+
+## Report contract
+
+For reading-first reports, choose `report` even when the user describes the result
+as PPT-like. Read [references/html-report.md](references/html-report.md) and use
+[assets/report.html](assets/report.html) with [assets/report.css](assets/report.css).
+Use Wabi-Press and Maple Mono NF CN across all text roles unless the user
+explicitly overrides them. Retain logical pages, visible page numbers and
+navigation on desktop and mobile. Use natural page height and a single column
+on phones; never shrink a desktop stage to simulate mobile support. Body text
+is 1.125rem (18px at the normal root), captions at least 1rem, with 1.8 body
+line-height and 44px touch targets. Embed the font for portable offline delivery;
+declaring the family or relying on local installation is insufficient.
+
+The fixed-stage contract and presentation references below apply to `new`,
+`convert` and `enhance`. They do not override report geometry or typography.
 
 ## Fixed-stage contract
 
@@ -108,14 +125,18 @@ interactive demos optional and provide a static fallback.
 
 ### 7. Verify every slide
 
-Render all slides at 1920x1080. Check overflow, clipping, font fallback, contrast,
+For reports, render at 320, 375, 390, 768, 1280 and 1920 CSS pixels wide and
+check text enlargement, navigation, font delivery and print using the report
+reference. For presentations, render all slides at 1920x1080.
+Check overflow, clipping, font fallback, contrast,
 image crop, alignment, page numbers, and source notes. Export a PDF or PNG set
 when the delivery requires it and inspect the export, not only the browser.
 
 ## Quality gates
 
 - [ ] The deck has one thesis and a clear claim sequence.
-- [ ] Every slide advances the argument and fits the stage without clipping.
+- [ ] Every page advances the argument; reports reflow and presentations fit the stage without clipping.
+- [ ] Reports use Wabi-Press and Maple Mono NF CN, with verified phone typography and offline font delivery or an explicitly reported font limitation.
 - [ ] Type, contrast, and measure are readable at presentation distance.
 - [ ] Color roles are consistent; the accent marks one signal.
 - [ ] Assets are local, licensed, and correctly cropped.
@@ -141,6 +162,8 @@ For `convert`, also return a source-to-slide map and list any content that could
 not be preserved.
 
 ## References
+
+- `references/html-report.md` - report-only design, fonts, mobile layout and verification; overrides fixed-stage reference geometry.
 
 - `references/frontend-slides-guide.md` - detailed mode workflows, layout rules, image pipeline, and editing guidance.
 - `DESIGN_SYSTEM.md` - deck design system and quality gate.

@@ -27,8 +27,12 @@ def check(label: str, ok: bool, detail: str, *, warning: bool = False) -> bool:
 
 
 def main() -> int:
+    if len(sys.argv) == 3 and sys.argv[2] == "--report":
+        from report_audit import audit
+        return audit(Path(sys.argv[1]))
+
     if len(sys.argv) != 2:
-        print("Usage: python scripts/quality_audit.py path/to/deck.html")
+        print("Usage: python scripts/quality_audit.py path/to/deck.html [--report]")
         return 2
 
     path = Path(sys.argv[1])
@@ -42,10 +46,10 @@ def main() -> int:
 
     print(f"\nFrontend Slides quality audit: {path}\n")
 
-    def require(label: str, pattern: str, detail: str, flags: int = re.I) -> None:
+    def require(label: str, pattern: str, detail: str, flags: int = re.I, *, warning: bool = False) -> None:
         nonlocal failures
         ok = re.search(pattern, html, flags) is not None
-        if not check(label, ok, detail if ok else f"missing: {detail}"):
+        if not check(label, ok, detail if ok else f"missing: {detail}", warning=warning):
             failures += 1
 
     require("Fixed stage", r"\.deck-stage\s*\{[^}]*width\s*:\s*1920px[^}]*height\s*:\s*1080px", "1920px × 1080px stage")

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#F5F3EC">
+  <title>阅读体验研究报告</title>
+  <link rel="stylesheet" href="report.css">
+</head>
+<body>
+  <nav class="report-contents" id="contents" aria-label="报告目录">
+    <strong>阅读体验研究报告</strong>
+    <ol>
+      <li><a href="#page-1">阅读原则</a></li>
+      <li><a href="#page-2">设备对照</a></li>
+      <li><a href="#page-3">交付检查</a></li>
+    </ol>
+  </nav>
+  <main class="report-pages">
+    <section class="report-page" id="page-1" aria-labelledby="title-1" tabindex="-1">
+      <p class="report-meta">阅读研究 / 01</p>
+      <h1 id="title-1">让内容随屏幕展开，让阅读保持从容。</h1>
+      <div class="report-grid">
+        <div>
+          <h2>每一页承载一个观点</h2>
+          <p>报告保留清晰的页序、标题与证据。宽屏通过留白和疏密建立演示节奏，窄屏通过自然换行和纵向排列维持阅读顺序。</p>
+        </div>
+        <div>
+          <h2>手机上的字应当直接可读</h2>
+          <p>正文使用舒展的行距，说明与来源也保持可读字号。较长的内容允许页面自然延伸，读者无需放大整张幻灯片寻找细节。</p>
+          <blockquote>留白服务于理解；页面高度服务于内容。</blockquote>
+        </div>
+      </div>
+      <aside class="report-sources" aria-label="本页来源">
+        <p>参考：<a href="https://www.w3.org/WAI/WCAG22/Understanding/reflow.html">WCAG 2.2：内容重排</a></p>
+      </aside>
+      <nav class="report-nav" aria-label="第 1 页导航">
+        <a href="#contents">返回目录</a><span>01 / 03</span><a href="#page-2">下一页 →</a>
+      </nav>
+    </section>
+    <section class="report-page" id="page-2" aria-labelledby="title-2" tabindex="-1">
+      <p class="report-meta">设备对照 / 02</p>
+      <h2 id="title-2">布局可以改变，信息应当完整。</h2>
+      <p>多列内容在窄屏中按原有顺序排列。确实需要横向对照的表格在自己的区域内滚动，保留列之间的关系。</p>
+      <div class="report-scroll" role="region" aria-label="设备阅读方式对照，可横向滚动" tabindex="0">
+        <table>
+          <caption>不同屏幕下的报告阅读方式</caption>
+          <thead><tr><th scope="col">维度</th><th scope="col">手机</th><th scope="col">桌面</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">阅读顺序</th><td>单列自然滚动</td><td>有主次的分栏</td></tr>
+            <tr><th scope="row">页面高度</th><td>跟随内容增长</td><td>保留演示留白并允许增长</td></tr>
+            <tr><th scope="row">操作方式</th><td>目录与页间链接</td><td>链接与键盘导航</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <aside class="report-sources" aria-label="本页来源">
+        <p>参考：<a href="https://www.w3.org/WAI/WCAG22/Understanding/resize-text.html">WCAG 2.2：调整文字大小</a></p>
+      </aside>
+      <nav class="report-nav" aria-label="第 2 页导航">
+        <a href="#page-1">← 上一页</a><span>02 / 03</span><a href="#page-3">下一页 →</a>
+      </nav>
+    </section>
+    <section class="report-page" id="page-3" aria-labelledby="title-3" tabindex="-1">
+      <p class="report-meta">交付检查 / 03</p>
+      <h2 id="title-3">以实际阅读结果作为完成标准。</h2>
+      <ul>
+        <li>检查中文、数字与标点的字体是否正确。</li>
+        <li>检查手机上的标题换行、正文、表格与来源。</li>
+        <li>检查离线打开、键盘访问和打印后的内容完整性。</li>
+      </ul>
+      <aside class="report-sources" aria-label="本页来源">
+        <p>字体来源：<a href="https://github.com/subframe7536/maple-font">Maple Font 官方项目</a>。</p>
+      </aside>
+      <nav class="report-nav" aria-label="第 3 页导航">
+        <a href="#page-2">← 上一页</a><span>03 / 03</span><a href="#contents">返回目录</a>
+      </nav>
+    </section>
+  </main>
+</body>
+</html>
