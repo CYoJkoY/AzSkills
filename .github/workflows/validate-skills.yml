@@ -13,6 +13,7 @@ on:
       - "THIRD_PARTY_NOTICES.md"
       - ".github/ISSUE_TEMPLATE/**"
       - "scripts/**"
+      - "integrations/**"
       - "README.md"
       - "assets/**"
       - "resume-evidence-workflow/assets/**"
@@ -44,3 +45,13 @@ jobs:
 
       - name: Test editable resume copy behavior
         run: node resume-evidence-workflow/tests/copy-description.test.cjs
+
+      - name: Check integration scripts syntax
+        run: |
+          node --check scripts/install-skills.mjs
+          node --check scripts/azskills-mcp.mjs
+          node --check scripts/generate-integrations.mjs
+          node --check scripts/validate-integrations.mjs
+
+      - name: Validate integration registry and guides
+        run: node scripts/validate-integrations.mjs
