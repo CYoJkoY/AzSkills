@@ -28,6 +28,10 @@ Register it as a stdio MCP server named azskills. Example configuration:
 
 Open the Claude Desktop configuration for MCP servers, paste the entry, and restart the app.
 
+## Use
+
+After the client connects, ask it to call list_skills, then read_skill with an id such as ultrathink, or search_skills with a task description. The server returns the same SKILL.md text stored in this repository.
+
 ## Verify
 
 Add the stdio server in Claude Desktop MCP settings and list AzSkills resources.

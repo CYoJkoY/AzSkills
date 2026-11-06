@@ -21,6 +21,10 @@ Install for the current user instead:
 
 Use --target to place the skill folder somewhere other than the default target. Use --dry-run first to inspect the destination.
 
+## Use
+
+Start a session in Kimi Code and describe the task. To force a specific contract, name it and its mode, for example: Use ultrathink in deep mode to challenge this design. The canonical ids and modes are listed in skills.json.
+
 ## Verify
 
 Restart Kimi Code and confirm skills are discoverable.

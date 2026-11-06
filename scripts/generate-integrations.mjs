@@ -64,6 +64,14 @@ const guide = (tool) => {
     lines.push('3. Keep the imported copy read-only and re-import after updating AzSkills.');
   }
   lines.push('');
+  lines.push('## Use');
+  lines.push('');
+  if (tool.mechanism === 'mcp') {
+    lines.push('After the client connects, ask it to call list_skills, then read_skill with an id such as ultrathink, or search_skills with a task description. The server returns the same SKILL.md text stored in this repository.');
+  } else {
+    lines.push('Start a session in ' + tool.name + ' and describe the task. To force a specific contract, name it and its mode, for example: Use ultrathink in deep mode to challenge this design. The canonical ids and modes are listed in skills.json.');
+  }
+  lines.push('');
   lines.push('## Verify');
   lines.push('');
   lines.push(tool.verify);

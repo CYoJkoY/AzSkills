@@ -28,6 +28,10 @@ Register it as a stdio MCP server named azskills. Example configuration:
 
 Use the client MCP settings to add the entry, then refresh its tool list.
 
+## Use
+
+After the client connects, ask it to call list_skills, then read_skill with an id such as ultrathink, or search_skills with a task description. The server returns the same SKILL.md text stored in this repository.
+
 ## Verify
 
 Add the MCP server in Raycast AI settings and call list_skills.
