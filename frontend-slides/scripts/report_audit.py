@@ -61,7 +61,7 @@ def audit(path: Path) -> int:
           "width=device-width" in report.viewport
           and not re.search(r"user-scalable\s*=\s*(?:no|0)|maximum-scale\s*=", report.viewport))
     for label, pattern in [
-        ("Requested font family declared", r"Maple Mono NF CN"),
+        ("Reading font role declared", r"--report-font\s*:"),
         ("Report body size token", r"--report-body\s*:\s*1\.125rem"),
         ("Caption size token", r"--report-caption\s*:\s*1rem"),
         ("Phone reflow breakpoint", r"@media[^{}]*max-width\s*:\s*48rem"),
@@ -72,6 +72,6 @@ def audit(path: Path) -> int:
         check(label, re.search(pattern, css, re.I) is not None)
     check("No fixed-stage scaling", not re.search(r"scale\s*\(|deck-stage", css, re.I))
     if not re.search(r"@font-face[^}]*url\(", css, re.I | re.S):
-        print("[WARN] No bundled/embedded font face: exact-font delivery is unverified.")
+        print("[INFO] System font stacks in use; verify fallback. Any requested exact custom font needs bundled/embedded delivery.")
     print(f"Report preflight: {'FAIL' if failures else 'PASS'}. Render every page on phone and desktop; verify actual fonts and print separately.")
     return 1 if failures else 0

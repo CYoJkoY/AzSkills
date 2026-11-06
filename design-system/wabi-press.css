@@ -694,10 +694,30 @@ html[data-surface="editorial"] {
 
   --text-primary: #1C1A17;                           /* pine-soot ink */
   --text-secondary: #524C44;                         /* 熟褐灰 body & descriptions */
-  --text-muted: #878074;                             /* faded ink, meta & footnotes */
+  --text-muted: #6E675D;                             /* readable ink, meta & footnotes */
 
   --accent-cinnabar: #A6382A;                        /* cinnabar seal · primary action */
   --accent-moss: #3B5848;                            /* patina moss · success / secondary */
+
+  /* Mineral pigments: text and line roles, never full-page decoration. */
+  --accent-indigo: #405F73;
+  --accent-ochre: #795B28;
+  --accent-clay: #855747;
+  --tint-indigo: #E4EBED;
+  --tint-ochre: #EFE7D5;
+  --tint-clay: #EEE2DA;
+  --font-reading: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-technical: "Maple Mono NF CN", var(--font-mono);
+  --reading-body: 1.125rem;
+  --reading-caption: 1rem;
+  --reading-measure: 65ch;
+  --reading-paragraph-gap: 1em;
+  --reading-heading-gap: 2em;
+  --reading-heading-after: 0.75em;
+  --reading-list-gap: 0.5em;
+  --reading-figure-gap: 1.5em;
+  --reading-caption-gap: 0.5em;
+  --reading-section-gap: clamp(2rem, 5vw, 4rem);
 
   /* [Paper geometry] */
   --radius-subtle: 2px;                              /* hand-cut paper corner */
@@ -716,27 +736,36 @@ html[data-surface="editorial"][data-theme="dark"] {
 
   --text-primary: #EDEAE2;                           /* warm rice-paper ink white */
   --text-secondary: #A39F95;                         /* faded ash */
-  --text-muted: #68645C;                             /* dark charcoal, auxiliary marks */
+  --text-muted: #AAA397;                             /* readable ash, auxiliary text */
 
-  --accent-cinnabar: #C84A3B;                        /* faintly luminous night cinnabar */
-  --accent-moss: #537B65;                            /* valley moss */
+  --accent-cinnabar: #E18C7C;                        /* faintly luminous night cinnabar */
+  --accent-moss: #9AB49E;                            /* valley moss */
+  --accent-indigo: #9EBBCB;
+  --accent-ochre: #D5B576;
+  --accent-clay: #CEA38E;
+  --tint-indigo: #253039;
+  --tint-ochre: #342F24;
+  --tint-clay: #352A27;
 }
 
 html[data-surface="editorial"],
 html[data-surface="editorial"] body {
   background: var(--bg-canvas);
   color: var(--text-secondary);
-  font-family: var(--font-sans);
-  font-size: 16px;
+  font-family: var(--font-reading);
   line-height: var(--line-height-prose);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
+html[data-surface="editorial"] { font-size: 100%; }
+html[data-surface="editorial"] body { font-size: var(--reading-body); }
+
 html[data-surface="editorial"] h1,
 html[data-surface="editorial"] h2,
 html[data-surface="editorial"] h3,
 html[data-surface="editorial"] h4 {
+  overflow-wrap: anywhere;
   font-family: var(--font-editorial);
   font-weight: 500;                                   /* medium only — no bold bloat */
   line-height: var(--line-height-display);            /* 1.2–1.35 */
@@ -748,7 +777,8 @@ html[data-surface="editorial"] h2 { font-size: 1.75rem; }
 html[data-surface="editorial"] h3 { font-size: 1.25rem; }
 
 html[data-surface="editorial"] p {
-  max-width: var(--measure-prose);                    /* 45–75ch discipline, 65ch default */
+  max-width: var(--reading-measure);
+  overflow-wrap: anywhere;
 }
 
 html[data-surface="editorial"] a {
@@ -770,15 +800,15 @@ html[data-surface="editorial"] input:focus-visible,
 html[data-surface="editorial"] select:focus-visible,
 html[data-surface="editorial"] textarea:focus-visible,
 html[data-surface="editorial"] [tabindex]:focus-visible {
-  outline: 1px solid var(--border-strong);            /* hairline ink focus, not a glow */
+  outline: 2px solid var(--accent-indigo);             /* visible ink focus */
   outline-offset: 2px;
   border-radius: var(--radius-subtle);
 }
 
-html[data-surface="editorial"] :is(code, kbd, samp, var, .mono, .meta, .meta-index, .wabi-meta-header, .kbd, .seal) {
-  font-family: var(--font-mono);
+html[data-surface="editorial"] :is(code, kbd, samp, var, .mono, .meta-index, .kbd) {
+  font-family: var(--font-technical);
   font-variant-numeric: tabular-nums;                 /* tabular figures for all technical text */
-  letter-spacing: 0.08em;
+  letter-spacing: normal;
 }
 
 html[data-surface="editorial"] ::selection {
@@ -859,9 +889,10 @@ html[data-surface="editorial"] .wabi-panel {
 
 html[data-surface="editorial"] .wabi-meta-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-2);
-  font-size: 0.75rem;
+  font-size: var(--reading-caption);
   color: var(--text-muted);
   text-transform: uppercase;
   margin-bottom: var(--space-2);
@@ -920,14 +951,16 @@ html[data-surface="editorial"] .seal--solid {
    ============================================================================ */
 
 html[data-surface="editorial"] .editorial-prose {
-  font-family: var(--font-sans);
+  overflow-wrap: anywhere;
+  font-family: var(--font-reading);
+  font-size: var(--reading-body);
   line-height: var(--line-height-prose);              /* 1.7–1.8 */
-  max-width: var(--measure-prose);
+  max-width: var(--reading-measure);
   color: var(--text-secondary);
 }
 
 html[data-surface="editorial"] .editorial-prose p + p {
-  margin-top: var(--space-2);
+  margin-top: var(--reading-paragraph-gap);
 }
 
 html[data-surface="editorial"] .editorial-prose .prose-lede {
@@ -935,6 +968,40 @@ html[data-surface="editorial"] .editorial-prose .prose-lede {
   font-size: 1.125rem;
   line-height: 1.7;
 }
+
+/* Reading rhythm: one margin owner per relationship; figures keep captions close. */
+html[data-surface="editorial"] .editorial-prose :where(p, ul, ol, dl, figure, blockquote, pre, table, h2, h3, h4) {
+  margin: 0;
+}
+html[data-surface="editorial"] .editorial-prose > * + * { margin-block-start: var(--reading-paragraph-gap); }
+html[data-surface="editorial"] .editorial-prose > :is(h2, h3, h4) { margin-block-start: var(--reading-heading-gap); }
+html[data-surface="editorial"] .editorial-prose > :is(h2, h3, h4) + * { margin-block-start: var(--reading-heading-after); }
+html[data-surface="editorial"] .editorial-prose > :first-child { margin-block-start: 0; }
+html[data-surface="editorial"] .editorial-prose :is(ul, ol) { padding-inline-start: 1.5em; }
+html[data-surface="editorial"] .editorial-prose li + li { margin-block-start: var(--reading-list-gap); }
+html[data-surface="editorial"] .editorial-prose > figure,
+html[data-surface="editorial"] .editorial-prose > figure + :where(:not(h2, h3, h4)) { margin-block-start: var(--reading-figure-gap); }
+html[data-surface="editorial"] .editorial-prose :is(img, video, svg) { display: block; max-width: 100%; height: auto; }
+html[data-surface="editorial"] .editorial-prose figcaption {
+  margin-block-start: var(--reading-caption-gap);
+  font: 400 var(--reading-caption)/1.6 var(--font-reading);
+  color: var(--text-muted);
+}
+html[data-surface="editorial"] .editorial-prose :is(p, li, a, figcaption) { overflow-wrap: anywhere; }
+html[data-surface="editorial"] .editorial-prose pre { overflow-x: auto; }
+html[data-surface="editorial"] .editorial-prose :is(code, kbd, samp) {
+  font-family: var(--font-technical);
+  letter-spacing: normal;
+}
+html[data-surface="editorial"] .editorial-prose:lang(zh) { --reading-measure: 34em; line-break: strict; }
+html[data-surface="editorial"] .wabi-note {
+  padding: 1em;
+  border-inline-start: 2px solid var(--accent-indigo);
+  background: var(--tint-indigo);
+  color: var(--text-primary);
+}
+html[data-surface="editorial"] .wabi-note--caution { border-color: var(--accent-ochre); background: var(--tint-ochre); }
+html[data-surface="editorial"] .wabi-note--context { border-color: var(--accent-clay); background: var(--tint-clay); }
 
 /* First-letter settlement · 首字沉降 */
 html[data-surface="editorial"] .editorial-prose .drop-cap::first-letter {
@@ -962,10 +1029,10 @@ html[data-surface="editorial"] .editorial-prose .pull-quote {
 html[data-surface="editorial"] .editorial-prose .pull-quote .pull-quote-cite {
   display: block;
   margin-top: var(--space-1);
-  font-family: var(--font-mono);
+  font-family: var(--font-reading);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.08em;
-  font-size: 0.75rem;
+  letter-spacing: normal;
+  font-size: var(--reading-caption);
   font-weight: 400;
   color: var(--text-muted);
 }
@@ -975,7 +1042,7 @@ html[data-surface="editorial"] .footnotes {
   margin-top: var(--space-4);
   padding-top: var(--space-2);
   border-top: 1px solid var(--border-subtle);
-  font-size: 0.8125rem;
+  font-size: var(--reading-caption);
   color: var(--text-muted);
 }
 
@@ -1006,7 +1073,7 @@ html[data-surface="editorial"] .index-rail {
 html[data-surface="editorial"] .wabi-container {
   max-width: 1088px;                                   /* 12 × 8 + generous 間 */
   margin-inline: auto;
-  padding-inline: var(--space-6);                      /* 1.5× a dense dashboard gutter */
+  padding-inline: clamp(1rem, 4vw, 3rem);                      /* 1.5× a dense dashboard gutter */
   padding-block: var(--space-8);
 }
 
@@ -1027,7 +1094,7 @@ html[data-surface="editorial"] .ma-grid .ma-6 { grid-column: span 6; }
 
 /* Section breathing: 48–80px between blocks */
 html[data-surface="editorial"] .ma-section {
-  margin-block: var(--space-6) var(--space-10);
+  margin-block: var(--reading-section-gap);
 }
 
 @media (max-width: 720px) {
@@ -1129,7 +1196,7 @@ html[data-surface="editorial"] .kbd {
   border-bottom-width: 2px;
   border-radius: var(--radius-subtle);
   background: var(--bg-surface);
-  font-size: 0.8125rem;
+  font-size: var(--reading-caption);
   color: var(--text-secondary);
 }
 
@@ -1189,10 +1256,10 @@ html[data-surface="editorial"] .wabi-input--underline:focus {
 }
 
 html[data-surface="editorial"] .wabi-input--mono {
-  font-family: var(--font-mono);
+  font-family: var(--font-technical);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.08em;
-  font-size: 0.8125rem;
+  letter-spacing: normal;
+  font-size: var(--reading-caption);
 }
 
 /* ============================================================================

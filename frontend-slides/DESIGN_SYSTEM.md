@@ -2,7 +2,7 @@
 
 This is the fixed-stage presentation system. Reading-first HTML reports use
 [references/html-report.md](references/html-report.md), with Wabi-Press,
-Maple Mono NF CN across all text roles, and responsive page geometry.
+role-based reading typography, and responsive page geometry.
 
 This document turns the skill from a collection of implementation rules into a repeatable visual-design system. Use it before writing the full deck and again during refinement. Repository-owned AzSkills presentation defaults inherit the root [`DESIGN.md`](../DESIGN.md) contract.
 
@@ -37,9 +37,12 @@ Define tokens before building repeated components.
   --color-hairline-strong: rgba(40, 36, 32, 0.25); /* active & focus ink line */
   --color-text: #1C1A17;          /* pine-soot ink */
   --color-text-secondary: #524C44;
-  --color-text-muted: #878074;
+  --color-text-muted: #6E675D;
   --color-cinnabar: #A6382A;      /* primary action / core seal */
   --color-moss: #3B5848;          /* success / secondary emphasis */
+  --color-indigo: #405F73;
+  --color-ochre: #795B28;
+  --color-clay: #855747;          /* context / secondary data */
 
   /* Editorial type stacks. */
   --font-display: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", Georgia, serif;
@@ -81,9 +84,12 @@ Define tokens before building repeated components.
   --color-hairline-strong: rgba(240, 235, 225, 0.18);
   --color-text: #EDEAE2;
   --color-text-secondary: #A39F95;
-  --color-text-muted: #68645C;
-  --color-cinnabar: #C84A3B;
-  --color-moss: #537B65;
+  --color-text-muted: #AAA397;
+  --color-cinnabar: #E18C7C;
+  --color-moss: #9AB49E;
+  --color-indigo: #9EBBCB;
+  --color-ochre: #D5B576;
+  --color-clay: #CEA38E;
 }
 ```
 

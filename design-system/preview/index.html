@@ -31,7 +31,11 @@
 .preview-is-hover{background:var(--wb-accent-hover);border-color:var(--wb-accent-hover);color:var(--wb-on-accent)}
 .preview-is-active{background:var(--wb-accent-active);border-color:var(--wb-accent-active);color:var(--wb-on-accent)}
 .preview-state-note{margin:var(--wb-space-8) 0 0;font-size:11px;color:var(--wb-text-muted)}
-.editorial-prose p{margin:0 0 var(--space-2)}
+.editorial-pigments{display:flex;flex-wrap:wrap;gap:1rem;margin-block:1.5em}
+.editorial-pigments span{border-bottom:3px solid currentColor}
+.editorial-pigments .indigo{color:var(--accent-indigo)}
+.editorial-pigments .ochre{color:var(--accent-ochre)}
+.editorial-pigments .clay{color:var(--accent-clay)}
 .preview-help{margin:var(--wb-space-4) 0 0;font-size:12px;color:var(--wb-danger)}
 .preview-is-focus{outline:2px solid var(--wb-focus);outline-offset:2px}
 .preview-empty{display:grid;gap:var(--wb-space-8);margin-top:var(--wb-space-8)}
@@ -251,8 +255,18 @@ html[data-surface="editorial"] .preview-density{display:none}
     <div class="wabi-card" style="margin-top:var(--wb-space-32)">
       <div class="wabi-meta-header"><span class="meta-index">SEC. 01</span><span>Washi surface</span><span class="meta-rule"></span><span class="seal seal-cinnabar">刊</span></div>
       <h2 style="margin:0 0 var(--space-2)">Opt-in, never the default</h2>
-      <div class="editorial-prose">
-        <p>Long-form reading benefits from a warmer canvas, a serif display stack, and a 65ch measure. A reading surface never inherits status-bar language.</p>
+      <div class="editorial-prose" lang="zh-CN">
+        <p>阅读从清晰开始。温润的纸色承载正文，宋体标题提示层次，黑体正文帮助读者连续阅读。技术标识使用等宽字体，例如 <code>data-surface="editorial"</code>。</p>
+        <p>留白表达内容之间的关系：同一观点的段落保持连贯，图片与说明靠近，新的章节保留更明确的停顿。无需依靠浅淡文字制造安静感。</p>
+        <h3>色彩帮助理解</h3>
+        <div class="editorial-pigments"><span class="indigo">Indigo / Information</span><span class="ochre">Ochre / Caution</span><span class="clay">Clay / Context</span></div>
+        <aside class="wabi-note"><strong>阅读提示：</strong>靛青标记参考信息，赭石提示需核实的内容，陶土色承载补充背景。每种含义同时有文字说明。</aside>
+        <ul><li>正文保持舒适的字号与行距。</li><li>来源和图注具有足够对比度。</li></ul>
+        <figure>
+          <svg viewBox="0 0 640 200" role="img" aria-label="阅读节奏示意：文本之后是插图，图注紧随其后"><rect width="640" height="200" fill="var(--tint-indigo)"/><path d="M40 150 Q160 25 300 100 T600 55" fill="none" stroke="var(--accent-indigo)" stroke-width="4"/></svg>
+          <figcaption>图 1 · 图注紧随图片；图片与前后正文保留更大的距离。</figcaption>
+        </figure>
+        <p>插图之后恢复正常阅读顺序。较长的中文段落、来源链接和图注在手机上自然换行，内容随文字放大而增长。</p>
         <blockquote class="pull-quote">Two layers, one system.<cite class="pull-quote-cite">DESIGN.md · Layer scope</cite></blockquote>
       </div>
       <div class="preview-row" style="margin-bottom:0">

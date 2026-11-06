@@ -16,49 +16,39 @@ No dashboard card wall, glass effects, decorative gradients, or distressed text.
 Use secondary ink for readable captions; muted palette colors are not a license
 to put low-contrast sources on paper.
 
-Use **Maple Mono NF CN** for headings, body, tables, numbers, captions, and
-navigation. Keep CJK tracking normal. Hierarchy comes from size, spacing and
-weight, rather than switching to a serif face. The report font stack is scoped
-to reports; do not change application or terminal typography.
+Use role-based typography: editorial serif headings, CJK-capable system sans
+body/navigation/captions, and mono only for code and identifiers. Maple Mono
+NF CN is optional for technical text or an explicit user font preference.
+Keep CJK tracking normal. Follow the root
+[editorial reading contract](../../DESIGN.md#editorial-reading-contract) for
+pigment roles, density and paragraph/list/figure/caption spacing. The report
+stylesheet is a standalone mapping of those tokens; keep both copies aligned.
 
 ### Font delivery
 
-A CSS family name does not deliver a font to a phone. Obtain the exact NF CN
-variant from [the official Maple Font project](https://github.com/subframe7536/maple-font),
-or reuse a verified user-supplied copy. Check the bundled family metadata,
-weights, license and Chinese coverage. Do not substitute NF-only or CN-only
-files and claim the requested variant loaded. Do not invent a CDN URL.
-
-Define `@font-face` with family `Maple Mono NF CN`, `font-display: swap`,
-and accurate weight/style descriptors. For a single HTML deliverable, embed
-licensed WOFF2/TTF bytes as data URLs and retain the license notice. For an
-explicitly accepted folder deliverable, use relative font files and include the
-license. Subset only after the final content is known, retaining its Chinese,
-Latin, numbers and punctuation; do not ship an entire multi-weight CJK archive.
-Use only the weights actually required. No runtime font CDN dependency.
-
-The starter resolves installed copies with `local()` and then falls back to
-CJK system fonts. It intentionally includes no font binary. It is a layout
-starter, not a font-complete deliverable. Replace its local-only face with the
-embedded or bundled font before final delivery. If the font cannot be obtained,
-report the fallback explicitly and mark exact-font verification incomplete.
-Wait for `document.fonts.ready`, inspect the rendered face and Chinese glyphs,
-and test with local fonts unavailable and the network offline. A declaration
-or `document.fonts.check()` alone is not proof of the rendered font.
+The starter uses local system stacks and requires no font download. Verify
+Chinese glyphs, punctuation, wrapping and font-unavailable fallback. If the user
+requires a particular face, obtain it from its official project or a verified
+user copy; check family metadata, weights, license and CJK coverage. Embed the
+licensed font in a self-contained deliverable, or bundle it for an accepted
+folder delivery. Subset only after final content is known. Keep license notices
+and avoid a runtime CDN dependency. Never claim an exact font from a family
+declaration alone: wait for document.fonts.ready and inspect rendered glyphs.
+Test offline with the requested local font unavailable and report limitations.
 
 ## Reading geometry
 
 - Keep ordered semantic sections with a title, one claim, evidence, sources and
   visible page number. A section is a logical report page, not a forced screen.
-- Use normal document flow at all widths. Desktop sections may have a 16:9-like
-  minimum height, but must grow for content. Never transform-scale the report.
+- Use normal document flow and content-driven height at all widths. A brief
+  may request presentation-like breathing room; never transform-scale a report.
 - At 48rem and below, use one column and natural height. Avoid fixed heights,
   hidden overflow, mandatory scroll snapping and absolute text positioning.
 - Preserve browser zoom and user text sizing. At a normal 16px root, body text
   is 18px on phones; captions, sources, tables and navigation are at least 16px.
   Use rem-based sizes; do not reduce the root to squeeze content into a page.
 - Use body line-height 1.8; heading line-height 1.3-1.4. Constrain prose to
-  about 32em on desktop and available width on phones. Do not insert desktop
+  65ch for Latin and 34em for Chinese on desktop and available width on phones. Do not insert desktop
   line breaks into Chinese paragraphs. Use 16-24px phone page padding.
 - Collapse grids in DOM reading order. Wrap long links and identifiers. Put
   genuinely wide tables/code in labeled, keyboard-focusable local scroll
@@ -95,7 +85,7 @@ tables, images and the final page. Verify:
 - contents/previous/next anchors, touch-sized links, keyboard focus, deep links,
   browser Back, reduced motion and navigation with JavaScript disabled;
 - font-loaded and font-unavailable states, plus offline delivery on a device
-  without Maple installed;
+  without optional custom fonts installed;
 - print preview/PDF with all sections, sources and no navigation overlay.
 
 Run `python frontend-slides/scripts/quality_audit.py path/to/report.html --report`

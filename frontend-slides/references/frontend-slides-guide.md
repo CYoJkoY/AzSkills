@@ -5,8 +5,8 @@ This reference supplies depth only. If it conflicts with the canonical frontend-
 # Frontend Slides Reference
 
 This guide covers fixed-stage presentation modes only. Reading-first HTML
-reports use [html-report.md](html-report.md); responsive geometry and Maple
-Mono NF CN replace this guide's fixed stage and typography.
+reports use [html-report.md](html-report.md); responsive geometry and role-based
+reading typography replace this guide's fixed stage and typography.
 
 Create presentation-grade, zero-dependency HTML decks that feel designed rather than generated. The default quality bar is a polished editorial or product-design artifact: clear hierarchy, deliberate composition, cohesive typography, controlled motion, and no accidental visual noise.
 
