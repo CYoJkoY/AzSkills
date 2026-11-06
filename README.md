@@ -242,7 +242,7 @@ What are you doing?
 |     +-- treatment | audit
 |
 +-- Create an HTML deck or paged report ------> frontend-slides (report for reading-first HTML)
-|     +-- new | convert | enhance
+|     +-- new | convert | enhance | report
 |
 +-- Create a rendered video ------------------> remotion-production
 |     +-- video | data | 3d | ui-showcase | motion | av
