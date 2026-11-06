@@ -439,6 +439,7 @@ The workbench contract governs interactive, repository-owned UI. It does not gov
 | Workbench and editor UI | Regions, density modes, state contract, 4px ramp, icon grid | Accent per product identity; radius 4–6px | Pill radius | — |
 | README and long-form docs | Heading hierarchy, spacing tiers, mono for technical tokens, 1px rules over shadows | Measure 65–75ch; no fixed viewport; light/dark parity via `<picture>` | Density modes (Markdown has no interactive density) | Status-bar language; keyboard badges that imply unavailable behaviour |
 | Slide decks | Type-scale discipline, spacing ramp for margins, one accent family | Fixed 1920×1080 stage; section gaps may exceed the ramp (64–120px) | — | Workbench chrome; rail and sidebar metaphor |
+| Reading-first HTML reports | Wabi-Press paper/ink palette, Maple Mono NF CN across text roles | Natural height; single column on phones; 18px body and 16px caption defaults | Desktop asymmetric composition | Fixed-stage scaling on phones; application chrome |
 | Logo and identity | Contrast discipline, single accent, grid construction | Own geometry system | 24px icon grid | Stroke weight, pill radius, UI tokens |
 | Hero and illustration art | Palette family, radius tiers, spacing rhythm | Decorative density, perspective, depth | Colour ramp values | Interactive state semantics |
 | Motion | 100–180ms state transitions, reduced-motion parity | Expressive motion for narrative surfaces | Easing tokens | Continuous decorative motion on tool surfaces |

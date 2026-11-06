@@ -1,0 +1,89 @@
+/* Wabi-Press report palette; fixed-stage presentation CSS is intentionally separate. */
+@font-face {
+  font-family: "Maple Mono NF CN";
+  src: local("Maple Mono NF CN Regular"), local("Maple Mono NF CN");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --report-canvas: #F5F3EC;
+  --report-paper: #FAF9F5;
+  --report-ink: #1C1A17;
+  --report-secondary: #524C44;
+  --report-rule: rgba(40, 36, 32, 0.25);
+  --report-accent: #A6382A;
+  --report-font: "Maple Mono NF CN", "PingFang SC", "Microsoft YaHei", monospace;
+  --report-body: 1.125rem;
+  --report-caption: 1rem;
+  --report-title: clamp(2rem, 1.4rem + 2vw, 3.5rem);
+  --report-heading: clamp(1.5rem, 1.15rem + 1vw, 2.25rem);
+  --report-padding: clamp(1rem, 4vw, 4rem);
+  color-scheme: light;
+  font-family: var(--report-font);
+  color: var(--report-ink);
+  background: var(--report-canvas);
+  line-height: 1.8;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; font-size: var(--report-body); }
+button, input, select, textarea { font: inherit; }
+a { color: var(--report-accent); text-underline-offset: .2em; }
+:focus-visible { outline: 2px solid var(--report-accent); outline-offset: 4px; }
+h1, h2, h3 { font-family: var(--report-font); font-weight: 400; line-height: 1.35; text-wrap: balance; }
+h1 { font-size: var(--report-title); }
+h2 { font-size: var(--report-heading); }
+h3 { font-size: 1.25rem; }
+p, li, dd, a, th, td { overflow-wrap: anywhere; }
+p { max-width: 32em; }
+figure { margin: 0; }
+img, svg, video { max-width: 100%; height: auto; }
+figcaption, .report-meta, .report-sources { font-size: var(--report-caption); color: var(--report-secondary); }
+.report-meta { font-variant-numeric: tabular-nums; }
+.report-contents, .report-pages { max-width: 80rem; margin-inline: auto; }
+.report-contents { padding: 1rem var(--report-padding); }
+.report-contents ol { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-left: 1.5rem; }
+.report-contents a, .report-nav a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+.report-page {
+  min-height: min(56.25vw, 54rem);
+  margin: 0 0 1.5rem;
+  padding: var(--report-padding);
+  padding-left: max(var(--report-padding), env(safe-area-inset-left));
+  padding-right: max(var(--report-padding), env(safe-area-inset-right));
+  background: var(--report-paper);
+  border-top: 1px solid var(--report-rule);
+  scroll-margin-top: 1rem;
+}
+.report-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 2rem; }
+.report-grid > * { min-width: 0; }
+.report-sources { margin-top: 2rem; border-top: 1px solid var(--report-rule); padding-top: 1rem; }
+.report-nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin-top: 2rem; font-size: var(--report-caption); }
+.report-scroll { max-width: 100%; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: var(--report-caption); }
+th, td { text-align: start; vertical-align: top; padding: .75rem; border-bottom: 1px solid var(--report-rule); }
+th { font-weight: 600; }
+blockquote { margin-inline: 0; padding-left: 1rem; border-left: 2px solid var(--report-accent); }
+
+@media screen and (max-width: 48rem) {
+  .report-grid { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .report-page { min-height: 0; margin-bottom: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+@media print {
+  @page { size: A4; margin: 15mm; }
+  :root { background: var(--report-paper); }
+  .report-contents, .report-nav { display: none; }
+  .report-page { min-height: 0; margin: 0; padding: 0; border: 0; break-before: page; }
+  .report-page:first-child { break-before: auto; }
+  .report-grid { display: block; }
+  .report-scroll { overflow: visible; }
+  table { table-layout: fixed; }
+  h1, h2, h3 { break-after: avoid; }
+  img, tr { break-inside: avoid; }
+}

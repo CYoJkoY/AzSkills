@@ -100,8 +100,8 @@
       "path": "frontend-slides/SKILL.md",
       "status": "canonical",
       "family": "production",
-      "modes": ["new", "convert", "enhance"],
-      "role": "Fixed-stage HTML presentations and deck QA.",
+      "modes": ["new", "convert", "enhance", "report"],
+      "role": "Responsive HTML reports, fixed-stage presentations, and rendered QA.",
       "composes": ["design-system", "logo-generator", "ui-motion"]
     },
     {

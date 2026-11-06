@@ -4,6 +4,10 @@ This reference supplies depth only. If it conflicts with the canonical frontend-
 
 # Frontend Slides Reference
 
+This guide covers fixed-stage presentation modes only. Reading-first HTML
+reports use [html-report.md](html-report.md); responsive geometry and Maple
+Mono NF CN replace this guide's fixed stage and typography.
+
 Create presentation-grade, zero-dependency HTML decks that feel designed rather than generated. The default quality bar is a polished editorial or product-design artifact: clear hierarchy, deliberate composition, cohesive typography, controlled motion, and no accidental visual noise.
 
 Before designing, automatically inherit [`../../design-intelligence.md`](../../design-intelligence.md). This shared layer supplies contextual style selection, semantic color and typography roles, spacing rhythm, composition, accessibility evidence, anti-pattern filtering, and the final visual-quality mindset. Motion mechanism, timing, and motion gates belong to `ui-motion`. This is automatic; the user does not need to name the external methodology.
@@ -15,7 +19,7 @@ This skill is deliberately inspired by the visual craft and fixed-stage workflow
 1. **Design system before markup** — establish a visual thesis, tokens, type pairing, spacing rhythm, contrast strategy, and component grammar before expanding the deck.
 2. **Show, don't tell** — when the aesthetic is not specified, create three genuine title-slide directions so the user can select by looking at the work.
 3. **Distinctive, contextual design** — avoid generic dashboards, repetitive card grids, purple-gradient clichés, and decoration without narrative purpose.
-4. **Fixed 16:9 stage** — every slide is authored at exactly 1920×1080 and the complete stage scales uniformly to the viewport. Never reflow slide content for phones.
+4. **Fixed 16:9 presentation stage** — in presentation modes, author slides at 1920×1080 and scale the stage uniformly. For phone-readable reports, select report mode instead.
 5. **Visual communication first** — turn structure, data, comparison, progression, and emphasis into spatial relationships before adding explanatory text.
 6. **Progressive disclosure** — read compact indexes first; load detailed template/design recipes only after a direction is selected.
 7. **Craft over accumulation** — the second pass should usually refine, simplify, align, and strengthen hierarchy instead of adding more decoration.

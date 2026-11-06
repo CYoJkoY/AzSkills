@@ -1,5 +1,9 @@
 # Frontend Slides — Design System & Quality Gate
 
+This is the fixed-stage presentation system. Reading-first HTML reports use
+[references/html-report.md](references/html-report.md), with Wabi-Press,
+Maple Mono NF CN across all text roles, and responsive page geometry.
+
 This document turns the skill from a collection of implementation rules into a repeatable visual-design system. Use it before writing the full deck and again during refinement. Repository-owned AzSkills presentation defaults inherit the root [`DESIGN.md`](../DESIGN.md) contract.
 
 ### AzSkills default visual contract

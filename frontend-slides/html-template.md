@@ -1,5 +1,9 @@
 # HTML Presentation Template
 
+For fixed-stage presentations only. Reading-first HTML reports use
+[references/html-report.md](references/html-report.md) and
+[assets/report.html](assets/report.html); do not scale this stage onto phones.
+
 Reference architecture for production-quality fixed-stage HTML presentations. Author every slide at 1920×1080 and scale the complete stage uniformly to the viewport.
 
 ## Recommended Document Shape

@@ -1,5 +1,10 @@
 # Style Presets Reference
 
+This reference covers fixed-stage presentations. HTML report mode uses
+[references/html-report.md](references/html-report.md): Wabi-Press and Maple
+Mono NF CN across all text roles. Report CSS replaces the stage scaffold
+and font pairing described below.
+
 Curated art directions for Frontend Slides. A preset is a starting point, not a template to copy mechanically. The deck's subject, audience, and visual thesis always outrank the preset.
 
 **Base scaffold:** include the complete [viewport-base.css](viewport-base.css) in every generated presentation. It supplies the fixed stage, reduced-motion, and accessibility scaffold plus the Wabi-Press default tokens; a documented direction may override palette and type without replacing the scaffold.
