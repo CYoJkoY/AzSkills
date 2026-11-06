@@ -1,8 +1,8 @@
 # Style Presets Reference
 
 This reference covers fixed-stage presentations. HTML report mode uses
-[references/html-report.md](references/html-report.md): Wabi-Press and Maple
-Mono NF CN across all text roles. Report CSS replaces the stage scaffold
+[references/html-report.md](references/html-report.md): Wabi-Press and role-based
+reading typography. Report CSS replaces the stage scaffold
 and font pairing described below.
 
 Curated art directions for Frontend Slides. A preset is a starting point, not a template to copy mechanically. The deck's subject, audience, and visual thesis always outrank the preset.
@@ -24,7 +24,7 @@ AzSkills-owned decks are subject-led. Use **Wabi-Press** as the default editoria
 - Body: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif` — line-height 1.7–1.8, measure 45–75ch (65ch default).
 - Index/meta (VOL., SEC., §, BAT., page numbers, timestamps): `"JetBrains Mono", SFMono-Regular, Menlo, monospace` with `font-variant-numeric: tabular-nums` and `letter-spacing: 0.08em`.
 
-**Signature:** one cinnabar seal accent (`#A6382A` light / `#C84A3B` dark) as the only primary mark — stamps, primary rules, and the single emphasized data series; a secondary moss role (`#3B5848` / `#537B65`) for success and tertiary emphasis; 1px hairline borders (`rgba(40, 36, 32, 0.10)` / `rgba(240, 235, 225, 0.08)`) and 0–2px hand-cut corners; `--shadow-press` (`0 1px 2px rgba(40, 36, 32, 0.04)`) as the only permitted depth; ink-absorption active states (background darkens one step + ink line deepens, never transform/bounce); `--ease-paper` reveals 240–320ms, `--ease-ink` micro feedback 120–150ms.
+**Signature:** one cinnabar seal accent (`#A6382A` light / `#E18C7C` dark) as the only primary mark — stamps, primary rules, and the single emphasized data series; a secondary moss role (`#3B5848` / `#9AB49E`) for success and tertiary emphasis; 1px hairline borders (`rgba(40, 36, 32, 0.10)` / `rgba(240, 235, 225, 0.08)`) and 0–2px hand-cut corners; `--shadow-press` (`0 1px 2px rgba(40, 36, 32, 0.04)`) as the only permitted depth; ink-absorption active states (background darkens one step + ink line deepens, never transform/bounce); `--ease-paper` reveals 240–320ms, `--ease-ink` micro feedback 120–150ms.
 
 **Best for:** every AzSkills-owned presentation by default; research, documentation, and narrative talks are especially well served.
 
@@ -33,6 +33,10 @@ AzSkills-owned decks are subject-led. Use **Wabi-Press** as the default editoria
 ### When a subject genuinely requires another direction
 
 When the user requests another direction, or the subject's evidence makes Wabi-Press incoherent (for example, a deck that must mimic an external brand the user provides), design a custom direction. In that case it is a one-off art direction for that deck: document the thesis, keep the fixed-stage and accessibility contracts, and never register it as an AzSkills preset or let it leak into owned repository surfaces.
+
+Use indigo for references, ochre for caution and clay for context, following the
+[editorial pigment roles](../DESIGN.md#pigments-and-roles). Keep paper and ink
+dominant; extra colors need a content role and a matching text label.
 
 ## Font Pairing (Wabi-Press)
 
@@ -53,9 +57,9 @@ Do not distribute colors evenly across all elements. Use semantic roles:
 - overlay / secondary block (`#ECE8DC` / `#25272D`)
 - primary ink text (`#1C1A17` / `#EDEAE2`)
 - secondary ink text (`#524C44` / `#A39F95`)
-- muted ink (`#878074` / `#68645C`)
-- cinnabar accent (`#A6382A` / `#C84A3B`)
-- moss accent (`#3B5848` / `#537B65`)
+- muted ink (`#6E675D` / `#AAA397`)
+- cinnabar accent (`#A6382A` / `#E18C7C`)
+- moss accent (`#3B5848` / `#9AB49E`)
 - status colors only when data genuinely requires them
 
 Keep the core palette at these eight roles. Cinnabar indicates action and core emphasis; it is a stamp, not a wash. Never use pure `#000000` or `#FFFFFF`.

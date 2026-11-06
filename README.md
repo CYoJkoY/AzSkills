@@ -180,7 +180,7 @@ registry is [`skills.json`](skills.json).
 | Interface | [`ui-motion`](ui-motion/SKILL.md) | build, review, audit, pattern, svg | Motion construction, review, audit, expressive patterns, and SVG. |
 | Visual | [`logo-generator`](logo-generator/SKILL.md) | mark, character, system | Logos, product marks, character marks, and identity systems. |
 | Visual | [`photo-abstract-editorial`](photo-abstract-editorial/SKILL.md) | treatment, audit | Photograph-preserving abstract editorial diptychs. |
-| Production | [`frontend-slides`](frontend-slides/SKILL.md) | new, convert, enhance, report | Responsive Wabi-Press HTML reports with Maple Mono NF CN, and fixed-stage presentations. |
+| Production | [`frontend-slides`](frontend-slides/SKILL.md) | new, convert, enhance, report | Responsive Wabi-Press HTML reports with role-based reading typography, and fixed-stage presentations. |
 | Production | [`remotion-production`](remotion-production/SKILL.md) | video, data, 3d, ui-showcase, motion, av | Deterministic programmatic video and render delivery. |
 | Publishing | [`readme-craft`](readme-craft/SKILL.md) | build, rewrite, audit | GitHub README architecture, visuals, links, and QA. |
 | Publishing | [`steam-mod-page`](steam-mod-page/SKILL.md) | player, developer, audit | Steam Workshop BBCode pages and bilingual delivery. |

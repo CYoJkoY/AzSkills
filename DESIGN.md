@@ -439,7 +439,7 @@ The workbench contract governs interactive, repository-owned UI. It does not gov
 | Workbench and editor UI | Regions, density modes, state contract, 4px ramp, icon grid | Accent per product identity; radius 4–6px | Pill radius | — |
 | README and long-form docs | Heading hierarchy, spacing tiers, mono for technical tokens, 1px rules over shadows | Measure 65–75ch; no fixed viewport; light/dark parity via `<picture>` | Density modes (Markdown has no interactive density) | Status-bar language; keyboard badges that imply unavailable behaviour |
 | Slide decks | Type-scale discipline, spacing ramp for margins, one accent family | Fixed 1920×1080 stage; section gaps may exceed the ramp (64–120px) | — | Workbench chrome; rail and sidebar metaphor |
-| Reading-first HTML reports | Wabi-Press paper/ink palette, Maple Mono NF CN across text roles | Natural height; single column on phones; 18px body and 16px caption defaults | Desktop asymmetric composition | Fixed-stage scaling on phones; application chrome |
+| Reading-first HTML reports | Wabi-Press paper/ink palette, serif headings, CJK sans body, mono code | Natural height; single column on phones; 18px body and 16px caption defaults | Desktop asymmetric composition | Fixed-stage scaling on phones; application chrome |
 | Logo and identity | Contrast discipline, single accent, grid construction | Own geometry system | 24px icon grid | Stroke weight, pill radius, UI tokens |
 | Hero and illustration art | Palette family, radius tiers, spacing rhythm | Decorative density, perspective, depth | Colour ramp values | Interactive state semantics |
 | Motion | 100–180ms state transitions, reduced-motion parity | Expressive motion for narrative surfaces | Easing tokens | Continuous decorative motion on tool surfaces |
@@ -466,7 +466,90 @@ Shared            Type stacks, the 8px editorial spacing module, measure, and ea
 - Do not add a third layer. A new surface either uses the workbench tokens, opts into the editorial layer, or is covered by the scenario matrix.
 - A terminal implementation is a render target of the workbench layer, not a CSS layer. Map the semantic roles in [Terminal colour and attributes](#terminal-colour-and-attributes); do not invent a second palette.
 - A component may reference semantic tokens from its own layer only. Cross-layer token use is drift.
-- The workbench uses a 2px focus ring. The editorial layer keeps its 1px ink line because its material rules forbid glow-like rings; both stay visible and offset.
+- Both layers use a visible 2px focus outline. Editorial focus uses solid indigo ink with a 2px offset, without glow.
+
+## Editorial reading contract
+
+Wabi-Press (侘寂刊本) values calm comprehension: paper warmth and restrained
+pigments establish character; legible text, grouping and reading order govern
+every choice. Whitespace separates ideas and keeps evidence near its claim.
+Avoid faded body text and sparse content stretched over screens. These values
+are maintained design choices, not historical pigment claims.
+
+### Pigments and roles
+
+All foregrounds below support normal text on canvas, surface and overlay in
+their matching theme (4.5:1 minimum). Tints carry primary/secondary ink;
+never assume arbitrary pigment-on-pigment combinations are readable.
+
+| Token | Light | Dark | Purpose |
+| :--- | :--- | :--- | :--- |
+| --accent-cinnabar | #A6382A | #E18C7C | Primary action, key emphasis |
+| --accent-moss | #3B5848 | #9AB49E | Positive result, supporting emphasis |
+| --accent-indigo | #405F73 | #9EBBCB | References, information, focus |
+| --accent-ochre | #795B28 | #D5B576 | Caution, uncertainty, annotation |
+| --accent-clay | #855747 | #CEA38E | Context, quotation, secondary data |
+| --text-muted | #6E675D | #AAA397 | Readable metadata and sources |
+| --tint-indigo | #E4EBED | #253039 | Information carrier |
+| --tint-ochre | #EFE7D5 | #342F24 | Caution carrier |
+| --tint-clay | #EEE2DA | #352A27 | Context carrier |
+
+Keep paper and ink dominant. Usually use one main accent plus one supporting
+pigment per section; additional pigments need meaningful data categories.
+Labels, line styles or symbols must also identify states and chart series.
+Use normal ink on tints. Decorative hairlines cannot be the only control boundary.
+
+### Typography and density
+
+- Default body: CJK-capable system sans (--font-reading), 1.125rem, 1.75-1.8
+  leading; captions and sources: at least 1rem, 1.6 leading. Keep the root at
+  the reader's default size and allow zoom. Do not shrink text to fit a page.
+- Titles: editorial serif, weight 500, 1.28-1.35 leading. Body emphasis may use
+  600-700; avoid long bold paragraphs. Use real font weights where available.
+- Code and identifiers: mono, with Maple Mono NF CN as an optional technical
+  face; normal tracking. Navigation, prose, captions and CJK labels use sans.
+  Tabular numerals help comparisons; avoid wide tracking on whole sentences.
+- Latin prose targets 45-75 characters per line, default 65ch. Chinese prose
+  uses a 34em maximum (roughly 28-36 full-width glyphs on desktop); phones use
+  available width with 16-24px gutters. Never force the desktop minimum on phones.
+- One claim per section, followed by evidence and sources. Use paragraphs for
+  connected reasoning, lists for parallel items, and tables for comparisons.
+  Long text stays in one reading column; desktop side-by-side evidence follows
+  DOM order when stacked. Avoid card walls and empty minimum-height pages.
+- Dense tables may use 1rem type and 1.5-1.6 leading with local horizontal
+  scrolling. Keep surrounding prose at body size; never compress it to fit.
+
+### Reading rhythm
+
+Apply .editorial-prose to prose containers; reports use matching rules in
+frontend-slides/assets/report.css. Relative gaps scale with reader text size.
+One relationship owns its margin, avoiding accumulated browser default margins.
+
+| Relationship | Token | Default |
+| :--- | :--- | :--- |
+| Paragraph to paragraph / adjacent blocks | --reading-paragraph-gap | 1em |
+| Previous block to subheading | --reading-heading-gap | 2em |
+| Heading to its content | --reading-heading-after | 0.75em |
+| List item to next item | --reading-list-gap | 0.5em |
+| Text to figure; figure to following text | --reading-figure-gap | 1.5em |
+| Image to its caption | --reading-caption-gap | 0.5em |
+| Section to next section | --reading-section-gap | 32-64px, fluid |
+
+Use semantic figure/figcaption, meaningful alt text and nearby source links.
+Keep captions closer to their image than surrounding prose. Preserve intrinsic
+image proportions; pair complex charts with a text summary or table. Avoid
+blank paragraphs, manual desktop line breaks and fixed-height prose containers.
+CJK text keeps normal tracking and natural wrapping.
+
+### Reading verification
+
+Check light/dark text on every shipped surface, including tints, links, captions
+and buttons. Verify 320px phones, intermediate and wide viewports, 200% text
+enlargement, long Chinese titles, font fallback, keyboard focus and print.
+Content must also survive user spacing of 1.5 line height, 2em paragraph gaps,
+0.12em letter spacing and 0.16em word spacing without clipping or loss.
+Inspect grouping and reading order, not just token declarations. Record which
+checks were actually rendered; a static audit cannot prove readability.
 
 ## External reference
 

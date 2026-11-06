@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "DESIGN.md"
+      - "scripts/check-editorial.mjs"
       - ".github/badges/**"
       - "assets/**"
       - "frontend-slides/**"
@@ -85,3 +86,4 @@ jobs:
           grep -q 'design-system/tui/preview.mjs' README.md
           grep -q 'tui/preview.mjs' design-system/SKILL.md
           node design-system/tui/preview.mjs --check
+          node scripts/check-editorial.mjs

@@ -16,9 +16,12 @@
   --hairline-strong: rgba(40, 36, 32, 0.25);
   --ink-text: #1C1A17;
   --ink-text-secondary: #524C44;
-  --ink-text-muted: #878074;
+  --ink-text-muted: #6E675D;
   --cinnabar: #A6382A;
   --moss: #3B5848;
+  --indigo: #405F73;
+  --ochre: #795B28;
+  --clay: #855747;
 
   /* Wabi-Press editorial stacks */
   --font-display: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", Georgia, serif;
@@ -40,9 +43,12 @@
   --hairline-strong: rgba(240, 235, 225, 0.18);
   --ink-text: #EDEAE2;
   --ink-text-secondary: #A39F95;
-  --ink-text-muted: #68645C;
-  --cinnabar: #C84A3B;
-  --moss: #537B65;
+  --ink-text-muted: #AAA397;
+  --cinnabar: #E18C7C;
+  --moss: #9AB49E;
+  --indigo: #9EBBCB;
+  --ochre: #D5B576;
+  --clay: #CEA38E;
 }
 
 html,
@@ -112,7 +118,7 @@ body {
     font-family: var(--font-mono, "JetBrains Mono", SFMono-Regular, Menlo, monospace);
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.08em;
-    color: var(--ink-text-muted, #878074);
+    color: var(--ink-text-muted, #6E675D);
 }
 
 img,

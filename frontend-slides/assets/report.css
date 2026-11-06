@@ -1,20 +1,53 @@
-/* Wabi-Press report palette; fixed-stage presentation CSS is intentionally separate. */
-@font-face {
-  font-family: "Maple Mono NF CN";
-  src: local("Maple Mono NF CN Regular"), local("Maple Mono NF CN");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
+/* Standalone report: editorial tokens mirror design-system/wabi-press.css. */
 :root {
-  --report-canvas: #F5F3EC;
-  --report-paper: #FAF9F5;
-  --report-ink: #1C1A17;
-  --report-secondary: #524C44;
-  --report-rule: rgba(40, 36, 32, 0.25);
-  --report-accent: #A6382A;
-  --report-font: "Maple Mono NF CN", "PingFang SC", "Microsoft YaHei", monospace;
+
+  color-scheme: light;
+
+  /* Washi tone spectrum */
+  --bg-canvas: #F5F3EC;                              /* warm washi base */
+  --bg-surface: #FAF9F5;                             /* cards & carriers */
+  --bg-overlay: #ECE8DC;                             /* overlays, hover, secondary blocks */
+  --border-subtle: rgba(40, 36, 32, 0.10);           /* 1px hairline impression */
+  --border-strong: rgba(40, 36, 32, 0.25);           /* active & focus ink line */
+
+  --text-primary: #1C1A17;                           /* pine-soot ink */
+  --text-secondary: #524C44;                         /* warm grey body & descriptions */
+  --text-muted: #6E675D;                             /* readable ink, meta & footnotes */
+
+  --accent-cinnabar: #A6382A;                        /* cinnabar seal · primary action */
+  --accent-moss: #3B5848;                            /* patina moss · success / secondary */
+
+  /* Mineral pigments: text and line roles, never full-page decoration. */
+  --accent-indigo: #405F73;
+  --accent-ochre: #795B28;
+  --accent-clay: #855747;
+  --tint-indigo: #E4EBED;
+  --tint-ochre: #EFE7D5;
+  --tint-clay: #EEE2DA;
+  --font-reading: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-technical: "Maple Mono NF CN", "JetBrains Mono", SFMono-Regular, Menlo, monospace;
+  --reading-body: 1.125rem;
+  --reading-caption: 1rem;
+  --reading-measure: 65ch;
+  --reading-paragraph-gap: 1em;
+  --reading-heading-gap: 2em;
+  --reading-heading-after: 0.75em;
+  --reading-list-gap: 0.5em;
+  --reading-figure-gap: 1.5em;
+  --reading-caption-gap: 0.5em;
+  --reading-section-gap: clamp(2rem, 5vw, 4rem);
+
+  /* [Paper geometry] */
+  --radius-subtle: 2px;                              /* hand-cut paper corner */
+  --shadow-press: 0 1px 2px rgba(40, 36, 32, 0.04);  /* near-zero paper seating */
+  --report-canvas: var(--bg-canvas);
+  --report-paper: var(--bg-surface);
+  --report-ink: var(--text-primary);
+  --report-secondary: var(--text-secondary);
+  --report-rule: var(--border-strong);
+  --report-accent: var(--accent-cinnabar);
+  --report-font: var(--font-reading);
+  --report-display: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", Georgia, serif;
   --report-body: 1.125rem;
   --report-caption: 1rem;
   --report-title: clamp(2rem, 1.4rem + 2vw, 3.5rem);
@@ -32,13 +65,28 @@ body { margin: 0; font-size: var(--report-body); }
 button, input, select, textarea { font: inherit; }
 a { color: var(--report-accent); text-underline-offset: .2em; }
 :focus-visible { outline: 2px solid var(--report-accent); outline-offset: 4px; }
-h1, h2, h3 { font-family: var(--report-font); font-weight: 400; line-height: 1.35; text-wrap: balance; }
+h1, h2, h3 { font-family: var(--report-display); font-weight: 500; line-height: 1.35; text-wrap: balance; }
 h1 { font-size: var(--report-title); }
 h2 { font-size: var(--report-heading); }
 h3 { font-size: 1.25rem; }
 p, li, dd, a, th, td { overflow-wrap: anywhere; }
-p { max-width: 32em; }
-figure { margin: 0; }
+p { max-width: var(--reading-measure); }
+/* One margin owner per reading relationship. */
+:where(p, ul, ol, dl, figure, blockquote, pre, table, h1, h2, h3) { margin: 0; }
+:where(.report-page, .report-grid > div) > * + * { margin-block-start: var(--reading-paragraph-gap); }
+:where(.report-page, .report-grid > div) > :is(h2, h3) { margin-block-start: var(--reading-heading-gap); }
+:where(.report-page, .report-grid > div) > :is(h1, h2, h3) + * { margin-block-start: var(--reading-heading-after); }
+:where(.report-page, .report-grid > div) > :first-child { margin-block-start: 0; }
+li + li { margin-block-start: var(--reading-list-gap); }
+:where(.report-page, .report-grid > div) > figure,
+:where(.report-page, .report-grid > div) > figure + :where(:not(h1, h2, h3)) { margin-block-start: var(--reading-figure-gap); }
+figure :is(img, svg, video) { display: block; }
+figcaption { margin-block-start: var(--reading-caption-gap); line-height: 1.6; }
+code, kbd, samp, pre { font-family: var(--font-technical); letter-spacing: normal; }
+:lang(zh) { --reading-measure: 34em; line-break: strict; }
+.report-note { padding: 1em; border-inline-start: 2px solid var(--accent-indigo); background: var(--tint-indigo); }
+.report-note--caution { border-color: var(--accent-ochre); background: var(--tint-ochre); }
+.report-note--context { border-color: var(--accent-clay); background: var(--tint-clay); }
 img, svg, video { max-width: 100%; height: auto; }
 figcaption, .report-meta, .report-sources { font-size: var(--report-caption); color: var(--report-secondary); }
 .report-meta { font-variant-numeric: tabular-nums; }
@@ -47,8 +95,8 @@ figcaption, .report-meta, .report-sources { font-size: var(--report-caption); co
 .report-contents ol { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-left: 1.5rem; }
 .report-contents a, .report-nav a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
 .report-page {
-  min-height: min(56.25vw, 54rem);
-  margin: 0 0 1.5rem;
+  min-height: 0;
+  margin: 0 0 var(--reading-section-gap);
   padding: var(--report-padding);
   padding-left: max(var(--report-padding), env(safe-area-inset-left));
   padding-right: max(var(--report-padding), env(safe-area-inset-right));
@@ -65,6 +113,31 @@ table { width: 100%; border-collapse: collapse; font-size: var(--report-caption)
 th, td { text-align: start; vertical-align: top; padding: .75rem; border-bottom: 1px solid var(--report-rule); }
 th { font-weight: 600; }
 blockquote { margin-inline: 0; padding-left: 1rem; border-left: 2px solid var(--report-accent); }
+
+:root[data-theme="dark"] {
+
+  color-scheme: dark;
+
+  /* Inkstone night spectrum */
+  --bg-canvas: #131416;                              /* inkstone black, never pure black */
+  --bg-surface: #1B1C20;                             /* lifted charcoal carrier */
+  --bg-overlay: #25272D;                             /* floating panels & active background */
+  --border-subtle: rgba(240, 235, 225, 0.08);        /* mica hairline */
+  --border-strong: rgba(240, 235, 225, 0.18);
+
+  --text-primary: #EDEAE2;                           /* warm rice-paper ink white */
+  --text-secondary: #A39F95;                         /* faded ash */
+  --text-muted: #AAA397;                             /* readable ash, auxiliary text */
+
+  --accent-cinnabar: #E18C7C;                        /* faintly luminous night cinnabar */
+  --accent-moss: #9AB49E;                            /* valley moss */
+  --accent-indigo: #9EBBCB;
+  --accent-ochre: #D5B576;
+  --accent-clay: #CEA38E;
+  --tint-indigo: #253039;
+  --tint-ochre: #342F24;
+  --tint-clay: #352A27;
+}
 
 @media screen and (max-width: 48rem) {
   .report-grid { grid-template-columns: minmax(0, 1fr); gap: 1rem; }

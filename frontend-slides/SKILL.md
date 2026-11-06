@@ -33,20 +33,20 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual e
 | `new` | Content must become a new deck | Narrative, thesis, composition, build, render QA | HTML deck |
 | `convert` | PowerPoint or outline must become HTML | Extract, normalize, restyle, verify | HTML deck plus source map |
 | `enhance` | Existing deck needs visual or structural repair | Audit, rank, smallest change, verify | Revised deck |
-| `report` | Reading-first report with PPT-like pages, including phone readers | Wabi-Press, Maple Mono NF CN, responsive flow, rendered QA | Self-contained HTML report |
+| `report` | Reading-first report with PPT-like pages, including phone readers | Wabi-Press, role-based typography, responsive flow, rendered QA | Self-contained HTML report |
 
 ## Report contract
 
 For reading-first reports, choose `report` even when the user describes the result
 as PPT-like. Read [references/html-report.md](references/html-report.md) and use
 [assets/report.html](assets/report.html) with [assets/report.css](assets/report.css).
-Use Wabi-Press and Maple Mono NF CN across all text roles unless the user
-explicitly overrides them. Retain logical pages, visible page numbers and
-navigation on desktop and mobile. Use natural page height and a single column
+Use Wabi-Press with serif headings, CJK-capable sans body and mono technical
+text unless the user explicitly overrides them. Retain logical pages, visible
+page numbers and navigation on desktop and mobile. Use natural page height and a single column
 on phones; never shrink a desktop stage to simulate mobile support. Body text
 is 1.125rem (18px at the normal root), captions at least 1rem, with 1.8 body
-line-height and 44px touch targets. Embed the font for portable offline delivery;
-declaring the family or relying on local installation is insufficient.
+line-height and 44px touch targets. Use verified system fallbacks; embed licensed
+custom fonts when an exact face is required for portable offline delivery.
 
 The fixed-stage contract and presentation references below apply to `new`,
 `convert` and `enhance`. They do not override report geometry or typography.
@@ -136,7 +136,7 @@ when the delivery requires it and inspect the export, not only the browser.
 
 - [ ] The deck has one thesis and a clear claim sequence.
 - [ ] Every page advances the argument; reports reflow and presentations fit the stage without clipping.
-- [ ] Reports use Wabi-Press and Maple Mono NF CN, with verified phone typography and offline font delivery or an explicitly reported font limitation.
+- [ ] Reports use Wabi-Press and role-based reading typography, with verified phone typography and offline font delivery or an explicitly reported font limitation.
 - [ ] Type, contrast, and measure are readable at presentation distance.
 - [ ] Color roles are consistent; the accent marks one signal.
 - [ ] Assets are local, licensed, and correctly cropped.

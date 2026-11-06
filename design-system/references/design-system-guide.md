@@ -236,10 +236,10 @@ Do not rewrite an external DESIGN.md merely to make it easier to consume.
 
 ### Editorial conformance (surfaces that opt into `data-surface=editorial`)
 - [ ] all colors trace to `wabi-press.css` editorial tokens; no pure `#000000`/`#FFFFFF`;
-- [ ] display type uses `--font-editorial` at weight 500; mono meta uses `tabular-nums` + `0.08em` tracking;
+- [ ] display type uses `--font-editorial` at weight 500; body and captions use CJK sans; technical text uses mono with normal tracking;
 - [ ] hierarchy uses 1px hairlines and lightness steps; the only shadow is `--shadow-press`;
 - [ ] active states use ink absorption (darken + ink line), never transform/scale/bounce;
-- [ ] prose measures hold 45–75ch (default 65ch) with 1.7–1.8 leading;
+- [ ] prose follows the [editorial reading contract](../../DESIGN.md#editorial-reading-contract), including CJK measure, readable captions, semantic pigments and figure spacing;
 - [ ] both `[data-theme]` spectra verified in `preview/index.html`;
 - [ ] reduced-motion behavior preserves state feedback.
 

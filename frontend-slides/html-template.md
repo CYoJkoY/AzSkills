@@ -27,9 +27,12 @@ Reference architecture for production-quality fixed-stage HTML presentations. Au
       --color-hairline-strong: rgba(40, 36, 32, 0.25);
       --color-text: #1C1A17;
       --color-text-secondary: #524C44;
-      --color-text-muted: #878074;
+      --color-text-muted: #6E675D;
       --color-cinnabar: #A6382A;
       --color-moss: #3B5848;
+      --color-indigo: #405F73;
+      --color-ochre: #795B28;
+      --color-clay: #855747;
       --font-display: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", Georgia, serif;
       --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --font-mono: "JetBrains Mono", SFMono-Regular, Menlo, monospace;
@@ -48,9 +51,12 @@ Reference architecture for production-quality fixed-stage HTML presentations. Au
       --color-hairline-strong: rgba(240, 235, 225, 0.18);
       --color-text: #EDEAE2;
       --color-text-secondary: #A39F95;
-      --color-text-muted: #68645C;
-      --color-cinnabar: #C84A3B;
-      --color-moss: #537B65;
+      --color-text-muted: #AAA397;
+      --color-cinnabar: #E18C7C;
+      --color-moss: #9AB49E;
+      --color-indigo: #9EBBCB;
+      --color-ochre: #D5B576;
+      --color-clay: #CEA38E;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
