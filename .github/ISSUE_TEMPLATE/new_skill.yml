@@ -139,6 +139,7 @@ body:
         - steam-mod-page
         - localization
         - resume-evidence-workflow
+        - tool-integration
         - ultrathink
         - None / Standalone
     validations:

@@ -187,6 +187,7 @@ registry is [`skills.json`](skills.json).
 | Publishing | [`steam-mod-page`](steam-mod-page/SKILL.md) | player, developer, audit | Steam Workshop BBCode pages and bilingual delivery. |
 | Publishing | [`localization`](localization/SKILL.md) | translate, audit | Game CSV localization with locale and markup safety. |
 | Career | [`resume-evidence-workflow`](resume-evidence-workflow/SKILL.md) | evidence, tailor, review | Career evidence bank, requirement-to-evidence mapping, and editable resume delivery. |
+| Operations | [`tool-integration`](tool-integration/SKILL.md) | install, configure, troubleshoot, remove | Guided AzSkills setup, verification, troubleshooting, and removal across AI clients. |
 <!-- SKILL-CATALOG:END -->
 
 ### Compatibility aliases
@@ -253,6 +254,8 @@ What are you doing?
 +-- Translate a game CSV ----------------------> localization
 +-- Build evidence and tailor a resume --------> resume-evidence-workflow
 |     +-- evidence | tailor | review
++-- Connect AzSkills to an AI client ----------> tool-integration
+|     +-- install | configure | troubleshoot | remove
 +-- Difficult or high-risk reasoning ----------> ultrathink + domain Skill
 ```
 
@@ -291,21 +294,24 @@ For AzSkills-owned interactive UI, follow [`DESIGN.md`](DESIGN.md) and use the w
 <a name="readme-connect"></a>
 ### 2. Connect a tool
 
-The connection layer installs the same contracts into a tool skill folder, or
-exposes them over MCP when a client has no documented local skill folder:
+If AzSkills is already available in your assistant, invoke tool-integration and name your client and scope, for example: "Set up AzSkills in Cursor for this project." The Skill uses the CLI wizard as the source of truth for preview, backup, install, verification, rollback, and uninstall.
 
-```bash
-node scripts/install-skills.mjs --list
-node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project
-node scripts/azskills-mcp.mjs
-```
+For first-time setup, clone the repository and start the interactive wizard:
 
-Per-tool targets, source references, verification steps, removal commands, and
-manual or MCP setup are in the [tool integration guides](integrations/README.md).
-The registry in [`integrations/tools.json`](integrations/tools.json) is the
-machine-readable source of truth. The installer writes a manifest so uninstall
-removes only AzSkills-owned paths.
+    git clone https://github.com/CYoJkoY/AzSkills.git
+    cd AzSkills
+    node scripts/install-skills.mjs
 
+The wizard prompts for client, scope, and skills (recommended set by default; search, select specific skills, or choose all). It detects candidate locations, previews filesystem changes, asks before writing, backs up managed skills, and checks that selected files are present. Use explicit flags for repeatable or non-interactive runs:
+
+    node scripts/install-skills.mjs --list
+    node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --dry-run
+    node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --skills tool-integration,architecture --yes
+    node scripts/install-skills.mjs --verify --tool cursor --mode project --project /path/to/project --skills tool-integration
+    node scripts/install-skills.mjs --rollback --target /path/to/.cursor/skills
+    node scripts/install-skills.mjs --uninstall --target /path/to/.cursor/skills
+
+The wizard automates only registered local skill-folder installs. Other clients show an explicit manual or MCP guide; their configuration is not edited unless an exact supported target is registered. Client discovery and a real skill invocation remain pending until checked inside that client. See the tool integration guides in integrations/README.md for each client's documented path, evidence, manual steps, and verification instructions. The registry in integrations/tools.json is the machine-readable source of truth. The manifest tracks AzSkills-owned skills so updates, rollback, and uninstall preserve unrelated files.
 ### 3. Select the narrowest Skill
 
 Start with the smallest capability that fully owns the requested work.

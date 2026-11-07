@@ -7,9 +7,18 @@
 | Connection | Manual import |
 | Project target | Import or attach SKILL.md in the client |
 | User target | Import or attach SKILL.md in the client |
+| Automation | manual-import |
+| Detection | manual |
+| Verification stages | manual-import → client-discovery → invocation |
 | Source | https://github.com/UNLINEARITY/dsh-code |
 
 ## Install
+
+For an interactive setup, run the guided wizard from the AzSkills checkout:
+
+    node scripts/install-skills.mjs
+
+The wizard detects candidate target directories, asks for user or project scope, lets you choose recommended skills or search the canonical catalog, and previews changes before confirmation.
 
 This client has no verified filesystem skill folder in the repository registry. Import the canonical contract manually:
 

@@ -23,10 +23,17 @@ for (const name of names) if (!expectedNames.includes(name)) errors.push('Unexpe
 if (new Set(ids).size !== ids.length) errors.push('Tool ids are not unique');
 
 for (const tool of registry.tools) {
-  for (const key of ['id', 'name', 'mechanism', 'target', 'userTarget', 'source', 'verify']) {
+  for (const key of ['id', 'name', 'mechanism', 'target', 'userTarget', 'source', 'verify', 'automation', 'detection']) {
     if (typeof tool[key] !== 'string' || tool[key].trim() === '') errors.push(tool.name + ': missing ' + key);
   }
   if (!mechanisms.has(tool.mechanism)) errors.push(tool.name + ': unknown mechanism ' + tool.mechanism);
+  if (!['managed-copy', 'guided-mcp', 'manual-import'].includes(tool.automation)) errors.push(tool.name + ': unknown automation profile ' + tool.automation);
+  if (!['target-directory', 'manual'].includes(tool.detection)) errors.push(tool.name + ': unknown detection profile ' + tool.detection);
+  if (!Array.isArray(tool.verification) || tool.verification.length !== 3) errors.push(tool.name + ': verification must declare three stages');
+  if (tool.configTarget !== null) errors.push(tool.name + ': automatic configuration target requires a dedicated adapter');
+  if (['native-skills', 'shared-skills'].includes(tool.mechanism) && (tool.automation !== 'managed-copy' || tool.detection !== 'target-directory')) errors.push(tool.name + ': inconsistent filesystem capability profile');
+  if (tool.mechanism === 'mcp' && tool.automation !== 'guided-mcp') errors.push(tool.name + ': MCP setup must be explicitly guided');
+  if (tool.mechanism === 'manual' && tool.automation !== 'manual-import') errors.push(tool.name + ': manual setup must be explicit');
   if (!tool.source.startsWith('https://')) errors.push(tool.name + ': source must be an https URL');
   if (!existsSync(path.join(root, 'integrations/guides', tool.id + '.md'))) errors.push(tool.name + ': guide is missing');
 }

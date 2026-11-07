@@ -24,6 +24,7 @@ body:
         - steam-mod-page
         - localization
         - resume-evidence-workflow
+        - tool-integration
         - ultrathink
         - application-architecture (alias)
         - frontend-architecture (alias)

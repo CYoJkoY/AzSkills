@@ -179,6 +179,7 @@ request
 | production | `frontend-slides`, `remotion-production` | Timed or staged visual production. |
 | publishing | `readme-craft`, `steam-mod-page`, `localization` | Repository, storefront, and locale delivery. |
 | career | `resume-evidence-workflow` | Career evidence, requirement alignment, and resume delivery. |
+| operations | `tool-integration` | Connect and manage AzSkills across supported AI clients. |
 
 ## Sizes and progressive disclosure
 
