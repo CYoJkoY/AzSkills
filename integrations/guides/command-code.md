@@ -7,9 +7,18 @@
 | Connection | Native skill folder |
 | Project target | .commandcode/skills |
 | User target | ~/.commandcode/skills |
+| Automation | managed-copy |
+| Detection | target-directory |
+| Verification stages | filesystem → client-discovery → invocation |
 | Source | https://github.com/vercel-labs/skills/blob/main/src/agents.ts |
 
 ## Install
+
+For an interactive setup, run the guided wizard from the AzSkills checkout:
+
+    node scripts/install-skills.mjs
+
+The wizard detects candidate target directories, asks for user or project scope, lets you choose recommended skills or search the canonical catalog, and previews changes before confirmation.
 
 From the AzSkills checkout, install into a project skill directory:
 
@@ -19,7 +28,7 @@ Install for the current user instead:
 
     node scripts/install-skills.mjs --tool command-code --mode user
 
-Use --target to place the skill folder somewhere other than the default target. Use --dry-run first to inspect the destination.
+Use --target to place the skill folder somewhere other than the default target. Use --dry-run to inspect without writing, --all-skills to install every canonical Skill, --rollback to restore the previous run, and --uninstall to remove only manifest-managed skill directories. Non-interactive writes require --yes after reviewing the preview.
 
 ## Use
 

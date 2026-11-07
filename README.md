@@ -294,32 +294,24 @@ For AzSkills-owned interactive UI, follow [`DESIGN.md`](DESIGN.md) and use the w
 <a name="readme-connect"></a>
 ### 2. Connect a tool
 
-If you already have AzSkills available in your assistant, ask: "Use tool-integration to install AzSkills in Cursor for this project." The Skill resolves the client guide and walks through preview, install, and discovery verification. It also supports MCP setup, troubleshooting, and removal.
+If AzSkills is already available in your assistant, invoke tool-integration and name your client and scope, for example: "Set up AzSkills in Cursor for this project." The Skill uses the CLI wizard as the source of truth for preview, backup, install, verification, rollback, and uninstall.
 
-For first-time setup, clone the repository and run the installer for your client:
+For first-time setup, clone the repository and start the interactive wizard:
 
-```bash
-git clone https://github.com/CYoJkoY/AzSkills.git
-cd AzSkills
-node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --dry-run
-node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project
-```
+    git clone https://github.com/CYoJkoY/AzSkills.git
+    cd AzSkills
+    node scripts/install-skills.mjs
 
-The connection layer installs the same contracts into a tool skill folder, or
-exposes them over MCP when a client has no documented local skill folder:
+The wizard prompts for client, scope, and skills (recommended set by default; search, select specific skills, or choose all). It detects candidate locations, previews filesystem changes, asks before writing, backs up managed skills, and checks that selected files are present. Use explicit flags for repeatable or non-interactive runs:
 
-```bash
-node scripts/install-skills.mjs --list
-node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project
-node scripts/azskills-mcp.mjs
-```
+    node scripts/install-skills.mjs --list
+    node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --dry-run
+    node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --skills tool-integration,architecture --yes
+    node scripts/install-skills.mjs --verify --tool cursor --mode project --project /path/to/project --skills tool-integration
+    node scripts/install-skills.mjs --rollback --target /path/to/.cursor/skills
+    node scripts/install-skills.mjs --uninstall --target /path/to/.cursor/skills
 
-Per-tool targets, source references, verification steps, removal commands, and
-manual or MCP setup are in the [tool integration guides](integrations/README.md).
-The registry in [`integrations/tools.json`](integrations/tools.json) is the
-machine-readable source of truth. The installer writes a manifest so uninstall
-removes only AzSkills-owned paths.
-
+The wizard automates only registered local skill-folder installs. Other clients show an explicit manual or MCP guide; their configuration is not edited unless an exact supported target is registered. Client discovery and a real skill invocation remain pending until checked inside that client. See the tool integration guides in integrations/README.md for each client's documented path, evidence, manual steps, and verification instructions. The registry in integrations/tools.json is the machine-readable source of truth. The manifest tracks AzSkills-owned skills so updates, rollback, and uninstall preserve unrelated files.
 ### 3. Select the narrowest Skill
 
 Start with the smallest capability that fully owns the requested work.

@@ -7,9 +7,18 @@
 | Connection | MCP server |
 | Project target | MCP server configuration |
 | User target | MCP server configuration |
+| Automation | guided-mcp |
+| Detection | manual |
+| Verification stages | mcp-connection → skill-read → invocation |
 | Source | https://modelcontextprotocol.io/docs/develop/build-server |
 
 ## Install
+
+For an interactive setup, run the guided wizard from the AzSkills checkout:
+
+    node scripts/install-skills.mjs
+
+The wizard detects candidate target directories, asks for user or project scope, lets you choose recommended skills or search the canonical catalog, and previews changes before confirmation.
 
 Run the dependency-free server from the AzSkills checkout:
 

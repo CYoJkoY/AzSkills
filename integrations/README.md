@@ -39,9 +39,16 @@ workflow is UI-based or not publicly documented for local files.
 
 ## Installer
 
+Start the interactive setup and maintenance wizard:
+
+    node scripts/install-skills.mjs
+
+Or select a client and scope explicitly:
+
     node scripts/install-skills.mjs --list
-    node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project
-    node scripts/install-skills.mjs --all --mode project --project /path/to/project
-    node scripts/install-skills.mjs --uninstall --target /path/to/project/.agents/skills
+    node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --skills ui-design,architecture --dry-run
+    node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --skills ui-design,architecture --yes
+    node scripts/install-skills.mjs --rollback --target /path/to/project/.cursor/skills --yes
+    node scripts/install-skills.mjs --uninstall --target /path/to/project/.cursor/skills --yes
 
 See [tool installers](../scripts/install-skills.mjs) and the [MCP server](../scripts/azskills-mcp.mjs).

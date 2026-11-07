@@ -55,3 +55,6 @@ jobs:
 
       - name: Validate integration registry and guides
         run: node scripts/validate-integrations.mjs
+
+      - name: Test installer lifecycle
+        run: node scripts/test-install-skills.mjs
