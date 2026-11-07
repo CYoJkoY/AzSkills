@@ -29,6 +29,7 @@ The repository-owned UI contract is documented in [`DESIGN.md`](DESIGN.md): a pr
   <a href="#readme-skills">Skills</a> ·
   <a href="#readme-choose">Choose</a> ·
   <a href="#readme-usage">Use</a> ·
+  <a href="#readme-connect">Connect</a> ·
   <a href="#readme-quality">Quality</a> ·
   <a href="#readme-contributing">Contribute</a> ·
   <a href="#readme-support">Support</a>
@@ -287,7 +288,25 @@ cd AzSkills
 
 For AzSkills-owned interactive UI, follow [`DESIGN.md`](DESIGN.md) and use the workbench tokens and primitives in [`design-system/wabi-press.css`](design-system/wabi-press.css); its historical filename is retained for compatibility. Do not force an application workbench onto slide decks, logos, editorial documents, or README illustrations. For those outputs—and for external product work without an authoritative local direction—use the visual judgment in [`design-intelligence.md`](design-intelligence.md).
 
-### 2. Select the narrowest Skill
+<a name="readme-connect"></a>
+### 2. Connect a tool
+
+The connection layer installs the same contracts into a tool skill folder, or
+exposes them over MCP when a client has no documented local skill folder:
+
+```bash
+node scripts/install-skills.mjs --list
+node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project
+node scripts/azskills-mcp.mjs
+```
+
+Per-tool targets, source references, verification steps, removal commands, and
+manual or MCP setup are in the [tool integration guides](integrations/README.md).
+The registry in [`integrations/tools.json`](integrations/tools.json) is the
+machine-readable source of truth. The installer writes a manifest so uninstall
+removes only AzSkills-owned paths.
+
+### 3. Select the narrowest Skill
 
 Start with the smallest capability that fully owns the requested work.
 
@@ -330,13 +349,13 @@ career material
 The resume paper keeps the source design. Compose with `ui-design` only when the
 editor chrome itself needs construction or a visual review.
 
-### 3. Read the contract and its references
+### 4. Read the contract and its references
 
 The contract is always the Skill directory's `SKILL.md`. Some Skills also contain reference documents, templates, assets, or specialized implementation guides.
 
 Do not assume a reference file is globally applicable. Read it only when the owning Skill points to it or the task requires it.
 
-### 4. Execute with repository context
+### 5. Execute with repository context
 
 Inspect the real project before implementing:
 
@@ -354,7 +373,7 @@ task-specific changes
 
 Preserve project-native APIs, configuration keys, defaults, component systems, and user-visible behavior unless the task explicitly changes them.
 
-### 5. Verify before returning the result
+### 6. Verify before returning the result
 
 The standard loop is:
 
