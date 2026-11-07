@@ -29,6 +29,10 @@
     "career": {
       "label": "Career",
       "purpose": "Career evidence, requirement alignment, and resume delivery."
+    },
+    "operations": {
+      "label": "Operations",
+      "purpose": "Connect and manage AzSkills across supported AI clients."
     }
   },
   "skills": [
@@ -148,6 +152,15 @@
       "modes": ["evidence", "tailor", "review"],
       "role": "Career evidence, requirement alignment, and editable resume delivery.",
       "composes": ["ui-design"]
+    },
+    {
+      "id": "tool-integration",
+      "path": "tool-integration/SKILL.md",
+      "status": "canonical",
+      "family": "operations",
+      "modes": ["install", "configure", "troubleshoot", "remove"],
+      "role": "Connect AzSkills to AI clients with verified installation and setup workflows.",
+      "composes": []
     }
   ],
   "aliases": [

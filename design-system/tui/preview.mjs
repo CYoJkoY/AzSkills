@@ -103,6 +103,13 @@ const SKILLS = [
     when: "Use when career material must become an evidence-backed application.",
     contract: "Confirmed evidence. Explicit gaps. Approved removals. Print-verified artifact.",
   },
+  {
+    name: "tool-integration",
+    group: "OPS",
+    purpose: "Connect AzSkills to supported AI clients with verified setup steps.",
+    when: "Use when installing, configuring, troubleshooting, or removing AzSkills in a client.",
+    contract: "Registry-backed mechanism. Preview writes. Verify discovery. Preserve unrelated data.",
+  },
 ];
 
 const DEFAULT_SELECTED = "ui-design";

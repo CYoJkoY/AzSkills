@@ -187,6 +187,7 @@ registry is [`skills.json`](skills.json).
 | Publishing | [`steam-mod-page`](steam-mod-page/SKILL.md) | player, developer, audit | Steam Workshop BBCode pages and bilingual delivery. |
 | Publishing | [`localization`](localization/SKILL.md) | translate, audit | Game CSV localization with locale and markup safety. |
 | Career | [`resume-evidence-workflow`](resume-evidence-workflow/SKILL.md) | evidence, tailor, review | Career evidence bank, requirement-to-evidence mapping, and editable resume delivery. |
+| Operations | [`tool-integration`](tool-integration/SKILL.md) | install, configure, troubleshoot, remove | Guided AzSkills setup, verification, troubleshooting, and removal across AI clients. |
 <!-- SKILL-CATALOG:END -->
 
 ### Compatibility aliases
@@ -253,6 +254,8 @@ What are you doing?
 +-- Translate a game CSV ----------------------> localization
 +-- Build evidence and tailor a resume --------> resume-evidence-workflow
 |     +-- evidence | tailor | review
++-- Connect AzSkills to an AI client ----------> tool-integration
+|     +-- install | configure | troubleshoot | remove
 +-- Difficult or high-risk reasoning ----------> ultrathink + domain Skill
 ```
 
@@ -290,6 +293,17 @@ For AzSkills-owned interactive UI, follow [`DESIGN.md`](DESIGN.md) and use the w
 
 <a name="readme-connect"></a>
 ### 2. Connect a tool
+
+If you already have AzSkills available in your assistant, ask: "Use tool-integration to install AzSkills in Cursor for this project." The Skill resolves the client guide and walks through preview, install, and discovery verification. It also supports MCP setup, troubleshooting, and removal.
+
+For first-time setup, clone the repository and run the installer for your client:
+
+```bash
+git clone https://github.com/CYoJkoY/AzSkills.git
+cd AzSkills
+node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --dry-run
+node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project
+```
 
 The connection layer installs the same contracts into a tool skill folder, or
 exposes them over MCP when a client has no documented local skill folder:

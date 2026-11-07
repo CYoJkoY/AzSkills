@@ -25,6 +25,7 @@ body:
         - steam-mod-page
         - localization
         - resume-evidence-workflow
+        - tool-integration
         - ultrathink
         - design-intelligence (root)
         - Compatibility alias path
