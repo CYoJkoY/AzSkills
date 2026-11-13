@@ -117,19 +117,19 @@ CJK and RTL, and narrow widths. Fix the mapping before polishing one component.
 
 ## AzSkills surfaces
 
-AzSkills owns one system with two scoped layers:
+Use the shared fallback and precedence in
+[Design Intelligence](../design-intelligence.md#default-visual-direction).
+Wabi Press is one palette with format-specific geometry:
 
-| Surface | Layer | Attribute |
+| Surface | Adaptation | Root attribute |
 | :--- | :--- | :--- |
-| Repository UI, README art, demos, slide chrome | Workbench | None |
-| Standalone long-form reading document | Editorial | `data-surface="editorial"` on `<html>` |
-| Terminal application or CLI surface | Workbench (TUI target) | None; ANSI generated at runtime |
+| Reading documents and demos | Paper/ink, reading rhythm | None; editorial remains compatible |
+| Dense tools | Same material via --wb-*; compact controls | data-surface="workbench" |
+| README art and slides | Same fallback, native format geometry | None required |
+| Terminal or CLI | Semantic roles, terminal-owned background | None; ANSI at runtime |
 
-The workbench layer is the default. The editorial layer is opt-in and does not
-provide article-level isolation inside a workbench page. Both execute from
-`wabi-press.css`; the theme controller and preview are verification surfaces.
-Do not introduce a second palette, a heavy component library, or a parallel
-visual language.
+The CSS palette applies at :root. Preserve existing paths, classes, theme API
+and aliases. Do not introduce an independent workbench palette or framework.
 
 New or changed AzSkills UI must pass the conformance gate in `DESIGN.md`: token-only
 spacing, the icon grid, explicit state layering, a non-color selection cue, and no

@@ -82,8 +82,8 @@ page breaks.
 
 State purpose, tone, constraint, and one or two signature ideas. Choose an art
 direction from the subject and audience. AzSkills-owned narrative decks use
-Wabi-Press as the default editorial direction when no stronger brief exists; it
-is a default, not a mandatory skin. Interactive chrome uses the Workbench tokens
+the [shared Wabi Press fallback](../design-intelligence.md#default-visual-direction) when no stronger brief exists; it
+is a default, not a mandatory skin. Interactive chrome uses the same paper/ink palette through --wb-* compatibility tokens
 from `DESIGN.md`.
 
 ### 3. Build the slide system

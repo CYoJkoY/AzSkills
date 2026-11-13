@@ -5,14 +5,14 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/azskills-hero-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/azskills-hero.svg">
-  <img src="assets/azskills-hero.svg" alt="AzSkills workbench overview: discover, compose, and verify reusable AI skill contracts" width="100%">
+  <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: discover, compose, and verify reusable AI skill contracts" width="100%">
 </picture>
 
 **Reusable AI Skills for real work.**
 
 Repository-local `SKILL.md` behavior contracts for engineering, architecture, frontend systems, design systems, UI quality, presentations, documentation, localization, translation, career evidence, and visual production.
 
-The repository-owned UI contract is documented in [`DESIGN.md`](DESIGN.md): a practical, VSCodium-inspired workbench model focused on compact navigation, discoverable search, technical-content readability, keyboard-first interaction, accessible states, responsive layout, and light/dark themes. The same contract has a terminal target: cell-based layout, ANSI semantic roles, ASCII fallbacks, and plain mode for logs and screen readers.
+The default visual language is **Wabi Press (侘寂刊本)**: warm paper, soot ink, cinnabar, moss, serif headings and readable CJK sans body. [`DESIGN.md`](DESIGN.md) defines one palette for reading, dense tools, README art and slides. Terminal output maps the same semantic roles while retaining native backgrounds, cell geometry, ASCII fallbacks and plain mode.
 
 <p>
   <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/CYoJkoY/AzSkills/main/.github/badges/skills.json&style=flat" alt="Skill count">
@@ -147,17 +147,17 @@ See:
 <a name="readme-design-system"></a>
 ## <img src="assets/readme/icons/visual-design.svg" width="20" height="20" alt=""> Design system
 
-AzSkills uses a **practical, workbench-oriented contract for interactive product UI**. The system takes cues from VSCodium / VS Code workbench conventions—compact navigation, content-first layout, search-led discovery, explicit selection and focus states, useful density, and keyboard access—without copying product branding or proprietary assets. It is a functional direction, not a mandatory visual skin for every artifact: README illustrations, logos, editorial documents, and slide decks should use an art direction suited to their content while respecting the repository’s accessibility and quality requirements.
+AzSkills uses **Wabi Press as the default visual direction across the library**. Paper and ink, hairline rules, restrained spacing and near-zero shadow support content-led composition. Dense tools retain navigation, search, selection, keyboard access and density; slides retain their fixed stage; documents retain natural reading flow. Explicit user direction, target-project identity and platform constraints take priority, as defined in [`design-intelligence.md`](design-intelligence.md#default-visual-direction).
 
-The workbench layer is the default. The washi editorial layer is opt-in: set `data-surface="editorial"` on the `<html>` root of a standalone reading document. A surface that relied on the older washi defaults needs that attribute to keep its treatment.
+No root attribute is needed for Wabi Press. Existing `data-surface="editorial"` pages remain compatible. Set `data-surface="workbench"` for dense tool typography; `--wb-*` colors and `.wb-*` primitives reuse the same paper/ink palette. Stylesheet paths and theme-controller APIs remain unchanged.
 
 Executable artifacts, all referenced by the contract in [`DESIGN.md`](DESIGN.md):
 
 | Artifact | Role |
 | :--- | :--- |
-| [`design-system/wabi-press.css`](design-system/wabi-press.css) | Existing stylesheet entry point, retained at its historical path; includes the current `--wb-*` workbench tokens and primitives alongside compatibility rules. `DESIGN.md` defines the current interface contract. |
+| [`design-system/wabi-press.css`](design-system/wabi-press.css) | Default Wabi Press material and reading primitives, plus compatible `--wb-*` aliases and dense tool geometry. |
 | [`design-system/wabi-press-theme.ts`](design-system/wabi-press-theme.ts) | Existing native TypeScript theme controller for explicit light/dark choice and system `prefers-color-scheme` behavior. The filename is retained for compatibility. |
-| [`design-system/preview/index.html`](design-system/preview/index.html) | Dependency-free workbench preview for skill navigation/search, selection states, theme switching, density modes, and responsive layout. |
+| [`design-system/preview/index.html`](design-system/preview/index.html) | Dependency-free Wabi Press reading preview with a dense tool adaptation, search/selection, light/dark themes, density modes and responsive layouts. |
 | [`design-system/tui/preview.mjs`](design-system/tui/preview.mjs) | Dependency-free terminal preview for 24-240 columns (CI matrix 40-160), truecolor/256/16/plain modes, keyboard states, and a `--check` conformance gate used by CI. |
 
 ---
@@ -289,7 +289,7 @@ git clone https://github.com/CYoJkoY/AzSkills.git
 cd AzSkills
 ```
 
-For AzSkills-owned interactive UI, follow [`DESIGN.md`](DESIGN.md) and use the workbench tokens and primitives in [`design-system/wabi-press.css`](design-system/wabi-press.css); its historical filename is retained for compatibility. Do not force an application workbench onto slide decks, logos, editorial documents, or README illustrations. For those outputs—and for external product work without an authoritative local direction—use the visual judgment in [`design-intelligence.md`](design-intelligence.md).
+For visual work without a stronger direction, follow the shared Wabi Press fallback in [`design-intelligence.md`](design-intelligence.md#default-visual-direction) and [`DESIGN.md`](DESIGN.md). Use [`design-system/wabi-press.css`](design-system/wabi-press.css) for default reading primitives or its compatible workbench tokens for dense tools. Adapt composition to README, slides, identity and terminal constraints.
 
 <a name="readme-connect"></a>
 ### 2. Connect a tool

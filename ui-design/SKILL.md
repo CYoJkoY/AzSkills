@@ -89,7 +89,8 @@ are components, not a page architecture.
 
 ### 4. Make the shell fit the work
 
-For technical tools and dense workflows, evaluate a workbench shell: compact
+Follow the shared fallback in [Design Intelligence](../design-intelligence.md#default-visual-direction).
+For technical tools and dense workflows, adapt the same Wabi Press palette to a workbench shell: compact
 navigation, contextual sidebar, content-first main region, optional secondary
 panel, and status feedback. Use a region only when it supports a real task.
 

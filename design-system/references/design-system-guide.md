@@ -8,22 +8,21 @@ This Skill is the boundary between external DESIGN.md systems and AzSkills. It d
 
 ## Repository-owned language
 
-AzSkills owns one system with two scoped layers. The **workbench layer** is the default for every AzSkills-owned surface; the **Wabi-Press editorial layer** is an opt-in reading surface for long-form prose. Both are documented in the root [`DESIGN.md`](../../DESIGN.md) and executed from these artifacts:
+AzSkills uses the shared [default visual direction](../../design-intelligence.md#default-visual-direction)
+and the root [DESIGN.md](../../DESIGN.md). Wabi Press material applies without
+a root attribute; `data-surface="editorial"` remains compatible.
 
-- [`wabi-press.css`](../wabi-press.css) — the complete token set: the `--wb-*` workbench palette with its accent ramp and spacing tiers, the `.wb-shell`, `.wb-sidebar`, `.wb-statusbar`, list, chip, button, and input primitives, and the `--bg-*`, `--text-*`, `--accent-cinnabar`, and `--accent-moss` washi tokens behind `html[data-surface="editorial"]`. It is the only CSS authority for AzSkills-owned surfaces.
-- [`wabi-press-theme.ts`](../wabi-press-theme.ts) — native TypeScript theme controller (`localStorage` persistence, automatic `prefers-color-scheme` response, `[data-theme]` attribute). It drives both layers.
-- [`preview/index.html`](../preview/index.html) — semantic HTML verification surface. It mounts the workbench shell by default and swaps to a standalone editorial view, so both layers, both themes, and both densities can be checked without a build step.
+- wabi-press.css owns paper/ink and reading tokens at :root, reusable .wabi-*
+  primitives, --wb-* compatibility aliases and dense .wb-* tool geometry.
+- wabi-press-theme.ts retains its existing exports, storage key and data-theme API.
+- preview/index.html opens in reading mode without a surface attribute and
+  switches to the same palette in a dense tool shell.
+- tui/preview.mjs maps material roles to ANSI; terminal font/background stay native.
 
-Layer scope is normative:
-
-| Surface | Layer | Attribute |
-|---|---|---|
-| Repository UI, README art, demos, slide chrome | Workbench | none (default) |
-| Standalone long-form reading document | Editorial | `data-surface="editorial"` on `<html>` |
-
-`data-surface` belongs on the `<html>` root of a standalone reading document, never on a tool shell or on one article inside a workbench page; the editorial layer does not provide article-level isolation. A component reads tokens from its own layer only.
-
-For AzSkills-owned visual work, apply the workbench layer by default and the editorial layer only when the deliverable is prose-first. Do not introduce a second palette, a heavy UI component library, or a JavaScript framework. The former Material 3-inspired `azskills-material-design` contract and the `style-reservoir` style catalog are retired; no parallel visual language may reappear.
+Use `data-surface="workbench"` on a dense standalone shell. Reading primitives
+also support local articles in a tool document. Keep one canonical palette;
+reports are checked against it rather than maintaining independent values.
+User direction, target identity and platform rules override the fallback.
 
 New or changed AzSkills UI must pass the conformance gate in [`DESIGN.md`](../../DESIGN.md#visual-qa): token-only spacing, the 24px icon grid, explicit state layering, a non-colour selection cue, and no horizontal overflow at 320 CSS px. A surface that fails an item is not ready for review.
 
@@ -234,7 +233,7 @@ Do not rewrite an external DESIGN.md merely to make it easier to consume.
 - [ ] interactive states remain coherent;
 - [ ] narrow, intermediate, and wide layouts inspected.
 
-### Editorial conformance (surfaces that opt into `data-surface=editorial`)
+### Wabi Press conformance (default material and reading surfaces)
 - [ ] all colors trace to `wabi-press.css` editorial tokens; no pure `#000000`/`#FFFFFF`;
 - [ ] display type uses `--font-editorial` at weight 500; body and captions use CJK sans; technical text uses mono with normal tracking;
 - [ ] hierarchy uses 1px hairlines and lightness steps; the only shadow is `--shadow-press`;

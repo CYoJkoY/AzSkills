@@ -1,19 +1,11 @@
 /* ============================================================================
    AzSkills design system
    ----------------------------------------------------------------------------
-   Two layers, one system:
-
-     :root                            workbench layer, the default surface.
-                                      Owns the --wb-* tokens and .wb-* primitives.
-     html[data-surface="editorial"]   washi editorial layer, opt-in on long-form
-                                      reading surfaces. Owns --bg-*, --border-*,
-                                      --text-*, --accent-cinnabar/moss, .wabi-*.
-     :root (shared block)             type stacks, the legacy 8px editorial
-                                      spacing module, measure, easing curves.
-
-   A component reads tokens from its own layer only. Set data-surface="editorial"
-   on the root of a standalone reading document, never on a tool shell or on one
-   article inside a workbench page. Layer scope is normative in DESIGN.md.
+   Wabi Press is the default: warm paper, soot ink, cinnabar and moss.
+   :root owns the material palette. --wb-* aliases preserve the tool API.
+   .wabi-* reading primitives work without a root attribute.
+   data-surface="workbench" selects dense tool typography; the legacy
+   data-surface="editorial" remains compatible with the reading default.
    ============================================================================ */
 
 /* ============================================================================
@@ -46,46 +38,109 @@
   --ease-ink: cubic-bezier(0.16, 1, 0.3, 1);         /* micro-interactions 120–150ms */
 }
 
+/* Wabi Press material tokens: default for every surface. */
+:root {
+  color-scheme: light;
+
+  /* [Washi tone spectrum 和纸鸟子谱] */
+  --bg-canvas: #F5F3EC;                              /* warm washi base */
+  --bg-surface: #FAF9F5;                             /* cards & carriers */
+  --bg-overlay: #ECE8DC;                             /* overlays, hover, secondary blocks */
+  --border-subtle: rgba(40, 36, 32, 0.10);           /* 1px hairline impression */
+  --border-strong: rgba(40, 36, 32, 0.25);           /* active & focus ink line */
+
+  --text-primary: #1C1A17;                           /* pine-soot ink */
+  --text-secondary: #524C44;                         /* 熟褐灰 body & descriptions */
+  --text-muted: #6E675D;                             /* readable ink, meta & footnotes */
+
+  --accent-cinnabar: #A6382A;                        /* cinnabar seal · primary action */
+  --accent-moss: #3B5848;                            /* patina moss · success / secondary */
+
+  /* Mineral pigments: text and line roles, never full-page decoration. */
+  --accent-indigo: #405F73;
+  --accent-ochre: #795B28;
+  --accent-clay: #855747;
+  --tint-indigo: #E4EBED;
+  --tint-ochre: #EFE7D5;
+  --tint-clay: #EEE2DA;
+  --font-reading: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-technical: "Maple Mono NF CN", var(--font-mono);
+  --reading-body: 1.125rem;
+  --reading-caption: 1rem;
+  --reading-measure: 65ch;
+  --reading-paragraph-gap: 1em;
+  --reading-heading-gap: 2em;
+  --reading-heading-after: 0.75em;
+  --reading-list-gap: 0.5em;
+  --reading-figure-gap: 1.5em;
+  --reading-caption-gap: 0.5em;
+  --reading-section-gap: clamp(2rem, 5vw, 4rem);
+
+  /* [Paper geometry] */
+  --radius-subtle: 2px;                              /* hand-cut paper corner */
+  --shadow-press: 0 1px 2px rgba(40, 36, 32, 0.04);  /* near-zero paper seating */
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* [Inkstone night spectrum 砚石夜墨谱] */
+  --bg-canvas: #131416;                              /* inkstone black, never pure black */
+  --bg-surface: #1B1C20;                             /* lifted charcoal carrier */
+  --bg-overlay: #25272D;                             /* floating panels & active background */
+  --border-subtle: rgba(240, 235, 225, 0.08);        /* mica hairline */
+  --border-strong: rgba(240, 235, 225, 0.18);
+
+  --text-primary: #EDEAE2;                           /* warm rice-paper ink white */
+  --text-secondary: #A39F95;                         /* faded ash */
+  --text-muted: #AAA397;                             /* readable ash, auxiliary text */
+
+  --accent-cinnabar: #E18C7C;                        /* faintly luminous night cinnabar */
+  --accent-moss: #9AB49E;                            /* valley moss */
+  --accent-indigo: #9EBBCB;
+  --accent-ochre: #D5B576;
+  --accent-clay: #CEA38E;
+  --tint-indigo: #253039;
+  --tint-ochre: #342F24;
+  --tint-clay: #352A27;
+}
+
 /* ============================================================================
-   2 · Workbench layer · default surface
+   2 · Workbench compatibility roles and tool geometry
    ============================================================================ */
 
 :root {
-  /* [Surface & text roles] */
-  --wb-canvas: #F7F8FA;
-  --wb-surface: #FFFFFF;
-  --wb-surface-subtle: #F3F4F6;
-  --wb-surface-active: #E8F0FE;
-  --wb-border: #D9DDE3;
-  --wb-border-strong: #AEB6C2;
-  --wb-text: #202124;
-  --wb-text-secondary: #5F6368;
-  --wb-text-muted: #666C78;
+  /* Compatibility roles: one paper/ink palette, tool geometry below. */
+  --wb-canvas: var(--bg-canvas);
+  --wb-surface: var(--bg-surface);
+  --wb-surface-subtle: var(--bg-overlay);
+  --wb-surface-active: var(--bg-overlay);
+  --wb-border: var(--border-subtle);
+  --wb-border-strong: var(--border-strong);
+  --wb-text: var(--text-primary);
+  --wb-text-secondary: var(--text-secondary);
+  --wb-text-muted: var(--text-muted);
+  --wb-accent: var(--accent-cinnabar);
+  --wb-accent-selected: var(--bg-overlay);
+  --wb-on-accent: var(--bg-canvas);
+  --wb-focus: var(--accent-indigo);
+  --wb-success: var(--accent-moss);
+  --wb-warning: var(--accent-ochre);
+  --wb-danger: var(--accent-cinnabar);
+  --wb-accent-hover: color-mix(in srgb, var(--accent-cinnabar) 88%, var(--text-primary));
+  --wb-accent-active: color-mix(in srgb, var(--accent-cinnabar) 78%, var(--text-primary));
 
-  /* [Accent ramp · suffix = lightness step] */
-  --wb-accent-50: #E8F0FE;
-  --wb-accent-100: #D3E3FD;
-  --wb-accent-200: #A8C7FA;
-  --wb-accent-300: #7CACF8;
-  --wb-accent-400: #4C8DF6;
-  --wb-accent-500: #1A73E8;
-  --wb-accent-600: #0B57D0;
-  --wb-accent-700: #0842A0;
-  --wb-accent-800: #062E6F;
-  --wb-accent-900: #041E49;
-
-  /* [Accent interaction states · one step per state, never a raw ramp step] */
-  --wb-accent: #0B57D0;                              /* default · step 600 */
-  --wb-accent-hover: #0842A0;                        /* hover · step 700 */
-  --wb-accent-active: #062E6F;                       /* active · step 800 */
-  --wb-accent-selected: var(--wb-accent-50);
-  --wb-on-accent: #FFFFFF;
-  --wb-focus: #0B57D0;
-
-  /* [Status roles · keep their own ramps] */
-  --wb-success: #137333;
-  --wb-warning: #8A4B00;
-  --wb-danger: #B3261E;
+  /* Legacy ramp API; components consume semantic state roles. */
+  --wb-accent-50: var(--bg-overlay);
+  --wb-accent-100: var(--border-strong);
+  --wb-accent-200: color-mix(in srgb, var(--accent-cinnabar) 20%, var(--bg-canvas));
+  --wb-accent-300: color-mix(in srgb, var(--accent-cinnabar) 30%, var(--bg-canvas));
+  --wb-accent-400: color-mix(in srgb, var(--accent-cinnabar) 40%, var(--bg-canvas));
+  --wb-accent-500: color-mix(in srgb, var(--accent-cinnabar) 50%, var(--bg-canvas));
+  --wb-accent-600: var(--wb-accent);
+  --wb-accent-700: var(--wb-accent-hover);
+  --wb-accent-800: var(--wb-accent-active);
+  --wb-accent-900: color-mix(in srgb, var(--accent-cinnabar) 90%, var(--bg-canvas));
 
   /* [Spacing ramp · Tier 1 primitive, suffix = px] */
   --wb-space-2: 2px;
@@ -114,9 +169,9 @@
   --wb-section-gap: var(--wb-space-48);
 
   /* [Radius tiers · surface role, not taste] */
-  --wb-radius-sm: 4px;
-  --wb-radius-md: 6px;
-  --wb-radius-lg: 12px;
+  --wb-radius-sm: 2px;
+  --wb-radius-md: 2px;
+  --wb-radius-lg: 2px;
   --wb-radius-pill: 999px;
 
   /* [Chrome geometry] */
@@ -126,27 +181,6 @@
   --wb-control-height: 32px;
   --wb-content-gap: var(--wb-space-16);
   --wb-transition: 140ms var(--ease-ink);
-}
-
-[data-theme="dark"] {
-  --wb-canvas: #18191C;
-  --wb-surface: #202127;
-  --wb-surface-subtle: #282A30;
-  --wb-surface-active: #263B5E;
-  --wb-border: #383B43;
-  --wb-border-strong: #555B66;
-  --wb-text: #E6E8EC;
-  --wb-text-secondary: #B4BAC4;
-  --wb-text-muted: #9299A5;
-  --wb-accent: #A8C7FA;                              /* dark remaps the accent; ramp steps stay light-theme */
-  --wb-accent-hover: #D3E3FD;
-  --wb-accent-active: #E8F0FE;
-  --wb-accent-selected: #263B5E;
-  --wb-on-accent: #18191C;
-  --wb-focus: #A8C7FA;
-  --wb-success: #81C995;
-  --wb-warning: #FDD663;
-  --wb-danger: #F2B8B5;
 }
 
 [data-density="comfortable"] {
@@ -675,81 +709,15 @@ a {
 }
 
 /* ============================================================================
-   3 · Editorial layer · opt-in washi surface
+   3 · Reading defaults and Wabi Press primitives
    ----------------------------------------------------------------------------
    Material: washi paper (和纸) + pine-soot ink (松烟墨).
    Prohibited: pure #000000, pure #FFFFFF, heavy shadows, spring/bounce motion.
    Depth comes from 1px hairline borders + background lightness steps only.
    ============================================================================ */
 
-html[data-surface="editorial"] {
-  color-scheme: light;
-
-  /* [Washi tone spectrum 和纸鸟子谱] */
-  --bg-canvas: #F5F3EC;                              /* warm washi base */
-  --bg-surface: #FAF9F5;                             /* cards & carriers */
-  --bg-overlay: #ECE8DC;                             /* overlays, hover, secondary blocks */
-  --border-subtle: rgba(40, 36, 32, 0.10);           /* 1px hairline impression */
-  --border-strong: rgba(40, 36, 32, 0.25);           /* active & focus ink line */
-
-  --text-primary: #1C1A17;                           /* pine-soot ink */
-  --text-secondary: #524C44;                         /* 熟褐灰 body & descriptions */
-  --text-muted: #6E675D;                             /* readable ink, meta & footnotes */
-
-  --accent-cinnabar: #A6382A;                        /* cinnabar seal · primary action */
-  --accent-moss: #3B5848;                            /* patina moss · success / secondary */
-
-  /* Mineral pigments: text and line roles, never full-page decoration. */
-  --accent-indigo: #405F73;
-  --accent-ochre: #795B28;
-  --accent-clay: #855747;
-  --tint-indigo: #E4EBED;
-  --tint-ochre: #EFE7D5;
-  --tint-clay: #EEE2DA;
-  --font-reading: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-  --font-technical: "Maple Mono NF CN", var(--font-mono);
-  --reading-body: 1.125rem;
-  --reading-caption: 1rem;
-  --reading-measure: 65ch;
-  --reading-paragraph-gap: 1em;
-  --reading-heading-gap: 2em;
-  --reading-heading-after: 0.75em;
-  --reading-list-gap: 0.5em;
-  --reading-figure-gap: 1.5em;
-  --reading-caption-gap: 0.5em;
-  --reading-section-gap: clamp(2rem, 5vw, 4rem);
-
-  /* [Paper geometry] */
-  --radius-subtle: 2px;                              /* hand-cut paper corner */
-  --shadow-press: 0 1px 2px rgba(40, 36, 32, 0.04);  /* near-zero paper seating */
-}
-
-html[data-surface="editorial"][data-theme="dark"] {
-  color-scheme: dark;
-
-  /* [Inkstone night spectrum 砚石夜墨谱] */
-  --bg-canvas: #131416;                              /* inkstone black, never pure black */
-  --bg-surface: #1B1C20;                             /* lifted charcoal carrier */
-  --bg-overlay: #25272D;                             /* floating panels & active background */
-  --border-subtle: rgba(240, 235, 225, 0.08);        /* mica hairline */
-  --border-strong: rgba(240, 235, 225, 0.18);
-
-  --text-primary: #EDEAE2;                           /* warm rice-paper ink white */
-  --text-secondary: #A39F95;                         /* faded ash */
-  --text-muted: #AAA397;                             /* readable ash, auxiliary text */
-
-  --accent-cinnabar: #E18C7C;                        /* faintly luminous night cinnabar */
-  --accent-moss: #9AB49E;                            /* valley moss */
-  --accent-indigo: #9EBBCB;
-  --accent-ochre: #D5B576;
-  --accent-clay: #CEA38E;
-  --tint-indigo: #253039;
-  --tint-ochre: #342F24;
-  --tint-clay: #352A27;
-}
-
-html[data-surface="editorial"],
-html[data-surface="editorial"] body {
+html:not([data-surface="workbench"]),
+html:not([data-surface="workbench"]) body {
   background: var(--bg-canvas);
   color: var(--text-secondary);
   font-family: var(--font-reading);
@@ -758,13 +726,13 @@ html[data-surface="editorial"] body {
   text-rendering: optimizeLegibility;
 }
 
-html[data-surface="editorial"] { font-size: 100%; }
-html[data-surface="editorial"] body { font-size: var(--reading-body); }
+html:not([data-surface="workbench"]) { font-size: 100%; }
+html:not([data-surface="workbench"]) body { font-size: var(--reading-body); }
 
-html[data-surface="editorial"] h1,
-html[data-surface="editorial"] h2,
-html[data-surface="editorial"] h3,
-html[data-surface="editorial"] h4 {
+html:not([data-surface="workbench"]) h1,
+html:not([data-surface="workbench"]) h2,
+html:not([data-surface="workbench"]) h3,
+html:not([data-surface="workbench"]) h4 {
   overflow-wrap: anywhere;
   font-family: var(--font-editorial);
   font-weight: 500;                                   /* medium only — no bold bloat */
@@ -772,16 +740,16 @@ html[data-surface="editorial"] h4 {
   color: var(--text-primary);
 }
 
-html[data-surface="editorial"] h1 { font-size: 2.5rem; }
-html[data-surface="editorial"] h2 { font-size: 1.75rem; }
-html[data-surface="editorial"] h3 { font-size: 1.25rem; }
+html:not([data-surface="workbench"]) h1 { font-size: 2.5rem; }
+html:not([data-surface="workbench"]) h2 { font-size: 1.75rem; }
+html:not([data-surface="workbench"]) h3 { font-size: 1.25rem; }
 
-html[data-surface="editorial"] p {
+html:not([data-surface="workbench"]) p {
   max-width: var(--reading-measure);
   overflow-wrap: anywhere;
 }
 
-html[data-surface="editorial"] a {
+html:not([data-surface="workbench"]) a {
   color: var(--accent-cinnabar);
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -790,28 +758,28 @@ html[data-surface="editorial"] a {
   transition: text-decoration-color 140ms var(--ease-ink), color 140ms var(--ease-ink);
 }
 
-html[data-surface="editorial"] a:hover {
+html:not([data-surface="workbench"]) a:hover {
   text-decoration-color: var(--accent-cinnabar);
 }
 
-html[data-surface="editorial"] a:focus-visible,
-html[data-surface="editorial"] button:focus-visible,
-html[data-surface="editorial"] input:focus-visible,
-html[data-surface="editorial"] select:focus-visible,
-html[data-surface="editorial"] textarea:focus-visible,
-html[data-surface="editorial"] [tabindex]:focus-visible {
+html:not([data-surface="workbench"]) a:focus-visible,
+html:not([data-surface="workbench"]) button:focus-visible,
+html:not([data-surface="workbench"]) input:focus-visible,
+html:not([data-surface="workbench"]) select:focus-visible,
+html:not([data-surface="workbench"]) textarea:focus-visible,
+html:not([data-surface="workbench"]) [tabindex]:focus-visible {
   outline: 2px solid var(--accent-indigo);             /* visible ink focus */
   outline-offset: 2px;
   border-radius: var(--radius-subtle);
 }
 
-html[data-surface="editorial"] :is(code, kbd, samp, var, .mono, .meta-index, .kbd) {
+html:not([data-surface="workbench"]) :is(code, kbd, samp, var, .mono, .meta-index, .kbd) {
   font-family: var(--font-technical);
   font-variant-numeric: tabular-nums;                 /* tabular figures for all technical text */
   letter-spacing: normal;
 }
 
-html[data-surface="editorial"] ::selection {
+html:not([data-surface="workbench"]) ::selection {
   background: var(--bg-overlay);
   color: var(--text-primary);
 }
@@ -820,27 +788,27 @@ html[data-surface="editorial"] ::selection {
    Chapter hairlines · 章节引线
    ============================================================================ */
 
-html[data-surface="editorial"] .hairline {
+.hairline {
   height: 1px;
   border: 0;
   background: var(--border-subtle);
 }
 
-html[data-surface="editorial"] .hairline-strong {
+.hairline-strong {
   height: 1px;
   border: 0;
   background: var(--border-strong);
 }
 
 /* Thin editorial lead-in rule prefixed by a mono marker, e.g. "SEC. 02 ─────" */
-html[data-surface="editorial"] .lead-rule {
+.lead-rule {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   margin: var(--space-6) 0 var(--space-3);
 }
 
-html[data-surface="editorial"] .lead-rule::after {
+.lead-rule::after {
   content: "";
   flex: 1;
   height: 1px;
@@ -852,7 +820,7 @@ html[data-surface="editorial"] .lead-rule::after {
    Hairline frame, 2px cut corners, faint paper seating. No heavy shadow.
    ============================================================================ */
 
-html[data-surface="editorial"] .wabi-card {
+.wabi-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-subtle);
@@ -860,22 +828,22 @@ html[data-surface="editorial"] .wabi-card {
   padding: var(--space-3);
 }
 
-html[data-surface="editorial"] .wabi-card--hoverable {
+.wabi-card--hoverable {
   transition: background 140ms var(--ease-ink), border-color 140ms var(--ease-ink);
 }
 
-html[data-surface="editorial"] .wabi-card--hoverable:hover {
+.wabi-card--hoverable:hover {
   background: var(--bg-overlay);
   border-color: var(--border-strong);
 }
 
-html[data-surface="editorial"] .wabi-card--raised {
+.wabi-card--raised {
   background: var(--bg-surface);
   border-color: var(--border-strong);
 }
 
 /* Secondary block sitting directly on the canvas (no card chrome) */
-html[data-surface="editorial"] .wabi-panel {
+.wabi-panel {
   background: var(--bg-overlay);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-subtle);
@@ -887,7 +855,7 @@ html[data-surface="editorial"] .wabi-panel {
    Monospace batch identifiers, section numbers, and seal badges.
    ============================================================================ */
 
-html[data-surface="editorial"] .wabi-meta-header {
+.wabi-meta-header {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -898,11 +866,11 @@ html[data-surface="editorial"] .wabi-meta-header {
   margin-bottom: var(--space-2);
 }
 
-html[data-surface="editorial"] .wabi-meta-header .meta-index {
+.wabi-meta-header .meta-index {
   color: var(--accent-cinnabar);
 }
 
-html[data-surface="editorial"] .wabi-meta-header .meta-rule {
+.wabi-meta-header .meta-rule {
   flex: 1;
   height: 1px;
   align-self: center;
@@ -914,7 +882,7 @@ html[data-surface="editorial"] .wabi-meta-header .meta-rule {
    Publication stamp marks in place of generic icon chips.
    ============================================================================ */
 
-html[data-surface="editorial"] .seal {
+.seal {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -931,15 +899,15 @@ html[data-surface="editorial"] .seal {
   user-select: none;
 }
 
-html[data-surface="editorial"] .seal-cinnabar {
+.seal-cinnabar {
   color: var(--accent-cinnabar);
 }
 
-html[data-surface="editorial"] .seal-moss {
+.seal-moss {
   color: var(--accent-moss);
 }
 
-html[data-surface="editorial"] .seal--solid {
+.seal--solid {
   background: var(--accent-cinnabar);
   border-color: var(--accent-cinnabar);
   color: var(--bg-canvas);
@@ -950,7 +918,7 @@ html[data-surface="editorial"] .seal--solid {
    Body measure, pull quotes, footnotes, index connectors.
    ============================================================================ */
 
-html[data-surface="editorial"] .editorial-prose {
+.editorial-prose {
   overflow-wrap: anywhere;
   font-family: var(--font-reading);
   font-size: var(--reading-body);
@@ -959,52 +927,52 @@ html[data-surface="editorial"] .editorial-prose {
   color: var(--text-secondary);
 }
 
-html[data-surface="editorial"] .editorial-prose p + p {
+.editorial-prose p + p {
   margin-top: var(--reading-paragraph-gap);
 }
 
-html[data-surface="editorial"] .editorial-prose .prose-lede {
+.editorial-prose .prose-lede {
   color: var(--text-primary);
   font-size: 1.125rem;
   line-height: 1.7;
 }
 
 /* Reading rhythm: one margin owner per relationship; figures keep captions close. */
-html[data-surface="editorial"] .editorial-prose :where(p, ul, ol, dl, figure, blockquote, pre, table, h2, h3, h4) {
+.editorial-prose :where(p, ul, ol, dl, figure, blockquote, pre, table, h2, h3, h4) {
   margin: 0;
 }
-html[data-surface="editorial"] .editorial-prose > * + * { margin-block-start: var(--reading-paragraph-gap); }
-html[data-surface="editorial"] .editorial-prose > :is(h2, h3, h4) { margin-block-start: var(--reading-heading-gap); }
-html[data-surface="editorial"] .editorial-prose > :is(h2, h3, h4) + * { margin-block-start: var(--reading-heading-after); }
-html[data-surface="editorial"] .editorial-prose > :first-child { margin-block-start: 0; }
-html[data-surface="editorial"] .editorial-prose :is(ul, ol) { padding-inline-start: 1.5em; }
-html[data-surface="editorial"] .editorial-prose li + li { margin-block-start: var(--reading-list-gap); }
-html[data-surface="editorial"] .editorial-prose > figure,
-html[data-surface="editorial"] .editorial-prose > figure + :where(:not(h2, h3, h4)) { margin-block-start: var(--reading-figure-gap); }
-html[data-surface="editorial"] .editorial-prose :is(img, video, svg) { display: block; max-width: 100%; height: auto; }
-html[data-surface="editorial"] .editorial-prose figcaption {
+.editorial-prose > * + * { margin-block-start: var(--reading-paragraph-gap); }
+.editorial-prose > :is(h2, h3, h4) { margin-block-start: var(--reading-heading-gap); }
+.editorial-prose > :is(h2, h3, h4) + * { margin-block-start: var(--reading-heading-after); }
+.editorial-prose > :first-child { margin-block-start: 0; }
+.editorial-prose :is(ul, ol) { padding-inline-start: 1.5em; }
+.editorial-prose li + li { margin-block-start: var(--reading-list-gap); }
+.editorial-prose > figure,
+.editorial-prose > figure + :where(:not(h2, h3, h4)) { margin-block-start: var(--reading-figure-gap); }
+.editorial-prose :is(img, video, svg) { display: block; max-width: 100%; height: auto; }
+.editorial-prose figcaption {
   margin-block-start: var(--reading-caption-gap);
   font: 400 var(--reading-caption)/1.6 var(--font-reading);
   color: var(--text-muted);
 }
-html[data-surface="editorial"] .editorial-prose :is(p, li, a, figcaption) { overflow-wrap: anywhere; }
-html[data-surface="editorial"] .editorial-prose pre { overflow-x: auto; }
-html[data-surface="editorial"] .editorial-prose :is(code, kbd, samp) {
+.editorial-prose :is(p, li, a, figcaption) { overflow-wrap: anywhere; }
+.editorial-prose pre { overflow-x: auto; }
+.editorial-prose :is(code, kbd, samp) {
   font-family: var(--font-technical);
   letter-spacing: normal;
 }
-html[data-surface="editorial"] .editorial-prose:lang(zh) { --reading-measure: 34em; line-break: strict; }
-html[data-surface="editorial"] .wabi-note {
+.editorial-prose:lang(zh) { --reading-measure: 34em; line-break: strict; }
+.wabi-note {
   padding: 1em;
   border-inline-start: 2px solid var(--accent-indigo);
   background: var(--tint-indigo);
   color: var(--text-primary);
 }
-html[data-surface="editorial"] .wabi-note--caution { border-color: var(--accent-ochre); background: var(--tint-ochre); }
-html[data-surface="editorial"] .wabi-note--context { border-color: var(--accent-clay); background: var(--tint-clay); }
+.wabi-note--caution { border-color: var(--accent-ochre); background: var(--tint-ochre); }
+.wabi-note--context { border-color: var(--accent-clay); background: var(--tint-clay); }
 
 /* First-letter settlement · 首字沉降 */
-html[data-surface="editorial"] .editorial-prose .drop-cap::first-letter {
+.editorial-prose .drop-cap::first-letter {
   float: left;
   font-family: var(--font-editorial);
   font-weight: 500;
@@ -1015,7 +983,7 @@ html[data-surface="editorial"] .editorial-prose .drop-cap::first-letter {
 }
 
 /* Pull quote bound by a 1px ink rule, never a box */
-html[data-surface="editorial"] .editorial-prose .pull-quote {
+.editorial-prose .pull-quote {
   margin: var(--space-4) 0;
   padding-left: var(--space-3);
   border-left: 1px solid var(--border-strong);
@@ -1026,7 +994,7 @@ html[data-surface="editorial"] .editorial-prose .pull-quote {
   color: var(--text-primary);
 }
 
-html[data-surface="editorial"] .editorial-prose .pull-quote .pull-quote-cite {
+.editorial-prose .pull-quote .pull-quote-cite {
   display: block;
   margin-top: var(--space-1);
   font-family: var(--font-reading);
@@ -1038,7 +1006,7 @@ html[data-surface="editorial"] .editorial-prose .pull-quote .pull-quote-cite {
 }
 
 /* Footnotes · 注脚 */
-html[data-surface="editorial"] .footnotes {
+.footnotes {
   margin-top: var(--space-4);
   padding-top: var(--space-2);
   border-top: 1px solid var(--border-subtle);
@@ -1046,12 +1014,12 @@ html[data-surface="editorial"] .footnotes {
   color: var(--text-muted);
 }
 
-html[data-surface="editorial"] .footnotes .footnote-ref {
+.footnotes .footnote-ref {
   color: var(--accent-cinnabar);
   margin-right: 0.5em;
 }
 
-html[data-surface="editorial"] .footnote-mark {
+.footnote-mark {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: 0.75em;
@@ -1061,7 +1029,7 @@ html[data-surface="editorial"] .footnote-mark {
 }
 
 /* Index connector column (left rail of a directory flow) */
-html[data-surface="editorial"] .index-rail {
+.index-rail {
   border-left: 1px solid var(--border-subtle);
   padding-left: var(--space-2);
 }
@@ -1070,14 +1038,14 @@ html[data-surface="editorial"] .index-rail {
    Layout & 間 — asymmetric grids and measured container
    ============================================================================ */
 
-html[data-surface="editorial"] .wabi-container {
+.wabi-container {
   max-width: 1088px;                                   /* 12 × 8 + generous 間 */
   margin-inline: auto;
   padding-inline: clamp(1rem, 4vw, 3rem);                      /* 1.5× a dense dashboard gutter */
   padding-block: var(--space-8);
 }
 
-html[data-surface="editorial"] .ma-grid {
+.ma-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: var(--space-3);
@@ -1085,23 +1053,23 @@ html[data-surface="editorial"] .ma-grid {
 }
 
 /* 5/7 golden split — index & meta rail + primary reading flow */
-html[data-surface="editorial"] .ma-grid .ma-5 { grid-column: span 5; }
-html[data-surface="editorial"] .ma-grid .ma-7 { grid-column: span 7; }
+.ma-grid .ma-5 { grid-column: span 5; }
+.ma-grid .ma-7 { grid-column: span 7; }
 
 /* 3/6/3 three-column ledger */
-html[data-surface="editorial"] .ma-grid .ma-3 { grid-column: span 3; }
-html[data-surface="editorial"] .ma-grid .ma-6 { grid-column: span 6; }
+.ma-grid .ma-3 { grid-column: span 3; }
+.ma-grid .ma-6 { grid-column: span 6; }
 
 /* Section breathing: 48–80px between blocks */
-html[data-surface="editorial"] .ma-section {
+.ma-section {
   margin-block: var(--reading-section-gap);
 }
 
 @media (max-width: 720px) {
-  html[data-surface="editorial"] .ma-grid .ma-3,
-  html[data-surface="editorial"] .ma-grid .ma-5,
-  html[data-surface="editorial"] .ma-grid .ma-6,
-  html[data-surface="editorial"] .ma-grid .ma-7 {
+  .ma-grid .ma-3,
+  .ma-grid .ma-5,
+  .ma-grid .ma-6,
+  .ma-grid .ma-7 {
     grid-column: span 12;
   }
 }
@@ -1113,7 +1081,7 @@ html[data-surface="editorial"] .ma-section {
    No transform, no scale, no bounce.
    ============================================================================ */
 
-html[data-surface="editorial"] .wabi-button {
+.wabi-button {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -1130,66 +1098,66 @@ html[data-surface="editorial"] .wabi-button {
   transition: background 140ms var(--ease-ink), border-color 140ms var(--ease-ink), color 140ms var(--ease-ink);
 }
 
-html[data-surface="editorial"] .wabi-button:hover {
+.wabi-button:hover {
   background: var(--bg-overlay);
 }
 
-html[data-surface="editorial"] .wabi-button:active {
+.wabi-button:active {
   /* ink absorption: one step darker + deepened ink line, zero bounce */
   background: var(--bg-overlay);
   border-color: var(--text-secondary);
   box-shadow: inset 0 1px 0 rgba(40, 36, 32, 0.06);
 }
 
-html[data-surface="editorial"] .wabi-button--primary {
+.wabi-button--primary {
   background: var(--accent-cinnabar);
   border-color: var(--accent-cinnabar);
   color: var(--bg-canvas);
 }
 
-html[data-surface="editorial"] .wabi-button--primary:hover {
+.wabi-button--primary:hover {
   background: color-mix(in srgb, var(--accent-cinnabar) 88%, var(--text-primary));
 }
 
-html[data-surface="editorial"] .wabi-button--primary:active {
+.wabi-button--primary:active {
   background: color-mix(in srgb, var(--accent-cinnabar) 78%, var(--text-primary));
   border-color: color-mix(in srgb, var(--accent-cinnabar) 70%, var(--text-primary));
 }
 
-html[data-surface="editorial"] .wabi-button--moss {
+.wabi-button--moss {
   background: var(--accent-moss);
   border-color: var(--accent-moss);
   color: var(--bg-canvas);
 }
 
-html[data-surface="editorial"] .wabi-button--moss:hover {
+.wabi-button--moss:hover {
   background: color-mix(in srgb, var(--accent-moss) 88%, var(--text-primary));
 }
 
-html[data-surface="editorial"] .wabi-button--moss:active {
+.wabi-button--moss:active {
   background: color-mix(in srgb, var(--accent-moss) 78%, var(--text-primary));
 }
 
-html[data-surface="editorial"] .wabi-button--ghost {
+.wabi-button--ghost {
   background: transparent;
   border-color: var(--border-subtle);
   color: var(--text-secondary);
 }
 
-html[data-surface="editorial"] .wabi-button--ghost:hover {
+.wabi-button--ghost:hover {
   background: var(--bg-overlay);
   border-color: var(--border-strong);
   color: var(--text-primary);
 }
 
-html[data-surface="editorial"] .wabi-button[disabled],
-html[data-surface="editorial"] .wabi-button:disabled {
+.wabi-button[disabled],
+.wabi-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
 /* Keyboard affordance, publication keycap */
-html[data-surface="editorial"] .kbd {
+.kbd {
   display: inline-block;
   padding: 0.05em 0.45em;
   border: 1px solid var(--border-subtle);
@@ -1200,7 +1168,7 @@ html[data-surface="editorial"] .kbd {
   color: var(--text-secondary);
 }
 
-html[data-surface="editorial"] .wabi-input {
+.wabi-input {
   width: 100%;
   max-width: 320px;
   padding: var(--space-1) 0.75em;
@@ -1214,16 +1182,16 @@ html[data-surface="editorial"] .wabi-input {
   transition: border-color 140ms var(--ease-ink), background 140ms var(--ease-ink);
 }
 
-html[data-surface="editorial"] .wabi-input::placeholder {
+.wabi-input::placeholder {
   color: var(--text-muted);
   letter-spacing: 0.02em;
 }
 
-html[data-surface="editorial"] .wabi-input:hover {
+.wabi-input:hover {
   border-color: var(--border-strong);
 }
 
-html[data-surface="editorial"] .wabi-input:focus {
+.wabi-input:focus {
   border-color: var(--border-strong);
   background: var(--bg-surface);
   box-shadow: inset 0 0 0 1px var(--border-subtle);
@@ -1232,12 +1200,12 @@ html[data-surface="editorial"] .wabi-input:focus {
 /* Pointer focus drops the ring where the UA omits :focus-visible. Text
    inputs match :focus-visible even on pointer focus in Chromium and
    Firefox, so an editorial input keeps the ink line above. */
-html[data-surface="editorial"] .wabi-input:focus:not(:focus-visible) {
+.wabi-input:focus:not(:focus-visible) {
   outline: none;
 }
 
 /* Minimal underline variant */
-html[data-surface="editorial"] .wabi-input--underline {
+.wabi-input--underline {
   padding-inline: 0.25em;
   background: transparent;
   border: 0;
@@ -1245,17 +1213,17 @@ html[data-surface="editorial"] .wabi-input--underline {
   border-radius: 0;
 }
 
-html[data-surface="editorial"] .wabi-input--underline:hover {
+.wabi-input--underline:hover {
   border-bottom-color: var(--border-strong);
   background: transparent;
 }
 
-html[data-surface="editorial"] .wabi-input--underline:focus {
+.wabi-input--underline:focus {
   box-shadow: none;
   border-bottom: 1px solid var(--border-strong);
 }
 
-html[data-surface="editorial"] .wabi-input--mono {
+.wabi-input--mono {
   font-family: var(--font-technical);
   font-variant-numeric: tabular-nums;
   letter-spacing: normal;
@@ -1266,7 +1234,7 @@ html[data-surface="editorial"] .wabi-input--mono {
    Page & surface transitions · 平缓转场
    ============================================================================ */
 
-html[data-surface="editorial"] .wabi-fade {
+.wabi-fade {
   opacity: 0;
   transform: translateY(8px);
   transition:
@@ -1274,13 +1242,13 @@ html[data-surface="editorial"] .wabi-fade {
     transform 280ms var(--ease-paper);
 }
 
-html[data-surface="editorial"] .wabi-fade.is-in {
+.wabi-fade.is-in {
   opacity: 1;
   transform: translateY(0);
 }
 
 /* Micro states (hover fills, seal stamps) ride the ink curve */
-html[data-surface="editorial"] .wabi-micro {
+.wabi-micro {
   transition:
     background 140ms var(--ease-ink),
     color 140ms var(--ease-ink),
@@ -1302,7 +1270,7 @@ html[data-surface="editorial"] .wabi-micro {
     animation-iteration-count: 1 !important;
   }
 
-  html[data-surface="editorial"] .wabi-fade {
+  .wabi-fade {
     opacity: 1;
     transform: none;
   }

@@ -1,56 +1,42 @@
 ---
-name: azskills-workbench
-description: Repository-owned interface design contract for AzSkills. A practical, VSCodium-inspired workbench system prioritizing navigation, search, dense technical content, keyboard operation, responsive layouts, and accessible states. Defines one 4px spacing ramp, one icon grid, a cell-based terminal rendering target, explicit colour-state layering, and per-surface adaptation rules so the workbench does not leak into slides, identity, or editorial output.
+name: azskills-wabi-press
+description: Repository-owned Wabi Press visual contract for AzSkills. Warm paper, soot ink, serif headings, CJK sans body and restrained pigments; reading, dense tools, slides and terminal targets retain their native geometry and accessible states.
 ---
 
-# AzSkills Workbench Design System
+# AzSkills Wabi Press Design System
 
-AzSkills uses a **workbench-first** interface model inspired by the information architecture and interaction conventions of the current VSCodium / VS Code workbench. This is a functional reference, not a pixel-level clone: do not copy product branding, icons, screenshots, or proprietary assets.
+Wabi Press (侘寂刊本) is the default visual language across AzSkills. Warm paper,
+soot ink, cinnabar, moss, hairline rules and near-zero shadow support calm,
+legible content. Serif titles establish hierarchy; CJK sans serves body text
+and labels; mono identifies code and technical metadata.
 
-The system is designed for a technical Skill library: frequent navigation, discovery, reading long instructions, comparing related capabilities, and moving between tasks. Aesthetic polish must not reduce scan speed, usable content area, keyboard access, or information density.
+Default precedence is maintained in [Design Intelligence](design-intelligence.md#default-visual-direction).
+An explicit user direction, an authoritative target-project identity or platform
+constraints take priority. Adapt composition to the task rather than copying
+application chrome into every output.
 
-The executable authority is `design-system/wabi-press.css`, `design-system/wabi-press-theme.ts`, `design-system/preview/index.html`, and `design-system/tui/preview.mjs`. These artifacts must express the same workbench contract. The stylesheet carries two layers with different scopes: the workbench layer applies by default, and the historical washi editorial layer applies only when `data-surface="editorial"` is set on the `<html>` root. See [Layer scope](#layer-scope).
+The executable authority is `design-system/wabi-press.css`, its existing theme
+controller, the HTML preview and the TUI preview. Material tokens apply at
+`:root` without a surface attribute. The `--wb-*` compatibility API maps into that
+same palette. See [Layer scope](#layer-scope).
 
 ## Visual thesis
 
-```text
-Purpose: make technical capabilities discoverable and usable with minimal navigation cost.
-Model: workbench shell + contextual navigation + focused content + optional auxiliary panel.
-Tone: quiet, precise, neutral, information-dense; functional before decorative.
-Signature: compact chrome, clear active rail, readable content canvas, keyboard-first command/search entry, persistent status feedback, and a terminal rendering that preserves the same information hierarchy.
-```
+Purpose: make technical capabilities discoverable, readable and verifiable.
+Material: paper warmth, soot ink, cinnabar emphasis and moss support.
+Signature: serif titles, measured prose, hairlines, restrained corners and space.
+Interaction: clear selection, visible focus, search and keyboard access.
+Geometry: reading rhythm for prose; compact regions for tools; fixed stages for
+slides; character cells and terminal-owned backgrounds for TUI.
 
 ## Reference provenance
 
-Two public references shape this contract. Both were studied for structure; neither contributes brand assets, copy, or proprietary graphics.
-
-```text
-VSCodium / VS Code workbench   → layout regions, navigation and search conventions, density, keyboard model.
-BioRender (biorender.com, app.biorender.com)
-                               → spacing discipline, semantic colour layering with explicit state ramps,
-                                  icon grouping semantics, and per-scenario theme adaptation.
-```
-
-Evidence levels follow the vocabulary defined in [`design-system/SKILL.md`](design-system/SKILL.md).
-
-```text
-verified-token     BioRender bright-blue 50–900 ramp; primary button background default/hover/active =
-                   blue 700/800/900; secondary hover/active = blue 50/100 background with blue 100/200 border;
-                   card border hover = blue 700; icon accent = blue 700; spacing primitives on a 4px base;
-                   three-tier token naming (primitive → grouping/molecule → organism).
-verified-prose     BioRender editor information architecture: gallery home, canvas-only export, left tool
-                   column, searchable icon library, top utility bar plus selection-contextual tools, a blue
-                   bounding box for one simple object, a purple bounding box for a grouped object with
-                   editable children, brand kits of 8 primary + 16 secondary colours with 6 fonts and 6 logos.
-implementation-choice
-                   Every value in this document. AzSkills keeps its own accent, type stack, and radii, and
-                   adopts the reference's structure - a primitive ramp, explicit semantic states, one icon
-                   grid, and a scenario matrix - rather than its palette or its layout.
-```
-
-The reference is internally inconsistent, and that inconsistency is instructive: its marketing surface runs pill buttons, 12px card radii, and generous section gaps, while its product app runs 4–6px control radii at a denser type scale. AzSkills resolves the same tension the same way: radius and spacing follow surface role, never one global value.
-
-Third-party colour aggregators disagree with the target stylesheet on the primary value (`#2571B7` and `#0373DF` both appear). Those readings are **unconfirmed** and are not used above; only values captured from the target's own CSS were adopted.
+Wabi Press is a maintained AzSkills implementation choice, not a claim about
+historical pigments. Existing repository paper/ink tokens are retained.
+VSCodium / VS Code informs tool navigation and keyboard behavior only.
+BioRender informed token layering, spacing discipline and grouped selection;
+its brand palette, logos and proprietary assets are not part of this system.
+Evidence and source reconciliation follow `design-system/SKILL.md`.
 
 ## Workbench layout
 
@@ -75,7 +61,7 @@ TUI   ANSI text. Cell grid, row-based spacing, 1-cell glyphs, reverse or bracket
       terminal-owned background and font.
 ```
 
-Render target is orthogonal to the two CSS layers. The editorial layer is a GUI reading surface; it has no TUI counterpart. A terminal implementation maps the workbench layer. It does not add a third palette or a third CSS layer.
+Render target is independent of composition. Reading and tool CSS use one palette. A terminal maps the same semantic roles while retaining its own font, background and cell grid.
 
 ## Primitive tokens
 
@@ -83,67 +69,45 @@ The CSS file is the executable source of truth. These semantic roles are normati
 
 ### Color roles
 
-```css
-:root {
-  --wb-canvas: #F7F8FA;
-  --wb-surface: #FFFFFF;
-  --wb-surface-subtle: #F3F4F6;
-  --wb-surface-active: #E8F0FE;
-  --wb-border: #D9DDE3;
-  --wb-border-strong: #AEB6C2;
-  --wb-text: #202124;
-  --wb-text-secondary: #5F6368;
-  --wb-text-muted: #666C78;
-  --wb-accent: #0B57D0;
-  --wb-accent-hover: #0842A0;
-  --wb-focus: #0B57D0;
-  --wb-success: #137333;
-  --wb-warning: #8A4B00;
-  --wb-danger: #B3261E;
-}
-[data-theme="dark"] {
-  --wb-canvas: #18191C;
-  --wb-surface: #202127;
-  --wb-surface-subtle: #282A30;
-  --wb-surface-active: #263B5E;
-  --wb-border: #383B43;
-  --wb-border-strong: #555B66;
-  --wb-text: #E6E8EC;
-  --wb-text-secondary: #B4BAC4;
-  --wb-text-muted: #9299A5;
-  --wb-accent: #A8C7FA;
-  --wb-accent-hover: #D3E3FD;
-  --wb-focus: #A8C7FA;
-  --wb-success: #81C995;
-  --wb-warning: #FDD663;
-  --wb-danger: #F2B8B5;
-}
-```
+Canonical paper, ink, pigment and reading tokens live at `:root` in
+`design-system/wabi-press.css`; `:root[data-theme="dark"]` remaps material values.
+The report template must match them. The pigment table below documents both
+themes; `scripts/check-editorial.mjs` verifies text contrast and report parity.
 
-- Use accent for primary actions, links, selected navigation, and focus. Reserve success/warning/danger for actual state.
-- Never rely on color alone: pair state with text, icon shape, border, or accessible status.
-- Maintain readable contrast in both themes. Muted text must remain readable; do not use opacity as the sole disabled-state signal.
+~~~css
+:root {
+  --bg-canvas: #F5F3EC;
+  --bg-surface: #FAF9F5;
+  --bg-overlay: #ECE8DC;
+  --text-primary: #1C1A17;
+  --accent-cinnabar: #A6382A;
+  --accent-moss: #3B5848;
+  --wb-canvas: var(--bg-canvas);
+  --wb-text: var(--text-primary);
+  --wb-accent: var(--accent-cinnabar);
+  --wb-focus: var(--accent-indigo);
+  --wb-success: var(--accent-moss);
+  --wb-warning: var(--accent-ochre);
+  --wb-danger: var(--accent-cinnabar);
+}
+~~~
+
+- Paper and ink dominate. Avoid pure black/white, decorative gradients and heavy shadows.
+- Accent marks actions and selection; status also needs an explicit label or symbol.
+- Muted text remains readable. Disabled states include native disabled semantics.
 
 ### Accent ramp and state layering
 
-The accent is a ramp, not a single value. Components reference a semantic state token; they never reference a raw step.
+Legacy `--wb-accent-50` through `--wb-accent-900` remain available as derived
+aliases. Components consume semantic state roles, not arbitrary ramp steps.
+Default uses cinnabar; hover mixes 88% cinnabar with primary ink; active uses
+78%. Both themes use this rule, darkening in light mode and lightening in dark.
+On-accent text uses canvas paper/ink, verified against every action state.
 
-```css
-:root {
-  --wb-accent-50: #E8F0FE;   --wb-accent-100: #D3E3FD;  --wb-accent-200: #A8C7FA;
-  --wb-accent-300: #7CACF8;  --wb-accent-400: #4C8DF6;  --wb-accent-500: #1A73E8;
-  --wb-accent-600: #0B57D0;  /* --wb-accent */
-  --wb-accent-700: #0842A0;  /* --wb-accent-hover */
-  --wb-accent-800: #062E6F;  /* --wb-accent-active */
-  --wb-accent-900: #041E49;
-  --wb-accent-selected: var(--wb-accent-50);
-}
-```
-
-- One interaction step per state: default 600, hover 700, active 800. Treat the ramp as ordered, not as a palette to sample from.
-- Selected surfaces use step 50 with a 1px step-100 border **and** a non-colour marker (rail, glyph, count). A tinted background alone is not a selection.
-- Dark theme remaps the accent to `#A8C7FA` and lightens on hover (`#D3E3FD`). Step numbers describe light-theme contrast; do not reuse them literally in dark.
-- Status colours keep their own ramps. Never tint success, warning, or danger with the accent.
+Selected surfaces use overlay paper, a strong border and a non-color marker.
+Focus uses a solid 2px indigo outline with 2px offset, without glow.
+Success, warning and danger map to moss, ochre and cinnabar respectively;
+words and glyphs distinguish destructive/error states from primary actions.
 
 ### Spacing scale
 
@@ -177,27 +141,17 @@ One primitive ramp, three application tiers. Never invent an off-ramp value for 
 
 ### Radius tiers
 
-Radius communicates surface role, not taste.
-
-```css
-:root {
-  --wb-radius-sm: 4px;      /* dense controls: inputs, buttons, list rows, tabs */
-  --wb-radius-md: 6px;      /* panels, popovers, cards at product density */
-  --wb-radius-lg: 12px;     /* large containers, media wrappers, hero frames */
-  --wb-radius-pill: 999px;  /* standalone primary CTA, status chip, count badge */
-}
-```
-
-- Product and editor surfaces stay at 4–6px. A tool surface where every control is a pill loses scanning speed and reads as decoration.
-- Pill radius is for one standalone action on a marketing-style surface, or for a small status or count chip. Do not mix pill and 4px controls in one toolbar.
-- Nest radii by one step at most: a 6px panel may contain 4px controls, not 12px ones.
+Paper-like corners stay restrained. The existing `--wb-radius-sm/md/lg` names
+all resolve to 2px; `--wb-radius-pill` remains 999px for compact count/status
+chips only. Do not use pill controls or large rounded hero frames as decoration.
+Depth comes from hairlines and adjacent paper tones, not stacked shadows.
 
 ### Typography and density
 
-- Use a native system sans-serif stack for UI labels and body text. Reserve monospace for code, shortcuts, IDs, and technical metadata.
+- Use editorial serif headings at weight 500; native CJK sans for UI labels and body text. Reserve monospace for code, shortcuts, IDs, and technical metadata.
 - Comfortable density is the default for first-use clarity; compact density is an explicit mode for repeated technical work.
 - Comfortable rows are 34px with 32px controls; compact rows and controls are 26px. Touch targets on touch-first surfaces should approach 44px.
-- Use the spacing ramp in [Spacing scale](#spacing-scale). Prefer 12–24px content gutters over oversized editorial whitespace.
+- Use the spacing ramp in [Spacing scale](#spacing-scale). Use 12–24px tool gutters; reading composition follows the reading contract below.
 - Use [Radius tiers](#radius-tiers) for corners. Use borders and surface contrast for grouping; avoid heavy shadows and ornamental cards.
 
 ### Density modes
@@ -257,12 +211,12 @@ Stroke      1.75px on the 24 grid; round caps and joins; no mitred corners
 Corners     1.5px radius on every rectangular joint
 Geometry    orthogonal and 45° only; round only where the object is round
 Fill        none by default; a solid fill marks a resolved state, never decoration
-Colour      currentColor in source; README exports pin accent step 500 (#1A73E8)
+Colour      currentColor in source; README exports use cinnabar (#A6382A light / #E18C7C dark)
 Sizes       16px dense rows | 20px toolbar and list | 24px headers and empty states
 ```
 
 - Stroke weight is authored on the 24 grid. Inline icons carry the optical target directly: 1.75 at 24px, 1.6 at 20px, 1.5 at 16px. An exported file scales its stroke with the box it is rendered into, so set `width`/`height` on the embedding `<img>` instead of faking a size with `transform: scale()`. The shipped README assets — drawn at 1.75 and displayed at 20px — therefore render at about 1.46px; that is the accepted heading weight. For a size-specific export, raise the grid stroke instead of scaling a 24px file: 1.92 for 1.6px at 20, 2.25 for 1.5px at 16.
-- Standalone SVGs loaded through `<img>` inherit no `currentColor`, so README assets set `color` on the root. Step 500 is used there because it holds at least 4:1 against both the light and dark README canvas; workbench components still read the semantic accent token.
+- Standalone SVGs loaded through `<img>` inherit no host color. README icons define light cinnabar and a prefers-color-scheme dark override inside each SVG; each is checked against its matching canvas. Workbench components read the semantic accent token.
 - Do not mix filled and outlined icons in one toolbar. A filled variant means on or selected, and it must also flip the accessible name or `aria-pressed`.
 - An icon that needs sub-pixel nudges to look right is mis-drawn, not mis-tuned. Redraw it on the grid.
 - Icon-only controls carry an accessible name and a visible tooltip. Pair every status icon with text.
@@ -318,14 +272,14 @@ Executable preview: `node design-system/tui/preview.mjs --width 120 --color true
 | Role | 16-colour | 256 light / dark | Truecolor light | Truecolor dark | Plain fallback |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Text | terminal default | terminal default | terminal default | terminal default | same text |
-| Muted | bright black (90) | 244 / 246 | `#666C78` | `#9299A5` | text plus label |
-| Accent | blue (34) | 26 / 153 | `#0B57D0` | `#A8C7FA` | marker |
-| Border | bright black (90) | 240 / 238 | `#D9DDE3` | `#383B43` | ASCII rule |
+| Muted | bright black (90) | 242 / 247 | `#6E675D` | `#AAA397` | text plus label |
+| Accent | red (31) | 131 / 174 | `#A6382A` | `#E18C7C` | marker |
+| Border | bright black (90) | 242 / 247 | `#6E675D` | `#AAA397` | ASCII rule |
 | Selection | accent marker + bold | marker + bold | marker + bold | marker + bold | `>` marker |
 | Focus | reverse or underline plus brackets | same | same | same | `[ ]` brackets |
-| Success | green (32) | 28 / 114 | `#137333` | `#81C995` | `OK` |
-| Warning | yellow (33) | 130 / 221 | `#8A4B00` | `#FDD663` | `WARN` |
-| Danger | red (31) | 160 / 217 | `#B3261E` | `#F2B8B5` | `ERR` |
+| Success | green (32) | 65 / 108 | `#3B5848` | `#9AB49E` | `OK` |
+| Warning | yellow (33) | 94 / 179 | `#795B28` | `#D5B576` | `WARN` |
+| Danger | red (31) | 131 / 174 | `#A6382A` | `#E18C7C` | `ERR` |
 
 - Default to 16 colours. Use 256 or truecolor only when the terminal advertises support and the user has not disabled colour. The truecolor columns are evaluation targets for a terminal with a known light or dark palette; brand fidelity is not required.
 - Never paint the full canvas background. Let the terminal own background, foreground defaults, font, cursor, and selection colours.
@@ -415,7 +369,7 @@ Empty state     reason plus one next action
 | :--- | :--- |
 | Canvas and surface fills | Terminal default background; no full-screen fill |
 | 2px focus ring | Reverse video or underline plus brackets |
-| 4/6/12px radius | No radius; single-cell rules and spacing |
+| 2px paper corner | No radius; single-cell rules and spacing |
 | 4px spacing ramp | 1-cell inline gap; 1-2 row group gap |
 | 24px icon grid | 1-cell glyph with an ASCII fallback |
 | 34/26px row height | One terminal row |
@@ -432,41 +386,40 @@ Empty state     reason plus one next action
 
 ## Scenario adaptation
 
-The workbench contract governs interactive, repository-owned UI. It does not govern every artifact in the repository. Classify the surface before styling it.
+Wabi Press supplies the fallback visual direction across visual skills. Surface
+geometry and platform rules remain specific to the task.
 
-| Surface | Adopt | Adapt | Keep as reference only | Reject |
-| :--- | :--- | :--- | :--- | :--- |
-| Workbench and editor UI | Regions, density modes, state contract, 4px ramp, icon grid | Accent per product identity; radius 4–6px | Pill radius | — |
-| README and long-form docs | Heading hierarchy, spacing tiers, mono for technical tokens, 1px rules over shadows | Measure 65–75ch; no fixed viewport; light/dark parity via `<picture>` | Density modes (Markdown has no interactive density) | Status-bar language; keyboard badges that imply unavailable behaviour |
-| Slide decks | Type-scale discipline, spacing ramp for margins, one accent family | Fixed 1920×1080 stage; section gaps may exceed the ramp (64–120px) | — | Workbench chrome; rail and sidebar metaphor |
-| Reading-first HTML reports | Wabi-Press paper/ink palette, serif headings, CJK sans body, mono code | Natural height; single column on phones; 18px body and 16px caption defaults | Desktop asymmetric composition | Fixed-stage scaling on phones; application chrome |
-| Logo and identity | Contrast discipline, single accent, grid construction | Own geometry system | 24px icon grid | Stroke weight, pill radius, UI tokens |
-| Hero and illustration art | Palette family, radius tiers, spacing rhythm | Decorative density, perspective, depth | Colour ramp values | Interactive state semantics |
-| Motion | 100–180ms state transitions, reduced-motion parity | Expressive motion for narrative surfaces | Easing tokens | Continuous decorative motion on tool surfaces |
-| Terminal UI | Cell grid, pane priorities, semantic roles, keyboard model, plain mode | One-cell glyphs with ASCII fallback; ANSI 16/256/truecolor | Pixel spacing, radius, shadows, hover | Full-screen paint, emoji, Nerd Font or PUA dependency |
+| Surface | Shared material | Composition and constraints |
+| :--- | :--- | :--- |
+| Workbench and editor UI | Paper/ink, cinnabar actions, serif headings | Search, navigation, selection, 34/26px rows; sans labels |
+| README and long-form docs | Serif art titles, paper/ink SVGs, hairlines | Native Markdown, readable hierarchy, theme-aware picture assets; no fake controls |
+| Slide decks | Paper/ink, serif titles, restrained pigments | Fixed 1920x1080 stage; no application chrome; narrative spacing |
+| Reading-first HTML reports | Canonical tokens and reading rhythm | Natural height, CJK sans body, single column on phones; no fixed-stage scaling |
+| Logo and identity | Restrained palette and contrast when brief permits | Original mark geometry; target identity takes precedence |
+| Hero and illustration art | Paper/ink, subtle rules and minimal depth | Editorial composition serving the subject; no invented UI behavior |
+| Motion | Quiet transitions and reduced-motion parity | ui-motion owns timing and mechanism; no continuous decoration |
+| Terminal UI | Semantic cinnabar/moss/ochre roles and state cues | Terminal-owned background/font; integer cells, ANSI fallback, NO_COLOR |
 
-- A surface outside the first row still has to pass the accessibility and visual-QA requirements; it may set its own art direction.
-- Adaptation changes composition and emphasis. It never changes what a state colour means or how focus behaves.
-- When a surface needs a value that is not on the ramp, add a named semantic token and record it as `implementation-choice`. Do not scatter a one-off number.
+Adaptation changes composition, density and emphasis. It preserves state meaning,
+focus and legibility. Do not force GUI fonts or paper fills into a terminal.
 
 ## Layer scope
 
-`design-system/wabi-press.css` carries two visual layers. Scope decides which one applies; they are not two competing themes.
+There is one material palette with reading and tool adaptations:
 
-```text
-Workbench layer   applies to :root by default. Owns --wb-* tokens and .wb-* primitives.
-Editorial layer   applies only inside html[data-surface=editorial]. Owns the washi material tokens
-                  (--bg-*, --border-*, --text-*, --accent-cinnabar, --accent-moss) and the .wabi-* primitives.
-Shared            Type stacks, the 8px editorial spacing module, measure, and easing curves are structural and
-                  stay at :root so both layers can read them.
-```
+- No root attribute: Wabi Press material, reading typography and `.wabi-*` primitives.
+- `data-surface="editorial"`: compatible with the reading default; no opt-in required.
+- `data-surface="workbench"`: same material, compact body typography and `.wb-*` geometry.
+- `.editorial-prose` and `.wabi-*` also work in a mixed tool document. Generic reading
+  body/heading rules are document-level; use semantic classes for a local article.
+- `--wb-*` colors alias canonical paper/ink roles. Preserve stylesheet paths,
+  theme-controller exports, storage key and `data-theme` light/dark behavior.
+- Density affects tool rows/controls only. Do not shrink reading body text.
+- TUI maps semantic roles without adding a separate brand palette or CSS layer.
 
-- Set `data-surface=editorial` only on a long-form reading surface that benefits from the washi treatment. Never on a tool shell.
-- `data-surface=editorial` is a document-level switch on `<html>`. It does not isolate one article inside a workbench page: tokens, the body background, headings, and focus rules all key off the root element.
-- Do not add a third layer. A new surface either uses the workbench tokens, opts into the editorial layer, or is covered by the scenario matrix.
-- A terminal implementation is a render target of the workbench layer, not a CSS layer. Map the semantic roles in [Terminal colour and attributes](#terminal-colour-and-attributes); do not invent a second palette.
-- A component may reference semantic tokens from its own layer only. Cross-layer token use is drift.
-- Both layers use a visible 2px focus outline. Editorial focus uses solid indigo ink with a 2px offset, without glow.
+Existing `--wb-*` and `.wb-*` consumers gain the paper palette without renaming.
+Set `data-surface="workbench"` for a standalone dense shell that previously relied
+on the old implicit tool body typography. Explicit editorial roots keep working.
 
 ## Editorial reading contract
 
@@ -560,7 +513,7 @@ The reference contributes proven workbench structure and interaction patterns. A
 
 ## Visual QA
 
-- [ ] `DESIGN.md`, CSS tokens, theme controller, and preview describe the same workbench system.
+- [ ] `DESIGN.md`, CSS tokens, theme controller, and preview describe the same Wabi Press default and tool adaptation.
 - [ ] Light/dark themes and compact/comfortable density are represented in the preview.
 - [ ] Sidebar, content, optional panel, and status regions have clear priority.
 - [ ] Search, selection, focus, disabled, loading, success, warning, and error states are visible and distinguishable.
@@ -573,7 +526,7 @@ The reference contributes proven workbench structure and interaction patterns. A
 - [ ] Icons follow the 24px grid and stroke compensation; no toolbar mixes fill and outline.
 - [ ] Selection exposes a non-colour cue; grouped selection shows child markers and a count.
 - [ ] The scenario matrix was applied: no workbench chrome reached slides, identity, or editorial surfaces.
-- [ ] The default surface renders the workbench layer; `data-surface="editorial"` renders the washi layer.
+- [ ] The default needs no attribute; explicit editorial is compatible; workbench shares its palette.
 - [ ] The TUI preview passes `node design-system/tui/preview.mjs --check` across 40-160 columns.
 - [ ] TUI plain mode contains no ANSI sequences and no non-ASCII glyphs; critical state remains readable.
 - [ ] TUI selection, focus, success, warning, and error survive `NO_COLOR` and a light or dark terminal palette.

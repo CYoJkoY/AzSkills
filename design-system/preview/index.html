@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light" data-density="comfortable" data-surface="workbench">
+<html lang="en" data-theme="light" data-density="comfortable">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>AzSkills Workbench Design System</title>
+<title>AzSkills Wabi Press Design System</title>
 <link rel="stylesheet" href="../wabi-press.css">
 <style>
-.preview-topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--wb-gap-inline);min-height:48px;padding:var(--wb-space-8) var(--wb-space-16);border-bottom:1px solid var(--wb-border);background:var(--wb-surface)}
+.preview-topbar{box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--wb-gap-inline);min-height:48px;padding:var(--wb-space-8) var(--wb-space-16);border-bottom:1px solid var(--wb-border);background:var(--wb-surface)}
 .preview-main{min-width:0}
 .preview-section{margin:0 0 var(--wb-section-gap)}
 .preview-section h2{font-size:1rem;margin:0 0 var(--wb-gap-stack)}
-.preview-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--wb-gap-inline);margin:var(--wb-space-8) 0}
+.preview-row{min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:var(--wb-gap-inline);margin:var(--wb-space-8) 0}
 .preview-label{margin:0;color:var(--wb-text-secondary);font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
 .preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:var(--wb-space-12)}
 .preview-card{margin:0;padding:var(--wb-inset-panel);border:1px solid var(--wb-border);border-radius:var(--wb-radius-md);background:var(--wb-surface)}
@@ -40,27 +40,28 @@
 .preview-is-focus{outline:2px solid var(--wb-focus);outline-offset:2px}
 .preview-empty{display:grid;gap:var(--wb-space-8);margin-top:var(--wb-space-8)}
 .preview-drawer-toggle{display:none}
+.preview-editorial .wabi-input{min-width:0;max-width:100%;box-sizing:border-box}
 .preview-editorial{padding-block:var(--wb-space-40);background:var(--bg-canvas)}
 .preview-editorial .wabi-container{padding-block:0}
-html[data-surface="editorial"] .preview-topbar{background:var(--bg-canvas);border-bottom-color:var(--border-subtle);color:var(--text-primary);font-size:14px}
-html[data-surface="editorial"] .preview-topbar strong{font-family:var(--font-editorial);font-weight:500;letter-spacing:.04em}
-html[data-surface="editorial"] .preview-topbar .preview-label{color:var(--text-muted)}
-html[data-surface="editorial"] .preview-topbar .wb-button{border-color:var(--border-subtle);border-radius:var(--radius-subtle);background:var(--bg-surface);color:var(--text-secondary)}
-html[data-surface="editorial"] .preview-topbar .wb-button:hover{border-color:var(--border-strong);background:var(--bg-overlay);color:var(--text-primary)}
-html[data-surface="editorial"] .preview-topbar .wb-button[aria-pressed="true"]{border-color:var(--accent-cinnabar);background:var(--bg-overlay);color:var(--text-primary)}
-html[data-surface="editorial"] .preview-topbar .wb-input{border-color:var(--border-subtle);border-radius:var(--radius-subtle);background:var(--bg-surface);color:var(--text-primary)}
-html[data-surface="editorial"] .preview-density{display:none}
+html:not([data-surface="workbench"]) .preview-topbar{background:var(--bg-canvas);border-bottom-color:var(--border-subtle);color:var(--text-primary);font-size:14px}
+html:not([data-surface="workbench"]) .preview-topbar strong{font-family:var(--font-editorial);font-weight:500;letter-spacing:.04em}
+html:not([data-surface="workbench"]) .preview-topbar .preview-label{color:var(--text-muted)}
+html:not([data-surface="workbench"]) .preview-topbar .wb-button{border-color:var(--border-subtle);border-radius:var(--radius-subtle);background:var(--bg-surface);color:var(--text-secondary)}
+html:not([data-surface="workbench"]) .preview-topbar .wb-button:hover{border-color:var(--border-strong);background:var(--bg-overlay);color:var(--text-primary)}
+html:not([data-surface="workbench"]) .preview-topbar .wb-button[aria-pressed="true"]{border-color:var(--accent-cinnabar);background:var(--bg-overlay);color:var(--text-primary)}
+html:not([data-surface="workbench"]) .preview-topbar .wb-input{border-color:var(--border-subtle);border-radius:var(--radius-subtle);background:var(--bg-surface);color:var(--text-primary)}
+html:not([data-surface="workbench"]) .preview-density{display:none}
 @media (max-width:760px){.preview-topbar{padding:var(--wb-space-8) var(--wb-space-12)}.preview-drawer-toggle{display:inline-flex}}
 </style>
 </head>
 <body>
 <header class="preview-topbar">
-  <strong>AzSkills / Workbench</strong>
+  <strong>AzSkills / Wabi Press</strong>
   <div class="preview-row">
     <span class="preview-label" id="surface-label">Surface</span>
     <div role="group" aria-labelledby="surface-label">
-      <button class="wb-button" type="button" id="surface-workbench" data-surface-option="workbench" aria-pressed="true">Workbench</button>
-      <button class="wb-button" type="button" id="surface-editorial" data-surface-option="editorial" aria-pressed="false">Editorial</button>
+      <button class="wb-button" type="button" id="surface-workbench" data-surface-option="workbench" aria-pressed="false">Workbench</button>
+      <button class="wb-button" type="button" id="surface-editorial" data-surface-option="editorial" aria-pressed="true">Reading</button>
     </div>
     <label class="preview-label preview-density" for="density">Density</label>
     <select id="density" class="wb-input wb-select preview-density" aria-label="Density">
@@ -71,7 +72,7 @@ html[data-surface="editorial"] .preview-density{display:none}
   </div>
 </header>
 
-<div id="workbench-view" class="preview-view">
+<div id="workbench-view" class="preview-view" hidden>
 <div class="wb-shell">
   <nav class="wb-activity-rail" aria-label="Global navigation">
     <button class="wb-activity-button" type="button" id="rail-skills" aria-current="page" aria-label="Skills">
@@ -121,16 +122,16 @@ html[data-surface="editorial"] .preview-density{display:none}
       <h2 id="ramp-heading">Accent ramp and state layering</h2>
       <p class="preview-label">default 600 · hover 700 · active 800 · selected 50 plus a marker</p>
       <ul class="preview-ramp" id="accent-ramp">
-        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-50)"><span class="preview-swatch"></span>50 #E8F0FE</li>
-        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-100)"><span class="preview-swatch"></span>100 #D3E3FD</li>
-        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-200)"><span class="preview-swatch"></span>200 #A8C7FA</li>
-        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-300)"><span class="preview-swatch"></span>300 #7CACF8</li>
-        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-400)"><span class="preview-swatch"></span>400 #4C8DF6</li>
-        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-500)"><span class="preview-swatch"></span>500 #1A73E8</li>
-        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-600)"><span class="preview-swatch"></span>600 #0B57D0</li>
-        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-700)"><span class="preview-swatch"></span>700 #0842A0</li>
-        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-800)"><span class="preview-swatch"></span>800 #062E6F</li>
-        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-900)"><span class="preview-swatch"></span>900 #041E49</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-50)"><span class="preview-swatch"></span>50 / semantic alias</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-100)"><span class="preview-swatch"></span>100 / semantic alias</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-200)"><span class="preview-swatch"></span>200 / semantic alias</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-300)"><span class="preview-swatch"></span>300 / semantic alias</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-400)"><span class="preview-swatch"></span>400 / semantic alias</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-500)"><span class="preview-swatch"></span>500 / semantic alias</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-600)"><span class="preview-swatch"></span>600 / semantic alias</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-700)"><span class="preview-swatch"></span>700 / semantic alias</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-800)"><span class="preview-swatch"></span>800 / semantic alias</li>
+        <li class="preview-ramp-step" style="--preview-swatch:var(--wb-accent-900)"><span class="preview-swatch"></span>900 / semantic alias</li>
       </ul>
       <div class="preview-row">
         <button class="wb-button wb-button--primary" type="button">Primary default</button>
@@ -162,9 +163,9 @@ html[data-surface="editorial"] .preview-density{display:none}
         <div class="preview-card">
           <p class="preview-label">Radius · surface role</p>
           <div class="preview-radii">
-            <div class="preview-radius"><span style="--preview-radius:var(--wb-radius-sm)"></span>sm 4</div>
-            <div class="preview-radius"><span style="--preview-radius:var(--wb-radius-md)"></span>md 6</div>
-            <div class="preview-radius"><span style="--preview-radius:var(--wb-radius-lg)"></span>lg 12</div>
+            <div class="preview-radius"><span style="--preview-radius:var(--wb-radius-sm)"></span>sm 2</div>
+            <div class="preview-radius"><span style="--preview-radius:var(--wb-radius-md)"></span>md 2</div>
+            <div class="preview-radius"><span style="--preview-radius:var(--wb-radius-lg)"></span>lg 2</div>
             <div class="preview-radius"><span style="--preview-radius:var(--wb-radius-pill)"></span>pill</div>
           </div>
           <p class="preview-state-note" style="margin-top:var(--wb-gap-stack)">Pill is reserved for one standalone action or a count chip.</p>
@@ -247,16 +248,16 @@ html[data-surface="editorial"] .preview-density{display:none}
 </div>
 </div>
 
-<div id="editorial-view" class="preview-view preview-editorial" hidden>
+<div id="editorial-view" class="preview-view preview-editorial">
   <article class="wabi-container" aria-labelledby="editorial-heading">
-    <p class="preview-label" style="margin:0;color:var(--text-muted)">Surface / Editorial</p>
-    <h1 id="editorial-heading" style="margin:var(--wb-space-8) 0 var(--wb-space-12)">Two layers, one system</h1>
-    <p style="max-width:var(--measure-prose);margin:0;color:var(--text-secondary);font-size:1.125rem;line-height:1.7">The washi layer applies only when the document root sets <span class="mono">data-surface="editorial"</span>. The harness bar above follows the active layer; the tokens stay scoped to this document.</p>
+    <p class="preview-label" style="margin:0;color:var(--text-muted)">Wabi Press / Reading</p>
+    <h1 id="editorial-heading" style="margin:var(--wb-space-8) 0 var(--wb-space-12)">侘寂刊本 · Wabi Press</h1>
+    <p style="max-width:var(--measure-prose);margin:0;color:var(--text-secondary);font-size:1.125rem;line-height:1.7">Warm paper, soot ink and restrained pigments are the default. No surface attribute is required. The workbench adapts the same palette to navigation, search and dense technical work.</p>
     <div class="wabi-card" style="margin-top:var(--wb-space-32)">
       <div class="wabi-meta-header"><span class="meta-index">SEC. 01</span><span>Washi surface</span><span class="meta-rule"></span><span class="seal seal-cinnabar">刊</span></div>
-      <h2 style="margin:0 0 var(--space-2)">Opt-in, never the default</h2>
+      <h2 style="margin:0 0 var(--space-2)">Paper, ink, and a clear reading order</h2>
       <div class="editorial-prose" lang="zh-CN">
-        <p>阅读从清晰开始。温润的纸色承载正文，宋体标题提示层次，黑体正文帮助读者连续阅读。技术标识使用等宽字体，例如 <code>data-surface="editorial"</code>。</p>
+        <p>阅读从清晰开始。温润的纸色承载正文，宋体标题提示层次，黑体正文帮助读者连续阅读。技术标识使用等宽字体，例如 <code>--accent-cinnabar</code>。</p>
         <p>留白表达内容之间的关系：同一观点的段落保持连贯，图片与说明靠近，新的章节保留更明确的停顿。无需依靠浅淡文字制造安静感。</p>
         <h3>色彩帮助理解</h3>
         <div class="editorial-pigments"><span class="indigo">Indigo / Information</span><span class="ochre">Ochre / Caution</span><span class="clay">Clay / Context</span></div>
@@ -267,19 +268,19 @@ html[data-surface="editorial"] .preview-density{display:none}
           <figcaption>图 1 · 图注紧随图片；图片与前后正文保留更大的距离。</figcaption>
         </figure>
         <p>插图之后恢复正常阅读顺序。较长的中文段落、来源链接和图注在手机上自然换行，内容随文字放大而增长。</p>
-        <blockquote class="pull-quote">Two layers, one system.<cite class="pull-quote-cite">DESIGN.md · Layer scope</cite></blockquote>
+        <blockquote class="pull-quote">侘寂刊本 · Wabi Press.<cite class="pull-quote-cite">DESIGN.md · Layer scope</cite></blockquote>
       </div>
       <div class="preview-row" style="margin-bottom:0">
         <button class="wabi-button" type="button">Secondary</button>
         <button class="wabi-button wabi-button--primary" type="button">Primary</button>
-        <input class="wabi-input" placeholder="Search the archive">
+        <input class="wabi-input" aria-label="Search the archive" placeholder="Search the archive">
       </div>
     </div>
   </article>
 </div>
 
-<footer class="wb-statusbar" id="status-bar">
-  <span>AzSkills</span><span>Branch: workbench-ux</span><span>Design contract preview</span><span id="surface-status">Surface: workbench</span>
+<footer class="wb-statusbar" id="status-bar" hidden>
+  <span>AzSkills</span><span>Wabi Press / Tool adaptation</span><span>Design contract preview</span><span id="surface-status">Surface: workbench</span>
 </footer>
 
 <script>
@@ -341,7 +342,8 @@ for (const button of surfaceButtons) {
   button.addEventListener("click", () => {
     const next = button.dataset.surfaceOption;
     const editorial = next === "editorial";
-    root.dataset.surface = next;
+    if (editorial) delete root.dataset.surface;
+    else root.dataset.surface = next;
     for (const sibling of surfaceButtons) {
       sibling.setAttribute("aria-pressed", String(sibling === button));
     }

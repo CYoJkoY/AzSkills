@@ -7,9 +7,11 @@ on:
     paths:
       - "DESIGN.md"
       - "scripts/check-editorial.mjs"
+      - "scripts/check-design-contract.mjs"
       - ".github/badges/**"
       - "assets/**"
       - "frontend-slides/**"
+      - "readme-craft/**"
       - "architecture/**"
       - "design-system/**"
       - "design-intelligence.md"
@@ -26,64 +28,22 @@ permissions:
 
 jobs:
   validate-design-contract:
-    name: Validate Workbench Design Contract
+    name: Validate Wabi Press Design Contract
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Validate canonical contract and implementation
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f DESIGN.md
-          grep -q '^name: azskills-workbench$' DESIGN.md
-          grep -q '^## Workbench layout$' DESIGN.md
-          grep -q '^## Interaction contract$' DESIGN.md
-          grep -q '^## Accessibility and responsiveness$' DESIGN.md
-          grep -q '^## Visual QA$' DESIGN.md
-          grep -q -- '--wb-canvas: #F7F8FA' DESIGN.md
-          grep -q -- '--wb-accent: #0B57D0' DESIGN.md
-          grep -q -- '--wb-row-height: 26px' DESIGN.md
-          grep -q 'VSCodium' DESIGN.md
+        run: node scripts/check-design-contract.mjs
 
-          test -f design-system/SKILL.md
-          test -f design-system/references/design-md-adapter.md
-          test -f design-system/references/design-md-schema.md
-          test -f design-system/references/source-format-matrix.md
-          grep -q '^name: design-system$' design-system/SKILL.md
+      - name: Validate terminal rendering and accessible states
+        run: node design-system/tui/preview.mjs --check
 
-          test -f design-system/wabi-press.css
-          test -f design-system/wabi-press-theme.ts
-          test -f design-system/preview/index.html
-          grep -q -- '--wb-canvas: #F7F8FA' design-system/wabi-press.css
-          grep -q -- '--wb-canvas: #18191C' design-system/wabi-press.css
-          grep -q -- '--wb-accent: #0B57D0' design-system/wabi-press.css
-          grep -q -- '--wb-row-height: 26px' design-system/wabi-press.css
-          grep -q '\.wb-shell' design-system/wabi-press.css
-          grep -q '\.wb-sidebar' design-system/wabi-press.css
-          grep -q '\.wb-statusbar' design-system/wabi-press.css
-          grep -q 'prefers-reduced-motion' design-system/wabi-press.css
-          grep -q 'wabi-press.css' design-system/preview/index.html
-          grep -q 'skill-search' design-system/preview/index.html
-          grep -q 'theme-toggle' design-system/preview/index.html
-          grep -q 'data-density' design-system/preview/index.html
-
-          grep -q '^## Contract$' ui-design/SKILL.md
-          grep -q '^## Workflow$' ui-design/SKILL.md
-          grep -q '^## Quality gates$' ui-design/SKILL.md
-          grep -q '^## Output contract$' ui-design/SKILL.md
-          grep -q '^## AzSkills surfaces$' design-system/SKILL.md
-          grep -q '^## Scenario adaptation$' DESIGN.md
-          grep -q 'VSCodium-inspired workbench model' README.md
-
-          test -f design-system/tui/preview.mjs
-          grep -q '^## Terminal / TUI contract$' DESIGN.md
-          grep -q 'NO_COLOR' DESIGN.md
-          grep -q 'grapheme' DESIGN.md
-          grep -q 'Terminal / TUI contract' ui-design/SKILL.md
-          grep -q 'Terminal / TUI contract' architecture/references/runtime-selection.md
-          grep -q 'design-system/tui/preview.mjs' README.md
-          grep -q 'tui/preview.mjs' design-system/SKILL.md
-          node design-system/tui/preview.mjs --check
-          node scripts/check-editorial.mjs
+      - name: Validate contrast and report token parity
+        run: node scripts/check-editorial.mjs

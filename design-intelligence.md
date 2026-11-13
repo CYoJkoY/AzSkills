@@ -5,6 +5,18 @@ owns the shared rules R01-R12 and precedence. This file adds only visual
 judgment not already owned by a canonical Skill. The active Skill owns workflow,
 quality gates, and output.
 
+## Default visual direction
+
+When the brief provides no visual direction, use Wabi Press (侘寂刊本) from the
+root [DESIGN.md](DESIGN.md): warm paper, soot ink, cinnabar, moss, hairlines,
+serif headings, CJK sans body, mono technical text and near-zero shadow.
+Explicit user direction, the target project's authoritative identity and
+platform constraints take priority over this fallback. Preserve each format's
+geometry: reading rhythm, dense tool controls, fixed slide stages, native
+Markdown, original identity construction and terminal-owned backgrounds.
+Canonical values and compatibility mappings stay in DESIGN.md and its CSS;
+visual skills reference this rule rather than maintaining competing defaults.
+
 ## Visual extensions
 
 ### Typography is structural
