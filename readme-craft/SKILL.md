@@ -36,6 +36,9 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual e
 
 ## Workflow
 
+Use the [shared visual fallback](../design-intelligence.md#default-visual-direction)
+for art direction when no stronger brief exists; preserve GitHub Markdown constraints.
+
 ### 1. Build the evidence inventory
 
 Read the repository before writing:

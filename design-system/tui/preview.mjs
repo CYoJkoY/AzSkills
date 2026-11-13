@@ -114,24 +114,19 @@ const SKILLS = [
 
 const DEFAULT_SELECTED = "ui-design";
 
-const THEMES = {
-  light: {
-    accent: [11, 87, 208],
-    muted: [102, 108, 120],
-    border: [217, 221, 227],
-    success: [19, 115, 51],
-    warning: [138, 75, 0],
-    danger: [179, 38, 30],
-  },
-  dark: {
-    accent: [168, 199, 250],
-    muted: [146, 153, 165],
-    border: [56, 59, 67],
-    success: [129, 201, 149],
-    warning: [253, 214, 99],
-    danger: [242, 184, 181],
-  },
-};
+// The terminal adapter reads canonical material roles; it never paints a canvas.
+const stylesheet = readFileSync(new URL("../wabi-press.css", import.meta.url), "utf8");
+const material = stylesheet.slice(stylesheet.indexOf("/* Wabi Press material tokens:"), stylesheet.indexOf("   2 · Workbench"));
+const blocks = [...material.matchAll(/:root(?:\[data-theme="dark"\])?\s*\{([\s\S]*?)\}/g)];
+if (blocks.length !== 2) throw new Error("Expected light and dark Wabi Press material blocks.");
+const roleTokens = { accent: "accent-cinnabar", muted: "text-muted", border: "text-muted", success: "accent-moss", warning: "accent-ochre", danger: "accent-cinnabar" };
+const THEMES = Object.fromEntries(["light", "dark"].map((theme, index) => {
+  const values = Object.fromEntries([...blocks[index][1].matchAll(/--([\w-]+):\s*#([0-9a-f]{6})\s*;/gi)].map((match) => [match[1], match[2]]));
+  return [theme, Object.fromEntries(Object.entries(roleTokens).map(([role, token]) => {
+    if (!values[token]) throw new Error("Missing terminal color role: " + theme + " " + token);
+    return [role, values[token].match(/../g).map((pair) => parseInt(pair, 16))];
+  }))];
+}));
 
 const WIDE = [
   [0x1100, 0x115f],
@@ -297,8 +292,8 @@ function makeStyle(colorMode, theme) {
 
     if (colorMode === "16") {
       if (role === "muted" || role === "border") return [90];
-      if (role === "accent") return [34];
-      if (role === "accentBold") return [34, 1];
+      if (role === "accent") return [31];
+      if (role === "accentBold") return [31, 1];
       if (role === "success") return [32];
       if (role === "warning") return [33];
       if (role === "danger") return [31];
@@ -306,15 +301,15 @@ function makeStyle(colorMode, theme) {
     }
 
     if (colorMode === "256") {
-      if (role === "muted") return ["38;5;" + (theme === "dark" ? "246" : "244")];
-      if (role === "border") return ["38;5;" + (theme === "dark" ? "238" : "240")];
-      if (role === "accent") return ["38;5;" + (theme === "dark" ? "153" : "26")];
+      if (role === "muted") return ["38;5;" + (theme === "dark" ? "247" : "242")];
+      if (role === "border") return ["38;5;" + (theme === "dark" ? "247" : "242")];
+      if (role === "accent") return ["38;5;" + (theme === "dark" ? "174" : "131")];
       if (role === "accentBold") {
-        return ["38;5;" + (theme === "dark" ? "153" : "26"), "1"];
+        return ["38;5;" + (theme === "dark" ? "174" : "131"), "1"];
       }
-      if (role === "success") return ["38;5;" + (theme === "dark" ? "114" : "28")];
-      if (role === "warning") return ["38;5;" + (theme === "dark" ? "221" : "130")];
-      if (role === "danger") return ["38;5;" + (theme === "dark" ? "217" : "160")];
+      if (role === "success") return ["38;5;" + (theme === "dark" ? "108" : "65")];
+      if (role === "warning") return ["38;5;" + (theme === "dark" ? "179" : "94")];
+      if (role === "danger") return ["38;5;" + (theme === "dark" ? "174" : "131")];
       return [];
     }
 
@@ -783,7 +778,7 @@ function checkFrame(width, color, theme, density) {
   if (color === "256" && !output.includes("38;5;")) {
     issues.push("256-colour SGR missing at " + width);
   }
-  if (color === "16" && !output.includes("\x1b[34")) {
+  if (color === "16" && !output.includes("\x1b[31")) {
     issues.push("16-colour accent SGR missing at " + width);
   }
   for (const required of ["AzSkills", "SKILLS", "ui-design"]) {
@@ -923,19 +918,14 @@ function runCheck() {
           ? ["\x1b[32", "\x1b[33", "\x1b[31"]
           : color === "256"
             ? [
-                "38;5;" + (theme === "dark" ? "114" : "28"),
-                "38;5;" + (theme === "dark" ? "221" : "130"),
-                "38;5;" + (theme === "dark" ? "217" : "160"),
+                "38;5;" + (theme === "dark" ? "108" : "65"),
+                "38;5;" + (theme === "dark" ? "179" : "94"),
+                "38;5;" + (theme === "dark" ? "174" : "131"),
               ]
             : color === "truecolor"
-              ? [
-                  "38;2;" +
-                    (theme === "dark" ? "129;201;149" : "19;115;51"),
-                  "38;2;" +
-                    (theme === "dark" ? "253;214;99" : "138;75;0"),
-                  "38;2;" +
-                    (theme === "dark" ? "242;184;181" : "179;38;30"),
-                ]
+              ? ["success", "warning", "danger"].map(
+                  (role) => "38;2;" + THEMES[theme][role].join(";"),
+                )
               : [];
       for (const code of roleCodes) {
         if (!fixture.includes(code)) {
