@@ -37,7 +37,9 @@ try {
   await packageSkillArchive(root, 'fixture', path.join(temp, 'archive-source'), path.join(output, 'fixture.zip'));
   assert.deepEqual(await readFile(archive), await readFile(path.join(output, 'fixture.zip')), 'Archives should be deterministic');
   const expanded = path.join(temp, 'expanded');
-  const unzip = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', 'Expand-Archive -LiteralPath $env:AZSKILLS_ARCHIVE -DestinationPath $env:AZSKILLS_EXPANDED -Force'], { encoding: 'utf8', env: { ...process.env, AZSKILLS_ARCHIVE: archive, AZSKILLS_EXPANDED: expanded } });
+  const unzip = process.platform === 'win32'
+    ? spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', 'Expand-Archive -LiteralPath $env:AZSKILLS_ARCHIVE -DestinationPath $env:AZSKILLS_EXPANDED -Force'], { encoding: 'utf8', env: { ...process.env, AZSKILLS_ARCHIVE: archive, AZSKILLS_EXPANDED: expanded } })
+    : spawnSync('unzip', ['-q', archive, '-d', expanded], { encoding: 'utf8' });
   if (unzip.error) throw unzip.error;
   assert.equal(unzip.status, 0, unzip.stderr || 'Expand-Archive failed');
   await validatePackagedSkill(expanded);
