@@ -1,281 +1,205 @@
-import { cp, mkdir, mkdtemp, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readdir, readFile, rename, rm, lstat, writeFile } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { packageSkill } from './package-skill.mjs';
+import { createHash } from 'node:crypto';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const registry = JSON.parse(await readFile(path.join(root, 'integrations/tools.json'), 'utf8'));
+const clients = JSON.parse(await readFile(path.join(root, 'integrations/tools.json'), 'utf8')).tools;
 const catalog = JSON.parse(await readFile(path.join(root, 'skills.json'), 'utf8'));
 const args = process.argv.slice(2);
-const has = (key) => args.includes(key);
-const value = (key, fallback = '') => { const index = args.indexOf(key); if (index < 0) return fallback; if (!args[index + 1] || args[index + 1].startsWith('--')) throw new Error(key + ' requires a value'); return args[index + 1]; };
-const canonical = catalog.skills.filter((skill) => skill.status === 'canonical');
-const aliases = catalog.aliases;
-const ids = new Set([...canonical, ...aliases].map((skill) => skill.id));
-const recommended = ['tool-integration', 'ultrathink', 'architecture', 'ui-design', 'frontend-slides'].filter((id) => ids.has(id));
-const action = has('--uninstall') ? 'uninstall' : has('--rollback') ? 'rollback' : has('--verify') ? 'verify' : 'install';
-let installMode = value('--mode', 'user');
-if (!['user', 'project'].includes(installMode)) throw new Error('--mode must be user or project');
-
-function targetFor(tool) {
-  const explicit = value('--target');
-  if (explicit) return path.resolve(explicit);
-  if (installMode === 'project') return path.resolve(value('--project', process.cwd()), tool.target);
-  return tool.userTarget.startsWith('~/') ? path.join(homedir(), tool.userTarget.slice(2)) : path.resolve(tool.userTarget);
+const has = key => args.includes(key);
+const value = (key, fallback = '') => {
+  const index = args.indexOf(key);
+  if (index < 0) return fallback;
+  if (!args[index + 1] || args[index + 1].startsWith('--')) throw new Error(key + ' requires a value');
+  return args[index + 1];
+};
+const manifestName = '.azskills-manifest.json';
+const backupName = '.azskills-backups';
+const safeId = id => typeof id === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id);
+const inside = (base, target) => { const rel = path.relative(base, target); return rel && rel !== '..' && !rel.startsWith('..' + path.sep) && !path.isAbsolute(rel); };
+const exists = async file => { try { await lstat(file); return true; } catch (e) { if (e.code === 'ENOENT') return false; throw e; } };
+async function regularAncestors(file) {
+  for (let current = path.resolve(file); ; current = path.dirname(current)) {
+    if (await exists(current) && (await lstat(current)).isSymbolicLink()) throw new Error('Refusing symbolic ancestor: ' + current);
+    if (path.dirname(current) === current) break;
+  }
 }
-async function exists(target) { try { await stat(target); return true; } catch (error) { if (error.code === 'ENOENT') return false; throw error; } }
-async function manifestAt(destination) {
-  try {
-    const data = JSON.parse(await readFile(path.join(destination, '.azskills-manifest.json'), 'utf8'));
-    if (data.schemaVersion === 1 && Array.isArray(data.paths)) return { schemaVersion: 2, skills: data.paths, lastRun: null };
-    if (data.schemaVersion !== 2 || !Array.isArray(data.skills)) throw new Error('Unsupported AzSkills manifest at ' + destination);
-    return data;
-  } catch (error) { if (error.code === 'ENOENT') return { schemaVersion: 2, skills: [], lastRun: null }; throw error; }
-}
-async function saveManifest(destination, data) {
-  const file = path.join(destination, '.azskills-manifest.json');
-  const temporary = file + '.tmp-' + process.pid;
-  await writeFile(temporary, JSON.stringify(data, null, 2) + String.fromCharCode(10), 'utf8');
-  await rename(temporary, file);
-}
-async function confirm(message) {
-  if (has('--yes')) return true;
-  if (!stdin.isTTY || !stdout.isTTY) throw new Error('Confirmation required. Review the preview, then rerun with --yes.');
-  const rl = createInterface({ input: stdin, output: stdout });
-  try { return (await rl.question(message + ' [y/N] ')).trim().toLowerCase() === 'y'; } finally { rl.close(); }
+async function regularTree(file) {
+  const info = await lstat(file);
+  if (info.isSymbolicLink()) throw new Error('Refusing symbolic path: ' + file);
+  if (info.isDirectory()) for (const name of await readdir(file)) await regularTree(path.join(file, name));
+  else if (!info.isFile()) throw new Error('Not a regular file: ' + file);
 }
 async function equalTree(a, b) {
-  const [sa, sb] = await Promise.all([stat(a), stat(b)]);
-  if (sa.isDirectory() !== sb.isDirectory()) return false;
-  if (!sa.isDirectory()) return (await readFile(a)).equals(await readFile(b));
-  const [aa, bb] = await Promise.all([readdir(a), readdir(b)]);
-  if (aa.length !== bb.length || aa.some((name) => !bb.includes(name))) return false;
-  for (const name of aa) if (!await equalTree(path.join(a, name), path.join(b, name))) return false;
+  const [aa, bb] = await Promise.all([lstat(a), lstat(b)]);
+  if (aa.isDirectory() !== bb.isDirectory()) return false;
+  if (!aa.isDirectory()) return (await readFile(a)).equals(await readFile(b));
+  const [an, bn] = await Promise.all([readdir(a), readdir(b)]);
+  if (an.length !== bn.length || an.some(n => !bn.includes(n))) return false;
+  for (const n of an) if (!await equalTree(path.join(a, n), path.join(b, n))) return false;
   return true;
 }
-async function skillSelection() {
-  const requested = value('--skills');
-  let selected = has('--all-skills') ? canonical.map((skill) => skill.id) : requested ? requested.split(',').map((id) => id.trim()).filter(Boolean) : recommended;
-  if (!requested && !has('--all-skills') && stdin.isTTY && stdout.isTTY) {
-    console.log('Recommended skills: ' + recommended.join(', '));
-    console.log('All canonical skills: ' + canonical.map((skill) => skill.id).join(', '));
-    const rl = createInterface({ input: stdin, output: stdout });
-    try {
-      const answer = (await rl.question('Skills [Enter=recommended, all, search <term>, or comma-separated IDs]: ')).trim();
-      if (answer.toLowerCase() === 'all') selected = canonical.map((skill) => skill.id);
-      else if (answer.toLowerCase().startsWith('search ')) {
-        const term = answer.slice(7).toLowerCase();
-        const matches = canonical.filter((skill) => (skill.id + ' ' + skill.role + ' ' + skill.family).toLowerCase().includes(term));
-        for (const skill of matches) console.log(skill.id + ' ' + skill.role);
-        selected = (await rl.question('Select skill IDs (comma-separated): ')).split(',').map((id) => id.trim()).filter(Boolean);
-      } else if (answer) selected = answer.split(',').map((id) => id.trim()).filter(Boolean);
-    } finally { rl.close(); }
-  }
-  const unknown = selected.filter((id) => !ids.has(id));
-  if (unknown.length) throw new Error('Unknown or non-canonical skill id(s): ' + unknown.join(', '));
-  if (!selected.length) throw new Error('Select skills with --skills <id,...> or --all-skills');
-  return [...new Set(selected)];
+async function manifestAt(destination) {
+  const file = path.join(destination, manifestName);
+  if (!await exists(file)) return { skills: [], raw: null, data: null };
+  await regularTree(file);
+  const raw = await readFile(file, 'utf8');
+  const data = JSON.parse(raw);
+  const skills = data.schemaVersion === 1 ? data.paths : data.skills;
+  if (![1, 2, 3].includes(data.schemaVersion) || !Array.isArray(skills) || skills.some(id => !safeId(id)) || new Set(skills).size !== skills.length) throw new Error('Invalid AzSkills manifest');
+  return { skills, raw, data };
 }
-async function clients() {
-  const toolId = value('--tool');
-  if (toolId) { const tool = registry.tools.find((item) => item.id === toolId); if (!tool) throw new Error('Unknown client "' + toolId + '". Run --list.'); return [tool]; }
-  if (has('--all')) return registry.tools;
-  if (!stdin.isTTY || !stdout.isTTY) throw new Error('Choose --tool <id> or --all. Run in a terminal without arguments to open the wizard.');
-  for (const tool of registry.tools) {
-    const target = ['native-skills', 'shared-skills'].includes(tool.mechanism) ? targetFor(tool) : null;
-    console.log([tool.id, tool.name, tool.mechanism, target && await exists(target) ? 'candidate path exists' : 'not detected', target ?? tool.target].join('	'));
-  }
+async function save(destination, raw) {
+  const file = path.join(destination, manifestName);
+  if (raw === null) { await rm(file, { force: true }); return; }
+  const temporary = file + '.tmp-' + process.pid;
+  await writeFile(temporary, raw);
+  await rename(temporary, file);
+}
+async function confirm() {
+  if (has('--dry-run')) return false;
+  if (has('--yes')) return true;
+  if (!stdin.isTTY || !stdout.isTTY) throw new Error('Review preview and rerun with --yes');
   const rl = createInterface({ input: stdin, output: stdout });
-  try {
-    const answer = (await rl.question('Client ID (or all): ')).trim();
-    if (answer.toLowerCase() === 'all') return registry.tools;
-    const matches = registry.tools.filter((tool) => tool.id === answer || tool.name.toLowerCase() === answer.toLowerCase());
-    if (matches.length !== 1) throw new Error('Unknown or ambiguous client. Use an ID from --list.');
-    return matches;
-  } finally { rl.close(); }
+  try { return (await rl.question('Apply these changes? [y/N] ')).trim().toLowerCase() === 'y'; } finally { rl.close(); }
 }
-async function install(destination, selected, packageRoot) {
-  const manifest = await manifestAt(destination);
-  const changes = [];
-  const backupRoot = path.join(destination, '.azskills-backups', new Date().toISOString().replaceAll(':', '-'));
-  for (const id of selected) {
-    const dest = path.join(destination, id);
-    const present = await exists(dest);
-    if (present && !manifest.skills.includes(id)) throw new Error('Refusing to overwrite unmanaged path: ' + dest);
-    if (present && await equalTree(path.join(packageRoot, id), dest)) continue;
-    changes.push({ id, dest, existed: present, backup: present ? path.join(backupRoot, id) : null });
+const backupBase = destination => path.join(path.dirname(destination), '.' + path.basename(destination) + '-azskills-backups');
+async function treeHash(file) {
+  const hash = createHash('sha256');
+  const visit = async (current, relative) => {
+    const info = await lstat(current);
+    hash.update(JSON.stringify([relative, info.isDirectory() ? 'directory' : 'file', info.isDirectory() ? 0 : info.size]));
+    if (info.isDirectory()) for (const name of (await readdir(current)).sort()) await visit(path.join(current, name), relative + '/' + name);
+    else hash.update(await readFile(current));
+  };
+  await regularTree(file);
+  await visit(file, '');
+  return hash.digest('hex');
+}
+async function snapshot(destination, names, previousManifest) {
+  const base = backupBase(destination);
+  if (await exists(base)) await regularTree(base);
+  await mkdir(base, { recursive: true });
+  const directory = await mkdtemp(path.join(base, 'run-'));
+  const items = [];
+  for (const id of names) {
+    const source = path.join(destination, id);
+    const present = await exists(source);
+    if (present) {
+      await regularTree(source);
+      await cp(source, path.join(directory, id), { recursive: true, errorOnExist: true, force: false });
+    }
+    items.push({ id, existed: present, hash: present ? await treeHash(path.join(directory, id)) : null });
   }
-  if (!changes.length) { console.log('Selected skills are already current at ' + destination); return; }
-  console.log('Preview:');
-  for (const change of changes) console.log((change.existed ? 'Update ' : 'Install ') + change.id + ' -> ' + change.dest);
-  console.log('Backup existing managed skills; update .azskills-manifest.json.');
-  if (!await confirm('Apply these changes?')) { console.log('Cancelled; no files changed.'); return; }
+  if (previousManifest !== null) await writeFile(path.join(directory, 'previous-manifest.json'), previousManifest);
+  return { directory, items, hadManifest: previousManifest !== null,
+    manifestHash: previousManifest === null ? null : createHash('sha256').update(previousManifest).digest('hex') };
+}
+async function validateSnapshot(destination, state) {
+  if (!state || typeof state.directory !== 'string' || !inside(backupBase(destination), path.resolve(state.directory)) || !Array.isArray(state.items)) throw new Error('Invalid rollback snapshot');
+  await regularTree(backupBase(destination));
+  await regularTree(state.directory);
+  if (typeof state.hadManifest !== 'boolean') throw new Error('Invalid previous manifest');
+  if (state.hadManifest) {
+    const previousManifest = await readFile(path.join(state.directory, 'previous-manifest.json'), 'utf8');
+    if (createHash('sha256').update(previousManifest).digest('hex') !== state.manifestHash) throw new Error('Previous manifest integrity check failed');
+    const prior = JSON.parse(previousManifest);
+    const ids = prior.schemaVersion === 1 ? prior.paths : prior.skills;
+    if (![1, 2, 3].includes(prior.schemaVersion) || !Array.isArray(ids) || ids.some(id => !safeId(id))) throw new Error('Invalid previous ownership');
+  }
+  const seen = new Set();
+  for (const item of state.items) {
+    if ((!safeId(item.id) && item.id !== backupName) || seen.has(item.id) || typeof item.existed !== 'boolean') throw new Error('Invalid rollback item');
+    seen.add(item.id);
+    if (item.existed && await treeHash(path.join(state.directory, item.id)) !== item.hash) throw new Error('Rollback backup integrity check failed: ' + item.id);
+    if (await exists(path.join(destination, item.id))) await regularTree(path.join(destination, item.id));
+  }
+}
+async function restore(destination, state) {
+  await validateSnapshot(destination, state);
+  for (const item of state.items) {
+    const target = path.join(destination, item.id);
+    await rm(target, { recursive: true, force: true });
+    if (item.existed) await cp(path.join(state.directory, item.id), target, { recursive: true, errorOnExist: true, force: false });
+  }
+  await save(destination, state.hadManifest ? await readFile(path.join(state.directory, 'previous-manifest.json'), 'utf8') : null);
+}
+async function maintain(destination, action, packaged) {
+  destination = path.resolve(destination);
+  await regularAncestors(destination);
+  await regularAncestors(backupBase(destination));
+  if (await exists(destination) && !(await lstat(destination)).isDirectory()) throw new Error('Skills root must be a directory');
+  const manifest = await manifestAt(destination);
+  for (const id of [...manifest.skills, backupName]) {
+    const owned = path.join(destination, id);
+    if (await exists(owned)) await regularTree(owned);
+  }
+  if (action === 'rollback') {
+    const state = manifest.data?.schemaVersion === 3 ? manifest.data.lastRun : null;
+    if (!state) throw new Error('No current rollback snapshot; use the previous installer for legacy rollback records');
+    await validateSnapshot(destination, state);
+    console.log('Preview: restore ' + state.items.map(i => i.id).join(', ') + ' at ' + destination);
+    if (!await confirm()) return;
+    const rescue = await snapshot(destination, state.items.map(i => i.id), manifest.raw);
+    try { await restore(destination, state); } catch (error) { await restore(destination, rescue); throw error; }
+    console.log('Rollback complete');
+    return;
+  }
+  if (action === 'verify') {
+    if (manifest.skills.join(',') !== 'azskills' || !await exists(path.join(destination, 'azskills')) || !await equalTree(packaged, path.join(destination, 'azskills'))) throw new Error('Installed AzSkills differs from the complete bundle');
+    if (await exists(path.join(destination, backupName))) throw new Error('Legacy backups remain inside the scan root; run install to migrate them');
+    console.log('PASS: complete bundle contents and single managed entry. Client discovery: PENDING. Invocation: PENDING.');
+    return;
+  }
+  const names = [...new Set([...manifest.skills, ...(action === 'install' ? ['azskills'] : [])])];
+  if (await exists(path.join(destination, backupName))) names.push(backupName);
+  if (action === 'install' && await exists(path.join(destination, 'azskills')) && !manifest.skills.includes('azskills')) throw new Error('Refusing to overwrite unmanaged azskills');
+  if (action === 'install' && manifest.skills.join(',') === 'azskills' && !names.includes(backupName) && await exists(path.join(destination, 'azskills')) && await equalTree(packaged, path.join(destination, 'azskills'))) { console.log('AzSkills is already current'); return; }
+  if (!names.length) { console.log('No managed entries'); return; }
+  console.log('Preview: ' + action + ' one azskills entry at ' + destination);
+  console.log('Replace managed paths: ' + names.join(', ') + '; backups: ' + backupBase(destination));
+  if (!await confirm()) return;
   await mkdir(destination, { recursive: true });
-  const previousSkills = [...manifest.skills];
-  const completed = [];
+  const state = await snapshot(destination, names, manifest.raw);
   try {
-    for (const change of changes) {
-      if (change.existed) { await mkdir(path.dirname(change.backup), { recursive: true }); await cp(change.dest, change.backup, { recursive: true, errorOnExist: true }); }
-      completed.push(change);
-      if (change.existed) await rm(change.dest, { recursive: true, force: true });
-      await cp(path.join(packageRoot, change.id), change.dest, { recursive: true, errorOnExist: true });
-    }
-    manifest.skills = [...new Set([...manifest.skills, ...changes.map((change) => change.id)])];
-    manifest.lastRun = { previousSkills, changes: changes.map(({ id, existed, backup }) => ({ id, existed, backup })) };
-    await saveManifest(destination, manifest);
-  } catch (error) {
-    for (const change of completed.reverse()) { await rm(change.dest, { recursive: true, force: true }); if (change.existed) await cp(change.backup, change.dest, { recursive: true, errorOnExist: true }); }
-    throw error;
-  }
-  console.log('Installed/updated ' + changes.length + ' skill(s). Backups: ' + backupRoot);
+    for (const id of names) await rm(path.join(destination, id), { recursive: true, force: true });
+    if (action === 'install') await cp(packaged, path.join(destination, 'azskills'), { recursive: true, errorOnExist: true, force: false });
+    await save(destination, JSON.stringify({ schemaVersion: 3, version: catalog.version, skills: action === 'install' ? ['azskills'] : [], lastRun: state }, null, 2) + '\n');
+  } catch (error) { await restore(destination, state); throw error; }
+  console.log('Completed ' + action + '; rollback snapshot: ' + state.directory);
 }
-async function previewInstall(toolName, destination, selected, packageRoot) {
-  const manifest = await manifestAt(destination);
-  const changes = [];
-  for (const id of selected) {
-    const dest = path.join(destination, id);
-    const present = await exists(dest);
-    if (present && !manifest.skills.includes(id)) throw new Error('Refusing to overwrite unmanaged path: ' + dest);
-    const unchanged = present && await equalTree(path.join(packageRoot, id), dest);
-    if (!unchanged) changes.push({ id, action: present ? 'Update' : 'Install', dest });
-  }
-  console.log('Preview for ' + toolName + ' -> ' + destination);
-  if (!changes.length) console.log('Selected skills are already current.');
-  for (const change of changes) console.log(change.action + ' ' + change.id + ' -> ' + change.dest);
-  if (changes.length) console.log('Each bundle includes linked support files under _azskills-support.');
-  console.log('No files changed (--dry-run).');
-}
-async function uninstall(destination) {
-  const manifest = await manifestAt(destination);
-  if (!manifest.skills.length) throw new Error('No AzSkills manifest found at ' + destination);
-  console.log('Preview: remove only managed skill directories: ' + manifest.skills.join(', '));
-  if (!await confirm('Uninstall these copies?')) { console.log('Cancelled; no files changed.'); return; }
-  const previousSkills = [...manifest.skills];
-  const backupRoot = path.join(destination, '.azskills-backups', new Date().toISOString().replaceAll(':', '-'));
-  const changes = previousSkills.map((id) => ({ id, existed: true, backup: path.join(backupRoot, id) }));
-  const completed = [];
-  try {
-    for (const change of changes) {
-      if (!ids.has(change.id)) throw new Error('Unknown skill in manifest; refusing removal: ' + change.id);
-      const source = path.join(destination, change.id);
-      if (!await exists(source)) throw new Error('Managed skill is missing; refusing uninstall: ' + source);
-      await mkdir(path.dirname(change.backup), { recursive: true });
-      await cp(source, change.backup, { recursive: true, errorOnExist: true });
-      completed.push(change);
-      await rm(source, { recursive: true });
-    }
-    manifest.skills = [];
-    manifest.lastRun = { previousSkills, changes };
-    await saveManifest(destination, manifest);
-  } catch (error) {
-    for (const change of completed.reverse()) {
-      const source = path.join(destination, change.id);
-      await rm(source, { recursive: true, force: true });
-      await cp(change.backup, source, { recursive: true, errorOnExist: true });
-    }
-    throw error;
-  }
-  console.log('Removed managed skills. Roll back with --rollback --target <directory>; backups: ' + backupRoot);
-}
-async function rollback(destination) {
-  const manifest = await manifestAt(destination);
-  if (!manifest.lastRun?.changes?.length) throw new Error('No rollback record found at ' + destination);
-  console.log('Preview: restore ' + manifest.lastRun.changes.map((change) => change.id).join(', '));
-  if (!await confirm('Rollback the last AzSkills operation?')) { console.log('Cancelled; no files changed.'); return; }
-  const original = structuredClone(manifest);
-  const restorePoints = [];
-  try {
-    for (const change of [...manifest.lastRun.changes].reverse()) {
-      const dest = path.join(destination, change.id);
-      const existed = await exists(dest);
-      const restore = path.join(destination, '.azskills-backups', 'rollback-' + process.pid, change.id);
-      if (existed) { await mkdir(path.dirname(restore), { recursive: true }); await cp(dest, restore, { recursive: true, errorOnExist: true }); }
-      restorePoints.push({ id: change.id, existed, restore });
-      await rm(dest, { recursive: true, force: true });
-      if (change.existed) await cp(change.backup, dest, { recursive: true, errorOnExist: true });
-    }
-    manifest.skills = manifest.lastRun.previousSkills;
-    manifest.lastRun = null;
-    await saveManifest(destination, manifest);
-  } catch (error) {
-    for (const point of restorePoints.reverse()) {
-      const dest = path.join(destination, point.id);
-      await rm(dest, { recursive: true, force: true });
-      if (point.existed) await cp(point.restore, dest, { recursive: true, errorOnExist: true });
-    }
-    await saveManifest(destination, original);
-    throw error;
-  }
-  console.log('Rollback complete.');
-}
-async function verify(tool, destination, selected) {
-  console.log('Verification for ' + tool.name + ':');
-  if (['native-skills', 'shared-skills'].includes(tool.mechanism)) {
-    const manifest = await manifestAt(destination);
-    const missing = [];
-    for (const id of selected) if (!manifest.skills.includes(id) || !await exists(path.join(destination, id))) missing.push(id);
-    console.log((missing.length ? 'FAIL' : 'PASS') + ' filesystem: ' + (missing.length ? 'missing ' + missing.join(', ') : selected.length + ' skill(s) present and managed'));
-    if (!missing.length) console.log('PASS bundle contents: linked support files are packaged under _azskills-support.');
-    console.log('PENDING client discovery: ' + tool.verify);
-    console.log('PENDING minimal invocation: ask the client to use one selected skill.');
-    if (missing.length) process.exitCode = 1;
-  } else {
-    console.log('PENDING ' + (tool.mechanism === 'mcp' ? 'MCP connection' : 'manual import') + ': follow integrations/guides/' + tool.id + '.md');
-    console.log('PENDING client discovery and minimal invocation: ' + tool.verify);
-  }
-}
-
 async function main() {
-  if (has('--help') || has('-h')) {
-    console.log(['AzSkills setup wizard', '', 'Usage: node scripts/install-skills.mjs [--tool <id>|--all] [--mode user|project] [--project <path>] [--skills <id,...>|--all-skills] [--dry-run] [--yes]', '       node scripts/install-skills.mjs --list', '       node scripts/install-skills.mjs --verify --tool <id> [--target <directory>] [--skills <id,...>]', '       node scripts/install-skills.mjs --rollback --target <directory> [--yes]', '       node scripts/install-skills.mjs --uninstall --target <directory> [--yes]', '', 'Default selection: recommended skills. --all-skills selects every canonical Skill. Writes preview and require confirmation; --yes confirms non-interactive runs.'].join(String.fromCharCode(10)));
-    return;
-  }
-  if (has('--list')) {
-    for (const tool of registry.tools) { const dest = ['native-skills', 'shared-skills'].includes(tool.mechanism) ? targetFor(tool) : null; console.log([tool.id, tool.name, tool.mechanism, dest && await exists(dest) ? 'candidate path exists' : 'not detected', dest ?? tool.target].join('	')); }
-    return;
-  }
-  if (!args.includes('--mode') && stdin.isTTY && stdout.isTTY && action === 'install') {
+  if (has('--help') || has('-h')) { console.log('AzSkills 2.0.0: one entry, all internal modules.\nnode scripts/install-skills.mjs --tool <id> [--mode user|project] [--project <path>] [--target <skills-root>] [--dry-run|--yes]\nMaintenance: --verify | --uninstall | --rollback with --target.\n--list lists clients; --all selects all clients. Legacy --skills and --all-skills always install the full bundle.'); return; }
+  if (has('--list')) { for (const tool of clients) console.log(tool.id + '\t' + tool.name + '\t' + tool.mechanism); return; }
+  const known = new Set(['azskills', ...catalog.modules.map(m => m.id), ...catalog.aliases.map(a => a.id)]);
+  if (value('--skills').split(',').filter(Boolean).some(id => !known.has(id.trim()))) throw new Error('Unknown module selection');
+  if (has('--skills') || has('--all-skills')) console.log('Legacy selection maps to one complete azskills entry.');
+  const mode = value('--mode', 'user');
+  if (!['user', 'project'].includes(mode)) throw new Error('--mode must be user or project');
+  const actions = ['--verify', '--uninstall', '--rollback'].filter(has);
+  if (actions.length > 1) throw new Error('Select one maintenance action');
+  const action = actions[0]?.slice(2) || 'install';
+  let chosen = has('--all') ? clients : clients.filter(t => t.id === value('--tool'));
+  if (has('--tool') && !chosen.length) throw new Error('Unknown client: ' + value('--tool'));
+  if (!chosen.length && !has('--target')) {
+    if (!stdin.isTTY || !stdout.isTTY) throw new Error('Choose --tool or --target; run --list for clients');
+    for (const t of clients) console.log(t.id + '\t' + t.name);
     const rl = createInterface({ input: stdin, output: stdout });
-    try { installMode = (await rl.question('Install scope [user/project, default user]: ')).trim().toLowerCase() || 'user'; }
-    finally { rl.close(); }
-    if (!['user', 'project'].includes(installMode)) throw new Error('Scope must be user or project');
+    try { const id = (await rl.question('Client ID: ')).trim(); chosen = clients.filter(t => t.id === id); } finally { rl.close(); }
+    if (!chosen.length) throw new Error('Unknown client');
   }
-  if (action === 'rollback' || action === 'uninstall') {
-    const explicitTarget = value('--target');
-    if (!explicitTarget) throw new Error(action + ' requires --target <directory>.');
-    const destination = path.resolve(explicitTarget);
-    if (action === 'rollback') await rollback(destination);
-    else await uninstall(destination);
-    return;
-  }
-  const selectedTools = await clients();
-  const filesystemTools = selectedTools.filter((tool) => ['native-skills', 'shared-skills'].includes(tool.mechanism));
-  if (action !== 'install') {
-    if (filesystemTools.length !== 1) throw new Error('Choose exactly one filesystem client for verification, rollback, or uninstall.');
-    const tool = filesystemTools[0]; const destination = targetFor(tool);
-    if (action === 'verify') await verify(tool, destination, await skillSelection());
-    if (action === 'rollback') await rollback(destination);
-    if (action === 'uninstall') await uninstall(destination);
-    return;
-  }
-  const selectedSkills = await skillSelection();
-  for (const tool of selectedTools.filter((item) => !filesystemTools.includes(item))) {
-    console.log(tool.name + ' (' + tool.mechanism + '): automatic local install is not registered.');
-    console.log('Follow integrations/guides/' + tool.id + '.md');
-    if (tool.mechanism === 'mcp') console.log('Server command: node ' + path.join(root, 'scripts/azskills-mcp.mjs'));
-  }
-  const packageRoot = await mkdtemp(path.join(tmpdir(), 'azskills-packages-'));
+  const targets = has('--target') ? [path.resolve(value('--target'))] : chosen.filter(t => ['native-skills', 'shared-skills'].includes(t.mechanism)).map(t => mode === 'project' ? path.resolve(value('--project', process.cwd()), t.target) : t.userTarget.startsWith('~/') ? path.join(homedir(), t.userTarget.slice(2)) : path.resolve(t.userTarget));
+  for (const t of chosen.filter(t => !['native-skills', 'shared-skills'].includes(t.mechanism))) console.log(t.name + ': follow integrations/guides/' + t.id + '.md');
+  if (!targets.length) return;
+  const staging = await mkdtemp(path.join(tmpdir(), 'azskills-install-'));
   try {
-    for (const id of selectedSkills) await packageSkill(root, id, packageRoot);
-    for (const tool of filesystemTools) {
-      const destination = targetFor(tool);
-      if (has('--dry-run')) await previewInstall(tool.name, destination, selectedSkills, packageRoot);
-      else { await install(destination, selectedSkills, packageRoot); await verify(tool, destination, selectedSkills); }
-    }
-  } finally { await rm(packageRoot, { recursive: true, force: true }); }
-  console.log('Selected skills: ' + selectedSkills.join(', '));
+    const packaged = ['install', 'verify'].includes(action) ? await packageSkill(root, 'azskills', staging) : null;
+    for (const target of new Set(targets)) await maintain(target, action, packaged);
+  } finally { await rm(staging, { recursive: true, force: true }); }
 }
-try { await main(); } catch (error) { console.error('AzSkills setup failed: ' + error.message); process.exitCode = 1; }
+try { await main(); } catch (error) { console.error('AzSkills installer: ' + error.message); process.exitCode = 1; }

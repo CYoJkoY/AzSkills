@@ -57,7 +57,7 @@ Define the canonical state and the transitions that can occur: idle, focus, poin
 ### 5. Translate to the host-native implementation
 
 Choose the mechanism the host project already uses. Framework choice belongs
-to [`architecture`](../../architecture/SKILL.md); when the project standardizes
+to [`architecture`](../../references/modules/architecture.md); when the project standardizes
 on React, Vue, Svelte, or another framework, implement the interaction with
 that framework's motion system and the project's own tokens. For surfaces with
 no framework, prefer CSS transitions for simple state changes and the Web

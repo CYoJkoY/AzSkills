@@ -5,6 +5,8 @@ on:
     branches:
       - main
     paths:
+      - "references/**"
+      - "SKILL.md"
       - "remotion-production/**"
       - "README.md"
       - "THIRD_PARTY_NOTICES.md"
@@ -28,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          test -f remotion-production/SKILL.md
+          test -f references/modules/remotion-production.md
 
           for reference in \
             timeline-composition-patterns.md \
@@ -44,16 +46,16 @@ jobs:
             test -f "remotion-production/references/$reference"
           done
 
-          grep -q '^name: remotion-production$' remotion-production/SKILL.md
-          grep -q '^description:' remotion-production/SKILL.md
-          grep -q '^## Contract$' remotion-production/SKILL.md
-          grep -q '^## Modes$' remotion-production/SKILL.md
-          grep -q '^## Workflow$' remotion-production/SKILL.md
-          grep -q '^## Determinism rules$' remotion-production/SKILL.md
-          grep -q '^## Quality gates$' remotion-production/SKILL.md
-          grep -q '^## Output contract$' remotion-production/SKILL.md
-          grep -q '^## Failure handling$' remotion-production/SKILL.md
-          grep -q '^## References$' remotion-production/SKILL.md
+          grep -q '^name: remotion-production$' references/modules/remotion-production.md
+          grep -q '^description:' references/modules/remotion-production.md
+          grep -q '^## Contract$' references/modules/remotion-production.md
+          grep -q '^## Modes$' references/modules/remotion-production.md
+          grep -q '^## Workflow$' references/modules/remotion-production.md
+          grep -q '^## Determinism rules$' references/modules/remotion-production.md
+          grep -q '^## Quality gates$' references/modules/remotion-production.md
+          grep -q '^## Output contract$' references/modules/remotion-production.md
+          grep -q '^## Failure handling$' references/modules/remotion-production.md
+          grep -q '^## References$' references/modules/remotion-production.md
 
       - name: Validate engine coverage and deterministic timing
         shell: bash
@@ -78,9 +80,9 @@ jobs:
             grep -q "$engine" remotion-production/references/visual-engine-matrix.md
           done
 
-          grep -q 'Frame number is the only authoritative time input.' remotion-production/SKILL.md
-          grep -q 'Randomness is seeded and stable across renders.' remotion-production/SKILL.md
-          grep -q 'Any wall-clock or network-dependent path is isolated' remotion-production/SKILL.md
+          grep -q 'Frame number is the only authoritative time input.' references/modules/remotion-production.md
+          grep -q 'Randomness is seeded and stable across renders.' references/modules/remotion-production.md
+          grep -q 'Any wall-clock or network-dependent path is isolated' references/modules/remotion-production.md
 
       - name: Validate cross-skill routing
         shell: bash
@@ -91,10 +93,9 @@ jobs:
             "ui-design" \
             "ui-motion" \
             "frontend-slides" \
-            "logo-generator" \
-            "ultrathink"
+            "logo-generator"
           do
-            grep -q "$skill" remotion-production/SKILL.md
+            grep -q "$skill" references/modules/remotion-production.md
           done
 
           grep -q 'remotion-production' README.md

@@ -216,7 +216,7 @@ For simple charts, inline SVG is preferred because it preserves the zero-depende
 
 ## 9. Motion System
 
-Every deck gets a motion language, not a pile of effects. Wabi-Press registers `--ease-paper` for slide reveals and surface transitions and `--ease-ink` for micro feedback, with the durations in section 2. Motion mechanism, timing rules, interruption, reduced-motion parity, and motion gates belong to [`ui-motion`](../ui-motion/SKILL.md); these tokens are the deck defaults those rules operate on. Spring and bounce entrances sit outside the Wabi-Press direction.
+Every deck gets a motion language, not a pile of effects. Wabi-Press registers `--ease-paper` for slide reveals and surface transitions and `--ease-ink` for micro feedback, with the durations in section 2. Motion mechanism, timing rules, interruption, reduced-motion parity, and motion gates belong to [`ui-motion`](../references/modules/ui-motion.md); these tokens are the deck defaults those rules operate on. Spring and bounce entrances sit outside the Wabi-Press direction.
 
 Choose one primary entrance pattern and one secondary emphasis pattern.
 

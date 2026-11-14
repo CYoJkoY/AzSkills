@@ -1,41 +1,12 @@
-# AzSkills Skill System
+# AzSkills module system
 
-AzSkills is a small set of composable behavior contracts. It is not a prompt
-library, a framework, or a collection of independent manifestos.
+Version: 2.0.0
 
-The model is one handle with interchangeable blades:
-
-```text
-shared rules
-    -> canonical Skill
-        -> mode
-            -> reference
-                -> task output
-```
-
-A canonical Skill owns one class of decisions. A mode changes the workflow and
-quality gates inside that owner. A reference supplies depth without expanding
-the owner. An alias preserves an old path but never owns a decision.
+AzSkills exposes one root SKILL.md. Its routing table selects internal module contracts under references/modules/. Modes and references load on demand. Legacy aliases exist only in skills.json and never create additional installable entries.
 
 ## Shared rules
 
-These rules apply to every canonical Skill. A Skill may add a stricter rule. It
-may not silently weaken one.
-
-| ID | Rule | Check |
-| :--- | :--- | :--- |
-| R01 | One owner per decision. | Name the single Skill that owns the outcome. |
-| R02 | Evidence before invention. | Repository facts, source tokens, and observed behavior precede proposals. |
-| R03 | Project-native first. | Reuse the existing stack, identity, tokens, and conventions before introducing a parallel system. |
-| R04 | One thesis, few signatures. | State the purpose, tone, constraint, and one or two memorable ideas before styling. |
-| R05 | Structure before decoration. | Hierarchy, composition, spacing, and reading order precede effects. |
-| R06 | Tokens before components. | Primitive, semantic, component, state. No scattered raw values. |
-| R07 | Every state is designed. | Default, hover, focus, active, selected, disabled, loading, empty, error, success, and recovery where relevant. |
-| R08 | Accessibility is a gate. | Keyboard, focus visibility, contrast, semantics, reduced motion, and localization survive the change. |
-| R09 | Motion must earn its place. | Name the purpose and frequency; remove, reduce, then refine before adding. |
-| R10 | Native before dependency. | Use the smallest mechanism that fully satisfies the interaction. |
-| R11 | Render before done. | Inspect the produced artifact at real sizes, themes, states, and content extremes. |
-| R12 | Output is a contract. | Return the requested artifact, evidence, unresolved items, and verification status. |
+Read [shared rules](references/shared-rules.md). They are maintained in one place.
 
 ## Layers
 
@@ -43,7 +14,7 @@ may not silently weaken one.
 | :--- | :--- | :--- | :--- |
 | Shared rules | Cross-Skill invariants | Never | Duplicate domain workflow |
 | Visual extension | Shared visual judgment | Extensions an owner links | Restate shared rules or own motion |
-| Canonical Skill | One decision class | Contract, modes, gates | Absorb a second owner |
+| Internal module | One decision class | Contract, modes, gates | Absorb a second owner |
 | Mode | Workflow variant | Sequence, gates, output shape | Redefine shared rules |
 | Reference | Depth | Examples, matrices, detailed procedures | Add scope or a new owner |
 | Alias | Compatibility | Target and mode | Restate a contract |
@@ -63,7 +34,7 @@ tradeoff, and never weaken a safety or accessibility gate silently.
 
 ## Canonical contract
 
-Every canonical `SKILL.md` uses this order. The required sections stay in
+Every internal `references/modules/<id>.md` uses this order. The required sections stay in
 sequence. Extra domain sections may appear between `## Modes` and
 `## Quality gates`; they cannot replace a required section.
 
@@ -72,7 +43,7 @@ sequence. Extra domain sections may appear between `## Modes` and
 name: skill-name
 description: One sentence that names the capability, the artifact, and the boundary.
 version: 2.0.0
-status: canonical
+status: module
 family: interface
 modes: [build, refine, review]
 ---
@@ -88,7 +59,7 @@ One paragraph: what this Skill turns into what, and what it does not do.
 - Owns: the decision class.
 - Inputs: required evidence or files.
 - Outputs: artifact shape.
-- Compose with: canonical Skills and the reason.
+- Compose with: internal modules and the reason.
 - Gates: the two or three non-negotiable checks.
 
 ## Modes
@@ -116,33 +87,14 @@ The `description` field is limited to 320 characters. The contract block is
 limited to seven bullets. A missing key is a validation error, not a style
 preference.
 
-Every alias uses a smaller manifest and no contract sections:
-
-```markdown
----
-name: historical-name
-description: Compatibility alias for the canonical Skill in one mode.
-version: 2.0.0
-status: alias
-canonical: canonical-name
-mode: one-mode
----
-
-# Historical Name
-
-This path is preserved for existing callers. It does not own a contract.
-
-Read [canonical-name](../canonical-name/SKILL.md) in `one-mode` mode.
-
-Do not add rules here. Change the canonical contract instead.
-```
+Aliases are registry-only records in skills.json. They have no manifest or directory. Each record declares id, status alias, canonical module, and mode.
 
 ## Composition grammar
 
 ```text
 request
   -> select family
-  -> select one canonical Skill
+  -> select one internal module
   -> select one mode
   -> load only the references that mode names
   -> execute
@@ -150,7 +102,7 @@ request
   -> return the artifact and evidence
 ```
 
-- Choose one canonical owner. Add a second canonical Skill only when it owns a
+- Choose one canonical owner. Add a second internal module only when it owns a
   separate artifact or a separate decision class.
 - `design-intelligence.md` is the visual extension layer, not a canonical owner.
   A visual Skill may load it; it adds visual judgment inside that owner's
@@ -164,15 +116,14 @@ request
   `ui-design` for a rendered README page. The order is part of the output
   contract.
 - A reference never becomes a hidden second contract. If a reference changes
-  scope, gates, or ownership, promote it to a mode or a canonical Skill.
-- An alias may be selected directly. It forwards to one canonical Skill and one
+  scope, gates, or ownership, promote it to a mode or an internal module.
+- An alias may be selected directly. It forwards to one internal module and one
   mode; it cannot add rules.
 
 ## Families
 
-| Family | Canonical Skills | Purpose |
+| Family | Internal modules | Purpose |
 | :--- | :--- | :--- |
-| core | `ultrathink` | Reasoning method for difficult work. |
 | architecture | `architecture` | Runtime, frontend, storage, and process boundaries. |
 | interface | `design-system`, `ui-design`, `ui-motion` | Design contracts, interface execution, and motion. |
 | visual | `logo-generator`, `photo-abstract-editorial` | Identity and image-led artifacts. |
@@ -185,8 +136,9 @@ request
 
 | Artifact | Limit | Rule |
 | :--- | :--- | :--- |
-| Canonical `SKILL.md` | 280 lines | Decision contract only. |
-| Alias `SKILL.md` | 24 lines | Target, mode, and one warning. |
+| Public `SKILL.md` | 100 lines | Routing and shared rules only. |
+| Internal module | 280 lines | Decision contract only. |
+| Alias | Registry metadata only | Target and mode. |
 | Description | 320 characters | Capability, artifact, boundary. |
 | Reference | No line limit | One topic, loaded only when named. |
 | README catalog | Registry order | No hand-maintained duplicate metadata. |
@@ -198,14 +150,14 @@ shorten a rule until it becomes ambiguous.
 ## Naming
 
 - Canonical directories and `name` fields use lowercase kebab-case.
-- One canonical Skill owns a directory. Modes are values, not directories.
-- Aliases keep their historical directory and point to the canonical path.
-- A new canonical Skill needs a new decision class, not a new adjective.
+- One internal module owns a directory. Modes are values, not directories.
+- Aliases keep historical IDs in the registry and point to an internal module.
+- A new internal module needs a new decision class, not a new adjective.
 
 ## Lifecycle
 
 1. Propose the decision class and the nearest existing owner.
-2. Add the Skill or mode to the registry.
+2. Add the internal module or mode to the registry.
 3. Write or update the contract and references.
 4. Update routing, catalog, and notices.
 5. Run `node scripts/validate-skills.mjs` and `node design-system/tui/preview.mjs --check`.
@@ -217,13 +169,13 @@ The validator enforces the machine-checkable part of this document:
 
 - registry paths, IDs, families, modes, and aliases;
 - frontmatter and contract keys;
-- canonical and alias line budgets;
+- public entry and internal module line budgets;
 - relative link integrity across every Markdown file, including reference-index paths and HTML asset sources;
 - catalog, alias, mode, and issue-template parity;
 - no unregistered `SKILL.md` files;
 - ASCII-only Skill metadata, canonical contracts, and aliases;
 - link integrity in the root system, design, and provenance documents.
-- canonical Skill choices in issue templates.
+- internal module choices in issue templates.
 
 CI also runs `node design-system/tui/preview.mjs --check`, which fails when the
 terminal preview drifts from the registry.

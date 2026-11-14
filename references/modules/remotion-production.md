@@ -1,8 +1,8 @@
 ---
 name: remotion-production
 description: Build deterministic programmatic video and motion graphics with Remotion as the single time authority, clear visual-engine ownership, audio and captions, frame QA, and reliable delivery. Use for rendered time-based artifacts.
-version: 2.0.0
-status: canonical
+version: 3.0.0
+status: module
 family: production
 modes: [video, data, 3d, ui-showcase, motion, av]
 ---
@@ -14,7 +14,7 @@ composition graph, frame state, scene orchestration, media synchronization, and
 render boundary. Specialized engines solve one visual problem each; none becomes
 a second time authority.
 
-Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../design-intelligence.md).
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../../design-intelligence.md).
 
 ## Contract
 
@@ -23,7 +23,7 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual e
 - Owns: frame authority, scene graph, compositor boundaries, determinism, media synchronization, render QA, and delivery variants.
 - Inputs: brief, aspect ratio, dimensions, FPS, duration, storyboard, assets, data, audio, captions, and delivery targets.
 - Outputs: composition code, rendered video or image sequence, preview evidence, and a delivery manifest.
-- Compose with: `ui-design` for UI semantics, `ui-motion` for motion language, `logo-generator` for identity assets, `ultrathink` for production architecture.
+- Compose with: `logo-generator` for identity assets; `ui-design` for interface scenes; `ui-motion` for motion details.
 - Gates: every frame is deterministic; one owner controls time; frame, audio, and captions align; the final render and every variant are inspected.
 
 ## Modes
@@ -174,13 +174,13 @@ synchronization, assets, performance, and delivery.
 
 ## References
 
-- `references/production-guide.md` - full production workflow, specialized modes, and extended gates.
-- `references/timeline-composition-patterns.md` - scene timing, sequences, transitions, and frame budgeting.
-- `references/react-video-architecture.md` - project structure, composition boundaries, props, and metadata.
-- `references/animation-engine-selection.md` - engine selection and rejection.
-- `references/asset-pipeline.md` - fonts, images, video, audio, SVG, 3D, and provenance.
-- `references/render-performance.md` - render speed, memory, concurrency, and frame sampling.
-- `references/audio-video-production.md` - narration, music, sound, captions, and synchronization.
-- `references/ai-video-workflow.md` - AI-assisted brief to storyboard to implementation.
-- `references/production-checklist.md` - final preflight and delivery.
-- `references/visual-engine-matrix.md` - engine comparison.
+- `../../remotion-production/references/production-guide.md` - full production workflow, specialized modes, and extended gates.
+- `../../remotion-production/references/timeline-composition-patterns.md` - scene timing, sequences, transitions, and frame budgeting.
+- `../../remotion-production/references/react-video-architecture.md` - project structure, composition boundaries, props, and metadata.
+- `../../remotion-production/references/animation-engine-selection.md` - engine selection and rejection.
+- `../../remotion-production/references/asset-pipeline.md` - fonts, images, video, audio, SVG, 3D, and provenance.
+- `../../remotion-production/references/render-performance.md` - render speed, memory, concurrency, and frame sampling.
+- `../../remotion-production/references/audio-video-production.md` - narration, music, sound, captions, and synchronization.
+- `../../remotion-production/references/ai-video-workflow.md` - AI-assisted brief to storyboard to implementation.
+- `../../remotion-production/references/production-checklist.md` - final preflight and delivery.
+- `../../remotion-production/references/visual-engine-matrix.md` - engine comparison.

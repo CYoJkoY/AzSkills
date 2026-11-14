@@ -1,8 +1,8 @@
 ---
 name: resume-evidence-workflow
 description: Build a portable career evidence bank, align a resume to a job description, and deliver an editable application-ready artifact. Use for career deep dives, evidence-backed tailoring, or resume audits.
-version: 1.0.0
-status: canonical
+version: 2.0.0
+status: module
 family: career
 modes: [evidence, tailor, review]
 ---
@@ -10,11 +10,11 @@ modes: [evidence, tailor, review]
 # Resume Evidence Workflow
 
 Turn scattered career material into a durable evidence bank, then use that evidence
-to select, tailor, and deliver a resume for a real application. This Skill owns
+to select, tailor, and deliver a resume for a real application. This module owns
 career facts, requirement mapping, resume content, feedback intake, and artifact
 delivery. It does not own interface construction or file-format engines.
 
-Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md) before changing this contract.
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md) before changing this contract.
 
 ## Contract
 
@@ -65,7 +65,7 @@ plausible value branches, and deepen selectively. Name a non-binding question
 estimate at the start of a substantial experience. Let one complete answer resolve
 several themes, and stop when another question would add no distinct signal.
 
-Read [intake-and-dialogue.md](references/intake-and-dialogue.md) before a career
+Read [intake-and-dialogue.md](../../resume-evidence-workflow/references/intake-and-dialogue.md) before a career
 deep dive, question selection, or transcript-heavy intake. Keep the bank factual
 and neutral rather than a draft resume.
 
@@ -75,13 +75,13 @@ file. Never invent a metric, responsibility, relationship type, or outcome.
 
 ### 3. Persist a portable evidence bank
 
-Read [evidence-bank.md](references/evidence-bank.md) when creating or changing the
+Read [evidence-bank.md](../../resume-evidence-workflow/references/evidence-bank.md) when creating or changing the
 bank, evaluating ownership, or recording project logic and key events. Store the
 underlying fact separately from a possible resume expression. Distinguish direct
 output from later outcome and the user's contribution from team or external work.
 
 When a resume is supplied for the first time, read
-[workspace-and-reuse.md](references/workspace-and-reuse.md). Offer a reusable
+[workspace-and-reuse.md](../../resume-evidence-workflow/references/workspace-and-reuse.md). Offer a reusable
 Markdown base resume and a Markdown layout profile beside the bank, plus an
 optional editable HTML master when that master will be maintained. Treat a source
 PDF as calibration input, not a recurring prerequisite.
@@ -91,7 +91,7 @@ PDF as calibration input, not a recurring prerequisite.
 Keep the complete original job description available through final verification.
 Extract the business objective, must-haves, preferred signals, role family,
 seniority, market, language, application channel, and likely evaluation standard.
-Read [jd-and-delivery.md](references/jd-and-delivery.md) before mapping a concrete
+Read [jd-and-delivery.md](../../resume-evidence-workflow/references/jd-and-delivery.md) before mapping a concrete
 role or choosing the delivery route.
 
 Build a requirement-to-evidence matrix that separates direct, adjacent, weak, and
@@ -119,7 +119,7 @@ removal. Reuse an approval only for the scope it covered.
 
 ### 6. Review the change against the requirement
 
-Run the visible alignment review in [jd-and-delivery.md](references/jd-and-delivery.md)
+Run the visible alignment review in [jd-and-delivery.md](../../resume-evidence-workflow/references/jd-and-delivery.md)
 after every targeted content revision and before delivery. Compare V0, the current
 draft, and the complete job description. Repair what is authorized, show material
 before/after changes with the requirement each addresses and the evidence used,
@@ -132,8 +132,8 @@ raise.
 ### 7. Deliver the requested artifact
 
 Deliver the format the application actually requires. For editable HTML, read
-[editable-html.md](references/editable-html.md), start from
-[the editable base](assets/editable-resume-base.html), preserve its tested editing,
+[editable-html.md](../../resume-evidence-workflow/references/editable-html.md), start from
+[the editable base](../../resume-evidence-workflow/assets/editable-resume-base.html), preserve its tested editing,
 copy, fitting, and print behavior, then adapt the document design. Compose with
 `ui-design` when the editor surface itself needs construction, refinement, or a
 visual review. The resume paper keeps its own design; do not apply the AzSkills
@@ -220,8 +220,8 @@ Unverified items:
 
 ## References
 
-- `references/intake-and-dialogue.md` - career discovery, value branches, question limits, voice input, and correction protocol.
-- `references/evidence-bank.md` - portable bank structure, ownership, project logic, metrics, and key-event cards.
-- `references/workspace-and-reuse.md` - base resume, layout profile, direction baselines, project material, and reusable wording.
-- `references/jd-and-delivery.md` - requirement decoding, routing, selection, Grooming, and final artifact checks.
-- `references/editable-html.md` - editable HTML controls, copy panel, fitting, print preflight, and layout preservation.
+- `../../resume-evidence-workflow/references/intake-and-dialogue.md` - career discovery, value branches, question limits, voice input, and correction protocol.
+- `../../resume-evidence-workflow/references/evidence-bank.md` - portable bank structure, ownership, project logic, metrics, and key-event cards.
+- `../../resume-evidence-workflow/references/workspace-and-reuse.md` - base resume, layout profile, direction baselines, project material, and reusable wording.
+- `../../resume-evidence-workflow/references/jd-and-delivery.md` - requirement decoding, routing, selection, Grooming, and final artifact checks.
+- `../../resume-evidence-workflow/references/editable-html.md` - editable HTML controls, copy panel, fitting, print preflight, and layout preservation.

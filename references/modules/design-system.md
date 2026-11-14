@@ -1,8 +1,8 @@
 ---
 name: design-system
 description: Consume, author, normalize, migrate, and audit DESIGN.md visual contracts with exact source evidence, semantic mapping, provenance, and executable QA. Use when a project has DESIGN.md, brand evidence must become rules, or an AzSkills surface needs contract validation.
-version: 2.0.0
-status: canonical
+version: 3.0.0
+status: module
 family: interface
 modes: [ingest, author, migrate, audit]
 ---
@@ -10,11 +10,11 @@ modes: [ingest, author, migrate, audit]
 # Design System
 
 Convert design evidence into a contract that implementation Skills can execute.
-This Skill owns source classification, token and semantic mapping, component and
+This module owns source classification, token and semantic mapping, component and
 state normalization, provenance, reconciliation, and design-contract QA. It does
 not choose the frontend framework or produce the final interface.
 
-Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../design-intelligence.md).
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../../design-intelligence.md).
 
 ## Contract
 
@@ -118,7 +118,7 @@ CJK and RTL, and narrow widths. Fix the mapping before polishing one component.
 ## AzSkills surfaces
 
 Use the shared fallback and precedence in
-[Design Intelligence](../design-intelligence.md#default-visual-direction).
+[Design Intelligence](../../design-intelligence.md#default-visual-direction).
 Wabi Press is one palette with format-specific geometry:
 
 | Surface | Adaptation | Root attribute |
@@ -138,8 +138,8 @@ horizontal overflow at 320 CSS px.
 ## Terminal target
 
 The workbench contract includes a terminal render target defined in
-[`DESIGN.md`](../DESIGN.md#terminal--tui-contract). The executable preview is
-[`tui/preview.mjs`](tui/preview.mjs). It uses cell and row geometry, ANSI
+[`DESIGN.md`](../../DESIGN.md#terminal--tui-contract). The executable preview is
+[`tui/preview.mjs`](../../design-system/tui/preview.mjs). It uses cell and row geometry, ANSI
 semantic roles, ASCII fallbacks, and `NO_COLOR` plain mode. It is not a third
 CSS layer or a separate palette; the workbench information architecture remains
 the source of truth.
@@ -177,8 +177,8 @@ only the decisions that change the artifact.
 
 ## References
 
-- `references/design-system-guide.md` - detailed extraction, section mapping, reconciliation, editorial conformance, and migration procedure.
-- `references/design-md-adapter.md` - source-to-contract adapter.
-- `references/design-md-schema.md` - DESIGN.md schema reference.
-- `references/source-format-matrix.md` - source class matrix.
-- [`tui/preview.mjs`](tui/preview.mjs) - executable terminal preview and conformance gate.
+- `../../design-system/references/design-system-guide.md` - detailed extraction, section mapping, reconciliation, editorial conformance, and migration procedure.
+- `../../design-system/references/design-md-adapter.md` - source-to-contract adapter.
+- `../../design-system/references/design-md-schema.md` - DESIGN.md schema reference.
+- `../../design-system/references/source-format-matrix.md` - source class matrix.
+- [`tui/preview.mjs`](../../design-system/tui/preview.mjs) - executable terminal preview and conformance gate.

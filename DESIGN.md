@@ -36,7 +36,7 @@ historical pigments. Existing repository paper/ink tokens are retained.
 VSCodium / VS Code informs tool navigation and keyboard behavior only.
 BioRender informed token layering, spacing discipline and grouped selection;
 its brand palette, logos and proprietary assets are not part of this system.
-Evidence and source reconciliation follow `design-system/SKILL.md`.
+Evidence and source reconciliation follow `references/modules/design-system.md`.
 
 ## Workbench layout
 

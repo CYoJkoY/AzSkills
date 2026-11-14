@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rmdir, rm, writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
@@ -49,6 +50,42 @@ try {
   await writeFile(path.join(root, 'integrations/missing.md'), '[Missing](../assets/absent.svg)');
   await writeFile(path.join(source, 'broken.md'), '[Broken](../integrations/missing.md)');
   await assert.rejects(packageSkill(root, 'fixture', path.join(temp, 'broken-output')), /missing linked file/);
+  const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const unified = path.join(temp, 'azskills.zip');
+  await packageSkillArchive(repository, 'azskills', path.join(temp, 'unified-stage'), unified);
+  const stagedSource = path.join(temp, 'unified-stage', 'azskills');
+  const stagedRegistry = JSON.parse(await readFile(path.join(stagedSource, 'skills.json'), 'utf8'));
+  for (const module of stagedRegistry.modules) {
+    const directory = path.join(stagedSource, module.id);
+    const entries = await readdir(directory).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
+    if (entries?.length === 0) await rmdir(directory);
+  }
+  const second = path.join(temp, 'azskills-second.zip');
+  await packageSkillArchive(stagedSource, 'azskills', path.join(temp, 'unified-stage-two'), second);
+  assert.deepEqual(await readFile(unified), await readFile(second), 'Unified archives must be deterministic');
+  const extracted = path.join(temp, 'unified-extracted');
+  const extraction = process.platform === 'win32'
+    ? spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', 'Expand-Archive -LiteralPath $env:AZSKILLS_ARCHIVE -DestinationPath $env:AZSKILLS_EXPANDED'], { encoding: 'utf8', env: { ...process.env, AZSKILLS_ARCHIVE: unified, AZSKILLS_EXPANDED: extracted } })
+    : spawnSync('unzip', ['-q', unified, '-d', extracted], { encoding: 'utf8' });
+  if (extraction.error) throw extraction.error;
+  assert.equal(extraction.status, 0, extraction.stderr);
+  const paths = [];
+  async function collect(directory) {
+    for (const item of await readdir(directory, { withFileTypes: true })) {
+      const full = path.join(directory, item.name);
+      if (item.isDirectory()) await collect(full);
+      else paths.push(path.relative(extracted, full).split(path.sep).join('/'));
+    }
+  }
+  await collect(extracted);
+  assert.deepEqual(paths.filter(p => /(^|\/)skill\.md$/i.test(p)), ['SKILL.md']);
+  assert.ok(paths.every(p => !/^(\.git|dist|node_modules)\//.test(p)));
+  const registry = JSON.parse(await readFile(path.join(repository, 'skills.json'), 'utf8'));
+  for (const module of registry.modules) assert.ok(paths.includes(module.path), module.path);
+  assert.deepEqual(JSON.parse(await readFile(path.join(extracted, 'skills.json'), 'utf8')).aliases, registry.aliases);
+  assert.deepEqual(await readFile(path.join(extracted, 'ui-design/references/ux/overview.md')), await readFile(path.join(repository, 'ui-design/references/ux/overview.md')));
+  await validatePackagedSkill(extracted);
+  console.log('Unified archive passed: exactly one manifest, all modules and aliases, extracted supporting bytes and links, deterministic output, and excluded build metadata.');
   console.log('Skill package tests passed (Markdown, HTML assets, srcset, fenced examples, missing dependencies, deterministic zip, and extracted links).');
 } finally {
   await rm(temp, { recursive: true, force: true });

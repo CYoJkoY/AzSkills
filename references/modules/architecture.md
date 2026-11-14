@@ -1,20 +1,20 @@
 ---
 name: architecture
 description: Choose and review the smallest maintainable runtime, frontend stack, persistence model, and process boundary before implementation. Use for new applications, browser extensions, desktop shells, web apps, migrations, and stack decisions.
-version: 2.0.0
-status: canonical
+version: 3.0.0
+status: module
 family: architecture
 modes: [runtime, frontend, migration, review]
 ---
 
 # Architecture
 
-Turn product constraints into one explicit architecture decision. This Skill owns
+Turn product constraints into one explicit architecture decision. This module owns
 runtime, language, framework, storage, and process boundaries. It does not own
 visual direction, interaction design, or rendered quality; those belong to
 `ui-design` and `design-system`.
 
-Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md) before changing this contract.
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md) before changing this contract.
 
 ## Contract
 
@@ -23,7 +23,7 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md) before ch
 - Owns: the smallest sufficient architecture and the evidence for rejecting heavier alternatives.
 - Inputs: product type, targets, interaction model, data shape, lifecycle, team constraints, existing stack, and performance limits.
 - Outputs: an architecture decision record with chosen runtime, stack, persistence, boundaries, rejected alternatives, and risks.
-- Compose with: `ui-design` after the boundary is fixed; `design-system` when the product has a visual contract; `ultrathink` for high-risk tradeoffs.
+- Compose with: `ui-design` after the boundary is fixed; `design-system` when the product has a visual contract.
 - Gates: no heavier runtime without a capability gap; no second stack beside an existing one; every boundary has an owner and a failure mode.
 
 ## Modes
@@ -175,5 +175,5 @@ maintenance impact, and give one smallest corrective action per finding.
 
 ## References
 
-- `references/runtime-selection.md` - detailed runtime, desktop, extension, server, and database gates.
-- `references/frontend-selection.md` - detailed language, framework, styling, persistence, and frontend boundary rules.
+- `../../architecture/references/runtime-selection.md` - detailed runtime, desktop, extension, server, and database gates.
+- `../../architecture/references/frontend-selection.md` - detailed language, framework, styling, persistence, and frontend boundary rules.

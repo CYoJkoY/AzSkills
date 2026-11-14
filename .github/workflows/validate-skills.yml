@@ -41,7 +41,9 @@ jobs:
         run: node --check scripts/validate-skills.mjs
 
       - name: Validate registry and contracts
-        run: node scripts/validate-skills.mjs
+        run: |
+          node scripts/validate-skills.mjs
+          node scripts/generate-routing.mjs --check
 
       - name: Test editable resume copy behavior
         run: node resume-evidence-workflow/tests/copy-description.test.cjs
@@ -71,11 +73,11 @@ jobs:
           for archive in "$RUNNER_TEMP"/azskills-export/*.zip; do
             unzip -tq "$archive"
           done
-          test "$(find "$RUNNER_TEMP/azskills-export" -maxdepth 1 -name '*.zip' | wc -l)" -eq 24
+          test "$(find "$RUNNER_TEMP/azskills-export" -maxdepth 1 -name '*.zip' | wc -l)" -eq 1
           mkdir -p "$RUNNER_TEMP/azskills-extracted"
-          unzip -q "$RUNNER_TEMP/azskills-export/ui-aesthetics.zip" -d "$RUNNER_TEMP/azskills-extracted"
+          unzip -q "$RUNNER_TEMP/azskills-export/azskills.zip" -d "$RUNNER_TEMP/azskills-extracted"
           test -f "$RUNNER_TEMP/azskills-extracted/SKILL.md"
-          test -f "$RUNNER_TEMP/azskills-extracted/_azskills-support/ui-design/references/ux/overview.md"
+          test -f "$RUNNER_TEMP/azskills-extracted/ui-design/references/ux/overview.md"
 
       - name: Test MCP bundle resources
         run: node scripts/test-azskills-mcp.mjs

@@ -11,14 +11,7 @@ import process from "node:process";
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
-const SKILLS = [
-  {
-    name: "ultrathink",
-    group: "CORE",
-    purpose: "Deep reasoning overlay for ambiguous or high-risk work.",
-    when: "Use when assumptions, alternatives, or failure modes need explicit analysis.",
-    contract: "State assumptions. Compare alternatives. Record the decision.",
-  },
+const MODULES = [
   {
     name: "architecture",
     group: "ARCH",
@@ -410,10 +403,10 @@ function headerLine(width, options, style, glyph) {
     { t: " / ", r: "muted" },
     { t: "Skills", r: "muted" },
   ];
-  let right = SKILLS.length + " skills";
+  let right = MODULES.length + " skills";
   if (width >= 80) right += " / " + options.theme;
   if (width >= 100) right += " / " + options.density;
-  if (stringWidth(right) > Math.floor(width * 0.5)) right = SKILLS.length + " skills";
+  if (stringWidth(right) > Math.floor(width * 0.5)) right = MODULES.length + " skills";
   return fitPair(left, [{ t: right, r: "muted" }], width, style, glyph.ellipsis);
 }
 
@@ -451,17 +444,17 @@ function buildRail(height, style, glyph) {
 function buildList(width, height, options, style, glyph) {
   const lines = [];
   const searchText = width >= 28 ? "Search skills" : "Search";
-  const visible = Math.min(SKILLS.length, Math.max(1, height - 2));
-  const selectedIndex = SKILLS.findIndex((item) => item.name === options.selected);
+  const visible = Math.min(MODULES.length, Math.max(1, height - 2));
+  const selectedIndex = MODULES.findIndex((item) => item.name === options.selected);
   const start =
     selectedIndex >= visible
-      ? Math.min(selectedIndex - visible + 1, SKILLS.length - visible)
+      ? Math.min(selectedIndex - visible + 1, MODULES.length - visible)
       : 0;
   const end = start + visible;
-  const range = start + 1 + "-" + end + "/" + SKILLS.length;
+  const range = start + 1 + "-" + end + "/" + MODULES.length;
   lines.push(
     fitPair(
-      [{ t: "SKILLS", r: "textBold" }],
+      [{ t: "MODULES", r: "textBold" }],
       [{ t: "ALL " + range, r: "muted" }],
       width,
       style,
@@ -483,7 +476,7 @@ function buildList(width, height, options, style, glyph) {
   );
 
   const showCategory = width >= 28;
-  for (const skill of SKILLS.slice(start, end)) {
+  for (const skill of MODULES.slice(start, end)) {
     if (lines.length >= height) break;
     const selected = skill.name === options.selected;
     const maxName = width - 2 - (showCategory ? stringWidth(skill.group) + 2 : 0);
@@ -515,7 +508,7 @@ function pushWrapped(lines, text, width, firstPrefix, restPrefix, style, glyph) 
 }
 
 function buildDetail(width, height, options, style, glyph) {
-  const skill = SKILLS.find((item) => item.name === options.selected) || SKILLS[0];
+  const skill = MODULES.find((item) => item.name === options.selected) || MODULES[0];
   const purpose =
     skill.purpose || "Repository-local behavior contract for " + skill.name + ".";
   const when = skill.when || "Use when this capability owns the task.";
@@ -590,12 +583,12 @@ function statusLine(width, options, style, glyph) {
 function renderNarrow(options) {
   const width = Math.max(24, Math.min(39, Number(options.width) || 40));
   const requestedSelected = sanitize(options.selected || DEFAULT_SELECTED);
-  const selected = SKILLS.some((item) => item.name === requestedSelected)
+  const selected = MODULES.some((item) => item.name === requestedSelected)
     ? requestedSelected
     : DEFAULT_SELECTED;
   const lines = [
     "AzSkills",
-    SKILLS.length + " skills",
+    MODULES.length + " skills",
     "Selected: " + selected,
     "Enter open",
     "/ search",
@@ -630,7 +623,7 @@ export function renderTui(options = {}) {
   const style = makeStyle(color, theme);
   const glyph = glyphs(ascii);
   const requestedSelected = sanitize(options.selected || DEFAULT_SELECTED);
-  const selected = SKILLS.some((item) => item.name === requestedSelected)
+  const selected = MODULES.some((item) => item.name === requestedSelected)
     ? requestedSelected
     : DEFAULT_SELECTED;
   const resolved = { width, rows, theme, density, selected, plain, ascii, color };
@@ -781,7 +774,7 @@ function checkFrame(width, color, theme, density) {
   if (color === "16" && !output.includes("\x1b[31")) {
     issues.push("16-colour accent SGR missing at " + width);
   }
-  for (const required of ["AzSkills", "SKILLS", "ui-design"]) {
+  for (const required of ["AzSkills", "MODULES", "ui-design"]) {
     if (!output.includes(required)) {
       issues.push("missing " + required + " at " + width + "/" + color);
     }
@@ -794,8 +787,8 @@ function runCheck() {
   let frames = 0;
   try {
     const registry = JSON.parse(readFileSync(new URL("../../skills.json", import.meta.url), "utf8"));
-    const registered = registry.skills.map((skill) => skill.id).join(",");
-    const rendered = SKILLS.map((skill) => skill.name).join(",");
+    const registered = registry.modules.map((skill) => skill.id).join(",");
+    const rendered = MODULES.map((skill) => skill.name).join(",");
     if (registered !== rendered) issues.push("preview skill list drifted from skills.json");
   } catch (error) {
     issues.push("cannot read skills.json: " + error.message);

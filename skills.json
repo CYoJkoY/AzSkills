@@ -1,11 +1,7 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "system": "SKILL-SYSTEM.md",
   "families": {
-    "core": {
-      "label": "Core",
-      "purpose": "Reasoning method that improves other Skill work."
-    },
     "architecture": {
       "label": "Architecture",
       "purpose": "Runtime, frontend, persistence, and process boundaries."
@@ -35,204 +31,292 @@
       "purpose": "Connect and manage AzSkills across supported AI clients."
     }
   },
-  "skills": [
-    {
-      "id": "ultrathink",
-      "path": "ultrathink/SKILL.md",
-      "status": "canonical",
-      "family": "core",
-      "modes": ["deep", "rescue"],
-      "role": "Deep reasoning overlay for ambiguous or high-risk work.",
-      "composes": []
-    },
-    {
-      "id": "architecture",
-      "path": "architecture/SKILL.md",
-      "status": "canonical",
-      "family": "architecture",
-      "modes": ["runtime", "frontend", "migration", "review"],
-      "role": "Runtime, frontend stack, persistence, and process boundaries.",
-      "composes": ["design-system", "ui-design", "ultrathink"]
-    },
-    {
-      "id": "design-system",
-      "path": "design-system/SKILL.md",
-      "status": "canonical",
-      "family": "interface",
-      "modes": ["ingest", "author", "migrate", "audit"],
-      "role": "DESIGN.md ingestion, normalization, provenance, and verification.",
-      "composes": ["architecture", "frontend-slides", "ui-design", "ui-motion"]
-    },
-    {
-      "id": "ui-design",
-      "path": "ui-design/SKILL.md",
-      "status": "canonical",
-      "family": "interface",
-      "modes": ["build", "refine", "review", "system"],
-      "role": "Interface hierarchy, components, states, responsive behavior, and visual QA.",
-      "composes": ["architecture", "design-system", "ui-motion"]
-    },
-    {
-      "id": "ui-motion",
-      "path": "ui-motion/SKILL.md",
-      "status": "canonical",
-      "family": "interface",
-      "modes": ["build", "review", "audit", "pattern", "svg"],
-      "role": "Motion construction, review, audit, patterns, and SVG animation.",
-      "composes": ["design-system", "ui-design"]
-    },
-    {
-      "id": "logo-generator",
-      "path": "logo-generator/SKILL.md",
-      "status": "canonical",
-      "family": "visual",
-      "modes": ["mark", "character", "system"],
-      "role": "Logos, product marks, character marks, and identity systems.",
-      "composes": ["design-system", "ui-design", "ui-motion"]
-    },
-    {
-      "id": "photo-abstract-editorial",
-      "path": "photo-abstract-editorial/SKILL.md",
-      "status": "canonical",
-      "family": "visual",
-      "modes": ["treatment", "audit"],
-      "role": "Photograph-preserving abstract editorial diptychs.",
-      "composes": ["logo-generator", "ui-design"]
-    },
-    {
-      "id": "frontend-slides",
-      "path": "frontend-slides/SKILL.md",
-      "status": "canonical",
-      "family": "production",
-      "modes": ["new", "convert", "enhance", "report"],
-      "role": "Responsive HTML reports, fixed-stage presentations, and rendered QA.",
-      "composes": ["design-system", "logo-generator", "ui-motion"]
-    },
-    {
-      "id": "remotion-production",
-      "path": "remotion-production/SKILL.md",
-      "status": "canonical",
-      "family": "production",
-      "modes": ["video", "data", "3d", "ui-showcase", "motion", "av"],
-      "role": "Deterministic programmatic video and render delivery.",
-      "composes": ["logo-generator", "ui-design", "ui-motion", "ultrathink"]
-    },
-    {
-      "id": "readme-craft",
-      "path": "readme-craft/SKILL.md",
-      "status": "canonical",
-      "family": "publishing",
-      "modes": ["build", "rewrite", "audit"],
-      "role": "GitHub README architecture, visuals, links, and QA.",
-      "composes": ["logo-generator", "ui-design"]
-    },
-    {
-      "id": "steam-mod-page",
-      "path": "steam-mod-page/SKILL.md",
-      "status": "canonical",
-      "family": "publishing",
-      "modes": ["player", "developer", "audit"],
-      "role": "Steam Workshop BBCode pages and bilingual delivery.",
-      "composes": ["localization", "ui-design"]
-    },
-    {
-      "id": "localization",
-      "path": "localization/SKILL.md",
-      "status": "canonical",
-      "family": "publishing",
-      "modes": ["translate", "audit"],
-      "role": "Game CSV localization with locale completeness and markup safety.",
-      "composes": ["readme-craft", "steam-mod-page"]
-    },
-    {
-      "id": "resume-evidence-workflow",
-      "path": "resume-evidence-workflow/SKILL.md",
-      "status": "canonical",
-      "family": "career",
-      "modes": ["evidence", "tailor", "review"],
-      "role": "Career evidence, requirement alignment, and editable resume delivery.",
-      "composes": ["ui-design"]
-    },
-    {
-      "id": "tool-integration",
-      "path": "tool-integration/SKILL.md",
-      "status": "canonical",
-      "family": "operations",
-      "modes": ["install", "configure", "troubleshoot", "remove"],
-      "role": "Connect AzSkills to AI clients with verified installation and setup workflows.",
-      "composes": []
-    }
-  ],
   "aliases": [
     {
       "id": "application-architecture",
-      "path": "application-architecture/SKILL.md",
       "status": "alias",
       "canonical": "architecture",
       "mode": "runtime"
     },
     {
       "id": "frontend-architecture",
-      "path": "frontend-architecture/SKILL.md",
       "status": "alias",
       "canonical": "architecture",
       "mode": "frontend"
     },
     {
       "id": "ui-aesthetics",
-      "path": "ui-aesthetics/SKILL.md",
       "status": "alias",
       "canonical": "ui-design",
       "mode": "refine"
     },
     {
       "id": "ui-ux-design-intelligence",
-      "path": "ui-ux-design-intelligence/SKILL.md",
       "status": "alias",
       "canonical": "ui-design",
       "mode": "review"
     },
     {
       "id": "ui-motion-review",
-      "path": "ui-motion-review/SKILL.md",
       "status": "alias",
       "canonical": "ui-motion",
       "mode": "review"
     },
     {
       "id": "ui-motion-audit",
-      "path": "ui-motion-audit/SKILL.md",
       "status": "alias",
       "canonical": "ui-motion",
       "mode": "audit"
     },
     {
       "id": "rare-ui-motion",
-      "path": "rare-ui-motion/SKILL.md",
       "status": "alias",
       "canonical": "ui-motion",
       "mode": "pattern"
     },
     {
       "id": "svg-animation",
-      "path": "svg-animation/SKILL.md",
       "status": "alias",
       "canonical": "ui-motion",
       "mode": "svg"
     },
     {
       "id": "ip-as-logo",
-      "path": "ip-as-logo/SKILL.md",
       "status": "alias",
       "canonical": "logo-generator",
       "mode": "character"
     },
     {
       "id": "l13n",
-      "path": "l13n/SKILL.md",
       "status": "alias",
       "canonical": "localization",
       "mode": "translate"
+    }
+  ],
+  "version": "2.0.0",
+  "entry": {
+    "id": "azskills",
+    "path": "SKILL.md",
+    "version": "2.0.0"
+  },
+  "modules": [
+    {
+      "id": "architecture",
+      "path": "references/modules/architecture.md",
+      "status": "module",
+      "family": "architecture",
+      "modes": [
+        "runtime",
+        "frontend",
+        "migration",
+        "review"
+      ],
+      "role": "Runtime, frontend stack, persistence, and process boundaries.",
+      "composes": [
+        "design-system",
+        "ui-design"
+      ]
+    },
+    {
+      "id": "design-system",
+      "path": "references/modules/design-system.md",
+      "status": "module",
+      "family": "interface",
+      "modes": [
+        "ingest",
+        "author",
+        "migrate",
+        "audit"
+      ],
+      "role": "DESIGN.md ingestion, normalization, provenance, and verification.",
+      "composes": [
+        "architecture",
+        "frontend-slides",
+        "ui-design",
+        "ui-motion"
+      ]
+    },
+    {
+      "id": "ui-design",
+      "path": "references/modules/ui-design.md",
+      "status": "module",
+      "family": "interface",
+      "modes": [
+        "build",
+        "refine",
+        "review",
+        "system"
+      ],
+      "role": "Interface hierarchy, components, states, responsive behavior, and visual QA.",
+      "composes": [
+        "architecture",
+        "design-system",
+        "ui-motion"
+      ]
+    },
+    {
+      "id": "ui-motion",
+      "path": "references/modules/ui-motion.md",
+      "status": "module",
+      "family": "interface",
+      "modes": [
+        "build",
+        "review",
+        "audit",
+        "pattern",
+        "svg"
+      ],
+      "role": "Motion construction, review, audit, patterns, and SVG animation.",
+      "composes": [
+        "design-system",
+        "ui-design"
+      ]
+    },
+    {
+      "id": "logo-generator",
+      "path": "references/modules/logo-generator.md",
+      "status": "module",
+      "family": "visual",
+      "modes": [
+        "mark",
+        "character",
+        "system"
+      ],
+      "role": "Logos, product marks, character marks, and identity systems.",
+      "composes": [
+        "design-system",
+        "ui-design",
+        "ui-motion"
+      ]
+    },
+    {
+      "id": "photo-abstract-editorial",
+      "path": "references/modules/photo-abstract-editorial.md",
+      "status": "module",
+      "family": "visual",
+      "modes": [
+        "treatment",
+        "audit"
+      ],
+      "role": "Photograph-preserving abstract editorial diptychs.",
+      "composes": [
+        "logo-generator",
+        "ui-design"
+      ]
+    },
+    {
+      "id": "frontend-slides",
+      "path": "references/modules/frontend-slides.md",
+      "status": "module",
+      "family": "production",
+      "modes": [
+        "new",
+        "convert",
+        "enhance",
+        "report"
+      ],
+      "role": "Responsive HTML reports, fixed-stage presentations, and rendered QA.",
+      "composes": [
+        "design-system",
+        "logo-generator",
+        "ui-motion"
+      ]
+    },
+    {
+      "id": "remotion-production",
+      "path": "references/modules/remotion-production.md",
+      "status": "module",
+      "family": "production",
+      "modes": [
+        "video",
+        "data",
+        "3d",
+        "ui-showcase",
+        "motion",
+        "av"
+      ],
+      "role": "Deterministic programmatic video and render delivery.",
+      "composes": [
+        "logo-generator",
+        "ui-design",
+        "ui-motion"
+      ]
+    },
+    {
+      "id": "readme-craft",
+      "path": "references/modules/readme-craft.md",
+      "status": "module",
+      "family": "publishing",
+      "modes": [
+        "build",
+        "rewrite",
+        "audit"
+      ],
+      "role": "GitHub README architecture, visuals, links, and QA.",
+      "composes": [
+        "logo-generator",
+        "ui-design"
+      ]
+    },
+    {
+      "id": "steam-mod-page",
+      "path": "references/modules/steam-mod-page.md",
+      "status": "module",
+      "family": "publishing",
+      "modes": [
+        "player",
+        "developer",
+        "audit"
+      ],
+      "role": "Steam Workshop BBCode pages and bilingual delivery.",
+      "composes": [
+        "localization",
+        "ui-design"
+      ]
+    },
+    {
+      "id": "localization",
+      "path": "references/modules/localization.md",
+      "status": "module",
+      "family": "publishing",
+      "modes": [
+        "translate",
+        "audit"
+      ],
+      "role": "Game CSV localization with locale completeness and markup safety.",
+      "composes": [
+        "readme-craft",
+        "steam-mod-page"
+      ]
+    },
+    {
+      "id": "resume-evidence-workflow",
+      "path": "references/modules/resume-evidence-workflow.md",
+      "status": "module",
+      "family": "career",
+      "modes": [
+        "evidence",
+        "tailor",
+        "review"
+      ],
+      "role": "Career evidence, requirement alignment, and editable resume delivery.",
+      "composes": [
+        "ui-design"
+      ]
+    },
+    {
+      "id": "tool-integration",
+      "path": "references/modules/tool-integration.md",
+      "status": "module",
+      "family": "operations",
+      "modes": [
+        "install",
+        "configure",
+        "troubleshoot",
+        "remove"
+      ],
+      "role": "Connect AzSkills to AI clients with verified installation and setup workflows.",
+      "composes": []
     }
   ]
 }

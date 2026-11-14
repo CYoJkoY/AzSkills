@@ -67,7 +67,7 @@ The integration preserves AzSkills-specific priorities: existing icon systems ta
 
 The upstream repository declares the MIT License. AzSkills does not copy its source code, icon data, generated outputs, or repository-specific implementation into the project.
 
-AzSkills intentionally does not import or reproduce external searchable databases, generated outputs, repository-specific scripts, private/internal material, or large upstream skill packages. The implementation is maintained as original AzSkills text in [`ui-design/SKILL.md`](ui-design/SKILL.md), [`ui-design/references/aesthetics.md`](ui-design/references/aesthetics.md), and [`design-intelligence.md`](design-intelligence.md).
+AzSkills intentionally does not import or reproduce external searchable databases, generated outputs, repository-specific scripts, private/internal material, or large upstream skill packages. The implementation is maintained as original AzSkills text in [`references/modules/ui-design.md`](references/modules/ui-design.md), [`ui-design/references/aesthetics.md`](ui-design/references/aesthetics.md), and [`design-intelligence.md`](design-intelligence.md).
 
 One caution from current public discussion is preserved in AzSkills' architecture: external tooling may ship much more data than an agent actually reads, and some combined modes can silently ignore options. AzSkills therefore prioritizes a compact contract with explicit trigger conditions and verification requirements over a large passive data bundle. See the public discussion around UI/UX Pro Max issue #484 for an example of this class of integration risk: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/issues/484
 

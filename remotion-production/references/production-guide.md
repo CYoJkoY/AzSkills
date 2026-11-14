@@ -671,7 +671,6 @@ The normal combinations are:
       → remotion-production only when video rendering is required
 
     Difficult production architecture
-      → ultrathink
       → remotion-production
 
 design-intelligence.md remains a shared reasoning layer. It should not be duplicated inside these references.

@@ -1,8 +1,8 @@
 ---
 name: frontend-slides
 description: Build responsive page-by-page HTML reports or fixed-stage 1920x1080 presentations with deliberate typography and rendered QA. Use for reading-first reports, new decks, PowerPoint conversion, and HTML deck refinement.
-version: 2.1.0
-status: canonical
+version: 3.0.0
+status: module
 family: production
 modes: [new, convert, enhance, report]
 ---
@@ -10,11 +10,11 @@ modes: [new, convert, enhance, report]
 # Frontend Slides
 
 Turn source content into an HTML report or presentation that reads as one
-designed argument. This Skill owns deck narrative, stage geometry, typography,
+designed argument. This module owns deck narrative, stage geometry, typography,
 layout, authored visual assets, and rendered slide QA. It does not own video
 production or general application UI.
 
-Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../design-intelligence.md).
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../../design-intelligence.md).
 
 ## Contract
 
@@ -38,8 +38,8 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual e
 ## Report contract
 
 For reading-first reports, choose `report` even when the user describes the result
-as PPT-like. Read [references/html-report.md](references/html-report.md) and use
-[assets/report.html](assets/report.html) with [assets/report.css](assets/report.css).
+as PPT-like. Read [references/html-report.md](../../frontend-slides/references/html-report.md) and use
+[assets/report.html](../../frontend-slides/assets/report.html) with [assets/report.css](../../frontend-slides/assets/report.css).
 Use Wabi-Press with serif headings, CJK-capable sans body and mono technical
 text unless the user explicitly overrides them. Retain logical pages, visible
 page numbers and navigation on desktop and mobile. Use natural page height and a single column
@@ -82,7 +82,7 @@ page breaks.
 
 State purpose, tone, constraint, and one or two signature ideas. Choose an art
 direction from the subject and audience. AzSkills-owned narrative decks use
-the [shared Wabi Press fallback](../design-intelligence.md#default-visual-direction) when no stronger brief exists; it
+the [shared Wabi Press fallback](../../design-intelligence.md#default-visual-direction) when no stronger brief exists; it
 is a default, not a mandatory skin. Interactive chrome uses the same paper/ink palette through --wb-* compatibility tokens
 from `DESIGN.md`.
 
@@ -163,10 +163,10 @@ not be preserved.
 
 ## References
 
-- `references/html-report.md` - report-only design, fonts, mobile layout and verification; overrides fixed-stage reference geometry.
+- `../../frontend-slides/references/html-report.md` - report-only design, fonts, mobile layout and verification; overrides fixed-stage reference geometry.
 
-- `references/frontend-slides-guide.md` - detailed mode workflows, layout rules, image pipeline, and editing guidance.
-- `DESIGN_SYSTEM.md` - deck design system and quality gate.
-- `STYLE_PRESETS.md` - default art direction and token reference.
-- `html-template.md` - stage shell and component markup.
-- `animation-patterns.md` - slide and element motion patterns.
+- `../../frontend-slides/references/frontend-slides-guide.md` - detailed mode workflows, layout rules, image pipeline, and editing guidance.
+- `../../frontend-slides/DESIGN_SYSTEM.md` - deck design system and quality gate.
+- `../../frontend-slides/STYLE_PRESETS.md` - default art direction and token reference.
+- `../../frontend-slides/html-template.md` - stage shell and component markup.
+- `../../frontend-slides/animation-patterns.md` - slide and element motion patterns.

@@ -1,8 +1,8 @@
 name: "New Skill Proposal"
 description: >
-  Propose a new SKILL.md behavior contract. A Skill must be a bounded,
+  Propose a new internal module contract. A module must be a bounded,
   composable capability - not a universal prompt.
-title: "[Proposal] <skill-directory-name>: <one-line capability summary>"
+title: "[Proposal] <module-id>: <one-line capability summary>"
 labels:
   - "type: proposal"
   - "status: triage"
@@ -11,7 +11,7 @@ body:
     attributes:
       value: |
         > **Before you submit**, please verify:
-        > 1. No existing canonical Skill or mode already covers this capability
+        > 1. No existing internal module or mode already covers this capability
         >    (check [`skills.json`](https://github.com/CYoJkoY/AzSkills/blob/main/skills.json)).
         > 2. The proposal is one decision class, not a workflow bundle.
         > 3. It can be **composed** with existing Skills rather than replacing them.
@@ -21,9 +21,8 @@ body:
     attributes:
       label: Target Directory
       description: >
-        For a new canonical Skill, use a kebab-case directory that will contain
-        SKILL.md. For a mode, reference, or alias, name the existing canonical
-        Skill directory and the target file or mode.
+        For a new internal module, use references/modules/<id>.md. For a mode, reference, or alias, name the existing module
+        and the target file or mode.
       placeholder: my-new-skill
     validations:
       required: true
@@ -32,9 +31,9 @@ body:
     id: kind
     attributes:
       label: Proposal Type
-      description: Prefer a mode or reference over a new canonical Skill.
+      description: Prefer a mode or reference over a new internal module.
       options:
-        - New canonical Skill
+        - New internal module
         - New mode on an existing Skill
         - New reference for an existing Skill
         - Compatibility alias for an existing Skill
@@ -111,7 +110,7 @@ body:
     attributes:
       label: Supporting Files (Optional)
       description: >
-        Will this Skill need additional files alongside SKILL.md
+        Will this module need supporting files
         (references, examples, templates, assets)?
       placeholder: |
         - references/example-input.md
@@ -140,7 +139,6 @@ body:
         - localization
         - resume-evidence-workflow
         - tool-integration
-        - ultrathink
         - None / Standalone
     validations:
       required: false
