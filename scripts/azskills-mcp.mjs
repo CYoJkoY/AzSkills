@@ -8,9 +8,21 @@ import { packageSkill } from './package-skill.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const catalog = JSON.parse(await readFile(path.join(root, 'skills.json'), 'utf8'));
 const fallbackProtocolVersion = '2025-06-18';
+const option = (name) => {
+  const index = process.argv.indexOf('--' + name);
+  const value = index >= 0 ? process.argv[index + 1] : '';
+  if (index >= 0 && (!value || value.startsWith('--'))) throw new Error('--' + name + ' requires a value');
+  return value;
+};
+const selected = option('skills');
+const knownIds = new Set([...catalog.skills, ...catalog.aliases].map((entry) => entry.id));
+const selection = selected ? selected.split(',').map((item) => item.trim()).filter(Boolean) : null;
+const unknownSelection = (selection ?? []).filter((item) => !knownIds.has(item));
+if (unknownSelection.length) throw new Error('Unknown skill id(s): ' + unknownSelection.join(', '));
+const requested = selection ?? [...catalog.skills, ...catalog.aliases].map((entry) => entry.id);
+const entries = [...catalog.skills, ...catalog.aliases].filter((entry) => requested.includes(entry.id));
 
 const bundleRoot = await mkdtemp(path.join(tmpdir(), 'azskills-mcp-'));
-const entries = [...catalog.skills, ...catalog.aliases];
 try {
   for (const skill of entries) await packageSkill(root, skill.id, bundleRoot);
 } catch (error) {

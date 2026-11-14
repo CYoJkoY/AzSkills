@@ -35,4 +35,21 @@ assert.match(responses.get(3)?.result?.contents?.[0]?.text ?? '', /Codex/);
 assert.match(responses.get(4)?.result?.content?.[0]?.text ?? '', /UX Review Reference/);
 assert.match(responses.get(5)?.error?.message ?? '', /escapes its bundle/);
 assert.match(responses.get(6)?.result?.content?.[0]?.text ?? '', /ui-design/);
-console.log('MCP integration tests passed (complete resources, aliases, supporting-file reads, and path traversal protection).');
+const limitedInput = [
+  { jsonrpc: '2.0', id: 1, method: 'resources/list' },
+  { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'read_skill', arguments: { id: 'architecture' } } },
+].map((request) => JSON.stringify(request)).join('\n') + '\n';
+const limited = spawnSync(process.execPath, [server, '--skills', 'tool-integration'], {
+  cwd: root,
+  encoding: 'utf8',
+  input: limitedInput,
+  timeout: 30000,
+});
+if (limited.error) throw limited.error;
+assert.equal(limited.status, 0, limited.stderr || 'MCP server exited unsuccessfully');
+const limitedResponses = new Map(limited.stdout.trim().split(/\r?\n/).map((line) => [JSON.parse(line).id, JSON.parse(line)]));
+const limitedResources = limitedResponses.get(1)?.result?.resources ?? [];
+assert.ok(limitedResources.some((resource) => resource.uri === 'azskills://skills/tool-integration'));
+assert.ok(!limitedResources.some((resource) => resource.uri.startsWith('azskills://skills/ui-design')));
+assert.match(limitedResponses.get(2)?.error?.message ?? '', /Unknown skill: architecture/);
+console.log('MCP integration tests passed (complete resources, selection, aliases, supporting-file reads, and path traversal protection).');
