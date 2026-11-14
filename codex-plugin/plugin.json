@@ -1,0 +1,21 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "azskills",
+  "version": "2.1.0",
+  "description": "AzSkills workflows for architecture, design, visual production, publishing, and client integration.",
+  "license": "MIT",
+  "keywords": ["architecture", "design", "skills", "workflow"],
+  "extensions": {
+    "com.openai": {
+      "hooks": "./hooks/hooks.json",
+      "interface": {
+        "displayName": "AzSkills",
+        "shortDescription": "Route work through specialized AzSkills workflows.",
+        "longDescription": "Automatically routes relevant requests through AzSkills modules for architecture, interfaces, visual production, publishing, and client integration.",
+        "developerName": "AzSkills",
+        "category": "Productivity",
+        "capabilities": ["Read", "Write"]
+      }
+    }
+  }
+}

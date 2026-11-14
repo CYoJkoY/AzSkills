@@ -6,7 +6,7 @@
   <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: one entry with specialized internal modules" width="100%">
 </picture>
 
-Version **2.0.0**. One entry in your client, specialized capabilities inside.
+Version **2.1.0**. One entry in your client, specialized capabilities inside.
 
 AzSkills installs as a single `azskills` folder with one `SKILL.md`. Describe the result you want; the entry routes to the relevant internal module and loads only the necessary references. Internal module names are workflow choices, not additional skills to install.
 
@@ -21,9 +21,18 @@ node scripts/install-skills.mjs --tool codex --mode project --project /path/to/p
 
 The resulting entry is `/path/to/project/.agents/skills/azskills/SKILL.md`. Use `--mode user` for the client user directory, `--target <skills-root>` to override the destination, or `--list` to see supported clients. Running without arguments opens a client-selection prompt. The default scope is user. Every selection installs the same complete bundle.
 
+For Codex's automatic routing hook, build and add the local plugin marketplace instead:
+
+```sh
+node scripts/package-plugin.mjs --output /path/to/fresh/exports
+codex plugin marketplace add /path/to/fresh/exports/azskills-marketplace
+```
+
+Install AzSkills from the marketplace in Codex and review/trust its `SessionStart` hook when prompted. After trust, each new session receives AzSkills routing guidance automatically. The regular installer above installs a skill folder without this hook.
+
 For archive import, run `node scripts/package-skill.mjs --output /path/to/exports` and import `azskills.zip`. The ZIP has one root `SKILL.md` and all supporting files. Install the complete archive, not the manifest alone. Use a fresh export directory; pre-existing older archives are not removed automatically.
 
-See [client integration guides](integrations/README.md) for native folders, manual import, and MCP configuration. Client discovery depends on the client scan scope and may require a restart. The installer verifies local contents separately from actual client discovery and invocation.
+See [client integration guides](integrations/README.md) for Codex plugin setup, skill folders, manual import, and MCP configuration. Client discovery depends on the client scan scope and may require a restart. The installer verifies local contents separately from actual client discovery and invocation.
 
 ## Use
 

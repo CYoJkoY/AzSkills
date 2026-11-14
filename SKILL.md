@@ -1,7 +1,7 @@
 ---
 name: azskills
 description: Build and review software architecture, interfaces, design systems, motion, logos, editorial images, HTML slides, video, README pages, Steam pages, game localization, resumes, and AI client setup. Routes each task to one internal module and loads its references on demand.
-version: 2.0.0
+version: 2.1.0
 ---
 
 # AzSkills
@@ -9,6 +9,11 @@ version: 2.0.0
 AzSkills is one skill with specialized internal modules. Start from the user's
 requested outcome. Module names and old aliases select workflows inside this
 entry; they are not separate skills to install.
+
+When loaded by the AzSkills Codex plugin's session hook, proactively route
+matching requests through this entry without waiting for the user to invoke
+AzSkills by name. Use this workflow only for requests within the capabilities
+listed above; unrelated tasks remain outside its scope.
 
 ## Route the task
 

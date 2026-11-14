@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
 import { packageSkill, packageSkillArchive, validatePackagedSkill } from './package-skill.mjs';
+import { packageCodexPlugin } from './package-plugin.mjs';
 
 const temp = await mkdtemp(path.join(os.tmpdir(), 'azskills-package-'));
 const root = path.join(temp, 'repository');
@@ -51,6 +52,30 @@ try {
   await writeFile(path.join(source, 'broken.md'), '[Broken](../integrations/missing.md)');
   await assert.rejects(packageSkill(root, 'fixture', path.join(temp, 'broken-output')), /missing linked file/);
   const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const pluginBuild = path.join(temp, 'plugin-build');
+  const { marketplace, plugin } = await packageCodexPlugin(repository, path.join(temp, 'marketplace-output'));
+  const pluginManifest = JSON.parse(await readFile(path.join(plugin, 'plugin.json'), 'utf8'));
+  const marketplaceManifest = JSON.parse(await readFile(path.join(marketplace, 'marketplace.json'), 'utf8'));
+  assert.equal(pluginManifest.name, 'azskills');
+  assert.equal(pluginManifest.version, JSON.parse(await readFile(path.join(plugin, 'skills/azskills/skills.json'), 'utf8')).version);
+  assert.equal(marketplaceManifest.plugins[0].source.path, './plugins/azskills');
+  assert.ok((await readdir(path.join(plugin, 'skills/azskills'))).includes('SKILL.md'));
+  const hook = spawnSync(process.execPath, [path.join(plugin, 'hooks/session-start.mjs')], {
+    encoding: 'utf8',
+    env: { ...process.env, PLUGIN_ROOT: plugin },
+  });
+  assert.equal(hook.status, 0, hook.stderr);
+  const hookOutput = JSON.parse(hook.stdout);
+  assert.equal(hookOutput.hookSpecificOutput.hookEventName, 'SessionStart');
+  assert.match(hookOutput.hookSpecificOutput.additionalContext, /do not wait for an explicit AzSkills invocation/);
+  assert.match(hookOutput.hookSpecificOutput.additionalContext, /# AzSkills/);
+  console.log('Codex plugin package and SessionStart context assertions passed.');
+  const pluginBuildResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.mjs'), '--output', pluginBuild], { encoding: 'utf8' });
+  assert.equal(pluginBuildResult.status, 0, pluginBuildResult.stderr);
+  const collisionResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.mjs'), '--output', pluginBuild], { encoding: 'utf8' });
+  assert.notEqual(collisionResult.status, 0, 'Packaging must not replace existing deliverables');
+  assert.match(collisionResult.stderr, /Output already exists/);
+  console.log('Codex plugin packaging collision guard passed.');
   const unified = path.join(temp, 'azskills.zip');
   await packageSkillArchive(repository, 'azskills', path.join(temp, 'unified-stage'), unified);
   const stagedSource = path.join(temp, 'unified-stage', 'azskills');

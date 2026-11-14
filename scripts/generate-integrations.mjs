@@ -10,6 +10,7 @@ const check = process.argv.includes('--check');
 const labels = {
   'native-skills': 'Native skill folder',
   'shared-skills': 'Shared skills folder',
+  'codex-plugin': 'Codex plugin with session hook',
   manual: 'Manual import',
   mcp: 'MCP server',
 };
@@ -32,13 +33,20 @@ const guide = (tool) => {
   lines.push('');
   lines.push('## Install');
   lines.push('');
-  lines.push('For an interactive setup, run the guided wizard from the AzSkills checkout:');
-  lines.push('');
-  lines.push('    node scripts/install-skills.mjs');
-  lines.push('');
-  lines.push('The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.');
-  lines.push('');
-  if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
+  if (tool.mechanism === 'codex-plugin') {
+    lines.push('Build the Codex plugin and its local marketplace from the AzSkills checkout:');
+    lines.push('');
+    lines.push('    node scripts/package-plugin.mjs');
+    lines.push('    codex plugin marketplace add ./dist/azskills-marketplace');
+    lines.push('');
+    lines.push('Install AzSkills from the marketplace in Codex. Review and trust the bundled SessionStart hook when prompted. Once trusted, the hook loads AzSkills routing guidance at session start so matching requests need no explicit invocation.');
+  } else if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
+    lines.push('For an interactive setup, run the guided wizard from the AzSkills checkout:');
+    lines.push('');
+    lines.push('    node scripts/install-skills.mjs');
+    lines.push('');
+    lines.push('The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.');
+    lines.push('');
     lines.push('From the AzSkills checkout, install into a project skill directory:');
     lines.push('');
     lines.push('    node scripts/install-skills.mjs --tool ' + tool.id + ' --mode project --project /path/to/project');
@@ -49,6 +57,12 @@ const guide = (tool) => {
     lines.push('');
     lines.push('Use --target to place the skill folder somewhere other than the default target. Use --dry-run to inspect without writing, --all-skills as a legacy shorthand for the complete AzSkills bundle, --rollback to restore the previous run, and --uninstall to remove only manifest-managed skill directories. Non-interactive writes require --yes after reviewing the preview.');
   } else if (tool.mechanism === 'mcp') {
+    lines.push('For an interactive setup, run the guided wizard from the AzSkills checkout:');
+    lines.push('');
+    lines.push('    node scripts/install-skills.mjs');
+    lines.push('');
+    lines.push('The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.');
+    lines.push('');
     lines.push('Run the dependency-free server from the AzSkills checkout:');
     lines.push('');
     lines.push('    node scripts/azskills-mcp.mjs');
@@ -66,6 +80,12 @@ const guide = (tool) => {
     lines.push('');
     lines.push(tool.id === 'claude-desktop' ? 'Open the Claude Desktop configuration for MCP servers, paste the entry, and restart the app.' : 'Use the client MCP settings to add the entry, then refresh its tool list.');
   } else {
+    lines.push('For an interactive setup, run the guided wizard from the AzSkills checkout:');
+    lines.push('');
+    lines.push('    node scripts/install-skills.mjs');
+    lines.push('');
+    lines.push('The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.');
+    lines.push('');
     lines.push('This client has no verified filesystem skill folder in the repository registry. Import the complete AzSkills bundle manually:');
     lines.push('');
     lines.push('1. Open the client project or workspace settings.');
@@ -75,7 +95,9 @@ const guide = (tool) => {
   lines.push('');
   lines.push('## Use');
   lines.push('');
-  if (tool.mechanism === 'mcp') {
+  if (tool.mechanism === 'codex-plugin') {
+    lines.push('Start a new Codex session and make a request covered by AzSkills without naming the plugin. The SessionStart hook should supply the AzSkills entry and routing instructions.');
+  } else if (tool.mechanism === 'mcp') {
     lines.push('After the client connects, call the azskills tool with action entry. Use action route for module selection, action module with id and optional mode to read one contract, or action file with a bundle-relative path to load support files. Discovery lists one tool and one public resource.');
   } else {
     lines.push('Start a session and ask AzSkills for the desired outcome, for example: Use AzSkills to review this architecture. Import the complete azskills.zip or install the azskills folder. Internal modules and legacy names route within this single entry.');
@@ -91,7 +113,9 @@ const guide = (tool) => {
   lines.push('');
   lines.push('## Remove');
   lines.push('');
-  if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
+  if (tool.mechanism === 'codex-plugin') {
+    lines.push('Disable or uninstall AzSkills in Codex, then remove the azskills-local marketplace with codex plugin marketplace remove azskills-local.');
+  } else if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
     lines.push('Use the manifest-based uninstaller so files not owned by AzSkills are preserved:');
     lines.push('');
     lines.push('    node scripts/install-skills.mjs --uninstall --target /path/to/project/' + tool.target);
@@ -109,10 +133,9 @@ const index = () => {
   return [
     '# Tool integrations',
     '',
-    'AzSkills connects to AI tools through four honest mechanisms. A native or shared',
-    'skills folder is one copied azskills bundle. An MCP server exposes the same single entry and internal modules',
-    'to clients without a skill folder. Manual import is used only where the vendor',
-    'workflow is UI-based or not publicly documented for local files.',
+    'AzSkills connects to AI tools through native skills, Codex plugins, MCP servers, and manual import.',
+    'Native and shared skill folders install one AzSkills bundle. The Codex plugin supplies routing guidance with a session hook; MCP serves the same entry to clients without a skill folder.',
+    'Manual import is used only where the vendor workflow is UI-based or not publicly documented for local files.',
     '',
     '| Tool | Mechanism | Default target |',
     '| :--- | :--- | :--- |',

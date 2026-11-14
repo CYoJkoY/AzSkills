@@ -4,43 +4,32 @@
 
 | Field | Value |
 | :--- | :--- |
-| Connection | Shared skills folder |
-| Project target | .agents/skills |
-| User target | ~/.agents/skills |
-| Automation | managed-copy |
-| Detection | target-directory |
-| Verification stages | filesystem → client-discovery → invocation |
-| Source | https://developers.openai.com/codex/skills |
+| Connection | Codex plugin with session hook |
+| Project target | Codex plugin marketplace |
+| User target | Codex plugin marketplace |
+| Automation | manual-import |
+| Detection | manual |
+| Verification stages | package-build → plugin-install-and-hook-trust → session-context |
+| Source | https://developers.openai.com/plugins/build/plugins |
 
 ## Install
 
-For an interactive setup, run the guided wizard from the AzSkills checkout:
+Build the Codex plugin and its local marketplace from the AzSkills checkout:
 
-    node scripts/install-skills.mjs
+    node scripts/package-plugin.mjs
+    codex plugin marketplace add ./dist/azskills-marketplace
 
-The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.
-
-From the AzSkills checkout, install into a project skill directory:
-
-    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project
-
-Install for the current user instead:
-
-    node scripts/install-skills.mjs --tool codex --mode user
-
-Use --target to place the skill folder somewhere other than the default target. Use --dry-run to inspect without writing, --all-skills as a legacy shorthand for the complete AzSkills bundle, --rollback to restore the previous run, and --uninstall to remove only manifest-managed skill directories. Non-interactive writes require --yes after reviewing the preview.
+Install AzSkills from the marketplace in Codex. Review and trust the bundled SessionStart hook when prompted. Once trusted, the hook loads AzSkills routing guidance at session start so matching requests need no explicit invocation.
 
 ## Use
 
-Start a session and ask AzSkills for the desired outcome, for example: Use AzSkills to review this architecture. Import the complete azskills.zip or install the azskills folder. Internal modules and legacy names route within this single entry.
+Start a new Codex session and make a request covered by AzSkills without naming the plugin. The SessionStart hook should supply the AzSkills entry and routing instructions.
 
 ## Verify
 
-Ask Codex to list available skills after restarting the session.
+Install the AzSkills plugin from its local marketplace, trust the session hook, then confirm a new session receives AzSkills routing context.
 
 
 ## Remove
 
-Use the manifest-based uninstaller so files not owned by AzSkills are preserved:
-
-    node scripts/install-skills.mjs --uninstall --target /path/to/project/.agents/skills
+Disable or uninstall AzSkills in Codex, then remove the azskills-local marketplace with codex plugin marketplace remove azskills-local.

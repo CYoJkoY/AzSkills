@@ -1,13 +1,12 @@
 # Tool integrations
 
-AzSkills connects to AI tools through four honest mechanisms. A native or shared
-skills folder is one copied azskills bundle. An MCP server exposes the same single entry and internal modules
-to clients without a skill folder. Manual import is used only where the vendor
-workflow is UI-based or not publicly documented for local files.
+AzSkills connects to AI tools through native skills, Codex plugins, MCP servers, and manual import.
+Native and shared skill folders install one AzSkills bundle. The Codex plugin supplies routing guidance with a session hook; MCP serves the same entry to clients without a skill folder.
+Manual import is used only where the vendor workflow is UI-based or not publicly documented for local files.
 
 | Tool | Mechanism | Default target |
 | :--- | :--- | :--- |
-| [Codex](guides/codex.md) | Shared skills folder | .agents/skills |
+| [Codex](guides/codex.md) | Codex plugin with session hook | Codex plugin marketplace |
 | [Claude](guides/claude-code.md) | Native skill folder | .claude/skills |
 | [Claude Desktop](guides/claude-desktop.md) | MCP server | MCP server configuration |
 | [Grok Build](guides/grok-build.md) | Native skill folder | .grok/skills |

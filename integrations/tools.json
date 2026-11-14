@@ -4,18 +4,18 @@
     {
       "id": "codex",
       "name": "Codex",
-      "mechanism": "shared-skills",
-      "target": ".agents/skills",
-      "userTarget": "~/.agents/skills",
-      "source": "https://developers.openai.com/codex/skills",
-      "verify": "Ask Codex to list available skills after restarting the session.",
-      "automation": "managed-copy",
-      "detection": "target-directory",
+      "mechanism": "codex-plugin",
+      "target": "Codex plugin marketplace",
+      "userTarget": "Codex plugin marketplace",
+      "source": "https://developers.openai.com/plugins/build/plugins",
+      "verify": "Install the AzSkills plugin from its local marketplace, trust the session hook, then confirm a new session receives AzSkills routing context.",
+      "automation": "manual-import",
+      "detection": "manual",
       "configTarget": null,
       "verification": [
-        "filesystem",
-        "client-discovery",
-        "invocation"
+        "package-build",
+        "plugin-install-and-hook-trust",
+        "session-context"
       ]
     },
     {
