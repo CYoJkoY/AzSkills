@@ -28,7 +28,7 @@ node scripts/package-plugin.mjs --output /path/to/fresh/exports
 codex plugin marketplace add /path/to/fresh/exports/azskills-marketplace
 ```
 
-Install AzSkills from the marketplace in Codex and review/trust its `SessionStart` and `UserPromptSubmit` hooks when prompted. After trust, AzSkills routing guidance is supplied automatically. SessionStart restores routing context on startup, resume, clear, compaction, and fork. UserPromptSubmit adds a short reminder for each request. Both hooks require Node.js on PATH and support installation paths containing spaces. The plugin bundles its AzSkills icon for the composer and plugin details. The regular installer above installs a skill folder without this hook. The `.agents/plugins/marketplace.json` manifest also enables importing the checkout directly.
+Install AzSkills from the marketplace in Codex and review/trust its `SessionStart`, `UserPromptSubmit`, `SubagentStart`, and `PostToolUse` hooks when prompted. After trust, AzSkills routing and GPT with Taste behavior are supplied automatically. SessionStart restores routing context and loads the Taste Main recipe; UserPromptSubmit applies both routing reminders; SubagentStart and completed local-agent waits apply Taste steering. Hooks require Node.js on PATH and support installation paths containing spaces. The plugin bundles its AzSkills icon for the composer and plugin details. The regular installer above installs a skill folder without these hooks. The `.agents/plugins/marketplace.json` manifest also enables importing the checkout directly.
 
 For archive import, run `node scripts/package-skill.mjs --output /path/to/exports` and import `azskills.zip`. The ZIP has one root `SKILL.md` and all supporting files. Install the complete archive, not the manifest alone. Use a fresh export directory; pre-existing older archives are not removed automatically.
 
@@ -78,6 +78,7 @@ These contracts are ordinary Markdown files. They retain their domain workflows 
 | Publishing | [`localization`](references/modules/localization.md) | translate, audit | Game CSV localization with locale completeness and markup safety. |
 | Career | [`resume-evidence-workflow`](references/modules/resume-evidence-workflow.md) | evidence, tailor, review | Career evidence, requirement alignment, and editable resume delivery. |
 | Operations | [`tool-integration`](references/modules/tool-integration.md) | install, configure, troubleshoot, remove | Connect AzSkills to AI clients with verified installation and setup workflows. |
+| Operations | [`taste`](references/modules/taste.md) | main, subagent, independent | Judgment, collaboration, and execution behavior automatically supplied by Codex hooks. |
 <!-- SKILL-CATALOG:END -->
 
 ## Legacy names

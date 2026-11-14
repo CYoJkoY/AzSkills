@@ -25,6 +25,7 @@ body:
         - localization
         - resume-evidence-workflow
         - tool-integration
+        - taste
         - application-architecture (alias)
         - frontend-architecture (alias)
         - ui-aesthetics (alias)

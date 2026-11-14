@@ -139,6 +139,7 @@ body:
         - localization
         - resume-evidence-workflow
         - tool-integration
+        - taste
         - None / Standalone
     validations:
       required: false

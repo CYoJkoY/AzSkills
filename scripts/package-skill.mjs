@@ -203,7 +203,7 @@ async function packageAzSkills(root, outputDirectory) {
   const registry = JSON.parse(await readFile(path.join(base, 'skills.json'), 'utf8'));
   const moduleDirectories = new Set(registry.modules.map(m => m.id));
   const names = ['SKILL.md', 'skills.json', 'README.md', 'SKILL-SYSTEM.md', 'DESIGN.md', 'design-intelligence.md',
-    'THIRD_PARTY_NOTICES.md', 'LICENSE', 'references', 'scripts', 'integrations', 'assets', 'docs',
+    'THIRD_PARTY_NOTICES.md', 'LICENSE', 'references', 'scripts', 'integrations', 'assets', 'docs', 'codex-plugin/taste',
     ...registry.modules.map(m => m.id)];
   await mkdir(output, { recursive: true });
   for (const name of names) {

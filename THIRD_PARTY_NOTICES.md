@@ -2,6 +2,10 @@
 
 AzSkills includes Skills that were independently rewritten or synthesized after studying public third-party methodologies, plus a small set of reusable visual assets. These notices make provenance explicit without mechanically vendoring unrelated repositories.
 
+## GPT with Taste
+
+The Codex plugin includes GPT with Taste's Main, Sub, and Independent recipes, its three steering prompts, and adapted Codex hook routing from https://github.com/NB-Corp/gpt-with-taste. Copyright (c) NB-Corp. These files are distributed under the upstream MIT License in `codex-plugin/taste/LICENSE`. The hook integration is adapted for AzSkills packaging and automatic Codex lifecycle events; the upstream installer and unrelated client adapters are not included.
+
 ## Workbench design references
 
 The repository's interface contract (`DESIGN.md` and `design-system/`) was informed by two publicly documented products:

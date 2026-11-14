@@ -9,6 +9,11 @@
             "statusMessage": "Loading AzSkills routing guidance"
           }
         ]
+      },
+      {
+        "hooks": [
+          {"type": "command", "command": "node \"${PLUGIN_ROOT}/taste/hooks/steer.mjs\"", "statusMessage": "Loading GPT with Taste main guidance"}
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -19,6 +24,26 @@
             "command": "node \"${PLUGIN_ROOT}/hooks/session-start.mjs\" UserPromptSubmit",
             "statusMessage": "Applying AzSkills task routing"
           }
+        ]
+      },
+      {
+        "hooks": [
+          {"type": "command", "command": "node \"${PLUGIN_ROOT}/taste/hooks/steer.mjs\"", "statusMessage": "Applying GPT with Taste request guidance"}
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {"type": "command", "command": "node \"${PLUGIN_ROOT}/taste/hooks/steer.mjs\"", "statusMessage": "Applying GPT with Taste subagent guidance"}
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^(?:wait_agent|multi_agent_v1\\.wait_agent|multi_agent_v1wait_agent|collaboration\\.wait_agent|collaborationwait_agent)$",
+        "hooks": [
+          {"type": "command", "command": "node \"${PLUGIN_ROOT}/taste/hooks/steer.mjs\"", "statusMessage": "Applying GPT with Taste agent results guidance"}
         ]
       }
     ]

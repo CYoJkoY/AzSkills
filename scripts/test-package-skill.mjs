@@ -63,6 +63,46 @@ try {
     assert.deepEqual(await readFile(path.join(plugin, asset)), await readFile(path.join(repository, 'codex-plugin', asset)));
   }
   assert.equal(pluginManifest.version, JSON.parse(await readFile(path.join(plugin, 'skills/azskills/skills.json'), 'utf8')).version);
+  const taste = path.join(plugin, 'taste');
+  assert.match(await readFile(path.join(taste, 'recipe/main.md'), 'utf8'), /Own the result/);
+  assert.match(await readFile(path.join(taste, 'recipe/sub.md'), 'utf8'), /parent's goal/i);
+  const { hooks: pluginHooks } = JSON.parse(await readFile(path.join(plugin, 'hooks/hooks.json'), 'utf8'));
+  assert.deepEqual(Object.keys(pluginHooks), ['SessionStart', 'UserPromptSubmit', 'SubagentStart', 'PostToolUse']);
+  assert.match(pluginHooks.PostToolUse[0].matcher, /wait_agent/);
+  for (const event of ['SessionStart', 'UserPromptSubmit']) {
+    const result = spawnSync(process.execPath, [path.join(taste, 'hooks/steer.mjs')], {
+      encoding: 'utf8',
+      input: JSON.stringify({ hook_event_name: event, session_id: 'main', turn_id: 'turn-1', prompt: 'Build this' }),
+      env: { ...process.env, PLUGIN_ROOT: plugin },
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout).hookSpecificOutput;
+    assert.equal(output.hookEventName, event);
+    assert.match(output.additionalContext, event === 'SessionStart' ? /# GPT with Taste/ : /<gpt-with-taste-user-steer>/);
+  }
+  const tasteCommand = pluginHooks.SessionStart[1].hooks[0].command.replaceAll('${PLUGIN_ROOT}', plugin);
+  const declaredTasteHook = spawnSync(tasteCommand, {
+    shell: true,
+    encoding: 'utf8',
+    input: JSON.stringify({ hook_event_name: 'SessionStart', session_id: 'main', turn_id: 'turn-1' }),
+    env: { ...process.env, PLUGIN_ROOT: plugin },
+  });
+  assert.equal(declaredTasteHook.status, 0, declaredTasteHook.stderr);
+  assert.match(JSON.parse(declaredTasteHook.stdout).hookSpecificOutput.additionalContext, /# GPT with Taste/);
+  const subStart = spawnSync(process.execPath, [path.join(taste, 'hooks/steer.mjs')], {
+    encoding: 'utf8',
+    input: JSON.stringify({ hook_event_name: 'SubagentStart', session_id: 'child-session', turn_id: 'turn-2', agent_id: 'child' }),
+    env: { ...process.env, PLUGIN_ROOT: plugin, PLUGIN_DATA: temp },
+  });
+  assert.equal(subStart.status, 0, subStart.stderr);
+  assert.match(JSON.parse(subStart.stdout).hookSpecificOutput.additionalContext, /<gpt-with-taste-sub-steer>/);
+  const agentResult = spawnSync(process.execPath, [path.join(taste, 'hooks/steer.mjs')], {
+    encoding: 'utf8',
+    input: JSON.stringify({ hook_event_name: 'PostToolUse', tool_name: 'wait_agent', tool_response: { timed_out: false, status: { child: { completed: 'Done' } } } }),
+    env: { ...process.env, PLUGIN_ROOT: plugin },
+  });
+  assert.equal(agentResult.status, 0, agentResult.stderr);
+  assert.match(JSON.parse(agentResult.stdout).hookSpecificOutput.additionalContext, /<gpt-with-taste-agent-steer>/);
   assert.equal(marketplaceManifest.plugins[0].source.path, './plugins/azskills');
   const repositoryMarketplace = JSON.parse(await readFile(path.join(repository, '.agents/plugins/marketplace.json'), 'utf8'));
   assert.equal(repositoryMarketplace.plugins[0].source.path, './codex-plugin');
