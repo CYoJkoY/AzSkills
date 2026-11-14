@@ -103,6 +103,13 @@ const MODULES = [
     when: "Use when installing, configuring, troubleshooting, or removing AzSkills in a client.",
     contract: "Registry-backed mechanism. Preview writes. Verify discovery. Preserve unrelated data.",
   },
+  {
+    name: "taste",
+    group: "OPS",
+    purpose: "Apply judgment, collaboration, and clear execution behavior.",
+    when: "Use when work benefits from Taste Main or agent roles.",
+    contract: "Main, Sub, and Independent roles. Automatic Codex steering.",
+  },
 ];
 
 const DEFAULT_SELECTED = "ui-design";
