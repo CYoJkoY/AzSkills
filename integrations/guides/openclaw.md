@@ -18,7 +18,7 @@ For an interactive setup, run the guided wizard from the AzSkills checkout:
 
     node scripts/install-skills.mjs
 
-The wizard detects candidate target directories, asks for user or project scope, lets you choose recommended skills or search the canonical catalog, and previews changes before confirmation.
+The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.
 
 From the AzSkills checkout, install into a project skill directory:
 
@@ -28,11 +28,11 @@ Install for the current user instead:
 
     node scripts/install-skills.mjs --tool openclaw --mode user
 
-Use --target to place the skill folder somewhere other than the default target. Use --dry-run to inspect without writing, --all-skills to install every canonical Skill, --rollback to restore the previous run, and --uninstall to remove only manifest-managed skill directories. Non-interactive writes require --yes after reviewing the preview.
+Use --target to place the skill folder somewhere other than the default target. Use --dry-run to inspect without writing, --all-skills as a legacy shorthand for the complete AzSkills bundle, --rollback to restore the previous run, and --uninstall to remove only manifest-managed skill directories. Non-interactive writes require --yes after reviewing the preview.
 
 ## Use
 
-Start a session in OpenClaw and describe the task. To force a specific contract, name it and its mode, for example: Use ultrathink in deep mode to challenge this design. The canonical ids and modes are listed in skills.json. If the client accepts Skill archives, import the generated <id>.zip; otherwise import or point the client at the installed <id>/SKILL.md folder.
+Start a session and ask AzSkills for the desired outcome, for example: Use AzSkills to review this architecture. Import the complete azskills.zip or install the azskills folder. Internal modules and legacy names route within this single entry.
 
 ## Verify
 

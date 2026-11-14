@@ -1,8 +1,8 @@
 ---
 name: ui-motion
 description: Construct, review, audit, and adapt UI motion using the smallest correct mechanism, host tokens, full interruption and accessibility behavior, and rendered verification. Also owns SVG animation and expressive interaction patterns.
-version: 2.0.0
-status: canonical
+version: 3.0.0
+status: module
 family: interface
 modes: [build, review, audit, pattern, svg]
 ---
@@ -10,11 +10,11 @@ modes: [build, review, audit, pattern, svg]
 # UI Motion
 
 Turn a motion request into an implementation, a review, an audit, a pattern
-choice, or an SVG animation. This Skill owns motion purpose, mechanism, timing,
+choice, or an SVG animation. This module owns motion purpose, mechanism, timing,
 physicality, interruption, accessibility, performance, and verification. It does
 not own general layout, visual hierarchy, or runtime selection.
 
-Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../design-intelligence.md).
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../../design-intelligence.md).
 
 ## Contract
 
@@ -23,7 +23,7 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual e
 - Owns: whether motion earns a place, which mechanism is smallest, timing, origin, interruption, reduced-motion parity, performance, and motion findings.
 - Inputs: host motion tokens, component frequency, interaction purpose, current mechanism, browser baseline, input model, reduced-motion policy, and rendered evidence.
 - Outputs: implemented motion, review findings, audit inventory and plan, pattern adaptation, or standalone SVG animation.
-- Compose with: `ui-design` for the static interface; `design-system` for motion tokens; load `references/animation-standards.md` for exact values.
+- Compose with: `ui-design` for the static interface; `design-system` for motion tokens; load `../../ui-motion/references/animation-standards.md` for exact values.
 - Gates: motion has a named purpose and frequency fit; reduced motion preserves meaning; the interaction is interruptible; the rendered result is verified.
 
 ## Modes
@@ -200,13 +200,13 @@ Unverified items:
 
 ## References
 
-- `references/animation-standards.md` - exact easing, duration, spring, performance, and accessibility reference.
-- `references/animation-recipes.md` - implementation recipes and component patterns.
-- `references/animation-vocabulary.md` - motion terms and intent vocabulary.
-- `references/review.md` - detailed read-only review sequence and findings contract.
-- `references/audit.md` - detailed codebase inventory, opportunity gates, and plan format.
-- `references/plan-template.md` - implementation plan template for audit findings.
-- `references/rare-interactions.md` - pattern-selection and adaptation contract.
-- `references/rare-patterns.md` - pattern catalog.
-- `references/svg-animation.md` - SVG-specific construction and optimization guide.
-- `references/icon-morphing.md` - semantic SVG icon morphing, geometry, interruption, and QA.
+- `../../ui-motion/references/animation-standards.md` - exact easing, duration, spring, performance, and accessibility reference.
+- `../../ui-motion/references/animation-recipes.md` - implementation recipes and component patterns.
+- `../../ui-motion/references/animation-vocabulary.md` - motion terms and intent vocabulary.
+- `../../ui-motion/references/review.md` - detailed read-only review sequence and findings contract.
+- `../../ui-motion/references/audit.md` - detailed codebase inventory, opportunity gates, and plan format.
+- `../../ui-motion/references/plan-template.md` - implementation plan template for audit findings.
+- `../../ui-motion/references/rare-interactions.md` - pattern-selection and adaptation contract.
+- `../../ui-motion/references/rare-patterns.md` - pattern catalog.
+- `../../ui-motion/references/svg-animation.md` - SVG-specific construction and optimization guide.
+- `../../ui-motion/references/icon-morphing.md` - semantic SVG icon morphing, geometry, interruption, and QA.

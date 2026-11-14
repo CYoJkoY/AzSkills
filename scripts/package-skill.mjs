@@ -1,5 +1,5 @@
 import { deflateRawSync } from 'node:zlib';
-import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, lstat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -146,6 +146,7 @@ export async function validatePackagedSkill(skillDirectory) {
 }
 
 export async function packageSkill(root, id, outputDirectory) {
+  if (id === 'azskills') return packageAzSkills(root, outputDirectory);
   const base = path.resolve(root);
   const sourceSkill = path.resolve(base, id);
   const outputSkill = path.resolve(outputDirectory, id);
@@ -193,6 +194,29 @@ export async function packageSkill(root, id, outputDirectory) {
   }
   await validatePackagedSkill(outputSkill);
   return outputSkill;
+}
+
+async function packageAzSkills(root, outputDirectory) {
+  const base = path.resolve(root);
+  const output = path.resolve(outputDirectory, 'azskills');
+  if (inside(output, base) || inside(base, output)) throw new Error('Staging must be outside the source tree');
+  const registry = JSON.parse(await readFile(path.join(base, 'skills.json'), 'utf8'));
+  const names = ['SKILL.md', 'skills.json', 'README.md', 'SKILL-SYSTEM.md', 'DESIGN.md', 'design-intelligence.md',
+    'THIRD_PARTY_NOTICES.md', 'LICENSE', 'references', 'scripts', 'integrations', 'assets', 'docs',
+    ...registry.modules.map(m => m.id)];
+  await mkdir(output, { recursive: true });
+  for (const name of names) {
+    const source = path.join(base, name);
+    // Inspect before copying: neither source files nor nested links may escape.
+    const info = await lstat(source);
+    if (info.isSymbolicLink()) throw new Error('Symbolic source: ' + name);
+    if (info.isDirectory()) await filesUnder(source);
+    await cp(source, path.join(output, name), { recursive: true, errorOnExist: true, force: false });
+  }
+  const manifests = (await filesUnder(output)).filter(f => path.basename(f).toLowerCase() === 'skill.md');
+  if (manifests.length !== 1 || manifests[0] !== path.join(output, 'SKILL.md')) throw new Error('AzSkills must expose exactly one SKILL.md');
+  await validatePackagedSkill(output);
+  return output;
 }
 
 function crc32(buffer) {
@@ -269,7 +293,7 @@ if (isMain) {
   const args = process.argv.slice(2);
   const option = (key) => { const index = args.indexOf(key); const result = index < 0 ? '' : args[index + 1]; if (index >= 0 && (!result || result.startsWith('--'))) throw new Error(key + ' requires a value'); return result; };
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(['AzSkills Skill bundle exporter', '', 'Usage: node scripts/package-skill.mjs [--skill <id>] [--output <directory>]', '', 'Without --skill, exports every canonical Skill and compatibility alias as <id>.zip. Archives are standalone, deterministic, and include linked support files under _azskills-support.'].join(String.fromCharCode(10)));
+    console.log('Usage: node scripts/package-skill.mjs [--skill azskills] [--output <directory>]\nExports one complete azskills.zip with on-demand internal modules.');
     process.exit(0);
   }
   try {
@@ -277,11 +301,10 @@ if (isMain) {
     const id = option('--skill');
     const output = path.resolve(option('--output') || path.join(root, 'dist', 'skills'));
     const registry = JSON.parse(await readFile(path.join(root, 'skills.json'), 'utf8'));
-    const entries = [...registry.skills, ...registry.aliases];
-    const ids = entries.map((entry) => entry.id);
-    const selected = id ? [id] : ids;
-    const unknown = selected.filter((item) => !ids.includes(item));
-    if (unknown.length) throw new Error('Unknown skill id(s): ' + unknown.join(', '));
+    const ids = ['azskills', ...registry.modules.map(m => m.id), ...registry.aliases.map(a => a.id)];
+    if (id && !ids.includes(id)) throw new Error('Unknown module or entry: ' + id);
+    if (id && id !== 'azskills') console.error('Legacy module selection exports the complete azskills bundle.');
+    const selected = ['azskills'];
     await mkdir(output, { recursive: true });
     const staging = await mkdtemp(path.join(tmpdir(), 'azskills-export-'));
     const archives = [];

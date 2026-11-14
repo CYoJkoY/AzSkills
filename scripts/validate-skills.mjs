@@ -167,11 +167,11 @@ async function main() {
     process.exit(1);
   }
 
-  if (registry.schemaVersion !== 1) fail("skills.json: schemaVersion must be 1");
+  if (registry.schemaVersion !== 2) fail("skills.json: schemaVersion must be 2");
   if (!registry.families || typeof registry.families !== "object") {
     fail("skills.json: missing families");
   }
-  if (!Array.isArray(registry.skills)) fail("skills.json: skills must be an array");
+  if (!Array.isArray(registry.modules)) fail("skills.json: skills must be an array");
   if (!Array.isArray(registry.aliases)) fail("skills.json: aliases must be an array");
   if (errors.length) return finish();
 
@@ -190,8 +190,8 @@ async function main() {
   const allIds = new Set();
   const texts = new Map();
 
-  for (const skill of registry.skills) {
-    if (skill.status !== "canonical") fail(skill.id + ": canonical entry must use status canonical");
+  for (const skill of registry.modules) {
+    if (skill.status !== "module") fail(skill.id + ": internal entry must use status module");
     if (!skill.id || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(skill.id)) {
       fail("skills.json: invalid canonical id: " + skill.id);
     }
@@ -201,14 +201,14 @@ async function main() {
     if (!Array.isArray(skill.modes) || skill.modes.length === 0) {
       fail(skill.id + ": at least one mode is required");
     }
-    if (skill.path !== skill.id + "/SKILL.md") {
-      fail(skill.id + ": canonical path must be <id>/SKILL.md");
+    if (skill.path !== "references/modules/" + skill.id + ".md") {
+      fail(skill.id + ": module path must be references/modules/<id>.md");
     }
     canonical.set(skill.id, skill);
     allPathEntries.set(skill.path, skill);
   }
 
-  for (const skill of registry.skills) {
+  for (const skill of registry.modules) {
     for (const target of skill.composes || []) {
       if (!canonical.has(target)) fail(skill.id + ": composes unknown canonical Skill " + target);
     }
@@ -223,24 +223,26 @@ async function main() {
     } else if (!canonical.get(alias.canonical).modes.includes(alias.mode)) {
       fail(alias.id + ": mode " + alias.mode + " is not declared by " + alias.canonical);
     }
-    if (alias.path !== alias.id + "/SKILL.md") {
-      fail(alias.id + ": alias path must be <id>/SKILL.md");
-    }
-    allPathEntries.set(alias.path, alias);
+    if (alias.path !== undefined) fail(alias.id + ": aliases must be routing metadata only");
   }
 
   const files = await walk(root);
-  const skillFiles = files.filter((file) => path.basename(file) === "SKILL.md");
+  const skillFiles = files.filter((file) => path.basename(file).toLowerCase() === "skill.md");
   const foundPaths = new Set(skillFiles.map(relative));
 
   for (const [entryPath, entry] of allPathEntries) {
-    if (!foundPaths.has(entryPath)) fail(entry.id + ": registered file is missing: " + entryPath);
+    if (!files.some(file => relative(file) === entryPath)) fail(entry.id + ": registered file is missing: " + entryPath);
   }
   for (const found of foundPaths) {
-    if (!allPathEntries.has(found)) fail(found + ": unregistered SKILL.md");
+    if (found !== "SKILL.md") fail(found + ": unregistered SKILL.md");
   }
 
-  for (const entry of [...registry.skills, ...registry.aliases]) {
+  if (foundPaths.size !== 1 || !foundPaths.has("SKILL.md")) fail("Exactly one root SKILL.md is required");
+  const publicEntry = await readFile(path.join(root, "SKILL.md"), "utf8");
+  const publicMetadata = parseFrontmatter(publicEntry, "SKILL.md").data;
+  if (publicMetadata.name !== "azskills" || publicMetadata.version !== registry.version || registry.entry?.version !== registry.version || registry.entry?.path !== "SKILL.md" || registry.entry?.id !== "azskills") fail("Public entry/version mismatch");
+  if (publicEntry.split("\n").length > 100) fail("Public entry exceeds 100 lines");
+  for (const entry of registry.modules) {
     const file = path.join(root, entry.path);
     let text;
     try {
@@ -261,15 +263,15 @@ async function main() {
     }
     if (!asciiOnly(text)) fail(entry.path + ": contract must be ASCII");
 
-    if (entry.status === "canonical") {
+    if (entry.status === "module") {
       if (lineCount > 280) fail(entry.path + ": " + lineCount + " lines exceeds 280");
-      if (data.status !== "canonical") fail(entry.path + ": status must be canonical");
+      if (data.status !== "module") fail(entry.path + ": status must be module");
       if (data.family !== entry.family) fail(entry.path + ": family must be " + entry.family);
       const modes = Array.isArray(data.modes) ? data.modes : [];
       if (modes.join(",") !== entry.modes.join(",")) {
         fail(entry.path + ": modes must match registry order: " + entry.modes.join(", "));
       }
-      if (!data.version) fail(entry.path + ": version is required");
+      if (!/^\d+\.\d+\.\d+$/.test(data.version || "")) fail(entry.path + ": SemVer version is required");
       const requiredHeadings = ["Contract", "Modes", "Workflow", "Quality gates", "Output contract"];
       for (const heading of requiredHeadings) {
         if (!hasSection(body, heading)) fail(entry.path + ": missing section ## " + heading);
@@ -348,15 +350,6 @@ async function main() {
       }
       if (entry.modes.length !== new Set(entry.modes).size) fail(entry.id + ": duplicate mode");
       if (!entry.role) fail(entry.id + ": role is required");
-    } else {
-      if (lineCount > 24) fail(entry.path + ": alias has " + lineCount + " lines; limit is 24");
-      if (data.status !== "alias") fail(entry.path + ": status must be alias");
-      if (data.canonical !== entry.canonical) fail(entry.path + ": canonical must be " + entry.canonical);
-      if (data.mode !== entry.mode) fail(entry.path + ": mode must be " + entry.mode);
-      const aliasSections = body.split("\n").filter((line) => /^## /.test(line));
-      if (aliasSections.length) {
-        fail(entry.path + ": alias must not define level-2 sections: " + aliasSections.join(", "));
-      }
     }
 
     await scanLinks(file, text);
@@ -379,10 +372,10 @@ async function main() {
         .split("\n")
         .filter((line) => line.startsWith("|"))
         .filter((line) => !line.startsWith("| :") && !line.startsWith("| Family"));
-      if (rows.length !== registry.skills.length) {
-        fail("README catalog has " + rows.length + " rows; expected " + registry.skills.length);
+      if (rows.length !== registry.modules.length) {
+        fail("README catalog has " + rows.length + " rows; expected " + registry.modules.length);
       }
-      for (const skill of registry.skills) {
+      for (const skill of registry.modules) {
         const row = rows.find((line) => line.includes("](" + skill.path + ")"));
         if (!row) {
           fail("README catalog missing row for " + skill.id + ": " + skill.path);
@@ -396,9 +389,9 @@ async function main() {
         if (!cells[3]) fail("README catalog focus is empty for " + skill.id);
       }
       const ordered = rows
-        .map((line) => registry.skills.find((skill) => line.includes("](" + skill.path + ")"))?.id)
+        .map((line) => registry.modules.find((skill) => line.includes("](" + skill.path + ")"))?.id)
         .filter(Boolean);
-      const expected = registry.skills.map((skill) => skill.id);
+      const expected = registry.modules.map((skill) => skill.id);
       if (ordered.length === expected.length && ordered.join(",") !== expected.join(",")) {
         fail("README catalog order must follow skills.json: " + expected.join(", "));
       }
@@ -453,7 +446,7 @@ async function main() {
         .filter(Boolean),
     );
     if (!block) fail(relativeTemplate + ": missing dropdown " + spec.dropdown);
-    for (const skill of registry.skills) {
+    for (const skill of registry.modules) {
       if (!entries.has(skill.id)) {
         fail(relativeTemplate + ": missing canonical Skill option " + skill.id);
       }
@@ -469,7 +462,7 @@ async function main() {
     }
   }
 
-  for (const skill of registry.skills) {
+  for (const skill of registry.modules) {
     const refDir = path.join(root, skill.id, "references");
     const hasRefs = await stat(refDir).then(() => true).catch(() => false);
     if (!hasRefs) continue;
@@ -498,8 +491,8 @@ function finish() {
   }
   console.log(
     "Skill validation passed: " +
-      registry.skills.length +
-      " canonical Skills, " +
+      registry.modules.length +
+      " internal modules, " +
       registry.aliases.length +
       " aliases, " +
       Object.keys(registry.families).length +

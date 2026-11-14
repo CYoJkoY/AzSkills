@@ -36,7 +36,7 @@ const guide = (tool) => {
   lines.push('');
   lines.push('    node scripts/install-skills.mjs');
   lines.push('');
-  lines.push('The wizard detects candidate target directories, asks for user or project scope, lets you choose recommended skills or search the canonical catalog, and previews changes before confirmation.');
+  lines.push('The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.');
   lines.push('');
   if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
     lines.push('From the AzSkills checkout, install into a project skill directory:');
@@ -47,7 +47,7 @@ const guide = (tool) => {
     lines.push('');
     lines.push('    node scripts/install-skills.mjs --tool ' + tool.id + ' --mode user');
     lines.push('');
-    lines.push('Use --target to place the skill folder somewhere other than the default target. Use --dry-run to inspect without writing, --all-skills to install every canonical Skill, --rollback to restore the previous run, and --uninstall to remove only manifest-managed skill directories. Non-interactive writes require --yes after reviewing the preview.');
+    lines.push('Use --target to place the skill folder somewhere other than the default target. Use --dry-run to inspect without writing, --all-skills as a legacy shorthand for the complete AzSkills bundle, --rollback to restore the previous run, and --uninstall to remove only manifest-managed skill directories. Non-interactive writes require --yes after reviewing the preview.');
   } else if (tool.mechanism === 'mcp') {
     lines.push('Run the dependency-free server from the AzSkills checkout:');
     lines.push('');
@@ -66,19 +66,19 @@ const guide = (tool) => {
     lines.push('');
     lines.push(tool.id === 'claude-desktop' ? 'Open the Claude Desktop configuration for MCP servers, paste the entry, and restart the app.' : 'Use the client MCP settings to add the entry, then refresh its tool list.');
   } else {
-    lines.push('This client has no verified filesystem skill folder in the repository registry. Import the canonical contract manually:');
+    lines.push('This client has no verified filesystem skill folder in the repository registry. Import the complete AzSkills bundle manually:');
     lines.push('');
     lines.push('1. Open the client project or workspace settings.');
-    lines.push('2. Attach or import ' + tool.target + ' from this checkout.');
+    lines.push('2. Export azskills.zip and import it using ' + tool.target + ' as the client import destination; retain all supporting files.');
     lines.push('3. Keep the imported copy read-only and re-import after updating AzSkills.');
   }
   lines.push('');
   lines.push('## Use');
   lines.push('');
   if (tool.mechanism === 'mcp') {
-    lines.push('After the client connects, call list_skills, then read_skill with a canonical id or compatibility alias. Use read_skill_file or the listed resources to load a Skill reference or supporting file by bundle-relative path. search_skills accepts a task description. Bundles include the local files linked by the Skill, and their Markdown links are rewritten to resolve inside the bundle.');
+    lines.push('After the client connects, call the azskills tool with action entry. Use action route for module selection, action module with id and optional mode to read one contract, or action file with a bundle-relative path to load support files. Discovery lists one tool and one public resource.');
   } else {
-    lines.push('Start a session in ' + tool.name + ' and describe the task. To force a specific contract, name it and its mode, for example: Use ultrathink in deep mode to challenge this design. The canonical ids and modes are listed in skills.json. If the client accepts Skill archives, import the generated <id>.zip; otherwise import or point the client at the installed <id>/SKILL.md folder.');
+    lines.push('Start a session and ask AzSkills for the desired outcome, for example: Use AzSkills to review this architecture. Import the complete azskills.zip or install the azskills folder. Internal modules and legacy names route within this single entry.');
   }
   lines.push('');
   lines.push('## Verify');
@@ -86,7 +86,7 @@ const guide = (tool) => {
   lines.push(tool.verify);
   lines.push('');
   if (tool.mechanism === 'manual' || tool.mechanism === 'mcp') {
-    lines.push('Also confirm that a request can read a named skill such as ultrathink.');
+    lines.push('Confirm the single azskills entry can read references/routing.md and one selected module.');
   }
   lines.push('');
   lines.push('## Remove');
@@ -110,7 +110,7 @@ const index = () => {
     '# Tool integrations',
     '',
     'AzSkills connects to AI tools through four honest mechanisms. A native or shared',
-    'skills folder is a copied skill contract. An MCP server exposes the same contracts',
+    'skills folder is one copied azskills bundle. An MCP server exposes the same single entry and internal modules',
     'to clients without a skill folder. Manual import is used only where the vendor',
     'workflow is UI-based or not publicly documented for local files.',
     '',
@@ -127,9 +127,9 @@ const index = () => {
     'Or select a client and scope explicitly:',
     '',
     '    node scripts/install-skills.mjs --list',
-    '    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills ui-design,architecture --dry-run',
-    '    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills ui-design,architecture --yes',
-    '    node scripts/package-skill.mjs --skill ui-design --output /path/to/exports',
+    '    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills azskills --dry-run',
+    '    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills azskills --yes',
+    '    node scripts/package-skill.mjs --skill azskills --output /path/to/exports',
     '    node scripts/install-skills.mjs --rollback --target /path/to/project/.agents/skills --yes',
     '    node scripts/install-skills.mjs --uninstall --target /path/to/project/.agents/skills --yes',
     '',

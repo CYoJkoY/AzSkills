@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, readdir, rm, stat } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import readline from 'node:readline';
@@ -7,170 +7,92 @@ import { packageSkill } from './package-skill.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const catalog = JSON.parse(await readFile(path.join(root, 'skills.json'), 'utf8'));
-const fallbackProtocolVersion = '2025-06-18';
-const option = (name) => {
-  const index = process.argv.indexOf('--' + name);
-  const value = index >= 0 ? process.argv[index + 1] : '';
-  if (index >= 0 && (!value || value.startsWith('--'))) throw new Error('--' + name + ' requires a value');
-  return value;
-};
-const selected = option('skills');
-const knownIds = new Set([...catalog.skills, ...catalog.aliases].map((entry) => entry.id));
-const selection = selected ? selected.split(',').map((item) => item.trim()).filter(Boolean) : null;
-const unknownSelection = (selection ?? []).filter((item) => !knownIds.has(item));
-if (unknownSelection.length) throw new Error('Unknown skill id(s): ' + unknownSelection.join(', '));
-const requested = selection ?? [...catalog.skills, ...catalog.aliases].map((entry) => entry.id);
-const entries = [...catalog.skills, ...catalog.aliases].filter((entry) => requested.includes(entry.id));
-
-const bundleRoot = await mkdtemp(path.join(tmpdir(), 'azskills-mcp-'));
-try {
-  for (const skill of entries) await packageSkill(root, skill.id, bundleRoot);
-} catch (error) {
-  await rm(bundleRoot, { recursive: true, force: true });
-  throw error;
+const legacy = process.argv.indexOf('--skills');
+if (legacy >= 0) {
+  const selected = process.argv[legacy + 1]?.split(',');
+  const known = new Set(['azskills', ...catalog.modules.map(m => m.id), ...catalog.aliases.map(a => a.id)]);
+  if (!selected?.length || selected.some(id => !known.has(id))) throw new Error('Unknown module selection');
+  console.error('--skills is deprecated; AzSkills exposes one complete entry.');
 }
-
-async function bundleFiles(directory) {
-  const files = [];
+const staging = await mkdtemp(path.join(tmpdir(), 'azskills-mcp-'));
+let bundle;
+try { bundle = await packageSkill(root, 'azskills', staging); }
+catch (error) { await rm(staging, { recursive: true, force: true }); throw error; }
+const files = new Map();
+async function index(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const full = path.join(directory, entry.name);
-    if (entry.isDirectory()) files.push(...await bundleFiles(full));
-    else if (entry.isFile()) files.push(full);
-  }
-  return files;
-}
-
-const mimeTypes = new Map([
-  ['.md', 'text/markdown'], ['.txt', 'text/plain'], ['.json', 'application/json'],
-  ['.js', 'text/javascript'], ['.mjs', 'text/javascript'], ['.cjs', 'text/javascript'], ['.ts', 'text/typescript'],
-  ['.css', 'text/css'], ['.html', 'text/html'], ['.svg', 'image/svg+xml'],
-  ['.yml', 'text/yaml'], ['.yaml', 'text/yaml'], ['.py', 'text/x-python'],
-  ['.sh', 'text/x-shellscript'], ['.toml', 'text/plain'], ['.xml', 'text/xml'],
-  ['.png', 'image/png'], ['.jpg', 'image/jpeg'], ['.jpeg', 'image/jpeg'],
-  ['.webp', 'image/webp'], ['.pdf', 'application/pdf'],
-]);
-const contentType = async (file) => {
-  const known = mimeTypes.get(path.extname(file).toLowerCase());
-  if (known) return { mimeType: known, text: known.startsWith('text/') || known === 'application/json' || known === 'image/svg+xml' };
-  try {
-    new TextDecoder('utf-8', { fatal: true }).decode(await readFile(file));
-    return { mimeType: 'text/plain', text: true };
-  } catch {
-    return { mimeType: 'application/octet-stream', text: false };
-  }
-};
-const descriptors = [];
-const resourcePaths = new Map();
-for (const skill of entries) {
-  const directory = path.join(bundleRoot, skill.id);
-  for (const file of await bundleFiles(directory)) {
-    const relative = path.relative(directory, file).split(path.sep).join('/');
-    const main = relative === 'SKILL.md';
-    const uri = main
-      ? 'azskills://skills/' + skill.id
-      : 'azskills://skills/' + skill.id + '/' + relative.split('/').map(encodeURIComponent).join('/');
-    const descriptor = {
-      uri,
-      name: main ? skill.id : skill.id + '/' + relative,
-      title: main ? skill.id : relative,
-      description: main ? skill.role : 'Supporting file for ' + skill.id,
-      mimeType: (await contentType(file)).mimeType,
-    };
-    descriptors.push(descriptor);
-    resourcePaths.set(uri, file);
+    if (entry.isDirectory()) await index(full);
+    else files.set(path.relative(bundle, full).split(path.sep).join('/'), full);
   }
 }
-const resources = descriptors;
-
-const send = (message) => process.stdout.write(JSON.stringify(message) + '\n');
-const result = (id, value) => send({ jsonrpc: '2.0', id, result: value });
-const fail = (id, code, message) => send({ jsonrpc: '2.0', id, error: { code, message } });
-const text = (value) => ({ content: [{ type: 'text', text: value }] });
-
-const findSkill = (id) => {
-  const skill = entries.find((item) => item.id === id);
-  if (!skill) throw new Error('Unknown skill: ' + id);
-  return skill;
+await index(bundle);
+const mainUri = 'azskills://skills/azskills';
+const uriFor = relative => relative === 'SKILL.md' ? mainUri : mainUri + '/' + relative.split('/').map(encodeURIComponent).join('/');
+const resourcePaths = new Map([...files].map(([name, file]) => [uriFor(name), file]));
+const resources = [{ uri: mainUri, name: 'azskills', title: 'AzSkills', description: 'One entry; internal modules load on demand.', mimeType: 'text/markdown' }];
+const tool = {
+  name: 'azskills', description: 'Read the AzSkills entry, route a task, or load one internal module or supporting file on demand. Start with action entry.',
+  inputSchema: { type: 'object', properties: { action: { type: 'string', enum: ['entry', 'route', 'module', 'file'] }, id: { type: 'string' }, mode: { type: 'string' }, path: { type: 'string' } }, additionalProperties: false },
 };
-const readSkill = async (id) => readFile(path.join(bundleRoot, findSkill(id).id, 'SKILL.md'), 'utf8');
-const readSkillFile = async (id, relative) => {
-  findSkill(id);
-  if (typeof relative !== 'string' || !relative || path.isAbsolute(relative)) throw new Error('Skill file path must be relative.');
-  const base = path.resolve(bundleRoot, id);
-  const target = path.resolve(base, relative);
-  const rel = path.relative(base, target);
-  if (rel === '..' || rel.startsWith('..' + path.sep) || path.isAbsolute(rel)) throw new Error('Skill file path escapes its bundle.');
-  if (!(await stat(target)).isFile()) throw new Error('Skill file is not a regular file: ' + relative);
-  const type = await contentType(target);
-  if (!type.text) {
-    throw new Error('Supporting file is binary; read it through its MCP resource instead: ' + relative);
+const textResult = text => ({ content: [{ type: 'text', text }] });
+async function resource(uri) {
+  const file = resourcePaths.get(uri);
+  if (!file) throw new Error('Unknown resource: ' + uri);
+  const bytes = await readFile(file);
+  const ext = path.extname(file).toLowerCase();
+  const mime = { '.md': 'text/markdown', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.pdf': 'application/pdf' }[ext];
+  if (['.png', '.jpg', '.jpeg', '.webp', '.pdf', '.zip'].includes(ext)) return { uri, mimeType: mime || 'application/octet-stream', blob: bytes.toString('base64') };
+  try { return { uri, mimeType: mime || 'text/plain', text: new TextDecoder('utf-8', { fatal: true }).decode(bytes) }; }
+  catch { return { uri, mimeType: 'application/octet-stream', blob: bytes.toString('base64') }; }
+}
+async function call(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Arguments must be an object');
+  if (Object.keys(input).some(key => !['action', 'id', 'mode', 'path'].includes(key))) throw new Error('Unknown argument');
+  const action = input.action ?? 'entry';
+  if (action === 'entry') return textResult(await readFile(files.get('SKILL.md'), 'utf8'));
+  if (action === 'route') return textResult(await readFile(files.get('references/routing.md'), 'utf8'));
+  if (action === 'module') {
+    const alias = catalog.aliases.find(a => a.id === input.id);
+    const module = catalog.modules.find(m => m.id === (alias?.canonical ?? input.id));
+    if (!module) throw new Error('Unknown module: ' + input.id);
+    const mode = input.mode ?? alias?.mode;
+    if (mode !== undefined && !module.modes.includes(mode)) throw new Error('Unknown mode for ' + module.id);
+    return textResult((mode ? 'Selected mode: ' + mode + '\n\n' : '') + await readFile(files.get(module.path), 'utf8'));
   }
-  return readFile(target, 'utf8');
-};
-
-const tools = [
-  { name: 'list_skills', description: 'List AzSkills contracts with id, family, modes, and role.', inputSchema: { type: 'object', properties: {}, additionalProperties: false } },
-  { name: 'read_skill', description: 'Read one SKILL.md contract by canonical id or compatibility alias.', inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'], additionalProperties: false } },
-  { name: 'read_skill_file', description: 'Read a supporting file from a packaged Skill bundle by id and bundle-relative path.', inputSchema: { type: 'object', properties: { id: { type: 'string' }, path: { type: 'string' } }, required: ['id', 'path'], additionalProperties: false } },
-  { name: 'search_skills', description: 'Search skill ids, roles, and full contract text.', inputSchema: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'], additionalProperties: false } },
-];
-
-const dispatch = async (request) => {
-  const { id, method, params = {} } = request;
-  if (method === 'initialize') {
-    return result(id, {
-      protocolVersion: typeof params.protocolVersion === 'string' ? params.protocolVersion : fallbackProtocolVersion,
-      capabilities: { resources: {}, tools: {} },
-      serverInfo: { name: 'azskills', version: '1.1.0' },
-    });
+  if (action === 'file') {
+    if (typeof input.path !== 'string' || !files.has(input.path)) throw new Error('Unknown bundle-relative file path');
+    const data = await resource(uriFor(input.path));
+    if (!('text' in data)) return { content: [{ type: 'resource', resource: data }] };
+    return textResult(data.text);
   }
-  if (method === 'ping') return result(id, {});
-  if (method === 'tools/list') return result(id, { tools });
-  if (method === 'resources/list') return result(id, { resources });
-  if (method === 'resources/read') {
-    const uri = String(params.uri ?? '');
-    const file = resourcePaths.get(uri);
-    if (!file) throw new Error('Unknown resource: ' + uri);
-    const type = await contentType(file);
-    const mimeType = resources.find((item) => item.uri === uri).mimeType;
-    if (type.text) {
-      return result(id, { contents: [{ uri, mimeType, text: await readFile(file, 'utf8') }] });
-    }
-    return result(id, { contents: [{ uri, mimeType, blob: (await readFile(file)).toString('base64') }] });
-  }
+  throw new Error('Unknown action: ' + action);
+}
+async function dispatch(request) {
+  const { method, params = {} } = request;
+  if (method === 'initialize') return { protocolVersion: typeof params.protocolVersion === 'string' ? params.protocolVersion : '2025-06-18', capabilities: { resources: {}, tools: {} }, serverInfo: { name: 'azskills', version: catalog.version } };
+  if (method === 'ping') return {};
+  if (method === 'tools/list') return { tools: [tool] };
+  if (method === 'resources/list') return { resources };
+  if (method === 'resources/read') return { contents: [await resource(params.uri)] };
   if (method === 'tools/call') {
-    const name = params.name;
-    const input = params.arguments ?? {};
-    if (name === 'list_skills') {
-      return result(id, text(entries.map((skill) => [skill.id, skill.family ?? 'alias', skill.modes?.join(',') ?? skill.mode, skill.role ?? 'Alias for ' + skill.canonical].join(' | ')).join('\n')));
-    }
-    if (name === 'read_skill') return result(id, text(await readSkill(String(input.id ?? ''))));
-    if (name === 'read_skill_file') return result(id, text(await readSkillFile(String(input.id ?? ''), input.path)));
-    if (name === 'search_skills') {
-      const query = String(input.query ?? '').toLowerCase();
-      const matches = [];
-      for (const skill of entries) {
-        const body = await readFile(path.join(bundleRoot, skill.id, 'SKILL.md'), 'utf8');
-        if ((skill.id + ' ' + skill.role + ' ' + body).toLowerCase().includes(query)) matches.push(skill.id + ' | ' + skill.role);
-      }
-      return result(id, text(matches.length ? matches.join('\n') : 'No matches'));
-    }
-    return fail(id, -32602, 'Unknown tool: ' + name);
+    if (params.name !== 'azskills') throw new Error('Unknown tool: ' + params.name);
+    try { return await call(params.arguments ?? {}); }
+    catch (error) { return { ...textResult(error.message), isError: true }; }
   }
-  return fail(id, -32601, 'Method not found: ' + method);
-};
-
+  throw new Error('Method not found: ' + method);
+}
 const lines = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
-let requestQueue = Promise.resolve();
-lines.on('line', (line) => {
+let queue = Promise.resolve();
+const send = message => process.stdout.write(JSON.stringify(message) + '\n');
+lines.on('line', line => {
   if (!line.trim()) return;
-  requestQueue = requestQueue.then(async () => {
+  queue = queue.then(async () => {
     let request;
-    try { request = JSON.parse(line); } catch { return; }
-    if (request.id === undefined) return;
-    try { await dispatch(request); } catch (error) { fail(request.id, -32603, error.message); }
+    try { request = JSON.parse(line); } catch { send({ jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } }); return; }
+    if (request?.id === undefined) return;
+    try { send({ jsonrpc: '2.0', id: request.id, result: await dispatch(request) }); }
+    catch (error) { send({ jsonrpc: '2.0', id: request.id, error: { code: request.method?.startsWith('resources/') ? -32602 : -32601, message: error.message } }); }
   });
 });
-lines.on('close', () => {
-  requestQueue.finally(() => rm(bundleRoot, { recursive: true, force: true })).catch(() => {});
-});
+lines.on('close', () => { queue.finally(() => rm(staging, { recursive: true, force: true })).catch(error => { console.error(error.message); process.exitCode = 1; }); });

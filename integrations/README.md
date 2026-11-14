@@ -1,7 +1,7 @@
 # Tool integrations
 
 AzSkills connects to AI tools through four honest mechanisms. A native or shared
-skills folder is a copied skill contract. An MCP server exposes the same contracts
+skills folder is one copied azskills bundle. An MCP server exposes the same single entry and internal modules
 to clients without a skill folder. Manual import is used only where the vendor
 workflow is UI-based or not publicly documented for local files.
 
@@ -46,9 +46,9 @@ Start the interactive setup and maintenance wizard:
 Or select a client and scope explicitly:
 
     node scripts/install-skills.mjs --list
-    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills ui-design,architecture --dry-run
-    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills ui-design,architecture --yes
-    node scripts/package-skill.mjs --skill ui-design --output /path/to/exports
+    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills azskills --dry-run
+    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills azskills --yes
+    node scripts/package-skill.mjs --skill azskills --output /path/to/exports
     node scripts/install-skills.mjs --rollback --target /path/to/project/.agents/skills --yes
     node scripts/install-skills.mjs --uninstall --target /path/to/project/.agents/skills --yes
 

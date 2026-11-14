@@ -1,574 +1,120 @@
 # AzSkills
 
-<div align="center">
-
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/azskills-hero-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/azskills-hero.svg">
-  <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: discover, compose, and verify reusable AI skill contracts" width="100%">
+  <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: one entry with specialized internal modules" width="100%">
 </picture>
 
-**Reusable AI Skills for real work.**
+Version **2.0.0**. One entry in your client, specialized capabilities inside.
 
-Repository-local `SKILL.md` behavior contracts for engineering, architecture, frontend systems, design systems, UI quality, presentations, documentation, localization, translation, career evidence, and visual production.
+AzSkills installs as a single `azskills` folder with one `SKILL.md`. Describe the result you want; the entry routes to the relevant internal module and loads only the necessary references. Internal module names are workflow choices, not additional skills to install.
 
-The default visual language is **Wabi Press (侘寂刊本)**: warm paper, soot ink, cinnabar, moss, serif headings and readable CJK sans body. [`DESIGN.md`](DESIGN.md) defines one palette for reading, dense tools, README art and slides. Terminal output maps the same semantic roles while retaining native backgrounds, cell geometry, ASCII fallbacks and plain mode.
+## Install
 
-<p>
-  <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/CYoJkoY/AzSkills/main/.github/badges/skills.json&style=flat" alt="Skill count">
-  <img src="https://img.shields.io/badge/Format-SKILL.md-0B57D0?style=flat" alt="SKILL.md format">
-  <img src="https://img.shields.io/github/actions/workflow/status/CYoJkoY/AzSkills/validate-design-contract.yml?branch=main&style=flat&label=Design%20contracts" alt="Design contract validation">
-  <img src="https://img.shields.io/github/license/CYoJkoY/AzSkills?style=flat&color=0B57D0" alt="MIT License">
-  <a href="https://github.com/CYoJkoY/AzSkills/stargazers"><img src="https://img.shields.io/github/stars/CYoJkoY/AzSkills?style=flat" alt="GitHub stars"></a>
-</p>
+Requires Node.js 22 or later. From this checkout:
 
-<p>
-  <a href="#readme-overview">Overview</a> ·
-  <a href="#readme-architecture">Architecture</a> ·
-  <a href="#readme-design-system">Design system</a> ·
-  <a href="#readme-skills">Skills</a> ·
-  <a href="#readme-choose">Choose</a> ·
-  <a href="#readme-usage">Use</a> ·
-  <a href="#readme-connect">Connect</a> ·
-  <a href="#readme-quality">Quality</a> ·
-  <a href="#readme-contributing">Contribute</a> ·
-  <a href="#readme-support">Support</a>
-</p>
-
-</div>
-
----
-
-<a name="readme-overview"></a>
-## <img src="assets/readme/icons/contract.svg" width="20" height="20" alt=""> Overview
-
-AzSkills is a **modular library of reusable AI behavior contracts**.
-
-A Skill is not a framework, runtime, agent platform, or application. It is a human-readable `SKILL.md` that defines a bounded capability with explicit rules for activation, execution, verification, and output.
-
-The core model is deliberately small:
-
-```text
-request
-  -> family
-    -> one canonical Skill
-      -> one mode
-        -> named references
-          -> execute
-            -> quality gates
-              -> artifact + evidence
+```sh
+node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --dry-run
+node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --yes
 ```
 
-### Why behavior contracts?
+The resulting entry is `/path/to/project/.agents/skills/azskills/SKILL.md`. Use `--mode user` for the client user directory, `--target <skills-root>` to override the destination, or `--list` to see supported clients. Running without arguments opens a client-selection prompt. The default scope is user. Every selection installs the same complete bundle.
 
-Prompt fragments are easy to copy and hard to maintain. A Skill makes the important parts explicit:
+For archive import, run `node scripts/package-skill.mjs --output /path/to/exports` and import `azskills.zip`. The ZIP has one root `SKILL.md` and all supporting files. Install the complete archive, not the manifest alone. Use a fresh export directory; pre-existing older archives are not removed automatically.
 
-| Contract element | Purpose |
-| :--- | :--- |
-| **Family** | Groups related capabilities without merging their responsibilities. |
-| **Contract** | Names applicability, ownership, inputs, outputs, composition, and gates. |
-| **Modes** | Changes the workflow and gates inside one owner. |
-| **Workflow** | Turns experience into a repeatable execution sequence. |
-| **Quality gates** | Defines what must be verified before work is considered complete. |
-| **Output contract** | Defines the expected artifact or response shape. |
-| **References** | Supplies depth without creating a hidden second contract. |
+See [client integration guides](integrations/README.md) for native folders, manual import, and MCP configuration. Client discovery depends on the client scan scope and may require a restart. The installer verifies local contents separately from actual client discovery and invocation.
 
-AzSkills therefore favors **small responsibilities, composition, repository-native context, explicit verification, and maintainability** over one giant universal prompt.
+## Use
 
----
+Ask naturally, for example:
 
-<a name="readme-architecture"></a>
-## <img src="assets/readme/icons/visual-design.svg" width="20" height="20" alt=""> Architecture
+- "Use AzSkills to review the architecture of this application."
+- "Use AzSkills to refine the interface and check its states."
+- "Use AzSkills to turn these findings into an HTML report."
 
-AzSkills separates **shared rules**, **canonical contracts**, **modes**, and
-**references**. The registry is the source of truth; the README and aliases are
-checked against it.
+You may specify `architecture/frontend` or a legacy name such as `frontend-architecture`. Both route within AzSkills. Read [routing](references/routing.md) for outcomes and modes; the [entry contract](SKILL.md) defines the loading sequence.
 
-```text
-SKILL-SYSTEM.md          shared rules and contract template
-    |
-skills.json              canonical owners, modes, aliases, families
-    |
-<skill>/SKILL.md         one decision class, at most 280 lines
-    |
-<skill>/references/      depth loaded only when the mode names it
-    |
-CI                       registry, frontmatter, budgets, links, catalog parity
+## Upgrade and rollback
+
+The installer migrates entries recorded in an older `.azskills-manifest.json` to one `azskills` directory. It preserves unrelated paths and refuses an unmanaged conflicting `azskills` directory. An old manual installation without a manifest needs manual reconciliation after reviewing its files. Legacy `--skills <module>` and `--all-skills` options map to the complete bundle.
+
+Backups live outside the scan root, in a sibling `.<skills-root-name>-azskills-backups` directory. Existing in-root AzSkills backups move there during migration so their old manifests cannot be rediscovered. Rollback restores the previous entries, previous manifest bytes, and previous in-root backup location, so it intentionally restores the previous discovery behavior too.
+
+```sh
+node scripts/install-skills.mjs --verify --target /path/to/skills
+node scripts/install-skills.mjs --rollback --target /path/to/skills --yes
+node scripts/install-skills.mjs --uninstall --target /path/to/skills --yes
 ```
 
-A caller may still use an old path. The alias forwards to one canonical Skill and
-one mode; it cannot add rules.
+Uninstall backs up and removes managed entries. Rollback restores the immediately preceding operation; an unchanged install preserves the existing rollback point. Backups are retained for recovery and are not automatically purged. A missing or modified rollback snapshot requires manual recovery; legacy rollback records use the previous installer.
 
+## Internal modules
 
-### Shared reasoning layer
-
-[`design-intelligence.md`](design-intelligence.md) is **not a Skill**. It is a visual extension layer for typography, color, composition, and visual QA.
-
-It is intentionally separate from implementation Skills so the same visual reasoning is not duplicated across UI, presentation, identity, and documentation workflows.
-
-### DESIGN.md integration
-
-[`design-system`](design-system/SKILL.md) is the boundary between external design-system documents and AzSkills.
-
-It supports three source forms:
-
-| Source form | Interpretation |
-| :--- | :--- |
-| **Token-bearing** | Machine-readable values are treated as exact source values; prose supplies intent and usage. |
-| **Prose-first** | Explicit values are retained as `verified-prose` evidence; missing tokens are never fabricated. |
-| **Mixed** | Token values supply exact data; prose supplies behavior, rationale, states, and responsive guidance. |
-
-The adapter then normalizes those sources into:
-
-```text
-Context
-  ->
-Primitive
-  ->
-Semantic
-  ->
-Component
-  ->
-State
-  ->
-Responsive / Accessibility / Motion / QA
-```
-
-Multiple design references remain a **reference corpus**, not a system to average together. Source authority, inferred values, implementation choices, and unresolved assumptions are kept explicit.
-
-See:
-
-- [DESIGN.md adapter](design-system/references/design-md-adapter.md)
-- [DESIGN.md schema reference](design-system/references/design-md-schema.md)
-- [Source format matrix](design-system/references/source-format-matrix.md)
-
----
-
-<a name="readme-design-system"></a>
-## <img src="assets/readme/icons/visual-design.svg" width="20" height="20" alt=""> Design system
-
-AzSkills uses **Wabi Press as the default visual direction across the library**. Paper and ink, hairline rules, restrained spacing and near-zero shadow support content-led composition. Dense tools retain navigation, search, selection, keyboard access and density; slides retain their fixed stage; documents retain natural reading flow. Explicit user direction, target-project identity and platform constraints take priority, as defined in [`design-intelligence.md`](design-intelligence.md#default-visual-direction).
-
-No root attribute is needed for Wabi Press. Existing `data-surface="editorial"` pages remain compatible. Set `data-surface="workbench"` for dense tool typography; `--wb-*` colors and `.wb-*` primitives reuse the same paper/ink palette. Stylesheet paths and theme-controller APIs remain unchanged.
-
-Executable artifacts, all referenced by the contract in [`DESIGN.md`](DESIGN.md):
-
-| Artifact | Role |
-| :--- | :--- |
-| [`design-system/wabi-press.css`](design-system/wabi-press.css) | Default Wabi Press material and reading primitives, plus compatible `--wb-*` aliases and dense tool geometry. |
-| [`design-system/wabi-press-theme.ts`](design-system/wabi-press-theme.ts) | Existing native TypeScript theme controller for explicit light/dark choice and system `prefers-color-scheme` behavior. The filename is retained for compatibility. |
-| [`design-system/preview/index.html`](design-system/preview/index.html) | Dependency-free Wabi Press reading preview with a dense tool adaptation, search/selection, light/dark themes, density modes and responsive layouts. |
-| [`design-system/tui/preview.mjs`](design-system/tui/preview.mjs) | Dependency-free terminal preview for 24-240 columns (CI matrix 40-160), truecolor/256/16/plain modes, keyboard states, and a `--check` conformance gate used by CI. |
-
----
-
-<a name="readme-skills"></a>
-## <img src="assets/readme/icons/engineering.svg" width="20" height="20" alt=""> Skill catalog
-
-The registry defines canonical Skills in seven families. Choose one canonical owner,
-then choose a mode. Deep detail lives in references and does not expand the owner.
-
-The assembly rules are in [`SKILL-SYSTEM.md`](SKILL-SYSTEM.md); the machine-readable
-registry is [`skills.json`](skills.json).
+These contracts are ordinary Markdown files. They retain their domain workflows and output gates.
 
 <!-- SKILL-CATALOG:START -->
-| Family | Canonical Skill | Modes | Focus |
+| Family | Module | Modes | Focus |
 | :--- | :--- | :--- | :--- |
-| Core | [`ultrathink`](ultrathink/SKILL.md) | deep, rescue | Assumptions, alternatives, failure analysis, and the decision record. |
-| Architecture | [`architecture`](architecture/SKILL.md) | runtime, frontend, migration, review | Runtime, stack, persistence, and process boundaries. |
-| Interface | [`design-system`](design-system/SKILL.md) | ingest, author, migrate, audit | DESIGN.md evidence, tokens, semantics, provenance, and QA. |
-| Interface | [`ui-design`](ui-design/SKILL.md) | build, refine, review, system | Interface hierarchy, components, states, responsive behavior, and visual QA. |
-| Interface | [`ui-motion`](ui-motion/SKILL.md) | build, review, audit, pattern, svg | Motion construction, review, audit, expressive patterns, and SVG. |
-| Visual | [`logo-generator`](logo-generator/SKILL.md) | mark, character, system | Logos, product marks, character marks, and identity systems. |
-| Visual | [`photo-abstract-editorial`](photo-abstract-editorial/SKILL.md) | treatment, audit | Photograph-preserving abstract editorial diptychs. |
-| Production | [`frontend-slides`](frontend-slides/SKILL.md) | new, convert, enhance, report | Responsive Wabi-Press HTML reports with role-based reading typography, and fixed-stage presentations. |
-| Production | [`remotion-production`](remotion-production/SKILL.md) | video, data, 3d, ui-showcase, motion, av | Deterministic programmatic video and render delivery. |
-| Publishing | [`readme-craft`](readme-craft/SKILL.md) | build, rewrite, audit | GitHub README architecture, visuals, links, and QA. |
-| Publishing | [`steam-mod-page`](steam-mod-page/SKILL.md) | player, developer, audit | Steam Workshop BBCode pages and bilingual delivery. |
-| Publishing | [`localization`](localization/SKILL.md) | translate, audit | Game CSV localization with locale and markup safety. |
-| Career | [`resume-evidence-workflow`](resume-evidence-workflow/SKILL.md) | evidence, tailor, review | Career evidence bank, requirement-to-evidence mapping, and editable resume delivery. |
-| Operations | [`tool-integration`](tool-integration/SKILL.md) | install, configure, troubleshoot, remove | Guided AzSkills setup, verification, troubleshooting, and removal across AI clients. |
+| Architecture | [`architecture`](references/modules/architecture.md) | runtime, frontend, migration, review | Runtime, frontend stack, persistence, and process boundaries. |
+| Interface | [`design-system`](references/modules/design-system.md) | ingest, author, migrate, audit | DESIGN.md ingestion, normalization, provenance, and verification. |
+| Interface | [`ui-design`](references/modules/ui-design.md) | build, refine, review, system | Interface hierarchy, components, states, responsive behavior, and visual QA. |
+| Interface | [`ui-motion`](references/modules/ui-motion.md) | build, review, audit, pattern, svg | Motion construction, review, audit, patterns, and SVG animation. |
+| Visual | [`logo-generator`](references/modules/logo-generator.md) | mark, character, system | Logos, product marks, character marks, and identity systems. |
+| Visual | [`photo-abstract-editorial`](references/modules/photo-abstract-editorial.md) | treatment, audit | Photograph-preserving abstract editorial diptychs. |
+| Production | [`frontend-slides`](references/modules/frontend-slides.md) | new, convert, enhance, report | Responsive HTML reports, fixed-stage presentations, and rendered QA. |
+| Production | [`remotion-production`](references/modules/remotion-production.md) | video, data, 3d, ui-showcase, motion, av | Deterministic programmatic video and render delivery. |
+| Publishing | [`readme-craft`](references/modules/readme-craft.md) | build, rewrite, audit | GitHub README architecture, visuals, links, and QA. |
+| Publishing | [`steam-mod-page`](references/modules/steam-mod-page.md) | player, developer, audit | Steam Workshop BBCode pages and bilingual delivery. |
+| Publishing | [`localization`](references/modules/localization.md) | translate, audit | Game CSV localization with locale completeness and markup safety. |
+| Career | [`resume-evidence-workflow`](references/modules/resume-evidence-workflow.md) | evidence, tailor, review | Career evidence, requirement alignment, and editable resume delivery. |
+| Operations | [`tool-integration`](references/modules/tool-integration.md) | install, configure, troubleshoot, remove | Connect AzSkills to AI clients with verified installation and setup workflows. |
 <!-- SKILL-CATALOG:END -->
 
-### Compatibility aliases
-
-Old paths still work. Each alias points to one canonical Skill and one mode; it
-does not own rules.
+## Legacy names
 
 <!-- SKILL-ALIASES:START -->
-| Alias | Canonical | Mode |
+| Alias | Module | Mode |
 | :--- | :--- | :--- |
-| `application-architecture` | [`architecture`](architecture/SKILL.md) | runtime |
-| `frontend-architecture` | [`architecture`](architecture/SKILL.md) | frontend |
-| `ui-aesthetics` | [`ui-design`](ui-design/SKILL.md) | refine |
-| `ui-ux-design-intelligence` | [`ui-design`](ui-design/SKILL.md) | review |
-| `ui-motion-review` | [`ui-motion`](ui-motion/SKILL.md) | review |
-| `ui-motion-audit` | [`ui-motion`](ui-motion/SKILL.md) | audit |
-| `rare-ui-motion` | [`ui-motion`](ui-motion/SKILL.md) | pattern |
-| `svg-animation` | [`ui-motion`](ui-motion/SKILL.md) | svg |
-| `ip-as-logo` | [`logo-generator`](logo-generator/SKILL.md) | character |
-| `l13n` | [`localization`](localization/SKILL.md) | translate |
+| `application-architecture` | [`architecture`](references/modules/architecture.md) | runtime |
+| `frontend-architecture` | [`architecture`](references/modules/architecture.md) | frontend |
+| `ui-aesthetics` | [`ui-design`](references/modules/ui-design.md) | refine |
+| `ui-ux-design-intelligence` | [`ui-design`](references/modules/ui-design.md) | review |
+| `ui-motion-review` | [`ui-motion`](references/modules/ui-motion.md) | review |
+| `ui-motion-audit` | [`ui-motion`](references/modules/ui-motion.md) | audit |
+| `rare-ui-motion` | [`ui-motion`](references/modules/ui-motion.md) | pattern |
+| `svg-animation` | [`ui-motion`](references/modules/ui-motion.md) | svg |
+| `ip-as-logo` | [`logo-generator`](references/modules/logo-generator.md) | character |
+| `l13n` | [`localization`](references/modules/localization.md) | translate |
 <!-- SKILL-ALIASES:END -->
 
-### Shared design reasoning
+## MCP
 
-[`design-intelligence.md`](design-intelligence.md) is a visual extension layer, not
-a Skill. It supplies only visual judgment shared by visual Skills.
+Register `node scripts/azskills-mcp.mjs` as a stdio server named `azskills`. It lists one tool and one public resource. Call `azskills` with `action: entry` to start, `route` for the routing table, `module` plus `id` (optionally `mode`) for one contract, or `file` plus a bundle-relative `path` for supporting content. Paths are matched against packaged files; arbitrary filesystem access is unavailable. Binary files return embedded resources. Supporting resource URIs use `azskills://skills/azskills/<encoded/path>`.
 
----
+## Contributing and verification
 
-<a name="readme-choose"></a>
-## <img src="assets/readme/icons/selection.svg" width="20" height="20" alt=""> Choose a Skill
+See [module system](SKILL-SYSTEM.md), [design contract](DESIGN.md), [design intelligence](design-intelligence.md), [migration and version plan](docs/single-entry-migration.md), and [third-party notices](THIRD_PARTY_NOTICES.md). License: [MIT](LICENSE).
 
-Use this routing map as the first decision point:
-
-```text
-What are you doing?
-|
-+-- Runtime, stack, persistence, boundaries --> architecture
-|     +-- runtime | frontend | migration | review
-|
-+-- Consume or author DESIGN.md ---------------> design-system
-|     +-- ingest | author | migrate | audit
-|
-+-- Build or change an interface --------------> ui-design
-|     +-- build | refine | review | system
-|
-+-- Add, review, audit, or adapt motion -------> ui-motion
-|     +-- build | review | audit | pattern | svg
-|
-+-- Create a logo or character mark -----------> logo-generator
-|     +-- mark | character | system
-|
-+-- Treat one photograph ---------------------> photo-abstract-editorial
-|     +-- treatment | audit
-|
-+-- Create an HTML deck or paged report ------> frontend-slides (report for reading-first HTML)
-|     +-- new | convert | enhance | report
-|
-+-- Create a rendered video ------------------> remotion-production
-|     +-- video | data | 3d | ui-showcase | motion | av
-|
-+-- Write a GitHub README ---------------------> readme-craft
-+-- Write a Steam Workshop page ---------------> steam-mod-page
-+-- Translate a game CSV ----------------------> localization
-+-- Build evidence and tailor a resume --------> resume-evidence-workflow
-|     +-- evidence | tailor | review
-+-- Connect AzSkills to an AI client ----------> tool-integration
-|     +-- install | configure | troubleshoot | remove
-+-- Difficult or high-risk reasoning ----------> ultrathink + domain Skill
+```sh
+node scripts/generate-routing.mjs --check
+node scripts/validate-skills.mjs
+node scripts/validate-integrations.mjs
+node scripts/test-package-skill.mjs
+node scripts/test-install-skills.mjs
+node scripts/test-azskills-mcp.mjs
+node design-system/tui/preview.mjs --check
 ```
 
-### Composition rules
+The terminal preview is an internal module catalog for contributors; it is not the client skill panel.
 
-```text
-New domain behavior    -> new canonical Skill
-Narrow variation       -> mode inside an existing Skill
-Reusable depth         -> reference inside the owning Skill
-Cross-artifact rule    -> shared rule in SKILL-SYSTEM.md
-DESIGN.md ingestion    -> design-system
-Deep reasoning         -> ultrathink + one owning domain Skill
-Runtime decision       -> architecture before downstream UI choices
-Resume fact and claim  -> resume-evidence-workflow
-```
+Report bugs or propose module improvements through the repository issue templates. Keep one public entry, version changed contracts, and verify portable links and migration behavior before submitting changes.
 
-Do not duplicate a shared rule merely to make a Skill look self-contained. An
-alias forwards; it does not add a second contract.
+## Support
 
----
+Support maintenance of the internal modules, references, and tooling.
 
-<a name="readme-usage"></a>
-## <img src="assets/readme/icons/model.svg" width="20" height="20" alt=""> Use
-
-AzSkills is runtime-agnostic. There is no repository-wide application to install; the deliverable is the Markdown contract itself plus any supporting references or assets.
-
-### 1. Clone
-
-```bash
-git clone https://github.com/CYoJkoY/AzSkills.git
-cd AzSkills
-```
-
-For visual work without a stronger direction, follow the shared Wabi Press fallback in [`design-intelligence.md`](design-intelligence.md#default-visual-direction) and [`DESIGN.md`](DESIGN.md). Use [`design-system/wabi-press.css`](design-system/wabi-press.css) for default reading primitives or its compatible workbench tokens for dense tools. Adapt composition to README, slides, identity and terminal constraints.
-
-<a name="readme-connect"></a>
-### 2. Connect a tool
-
-If AzSkills is already available in your assistant, invoke tool-integration and name your client and scope, for example: "Set up AzSkills in Cursor for this project." The Skill uses the CLI wizard as the source of truth for preview, backup, install, verification, rollback, and uninstall.
-
-For first-time setup, clone the repository and start the interactive wizard:
-
-    git clone https://github.com/CYoJkoY/AzSkills.git
-    cd AzSkills
-    node scripts/install-skills.mjs
-
-The wizard prompts for client, scope, and skills (recommended set by default; search, select specific skills, or choose all). It detects candidate locations, previews filesystem changes, asks before writing, backs up managed skills, and checks that selected files are present. Use explicit flags for repeatable or non-interactive runs:
-
-    node scripts/install-skills.mjs --list
-    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --dry-run
-    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --yes
-    node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --dry-run
-    node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --skills tool-integration,architecture --yes
-    node scripts/install-skills.mjs --verify --tool cursor --mode project --project /path/to/project --skills tool-integration
-    node scripts/install-skills.mjs --rollback --target /path/to/.cursor/skills
-    node scripts/install-skills.mjs --uninstall --target /path/to/.cursor/skills
-    node scripts/package-skill.mjs --skill ui-design --output ./dist/skills
-    node scripts/package-skill.mjs --output ./dist/skills
-
-The installer copies each selected Skill with linked local Markdown references, assets, and scripts under `_azskills-support`; the rewritten links resolve inside the installed folder. It also accepts registered compatibility aliases in `--skills`. The packaging command exports a deterministic standalone `.zip` for clients that accept Skill archives; without `--skill`, it exports all 14 canonical Skills and 10 aliases. Each archive contains the Skill at its root, so extract it directly into a client's skills directory or import it as one Skill.
-
-The wizard automates only registered local skill-folder installs. Other clients show an explicit manual or MCP guide; their configuration is not edited unless an exact supported target is registered. Client discovery and a real skill invocation remain pending until checked inside that client. See the tool integration guides in integrations/README.md for each client's documented path, evidence, manual steps, and verification instructions. The registry in integrations/tools.json is the machine-readable source of truth. The manifest tracks AzSkills-owned skills so updates, rollback, and uninstall preserve unrelated files.
-### 3. Select the narrowest Skill
-
-Start with the smallest capability that fully owns the requested work.
-
-For example:
-
-```text
-New application
-   -> architecture (runtime)
-   -> architecture (frontend)
-   -> ui-design (build)
-```
-
-Or:
-
-```text
-DESIGN.md + UI implementation
-   -> design-system (ingest)
-   -> ui-design (build)
-   -> ui-design (refine) when visual polish is needed
-```
-
-For difficult work:
-
-```text
-ultrathink (deep)
-   + one canonical owner
-```
-
-For a job application:
-
-```text
-career material
-   -> resume-evidence-workflow (evidence)
-   -> base resume and layout profile
-   -> resume-evidence-workflow (tailor) with the complete job description
-   -> editable HTML master or the renderer the channel requires
-   -> resume-evidence-workflow (review) before sending
-```
-
-The resume paper keeps the source design. Compose with `ui-design` only when the
-editor chrome itself needs construction or a visual review.
-
-### 4. Read the contract and its references
-
-The contract is always the Skill directory's `SKILL.md`. Some Skills also contain reference documents, templates, assets, or specialized implementation guides.
-
-Do not assume a reference file is globally applicable. Read it only when the owning Skill points to it or the task requires it.
-
-### 5. Execute with repository context
-
-Inspect the real project before implementing:
-
-```text
-repository
-  ->
-existing architecture
-  ->
-existing conventions / identity
-  ->
-active Skill contract
-  ->
-task-specific changes
-```
-
-Preserve project-native APIs, configuration keys, defaults, component systems, and user-visible behavior unless the task explicitly changes them.
-
-### 6. Verify before returning the result
-
-The standard loop is:
-
-```text
-inspect
-  ->
-plan
-  ->
-implement
-  ->
-render / test
-  ->
-inspect again
-  ->
-correct
-  ->
-verify
-```
-
-For design-system work, verify both the source mapping and the rendered result.
-
----
-
-<a name="readme-quality"></a>
-## <img src="assets/readme/icons/verification.svg" width="20" height="20" alt=""> Quality bar
-
-AzSkills is intentionally evidence-first.
-
-**Repository truth.** Do not invent features, benchmarks, screenshots, compatibility, versions, URLs, or destinations.
-
-**Explicit behavior.** A Skill should define scope, constraints, workflow, quality gates, and output expectations.
-
-**Project-native context.** Inspect the real repository before making architecture, UI, documentation, or visual decisions.
-
-**Composition over duplication.** Shared behavior belongs in shared references; distinct behavior belongs in focused Skills.
-
-**Design-system integrity.** Preserve exact source tokens, distinguish inference from fact, and never blend unrelated brand systems without an explicit synthesis requirement.
-
-**Visual verification.** Authored SVGs, interfaces, and presentations should be inspected at realistic display sizes with attention to geometry, spacing, typography, themes, accessibility, and interaction states.
-
-**Stable navigation.** Manually authored README navigation should use explicit custom anchors rather than guessed GitHub fragments.
-
-**Searchable documentation.** Installation, configuration, limitations, legal information, important links, and canonical support destinations belong in searchable Markdown or normal HTML.
-
-**Dynamic facts.** Repository-generated facts such as the Skill count should come from automation rather than becoming stale hardcoded prose.
-
-### CI quality gates
-
-[`validate-skills.yml`](.github/workflows/validate-skills.yml) checks the registry,
-contract blocks, line budgets, aliases, links, and catalog parity. The DESIGN.md
-and motion contracts have their own workflows. [`update-skill-badge.yml`](.github/workflows/update-skill-badge.yml)
-counts canonical Skills from `skills.json`, not every directory.
-
----
-
-<a name="readme-repository"></a>
-## <img src="assets/readme/icons/documentation.svg" width="20" height="20" alt=""> Repository map
-
-```text
-AzSkills/
-├── .github/
-│   ├── ISSUE_TEMPLATE/
-│   │   ├── bug_report.yml
-│   │   ├── config.yml
-│   │   ├── documentation.yml
-│   │   ├── new_skill.yml
-│   │   └── skill_improvement.yml
-│   ├── badges/
-│   │   └── skills.json
-│   └── workflows/
-│       ├── update-skill-badge.yml
-│       ├── validate-design-contract.yml
-│       ├── validate-remotion-production-contract.yml
-│       ├── validate-motion-contract.yml
-│       └── validate-skills.yml
-│
-├── assets/
-│   ├── azskills-hero.svg
-│   ├── azskills-hero-dark.svg
-│   └── readme/
-│       ├── icons/
-│       ├── support-cta.svg
-│       └── support-cta-dark.svg
-│
-├── architecture/
-│   ├── SKILL.md
-│   └── references/
-├── design-system/
-│   ├── SKILL.md
-│   ├── wabi-press.css
-│   ├── wabi-press-theme.ts
-│   ├── preview/
-│   ├── tui/
-│   └── references/
-├── localization/
-│   └── SKILL.md
-├── logo-generator/
-│   ├── SKILL.md
-│   └── references/
-├── photo-abstract-editorial/
-│   └── SKILL.md
-├── frontend-slides/
-│   ├── DESIGN_SYSTEM.md
-│   ├── STYLE_PRESETS.md
-│   ├── animation-patterns.md
-│   ├── html-template.md
-│   ├── scripts/
-│   ├── viewport-base.css
-│   └── references/
-├── remotion-production/
-│   ├── SKILL.md
-│   └── references/
-├── readme-craft/
-│   ├── SKILL.md
-│   └── references/
-├── resume-evidence-workflow/
-│   ├── SKILL.md
-│   ├── assets/
-│   ├── references/
-│   ├── tests/
-│   └── LICENSE
-├── steam-mod-page/
-│   ├── SKILL.md
-│   └── references/
-├── ui-design/
-│   ├── SKILL.md
-│   └── references/
-├── ui-motion/
-│   ├── SKILL.md
-│   └── references/
-├── ultrathink/
-│   ├── SKILL.md
-│   └── references/
-│
-├── application-architecture/   # alias -> architecture/runtime
-├── frontend-architecture/      # alias -> architecture/frontend
-├── ui-aesthetics/              # alias -> ui-design/refine
-├── ui-ux-design-intelligence/  # alias -> ui-design/review
-├── ui-motion-review/           # alias -> ui-motion/review
-├── ui-motion-audit/            # alias -> ui-motion/audit
-├── rare-ui-motion/             # alias -> ui-motion/pattern
-├── svg-animation/              # alias -> ui-motion/svg
-├── ip-as-logo/                 # alias -> logo-generator/character
-├── l13n/                       # alias -> localization/translate
-│
-├── scripts/
-│   └── validate-skills.mjs
-├── skills.json
-├── SKILL-SYSTEM.md
-├── DESIGN.md
-├── design-intelligence.md
-├── THIRD_PARTY_NOTICES.md
-├── LICENSE
-└── README.md
-```
-
----
-
-<a name="readme-contributing"></a>
-## <img src="assets/readme/icons/contributing.svg" width="20" height="20" alt=""> Contributing
-
-Good contributions add a clear capability, improve an existing workflow, fix a concrete defect, or remove unnecessary complexity.
-
-Before creating a new Skill:
-
-1. Check whether the behavior belongs in an existing Skill as a mode.
-2. Check whether it is a cross-Skill rule for [`SKILL-SYSTEM.md`](SKILL-SYSTEM.md) or visual judgment for [`design-intelligence.md`](design-intelligence.md).
-3. Register the canonical Skill or alias in [`skills.json`](skills.json).
-4. Use the contract template; keep the canonical file at or below 280 lines.
-5. Put depth in a reference and link it from `## References`.
-6. Record provenance and licensing in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
-7. Run `node scripts/validate-skills.mjs` and `node design-system/tui/preview.mjs --check` before opening the PR.
-
-For Skill proposals and improvements, use the repository's structured [Issue Forms](https://github.com/CYoJkoY/AzSkills/issues/new/choose).
-
----
-
-<a name="readme-support"></a>
-## <img src="assets/readme/icons/heart.svg" width="20" height="20" alt=""> Support
-
-AzSkills is maintained as an open collection of reusable engineering, design, documentation, localization, translation, career, and visual workflows. Support helps sustain the time required to maintain the Skills, references, assets, and repository infrastructure.
-
-<div align="center">
+[Support AzSkills](https://cyojkoy.github.io/Payment/)
 
 <a href="https://cyojkoy.github.io/Payment/">
   <picture>
@@ -577,20 +123,3 @@ AzSkills is maintained as an open collection of reusable engineering, design, do
     <img src="assets/readme/support-cta.svg" alt="Support AzSkills" width="640">
   </picture>
 </a>
-
-**Direct support link:** https://cyojkoy.github.io/Payment/
-
-<sub>The support CTA is authored for AzSkills and links directly to the project's support destination.</sub>
-
-</div>
-
----
-
-<a name="readme-license"></a>
-## <img src="assets/readme/icons/license.svg" width="20" height="20" alt=""> License & provenance
-
-AzSkills is released under the [MIT License](LICENSE).
-
-Some Skills incorporate or adapt ideas from public upstream projects and methodologies. Sources and applicable notices are documented in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
-
-Integrated Skills are rewritten to fit AzSkills' architecture rather than mechanically vendoring unrelated upstream repositories.

@@ -5,14 +5,11 @@ on:
     branches:
       - main
     paths:
+      - "references/**"
+      - "SKILL.md"
       - "ui-motion/**"
-      - "ui-motion-review/**"
-      - "ui-motion-audit/**"
-      - "rare-ui-motion/**"
-      - "svg-animation/**"
       - "design-intelligence.md"
-      - "ui-design/SKILL.md"
-      - "ui-aesthetics/SKILL.md"
+      - "references/modules/ui-design.md"
       - ".github/workflows/validate-motion-contract.yml"
   workflow_dispatch:
 
@@ -33,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          test -f ui-motion/SKILL.md
+          test -f references/modules/ui-motion.md
           test -f ui-motion/references/animation-standards.md
           test -f ui-motion/references/animation-vocabulary.md
           test -f ui-motion/references/animation-recipes.md
@@ -45,13 +42,13 @@ jobs:
           test -f ui-motion/references/svg-animation.md
           test -f ui-motion/references/icon-morphing.md
 
-          grep -q '^name: ui-motion$' ui-motion/SKILL.md
-          grep -q '^## Contract$' ui-motion/SKILL.md
-          grep -q '^## Modes$' ui-motion/SKILL.md
-          grep -q '^## Workflow$' ui-motion/SKILL.md
-          grep -q '^## Quality gates$' ui-motion/SKILL.md
-          grep -q '^## Output contract$' ui-motion/SKILL.md
-          grep -q '^## References$' ui-motion/SKILL.md
+          grep -q '^name: ui-motion$' references/modules/ui-motion.md
+          grep -q '^## Contract$' references/modules/ui-motion.md
+          grep -q '^## Modes$' references/modules/ui-motion.md
+          grep -q '^## Workflow$' references/modules/ui-motion.md
+          grep -q '^## Quality gates$' references/modules/ui-motion.md
+          grep -q '^## Output contract$' references/modules/ui-motion.md
+          grep -q '^## References$' references/modules/ui-motion.md
 
           grep -q '^# Motion Review Reference$' ui-motion/references/review.md
           grep -q '^## Review sequence$' ui-motion/references/review.md
@@ -67,19 +64,7 @@ jobs:
           grep -q '^# Icon Morphing Reference$' ui-motion/references/icon-morphing.md
           grep -q '^## Interruptibility$' ui-motion/references/icon-morphing.md
 
-          for entry in \
-            "ui-motion-review:review" \
-            "ui-motion-audit:audit" \
-            "rare-ui-motion:pattern" \
-            "svg-animation:svg"
-          do
-            alias=${entry%%:*}
-            mode=${entry##*:}
-            test -f "$alias/SKILL.md"
-            grep -q "^name: $alias$" "$alias/SKILL.md"
-            grep -q '^canonical: ui-motion$' "$alias/SKILL.md"
-            grep -q "^mode: $mode$" "$alias/SKILL.md"
-          done
+          node scripts/validate-skills.mjs
 
       - name: Validate cross-skill composition
         shell: bash
@@ -87,14 +72,14 @@ jobs:
           set -euo pipefail
           grep -q 'ui-motion' design-intelligence.md
           grep -q 'Rare UI-inspired interaction craft' THIRD_PARTY_NOTICES.md
-          grep -q 'ui-motion' ui-design/SKILL.md
-          grep -q 'references/review.md' ui-motion/SKILL.md
-          grep -q 'references/audit.md' ui-motion/SKILL.md
-          grep -q 'references/rare-interactions.md' ui-motion/SKILL.md
-          grep -q 'references/svg-animation.md' ui-motion/SKILL.md
-          grep -q 'references/icon-morphing.md' ui-motion/SKILL.md
-          ! grep -q 'icon-morphing' ui-design/SKILL.md
-          ! grep -nE 'ui-motion-review|ui-motion-audit|rare-ui-motion|svg-animation' design-intelligence.md ui-design/SKILL.md
+          grep -q 'ui-motion' references/modules/ui-design.md
+          grep -q 'references/review.md' references/modules/ui-motion.md
+          grep -q 'references/audit.md' references/modules/ui-motion.md
+          grep -q 'references/rare-interactions.md' references/modules/ui-motion.md
+          grep -q 'references/svg-animation.md' references/modules/ui-motion.md
+          grep -q 'references/icon-morphing.md' references/modules/ui-motion.md
+          ! grep -q 'icon-morphing' references/modules/ui-design.md
+          ! grep -nE 'ui-motion-review|ui-motion-audit|rare-ui-motion|svg-animation' design-intelligence.md references/modules/ui-design.md
 
       - name: Validate shared motion reference
         shell: bash
@@ -105,13 +90,13 @@ jobs:
           grep -q 'cubic-bezier(0.77, 0, 0.175, 1)' ui-motion/references/animation-standards.md
           grep -q 'prefers-reduced-motion' ui-motion/references/animation-standards.md
           grep -q 'hover: hover' ui-motion/references/animation-standards.md
-          ! grep -Rni 'disable-model-invocation' ui-motion ui-motion-review ui-motion-audit rare-ui-motion svg-animation
+          ! grep -Rni 'disable-model-invocation' ui-motion references/modules/ui-motion.md
 
       - name: Reject mechanical upstream copy markers
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RniE 'emilkowalski/skills|framer motion.*mandatory|install.*sonner' ui-motion ui-motion-review ui-motion-audit rare-ui-motion svg-animation; then
+          if grep -RniE 'emilkowalski/skills|framer motion.*mandatory|install.*sonner' ui-motion references/modules/ui-motion.md; then
             echo "Motion Skills contain provider-specific integration markers that belong at the edge, not in core contracts."
             exit 1
           fi

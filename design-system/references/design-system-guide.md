@@ -183,7 +183,6 @@ DESIGN.md must not silently become an architectural specification.
 - frontend-slides maps the contract into its fixed stage.
 - logo-generator handles identity-specific extraction only.
 - readme-craft keeps GitHub rendering and information architecture authoritative.
-- ultrathink is appropriate for ambiguous migrations and multi-source conflicts.
 
 ## Authoring a new DESIGN.md
 

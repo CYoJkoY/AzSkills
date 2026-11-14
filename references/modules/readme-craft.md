@@ -1,20 +1,20 @@
 ---
 name: readme-craft
 description: Design, rewrite, and audit GitHub README homepages with evidence-first information architecture, theme-safe SVG headings, stable anchors, verified links, dynamic repository facts, and rendered QA. Use for repository landing pages.
-version: 2.0.0
-status: canonical
+version: 3.0.0
+status: module
 family: publishing
 modes: [build, rewrite, audit]
 ---
 
 # README Craft
 
-Turn a repository into a readable, verifiable GitHub landing page. This Skill
+Turn a repository into a readable, verifiable GitHub landing page. This module
 owns information architecture, first-screen identity, heading icons, navigation,
 repository facts, support presentation, and README visual QA. It does not invent
 product claims, screenshots, benchmarks, or destinations.
 
-Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../design-intelligence.md).
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../../design-intelligence.md).
 
 ## Contract
 
@@ -36,7 +36,7 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual e
 
 ## Workflow
 
-Use the [shared visual fallback](../design-intelligence.md#default-visual-direction)
+Use the [shared visual fallback](../../design-intelligence.md#default-visual-direction)
 for art direction when no stronger brief exists; preserve GitHub Markdown constraints.
 
 ### 1. Build the evidence inventory
@@ -100,7 +100,7 @@ generic banner that could belong to any repository.
 ### 5. Build the heading icon system
 
 For AzSkills-owned READMEs, every major `##` section uses one semantic SVG icon
-from `assets/readme/icons/`; minor subsections do not need icons. For an external
+from `../../readme-craft/assets/readme/icons`; minor subsections do not need icons. For an external
 repository, follow its existing icon policy. Do not add icons without an owned
 icon set, and do not use emoji as a substitute.
 
@@ -168,7 +168,7 @@ correction per finding.
 
 ## References
 
-- `references/readme-guide.md` - detailed first-screen, SVG grammar, layout, composition, and QA procedure.
-- `references/beautify-github-readme.md` - README information architecture and visual patterns.
-- `references/icon-selection.md` - icon selection and scoring.
-- `references/support-cta-auto-adapt.md` - theme-adaptive support CTA.
+- `../../readme-craft/references/readme-guide.md` - detailed first-screen, SVG grammar, layout, composition, and QA procedure.
+- `../../readme-craft/references/beautify-github-readme.md` - README information architecture and visual patterns.
+- `../../readme-craft/references/icon-selection.md` - icon selection and scoring.
+- `../../readme-craft/references/support-cta-auto-adapt.md` - theme-adaptive support CTA.

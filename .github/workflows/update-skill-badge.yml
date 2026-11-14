@@ -28,9 +28,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          count="$(node -e "const r=require('./skills.json'); process.stdout.write(String(r.skills.filter((s)=>s.status==='canonical').length))")"
+          count="$(node -e "const r=require('./skills.json'); process.stdout.write(String(r.entry ? 1 : 0))")"
           echo "count=${count}" >> "$GITHUB_OUTPUT"
-          echo "Detected ${count} canonical skill(s)."
+          echo "Detected ${count} public skill entry."
 
       - name: Write badge endpoint
         shell: bash

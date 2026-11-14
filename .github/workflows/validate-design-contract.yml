@@ -5,6 +5,8 @@ on:
     branches:
       - main
     paths:
+      - "references/**"
+      - "SKILL.md"
       - "DESIGN.md"
       - "scripts/check-editorial.mjs"
       - "scripts/check-design-contract.mjs"

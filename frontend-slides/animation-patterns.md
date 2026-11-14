@@ -2,7 +2,7 @@
 
 Deck motion is placement and pacing. Mechanism, easing, timing, interruption,
 reduced-motion parity, and motion gates belong to
-[`ui-motion`](../ui-motion/SKILL.md). Read
+[`ui-motion`](../references/modules/ui-motion.md). Read
 [`../ui-motion/references/animation-standards.md`](../ui-motion/references/animation-standards.md)
 before choosing a mechanism, and use the deck tokens registered in
 [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) section 2.

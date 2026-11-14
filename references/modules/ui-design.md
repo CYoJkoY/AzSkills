@@ -1,8 +1,8 @@
 ---
 name: ui-design
 description: Design, build, refine, and review production interfaces with one visual thesis, a token-based system, complete states, responsive behavior, accessibility, and rendered visual QA. Use for web apps, dashboards, tools, settings, forms, and component libraries.
-version: 2.0.1
-status: canonical
+version: 3.0.0
+status: module
 family: interface
 modes: [build, refine, review, system]
 ---
@@ -10,12 +10,12 @@ modes: [build, refine, review, system]
 # UI Design
 
 Turn a product requirement into a coherent interface and a usable
-implementation. This Skill owns the interface layer: hierarchy, composition,
+implementation. This module owns the interface layer: hierarchy, composition,
 components, states, responsive behavior, accessibility, and visual verification.
 It does not choose the runtime or absorb motion-only, identity, or publishing
 work.
 
-Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../design-intelligence.md).
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../../design-intelligence.md).
 
 ## Contract
 
@@ -89,7 +89,7 @@ are components, not a page architecture.
 
 ### 4. Make the shell fit the work
 
-Follow the shared fallback in [Design Intelligence](../design-intelligence.md#default-visual-direction).
+Follow the shared fallback in [Design Intelligence](../../design-intelligence.md#default-visual-direction).
 For technical tools and dense workflows, adapt the same Wabi Press palette to a workbench shell: compact
 navigation, contextual sidebar, content-first main region, optional secondary
 panel, and status feedback. Use a region only when it supports a real task.
@@ -97,7 +97,7 @@ panel, and status feedback. Use a region only when it supports a real task.
 - Offer compact and comfortable density when repetition or long lists justify it.
 - Prioritize search or command entry, persistent selection, contextual actions, and keyboard navigation.
 - Use system sans-serif for interface text and monospace for code, shortcuts, and technical values.
-- For CLI or TUI surfaces, follow the [Terminal / TUI contract](../DESIGN.md#terminal--tui-contract): integer cell geometry, ANSI semantic roles, one-cell glyphs with ASCII fallbacks, and `NO_COLOR` parity. Do not translate pixel spacing, radius, shadows, or hover into terminal output.
+- For CLI or TUI surfaces, follow the [Terminal / TUI contract](../../DESIGN.md#terminal--tui-contract): integer cell geometry, ANSI semantic roles, one-cell glyphs with ASCII fallbacks, and `NO_COLOR` parity. Do not translate pixel spacing, radius, shadows, or hover into terminal output.
 
 ### 5. Design the state matrix
 
@@ -180,6 +180,6 @@ Unverified items:
 
 ## References
 
-- [Implementation details](references/implementation-details.md) - detailed layout, typography, color, forms, motion handoff, performance, and review procedure.
-- [Aesthetics](references/aesthetics.md) - composition-first visual critique and anti-generic quality gate.
-- [UX overview](references/ux/overview.md) - product-level UX analysis, platform patterns, and review workflow.
+- [Implementation details](../../ui-design/references/implementation-details.md) - detailed layout, typography, color, forms, motion handoff, performance, and review procedure.
+- [Aesthetics](../../ui-design/references/aesthetics.md) - composition-first visual critique and anti-generic quality gate.
+- [UX overview](../../ui-design/references/ux/overview.md) - product-level UX analysis, platform patterns, and review workflow.

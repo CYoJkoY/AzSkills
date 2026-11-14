@@ -1,20 +1,20 @@
 ---
 name: steam-mod-page
 description: Write and audit Steam Workshop Mod descriptions as clean BBCode with verified facts, player-first or developer-first structure, independent Chinese and English deliverables, and a final syntax lint.
-version: 2.0.0
-status: canonical
+version: 3.0.0
+status: module
 family: publishing
 modes: [player, developer, audit]
 ---
 
 # Steam Mod Page
 
-Turn a Mod repository into a complete Steam Workshop description. This Skill
+Turn a Mod repository into a complete Steam Workshop description. This module
 owns the page argument, BBCode surface, bilingual delivery, compatibility facts,
 changelog, images, support, and final syntax lint. It does not invent features or
 produce Markdown.
 
-Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../design-intelligence.md).
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../../design-intelligence.md).
 
 ## Contract
 
@@ -195,4 +195,4 @@ Unverified items:
 
 ## References
 
-- `references/steam-guide.md` - detailed page patterns, BBCode nesting, language tone, image discipline, and extended lint.
+- `../../steam-mod-page/references/steam-guide.md` - detailed page patterns, BBCode nesting, language tone, image discipline, and extended lint.

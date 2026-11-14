@@ -1,8 +1,8 @@
 ---
 name: localization
 description: Translate game CSV rows into 13 fixed locales with consistent terminology, intact BBCode, correct CSV escaping, and a clean importable output. Use for game localization batches and locale audits.
-version: 2.0.0
-status: canonical
+version: 3.0.0
+status: module
 family: publishing
 modes: [translate, audit]
 ---
@@ -10,11 +10,11 @@ modes: [translate, audit]
 # Localization
 
 Translate game copy into a fixed locale set without changing its structure,
-markup, or meaning. This Skill owns terminology, locale completeness, BBCode
+markup, or meaning. This module owns terminology, locale completeness, BBCode
 preservation, CSV escaping, and output purity. It does not own copywriting,
 store-page design, or general translation of non-CSV artifacts.
 
-Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md) before changing this contract.
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md) before changing this contract.
 
 ## Contract
 

@@ -18,7 +18,7 @@ For an interactive setup, run the guided wizard from the AzSkills checkout:
 
     node scripts/install-skills.mjs
 
-The wizard detects candidate target directories, asks for user or project scope, lets you choose recommended skills or search the canonical catalog, and previews changes before confirmation.
+The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.
 
 Run the dependency-free server from the AzSkills checkout:
 
@@ -39,13 +39,13 @@ Use the client MCP settings to add the entry, then refresh its tool list.
 
 ## Use
 
-After the client connects, call list_skills, then read_skill with a canonical id or compatibility alias. Use read_skill_file or the listed resources to load a Skill reference or supporting file by bundle-relative path. search_skills accepts a task description. Bundles include the local files linked by the Skill, and their Markdown links are rewritten to resolve inside the bundle.
+After the client connects, call the azskills tool with action entry. Use action route for module selection, action module with id and optional mode to read one contract, or action file with a bundle-relative path to load support files. Discovery lists one tool and one public resource.
 
 ## Verify
 
-Configure the MCP stdio server and call the list_skills tool.
+Configure the MCP stdio server and call the azskills with action entry tool.
 
-Also confirm that a request can read a named skill such as ultrathink.
+Confirm the single azskills entry can read references/routing.md and one selected module.
 
 ## Remove
 

@@ -1,8 +1,8 @@
 ---
 name: photo-abstract-editorial
 description: Turn one supplied photograph into a restrained vertical editorial diptych. The photograph stays faithful; a sparse abstract panel derives only its spatial, tonal, and color relationships.
-version: 2.0.0
-status: canonical
+version: 3.0.0
+status: module
 family: visual
 modes: [treatment, audit]
 ---
@@ -11,9 +11,9 @@ modes: [treatment, audit]
 
 Create one finished vertical composition from one photograph. The photograph is
 the factual source; the abstract panel is a memory of its relationships, not a
-second artwork. This Skill does not redraw, illustrate, or stylize the source.
+second artwork. This module does not redraw, illustrate, or stylize the source.
 
-Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../design-intelligence.md).
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../../design-intelligence.md).
 
 ## Contract
 

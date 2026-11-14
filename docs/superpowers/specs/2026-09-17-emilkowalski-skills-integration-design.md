@@ -1,3 +1,5 @@
+> Historical design record. Paths and installation behavior in this proposal predate the single-entry migration; see [current migration](../../single-entry-migration.md).
+
 # emilkowalski/skills → AzSkills Integration Design
 
 **Issue:** #6  

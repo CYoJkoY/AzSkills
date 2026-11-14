@@ -42,7 +42,7 @@ from unrelated section templates.
 ### Motion is owned by `ui-motion`
 
 Motion purpose, mechanism, timing, review, audit, patterns, and SVG output
-belong to [`ui-motion`](ui-motion/SKILL.md). Visual composition may reserve a
+belong to [`ui-motion`](references/modules/ui-motion.md). Visual composition may reserve a
 motion role; it does not define duration, easing, or a second motion gate.
 
 ### Visual evidence
@@ -54,7 +54,7 @@ A result that only works in the author's viewport is unfinished.
 ## DESIGN.md adaptation
 
 DESIGN.md is a visual input format, not a behavior contract. Use
-[`design-system`](design-system/SKILL.md) for ingestion, normalization,
+[`design-system`](references/modules/design-system.md) for ingestion, normalization,
 reconciliation, and provenance.
 
 ```text

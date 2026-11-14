@@ -1,8 +1,8 @@
 ---
 name: logo-generator
 description: Develop logos, product marks, wordmarks, character marks, and identity systems from a product brief. Use for concept exploration, vector construction, small-size validation, colorways, and identity rules.
-version: 2.0.0
-status: canonical
+version: 3.0.0
+status: module
 family: visual
 modes: [mark, character, system]
 ---
@@ -10,11 +10,11 @@ modes: [mark, character, system]
 # Logo Generator
 
 Turn a product brief into a recognizable mark and the rules that keep it
-coherent. This Skill owns identity concepts, vector construction, small-size
+coherent. This module owns identity concepts, vector construction, small-size
 legibility, colorways, and identity-system handoff. It does not own character
 illustration beyond the simplified mark boundary, page layout, or brand copy.
 
-Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../design-intelligence.md).
+Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../../design-intelligence.md).
 
 ## Contract
 
@@ -98,7 +98,7 @@ If the idea disappears at 16px, simplify the idea rather than adding detail.
 For `character` mode, reduce the figure to silhouette, head or body proportion,
 one expression, and one recognizable accessory. The mark is not a full
 illustration. Keep the character readable in one color and at avatar size. Use
-the [character reference](references/character-marks.md) for the stricter budget.
+the [character reference](../../logo-generator/references/character-marks.md) for the stricter budget.
 
 ### 6. Expand into a system
 
@@ -157,5 +157,5 @@ redraw the whole mark to fix one optical issue.
 
 ## References
 
-- `references/logo-guide.md` - detailed concept, exploration, system-board, showcase, and revision workflows.
-- `references/character-marks.md` - character and IP simplification budget.
+- `../../logo-generator/references/logo-guide.md` - detailed concept, exploration, system-board, showcase, and revision workflows.
+- `../../logo-generator/references/character-marks.md` - character and IP simplification budget.

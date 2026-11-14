@@ -8,13 +8,13 @@ for (const path of ["design-system/references/design-md-adapter.md", "design-sys
 const design = read("DESIGN.md");
 assert.match(design, /^name: azskills-wabi-press$/m);
 for (const term of ["NO_COLOR", "grapheme", "VSCodium"]) assert.ok(design.includes(term), "Missing retained contract: " + term);
-for (const path of ["ui-design/SKILL.md", "architecture/references/runtime-selection.md"]) {
+for (const path of ["references/modules/ui-design.md", "architecture/references/runtime-selection.md"]) {
   assert.ok(read(path).includes("Terminal / TUI contract"), "Missing terminal guidance: " + path);
 }
 for (const heading of ["Contract", "Workflow", "Quality gates", "Output contract"]) {
-  assert.ok(read("ui-design/SKILL.md").includes("## " + heading), "Missing UI contract: " + heading);
+  assert.ok(read("references/modules/ui-design.md").includes("## " + heading), "Missing UI contract: " + heading);
 }
-assert.match(read("design-system/SKILL.md"), /^name: design-system$/m);
+assert.match(read("references/modules/design-system.md"), /^name: design-system$/m);
 for (const heading of ["Workbench layout", "Interaction contract", "Accessibility and responsiveness", "Scenario adaptation", "Layer scope", "Terminal / TUI contract", "Editorial reading contract", "Visual QA"]) {
   assert.ok(design.includes("## " + heading), "Missing contract section: " + heading);
 }
@@ -38,7 +38,7 @@ for (const id of ["skill-search", "theme-toggle", "density", "surface-workbench"
   assert.ok(preview.includes('id="' + id + '"'), "Missing interactive preview: " + id);
 }
 assert.match(preview, /delete root.dataset.surface/);
-for (const path of ["design-system/SKILL.md", "ui-design/SKILL.md", "frontend-slides/SKILL.md", "readme-craft/SKILL.md"]) {
+for (const path of ["references/modules/design-system.md", "references/modules/ui-design.md", "references/modules/frontend-slides.md", "references/modules/readme-craft.md"]) {
   assert.ok(read(path).includes("design-intelligence.md#default-visual-direction"), "Missing shared fallback: " + path);
 }
 const intelligence = read("design-intelligence.md");
