@@ -1,10 +1,12 @@
 ---
 name: azskills
-description: Build and review software architecture, interfaces, design systems, motion, logos, editorial images, HTML slides, video, README pages, Steam pages, game localization, resumes, and AI client setup. Routes each task to one internal module and loads its references on demand.
-version: 2.2.0
+description: Build and review software architecture, interfaces, design systems, motion, logos, editorial images, HTML slides, video, README pages, Steam pages, game localization, resumes, AI client setup, and GPT with Taste execution behavior. Routes each task to one internal module and loads its references on demand.
+version: 2.3.0
 ---
 
 # AzSkills
+
+The Codex plugin automatically supplies GPT with Taste Main behavior at session start and role-specific steering through hooks.
 
 AzSkills is one skill with specialized internal modules. Start from the user's
 requested outcome. Module names and old aliases select workflows inside this

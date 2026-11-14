@@ -17,6 +17,7 @@ Choose by the requested output. These are internal modules, not installable skil
 | [localization](modules/localization.md) | Game CSV localization with locale completeness and markup safety. | translate, audit |
 | [resume-evidence-workflow](modules/resume-evidence-workflow.md) | Career evidence, requirement alignment, and editable resume delivery. | evidence, tailor, review |
 | [tool-integration](modules/tool-integration.md) | Connect AzSkills to AI clients with verified installation and setup workflows. | install, configure, troubleshoot, remove |
+| [taste](modules/taste.md) | GPT with Taste judgment, collaboration, and execution behavior. | main, subagent, independent |
 
 ## Legacy names
 

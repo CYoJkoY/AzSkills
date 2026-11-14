@@ -93,11 +93,11 @@
       "mode": "translate"
     }
   ],
-  "version": "2.2.0",
+  "version": "2.3.0",
   "entry": {
     "id": "azskills",
     "path": "SKILL.md",
-    "version": "2.2.0"
+    "version": "2.3.0"
   },
   "modules": [
     {
@@ -316,6 +316,15 @@
         "remove"
       ],
       "role": "Connect AzSkills to AI clients with verified installation and setup workflows.",
+      "composes": []
+    },
+    {
+      "id": "taste",
+      "path": "references/modules/taste.md",
+      "status": "module",
+      "family": "operations",
+      "modes": ["main", "subagent", "independent"],
+      "role": "GPT with Taste judgment, collaboration, and execution behavior.",
       "composes": []
     }
   ]
