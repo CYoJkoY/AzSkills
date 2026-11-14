@@ -21,7 +21,7 @@ Build the Codex plugin and its local marketplace from the AzSkills checkout:
 
 For a direct checkout import, select the AzSkills repository root; its .agents/plugins/marketplace.json points to the source plugin directory.
 
-Install AzSkills from the marketplace in Codex. Review and trust the bundled SessionStart hook when prompted. Once trusted, the hook loads AzSkills routing guidance at session start so matching requests need no explicit invocation.
+Install AzSkills from the marketplace in Codex. Review and trust the bundled SessionStart and UserPromptSubmit hooks when prompted. Once trusted, matching requests need no explicit invocation. SessionStart restores routing context on startup, resume, clear, compaction, and fork. UserPromptSubmit adds a short reminder for each request. Both hooks require Node.js on PATH and support installation paths containing spaces. The plugin bundles its AzSkills icon for the composer and plugin details.
 
 ## Use
 

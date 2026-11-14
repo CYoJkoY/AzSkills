@@ -27,7 +27,7 @@ const responses = result.stdout.trim().split(/\r?\n/).map(JSON.parse);
 assert.equal(responses.length, requests.length);
 const response = i => responses.find(r => r.id === i);
 const text = i => response(i).result.content[0].text;
-assert.equal(response(1).result.serverInfo.version, '2.1.1');
+assert.equal(response(1).result.serverInfo.version, '2.2.0');
 assert.deepEqual(response(2).result.tools.map(t => t.name), ['azskills']);
 assert.deepEqual(response(3).result.resources.map(r => r.uri), ['azskills://skills/azskills']);
 assert.match(text(4), /name: azskills/);

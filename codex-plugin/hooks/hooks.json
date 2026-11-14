@@ -5,8 +5,19 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ${PLUGIN_ROOT}/hooks/session-start.mjs",
+            "command": "node \"${PLUGIN_ROOT}/hooks/session-start.mjs\"",
             "statusMessage": "Loading AzSkills routing guidance"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/session-start.mjs\" UserPromptSubmit",
+            "statusMessage": "Applying AzSkills task routing"
           }
         ]
       }

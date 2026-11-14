@@ -53,10 +53,15 @@ try {
   await assert.rejects(packageSkill(root, 'fixture', path.join(temp, 'broken-output')), /missing linked file/);
   const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   const pluginBuild = path.join(temp, 'plugin-build');
-  const { marketplace, plugin } = await packageCodexPlugin(repository, path.join(temp, 'marketplace-output'));
+  const { marketplace, plugin } = await packageCodexPlugin(repository, path.join(temp, 'marketplace output with spaces'));
   const pluginManifest = JSON.parse(await readFile(path.join(plugin, 'plugin.json'), 'utf8'));
   const marketplaceManifest = JSON.parse(await readFile(path.join(marketplace, '.agents/plugins/marketplace.json'), 'utf8'));
   assert.equal(pluginManifest.name, 'azskills');
+  for (const field of ['composerIcon', 'logo']) {
+    const asset = pluginManifest.extensions['com.openai'].interface[field];
+    assert.match(asset, /^\.\/assets\//);
+    assert.deepEqual(await readFile(path.join(plugin, asset)), await readFile(path.join(repository, 'codex-plugin', asset)));
+  }
   assert.equal(pluginManifest.version, JSON.parse(await readFile(path.join(plugin, 'skills/azskills/skills.json'), 'utf8')).version);
   assert.equal(marketplaceManifest.plugins[0].source.path, './plugins/azskills');
   const repositoryMarketplace = JSON.parse(await readFile(path.join(repository, '.agents/plugins/marketplace.json'), 'utf8'));
@@ -78,6 +83,29 @@ try {
   });
   assert.equal(checkoutHook.status, 0, checkoutHook.stderr);
   assert.match(JSON.parse(checkoutHook.stdout).hookSpecificOutput.additionalContext, /# AzSkills/);
+  // Execute the declared commands, including their quoting, from an unrelated cwd.
+  for (const pluginRoot of [plugin, path.join(repository, 'codex-plugin')]) {
+    const hooksFile = JSON.parse(await readFile(path.join(pluginRoot, 'plugin.json'), 'utf8')).extensions['com.openai'].hooks;
+    const { hooks } = JSON.parse(await readFile(path.join(pluginRoot, hooksFile), 'utf8'));
+    for (const event of ['SessionStart', 'UserPromptSubmit']) {
+      const command = hooks[event][0].hooks[0].command.replaceAll('${PLUGIN_ROOT}', pluginRoot);
+      const result = spawnSync(command, {
+        shell: true, cwd: temp, encoding: 'utf8',
+        input: JSON.stringify({ hook_event_name: event, prompt: 'Review this architecture' }),
+        env: { ...process.env, PLUGIN_ROOT: pluginRoot },
+      });
+      assert.equal(result.status, 0, result.stderr);
+      const context = JSON.parse(result.stdout).hookSpecificOutput;
+      assert.equal(context.hookEventName, event);
+      if (event === 'UserPromptSubmit') {
+        assert.match(context.additionalContext, /proactively apply AzSkills/);
+        assert.match(context.additionalContext, /SKILL\.md/);
+        assert.doesNotMatch(context.additionalContext, /# AzSkills/);
+      } else {
+        assert.match(context.additionalContext, /# AzSkills/);
+      }
+    }
+  }
   console.log('Codex plugin package and SessionStart context assertions passed.');
   const pluginBuildResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.mjs'), '--output', pluginBuild], { encoding: 'utf8' });
   assert.equal(pluginBuildResult.status, 0, pluginBuildResult.stderr);

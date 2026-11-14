@@ -13,6 +13,7 @@ export async function packageCodexPlugin(repositoryRoot, outputDirectory) {
 
   await mkdir(path.join(plugin, 'hooks'), { recursive: true });
   await cp(path.join(base, 'codex-plugin/plugin.json'), path.join(plugin, 'plugin.json'));
+  await cp(path.join(base, 'codex-plugin/assets'), path.join(plugin, 'assets'), { recursive: true });
   await cp(path.join(base, 'codex-plugin/hooks'), path.join(plugin, 'hooks'), { recursive: true });
   await packageSkill(base, 'azskills', path.join(plugin, 'skills'));
 
