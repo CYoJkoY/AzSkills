@@ -49,12 +49,36 @@ jobs:
       - name: Check integration scripts syntax
         run: |
           node --check scripts/install-skills.mjs
+          node --check scripts/package-skill.mjs
           node --check scripts/azskills-mcp.mjs
           node --check scripts/generate-integrations.mjs
           node --check scripts/validate-integrations.mjs
+          node --check scripts/test-package-skill.mjs
+          node --check scripts/test-azskills-mcp.mjs
 
       - name: Validate integration registry and guides
         run: node scripts/validate-integrations.mjs
 
       - name: Test installer lifecycle
         run: node scripts/test-install-skills.mjs
+
+      - name: Test portable Skill bundles
+        run: node scripts/test-package-skill.mjs
+
+      - name: Export all portable Skill bundles
+        run: |
+          node scripts/package-skill.mjs --output "$RUNNER_TEMP/azskills-export"
+          for archive in "$RUNNER_TEMP"/azskills-export/*.zip; do
+            unzip -tq "$archive"
+          done
+          test "$(find "$RUNNER_TEMP/azskills-export" -maxdepth 1 -name '*.zip' | wc -l)" -eq 24
+          mkdir -p "$RUNNER_TEMP/azskills-extracted"
+          unzip -q "$RUNNER_TEMP/azskills-export/ui-aesthetics.zip" -d "$RUNNER_TEMP/azskills-extracted"
+          test -f "$RUNNER_TEMP/azskills-extracted/SKILL.md"
+          test -f "$RUNNER_TEMP/azskills-extracted/_azskills-support/ui-design/references/ux/overview.md"
+
+      - name: Test MCP bundle resources
+        run: node scripts/test-azskills-mcp.mjs
+
+      - name: Check generated integration guides
+        run: node scripts/generate-integrations.mjs --check

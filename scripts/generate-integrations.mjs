@@ -76,9 +76,9 @@ const guide = (tool) => {
   lines.push('## Use');
   lines.push('');
   if (tool.mechanism === 'mcp') {
-    lines.push('After the client connects, ask it to call list_skills, then read_skill with an id such as ultrathink, or search_skills with a task description. The server returns the same SKILL.md text stored in this repository.');
+    lines.push('After the client connects, call list_skills, then read_skill with a canonical id or compatibility alias. Use read_skill_file or the listed resources to load a Skill reference or supporting file by bundle-relative path. search_skills accepts a task description. Bundles include the local files linked by the Skill, and their Markdown links are rewritten to resolve inside the bundle.');
   } else {
-    lines.push('Start a session in ' + tool.name + ' and describe the task. To force a specific contract, name it and its mode, for example: Use ultrathink in deep mode to challenge this design. The canonical ids and modes are listed in skills.json.');
+    lines.push('Start a session in ' + tool.name + ' and describe the task. To force a specific contract, name it and its mode, for example: Use ultrathink in deep mode to challenge this design. The canonical ids and modes are listed in skills.json. If the client accepts Skill archives, import the generated <id>.zip; otherwise import or point the client at the installed <id>/SKILL.md folder.');
   }
   lines.push('');
   lines.push('## Verify');
@@ -127,10 +127,11 @@ const index = () => {
     'Or select a client and scope explicitly:',
     '',
     '    node scripts/install-skills.mjs --list',
-    '    node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --skills ui-design,architecture --dry-run',
-    '    node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --skills ui-design,architecture --yes',
-    '    node scripts/install-skills.mjs --rollback --target /path/to/project/.cursor/skills --yes',
-    '    node scripts/install-skills.mjs --uninstall --target /path/to/project/.cursor/skills --yes',
+    '    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills ui-design,architecture --dry-run',
+    '    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills ui-design,architecture --yes',
+    '    node scripts/package-skill.mjs --skill ui-design --output /path/to/exports',
+    '    node scripts/install-skills.mjs --rollback --target /path/to/project/.agents/skills --yes',
+    '    node scripts/install-skills.mjs --uninstall --target /path/to/project/.agents/skills --yes',
     '',
     'See [tool installers](../scripts/install-skills.mjs) and the [MCP server](../scripts/azskills-mcp.mjs).',
     '',

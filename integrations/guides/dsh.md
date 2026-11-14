@@ -28,7 +28,7 @@ This client has no verified filesystem skill folder in the repository registry. 
 
 ## Use
 
-Start a session in DSH and describe the task. To force a specific contract, name it and its mode, for example: Use ultrathink in deep mode to challenge this design. The canonical ids and modes are listed in skills.json.
+Start a session in DSH and describe the task. To force a specific contract, name it and its mode, for example: Use ultrathink in deep mode to challenge this design. The canonical ids and modes are listed in skills.json. If the client accepts Skill archives, import the generated <id>.zip; otherwise import or point the client at the installed <id>/SKILL.md folder.
 
 ## Verify
 
