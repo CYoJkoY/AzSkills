@@ -55,10 +55,13 @@ try {
   const pluginBuild = path.join(temp, 'plugin-build');
   const { marketplace, plugin } = await packageCodexPlugin(repository, path.join(temp, 'marketplace-output'));
   const pluginManifest = JSON.parse(await readFile(path.join(plugin, 'plugin.json'), 'utf8'));
-  const marketplaceManifest = JSON.parse(await readFile(path.join(marketplace, 'marketplace.json'), 'utf8'));
+  const marketplaceManifest = JSON.parse(await readFile(path.join(marketplace, '.agents/plugins/marketplace.json'), 'utf8'));
   assert.equal(pluginManifest.name, 'azskills');
   assert.equal(pluginManifest.version, JSON.parse(await readFile(path.join(plugin, 'skills/azskills/skills.json'), 'utf8')).version);
   assert.equal(marketplaceManifest.plugins[0].source.path, './plugins/azskills');
+  const repositoryMarketplace = JSON.parse(await readFile(path.join(repository, '.agents/plugins/marketplace.json'), 'utf8'));
+  assert.equal(repositoryMarketplace.plugins[0].source.path, './codex-plugin');
+  assert.equal(JSON.parse(await readFile(path.join(repository, repositoryMarketplace.plugins[0].source.path, 'plugin.json'), 'utf8')).name, 'azskills');
   assert.ok((await readdir(path.join(plugin, 'skills/azskills'))).includes('SKILL.md'));
   const hook = spawnSync(process.execPath, [path.join(plugin, 'hooks/session-start.mjs')], {
     encoding: 'utf8',
@@ -69,6 +72,12 @@ try {
   assert.equal(hookOutput.hookSpecificOutput.hookEventName, 'SessionStart');
   assert.match(hookOutput.hookSpecificOutput.additionalContext, /do not wait for an explicit AzSkills invocation/);
   assert.match(hookOutput.hookSpecificOutput.additionalContext, /# AzSkills/);
+  const checkoutHook = spawnSync(process.execPath, [path.join(repository, 'codex-plugin/hooks/session-start.mjs')], {
+    encoding: 'utf8',
+    env: { ...process.env, PLUGIN_ROOT: path.join(repository, 'codex-plugin') },
+  });
+  assert.equal(checkoutHook.status, 0, checkoutHook.stderr);
+  assert.match(JSON.parse(checkoutHook.stdout).hookSpecificOutput.additionalContext, /# AzSkills/);
   console.log('Codex plugin package and SessionStart context assertions passed.');
   const pluginBuildResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.mjs'), '--output', pluginBuild], { encoding: 'utf8' });
   assert.equal(pluginBuildResult.status, 0, pluginBuildResult.stderr);

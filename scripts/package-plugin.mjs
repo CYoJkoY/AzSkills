@@ -30,7 +30,9 @@ export async function packageCodexPlugin(repositoryRoot, outputDirectory) {
       category: 'Productivity',
     }],
   };
-  await writeFile(path.join(output, 'marketplace.json'), JSON.stringify(marketplace, null, 2) + '\n', 'utf8');
+  const marketplaceManifest = path.join(output, '.agents', 'plugins', 'marketplace.json');
+  await mkdir(path.dirname(marketplaceManifest), { recursive: true });
+  await writeFile(marketplaceManifest, JSON.stringify(marketplace, null, 2) + '\n', 'utf8');
   return { marketplace: output, plugin, skillRoot };
 }
 

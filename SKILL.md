@@ -1,7 +1,7 @@
 ---
 name: azskills
 description: Build and review software architecture, interfaces, design systems, motion, logos, editorial images, HTML slides, video, README pages, Steam pages, game localization, resumes, and AI client setup. Routes each task to one internal module and loads its references on demand.
-version: 2.1.0
+version: 2.1.1
 ---
 
 # AzSkills

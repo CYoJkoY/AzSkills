@@ -39,6 +39,8 @@ const guide = (tool) => {
     lines.push('    node scripts/package-plugin.mjs');
     lines.push('    codex plugin marketplace add ./dist/azskills-marketplace');
     lines.push('');
+    lines.push('For a direct checkout import, select the AzSkills repository root; its .agents/plugins/marketplace.json points to the source plugin directory.');
+    lines.push('');
     lines.push('Install AzSkills from the marketplace in Codex. Review and trust the bundled SessionStart hook when prompted. Once trusted, the hook loads AzSkills routing guidance at session start so matching requests need no explicit invocation.');
   } else if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
     lines.push('For an interactive setup, run the guided wizard from the AzSkills checkout:');

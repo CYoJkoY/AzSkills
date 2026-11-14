@@ -6,7 +6,7 @@
   <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: one entry with specialized internal modules" width="100%">
 </picture>
 
-Version **2.1.0**. One entry in your client, specialized capabilities inside.
+Version **2.1.1**. One entry in your client, specialized capabilities inside.
 
 AzSkills installs as a single `azskills` folder with one `SKILL.md`. Describe the result you want; the entry routes to the relevant internal module and loads only the necessary references. Internal module names are workflow choices, not additional skills to install.
 
@@ -28,7 +28,7 @@ node scripts/package-plugin.mjs --output /path/to/fresh/exports
 codex plugin marketplace add /path/to/fresh/exports/azskills-marketplace
 ```
 
-Install AzSkills from the marketplace in Codex and review/trust its `SessionStart` hook when prompted. After trust, each new session receives AzSkills routing guidance automatically. The regular installer above installs a skill folder without this hook.
+Install AzSkills from the marketplace in Codex and review/trust its `SessionStart` hook when prompted. After trust, each new session receives AzSkills routing guidance automatically. The regular installer above installs a skill folder without this hook. The `.agents/plugins/marketplace.json` manifest also enables importing the checkout directly.
 
 For archive import, run `node scripts/package-skill.mjs --output /path/to/exports` and import `azskills.zip`. The ZIP has one root `SKILL.md` and all supporting files. Install the complete archive, not the manifest alone. Use a fresh export directory; pre-existing older archives are not removed automatically.
 

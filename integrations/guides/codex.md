@@ -19,6 +19,8 @@ Build the Codex plugin and its local marketplace from the AzSkills checkout:
     node scripts/package-plugin.mjs
     codex plugin marketplace add ./dist/azskills-marketplace
 
+For a direct checkout import, select the AzSkills repository root; its .agents/plugins/marketplace.json points to the source plugin directory.
+
 Install AzSkills from the marketplace in Codex. Review and trust the bundled SessionStart hook when prompted. Once trusted, the hook loads AzSkills routing guidance at session start so matching requests need no explicit invocation.
 
 ## Use
