@@ -201,6 +201,7 @@ async function packageAzSkills(root, outputDirectory) {
   const output = path.resolve(outputDirectory, 'azskills');
   if (inside(output, base) || inside(base, output)) throw new Error('Staging must be outside the source tree');
   const registry = JSON.parse(await readFile(path.join(base, 'skills.json'), 'utf8'));
+  const moduleDirectories = new Set(registry.modules.map(m => m.id));
   const names = ['SKILL.md', 'skills.json', 'README.md', 'SKILL-SYSTEM.md', 'DESIGN.md', 'design-intelligence.md',
     'THIRD_PARTY_NOTICES.md', 'LICENSE', 'references', 'scripts', 'integrations', 'assets', 'docs',
     ...registry.modules.map(m => m.id)];
@@ -208,7 +209,13 @@ async function packageAzSkills(root, outputDirectory) {
   for (const name of names) {
     const source = path.join(base, name);
     // Inspect before copying: neither source files nor nested links may escape.
-    const info = await lstat(source);
+    let info;
+    try { info = await lstat(source); }
+    catch (error) {
+      // Modules without supporting files have no directory in a Git checkout.
+      if (error.code === 'ENOENT' && moduleDirectories.has(name)) continue;
+      throw error;
+    }
     if (info.isSymbolicLink()) throw new Error('Symbolic source: ' + name);
     if (info.isDirectory()) await filesUnder(source);
     await cp(source, path.join(output, name), { recursive: true, errorOnExist: true, force: false });

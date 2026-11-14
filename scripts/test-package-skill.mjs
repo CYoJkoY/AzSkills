@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rmdir, rm, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import os from 'node:os';
@@ -53,8 +53,15 @@ try {
   const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   const unified = path.join(temp, 'azskills.zip');
   await packageSkillArchive(repository, 'azskills', path.join(temp, 'unified-stage'), unified);
+  const stagedSource = path.join(temp, 'unified-stage', 'azskills');
+  const stagedRegistry = JSON.parse(await readFile(path.join(stagedSource, 'skills.json'), 'utf8'));
+  for (const module of stagedRegistry.modules) {
+    const directory = path.join(stagedSource, module.id);
+    const entries = await readdir(directory).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
+    if (entries?.length === 0) await rmdir(directory);
+  }
   const second = path.join(temp, 'azskills-second.zip');
-  await packageSkillArchive(repository, 'azskills', path.join(temp, 'unified-stage-two'), second);
+  await packageSkillArchive(stagedSource, 'azskills', path.join(temp, 'unified-stage-two'), second);
   assert.deepEqual(await readFile(unified), await readFile(second), 'Unified archives must be deterministic');
   const extracted = path.join(temp, 'unified-extracted');
   const extraction = process.platform === 'win32'

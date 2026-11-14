@@ -37,7 +37,7 @@ The old paths above identify the previous version carriers. Their current paths 
 Local verification on Windows with Node.js v26.13.1:
 
 - Registry and routing: one public manifest, 13 internal modules, 10 metadata aliases, 7 families.
-- Packaging: deterministic unified ZIP, exactly one extracted manifest, complete module/support bytes and valid local links; no Git or build directory included.
+- Packaging: deterministic unified ZIP, exactly one extracted manifest, complete module/support bytes and valid local links; no Git or build directory included. Modules without supporting files may have no resource directory in a clean Git checkout; the exporter accepts that while retaining their required contracts under references/modules.
 - Installer: legacy schemas 1/2, migration of in-root backups, byte-preserving rollback, idempotency, local content verification, unmanaged conflicts, unsafe ownership paths, incomplete snapshots, and recovery after an injected copy failure.
 - MCP: exactly one tool and one listed resource; entry, routing, module modes, aliases, supporting bytes, invalid paths and modes.
 - Design: 134 terminal frames and 78 contrast pairs; design contracts and editable resume regressions passed. The editorial checker normalizes Windows line endings before matching CSS selectors.
