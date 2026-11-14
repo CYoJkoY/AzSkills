@@ -1,7 +1,7 @@
 ---
 name: ui-design
 description: Design, build, refine, and review production interfaces with one visual thesis, a token-based system, complete states, responsive behavior, accessibility, and rendered visual QA. Use for web apps, dashboards, tools, settings, forms, and component libraries.
-version: 2.0.0
+version: 2.0.1
 status: canonical
 family: interface
 modes: [build, refine, review, system]
@@ -180,6 +180,6 @@ Unverified items:
 
 ## References
 
-- `references/implementation-details.md` - detailed layout, typography, color, forms, motion handoff, performance, and review procedure.
-- `references/aesthetics.md` - composition-first visual critique and anti-generic quality gate.
-- `references/ux/overview.md` - product-level UX analysis, platform patterns, and review workflow.
+- [Implementation details](references/implementation-details.md) - detailed layout, typography, color, forms, motion handoff, performance, and review procedure.
+- [Aesthetics](references/aesthetics.md) - composition-first visual critique and anti-generic quality gate.
+- [UX overview](references/ux/overview.md) - product-level UX analysis, platform patterns, and review workflow.

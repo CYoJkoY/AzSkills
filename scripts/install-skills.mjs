@@ -1,9 +1,10 @@
-import { cp, mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
-import { homedir } from 'node:os';
+import { cp, mkdir, mkdtemp, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { packageSkill } from './package-skill.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const registry = JSON.parse(await readFile(path.join(root, 'integrations/tools.json'), 'utf8'));
@@ -12,7 +13,8 @@ const args = process.argv.slice(2);
 const has = (key) => args.includes(key);
 const value = (key, fallback = '') => { const index = args.indexOf(key); if (index < 0) return fallback; if (!args[index + 1] || args[index + 1].startsWith('--')) throw new Error(key + ' requires a value'); return args[index + 1]; };
 const canonical = catalog.skills.filter((skill) => skill.status === 'canonical');
-const ids = new Set(canonical.map((skill) => skill.id));
+const aliases = catalog.aliases;
+const ids = new Set([...canonical, ...aliases].map((skill) => skill.id));
 const recommended = ['tool-integration', 'ultrathink', 'architecture', 'ui-design', 'frontend-slides'].filter((id) => ids.has(id));
 const action = has('--uninstall') ? 'uninstall' : has('--rollback') ? 'rollback' : has('--verify') ? 'verify' : 'install';
 let installMode = value('--mode', 'user');
@@ -95,7 +97,7 @@ async function clients() {
     return matches;
   } finally { rl.close(); }
 }
-async function install(destination, selected) {
+async function install(destination, selected, packageRoot) {
   const manifest = await manifestAt(destination);
   const changes = [];
   const backupRoot = path.join(destination, '.azskills-backups', new Date().toISOString().replaceAll(':', '-'));
@@ -103,7 +105,7 @@ async function install(destination, selected) {
     const dest = path.join(destination, id);
     const present = await exists(dest);
     if (present && !manifest.skills.includes(id)) throw new Error('Refusing to overwrite unmanaged path: ' + dest);
-    if (present && await equalTree(path.join(root, id), dest)) continue;
+    if (present && await equalTree(path.join(packageRoot, id), dest)) continue;
     changes.push({ id, dest, existed: present, backup: present ? path.join(backupRoot, id) : null });
   }
   if (!changes.length) { console.log('Selected skills are already current at ' + destination); return; }
@@ -119,7 +121,7 @@ async function install(destination, selected) {
       if (change.existed) { await mkdir(path.dirname(change.backup), { recursive: true }); await cp(change.dest, change.backup, { recursive: true, errorOnExist: true }); }
       completed.push(change);
       if (change.existed) await rm(change.dest, { recursive: true, force: true });
-      await cp(path.join(root, change.id), change.dest, { recursive: true, errorOnExist: true });
+      await cp(path.join(packageRoot, change.id), change.dest, { recursive: true, errorOnExist: true });
     }
     manifest.skills = [...new Set([...manifest.skills, ...changes.map((change) => change.id)])];
     manifest.lastRun = { previousSkills, changes: changes.map(({ id, existed, backup }) => ({ id, existed, backup })) };
@@ -129,6 +131,22 @@ async function install(destination, selected) {
     throw error;
   }
   console.log('Installed/updated ' + changes.length + ' skill(s). Backups: ' + backupRoot);
+}
+async function previewInstall(toolName, destination, selected, packageRoot) {
+  const manifest = await manifestAt(destination);
+  const changes = [];
+  for (const id of selected) {
+    const dest = path.join(destination, id);
+    const present = await exists(dest);
+    if (present && !manifest.skills.includes(id)) throw new Error('Refusing to overwrite unmanaged path: ' + dest);
+    const unchanged = present && await equalTree(path.join(packageRoot, id), dest);
+    if (!unchanged) changes.push({ id, action: present ? 'Update' : 'Install', dest });
+  }
+  console.log('Preview for ' + toolName + ' -> ' + destination);
+  if (!changes.length) console.log('Selected skills are already current.');
+  for (const change of changes) console.log(change.action + ' ' + change.id + ' -> ' + change.dest);
+  if (changes.length) console.log('Each bundle includes linked support files under _azskills-support.');
+  console.log('No files changed (--dry-run).');
 }
 async function uninstall(destination) {
   const manifest = await manifestAt(destination);
@@ -200,6 +218,7 @@ async function verify(tool, destination, selected) {
     const missing = [];
     for (const id of selected) if (!manifest.skills.includes(id) || !await exists(path.join(destination, id))) missing.push(id);
     console.log((missing.length ? 'FAIL' : 'PASS') + ' filesystem: ' + (missing.length ? 'missing ' + missing.join(', ') : selected.length + ' skill(s) present and managed'));
+    if (!missing.length) console.log('PASS bundle contents: linked support files are packaged under _azskills-support.');
     console.log('PENDING client discovery: ' + tool.verify);
     console.log('PENDING minimal invocation: ask the client to use one selected skill.');
     if (missing.length) process.exitCode = 1;
@@ -248,14 +267,15 @@ async function main() {
     console.log('Follow integrations/guides/' + tool.id + '.md');
     if (tool.mechanism === 'mcp') console.log('Server command: node ' + path.join(root, 'scripts/azskills-mcp.mjs'));
   }
-  for (const tool of filesystemTools) {
-    const destination = targetFor(tool);
-    if (has('--dry-run')) {
-      const manifest = await manifestAt(destination);
-      console.log('Preview for ' + tool.name + ' -> ' + destination);
-      for (const id of selectedSkills) console.log((manifest.skills.includes(id) ? 'Update if changed ' : 'Install ') + id);
-    } else { await install(destination, selectedSkills); await verify(tool, destination, selectedSkills); }
-  }
+  const packageRoot = await mkdtemp(path.join(tmpdir(), 'azskills-packages-'));
+  try {
+    for (const id of selectedSkills) await packageSkill(root, id, packageRoot);
+    for (const tool of filesystemTools) {
+      const destination = targetFor(tool);
+      if (has('--dry-run')) await previewInstall(tool.name, destination, selectedSkills, packageRoot);
+      else { await install(destination, selectedSkills, packageRoot); await verify(tool, destination, selectedSkills); }
+    }
+  } finally { await rm(packageRoot, { recursive: true, force: true }); }
   console.log('Selected skills: ' + selectedSkills.join(', '));
 }
 try { await main(); } catch (error) { console.error('AzSkills setup failed: ' + error.message); process.exitCode = 1; }

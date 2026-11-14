@@ -305,11 +305,17 @@ For first-time setup, clone the repository and start the interactive wizard:
 The wizard prompts for client, scope, and skills (recommended set by default; search, select specific skills, or choose all). It detects candidate locations, previews filesystem changes, asks before writing, backs up managed skills, and checks that selected files are present. Use explicit flags for repeatable or non-interactive runs:
 
     node scripts/install-skills.mjs --list
+    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --dry-run
+    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --yes
     node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --dry-run
     node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --skills tool-integration,architecture --yes
     node scripts/install-skills.mjs --verify --tool cursor --mode project --project /path/to/project --skills tool-integration
     node scripts/install-skills.mjs --rollback --target /path/to/.cursor/skills
     node scripts/install-skills.mjs --uninstall --target /path/to/.cursor/skills
+    node scripts/package-skill.mjs --skill ui-design --output ./dist/skills
+    node scripts/package-skill.mjs --output ./dist/skills
+
+The installer copies each selected Skill with linked local Markdown references, assets, and scripts under `_azskills-support`; the rewritten links resolve inside the installed folder. It also accepts registered compatibility aliases in `--skills`. The packaging command exports a deterministic standalone `.zip` for clients that accept Skill archives; without `--skill`, it exports all 14 canonical Skills and 10 aliases. Each archive contains the Skill at its root, so extract it directly into a client's skills directory or import it as one Skill.
 
 The wizard automates only registered local skill-folder installs. Other clients show an explicit manual or MCP guide; their configuration is not edited unless an exact supported target is registered. Client discovery and a real skill invocation remain pending until checked inside that client. See the tool integration guides in integrations/README.md for each client's documented path, evidence, manual steps, and verification instructions. The registry in integrations/tools.json is the machine-readable source of truth. The manifest tracks AzSkills-owned skills so updates, rollback, and uninstall preserve unrelated files.
 ### 3. Select the narrowest Skill

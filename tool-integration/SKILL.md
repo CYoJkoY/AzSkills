@@ -1,7 +1,7 @@
 ---
 name: tool-integration
 description: Connect AzSkills to a supported AI client and produce verified install, MCP, or manual setup steps without inventing client capabilities.
-version: 1.0.0
+version: 1.0.1
 status: canonical
 family: operations
 modes: [install, configure, troubleshoot, remove]
@@ -35,13 +35,14 @@ Turn a user's target AI client and desired scope into the shortest verified AzSk
 1. When the AzSkills checkout is available, use the CLI wizard as the executable source of truth: run [0mnode scripts/install-skills.mjs[0m for interactive client, scope, and skill selection, or pass explicit options in automation. Use [0mnode scripts/install-skills.mjs --list[0m to inspect registered clients and candidate directories. A matching directory is only a detection hint, not proof the client is installed.
 2. Resolve the client name against integrations/tools.json. Match aliases case-insensitively only when unambiguous. If the client is not registered, say so and offer the closest documented mechanism without claiming compatibility.
 3. Ask only for a missing value that changes the destination: project path versus user-wide install. Default to project scope when the current project is evident; otherwise show both choices briefly.
-4. Read integrations/guides/<id>.md and check the current repository root. Do not assume the user already has an AzSkills checkout; if absent, give the repository clone command and continue from that path.
-5. For native-skills or shared-skills, run --dry-run first to inspect the destination. The installer previews every write and requires confirmation; unattended runs must pass --yes only after the preview has been reviewed. It refuses unmanaged skill paths, updates only manifest-owned skills, and saves a backup for rollback. The default set is recommended; use --skills <id,...>, --all-skills, or the interactive search prompt to customize.
-6. For mcp, provide the exact registered server command and the client's documented configuration location from its guide. Do not infer configuration paths or edit client settings unless a client-specific config adapter is registered and the user explicitly requested setup.
-7. For manual, give the guide's import steps and identify which canonical SKILL.md files to attach. Do not describe it as automatic installation.
-8. Verify in stages: local files/manifest, client discovery, then a minimal skill read or invocation. CLI output must clearly label client-side actions as pending until the actual client confirms them; do not treat copied files as proof of client loading.
-9. For troubleshooting, follow the failing stage from path resolution to file presence, client discovery, and invocation. Fix the earliest failed stage and repeat its verification.
-10. For removal, use --uninstall to preview and remove manifest-owned skill directories; backups remain available and --rollback restores the preceding operation. MCP setups remove only the AzSkills entry from client settings; manual setups detach the imported files. Preserve unrelated configuration and unmanaged files.
+4. Read the selected guide from the [client guide directory](../integrations/guides/) and check the current repository root. Do not assume the user already has an AzSkills checkout; if absent, give the repository clone command and continue from that path.
+5. For native-skills or shared-skills, run --dry-run first to inspect the destination. The installer previews every write and requires confirmation; unattended runs must pass --yes only after the preview has been reviewed. It packages each selected Skill with its linked local Markdown dependencies under `_azskills-support`, refuses unmanaged skill paths, updates only manifest-owned skills, and saves a backup for rollback. Canonical IDs and registered alias IDs are accepted by `--skills`; the default set is recommended. Use `--skills <id,...>`, `--all-skills`, or the interactive search prompt to customize.
+6. If the client accepts Skill archives or a single folder import, use `node scripts/package-skill.mjs --skill <id> --output <directory>` to produce a standalone `<id>.zip`. Without `--skill`, export all canonical Skills and aliases. Do not flatten a bundle or remove `_azskills-support`: the rewritten references depend on that layout. Treat importing the archive into the client as a separate action from creating it.
+7. For mcp, provide the exact registered server command and the client's documented configuration location from its guide. The server exposes canonical and alias contracts through `read_skill`, and exposes packaged references and supporting files through `resources/list`/`resources/read` or `read_skill_file`. Do not infer configuration paths or edit client settings unless a client-specific config adapter is registered and the user explicitly requested setup.
+8. For manual, give the guide's import steps and identify which canonical SKILL.md files or Skill archive to attach. Do not describe it as automatic installation.
+9. Verify in stages: local files/manifest, client discovery, then a minimal skill read or invocation. CLI output must clearly label client-side actions as pending until the actual client confirms them; do not treat copied files as proof of client loading.
+10. For troubleshooting, follow the failing stage from path resolution to file presence, client discovery, and invocation. Fix the earliest failed stage and repeat its verification.
+11. For removal, use --uninstall to preview and remove manifest-owned skill directories; backups remain available and --rollback restores the preceding operation. MCP setups remove only the AzSkills entry from client settings; manual setups detach the imported files. Preserve unrelated configuration and unmanaged files.
 
 ## Quality gates
 
@@ -58,8 +59,9 @@ For guidance, return the selected client and mechanism, a short ordered setup se
 
 ## References
 
-- ../integrations/README.md - overview and installer entry point.
-- ../integrations/tools.json - source of truth for client IDs, mechanisms, and targets.
-- ../integrations/guides/ - per-client setup details; load only the selected client guide.
-- ../scripts/install-skills.mjs - guided native/shared installer, updater, verifier, and rollback manager.
-- ../scripts/azskills-mcp.mjs - local MCP server interface.
+- [Integration overview](../integrations/README.md) - overview and installer entry point.
+- [Integration registry](../integrations/tools.json) - source of truth for client IDs, mechanisms, and targets.
+- [Client guides](../integrations/guides/) - per-client setup details; load only the selected client guide.
+- [Installer CLI](../scripts/install-skills.mjs) - guided native/shared installer, updater, verifier, and rollback manager.
+- [Packaging CLI](../scripts/package-skill.mjs) - deterministic single-Skill and full-catalog zip export.
+- [MCP server](../scripts/azskills-mcp.mjs) - local MCP server interface.

@@ -46,9 +46,10 @@ Start the interactive setup and maintenance wizard:
 Or select a client and scope explicitly:
 
     node scripts/install-skills.mjs --list
-    node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --skills ui-design,architecture --dry-run
-    node scripts/install-skills.mjs --tool cursor --mode project --project /path/to/project --skills ui-design,architecture --yes
-    node scripts/install-skills.mjs --rollback --target /path/to/project/.cursor/skills --yes
-    node scripts/install-skills.mjs --uninstall --target /path/to/project/.cursor/skills --yes
+    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills ui-design,architecture --dry-run
+    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills ui-design,architecture --yes
+    node scripts/package-skill.mjs --skill ui-design --output /path/to/exports
+    node scripts/install-skills.mjs --rollback --target /path/to/project/.agents/skills --yes
+    node scripts/install-skills.mjs --uninstall --target /path/to/project/.agents/skills --yes
 
 See [tool installers](../scripts/install-skills.mjs) and the [MCP server](../scripts/azskills-mcp.mjs).
