@@ -73,8 +73,10 @@ try {
   assert.equal(pluginManifest.hooks, './codex-plugin/hooks/hooks.json');
   assert.equal(await readFile(path.join(plugin, 'plugin.json'), 'utf8').catch(error => error.code), 'ENOENT');
   const { hooks: pluginHooks } = JSON.parse(await readFile(path.join(plugin, pluginManifest.hooks.slice(2)), 'utf8'));
-  assert.deepEqual(Object.keys(pluginHooks), ['SessionStart', 'UserPromptSubmit', 'SubagentStart', 'PostToolUse']);
-  assert.match(pluginHooks.PostToolUse[0].matcher, /wait_agent/);
+  assert.deepEqual(Object.keys(pluginHooks), ['SessionStart', 'UserPromptSubmit', 'SubagentStart', 'PreToolUse', 'PostToolUse']);
+  assert.match(pluginHooks.PreToolUse[0].matcher, /apply_patch/);
+  assert.match(pluginHooks.PostToolUse[0].matcher, /apply_patch/);
+  assert.match(pluginHooks.PostToolUse[1].matcher, /wait_agent/);
   for (const event of ['SessionStart', 'UserPromptSubmit']) {
     const result = spawnSync(process.execPath, [path.join(taste, 'hooks/steer.mjs')], {
       encoding: 'utf8',
@@ -132,6 +134,24 @@ try {
   });
   assert.equal(checkoutHook.status, 0, checkoutHook.stderr);
   assert.match(JSON.parse(checkoutHook.stdout).hookSpecificOutput.additionalContext, /# AzSkills/);
+  const guard = path.join(plugin, 'codex-plugin/hooks/godot3-guard.mjs');
+  const patchBody = (...lines) => ['*** Begin Patch', ...lines, '*** End Patch'].join('\n');
+  const deniedPatch = spawnSync(process.execPath, [guard], {
+    encoding: 'utf8',
+    input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'apply_patch', tool_input: { patch: patchBody('*** Update File: Player.gd', '@@', '+\t._ready()') } }),
+    env: { ...process.env, PLUGIN_ROOT: plugin },
+  });
+  assert.equal(deniedPatch.status, 0, deniedPatch.stderr);
+  assert.equal(JSON.parse(deniedPatch.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  const allowedPatch = spawnSync(process.execPath, [guard], {
+    encoding: 'utf8',
+    input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'apply_patch', tool_input: { patch: patchBody('*** Update File: Player.gd', '@@', '+\tvelocity = move_and_slide(velocity)') } }),
+    env: { ...process.env, PLUGIN_ROOT: plugin },
+  });
+  assert.equal(allowedPatch.status, 0, allowedPatch.stderr);
+  assert.equal(JSON.parse(allowedPatch.stdout).continue, true);
+  const godotCheck = spawnSync(process.execPath, [path.join(plugin, 'godot-3-dev/scripts/check-godot-3x.mjs'), '--self-test'], { encoding: 'utf8' });
+  assert.equal(godotCheck.status, 0, godotCheck.stderr);
   // Execute the declared commands, including their quoting, from an unrelated cwd.
   for (const pluginRoot of [plugin, repository]) {
     const hooksFile = JSON.parse(await readFile(path.join(pluginRoot, '.codex-plugin/plugin.json'), 'utf8')).hooks;
@@ -179,7 +199,7 @@ try {
   });
   const cloneMarketplace = JSON.parse(await readFile(path.join(cleanClone, '.agents/plugins/marketplace.json'), 'utf8'));
   const clonePlugin = path.resolve(cleanClone, cloneMarketplace.plugins[0].source.path);
-  for (const required of ['.codex-plugin/plugin.json', 'SKILL.md', 'skills/azskills/SKILL.md', 'skills/az-clean-code/SKILL.md', 'codex-plugin/hooks/hooks.json', 'codex-plugin/hooks/session-start.mjs', 'codex-plugin/taste/hooks/steer.mjs']) {
+  for (const required of ['.codex-plugin/plugin.json', 'SKILL.md', 'skills/azskills/SKILL.md', 'skills/az-clean-code/SKILL.md', 'codex-plugin/hooks/hooks.json', 'codex-plugin/hooks/session-start.mjs', 'codex-plugin/hooks/godot3-guard.mjs', 'godot-3-dev/scripts/check-godot-3x.mjs', 'godot-3-dev/references/api-3.6.json', 'codex-plugin/taste/hooks/steer.mjs']) {
     await stat(path.join(clonePlugin, required));
   }
   const cloneHooks = JSON.parse(await readFile(path.join(clonePlugin, 'codex-plugin/hooks/hooks.json'), 'utf8')).hooks;

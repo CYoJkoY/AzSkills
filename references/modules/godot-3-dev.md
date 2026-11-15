@@ -1,7 +1,7 @@
 ---
 name: godot-3-dev
 description: Write, review, and down-port Godot 3.x (3.6) GDScript and scenes without re-calling engine-dispatched virtuals and without Godot 4.x symbols.
-version: 2.6.0
+version: 2.7.0
 status: module
 family: architecture
 modes: [script, review, port]
@@ -94,16 +94,17 @@ velocity in 3.x.
 
 ### 7. Verify mechanically
 
-Before returning code, run the checks that catch these defects:
+Before returning code, run the bundled deterministic checker against the project:
 
 ```text
-re-called virtuals   search "^\s*\._(ready|process|physics_process|input|unhandled_input|enter_tree|exit_tree|notification|draw|gui_input|integrate_forces)\s*\("
-4.x symbols          search Node3D|CharacterBody|instantiate\(|await |create_tween|@export|@onready|@tool|PackedStringArray|FileAccess|randf_range|change_scene_to_file|linear_interpolate-free code
-version drift        project.godot config_version and every scene node type
+node "<skill-root>/godot-3-dev/scripts/check-godot-3x.mjs" --root "<project>" --api "<skill-root>/godot-3-dev/references/api-3.6.json" --json
 ```
 
-Then run the project or the editor script parser and report the real result. A
-claim that the script parses is only acceptable when it was actually parsed.
+The checker uses an official Godot 3.6 API snapshot and catches re-called
+virtuals, Godot 4.x syntax and symbols, scene format drift, unknown scene node
+types, project-setting drift, and high-risk 3.x physics mistakes. Treat a
+nonzero exit code as blocking. The checker is static evidence, not a runtime
+proof: run the project or the editor script parser and report the real result.
 
 ### 8. Report the evidence
 
@@ -135,11 +136,12 @@ Name each virtual override and why it is safe, and each engine symbol with the
 
 - [ ] The engine version is established as Godot 3.x before any code is written.
 - [ ] No engine-dispatched virtual is re-called from its own override, or from any other override.
+- [ ] The bundled Godot 3.6 mechanical checker was run; its command, exit code, errors, warnings, and unverified items are reported.
 - [ ] Every engine symbol used resolves in the official Godot 3.6 class reference or the 3.6 source tree.
 - [ ] No Godot 4.x class name, annotation, keyword, or Callable connection appears in the output.
 - [ ] Signal connections use the 3.x `connect(signal, target, method, binds, flags)` form.
 - [ ] Node access, `queue_free`, `is_instance_valid`, and deferred calls respect 3.x lifetimes.
-- [ ] The script was actually parsed or the project actually run, and the result is reported.
+- [ ] The script was actually parsed or the project actually run, and the result is reported; static checks alone are not presented as runtime proof.
 - [ ] Every unverified symbol or assumption is listed instead of being presented as fact.
 
 ## Output contract
@@ -154,6 +156,7 @@ Symbol audit:
 Port mapping (port mode only):
   original 4.x form | replacement 3.x form | call-signature change
 Verification run:
+Mechanical check: command | exit code | errors | warnings
 Unverified items:
 ```
 
@@ -166,3 +169,5 @@ virtual and symbol audit.
 - [Virtual callbacks](../../godot-3-dev/references/virtual-callbacks.md) - engine dispatch evidence, the forbidden re-call list, and compliant patterns.
 - [3.x and 4.x map](../../godot-3-dev/references/api-3x-vs-4x.md) - symbol, signature, and type differences with verified 3.6 forms.
 - [GDScript 3.x](../../godot-3-dev/references/gdscript-3x.md) - syntax, signals, node access, lifetimes, and common 3.x pitfalls.
+- [Mechanical check](../../godot-3-dev/references/mechanical-check.md) - bundled static checker, API snapshot, hook behavior, and limitations.
+- [Godot 3.6 API snapshot](../../godot-3-dev/references/api-3.6.json) - generated from the official 3.6-stable source tree.

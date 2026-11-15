@@ -15,6 +15,9 @@ const requiredPluginFiles = [
   'az-clean-code/SKILL.md',
   'codex-plugin/hooks/hooks.json',
   'codex-plugin/hooks/session-start.mjs',
+  'codex-plugin/hooks/godot3-guard.mjs',
+  'godot-3-dev/scripts/check-godot-3x.mjs',
+  'godot-3-dev/references/api-3.6.json',
   'codex-plugin/taste/hooks/steer.mjs',
 ];
 

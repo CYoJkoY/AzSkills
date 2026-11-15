@@ -14,6 +14,7 @@ on:
       - ".github/ISSUE_TEMPLATE/**"
       - "scripts/**"
       - "codex-plugin/**"
+      - "godot-3-dev/**"
       - "integrations/**"
       - "README.md"
       - "assets/**"
@@ -40,6 +41,13 @@ jobs:
 
       - name: Check validator syntax
         run: node --check scripts/validate-skills.mjs
+
+      - name: Check Godot 3.x guard syntax and behavior
+        run: |
+          node --check godot-3-dev/scripts/check-godot-3x.mjs
+          node --check godot-3-dev/scripts/build-api-index.mjs
+          node --check codex-plugin/hooks/godot3-guard.mjs
+          node godot-3-dev/scripts/check-godot-3x.mjs --self-test
 
       - name: Validate registry and contracts
         run: |
