@@ -17,15 +17,19 @@ if (input.trim()) {
   }
 }
 
-let skillRoot = path.join(pluginRoot, 'skills', 'azskills');
-let entry;
-try {
-  entry = await readFile(path.join(skillRoot, 'SKILL.md'), 'utf8');
-} catch (error) {
-  if (error.code !== 'ENOENT') throw error;
-  skillRoot = path.resolve(pluginRoot, '..');
-  entry = await readFile(path.join(skillRoot, 'SKILL.md'), 'utf8');
+const entryDirectories = [pluginRoot, path.join(pluginRoot, 'skills', 'azskills'), path.resolve(pluginRoot, '..')];
+let skillRoot = '';
+let entry = '';
+for (const directory of entryDirectories) {
+  try {
+    entry = await readFile(path.join(directory, 'SKILL.md'), 'utf8');
+    skillRoot = directory;
+    break;
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
 }
+if (!entry) throw new Error('AzSkills SKILL.md is missing from ' + pluginRoot);
 const cleanCodeMatch = event === 'UserPromptSubmit' && (/(^|[^a-z])(write|writing|implement|code|coding|review|reviewing|refactor|refactoring)([^a-z]|$)/i.test(prompt) || /重构|编写|实现|评审|审查/.test(prompt));
 const cleanCodeRoot = path.join(skillRoot, 'az-clean-code');
 const cleanCodeEntry = path.join(cleanCodeRoot, 'SKILL.md');

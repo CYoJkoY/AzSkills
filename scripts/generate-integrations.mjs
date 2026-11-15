@@ -34,16 +34,18 @@ const guide = (tool) => {
   lines.push('## Install');
   lines.push('');
   if (tool.mechanism === 'codex-plugin') {
-    lines.push('Build the Codex plugin and its local marketplace from the AzSkills checkout:');
+    lines.push('Add the repository as a Git marketplace, or build a local marketplace from the AzSkills checkout:');
+    lines.push('');
+    lines.push('    codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git');
     lines.push('');
     lines.push('    node scripts/package-plugin.mjs');
     lines.push('    codex plugin marketplace add ./dist/azskills-marketplace');
     lines.push('');
-    lines.push('To import the repository root, first run the default build above. Its .agents/plugins/marketplace.json points to ./dist/azskills-marketplace/plugins/azskills, the complete built plugin. The source codex-plugin directory alone has no bundled skills and must not be installed. With a custom --output directory, import the generated azskills-marketplace directory instead.');
+    lines.push('The repository root is the plugin root. Its .agents/plugins/marketplace.json points to ./, so a Git clone already contains .codex-plugin/plugin.json, codex-plugin/hooks, the canonical SKILL.md, and the skills entries Codex discovers. The default build mirrors that layout under dist/azskills-marketplace/plugins/azskills; with a custom --output directory, import the generated azskills-marketplace directory instead.');
     lines.push('');
-    lines.push('Install AzSkills from the marketplace in Codex. Review and trust the bundled hooks when prompted. The package uses the supported `.codex-plugin/plugin.json` manifest with a direct `hooks` path. Codex 0.167.0-alpha.4.1 discovers all six handlers in this format but silently omits them from the Agent Plugins root manifest ([upstream issue](https://github.com/openai/codex/issues/59516)). Keep the plugin root free of `plugin.json`; adding a compatibility manifest alongside it does not select the compatibility loader. Once trusted, matching requests need no explicit invocation. SessionStart restores routing context; UserPromptSubmit applies routing and code-task guidance; SubagentStart and PostToolUse apply Taste steering. Hooks require Node.js on PATH and support installation paths containing spaces.');
+    lines.push('Install AzSkills from the marketplace in Codex. Review and trust the bundled hooks when prompted. The package uses the supported `.codex-plugin/plugin.json` manifest with a direct `hooks` path. Codex 0.167.0-alpha.4.1 discovers all six handlers in this format but silently omits them from the Agent Plugins root manifest ([upstream issue](https://github.com/openai/codex/issues/59516)). Keep a root `plugin.json` out of the plugin root; adding a compatibility manifest alongside `.codex-plugin` does not select the compatibility loader. Once trusted, matching requests need no explicit invocation. SessionStart restores routing context; UserPromptSubmit applies routing and code-task guidance; SubagentStart and PostToolUse apply Taste steering. Hooks require Node.js on PATH and support installation paths containing spaces.');
     lines.push('');
-    lines.push('When upgrading from 2.5.1, rebuild into a fresh output directory, refresh the marketplace source, and update or reinstall AzSkills in Codex. Confirm the installed plugin reports 2.5.2 or later; changing the checkout alone does not replace a cached installation. Open the hook list (or `/hooks` in the CLI): expect six handlers across SessionStart, UserPromptSubmit, SubagentStart, and PostToolUse, visible even before trust. Review and trust the commands, then start a new session. An empty list indicates discovery or installation trouble; visible untrusted hooks require trust before execution.');
+    lines.push('When upgrading from 2.5.1 or 2.5.2, refresh the marketplace source and update or reinstall AzSkills in Codex. Confirm the installed plugin reports 2.5.3 or later; changing the checkout alone does not replace a cached installation. Open the hook list (or `/hooks` in the CLI): expect six handlers across SessionStart, UserPromptSubmit, SubagentStart, and PostToolUse, visible even before trust. Review and trust the commands, then start a new session. An empty list indicates discovery or installation trouble; visible untrusted hooks require trust before execution.');
   } else if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
     lines.push('For an interactive setup, run the guided wizard from the AzSkills checkout:');
     lines.push('');

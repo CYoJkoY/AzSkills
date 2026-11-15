@@ -234,11 +234,32 @@ async function main() {
   for (const [entryPath, entry] of allPathEntries) {
     if (!files.some(file => relative(file) === entryPath)) fail(entry.id + ": registered file is missing: " + entryPath);
   }
-  const allowedSkillPaths = new Set(["SKILL.md", "az-clean-code/SKILL.md"]);
+  const allowedSkillPaths = new Set([
+    "SKILL.md",
+    "az-clean-code/SKILL.md",
+    "skills/azskills/SKILL.md",
+    "skills/az-clean-code/SKILL.md",
+  ]);
   for (const found of foundPaths) {
     if (!allowedSkillPaths.has(found)) fail(found + ": unregistered SKILL.md");
   }
   if (!foundPaths.has("SKILL.md")) fail("Root SKILL.md is required");
+  const pluginSkillEntries = [
+    { path: "skills/azskills/SKILL.md", name: "azskills", canonical: "../../SKILL.md" },
+    { path: "skills/az-clean-code/SKILL.md", name: "az-clean-code", canonical: "../../az-clean-code/SKILL.md" },
+  ];
+  for (const entry of pluginSkillEntries) {
+    if (!foundPaths.has(entry.path)) {
+      fail(entry.path + ": plugin skill entry is required");
+      continue;
+    }
+    const text = await readFile(path.join(root, entry.path), "utf8");
+    const meta = parseFrontmatter(text, entry.path).data;
+    if (meta.name !== entry.name) fail(entry.path + ": name must be " + entry.name);
+    if (!meta.description) fail(entry.path + ": description is required");
+    if (!asciiOnly(text)) fail(entry.path + ": content must be ASCII");
+    if (!text.includes(entry.canonical)) fail(entry.path + ": must link the canonical contract at " + entry.canonical);
+  }
   if (foundPaths.has("az-clean-code/SKILL.md")) {
     const cleanCodePath = path.join(root, "az-clean-code/SKILL.md");
     const cleanCodeText = await readFile(cleanCodePath, "utf8");

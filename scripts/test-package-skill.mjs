@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, readdir, rmdir, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, rmdir, rm, stat, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import os from 'node:os';
@@ -60,15 +60,17 @@ try {
   assert.equal(pluginManifest.name, 'azskills');
   for (const field of ['composerIcon', 'logo']) {
     const asset = pluginManifest.interface[field];
-    assert.match(asset, /^\.\/assets\//);
-    assert.deepEqual(await readFile(path.join(plugin, asset)), await readFile(path.join(repository, 'codex-plugin', asset)));
+    assert.match(asset, /^\.\/codex-plugin\/assets\//);
+    assert.deepEqual(await readFile(path.join(plugin, asset)), await readFile(path.join(repository, asset)));
   }
-  assert.equal(pluginManifest.version, JSON.parse(await readFile(path.join(plugin, 'skills/azskills/skills.json'), 'utf8')).version);
-  assert.match(await readFile(path.join(plugin, 'skills/azskills/az-clean-code/SKILL.md'), 'utf8'), /C7 - Externalize business data before coding/);
-  const taste = path.join(plugin, 'taste');
+  assert.equal(pluginManifest.version, JSON.parse(await readFile(path.join(plugin, 'skills.json'), 'utf8')).version);
+  assert.match(await readFile(path.join(plugin, 'az-clean-code/SKILL.md'), 'utf8'), /C7 - Externalize business data before coding/);
+  assert.match(await readFile(path.join(plugin, 'skills/azskills/SKILL.md'), 'utf8'), /canonical entry at \[SKILL\.md\]\(\.\.\/\.\.\/SKILL\.md\)/);
+  assert.match(await readFile(path.join(plugin, 'skills/az-clean-code/SKILL.md'), 'utf8'), /canonical contract is \[az-clean-code\/SKILL\.md\]/);
+  const taste = path.join(plugin, 'codex-plugin/taste');
   assert.match(await readFile(path.join(taste, 'recipe/main.md'), 'utf8'), /Own the result/);
   assert.match(await readFile(path.join(taste, 'recipe/sub.md'), 'utf8'), /parent's goal/i);
-  assert.equal(pluginManifest.hooks, './hooks/hooks.json');
+  assert.equal(pluginManifest.hooks, './codex-plugin/hooks/hooks.json');
   assert.equal(await readFile(path.join(plugin, 'plugin.json'), 'utf8').catch(error => error.code), 'ENOENT');
   const { hooks: pluginHooks } = JSON.parse(await readFile(path.join(plugin, pluginManifest.hooks.slice(2)), 'utf8'));
   assert.deepEqual(Object.keys(pluginHooks), ['SessionStart', 'UserPromptSubmit', 'SubagentStart', 'PostToolUse']);
@@ -112,9 +114,10 @@ try {
   assert.match(await readFile(path.join(standaloneCleanCode, 'SKILL.md'), 'utf8'), /C1-C7/);
   await validatePackagedSkill(standaloneCleanCode);
   const repositoryMarketplace = JSON.parse(await readFile(path.join(repository, '.agents/plugins/marketplace.json'), 'utf8'));
-  assert.equal(repositoryMarketplace.plugins[0].source.path, './dist/azskills-marketplace/plugins/azskills');
+  assert.equal(repositoryMarketplace.plugins[0].source.path, './');
   assert.ok((await readdir(path.join(plugin, 'skills/azskills'))).includes('SKILL.md'));
-  const hook = spawnSync(process.execPath, [path.join(plugin, 'hooks/session-start.mjs')], {
+  assert.ok((await readdir(path.join(plugin, 'skills/az-clean-code'))).includes('SKILL.md'));
+  const hook = spawnSync(process.execPath, [path.join(plugin, 'codex-plugin/hooks/session-start.mjs')], {
     encoding: 'utf8',
     env: { ...process.env, PLUGIN_ROOT: plugin },
   });
@@ -125,12 +128,12 @@ try {
   assert.match(hookOutput.hookSpecificOutput.additionalContext, /# AzSkills/);
   const checkoutHook = spawnSync(process.execPath, [path.join(repository, 'codex-plugin/hooks/session-start.mjs')], {
     encoding: 'utf8',
-    env: { ...process.env, PLUGIN_ROOT: path.join(repository, 'codex-plugin') },
+    env: { ...process.env, PLUGIN_ROOT: repository },
   });
   assert.equal(checkoutHook.status, 0, checkoutHook.stderr);
   assert.match(JSON.parse(checkoutHook.stdout).hookSpecificOutput.additionalContext, /# AzSkills/);
   // Execute the declared commands, including their quoting, from an unrelated cwd.
-  for (const pluginRoot of [plugin, path.join(repository, 'codex-plugin')]) {
+  for (const pluginRoot of [plugin, repository]) {
     const hooksFile = JSON.parse(await readFile(path.join(pluginRoot, '.codex-plugin/plugin.json'), 'utf8')).hooks;
     const { hooks } = JSON.parse(await readFile(path.join(pluginRoot, hooksFile), 'utf8'));
     for (const event of ['SessionStart', 'UserPromptSubmit']) {
@@ -155,7 +158,7 @@ try {
         assert.match(context.additionalContext, /# AzSkills/);
       }
     }
-    const unrelated = spawnSync(process.execPath, [path.join(pluginRoot, 'hooks/session-start.mjs'), 'UserPromptSubmit'], {
+    const unrelated = spawnSync(process.execPath, [path.join(pluginRoot, 'codex-plugin/hooks/session-start.mjs'), 'UserPromptSubmit'], {
       cwd: temp, encoding: 'utf8', input: JSON.stringify({ prompt: 'Explain the architecture concept' }),
       env: { ...process.env, PLUGIN_ROOT: pluginRoot },
     });
@@ -163,6 +166,33 @@ try {
     assert.doesNotMatch(JSON.parse(unrelated.stdout).hookSpecificOutput.additionalContext, /Az Clean Code/);
   }
   console.log('Codex plugin package and SessionStart context assertions passed.');
+  // A clean checkout has no ignored dist directory, so the marketplace must resolve inside it.
+  const cleanClone = path.join(temp, 'clean-clone');
+  await cp(repository, cleanClone, {
+    recursive: true,
+    filter(source) {
+      const relative = path.relative(repository, source);
+      if (!relative) return true;
+      const top = relative.split(path.sep)[0];
+      return top !== '.git' && top !== 'dist' && top !== 'node_modules' && !top.startsWith('.tmp_');
+    },
+  });
+  const cloneMarketplace = JSON.parse(await readFile(path.join(cleanClone, '.agents/plugins/marketplace.json'), 'utf8'));
+  const clonePlugin = path.resolve(cleanClone, cloneMarketplace.plugins[0].source.path);
+  for (const required of ['.codex-plugin/plugin.json', 'SKILL.md', 'skills/azskills/SKILL.md', 'skills/az-clean-code/SKILL.md', 'codex-plugin/hooks/hooks.json', 'codex-plugin/hooks/session-start.mjs', 'codex-plugin/taste/hooks/steer.mjs']) {
+    await stat(path.join(clonePlugin, required));
+  }
+  const cloneHooks = JSON.parse(await readFile(path.join(clonePlugin, 'codex-plugin/hooks/hooks.json'), 'utf8')).hooks;
+  for (const groups of Object.values(cloneHooks)) {
+    for (const group of groups) {
+      for (const hook of group.hooks) {
+        const marker = '$' + '{PLUGIN_ROOT}';
+        const target = hook.command.slice(hook.command.indexOf(marker) + marker.length, hook.command.indexOf('"', hook.command.indexOf(marker)));
+        await stat(path.join(clonePlugin, target));
+      }
+    }
+  }
+  console.log('Clean checkout marketplace and hook command paths resolve without dist.');
   const pluginBuildResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.mjs'), '--output', pluginBuild], { encoding: 'utf8' });
   assert.equal(pluginBuildResult.status, 0, pluginBuildResult.stderr);
   const pluginExpanded = path.join(temp, 'plugin-extracted');
@@ -177,9 +207,9 @@ try {
   assert.equal(await readFile(path.join(pluginExpanded, 'plugin.json'), 'utf8').catch(error => error.code), 'ENOENT');
   assert.deepEqual(JSON.parse(await readFile(path.join(pluginExpanded, extractedPlugin.hooks), 'utf8')).hooks, pluginHooks);
   // Resolve the repository marketplace against the build tree, as a local install does.
-  const builtPlugin = path.resolve(pluginBuild, repositoryMarketplace.plugins[0].source.path.slice('./dist/'.length));
+  const builtPlugin = path.join(pluginBuild, 'azskills-marketplace/plugins/azskills');
   assert.deepEqual(JSON.parse(await readFile(path.join(builtPlugin, '.codex-plugin/plugin.json'), 'utf8')), pluginManifest);
-  const installedHook = spawnSync(process.execPath, [path.join(pluginExpanded, 'hooks/session-start.mjs')], {
+  const installedHook = spawnSync(process.execPath, [path.join(pluginExpanded, 'codex-plugin/hooks/session-start.mjs')], {
     cwd: temp, encoding: 'utf8', env: { ...process.env, PLUGIN_ROOT: pluginExpanded },
   });
   assert.equal(installedHook.status, 0, installedHook.stderr);
