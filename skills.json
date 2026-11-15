@@ -93,11 +93,11 @@
       "mode": "translate"
     }
   ],
-  "version": "2.5.3",
+  "version": "2.6.0",
   "entry": {
     "id": "azskills",
     "path": "SKILL.md",
-    "version": "2.5.3"
+    "version": "2.6.0"
   },
   "modules": [
     {
@@ -335,6 +335,15 @@
       "modes": ["write", "review", "refactor"],
       "role": "Explicit, flat, reusable code with business data externalized before implementation.",
       "composes": ["architecture"]
+    },
+    {
+      "id": "godot-3-dev",
+      "path": "references/modules/godot-3-dev.md",
+      "status": "module",
+      "family": "architecture",
+      "modes": ["script", "review", "port"],
+      "role": "Godot 3.x GDScript, virtual-call safety, 3.6 API surface, and down-porting.",
+      "composes": ["az-clean-code", "architecture"]
     }
   ]
 }

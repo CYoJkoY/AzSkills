@@ -117,6 +117,13 @@ const MODULES = [
     when: "Use when authoring, reviewing, or refactoring application behavior.",
     contract: "C1-C7 acceptance. Schema before logic. Automated structural checks.",
   },
+  {
+    name: "godot-3-dev",
+    group: "ARCH",
+    purpose: "Write, review, and down-port Godot 3.6 GDScript with safe virtuals.",
+    when: "Use when a task targets Godot 3.x, GDScript, scenes, or 4.x down-porting.",
+    contract: "No re-called virtuals. 3.6-only symbols. Version pinned before code.",
+  },
 ];
 
 const DEFAULT_SELECTED = "ui-design";
