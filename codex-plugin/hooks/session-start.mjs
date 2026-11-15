@@ -36,8 +36,13 @@ const cleanCodeEntry = path.join(cleanCodeRoot, 'SKILL.md');
 const cleanCodeContext = cleanCodeMatch
   ? ' This request matches Az Clean Code. Read ' + cleanCodeEntry + ' and follow its C1-C7 constraints and required self-check; establish business-data configuration before coding.'
   : '';
+const godot3Match = event === 'UserPromptSubmit' && (/(^|[^a-z])(godot|gdscript)([^a-z]|$)/i.test(prompt) || /\.(gd|tscn)\b/i.test(prompt));
+const godot3Entry = path.join(skillRoot, 'references', 'modules', 'godot-3-dev.md');
+const godot3Context = godot3Match
+  ? ' This request matches Godot 3.x work. Read ' + godot3Entry + ' and follow its virtual-call and 3.6 API rules before writing any GDScript; never re-call ._ready() or ._physics_process(), and use only Godot 3.6 symbols.'
+  : '';
 const additionalContext = event === 'UserPromptSubmit'
-  ? 'For this request, proactively apply AzSkills when its capabilities match the requested outcome. Read ' + path.join(skillRoot, 'SKILL.md') + ' if the entry is not already in context, select one owning module, and load only its required references. Follow user and repository instructions.' + cleanCodeContext
+  ? 'For this request, proactively apply AzSkills when its capabilities match the requested outcome. Read ' + path.join(skillRoot, 'SKILL.md') + ' if the entry is not already in context, select one owning module, and load only its required references. Follow user and repository instructions.' + cleanCodeContext + godot3Context
   : [
   'AzSkills is active for this session. Apply it proactively when the user asks for work covered by its architecture, interface/design, visual production, publishing, career, or AI-client integration workflows; do not wait for an explicit AzSkills invocation.',
   'Follow the entry below and load its supporting files from ' + skillRoot + '. Use one owning module and only the references needed for the request.',
