@@ -19,6 +19,7 @@ Choose by the requested output. These are internal modules, not installable skil
 | [tool-integration](modules/tool-integration.md) | Connect AzSkills to AI clients with verified installation and setup workflows. | install, configure, troubleshoot, remove |
 | [taste](modules/taste.md) | GPT with Taste judgment, collaboration, and execution behavior. | main, subagent, independent |
 | [az-clean-code](modules/az-clean-code.md) | Explicit, flat, reusable code with business data externalized before implementation. | write, review, refactor |
+| [godot-3-dev](modules/godot-3-dev.md) | Godot 3.x GDScript, virtual-call safety, 3.6 API surface, and down-porting. | script, review, port |
 
 ## Legacy names
 

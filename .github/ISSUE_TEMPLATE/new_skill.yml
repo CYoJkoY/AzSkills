@@ -141,6 +141,7 @@ body:
         - tool-integration
         - taste
         - az-clean-code
+        - godot-3-dev
         - None / Standalone
     validations:
       required: false

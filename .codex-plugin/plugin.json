@@ -1,6 +1,6 @@
 {
   "name": "azskills",
-  "version": "2.5.3",
+  "version": "2.6.0",
   "description": "AzSkills workflows and GPT with Taste behavior for architecture, clean code, design, visual production, publishing, and agent collaboration.",
   "license": "MIT",
   "keywords": ["architecture", "design", "skills", "workflow"],
