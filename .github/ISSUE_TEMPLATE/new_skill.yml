@@ -140,6 +140,7 @@ body:
         - resume-evidence-workflow
         - tool-integration
         - taste
+        - az-clean-code
         - None / Standalone
     validations:
       required: false

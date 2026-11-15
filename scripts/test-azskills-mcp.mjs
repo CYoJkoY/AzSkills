@@ -19,6 +19,8 @@ const requests = [
   ['resources/read', { uri: 'azskills://skills/azskills/../../skills.json' }],
   ['resources/read', { uri: 'azskills://skills/azskills' }],
   ['tools/call', { name: 'azskills', arguments: { action: 'file', path: 'assets/azskills-hero.svg' } }],
+  ['tools/call', { name: 'azskills', arguments: { action: 'module', id: 'az-clean-code', mode: 'write' } }],
+  ['tools/call', { name: 'azskills', arguments: { action: 'file', path: 'az-clean-code/SKILL.md' } }],
 ];
 const result = spawnSync(process.execPath, ['scripts/azskills-mcp.mjs'], { cwd: root, encoding: 'utf8', timeout: 30000, maxBuffer: 3000000, input: requests.map(([method, params], i) => JSON.stringify({ jsonrpc: '2.0', id: i + 1, method, params })).join('\n') + '\n' });
 if (result.error) throw result.error;
@@ -43,4 +45,7 @@ assert.match(response(12).result.contents[0].text, /name: architecture/);
 assert.equal(response(13).error.code, -32602);
 assert.match(response(14).result.contents[0].text, /name: azskills/);
 assert.match(text(15), /<svg/);
+assert.match(text(16), /name: az-clean-code/);
+assert.match(text(16), /Selected mode: write/);
+assert.equal(text(17), await readFile(path.join(root, 'az-clean-code/SKILL.md'), 'utf8'));
 console.log('MCP tests passed: single tool/resource, lazy routing and aliases, module modes, supporting file bytes, traversal rejection, and unknown module/mode errors.');

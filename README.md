@@ -6,9 +6,9 @@
   <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: one entry with specialized internal modules" width="100%">
 </picture>
 
-Version **2.2.0**. One entry in your client, specialized capabilities inside.
+Version **2.4.0**. One entry in your client, specialized capabilities inside.
 
-AzSkills installs as a single `azskills` folder with one `SKILL.md`. Describe the result you want; the entry routes to the relevant internal module and loads only the necessary references. Internal module names are workflow choices, not additional skills to install.
+AzSkills installs as a single `azskills` folder with one root `SKILL.md`. Describe the result you want; the entry routes to the relevant internal module and loads only the necessary references. Internal module names are workflow choices, not additional skills to install. The `az-clean-code` package is also available as a standalone Skill.
 
 ## Install
 
@@ -28,9 +28,9 @@ node scripts/package-plugin.mjs --output /path/to/fresh/exports
 codex plugin marketplace add /path/to/fresh/exports/azskills-marketplace
 ```
 
-Install AzSkills from the marketplace in Codex and review/trust its `SessionStart`, `UserPromptSubmit`, `SubagentStart`, and `PostToolUse` hooks when prompted. After trust, AzSkills routing and GPT with Taste behavior are supplied automatically. SessionStart restores routing context and loads the Taste Main recipe; UserPromptSubmit applies both routing reminders; SubagentStart and completed local-agent waits apply Taste steering. Hooks require Node.js on PATH and support installation paths containing spaces. The plugin bundles its AzSkills icon for the composer and plugin details. The regular installer above installs a skill folder without these hooks. The `.agents/plugins/marketplace.json` manifest also enables importing the checkout directly.
+Install AzSkills from the marketplace in Codex and review/trust its `SessionStart`, `UserPromptSubmit`, `SubagentStart`, and `PostToolUse` hooks when prompted. After trust, AzSkills routing and GPT with Taste behavior are supplied automatically. SessionStart restores routing context and loads the Taste Main recipe; UserPromptSubmit applies both routing reminders and routes matching code tasks to Az Clean Code; SubagentStart and completed local-agent waits apply Taste steering. Hooks require Node.js on PATH and support installation paths containing spaces. The plugin bundles its AzSkills icon for the composer and plugin details. The regular installer above installs a skill folder without these hooks. The `.agents/plugins/marketplace.json` manifest also enables importing the checkout directly.
 
-For archive import, run `node scripts/package-skill.mjs --output /path/to/exports` and import `azskills.zip`. The ZIP has one root `SKILL.md` and all supporting files. Install the complete archive, not the manifest alone. Use a fresh export directory; pre-existing older archives are not removed automatically.
+For archive import, run `node scripts/package-skill.mjs --output /path/to/exports` and import `azskills.zip`. The ZIP has the AzSkills root entry and the standalone `az-clean-code/SKILL.md`, plus supporting files. To export only Az Clean Code, run `node scripts/package-skill.mjs --skill az-clean-code --output /path/to/exports`. Install the complete archive, not the manifest alone. Use a fresh export directory; pre-existing older archives are not removed automatically.
 
 See [client integration guides](integrations/README.md) for Codex plugin setup, skill folders, manual import, and MCP configuration. Client discovery depends on the client scan scope and may require a restart. The installer verifies local contents separately from actual client discovery and invocation.
 
@@ -79,6 +79,7 @@ These contracts are ordinary Markdown files. They retain their domain workflows 
 | Career | [`resume-evidence-workflow`](references/modules/resume-evidence-workflow.md) | evidence, tailor, review | Career evidence, requirement alignment, and editable resume delivery. |
 | Operations | [`tool-integration`](references/modules/tool-integration.md) | install, configure, troubleshoot, remove | Connect AzSkills to AI clients with verified installation and setup workflows. |
 | Operations | [`taste`](references/modules/taste.md) | main, subagent, independent | Judgment, collaboration, and execution behavior automatically supplied by Codex hooks. |
+| Architecture | [`az-clean-code`](references/modules/az-clean-code.md) | write, review, refactor | Explicit code, flat control flow, reuse, and business data externalized before coding. |
 <!-- SKILL-CATALOG:END -->
 
 ## Legacy names
