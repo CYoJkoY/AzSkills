@@ -8,7 +8,7 @@
       "name": "azskills",
       "source": {
         "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/azskills"
+        "path": "./"
       },
       "policy": {
         "installation": "AVAILABLE",

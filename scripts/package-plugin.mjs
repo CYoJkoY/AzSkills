@@ -1,26 +1,40 @@
-import { cp, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
-import { packageSkill, writeSkillZip } from './package-skill.mjs';
+import { writeSkillZip } from './package-skill.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+const excludedTopLevel = new Set(['.git', 'dist', 'node_modules']);
+const requiredPluginFiles = [
+  '.codex-plugin/plugin.json',
+  'SKILL.md',
+  'skills/azskills/SKILL.md',
+  'skills/az-clean-code/SKILL.md',
+  'az-clean-code/SKILL.md',
+  'codex-plugin/hooks/hooks.json',
+  'codex-plugin/hooks/session-start.mjs',
+  'codex-plugin/taste/hooks/steer.mjs',
+];
 
 export async function packageCodexPlugin(repositoryRoot, outputDirectory) {
   const base = path.resolve(repositoryRoot);
   const output = path.resolve(outputDirectory);
   const plugin = path.join(output, 'plugins', 'azskills');
-  const skillRoot = path.join(plugin, 'skills', 'azskills');
 
-  await mkdir(path.join(plugin, 'hooks'), { recursive: true });
-  await cp(path.join(base, 'codex-plugin/.codex-plugin'), path.join(plugin, '.codex-plugin'), { recursive: true });
-  await cp(path.join(base, 'codex-plugin/assets'), path.join(plugin, 'assets'), { recursive: true });
-  await cp(path.join(base, 'codex-plugin/taste'), path.join(plugin, 'taste'), { recursive: true });
-  await cp(path.join(base, 'codex-plugin/hooks'), path.join(plugin, 'hooks'), { recursive: true });
-  await packageSkill(base, 'azskills', path.join(plugin, 'skills'));
+  await mkdir(plugin, { recursive: true });
+  for (const entry of await readdir(base, { withFileTypes: true })) {
+    if (excludedTopLevel.has(entry.name) || entry.name.startsWith('.tmp_')) continue;
+    await cp(path.join(base, entry.name), path.join(plugin, entry.name), { recursive: true, errorOnExist: true, force: false });
+  }
+  for (const required of requiredPluginFiles) {
+    const present = await stat(path.join(plugin, required)).then(() => true).catch(() => false);
+    if (!present) throw new Error('Plugin package is missing ' + required);
+  }
 
   const manifest = JSON.parse(await readFile(path.join(plugin, '.codex-plugin/plugin.json'), 'utf8'));
-  const registry = JSON.parse(await readFile(path.join(skillRoot, 'skills.json'), 'utf8'));
+  const registry = JSON.parse(await readFile(path.join(plugin, 'skills.json'), 'utf8'));
   if (manifest.name !== 'azskills' || manifest.version !== registry.version) throw new Error('Plugin and AzSkills versions must match');
 
   const marketplace = {
@@ -36,7 +50,7 @@ export async function packageCodexPlugin(repositoryRoot, outputDirectory) {
   const marketplaceManifest = path.join(output, '.agents', 'plugins', 'marketplace.json');
   await mkdir(path.dirname(marketplaceManifest), { recursive: true });
   await writeFile(marketplaceManifest, JSON.stringify(marketplace, null, 2) + '\n', 'utf8');
-  return { marketplace: output, plugin, skillRoot };
+  return { marketplace: output, plugin };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
