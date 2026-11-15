@@ -6,6 +6,16 @@ AzSkills includes Skills that were independently rewritten or synthesized after 
 
 The Codex plugin includes GPT with Taste's Main, Sub, and Independent recipes, its three steering prompts, and adapted Codex hook routing from https://github.com/NB-Corp/gpt-with-taste. Copyright (c) NB-Corp. These files are distributed under the upstream MIT License in `codex-plugin/taste/LICENSE`. The hook integration is adapted for AzSkills packaging and automatic Codex lifecycle events; the upstream installer and unrelated client adapters are not included.
 
+## Godot 3.6 API snapshot
+
+`godot-3-dev/references/api-3.6.json` contains extracted class, method,
+property, signal, constant, project-setting, and GDScript built-in function
+names from Godot Engine `3.6-stable`. The source is available at
+https://github.com/godotengine/godot/tree/3.6-stable and
+https://github.com/godotengine/godot/blob/3.6-stable/modules/gdscript/gdscript_functions.cpp.
+Godot Engine is distributed under the MIT License. The snapshot is used as
+reference data only and does not include the Godot engine binary or source.
+
 ## Workbench design references
 
 The repository's interface contract (`DESIGN.md` and `design-system/`) was informed by two publicly documented products:
