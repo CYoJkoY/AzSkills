@@ -31,13 +31,14 @@ try {
   cli(target, [], false);
   assert.equal(await exists(target), false, 'Missing confirmation must not write');
   cli(target, ['--skills', 'ui-aesthetics', '--yes']);
-  assert.deepEqual((await manifests(target)).map(f => path.relative(target, f)), [path.join('azskills', 'SKILL.md')]);
+  assert.deepEqual((await manifests(target)).map(f => path.relative(target, f)).sort(), [path.join('azskills', 'SKILL.md'), path.join('azskills', 'az-clean-code', 'SKILL.md')].sort());
   const installed = path.join(target, 'azskills');
   const unrelated = path.join(temp, 'unrelated-skill');
   await mkdir(unrelated);
   await writeFile(path.join(unrelated, 'SKILL.md'), 'unrelated linked skill');
   await symlink(unrelated, path.join(target, 'unrelated-linked'), process.platform === 'win32' ? 'junction' : 'dir');
   assert.match(await readFile(path.join(installed, 'references/modules/architecture.md'), 'utf8'), /name: architecture/);
+  assert.match(await readFile(path.join(installed, 'az-clean-code/SKILL.md'), 'utf8'), /C7 - Externalize business data before coding/);
   assert.match(await readFile(path.join(installed, 'references/routing.md'), 'utf8'), /frontend-architecture/);
   cli(target, ['--verify']);
   assert.equal((await lstat(path.join(target, 'unrelated-linked'))).isSymbolicLink(), true, 'Unrelated linked skills must be preserved');
@@ -71,7 +72,7 @@ try {
     cli(legacy, ['--dry-run']);
     assert.equal((await manifests(legacy)).length, 4);
     cli(legacy, ['--yes']);
-    assert.equal((await manifests(legacy)).length, 1, 'Migration must also move legacy backups out of scan root');
+    assert.equal((await manifests(legacy)).length, 2, 'Migration must also move legacy backups out of scan root');
     const data = JSON.parse(await readFile(manifestFile(legacy), 'utf8'));
     assert.equal(path.relative(legacy, data.lastRun.directory).startsWith('..'), true);
     assert.deepEqual(data.skills, ['azskills']);

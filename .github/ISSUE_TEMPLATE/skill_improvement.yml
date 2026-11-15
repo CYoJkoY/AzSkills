@@ -26,6 +26,7 @@ body:
         - resume-evidence-workflow
         - tool-integration
         - taste
+        - az-clean-code
         - application-architecture (alias)
         - frontend-architecture (alias)
         - ui-aesthetics (alias)

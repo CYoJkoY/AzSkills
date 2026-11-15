@@ -233,11 +233,20 @@ async function main() {
   for (const [entryPath, entry] of allPathEntries) {
     if (!files.some(file => relative(file) === entryPath)) fail(entry.id + ": registered file is missing: " + entryPath);
   }
+  const allowedSkillPaths = new Set(["SKILL.md", "az-clean-code/SKILL.md"]);
   for (const found of foundPaths) {
-    if (found !== "SKILL.md") fail(found + ": unregistered SKILL.md");
+    if (!allowedSkillPaths.has(found)) fail(found + ": unregistered SKILL.md");
   }
-
-  if (foundPaths.size !== 1 || !foundPaths.has("SKILL.md")) fail("Exactly one root SKILL.md is required");
+  if (!foundPaths.has("SKILL.md")) fail("Root SKILL.md is required");
+  if (foundPaths.has("az-clean-code/SKILL.md")) {
+    const cleanCodePath = path.join(root, "az-clean-code/SKILL.md");
+    const cleanCodeText = await readFile(cleanCodePath, "utf8");
+    const cleanCodeMeta = parseFrontmatter(cleanCodeText, "az-clean-code/SKILL.md").data;
+    if (cleanCodeMeta.name !== "az-clean-code") fail("az-clean-code/SKILL.md: name must be az-clean-code");
+    if (!cleanCodeMeta.description || cleanCodeMeta.description.length > 100) fail("az-clean-code/SKILL.md: description must be 100 characters or fewer");
+    if (cleanCodeMeta.description && !/\bwhen\b/i.test(cleanCodeMeta.description)) fail("az-clean-code/SKILL.md: description must state when to use it");
+    if (!asciiOnly(cleanCodeText)) fail("az-clean-code/SKILL.md: content must be ASCII");
+  }
   const publicEntry = await readFile(path.join(root, "SKILL.md"), "utf8");
   const publicMetadata = parseFrontmatter(publicEntry, "SKILL.md").data;
   if (publicMetadata.name !== "azskills" || publicMetadata.version !== registry.version || registry.entry?.version !== registry.version || registry.entry?.path !== "SKILL.md" || registry.entry?.id !== "azskills") fail("Public entry/version mismatch");

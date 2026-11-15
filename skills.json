@@ -93,11 +93,11 @@
       "mode": "translate"
     }
   ],
-  "version": "2.3.0",
+  "version": "2.5.1",
   "entry": {
     "id": "azskills",
     "path": "SKILL.md",
-    "version": "2.3.0"
+    "version": "2.5.1"
   },
   "modules": [
     {
@@ -326,6 +326,15 @@
       "modes": ["main", "subagent", "independent"],
       "role": "GPT with Taste judgment, collaboration, and execution behavior.",
       "composes": []
+    },
+    {
+      "id": "az-clean-code",
+      "path": "references/modules/az-clean-code.md",
+      "status": "module",
+      "family": "architecture",
+      "modes": ["write", "review", "refactor"],
+      "role": "Explicit, flat, reusable code with business data externalized before implementation.",
+      "composes": ["architecture"]
     }
   ]
 }

@@ -18,6 +18,7 @@ Choose by the requested output. These are internal modules, not installable skil
 | [resume-evidence-workflow](modules/resume-evidence-workflow.md) | Career evidence, requirement alignment, and editable resume delivery. | evidence, tailor, review |
 | [tool-integration](modules/tool-integration.md) | Connect AzSkills to AI clients with verified installation and setup workflows. | install, configure, troubleshoot, remove |
 | [taste](modules/taste.md) | GPT with Taste judgment, collaboration, and execution behavior. | main, subagent, independent |
+| [az-clean-code](modules/az-clean-code.md) | Explicit, flat, reusable code with business data externalized before implementation. | write, review, refactor |
 
 ## Legacy names
 

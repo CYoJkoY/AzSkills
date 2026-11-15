@@ -221,7 +221,8 @@ async function packageAzSkills(root, outputDirectory) {
     await cp(source, path.join(output, name), { recursive: true, errorOnExist: true, force: false });
   }
   const manifests = (await filesUnder(output)).filter(f => path.basename(f).toLowerCase() === 'skill.md');
-  if (manifests.length !== 1 || manifests[0] !== path.join(output, 'SKILL.md')) throw new Error('AzSkills must expose exactly one SKILL.md');
+  const expectedManifests = [path.join(output, 'SKILL.md'), path.join(output, 'az-clean-code', 'SKILL.md')].sort();
+  if (manifests.sort().join(path.delimiter) !== expectedManifests.join(path.delimiter)) throw new Error('AzSkills must expose its root and registered az-clean-code manifests');
   await validatePackagedSkill(output);
   return output;
 }
@@ -311,7 +312,7 @@ if (isMain) {
     const ids = ['azskills', ...registry.modules.map(m => m.id), ...registry.aliases.map(a => a.id)];
     if (id && !ids.includes(id)) throw new Error('Unknown module or entry: ' + id);
     if (id && id !== 'azskills') console.error('Legacy module selection exports the complete azskills bundle.');
-    const selected = ['azskills'];
+    const selected = id === 'az-clean-code' ? [id] : ['azskills'];
     await mkdir(output, { recursive: true });
     const staging = await mkdtemp(path.join(tmpdir(), 'azskills-export-'));
     const archives = [];

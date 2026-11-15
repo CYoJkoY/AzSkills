@@ -63,6 +63,7 @@ try {
     assert.deepEqual(await readFile(path.join(plugin, asset)), await readFile(path.join(repository, 'codex-plugin', asset)));
   }
   assert.equal(pluginManifest.version, JSON.parse(await readFile(path.join(plugin, 'skills/azskills/skills.json'), 'utf8')).version);
+  assert.match(await readFile(path.join(plugin, 'skills/azskills/az-clean-code/SKILL.md'), 'utf8'), /C7 - Externalize business data before coding/);
   const taste = path.join(plugin, 'taste');
   assert.match(await readFile(path.join(taste, 'recipe/main.md'), 'utf8'), /Own the result/);
   assert.match(await readFile(path.join(taste, 'recipe/sub.md'), 'utf8'), /parent's goal/i);
@@ -104,6 +105,9 @@ try {
   assert.equal(agentResult.status, 0, agentResult.stderr);
   assert.match(JSON.parse(agentResult.stdout).hookSpecificOutput.additionalContext, /<gpt-with-taste-agent-steer>/);
   assert.equal(marketplaceManifest.plugins[0].source.path, './plugins/azskills');
+  const standaloneCleanCode = await packageSkill(repository, 'az-clean-code', path.join(temp, 'standalone-skill'));
+  assert.match(await readFile(path.join(standaloneCleanCode, 'SKILL.md'), 'utf8'), /C1-C7/);
+  await validatePackagedSkill(standaloneCleanCode);
   const repositoryMarketplace = JSON.parse(await readFile(path.join(repository, '.agents/plugins/marketplace.json'), 'utf8'));
   assert.equal(repositoryMarketplace.plugins[0].source.path, './codex-plugin');
   assert.equal(JSON.parse(await readFile(path.join(repository, repositoryMarketplace.plugins[0].source.path, 'plugin.json'), 'utf8')).name, 'azskills');
@@ -140,11 +144,19 @@ try {
       if (event === 'UserPromptSubmit') {
         assert.match(context.additionalContext, /proactively apply AzSkills/);
         assert.match(context.additionalContext, /SKILL\.md/);
+        assert.match(context.additionalContext, /Az Clean Code/);
+        assert.match(context.additionalContext, /establish business-data configuration before coding/);
         assert.doesNotMatch(context.additionalContext, /# AzSkills/);
       } else {
         assert.match(context.additionalContext, /# AzSkills/);
       }
     }
+    const unrelated = spawnSync(process.execPath, [path.join(pluginRoot, 'hooks/session-start.mjs'), 'UserPromptSubmit'], {
+      cwd: temp, encoding: 'utf8', input: JSON.stringify({ prompt: 'Explain the architecture concept' }),
+      env: { ...process.env, PLUGIN_ROOT: pluginRoot },
+    });
+    assert.equal(unrelated.status, 0, unrelated.stderr);
+    assert.doesNotMatch(JSON.parse(unrelated.stdout).hookSpecificOutput.additionalContext, /Az Clean Code/);
   }
   console.log('Codex plugin package and SessionStart context assertions passed.');
   const pluginBuildResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.mjs'), '--output', pluginBuild], { encoding: 'utf8' });
@@ -180,7 +192,7 @@ try {
     }
   }
   await collect(extracted);
-  assert.deepEqual(paths.filter(p => /(^|\/)skill\.md$/i.test(p)), ['SKILL.md']);
+  assert.deepEqual(paths.filter(p => /(^|\/)skill\.md$/i.test(p)).sort(), ['SKILL.md', 'az-clean-code/SKILL.md']);
   assert.ok(paths.every(p => !/^(\.git|dist|node_modules)\//.test(p)));
   const registry = JSON.parse(await readFile(path.join(repository, 'skills.json'), 'utf8'));
   for (const module of registry.modules) assert.ok(paths.includes(module.path), module.path);
