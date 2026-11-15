@@ -93,11 +93,11 @@
       "mode": "translate"
     }
   ],
-  "version": "2.4.0",
+  "version": "2.5.0",
   "entry": {
     "id": "azskills",
     "path": "SKILL.md",
-    "version": "2.4.0"
+    "version": "2.5.0"
   },
   "modules": [
     {

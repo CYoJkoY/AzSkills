@@ -4,7 +4,7 @@ description: Apply explicit, flat, reusable, data-driven constraints when writin
 status: module
 family: architecture
 modes: [write, review, refactor]
-version: 2.4.0
+version: 2.5.0
 ---
 
 ## Contract

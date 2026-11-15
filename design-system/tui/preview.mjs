@@ -110,6 +110,13 @@ const MODULES = [
     when: "Use when work benefits from Taste Main or agent roles.",
     contract: "Main, Sub, and Independent roles. Automatic Codex steering.",
   },
+  {
+    name: "az-clean-code",
+    group: "ARCH",
+    purpose: "Keep application logic explicit, flat, reusable, and data-driven.",
+    when: "Use when authoring, reviewing, or refactoring application behavior.",
+    contract: "C1-C7 acceptance. Schema before logic. Automated structural checks.",
+  },
 ];
 
 const DEFAULT_SELECTED = "ui-design";

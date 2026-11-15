@@ -6,7 +6,7 @@
   <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: one entry with specialized internal modules" width="100%">
 </picture>
 
-Version **2.4.0**. One entry in your client, specialized capabilities inside.
+Version **2.5.0**. One entry in your client, specialized capabilities inside.
 
 AzSkills installs as a single `azskills` folder with one root `SKILL.md`. Describe the result you want; the entry routes to the relevant internal module and loads only the necessary references. Internal module names are workflow choices, not additional skills to install. The `az-clean-code` package is also available as a standalone Skill.
 

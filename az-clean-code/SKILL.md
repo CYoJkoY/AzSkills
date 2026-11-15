@@ -9,6 +9,8 @@ Apply this Skill when creating or changing application behavior, reviewing code 
 
 All applicable code must pass C1-C7. These are acceptance constraints, not suggestions. A conflict with an existing public contract must be reported and resolved within the requested scope; do not silently break the contract. See [constraint sources](references/constraint-sources.md), [data schema](references/data-driven-schema.md), and [anti-patterns](references/anti-patterns.md).
 
+Run `python az-clean-code/scripts/check_constraints.py <changed-source-path>...` for structural checks. It checks tabs in supported source files and, for Python, parses syntax and reports function parameter counts, body lengths needing review, and control-flow nesting. Other languages receive tab checks only. A pass does not establish semantic compliance; C1, C4, C5, C7 and ambiguous cases still require the self-check.
+
 ## Constraints
 
 - **C1 - Explicit behavior:** Validate important preconditions at the boundary. Do not depend on implicit conversion, hidden side effects, or defaults for important behavior. Do not use a Boolean parameter to select distinct operations; name the operations separately. Give complex expressions a meaningful name. See the explicitness guidance in Google Python Style Guide and the project's API conventions.
