@@ -186,7 +186,9 @@ func slide_in():
 ```
 
 `Tween` is a node in 3.x. Call `interpolate_property` then `start()`. There is
-no `create_tween()`.
+Godot 3.6 also provides `get_tree().create_tween()` and `tween_property()`
+through `SceneTreeTween`; projects targeting older 3.x minors should use a
+`Tween` node with `interpolate_property()` and `start()` instead.
 
 ## Pools and built-in types
 

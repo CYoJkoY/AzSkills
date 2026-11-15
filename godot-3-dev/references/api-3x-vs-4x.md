@@ -34,7 +34,7 @@ call.
 | :--- | :--- | :--- |
 | `packed_scene.instantiate()` | `packed_scene.instance()` | 3.6 signature: `instance(edit_state=0)` |
 | `await signal` | `yield(object, "signal_name")` | Also `yield(get_tree().create_timer(seconds), "timeout")` for delays |
-| `create_tween()` | `Tween` node | `interpolate_property(object, "property", from, to, duration, trans, ease, delay)` then `start()` |
+| `create_tween()` and `tween_property(...)` | `SceneTreeTween` via `get_tree().create_tween()` | These methods exist in Godot 3.6; older 3.x minors need the `Tween` node and `interpolate_property(...)`/`start()` form. |
 | `sig.connect(callable)` | `connect("sig", self, "method", [binds], flags)` | No Callable in 3.x |
 | `sig.disconnect(callable)` | `disconnect("sig", self, "method")` | |
 | `sig.is_connected(callable)` | `is_connected("sig", self, "method")` | |

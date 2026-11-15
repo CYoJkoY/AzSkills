@@ -23,9 +23,9 @@ Add the repository as a Git marketplace, or build a local marketplace from the A
 
 The repository root is the plugin root. Its .agents/plugins/marketplace.json points to ./, so a Git clone already contains .codex-plugin/plugin.json, codex-plugin/hooks, the canonical SKILL.md, and the skills entries Codex discovers. The default build mirrors that layout under dist/azskills-marketplace/plugins/azskills; with a custom --output directory, import the generated azskills-marketplace directory instead.
 
-Install AzSkills from the marketplace in Codex. Review and trust the bundled hooks when prompted. The package uses the supported `.codex-plugin/plugin.json` manifest with a direct `hooks` path. Codex 0.167.0-alpha.4.1 discovers all six handlers in this format but silently omits them from the Agent Plugins root manifest ([upstream issue](https://github.com/openai/codex/issues/59516)). Keep a root `plugin.json` out of the plugin root; adding a compatibility manifest alongside `.codex-plugin` does not select the compatibility loader. Once trusted, matching requests need no explicit invocation. SessionStart restores routing context; UserPromptSubmit applies routing and code-task guidance; SubagentStart and PostToolUse apply Taste steering. Hooks require Node.js on PATH and support installation paths containing spaces.
+Install AzSkills from the marketplace in Codex. Review and trust the bundled hooks when prompted. The package uses the supported `.codex-plugin/plugin.json` manifest with a direct `hooks` path. Codex 0.167.0-alpha.4.1 discovers all eight handlers in this format but silently omits them from the Agent Plugins root manifest ([upstream issue](https://github.com/openai/codex/issues/59516)). Keep a root `plugin.json` out of the plugin root; adding a compatibility manifest alongside `.codex-plugin` does not select the compatibility loader. Once trusted, matching requests need no explicit invocation. SessionStart restores routing context; UserPromptSubmit applies routing and code-task guidance; the Godot 3.x guard blocks high-confidence invalid edits in PreToolUse and reports checker findings in PostToolUse; SubagentStart and the wait-agent PostToolUse handler apply Taste steering. Hooks require Node.js on PATH and support installation paths containing spaces.
 
-When upgrading from 2.5.3 or earlier, refresh the marketplace source and update or reinstall AzSkills in Codex. Confirm the installed plugin reports 2.6.0 or later; changing the checkout alone does not replace a cached installation. Open the hook list (or `/hooks` in the CLI): expect six handlers across SessionStart, UserPromptSubmit, SubagentStart, and PostToolUse, visible even before trust. Review and trust the commands, then start a new session. An empty list indicates discovery or installation trouble; visible untrusted hooks require trust before execution.
+When upgrading from an earlier release, refresh the marketplace source and update or reinstall AzSkills in Codex. Confirm the installed plugin reports 2.7.0 or later; changing the checkout alone does not replace a cached installation. Open the hook list (or `/hooks` in the CLI): expect eight handlers across SessionStart, UserPromptSubmit, SubagentStart, PreToolUse, and PostToolUse, visible even before trust. Review and trust the commands, then start a new session. An empty list indicates discovery or installation trouble; visible untrusted hooks require trust before execution.
 
 ## Use
 
@@ -33,7 +33,7 @@ Start a new Codex session and make a request covered by AzSkills without naming 
 
 ## Verify
 
-Confirm the installed plugin version, list all six handlers across four events, review and trust their commands, then confirm a new session receives AzSkills routing context.
+Confirm the installed plugin version, list eight handlers across five events, review and trust their commands including the Godot 3.x PreToolUse/PostToolUse guard, then confirm a new session receives AzSkills routing context.
 
 
 ## Remove
