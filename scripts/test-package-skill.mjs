@@ -11,6 +11,7 @@ const temp = await mkdtemp(path.join(os.tmpdir(), 'azskills-package-'));
 const root = path.join(temp, 'repository');
 const output = path.join(temp, 'output');
 const source = path.join(root, 'fixture');
+let inTreeOutput;
 try {
   await mkdir(path.join(source, 'references'), { recursive: true });
   await mkdir(path.join(root, 'integrations'), { recursive: true });
@@ -54,11 +55,11 @@ try {
   const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   const pluginBuild = path.join(temp, 'plugin-build');
   const { marketplace, plugin } = await packageCodexPlugin(repository, path.join(temp, 'marketplace output with spaces'));
-  const pluginManifest = JSON.parse(await readFile(path.join(plugin, 'plugin.json'), 'utf8'));
+  const pluginManifest = JSON.parse(await readFile(path.join(plugin, '.codex-plugin/plugin.json'), 'utf8'));
   const marketplaceManifest = JSON.parse(await readFile(path.join(marketplace, '.agents/plugins/marketplace.json'), 'utf8'));
   assert.equal(pluginManifest.name, 'azskills');
   for (const field of ['composerIcon', 'logo']) {
-    const asset = pluginManifest.extensions['com.openai'].interface[field];
+    const asset = pluginManifest.interface[field];
     assert.match(asset, /^\.\/assets\//);
     assert.deepEqual(await readFile(path.join(plugin, asset)), await readFile(path.join(repository, 'codex-plugin', asset)));
   }
@@ -67,7 +68,9 @@ try {
   const taste = path.join(plugin, 'taste');
   assert.match(await readFile(path.join(taste, 'recipe/main.md'), 'utf8'), /Own the result/);
   assert.match(await readFile(path.join(taste, 'recipe/sub.md'), 'utf8'), /parent's goal/i);
-  const { hooks: pluginHooks } = JSON.parse(await readFile(path.join(plugin, 'hooks/hooks.json'), 'utf8'));
+  assert.equal(pluginManifest.hooks, './hooks/hooks.json');
+  assert.equal(await readFile(path.join(plugin, 'plugin.json'), 'utf8').catch(error => error.code), 'ENOENT');
+  const { hooks: pluginHooks } = JSON.parse(await readFile(path.join(plugin, pluginManifest.hooks.slice(2)), 'utf8'));
   assert.deepEqual(Object.keys(pluginHooks), ['SessionStart', 'UserPromptSubmit', 'SubagentStart', 'PostToolUse']);
   assert.match(pluginHooks.PostToolUse[0].matcher, /wait_agent/);
   for (const event of ['SessionStart', 'UserPromptSubmit']) {
@@ -109,8 +112,7 @@ try {
   assert.match(await readFile(path.join(standaloneCleanCode, 'SKILL.md'), 'utf8'), /C1-C7/);
   await validatePackagedSkill(standaloneCleanCode);
   const repositoryMarketplace = JSON.parse(await readFile(path.join(repository, '.agents/plugins/marketplace.json'), 'utf8'));
-  assert.equal(repositoryMarketplace.plugins[0].source.path, './codex-plugin');
-  assert.equal(JSON.parse(await readFile(path.join(repository, repositoryMarketplace.plugins[0].source.path, 'plugin.json'), 'utf8')).name, 'azskills');
+  assert.equal(repositoryMarketplace.plugins[0].source.path, './dist/azskills-marketplace/plugins/azskills');
   assert.ok((await readdir(path.join(plugin, 'skills/azskills'))).includes('SKILL.md'));
   const hook = spawnSync(process.execPath, [path.join(plugin, 'hooks/session-start.mjs')], {
     encoding: 'utf8',
@@ -129,7 +131,7 @@ try {
   assert.match(JSON.parse(checkoutHook.stdout).hookSpecificOutput.additionalContext, /# AzSkills/);
   // Execute the declared commands, including their quoting, from an unrelated cwd.
   for (const pluginRoot of [plugin, path.join(repository, 'codex-plugin')]) {
-    const hooksFile = JSON.parse(await readFile(path.join(pluginRoot, 'plugin.json'), 'utf8')).extensions['com.openai'].hooks;
+    const hooksFile = JSON.parse(await readFile(path.join(pluginRoot, '.codex-plugin/plugin.json'), 'utf8')).hooks;
     const { hooks } = JSON.parse(await readFile(path.join(pluginRoot, hooksFile), 'utf8'));
     for (const event of ['SessionStart', 'UserPromptSubmit']) {
       const command = hooks[event][0].hooks[0].command.replaceAll('${PLUGIN_ROOT}', pluginRoot);
@@ -146,6 +148,8 @@ try {
         assert.match(context.additionalContext, /SKILL\.md/);
         assert.match(context.additionalContext, /Az Clean Code/);
         assert.match(context.additionalContext, /establish business-data configuration before coding/);
+        const cleanCodeEntry = context.additionalContext.match(/This request matches Az Clean Code. Read (.+?) and follow its C1-C7/)[1];
+        assert.match(await readFile(cleanCodeEntry, 'utf8'), /C1-C7/);
         assert.doesNotMatch(context.additionalContext, /# AzSkills/);
       } else {
         assert.match(context.additionalContext, /# AzSkills/);
@@ -161,9 +165,33 @@ try {
   console.log('Codex plugin package and SessionStart context assertions passed.');
   const pluginBuildResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.mjs'), '--output', pluginBuild], { encoding: 'utf8' });
   assert.equal(pluginBuildResult.status, 0, pluginBuildResult.stderr);
+  const pluginExpanded = path.join(temp, 'plugin-extracted');
+  const pluginArchive = path.join(pluginBuild, 'azskills-plugin.zip');
+  const pluginExtraction = process.platform === 'win32'
+    ? spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', 'Expand-Archive -LiteralPath $env:AZSKILLS_ARCHIVE -DestinationPath $env:AZSKILLS_EXPANDED'], { encoding: 'utf8', env: { ...process.env, AZSKILLS_ARCHIVE: pluginArchive, AZSKILLS_EXPANDED: pluginExpanded } })
+    : spawnSync('unzip', ['-q', pluginArchive, '-d', pluginExpanded], { encoding: 'utf8' });
+  if (pluginExtraction.error) throw pluginExtraction.error;
+  assert.equal(pluginExtraction.status, 0, pluginExtraction.stderr);
+  const extractedPlugin = JSON.parse(await readFile(path.join(pluginExpanded, '.codex-plugin/plugin.json'), 'utf8'));
+  assert.deepEqual(extractedPlugin, pluginManifest);
+  assert.equal(await readFile(path.join(pluginExpanded, 'plugin.json'), 'utf8').catch(error => error.code), 'ENOENT');
+  assert.deepEqual(JSON.parse(await readFile(path.join(pluginExpanded, extractedPlugin.hooks), 'utf8')).hooks, pluginHooks);
+  // Resolve the repository marketplace against the build tree, as a local install does.
+  const builtPlugin = path.resolve(pluginBuild, repositoryMarketplace.plugins[0].source.path.slice('./dist/'.length));
+  assert.deepEqual(JSON.parse(await readFile(path.join(builtPlugin, '.codex-plugin/plugin.json'), 'utf8')), pluginManifest);
+  const installedHook = spawnSync(process.execPath, [path.join(pluginExpanded, 'hooks/session-start.mjs')], {
+    cwd: temp, encoding: 'utf8', env: { ...process.env, PLUGIN_ROOT: pluginExpanded },
+  });
+  assert.equal(installedHook.status, 0, installedHook.stderr);
+  assert.match(JSON.parse(installedHook.stdout).hookSpecificOutput.additionalContext, /# AzSkills/);
   const collisionResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.mjs'), '--output', pluginBuild], { encoding: 'utf8' });
   assert.notEqual(collisionResult.status, 0, 'Packaging must not replace existing deliverables');
   assert.match(collisionResult.stderr, /Output already exists/);
+  await mkdir(path.join(repository, 'dist'), { recursive: true });
+  inTreeOutput = await mkdtemp(path.join(repository, 'dist', '.azskills-package-test-'));
+  const inTreeBuild = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.mjs'), '--output', inTreeOutput], { encoding: 'utf8' });
+  assert.equal(inTreeBuild.status, 0, inTreeBuild.stderr);
+  assert.deepEqual(JSON.parse(await readFile(path.join(inTreeOutput, 'azskills-marketplace/plugins/azskills/.codex-plugin/plugin.json'), 'utf8')), pluginManifest);
   console.log('Codex plugin packaging collision guard passed.');
   const unified = path.join(temp, 'azskills.zip');
   await packageSkillArchive(repository, 'azskills', path.join(temp, 'unified-stage'), unified);
@@ -202,5 +230,6 @@ try {
   console.log('Unified archive passed: exactly one manifest, all modules and aliases, extracted supporting bytes and links, deterministic output, and excluded build metadata.');
   console.log('Skill package tests passed (Markdown, HTML assets, srcset, fenced examples, missing dependencies, deterministic zip, and extracted links).');
 } finally {
+  if (inTreeOutput) await rm(inTreeOutput, { recursive: true, force: true });
   await rm(temp, { recursive: true, force: true });
 }

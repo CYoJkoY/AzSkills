@@ -27,7 +27,7 @@ try {
   entry = await readFile(path.join(skillRoot, 'SKILL.md'), 'utf8');
 }
 const cleanCodeMatch = event === 'UserPromptSubmit' && (/(^|[^a-z])(write|writing|implement|code|coding|review|reviewing|refactor|refactoring)([^a-z]|$)/i.test(prompt) || /重构|编写|实现|评审|审查/.test(prompt));
-const cleanCodeRoot = path.join(pluginRoot, 'skills', 'azskills', 'az-clean-code');
+const cleanCodeRoot = path.join(skillRoot, 'az-clean-code');
 const cleanCodeEntry = path.join(cleanCodeRoot, 'SKILL.md');
 const cleanCodeContext = cleanCodeMatch
   ? ' This request matches Az Clean Code. Read ' + cleanCodeEntry + ' and follow its C1-C7 constraints and required self-check; establish business-data configuration before coding.'

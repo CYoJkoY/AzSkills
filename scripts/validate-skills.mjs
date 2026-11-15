@@ -82,6 +82,7 @@ async function walk(directory) {
   const output = [];
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     if (entry.name === ".git" || entry.name === "node_modules") continue;
+    if (directory === root && entry.name === "dist") continue;
     const full = path.join(directory, entry.name);
     if (entry.isDirectory()) output.push(...(await walk(full)));
     else output.push(full);
