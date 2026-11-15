@@ -41,7 +41,7 @@ collections, `super`, `.emit()`, `instantiate()`, `queue_redraw()`, value
 Names that a project could legitimately reuse, such as `get_window()` or
 `is_editor_hint()`, are reported as warnings instead of errors.
 
-The checker ships with 14 fixtures that assert clean 3.x code passes and known
+The checker ships with 16 fixtures that assert clean 3.x code passes and known
 regressions fail:
 
 ```text

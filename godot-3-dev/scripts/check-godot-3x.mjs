@@ -281,6 +281,7 @@ const fourXMemberCalls = [
     code: 'GODOT4_METHOD',
     message: 'Godot 4.x value `.lerp()`',
     hint: '3.x uses `Vector2.linear_interpolate()`, `Color.linear_interpolate()`, or the global `lerp()`.',
+    skipWhenProjectMethod: 'lerp',
   },
 ];
 
@@ -376,18 +377,34 @@ function locate(starts, offset) {
 }
 
 // Blank out comments and string bodies so token checks only see real code.
+// GDScript 3.x strings may be single-quoted, double-quoted, or triple-quoted,
+// and triple-quoted strings may span lines, so all three forms are tracked.
 function stripCommentsAndStrings(text) {
   let output = '';
   let state = 'code';
+  let quote = '';
   for (let index = 0; index < text.length; index += 1) {
     const char = text[index];
+    const triple = text.slice(index, index + 3);
     if (state === 'code') {
-      if (char === '#') state = 'comment';
-      else if (char === '"' || char === "'") {
-        state = char === '"' ? 'double' : 'single';
+      if (char === '#') {
+        state = 'comment';
+        continue;
+      }
+      if (triple === '"""' || triple === "'''") {
+        quote = triple;
+        state = 'string';
+        output += triple;
+        index += 2;
+        continue;
+      }
+      if (char === '"' || char === "'") {
+        quote = char;
+        state = 'string';
         output += char;
         continue;
-      } else output += char;
+      }
+      output += char;
       continue;
     }
     if (state === 'comment') {
@@ -397,14 +414,17 @@ function stripCommentsAndStrings(text) {
       } else output += ' ';
       continue;
     }
+    // Inside a string literal.
     if (char === '\\') {
       output += '  ';
       index += 1;
       continue;
     }
-    if ((state === 'double' && char === '"') || (state === 'single' && char === "'")) {
+    if (quote.length === 3 ? triple === quote : char === quote) {
       state = 'code';
-      output += char;
+      output += quote;
+      if (quote.length === 3) index += 2;
+      quote = '';
       continue;
     }
     output += char === '\n' ? '\n' : ' ';
@@ -675,9 +695,14 @@ function checkVirtualRecalls(report, file, mask, starts) {
   }
 }
 
-function checkMemberCalls(report, file, mask, starts) {
+function checkMemberCalls(report, file, mask, starts, api, customMethods) {
   for (const rule of fourXMemberCalls) {
     for (const match of mask.matchAll(rule.pattern)) {
+      // No 3.6 value type defines `.lerp()`, but a project may declare its own.
+      if (rule.skipWhenProjectMethod) {
+        const callee = rule.skipWhenProjectMethod;
+        if (customMethods.has(callee) || api.hasMethod(callee)) continue;
+      }
       addIssue(report, file, starts, match.index, rule.code, rule.message, rule.hint);
     }
   }
@@ -951,7 +976,7 @@ function checkGdScript(report, file, text, mask, starts, api, projectClasses) {
   const customMethods = new Set(declared.methods);
   const declaredClasses = new Set([...declared.classes, ...projectClasses]);
   checkTokens(report, file, mask, starts);
-  checkMemberCalls(report, file, mask, starts);
+  checkMemberCalls(report, file, mask, starts, api, customMethods);
   checkVirtualRecalls(report, file, mask, starts);
   checkClasses(report, file, mask, starts, api, declaredClasses);
   checkCalls(report, file, mask, starts, api, declaredClasses, customMethods);
@@ -1281,6 +1306,24 @@ const fixtures = [
       'Note.gd': 'extends Node\n\n# 3.x signals stay untyped\nsignal scored(points)\n\nfunc ok():\n\temit_signal("scored", 1)\n',
     },
     expect: 'fail',
+  },
+  {
+    name: 'triple-quoted-ok',
+    files: {
+      // Shader code and documentation strings often mention 4.x identifiers.
+      'Shader.gd':
+        'extends Node\n\nvar shader = """\nshader_type canvas_item;\nvoid fragment() {\n\tawait something;\n}\n"""\n\nvar note = \'\'\'\nNode3D and CharacterBody2D and instantiate() are 4.x\n\'\'\'\n\nfunc _ready():\n\tprint(shader + note)\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'project-lerp-ok',
+    files: {
+      // A project-defined lerp() must not be reported as the 4.x value method.
+      'Blend.gd':
+        'extends Node\n\nvar mixer = null\n\nfunc lerp(a, b, t):\n\treturn a + (b - a) * t\n\nfunc run():\n\tvar v = mixer.lerp(1, 2, 0.5)\n\tprint(str(v))\n',
+    },
+    expect: 'pass',
   },
 ];
 
