@@ -1,7 +1,7 @@
 ---
 name: azskills
 description: Build and review software architecture, clean code, interfaces, design systems, motion, logos, editorial images, HTML slides, video, README pages, Steam pages, game localization, resumes, AI client setup, and GPT with Taste behavior. Routes each task to one internal module and loads references on demand.
-version: 2.5.0
+version: 2.5.1
 ---
 
 # AzSkills

@@ -9,7 +9,7 @@ Apply this Skill when creating or changing application behavior, reviewing code 
 
 All applicable code must pass C1-C7. These are acceptance constraints, not suggestions. A conflict with an existing public contract must be reported and resolved within the requested scope; do not silently break the contract. See [constraint sources](references/constraint-sources.md), [data schema](references/data-driven-schema.md), and [anti-patterns](references/anti-patterns.md).
 
-Run `python az-clean-code/scripts/check_constraints.py <changed-source-path>...` for structural checks. It checks tabs in supported source files and, for Python, parses syntax and reports function parameter counts, body lengths needing review, and control-flow nesting. Other languages receive tab checks only. A pass does not establish semantic compliance; C1, C4, C5, C7 and ambiguous cases still require the self-check.
+The executable policy lives in `constraints.json`. Run `python az-clean-code/scripts/check_constraints.py <changed-source-path>...` for structural checks; add `--json` for a machine-readable report. It checks tabs in supported source files and, for Python, parses syntax and checks function parameters, body length, and control-flow depth. Other languages receive tab checks only. The report states which constraints still require review; a pass does not establish semantic compliance.
 
 ## Constraints
 
