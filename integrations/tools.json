@@ -8,7 +8,7 @@
       "target": "Codex plugin marketplace",
       "userTarget": "Codex plugin marketplace",
       "source": "https://developers.openai.com/plugins/build/plugins",
-      "verify": "Install the AzSkills plugin from its local marketplace, trust the session hook, then confirm a new session receives AzSkills routing context.",
+      "verify": "Confirm the installed plugin version, list all six handlers across four events, review and trust their commands, then confirm a new session receives AzSkills routing context.",
       "automation": "manual-import",
       "detection": "manual",
       "configTarget": null,

@@ -1,6 +1,7 @@
 import { cp, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { tmpdir } from 'node:os';
 import { packageSkill, writeSkillZip } from './package-skill.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -12,13 +13,13 @@ export async function packageCodexPlugin(repositoryRoot, outputDirectory) {
   const skillRoot = path.join(plugin, 'skills', 'azskills');
 
   await mkdir(path.join(plugin, 'hooks'), { recursive: true });
-  await cp(path.join(base, 'codex-plugin/plugin.json'), path.join(plugin, 'plugin.json'));
+  await cp(path.join(base, 'codex-plugin/.codex-plugin'), path.join(plugin, '.codex-plugin'), { recursive: true });
   await cp(path.join(base, 'codex-plugin/assets'), path.join(plugin, 'assets'), { recursive: true });
   await cp(path.join(base, 'codex-plugin/taste'), path.join(plugin, 'taste'), { recursive: true });
   await cp(path.join(base, 'codex-plugin/hooks'), path.join(plugin, 'hooks'), { recursive: true });
   await packageSkill(base, 'azskills', path.join(plugin, 'skills'));
 
-  const manifest = JSON.parse(await readFile(path.join(plugin, 'plugin.json'), 'utf8'));
+  const manifest = JSON.parse(await readFile(path.join(plugin, '.codex-plugin/plugin.json'), 'utf8'));
   const registry = JSON.parse(await readFile(path.join(skillRoot, 'skills.json'), 'utf8'));
   if (manifest.name !== 'azskills' || manifest.version !== registry.version) throw new Error('Plugin and AzSkills versions must match');
 
@@ -54,7 +55,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       if (error.code !== 'ENOENT') throw error;
     }
   }
-  const staging = await mkdtemp(path.join(outputRoot, '.azskills-plugin-'));
+  const staging = await mkdtemp(path.join(tmpdir(), 'azskills-plugin-'));
   try {
     const { marketplace, plugin } = await packageCodexPlugin(root, path.join(staging, 'marketplace'));
     await cp(marketplace, destination, { recursive: true });

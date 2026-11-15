@@ -6,7 +6,7 @@
   <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: one entry with specialized internal modules" width="100%">
 </picture>
 
-Version **2.5.1**. One entry in your client, specialized capabilities inside.
+Version **2.5.2**. One entry in your client, specialized capabilities inside.
 
 AzSkills installs as a single `azskills` folder with one root `SKILL.md`. Describe the result you want; the entry routes to the relevant internal module and loads only the necessary references. Internal module names are workflow choices, not additional skills to install. The `az-clean-code` package is also available as a standalone Skill.
 
@@ -28,7 +28,7 @@ node scripts/package-plugin.mjs --output /path/to/fresh/exports
 codex plugin marketplace add /path/to/fresh/exports/azskills-marketplace
 ```
 
-Install AzSkills from the marketplace in Codex and review/trust its `SessionStart`, `UserPromptSubmit`, `SubagentStart`, and `PostToolUse` hooks when prompted. After trust, AzSkills routing and GPT with Taste behavior are supplied automatically. SessionStart restores routing context and loads the Taste Main recipe; UserPromptSubmit applies both routing reminders and routes matching code tasks to Az Clean Code; SubagentStart and completed local-agent waits apply Taste steering. Hooks require Node.js on PATH and support installation paths containing spaces. The plugin bundles its AzSkills icon for the composer and plugin details. The regular installer above installs a skill folder without these hooks. The `.agents/plugins/marketplace.json` manifest also enables importing the checkout directly.
+Install AzSkills from the marketplace in Codex and review/trust its `SessionStart`, `UserPromptSubmit`, `SubagentStart`, and `PostToolUse` hooks when prompted. The Codex package uses the supported `.codex-plugin/plugin.json` compatibility manifest with a direct `hooks` path because current Codex CLI hook discovery does not reliably read hooks from Agent Plugins root manifests. After trust, AzSkills routing and GPT with Taste behavior are supplied automatically. SessionStart restores routing context and loads the Taste Main recipe; UserPromptSubmit applies both routing reminders and routes matching code tasks to Az Clean Code; SubagentStart and completed local-agent waits apply Taste steering. Hooks require Node.js on PATH and support installation paths containing spaces. The plugin bundles its AzSkills icon for the composer and plugin details. The regular installer above installs a skill folder without these hooks. To import the repository root, first run the default plugin build: its `.agents/plugins/marketplace.json` points to the complete plugin under `dist/azskills-marketplace/plugins/azskills`. With custom output, import the generated marketplace instead. See the [Codex upgrade and verification guide](integrations/guides/codex.md) to replace a cached 2.5.1 installation and verify all six handlers.
 
 For archive import, run `node scripts/package-skill.mjs --output /path/to/exports` and import `azskills.zip`. The ZIP has the AzSkills root entry and the standalone `az-clean-code/SKILL.md`, plus supporting files. To export only Az Clean Code, run `node scripts/package-skill.mjs --skill az-clean-code --output /path/to/exports`. Install the complete archive, not the manifest alone. Use a fresh export directory; pre-existing older archives are not removed automatically.
 
