@@ -343,9 +343,11 @@ class ProjectIndex {
     this.api = api;
     // Keyed by project-relative POSIX path so overlay and real files agree.
     this.scripts = new Map();
+    this.scenes = new Set();
     this.classOwners = new Map();
     this.classNames = new Set();
     this.autoloads = new Set();
+    this.autoloadPaths = new Map();
   }
 
   addScript(relativePath, text) {
@@ -392,9 +394,19 @@ class ProjectIndex {
         continue;
       }
       if (section !== 'autoload') continue;
-      const match = /^\s*([A-Za-z_]\w*)\s*=/.exec(line);
-      if (match) this.autoloads.add(match[1]);
+      const match = /^\s*([A-Za-z_]\w*)\s*=\s*"?(?:\*)?(res:\/\/[^"]+)"?/.exec(line);
+      if (!match) {
+        const nameOnly = /^\s*([A-Za-z_]\w*)\s*=/.exec(line);
+        if (nameOnly) this.autoloads.add(nameOnly[1]);
+        continue;
+      }
+      this.autoloads.add(match[1]);
+      this.autoloadPaths.set(match[1], match[2]);
     }
+  }
+
+  addScene(relativePath) {
+    this.scenes.add(normalizeRelative(relativePath));
   }
 
   scriptRelative(fromRelative, target) {
@@ -411,6 +423,18 @@ class ProjectIndex {
     const direct = this.scriptRelative(fromRelative, target);
     if (direct && this.scripts.has(direct)) return direct;
     return this.classOwners.get(target) ?? null;
+  }
+
+  resolveScene(fromRelative, target) {
+    if (!target) return null;
+    const value = target.startsWith('res://')
+      ? target.slice('res://'.length)
+      : /\.(?:tscn|escn)$/i.test(target)
+        ? path.posix.join(path.posix.dirname(normalizeRelative(fromRelative)), target)
+        : null;
+    if (!value) return null;
+    const relative = normalizeRelative(value);
+    return this.scenes.has(relative) ? relative : null;
   }
 
   ancestry(relativePath) {
@@ -545,7 +569,39 @@ function checkProjectSettings(report, file, text, api) {
   });
 }
 
-function checkScene(report, file, text, api, projectClasses) {
+function checkAutoloadPaths(report, file, text, index) {
+  if (!index.autoloadPaths.size) return;
+  const lines = text.split('\n');
+  const starts = lineStarts(text);
+  let section = '';
+  lines.forEach((line, lineIndex) => {
+    const sectionMatch = /^\s*\[([^\]]+)\]\s*$/.exec(line);
+    if (sectionMatch) {
+      section = sectionMatch[1].trim();
+      return;
+    }
+    if (section !== 'autoload') return;
+    const match = /^\s*([A-Za-z_]\w*)\s*=/.exec(line);
+    if (!match) return;
+    const target = index.autoloadPaths.get(match[1]);
+    if (!target) return;
+    const scripted = /\.gd$/i.test(target) ? index.resolveScript(file, target) : null;
+    const scene = /\.(?:tscn|escn)$/i.test(target) ? index.resolveScene(file, target) : null;
+    const resolvable = /\.(?:gd|tscn|escn)$/i.test(target);
+    if (!resolvable || scripted || scene) return;
+    addIssue(
+      report,
+      file,
+      starts,
+      starts[lineIndex] + match.index,
+      'MISSING_AUTOLOAD_PATH',
+      'autoload ' + match[1] + ' targets missing resource ' + target,
+      'Godot 3.x reports an autoload load error and the singleton is unavailable when the path is missing.',
+    );
+  });
+}
+
+function checkScene(report, file, text, api, projectClasses, index) {
   const starts = lineStarts(text);
   const header = /\[gd_scene\b([^\]]*)\]/.exec(text);
   if (!header) {
@@ -584,8 +640,11 @@ function checkScene(report, file, text, api, projectClasses) {
   } else {
     report.verified.push(file + ': gd_scene format=2');
   }
-  for (const match of text.matchAll(/\[ext_resource\b[^\]]*\btype\s*=\s*"([^"]+)"[^\]]*\]/g)) {
-    const type = match[1];
+  for (const match of text.matchAll(/\[ext_resource\b[^\]]*\]/g)) {
+    const attributes = match[0];
+    const type = /\btype\s*=\s*"([^"]+)"/.exec(attributes)?.[1];
+    const target = /\bpath\s*=\s*"([^"]+)"/.exec(attributes)?.[1];
+    if (!type) continue;
     if (fourXClasses.includes(type) && !api.hasClass(type)) {
       addIssue(
         report,
@@ -595,6 +654,19 @@ function checkScene(report, file, text, api, projectClasses) {
         'GODOT4_SCENE_TYPE',
         'scene uses Godot 4.x resource type ' + type,
         'Use ' + (renamedClasses[type] ?? 'the Godot 3.6 equivalent') + ' in 3.x.',
+      );
+    }
+    // A scene cannot load when its ext_resource script is gone. The path is
+    // literal in the file, so this is a hard error rather than a guess.
+    if (target && /\.gd$/i.test(target) && !index.resolveScript(file, target)) {
+      addIssue(
+        report,
+        file,
+        starts,
+        match.index,
+        'MISSING_SCENE_SCRIPT_PATH',
+        'scene ext_resource targets missing script ' + target,
+        'Godot 3.x fails to load the scene when an ext_resource path does not exist.',
       );
     }
   }
@@ -932,6 +1004,28 @@ function checkSignalTargets(report, file, text, mask, starts, api, baseClasses, 
   }
 }
 
+function godotResourceExists(index, file, target) {
+  if (/\.gd$/i.test(target)) return Boolean(index.resolveScript(file, target));
+  if (/\.(?:tscn|escn)$/i.test(target)) return Boolean(index.resolveScene(file, target));
+  return true;
+}
+
+function checkRuntimePath(report, file, starts, index, offset, target, fnName, code) {
+  if (!/\.(?:gd|tscn|escn)$/i.test(target)) return;
+  if (godotResourceExists(index, file, target)) return;
+  addIssue(
+    report,
+    file,
+    starts,
+    offset,
+    code,
+    fnName + '() targets missing resource ' + target,
+    fnName === 'preload'
+      ? '3.x resolves preload at parse time, so a missing path is a hard parse error.'
+      : 'Godot 3.x load() returns null at runtime when the path is missing; fix the res:// path or load user:// data.',
+  );
+}
+
 function checkScriptPaths(report, file, text, mask, starts, index) {
   const extendsPattern = /^[ \t]*extends\b/gm;
   for (const match of maskedMatches(text, mask, extendsPattern, (slice) =>
@@ -954,18 +1048,21 @@ function checkScriptPaths(report, file, text, mask, starts, index) {
   for (const match of maskedMatches(text, mask, preloadPattern, (slice) =>
     /^preload\s*\(\s*"([^"]+)"/.exec(slice),
   )) {
-    const target = match.groups[1];
-    if (!/\.gd$/i.test(target)) continue;
-    if (index.resolveScript(file, target)) continue;
-    addIssue(
-      report,
-      file,
-      starts,
-      match.index,
-      'MISSING_PRELOAD_PATH',
-      'preload() targets missing script ' + target,
-      '3.x resolves preload at parse time, so a missing path is a hard parse error.',
-    );
+    checkRuntimePath(report, file, starts, index, match.index, match.groups[1], 'preload', 'MISSING_PRELOAD_PATH');
+  }
+  // Only the global load() is a resource lookup; `object.load(path)` belongs to
+  // whatever type owns it (ConfigFile, custom loader) and has other semantics.
+  const loadPattern = /(?<![\w.])load\s*\(/g;
+  for (const match of maskedMatches(text, mask, loadPattern, (slice) =>
+    /^load\s*\(\s*"([^"]+)"/.exec(slice),
+  )) {
+    checkRuntimePath(report, file, starts, index, match.index, match.groups[1], 'load', 'MISSING_LOAD_PATH');
+  }
+  const resourceLoaderPattern = /\bResourceLoader\s*\.\s*load\s*\(/g;
+  for (const match of maskedMatches(text, mask, resourceLoaderPattern, (slice) =>
+    /^ResourceLoader\s*\.\s*load\s*\(\s*"([^"]+)"/.exec(slice),
+  )) {
+    checkRuntimePath(report, file, starts, index, match.index, match.groups[1], 'ResourceLoader.load', 'MISSING_LOAD_PATH');
   }
 }
 
@@ -1041,9 +1138,10 @@ function checkGdScript(report, file, text, mask, starts, api, context) {
   }
 }
 
-function checkProjectGodotText(report, file, text, api) {
+function checkProjectGodotText(report, file, text, api, index) {
   checkGodotVersion(report, file, text);
   checkProjectSettings(report, file, text, api);
+  checkAutoloadPaths(report, file, text, index);
 }
 
 async function* walk(directory) {
@@ -1134,7 +1232,9 @@ async function runCheck({ root, overlay, apiPath, files, strict }) {
       index.addProjectGodot(text);
       continue;
     }
-    if (gdExtensions.has(path.posix.extname(relative).toLowerCase())) index.addScript(relative, text);
+    const extension = path.posix.extname(relative).toLowerCase();
+    if (gdExtensions.has(extension)) index.addScript(relative, text);
+    else if (sceneExtensions.has(extension)) index.addScene(relative);
   }
   let targets;
   if (files.length) {
@@ -1158,14 +1258,14 @@ async function runCheck({ root, overlay, apiPath, files, strict }) {
     if (text == null) continue;
     const extension = path.posix.extname(file).toLowerCase();
     if (path.posix.basename(file) === 'project.godot') {
-      checkProjectGodotText(report, file, text, api);
+      checkProjectGodotText(report, file, text, api, context.index);
     } else if (gdExtensions.has(extension)) {
       const starts = lineStarts(text);
       const mask = maskCommentsAndStrings(text);
       checkGdScript(report, file, text, mask, starts, api, context);
       checkMoveAndSlide(report, file, text, mask, starts);
     } else if (sceneExtensions.has(extension)) {
-      checkScene(report, file, text, api, context.projectClasses);
+      checkScene(report, file, text, api, context.projectClasses, context.index);
     }
     report.checked.push(file);
   }
@@ -1374,6 +1474,52 @@ const fixtures = [
         'common/physics_fps=60',
         '',
       ].join('\n'),
+      'Game.gd': 'extends Node\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'missing-autoload-path',
+    files: {
+      'project.godot': [
+        'config_version=4',
+        '',
+        '[autoload]',
+        '',
+        'Game="*res://Gone.gd"',
+        '',
+      ].join('\n'),
+    },
+    expect: 'fail',
+    expectCodes: ['MISSING_AUTOLOAD_PATH'],
+  },
+  {
+    name: 'missing-autoload-scene',
+    files: {
+      'project.godot': [
+        'config_version=4',
+        '',
+        '[autoload]',
+        '',
+        'Hud="*res://Gone.tscn"',
+        '',
+      ].join('\n'),
+    },
+    expect: 'fail',
+    expectCodes: ['MISSING_AUTOLOAD_PATH'],
+  },
+  {
+    name: 'autoload-scene-ok',
+    files: {
+      'project.godot': [
+        'config_version=4',
+        '',
+        '[autoload]',
+        '',
+        'Hud="*res://Hud.tscn"',
+        '',
+      ].join('\n'),
+      'Hud.tscn': '[gd_scene format=2]\n\n[node name="Hud" type="CanvasLayer"]\n',
     },
     expect: 'pass',
   },
@@ -1472,6 +1618,65 @@ const fixtures = [
         'extends Node\n\nvar mixer = null\n\nfunc lerp(a, b, t):\n\treturn a + (b - a) * t\n\nfunc run():\n\tvar v = mixer.lerp(1, 2, 0.5)\n\tprint(str(v))\n',
     },
     expect: 'pass',
+  },
+  {
+    name: 'missing-scene-script',
+    files: {
+      'Main.tscn':
+        '[gd_scene load_steps=2 format=2]\n\n[ext_resource path="res://Gone.gd" type="Script" id=1]\n\n[node name="Main" type="Node2D"]\n',
+    },
+    expect: 'fail',
+    expectCodes: ['MISSING_SCENE_SCRIPT_PATH'],
+  },
+  {
+    name: 'missing-load-path',
+    files: {
+      'Loader.gd': 'extends Node\n\nfunc _ready():\n\tvar scene = load("res://Gone.tscn")\n\tprint(scene)\n',
+    },
+    expect: 'fail',
+    expectCodes: ['MISSING_LOAD_PATH'],
+  },
+  {
+    name: 'missing-preload-scene',
+    files: {
+      'Loader.gd': 'extends Node\n\nconst Missing = preload("res://Gone.tscn")\n',
+    },
+    expect: 'fail',
+    expectCodes: ['MISSING_PRELOAD_PATH'],
+  },
+  {
+    name: 'existing-scene-load-ok',
+    files: {
+      'Level.tscn': '[gd_scene format=2]\n\n[node name="Level" type="Node2D"]\n',
+      'Loader.gd':
+        'extends Node\n\nconst Level = preload("res://Level.tscn")\n\nfunc _ready():\n\tvar other = load("res://Level.tscn")\n\tprint(Level)\n\tprint(other)\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'commented-load-paths-ok',
+    files: {
+      'Note.gd':
+        'extends Node\n\n# load("res://Gone.gd") and preload("res://Gone.tscn")\nvar text = \'load("res://Gone.gd")\'\n\nfunc _ready():\n\tprint(text)\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'member-load-ok',
+    files: {
+      // Only the global load() is a resource lookup; object.load() is not.
+      'MemberLoader.gd': 'extends Node\n\nvar loader = null\n\nfunc _ready():\n\tloader.load("res://Gone.gd")\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'missing-resource-loader-load',
+    files: {
+      'ResourceLoaderLoad.gd':
+        'extends Node\n\nfunc _ready():\n\tvar script = ResourceLoader.load("res://Gone.gd")\n\tprint(script)\n',
+    },
+    expect: 'fail',
+    expectCodes: ['MISSING_LOAD_PATH'],
   },
 ];
 

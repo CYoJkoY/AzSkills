@@ -45,7 +45,12 @@ Symbol context covers `class_name`, top-level methods, signals, `extends`,
 `preload` aliases, autoloads, and the resolved inheritance chain, including
 engine base classes. Inherited methods and signals resolve through that chain,
 and a missing `extends` or `preload` path reports `MISSING_EXTENDS_PATH` or
-`MISSING_PRELOAD_PATH`.
+`MISSING_PRELOAD_PATH`. Scene `ext_resource` script paths report
+`MISSING_SCENE_SCRIPT_PATH`, and literal resource paths passed to the global
+`load()` or `ResourceLoader.load()` report `MISSING_LOAD_PATH` for `.gd`,
+`.tscn`, and `.escn` targets. `object.load()` is not a resource lookup and is
+left alone. An `[autoload]` entry whose literal `res://` path names a missing
+`.gd`, `.tscn`, or `.escn` reports `MISSING_AUTOLOAD_PATH`.
 
 Symbol checks cover the Godot 4.x renames that have no 3.6 equivalent, including
 annotations, `await`, `Callable`, `StringName`, `Packed*Array`, typed
@@ -55,7 +60,7 @@ collections, `super`, `.emit()`, `instantiate()`, `queue_redraw()`, value
 Names that a project could legitimately reuse, such as `get_window()` or
 `is_editor_hint()`, are reported as warnings instead of errors.
 
-The checker ships with 26 fixtures that assert clean 3.x code passes and known
+The checker ships with 36 fixtures that assert clean 3.x code passes and known
 regressions fail:
 
 ```text
