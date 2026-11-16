@@ -18,6 +18,7 @@ const godotExtensions = new Set(['.gd', '.tscn', '.escn']);
 const checkerTimeoutMs = 15000;
 const postCheckTimeoutMs = 30000;
 const checkerMaxBuffer = 16 * 1024 * 1024;
+const runtimeLimit = '\nStatic checks do not prove runtime semantics; run the Godot 3.6 parser or headless project check.';
 
 function isGodotPath(file) {
   const base = path.basename(file).toLowerCase();
@@ -50,9 +51,19 @@ function patchFiles(patch, event) {
   return files;
 }
 
+// Codex serializes the canonical `apply_patch` call as `{ "command": patch }`.
+// Older hook payloads and synthetic events use `patch` or `input`; accepting all
+// three keeps real Codex and portable events on the same checker path.
+function patchText(input) {
+  if (typeof input.patch === 'string') return input.patch;
+  if (typeof input.command === 'string') return input.command;
+  if (typeof input.input === 'string') return input.input;
+  return '';
+}
+
 function changedFiles(event) {
   const input = event.tool_input ?? {};
-  if (event.tool_name === 'apply_patch') return patchFiles(input.patch, event);
+  if (event.tool_name === 'apply_patch') return patchFiles(patchText(input), event);
   const file = input.file_path ?? input.path ?? input.filePath;
   if (!file) return new Map();
   if (event.tool_name === 'MultiEdit') {
@@ -64,6 +75,76 @@ function changedFiles(event) {
   }
   const content = input.content ?? input.new_string;
   return new Map([[resolveToolPath(file, event), content == null ? [] : String(content).split(/\r?\n/)]])
+}
+
+// Shell writes cannot be reconstructed before execution, so the guard only
+// blocks commands that both name a Godot file and carry a high-confidence
+// write shape. Reads such as `Get-Content Player.gd` stay allowed.
+const shellWriteIndicators = [
+  { pattern: /\b(?:Set-Content|Add-Content|Out-File|Tee-Object)\b/i, label: 'PowerShell content cmdlet' },
+  { pattern: /\b(?:Copy-Item|Move-Item|New-Item|cp|mv|copy|move|rsync|scp)\b/i, label: 'file copy, move, or create command' },
+  { pattern: /\b(?:writeFileSync|writeFile|appendFileSync|appendFile|createWriteStream)\b/, label: 'Node write API' },
+  { pattern: /\bwrite_(?:text|bytes)\s*\(/i, label: 'Python write API' },
+  { pattern: /\bopen\s*\([^)]*["'][wa]\+?["']/i, label: 'file open for write' },
+  { pattern: /\bsed\b[^\n|;&]*\s-[a-zA-Z.]*i/, label: 'in-place sed' },
+  { pattern: /\bperl\b[^\n|;&]*\s-[a-zA-Z]*i/, label: 'in-place perl' },
+  { pattern: /\bgit\s+(?:apply|checkout|restore)\b/i, label: 'git working-tree write' },
+  { pattern: /(?:^|[^-\w])patch\b/i, label: 'patch application' },
+];
+
+function godotToken(value) {
+  const cleaned = value.replace(/^["'`(]+|["'`),;:]+$/g, '').replace(/:\d+$/, '');
+  if (!cleaned) return null;
+  const base = cleaned.toLowerCase();
+  return base === 'project.godot' || /\.(?:gd|tscn|escn)$/.test(base) ? cleaned : null;
+}
+
+// Split on path separators, commas, and `=` so `--files=a.gd,b.gd` still
+// yields both targets. Quoted prose is tokenized too; the write-shape gate
+// keeps a mention inside a commit message from denying on its own.
+function shellGodotPaths(command) {
+  const found = [];
+  for (const match of String(command ?? '').matchAll(/[^\s"'`|;&<>()]+/g)) {
+    for (const part of match[0].split(/[\\/,=]/)) {
+      const token = godotToken(part);
+      if (token && !found.includes(token)) found.push(token);
+    }
+  }
+  return found;
+}
+
+function redirectTargets(command) {
+  const targets = [];
+  for (const match of String(command ?? '').matchAll(/(?:^|[^<>])(?:>>?)\s*("[^"]+"|'[^']+'|[^\s<>|;&]+)/g)) {
+    targets.push(match[1]);
+  }
+  return targets;
+}
+
+function shellWriteReason(command) {
+  const text = String(command ?? '');
+  const godot = shellGodotPaths(text);
+  if (!godot.length) return null;
+  for (const target of redirectTargets(text)) {
+    if (shellGodotPaths(target).length) return 'output redirect into ' + target;
+  }
+  for (const indicator of shellWriteIndicators) {
+    if (indicator.pattern.test(text)) return indicator.label + ' touching ' + godot[0];
+  }
+  return null;
+}
+
+function shellDeny(reason) {
+  return {
+    hookSpecificOutput: {
+      hookEventName: 'PreToolUse',
+      permissionDecision: 'deny',
+      permissionDecisionReason:
+        'Shell command appears to write a Godot 3.x file (' + reason + '). ' +
+        'The guard can only verify proposed content that Codex exposes as a patch, so use apply_patch for this change. ' +
+        'If the file must be generated, run the checker afterwards and report its result.',
+    },
+  };
 }
 
 function countOccurrences(text, needle) {
@@ -224,7 +305,7 @@ function parseHunkHeader(line) {
 async function completePatchFiles(event) {
   if (event.tool_name !== 'apply_patch') return new Map();
   const output = new Map();
-  for (const section of parsePatchSections(event.tool_input?.patch)) {
+  for (const section of parsePatchSections(patchText(event.tool_input ?? {}))) {
     const resolved = resolveToolPath(section.file, event);
     if (section.action === 'Delete') continue;
     if (section.action === 'Add') {
@@ -414,6 +495,16 @@ async function projectRoot(file) {
   }
 }
 
+async function findProjectRoot(start) {
+  let current = path.resolve(start);
+  while (true) {
+    if (await exists(path.join(current, 'project.godot'))) return current;
+    const parent = path.dirname(current);
+    if (parent === current) return null;
+    current = parent;
+  }
+}
+
 async function postCheck(event, files) {
   const existing = [];
   for (const file of files.keys()) {
@@ -457,41 +548,104 @@ async function postCheck(event, files) {
     );
     for (const item of errors) failures.push(item.file + ':' + item.line + ':' + item.column + ' ' + item.code + ' - ' + item.message);
   }
-  const limit = '\nStatic checks do not prove runtime semantics; run the Godot 3.6 parser or headless project check.';
   if (failures.length) {
     return {
       decision: 'block',
-      reason: 'Godot 3.x static check found errors in the written content. Fix all of them before continuing:\n' + failures.slice(0, 10).join('\n') + limit,
+      reason: 'Godot 3.x static check found errors in the written content. Fix all of them before continuing:\n' + failures.slice(0, 10).join('\n') + runtimeLimit,
     };
   }
-  return { continue: true, hookSpecificOutput: { hookEventName: event.hook_event_name, additionalContext: messages.join('\n') + limit } };
+  return { continue: true, hookSpecificOutput: { hookEventName: event.hook_event_name, additionalContext: messages.join('\n') + runtimeLimit } };
+}
+
+// Shell tools expose `{ "command": ... }` and no proposed file content. After
+// execution, check the named Godot files, or the whole project for patch and
+// VCS commands that rewrite files without naming them.
+async function shellPostCheck(event) {
+  const command = String(event.tool_input?.command ?? '');
+  const files = new Map();
+  for (const token of shellGodotPaths(command)) files.set(resolveToolPath(token, event), []);
+  if (files.size) {
+    const result = await postCheck(event, files);
+    if (result.decision === 'block') return result;
+    const extra = result.hookSpecificOutput?.additionalContext ?? '';
+    return {
+      continue: true,
+      hookSpecificOutput: {
+        hookEventName: event.hook_event_name,
+        additionalContext: 'Shell command referenced Godot files; the static checker ran after execution.\n' + extra,
+      },
+    };
+  }
+  if (!shellWriteIndicators.some((indicator) => indicator.pattern.test(command))) return { continue: true };
+  const root = await findProjectRoot(event.cwd ? String(event.cwd) : process.cwd());
+  if (!root) return { continue: true };
+  const { report, unavailable } = runChecker({ root, files: [], timeout: postCheckTimeoutMs });
+  if (unavailable) {
+    return {
+      continue: true,
+      hookSpecificOutput: {
+        hookEventName: event.hook_event_name,
+        additionalContext: 'Godot 3.x checker unavailable after shell write in ' + root + ': ' + unavailable + '. Run it manually.' + runtimeLimit,
+      },
+    };
+  }
+  const errors = report.errors ?? [];
+  if (errors.length) {
+    return {
+      decision: 'block',
+      reason:
+        'Godot 3.x static check found errors after a shell write. Fix them before continuing:\n' +
+        errors.slice(0, 10).map((item) => item.file + ':' + item.line + ':' + item.column + ' ' + item.code + ' - ' + item.message).join('\n') +
+        runtimeLimit,
+    };
+  }
+  return {
+    continue: true,
+    hookSpecificOutput: {
+      hookEventName: event.hook_event_name,
+      additionalContext:
+        'Godot 3.x static check after shell write in ' + root + ': checked=' + report.checked.length +
+        ', errors=0, warnings=' + (report.warnings ?? []).length + '.' + runtimeLimit,
+    },
+  };
 }
 
 const event = await parseInput();
-const files = changedFiles(event);
-if (event.hook_event_name === 'PreToolUse') {
-  const lexical = violations(files);
-  const findings = lexical.length ? lexical : await manifestViolations(files);
-  if (findings.length) {
-    process.stdout.write(JSON.stringify(deny(findings)));
+if (event.tool_name === 'Bash') {
+  if (event.hook_event_name === 'PreToolUse') {
+    const reason = shellWriteReason(event.tool_input?.command);
+    process.stdout.write(JSON.stringify(reason ? shellDeny(reason) : { continue: true }));
+  } else if (event.hook_event_name === 'PostToolUse') {
+    process.stdout.write(JSON.stringify(await shellPostCheck(event)));
   } else {
-    const proposed = await reconstructableFiles(event);
-    const checked = await preCheck(proposed);
-    const notes = checked.notes;
-    const skipped = [...files.keys()].filter((file) => isGodotPath(file) && !proposed.has(file));
-    if (skipped.length) {
-      notes.push('Could not reconstruct the final content of ' + skipped.map((file) => path.basename(file)).join(', ') + '; only lexical checks ran. Re-run the checker after the write.');
-    }
-    if (checked.findings.length) process.stdout.write(JSON.stringify(deny(checked.findings)));
-    else if (notes.length) {
-      process.stdout.write(JSON.stringify({
-        continue: true,
-        hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: notes.join('\n') },
-      }));
-    } else process.stdout.write(JSON.stringify({ continue: true }));
+    process.stdout.write(JSON.stringify({ continue: true }));
   }
-} else if (event.hook_event_name === 'PostToolUse') {
-  process.stdout.write(JSON.stringify(await postCheck(event, files)));
 } else {
-  process.stdout.write(JSON.stringify({ continue: true }));
+  const files = changedFiles(event);
+  if (event.hook_event_name === 'PreToolUse') {
+    const lexical = violations(files);
+    const findings = lexical.length ? lexical : await manifestViolations(files);
+    if (findings.length) {
+      process.stdout.write(JSON.stringify(deny(findings)));
+    } else {
+      const proposed = await reconstructableFiles(event);
+      const checked = await preCheck(proposed);
+      const notes = checked.notes;
+      const skipped = [...files.keys()].filter((file) => isGodotPath(file) && !proposed.has(file));
+      if (skipped.length) {
+        notes.push('Could not reconstruct the final content of ' + skipped.map((file) => path.basename(file)).join(', ') + '; only lexical checks ran. Re-run the checker after the write.');
+      }
+      if (checked.findings.length) process.stdout.write(JSON.stringify(deny(checked.findings)));
+      else if (notes.length) {
+        process.stdout.write(JSON.stringify({
+          continue: true,
+          hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: notes.join('\n') },
+        }));
+      } else process.stdout.write(JSON.stringify({ continue: true }));
+    }
+  } else if (event.hook_event_name === 'PostToolUse') {
+    process.stdout.write(JSON.stringify(await postCheck(event, files)));
+  } else {
+    process.stdout.write(JSON.stringify({ continue: true }));
+  }
 }

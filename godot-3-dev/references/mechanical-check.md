@@ -89,23 +89,37 @@ existence, not for the classes they define or the runtime state they produce.
 An unknown class may also be a project-defined class or an add-on class.
 Review warnings and use `--strict` when those warnings must block delivery.
 
-For Codex `Write`, `Edit`, `MultiEdit`, and `apply_patch` events whose proposed
+For Codex, file edits arrive as the canonical `apply_patch` tool with the patch
+text in `tool_input.command`; `Write` and `Edit` are matcher aliases, and
+synthetic `MultiEdit` events are accepted for portability. When the proposed
 content can be reconstructed unambiguously, the `PreToolUse` hook passes the
 real project as `--root` and the proposed files as `--overlay`, then runs this
 full checker before the write; `project.godot` joins the reported targets so a
 Godot 4.x manifest rejects even a clean-looking 3.x script. Any checker error
 denies the edit. For partial or ambiguous patches, the hook does not guess the
 final file; it falls back to the high-confidence lexical deny list and still
-reads `project.godot` from disk to reject 4.x projects. The
-`PostToolUse` hook reruns the checker on the written files, reports warnings,
+reads `project.godot` from disk to reject 4.x projects.
+
+`Bash` commands are inspected before execution. A command that combines a
+high-confidence write form (`>`, `>>`, `Set-Content`, `Add-Content`,
+`Out-File`, `Tee-Object`, `Copy-Item`, `Move-Item`, `cp`, `mv`, in-place
+`sed`/`perl`, Node or Python write APIs, `git apply`/`checkout`/`restore`, or
+`patch`) with a literal `.gd`, `.tscn`, `.escn`, or `project.godot` target is
+denied and asked to use `apply_patch`, because shell content cannot be
+reconstructed before execution. After a shell command that names Godot files,
+or applies a patch or VCS rewrite, the `PostToolUse` hook runs the checker and
+blocks while errors remain. A shell command can still write Godot content from
+inside a generated program, a build tool, or a path assembled at runtime;
+static command inspection cannot see that content.
+
+The `PostToolUse` hook reruns the checker on written files, reports warnings,
 and returns a blocking reason when errors remain, so the agent must fix them
 before continuing; it cannot undo the write. If the checker is missing, times
 out, or exits with status `2`, the pre-write hook does not deny on that basis
 alone: it keeps the lexical deny list and tells the agent to run the checker
 manually. `PostToolUse` falls back to the lexical rules on the written files
 in the same situation. Hooks are prevention and feedback, not proof that the
-project runs. Godot files written by shell commands bypass the guard, so run
-the checker command directly after those writes.
+project runs; the final gate below remains mandatory.
 
 ## Final gate
 
