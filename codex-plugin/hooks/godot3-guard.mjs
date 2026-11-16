@@ -121,17 +121,25 @@ function redirectTargets(command) {
   return targets;
 }
 
-function shellWriteReason(command) {
+// Evidence that a shell command may change a file. Read-only commands that
+// merely name Godot files (`Get-Content Player.gd`, `rg -g '*.gd'`) must not
+// rerun the checker and block on pre-existing errors.
+function shellWriteEvidence(command) {
   const text = String(command ?? '');
-  const godot = shellGodotPaths(text);
-  if (!godot.length) return null;
   for (const target of redirectTargets(text)) {
     if (shellGodotPaths(target).length) return 'output redirect into ' + target;
   }
   for (const indicator of shellWriteIndicators) {
-    if (indicator.pattern.test(text)) return indicator.label + ' touching ' + godot[0];
+    if (indicator.pattern.test(text)) return indicator.label;
   }
   return null;
+}
+
+function shellWriteReason(command) {
+  const godot = shellGodotPaths(command);
+  if (!godot.length) return null;
+  const evidence = shellWriteEvidence(command);
+  return evidence ? evidence + ' touching ' + godot[0] : null;
 }
 
 function shellDeny(reason) {
@@ -594,6 +602,8 @@ async function postCheck(event, files) {
 // VCS commands that rewrite files without naming them.
 async function shellPostCheck(event) {
   const command = String(event.tool_input?.command ?? '');
+  // A read-only command is not a write event, even when it names a Godot file.
+  if (!shellWriteEvidence(command)) return { continue: true };
   const files = new Map();
   for (const token of shellGodotPaths(command)) files.set(resolveToolPath(token, event), []);
   if (files.size) {
@@ -608,7 +618,6 @@ async function shellPostCheck(event) {
       },
     };
   }
-  if (!shellWriteIndicators.some((indicator) => indicator.pattern.test(command))) return { continue: true };
   const root = await findProjectRoot(event.cwd ? String(event.cwd) : process.cwd());
   if (!root) return { continue: true };
   const { report, unavailable } = runChecker({ root, files: [], timeout: postCheckTimeoutMs });

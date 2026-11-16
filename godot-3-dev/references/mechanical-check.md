@@ -106,11 +106,12 @@ high-confidence write form (`>`, `>>`, `Set-Content`, `Add-Content`,
 `sed`/`perl`, Node or Python write APIs, `git apply`/`checkout`/`restore`, or
 `patch`) with a literal `.gd`, `.tscn`, `.escn`, or `project.godot` target is
 denied and asked to use `apply_patch`, because shell content cannot be
-reconstructed before execution. After a shell command that names Godot files,
-or applies a patch or VCS rewrite, the `PostToolUse` hook runs the checker and
-blocks while errors remain. A shell command can still write Godot content from
-inside a generated program, a build tool, or a path assembled at runtime;
-static command inspection cannot see that content.
+reconstructed before execution. After a shell command that names Godot files
+and shows a write form, or applies a patch or VCS rewrite, the `PostToolUse`
+hook runs the checker and blocks while errors remain. Read-only commands that
+only mention Godot files do not trigger a check. A shell command can still
+write Godot content from inside a generated program, a build tool, or a path
+assembled at runtime; static command inspection cannot see that content.
 
 The `PostToolUse` hook reruns the checker on written files, reports warnings,
 and returns a blocking reason when errors remain, so the agent must fix them

@@ -122,11 +122,12 @@ the hook reruns the checker and blocks further progress while errors remain.
 
 `Bash` is guarded separately because shell tools expose no proposed content: a
 command that both names a Godot file and carries a high-confidence write form
-is denied and redirected to `apply_patch`, and any shell command that names
-Godot files or rewrites them through a patch or VCS command triggers a
-post-execution check. Shell content produced inside a generated program, a
-build tool, or a runtime-assembled path remains invisible to static command
-inspection; run the checker directly after such writes.
+is denied and redirected to `apply_patch`; a command that both names Godot
+files and shows a write form, or rewrites them through a patch or VCS command,
+triggers a post-execution check. Read-only commands that merely mention Godot
+files do not. Shell content produced inside a generated program, a build tool,
+or a runtime-assembled path remains invisible to static command inspection;
+run the checker directly after such writes.
 
 The checker is static evidence, not a runtime proof: call signatures, dynamic
 members, `tres`/shader resources, and runtime behavior still need the project

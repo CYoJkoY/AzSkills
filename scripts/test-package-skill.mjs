@@ -493,6 +493,16 @@ try {
   assert.equal(shellPostError.status, 0, shellPostError.stderr);
   assert.equal(JSON.parse(shellPostError.stdout).decision, 'block');
   assert.match(JSON.parse(shellPostError.stdout).reason, /UNKNOWN_SIGNAL_TARGET/);
+  // A read-only command that names a broken Godot file must not block on
+  // pre-existing errors; only commands with write evidence rerun the checker.
+  const shellPostReadOnly = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'Get-Content Player.gd' },
+  });
+  assert.equal(shellPostReadOnly.status, 0, shellPostReadOnly.stderr);
+  assert.equal(JSON.parse(shellPostReadOnly.stdout).continue, true);
   const deleteProject = path.join(temp, 'godot-delete-project');
   await mkdir(deleteProject, { recursive: true });
   await writeFile(path.join(deleteProject, 'project.godot'), 'config_version=4\n');
