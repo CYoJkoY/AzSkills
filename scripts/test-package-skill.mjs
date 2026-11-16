@@ -75,7 +75,11 @@ try {
   const { hooks: pluginHooks } = JSON.parse(await readFile(path.join(plugin, pluginManifest.hooks.slice(2)), 'utf8'));
   assert.deepEqual(Object.keys(pluginHooks), ['SessionStart', 'UserPromptSubmit', 'SubagentStart', 'PreToolUse', 'PostToolUse']);
   assert.match(pluginHooks.PreToolUse[0].matcher, /apply_patch/);
+  assert.match(pluginHooks.PreToolUse[0].matcher, /MultiEdit/);
+  assert.match(pluginHooks.PreToolUse[0].matcher, /Bash/);
   assert.match(pluginHooks.PostToolUse[0].matcher, /apply_patch/);
+  assert.match(pluginHooks.PostToolUse[0].matcher, /MultiEdit/);
+  assert.match(pluginHooks.PostToolUse[0].matcher, /Bash/);
   assert.match(pluginHooks.PostToolUse[1].matcher, /wait_agent/);
   for (const event of ['SessionStart', 'UserPromptSubmit']) {
     const result = spawnSync(process.execPath, [path.join(taste, 'hooks/steer.mjs')], {
@@ -150,6 +154,22 @@ try {
   });
   assert.equal(allowedPatch.status, 0, allowedPatch.stderr);
   assert.equal(JSON.parse(allowedPatch.stdout).continue, true);
+  // Codex serializes apply_patch as {"command": patch}, not {"patch": patch}.
+  // If the guard reads the wrong field, the full checker never runs.
+  const codexShapeDenied = spawnSync(process.execPath, [guard], {
+    encoding: 'utf8',
+    input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'apply_patch', tool_input: { command: patchBody('*** Update File: Player.gd', '@@', '+\t._ready()') } }),
+    env: { ...process.env, PLUGIN_ROOT: plugin },
+  });
+  assert.equal(codexShapeDenied.status, 0, codexShapeDenied.stderr);
+  assert.equal(JSON.parse(codexShapeDenied.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  const codexShapeClean = spawnSync(process.execPath, [guard], {
+    encoding: 'utf8',
+    input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'apply_patch', tool_input: { command: patchBody('*** Update File: Player.gd', '@@', '+\tvelocity = move_and_slide(velocity)') } }),
+    env: { ...process.env, PLUGIN_ROOT: plugin },
+  });
+  assert.equal(codexShapeClean.status, 0, codexShapeClean.stderr);
+  assert.equal(JSON.parse(codexShapeClean.stdout).continue, true);
   const prewriteProject = path.join(temp, 'godot-prewrite-project');
   await mkdir(prewriteProject, { recursive: true });
   await writeFile(path.join(prewriteProject, 'project.godot'), 'config_version=4\n');
@@ -180,6 +200,43 @@ try {
   });
   assert.equal(cleanWrite.status, 0, cleanWrite.stderr);
   assert.equal(JSON.parse(cleanWrite.stdout).continue, true);
+  // A Godot 4.x manifest must veto even perfectly clean 3.x-looking scripts:
+  // project.godot joins the checker targets, not just the symbol context.
+  const godot4Project = path.join(temp, 'godot4-project');
+  await mkdir(godot4Project, { recursive: true });
+  await writeFile(path.join(godot4Project, 'project.godot'), 'config_version=5\n');
+  const cleanWriteInGodot4 = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Write',
+    tool_input: {
+      file_path: path.join(godot4Project, 'Clean.gd'),
+      content: 'extends Node\n\nfunc _ready():\n\tprint("ok")\n',
+    },
+  });
+  assert.equal(cleanWriteInGodot4.status, 0, cleanWriteInGodot4.stderr);
+  assert.equal(JSON.parse(cleanWriteInGodot4.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  assert.match(JSON.parse(cleanWriteInGodot4.stdout).hookSpecificOutput.permissionDecisionReason, /GODOT4_PROJECT/);
+  const ambiguousWriteInGodot4 = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'MultiEdit',
+    tool_input: {
+      file_path: path.join(godot4Project, 'Clean.gd'),
+      edits: [{ old_string: '\n', new_string: '\n# note\n', replace_all: false }],
+    },
+  });
+  assert.equal(ambiguousWriteInGodot4.status, 0, ambiguousWriteInGodot4.stderr);
+  assert.equal(JSON.parse(ambiguousWriteInGodot4.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  assert.match(JSON.parse(ambiguousWriteInGodot4.stdout).hookSpecificOutput.permissionDecisionReason, /GODOT4_PROJECT/);
+  const manifestDowngrade = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Write',
+    tool_input: {
+      file_path: path.join(godot4Project, 'project.godot'),
+      content: 'config_version=4\n',
+    },
+  });
+  assert.equal(manifestDowngrade.status, 0, manifestDowngrade.stderr);
+  assert.equal(JSON.parse(manifestDowngrade.stdout).continue, true);
   await writeFile(prewriteScript, 'extends Node\n\nfunc _ready():\n\tprint("ok")\n');
   const checkerOnlyEdit = runGuard({
     hook_event_name: 'PreToolUse',
@@ -300,7 +357,53 @@ try {
   const multiFileReason = JSON.parse(multiFilePatch.stdout).hookSpecificOutput.permissionDecisionReason;
   assert.match(multiFileReason, /MultiBad\.gd/);
   assert.doesNotMatch(multiFileReason, /MultiClean\.gd/);
+  const numberedInsertion = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'apply_patch',
+    tool_input: {
+      patch: patchBody(
+        '*** Update File: ' + prewriteScript,
+        '@@ -3,0 +4,1 @@',
+        '+\tconnect("ready", self, "_missing")',
+      ),
+    },
+  });
+  assert.equal(numberedInsertion.status, 0, numberedInsertion.stderr);
+  assert.equal(JSON.parse(numberedInsertion.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  assert.match(JSON.parse(numberedInsertion.stdout).hookSpecificOutput.permissionDecisionReason, /UNKNOWN_SIGNAL_TARGET/);
+  const multiEditDenied = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'MultiEdit',
+    tool_input: {
+      file_path: prewriteScript,
+      edits: [
+        { old_string: 'print("ok")', new_string: 'connect("ready", self, "_missing")', replace_all: false },
+      ],
+    },
+  });
+  assert.equal(multiEditDenied.status, 0, multiEditDenied.stderr);
+  assert.equal(JSON.parse(multiEditDenied.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  assert.match(JSON.parse(multiEditDenied.stdout).hookSpecificOutput.permissionDecisionReason, /UNKNOWN_SIGNAL_TARGET/);
+  const multiEditAmbiguous = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'MultiEdit',
+    tool_input: {
+      file_path: prewriteScript,
+      edits: [{ old_string: '\n', new_string: '\n# comment\n', replace_all: false }],
+    },
+  });
+  assert.equal(multiEditAmbiguous.status, 0, multiEditAmbiguous.stderr);
+  assert.equal(JSON.parse(multiEditAmbiguous.stdout).continue, true);
   await writeFile(prewriteScript, 'extends Node\n\nfunc _ready():\n\tconnect("ready", self, "_missing")\n');
+  const postPatchShape = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'apply_patch',
+    cwd: prewriteProject,
+    tool_input: { command: patchBody('*** Update File: Player.gd', '@@', '+\tprint("x")') },
+  });
+  assert.equal(postPatchShape.status, 0, postPatchShape.stderr);
+  assert.equal(JSON.parse(postPatchShape.stdout).decision, 'block');
+  assert.match(JSON.parse(postPatchShape.stdout).reason, /UNKNOWN_SIGNAL_TARGET/);
   const postWriteError = runGuard({
     hook_event_name: 'PostToolUse',
     tool_name: 'Write',
@@ -309,6 +412,22 @@ try {
   assert.equal(postWriteError.status, 0, postWriteError.stderr);
   assert.equal(JSON.parse(postWriteError.stdout).decision, 'block');
   assert.match(JSON.parse(postWriteError.stdout).reason, /UNKNOWN_SIGNAL_TARGET/);
+  const postMultiEditError = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'MultiEdit',
+    tool_input: { file_path: prewriteScript, edits: [] },
+  });
+  assert.equal(postMultiEditError.status, 0, postMultiEditError.stderr);
+  assert.equal(JSON.parse(postMultiEditError.stdout).decision, 'block');
+  await writeFile(path.join(godot4Project, 'Written.gd'), 'extends Node\n');
+  const postWriteInGodot4 = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'Write',
+    tool_input: { file_path: path.join(godot4Project, 'Written.gd'), content: '' },
+  });
+  assert.equal(postWriteInGodot4.status, 0, postWriteInGodot4.stderr);
+  assert.equal(JSON.parse(postWriteInGodot4.stdout).decision, 'block');
+  assert.match(JSON.parse(postWriteInGodot4.stdout).reason, /GODOT4_PROJECT/);
   await writeFile(prewriteScript, 'extends Node\n\nfunc _ready():\n\tprint("ok")\n');
   const postWriteClean = runGuard({
     hook_event_name: 'PostToolUse',
@@ -318,6 +437,137 @@ try {
   assert.equal(postWriteClean.status, 0, postWriteClean.stderr);
   assert.equal(JSON.parse(postWriteClean.stdout).continue, true);
   assert.match(JSON.parse(postWriteClean.stdout).hookSpecificOutput.additionalContext, /errors=0/);
+  const shellProject = path.join(temp, 'godot-shell-project');
+  await mkdir(shellProject, { recursive: true });
+  await writeFile(path.join(shellProject, 'project.godot'), 'config_version=4\n');
+  await writeFile(path.join(shellProject, 'Player.gd'), 'extends Node\n\nfunc _ready():\n\tprint("ok")\n');
+  const shellDenied = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'Set-Content -Path Player.gd -Value "extends Node"' },
+  });
+  assert.equal(shellDenied.status, 0, shellDenied.stderr);
+  assert.equal(JSON.parse(shellDenied.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  assert.match(JSON.parse(shellDenied.stdout).hookSpecificOutput.permissionDecisionReason, /apply_patch/);
+  const shellRedirectDenied = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'echo "extends Node" > Player.gd' },
+  });
+  assert.equal(shellRedirectDenied.status, 0, shellRedirectDenied.stderr);
+  assert.equal(JSON.parse(shellRedirectDenied.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  const shellInterpreterDenied = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'powershell -Command "Set-Content -Path Player.gd -Value \'clean\'"' },
+  });
+  assert.equal(shellInterpreterDenied.status, 0, shellInterpreterDenied.stderr);
+  assert.equal(JSON.parse(shellInterpreterDenied.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  const shellCmdCopyDenied = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'cmd /c "copy Player.gd Player.bak"' },
+  });
+  assert.equal(shellCmdCopyDenied.status, 0, shellCmdCopyDenied.stderr);
+  assert.equal(JSON.parse(shellCmdCopyDenied.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  const shellReadAllowed = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'Get-Content Player.gd' },
+  });
+  assert.equal(shellReadAllowed.status, 0, shellReadAllowed.stderr);
+  assert.equal(JSON.parse(shellReadAllowed.stdout).continue, true);
+  const shellUnsupportedScript = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'node tools/build-godot-assets.mjs' },
+  });
+  assert.equal(shellUnsupportedScript.status, 0, shellUnsupportedScript.stderr);
+  assert.equal(JSON.parse(shellUnsupportedScript.stdout).continue, true);
+  const shellPostClean = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'Set-Content -Path Player.gd -Value "clean"' },
+  });
+  assert.equal(shellPostClean.status, 0, shellPostClean.stderr);
+  assert.equal(JSON.parse(shellPostClean.stdout).continue, true);
+  assert.match(JSON.parse(shellPostClean.stdout).hookSpecificOutput.additionalContext, /errors=0/);
+  await writeFile(path.join(shellProject, 'Player.gd'), 'extends Node\n\nfunc _ready():\n\tconnect("ready", self, "_missing")\n');
+  const shellPostError = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'Set-Content -Path Player.gd -Value "bad"' },
+  });
+  assert.equal(shellPostError.status, 0, shellPostError.stderr);
+  assert.equal(JSON.parse(shellPostError.stdout).decision, 'block');
+  assert.match(JSON.parse(shellPostError.stdout).reason, /UNKNOWN_SIGNAL_TARGET/);
+  // A read-only command that names a broken Godot file must not block on
+  // pre-existing errors; only commands with write evidence rerun the checker.
+  const shellPostReadOnly = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'Get-Content Player.gd' },
+  });
+  assert.equal(shellPostReadOnly.status, 0, shellPostReadOnly.stderr);
+  assert.equal(JSON.parse(shellPostReadOnly.stdout).continue, true);
+  const shellPostUnrelatedCopy = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'Copy-Item README.md README.bak' },
+  });
+  assert.equal(shellPostUnrelatedCopy.status, 0, shellPostUnrelatedCopy.stderr);
+  assert.equal(JSON.parse(shellPostUnrelatedCopy.stdout).continue, true);
+  const shellPostQuotedProse = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'git commit -m "move Player.gd docs into a section"' },
+  });
+  assert.equal(shellPostQuotedProse.status, 0, shellPostQuotedProse.stderr);
+  assert.equal(JSON.parse(shellPostQuotedProse.stdout).continue, true);
+  const deleteProject = path.join(temp, 'godot-delete-project');
+  await mkdir(deleteProject, { recursive: true });
+  await writeFile(path.join(deleteProject, 'project.godot'), 'config_version=4\n');
+  await writeFile(
+    path.join(deleteProject, 'Main.tscn'),
+    '[gd_scene load_steps=2 format=2]\n\n[ext_resource path="res://Removed.gd" type="Script" id=1]\n\n[node name="Main" type="Node2D"]\n',
+  );
+  await writeFile(path.join(deleteProject, 'Removed.gd'), 'extends Node\n');
+  await rm(path.join(deleteProject, 'Removed.gd'));
+  const postDelete = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'apply_patch',
+    cwd: deleteProject,
+    tool_input: { command: patchBody('*** Delete File: Removed.gd') },
+  });
+  assert.equal(postDelete.status, 0, postDelete.stderr);
+  assert.equal(JSON.parse(postDelete.stdout).decision, 'block');
+  assert.match(JSON.parse(postDelete.stdout).reason, /MISSING_SCENE_SCRIPT_PATH/);
+  const brokenSceneProject = path.join(temp, 'godot-delete-broken-scene-project');
+  await mkdir(brokenSceneProject, { recursive: true });
+  await writeFile(path.join(brokenSceneProject, 'project.godot'), 'config_version=4\n');
+  await writeFile(path.join(brokenSceneProject, 'Broken.tscn'), '[node name="Broken" type="Node"]\n');
+  await writeFile(path.join(brokenSceneProject, 'Removed.gd'), 'extends Node\n');
+  await rm(path.join(brokenSceneProject, 'Removed.gd'));
+  const postDeleteUnrelatedError = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'apply_patch',
+    cwd: brokenSceneProject,
+    tool_input: { command: patchBody('*** Delete File: Removed.gd') },
+  });
+  assert.equal(postDeleteUnrelatedError.status, 0, postDeleteUnrelatedError.stderr);
+  assert.equal(JSON.parse(postDeleteUnrelatedError.stdout).continue, true);
+  assert.match(JSON.parse(postDeleteUnrelatedError.stdout).hookSpecificOutput.additionalContext, /errors=1, related=0/);
   const godotCheck = spawnSync(process.execPath, [path.join(plugin, 'godot-3-dev/scripts/check-godot-3x.mjs'), '--self-test'], { encoding: 'utf8' });
   assert.equal(godotCheck.status, 0, godotCheck.stderr);
   // Execute the declared commands, including their quoting, from an unrelated cwd.
@@ -367,7 +617,7 @@ try {
   });
   const cloneMarketplace = JSON.parse(await readFile(path.join(cleanClone, '.agents/plugins/marketplace.json'), 'utf8'));
   const clonePlugin = path.resolve(cleanClone, cloneMarketplace.plugins[0].source.path);
-  for (const required of ['.codex-plugin/plugin.json', 'SKILL.md', 'skills/azskills/SKILL.md', 'skills/az-clean-code/SKILL.md', 'codex-plugin/hooks/hooks.json', 'codex-plugin/hooks/session-start.mjs', 'codex-plugin/hooks/godot3-guard.mjs', 'godot-3-dev/scripts/check-godot-3x.mjs', 'godot-3-dev/references/api-3.6.json', 'codex-plugin/taste/hooks/steer.mjs']) {
+  for (const required of ['.codex-plugin/plugin.json', 'SKILL.md', 'skills/azskills/SKILL.md', 'skills/az-clean-code/SKILL.md', 'codex-plugin/hooks/hooks.json', 'codex-plugin/hooks/session-start.mjs', 'codex-plugin/hooks/godot3-guard.mjs', 'godot-3-dev/scripts/check-godot-3x.mjs', 'godot-3-dev/scripts/godot3-lexical.mjs', 'godot-3-dev/references/api-3.6.json', 'codex-plugin/taste/hooks/steer.mjs']) {
     await stat(path.join(clonePlugin, required));
   }
   const cloneHooks = JSON.parse(await readFile(path.join(clonePlugin, 'codex-plugin/hooks/hooks.json'), 'utf8')).hooks;
