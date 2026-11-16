@@ -60,7 +60,7 @@ collections, `super`, `.emit()`, `instantiate()`, `queue_redraw()`, value
 Names that a project could legitimately reuse, such as `get_window()` or
 `is_editor_hint()`, are reported as warnings instead of errors.
 
-The checker ships with 36 fixtures that assert clean 3.x code passes and known
+The checker ships with 38 fixtures that assert clean 3.x code passes and known
 regressions fail:
 
 ```text
@@ -106,18 +106,23 @@ high-confidence write form (`>`, `>>`, `Set-Content`, `Add-Content`,
 `sed`/`perl`, Node or Python write APIs, `git apply`/`checkout`/`restore`, or
 `patch`) with a literal `.gd`, `.tscn`, `.escn`, or `project.godot` target is
 denied and asked to use `apply_patch`, because shell content cannot be
-reconstructed before execution. After a shell command that names Godot files
-and shows a write form, or applies a patch or VCS rewrite, the `PostToolUse`
-hook runs the checker and blocks while errors remain. Read-only commands that
-only mention Godot files do not trigger a check. A shell command can still
-write Godot content from inside a generated program, a build tool, or a path
-assembled at runtime; static command inspection cannot see that content.
+reconstructed before execution. After a shell command that names a Godot
+target and shows a write form, or applies a patch, VCS rewrite, or Godot-file
+glob, the `PostToolUse` hook runs the checker and blocks while errors remain.
+Writes to unrelated files are skipped, so pre-existing Godot errors do not
+block them. Read-only commands that only mention Godot files do not trigger a
+check. Quoted interpreter payloads such as `powershell -Command "..."`,
+`cmd /c "..."`, or `node -e "..."` are treated as executable code; quoted prose
+such as a commit message is not. A shell command can still write Godot content
+from inside a generated program, a build tool, or a path assembled at runtime;
+static command inspection cannot see that content.
 
 The `PostToolUse` hook reruns the checker on written files, reports warnings,
 and returns a blocking reason when errors remain, so the agent must fix them
 before continuing; it cannot undo the write. Removing a Godot file reruns the
-whole project and blocks on `MISSING_*` reference errors, which the removal
-can cause; findings outside that family stay as notes. If the checker is
+whole project and blocks on missing-path findings that the removal can cause
+(`*_PATH`, such as `MISSING_EXTENDS_PATH`) and findings whose message names the
+removed file. Unrelated pre-existing findings stay as notes. If the checker is
 missing, times out, or exits with status `2`, the pre-write hook does not deny
 on that basis alone: it keeps the lexical deny list and tells the agent to run
 the checker manually. `PostToolUse` falls back to the lexical rules on the

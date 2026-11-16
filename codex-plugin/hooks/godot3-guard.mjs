@@ -121,6 +121,23 @@ function redirectTargets(command) {
   return targets;
 }
 
+function maskQuotedText(text) {
+  return text.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`/g, (match) => ' '.repeat(match.length));
+}
+
+const shellInterpreterEval = /\b(?:pwsh|powershell|cmd|bash|sh|zsh|fish|node|deno|bun|python[\d.]*|py|perl|ruby)\b[^\n|;&]*?\s(?:--?|\/)?(?:command|encodedcommand|c|e|eval|k|lc)\b/i;
+
+// A quoted interpreter payload is executable code, so keep it visible to the
+// write indicators. Quoted prose elsewhere, such as a commit message, is not.
+function shellIndicatorText(command) {
+  const text = String(command ?? '');
+  const masked = maskQuotedText(text);
+  const evaluated = shellInterpreterEval.exec(masked);
+  if (!evaluated) return masked;
+  const end = evaluated.index + evaluated[0].length;
+  return masked.slice(0, end) + text.slice(end);
+}
+
 // Evidence that a shell command may change a file. Read-only commands that
 // merely name Godot files (`Get-Content Player.gd`, `rg -g '*.gd'`) must not
 // rerun the checker and block on pre-existing errors.
@@ -129,10 +146,19 @@ function shellWriteEvidence(command) {
   for (const target of redirectTargets(text)) {
     if (shellGodotPaths(target).length) return 'output redirect into ' + target;
   }
+  const indicatorText = shellIndicatorText(text);
   for (const indicator of shellWriteIndicators) {
-    if (indicator.pattern.test(text)) return indicator.label;
+    if (indicator.pattern.test(indicatorText)) return indicator.label;
   }
   return null;
+}
+
+// Whole-project post-checks must not turn unrelated shell writes into
+// pre-existing-error failures. They stay useful for rewrites whose targets
+// are not explicit, such as patches, VCS restores, and Godot-file globs.
+function shellWritesGodotProject(command) {
+  const text = shellIndicatorText(command);
+  return shellGodotPaths(command).length > 0 || /\b(?:git\s+(?:apply|checkout|restore)|patch\b|\*\.(?:gd|tscn|escn)|project\.godot)/i.test(text);
 }
 
 function shellWriteReason(command) {
@@ -580,7 +606,7 @@ async function postCheck(event, files) {
     // Block only on missing-path errors that can result from the removal;
     // unrelated findings in other files stay as notes.
     const related = errors.filter((item) =>
-      item.code.startsWith('MISSING_') || names.some((name) => item.message.includes(name)),
+      item.code.endsWith('_PATH') || names.some((name) => item.message.includes(name)),
     );
     messages.push(
       'Godot 3.x reference check after removing ' + [...removed].join(', ') +
@@ -604,6 +630,7 @@ async function shellPostCheck(event) {
   const command = String(event.tool_input?.command ?? '');
   // A read-only command is not a write event, even when it names a Godot file.
   if (!shellWriteEvidence(command)) return { continue: true };
+  if (!shellWritesGodotProject(command)) return { continue: true };
   const files = new Map();
   for (const token of shellGodotPaths(command)) files.set(resolveToolPath(token, event), []);
   if (files.size) {

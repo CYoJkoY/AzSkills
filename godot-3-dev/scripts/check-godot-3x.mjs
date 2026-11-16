@@ -1351,6 +1351,21 @@ const fixtures = [
     expectCodes: ['VIRTUAL_RECALL'],
   },
   {
+    name: 'object-property-access-ok',
+    files: { 'Holder.gd': 'extends Node\n\nfunc _ready():\n\tset("meta", 1)\n\tprint(get("meta"))\n\tprint(get_property_list())\n' },
+    expect: 'pass',
+  },
+  {
+    name: 'virtual-property-recall',
+    files: {
+      'Enemy.gd': 'extends Node\n\nfunc _set(property, value):\n\tpass\n',
+      'Boss.gd':
+        'extends "res://Enemy.gd"\n\nfunc _set(property, value):\n\t._set(property, value)\n',
+    },
+    expect: 'fail',
+    expectCodes: ['VIRTUAL_RECALL'],
+  },
+  {
     name: 'inherited-signal-target-ok',
     files: {
       'Base.gd': 'extends Node\n\nfunc _on_timer_timeout():\n\tpass\n',

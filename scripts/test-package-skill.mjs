@@ -458,6 +458,22 @@ try {
   });
   assert.equal(shellRedirectDenied.status, 0, shellRedirectDenied.stderr);
   assert.equal(JSON.parse(shellRedirectDenied.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  const shellInterpreterDenied = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'powershell -Command "Set-Content -Path Player.gd -Value \'clean\'"' },
+  });
+  assert.equal(shellInterpreterDenied.status, 0, shellInterpreterDenied.stderr);
+  assert.equal(JSON.parse(shellInterpreterDenied.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  const shellCmdCopyDenied = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'cmd /c "copy Player.gd Player.bak"' },
+  });
+  assert.equal(shellCmdCopyDenied.status, 0, shellCmdCopyDenied.stderr);
+  assert.equal(JSON.parse(shellCmdCopyDenied.stdout).hookSpecificOutput.permissionDecision, 'deny');
   const shellReadAllowed = runGuard({
     hook_event_name: 'PreToolUse',
     tool_name: 'Bash',
@@ -503,6 +519,22 @@ try {
   });
   assert.equal(shellPostReadOnly.status, 0, shellPostReadOnly.stderr);
   assert.equal(JSON.parse(shellPostReadOnly.stdout).continue, true);
+  const shellPostUnrelatedCopy = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'Copy-Item README.md README.bak' },
+  });
+  assert.equal(shellPostUnrelatedCopy.status, 0, shellPostUnrelatedCopy.stderr);
+  assert.equal(JSON.parse(shellPostUnrelatedCopy.stdout).continue, true);
+  const shellPostQuotedProse = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Bash',
+    cwd: shellProject,
+    tool_input: { command: 'git commit -m "move Player.gd docs into a section"' },
+  });
+  assert.equal(shellPostQuotedProse.status, 0, shellPostQuotedProse.stderr);
+  assert.equal(JSON.parse(shellPostQuotedProse.stdout).continue, true);
   const deleteProject = path.join(temp, 'godot-delete-project');
   await mkdir(deleteProject, { recursive: true });
   await writeFile(path.join(deleteProject, 'project.godot'), 'config_version=4\n');
@@ -521,6 +553,21 @@ try {
   assert.equal(postDelete.status, 0, postDelete.stderr);
   assert.equal(JSON.parse(postDelete.stdout).decision, 'block');
   assert.match(JSON.parse(postDelete.stdout).reason, /MISSING_SCENE_SCRIPT_PATH/);
+  const brokenSceneProject = path.join(temp, 'godot-delete-broken-scene-project');
+  await mkdir(brokenSceneProject, { recursive: true });
+  await writeFile(path.join(brokenSceneProject, 'project.godot'), 'config_version=4\n');
+  await writeFile(path.join(brokenSceneProject, 'Broken.tscn'), '[node name="Broken" type="Node"]\n');
+  await writeFile(path.join(brokenSceneProject, 'Removed.gd'), 'extends Node\n');
+  await rm(path.join(brokenSceneProject, 'Removed.gd'));
+  const postDeleteUnrelatedError = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'apply_patch',
+    cwd: brokenSceneProject,
+    tool_input: { command: patchBody('*** Delete File: Removed.gd') },
+  });
+  assert.equal(postDeleteUnrelatedError.status, 0, postDeleteUnrelatedError.stderr);
+  assert.equal(JSON.parse(postDeleteUnrelatedError.stdout).continue, true);
+  assert.match(JSON.parse(postDeleteUnrelatedError.stdout).hookSpecificOutput.additionalContext, /errors=1, related=0/);
   const godotCheck = spawnSync(process.execPath, [path.join(plugin, 'godot-3-dev/scripts/check-godot-3x.mjs'), '--self-test'], { encoding: 'utf8' });
   assert.equal(godotCheck.status, 0, godotCheck.stderr);
   // Execute the declared commands, including their quoting, from an unrelated cwd.
