@@ -102,14 +102,22 @@ node "<skill-root>/godot-3-dev/scripts/check-godot-3x.mjs" --root "<project>" --
 
 The checker uses an official Godot 3.6 API snapshot and catches re-called
 virtuals, Godot 4.x syntax and symbols, scene format drift, unknown scene node
-types, project-setting drift, and high-risk 3.x physics mistakes. Treat a
-nonzero exit code as blocking. In Codex, the `PreToolUse` guard runs this
-checker on reconstructable `Write`, `Edit`, and `apply_patch` content before
-write and denies checker errors; partial or ambiguous patches fall back to the
-high-confidence lexical guard instead of guessing the final file. After write,
+types, project-setting drift, missing `extends`/`preload` script paths,
+inherited method and signal names, and high-risk 3.x physics mistakes. Every
+project script participates in the symbol index; `--files` only selects which
+files report findings, and `--overlay` substitutes proposed contents so a
+write can be checked against the real project. Treat a nonzero exit code as
+blocking. In Codex, the `PreToolUse` guard runs this checker on reconstructable
+`Write`, `Edit`, `MultiEdit`, and `apply_patch` content before write and denies
+checker errors; `project.godot` also joins the checked targets, so a
+`config_version=5` project rejects even a clean-looking 3.x script. Partial or
+ambiguous patches fall back to the high-confidence lexical guard instead of
+guessing the final file, and an unavailable checker degrades to the lexical
+guard with a manual-check note rather than blocking every write. After write,
 the hook reruns the checker and blocks further progress while errors remain.
-The checker is static evidence, not a runtime proof: run the project or the
-editor script parser and report the real result.
+The checker is static evidence, not a runtime proof: call signatures, dynamic
+members, `tres`/shader resources, and runtime behavior still need the project
+or the editor script parser, and the real result must be reported.
 
 ### 8. Report the evidence
 

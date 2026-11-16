@@ -10,13 +10,21 @@ node "<skill-root>/godot-3-dev/scripts/check-godot-3x.mjs" --root "<project>" --
 
 - `--root <directory>` selects the project root. It defaults to the current directory.
 - `--api <file>` selects the API index. It defaults to the bundled 3.6 snapshot.
-- `--files a.gd,b.tscn` limits the check to paths relative to `--root`.
+- `--overlay <directory>` supplies proposed contents at paths relative to
+  `--root`, replacing the on-disk file. The directory must sit outside the
+  project.
+- `--files a.gd,b.tscn` limits which files may report findings. Every Godot
+  file under `--root` and `--overlay` still participates in the symbol index,
+  so inheritance and path checks keep the whole project as context.
 - `--json` emits machine-readable errors, warnings, checked files, and limitations.
 - `--strict` promotes warnings to errors for review or release gates.
 - `--self-test` runs the embedded clean and regression fixtures.
 
 Exit code `0` means no errors, `1` means findings blocked the check, and `2`
 means invalid arguments, missing files, or an unusable API index.
+
+Files under `addons/` participate in the symbol index but are not reported
+unless named explicitly with `--files`.
 
 ## Coverage
 
@@ -33,6 +41,12 @@ not exist on `self`, and `emit_signal()` names that this script never declares.
 Project settings are matched against the 3.6 reference, with project-defined
 namespaces such as `autoload` and `input` exempted.
 
+Symbol context covers `class_name`, top-level methods, signals, `extends`,
+`preload` aliases, autoloads, and the resolved inheritance chain, including
+engine base classes. Inherited methods and signals resolve through that chain,
+and a missing `extends` or `preload` path reports `MISSING_EXTENDS_PATH` or
+`MISSING_PRELOAD_PATH`.
+
 Symbol checks cover the Godot 4.x renames that have no 3.6 equivalent, including
 annotations, `await`, `Callable`, `StringName`, `Packed*Array`, typed
 collections, `super`, `.emit()`, `instantiate()`, `queue_redraw()`, value
@@ -41,7 +55,7 @@ collections, `super`, `.emit()`, `instantiate()`, `queue_redraw()`, value
 Names that a project could legitimately reuse, such as `get_window()` or
 `is_editor_hint()`, are reported as warnings instead of errors.
 
-The checker ships with 16 fixtures that assert clean 3.x code passes and known
+The checker ships with 26 fixtures that assert clean 3.x code passes and known
 regressions fail:
 
 ```text
@@ -62,22 +76,31 @@ source snapshot is intentionally refreshed.
 ## Limits
 
 Static checking cannot prove runtime semantics, overloaded call signatures,
-dynamic member access, signal target methods, resource paths, exported values,
-autoload availability, project loading, or physics behavior. An unknown class
-may also be a project-defined class or an add-on class. Review warnings and
-use `--strict` when those warnings must block delivery.
+dynamic member access through `get()`/`call()`/dictionaries, signal connection
+targets reached at runtime, exported value ranges, autoload availability,
+project loading, physics behavior, `tres`/`res`/shader/audio resources, or
+whether the project actually loads. `.gd` paths are only checked for
+existence, not for the classes they define or the runtime state they produce.
+An unknown class may also be a project-defined class or an add-on class.
+Review warnings and use `--strict` when those warnings must block delivery.
 
-For Codex `Write`, `Edit`, and `apply_patch` events whose proposed content can
-be reconstructed unambiguously, the `PreToolUse` hook stages a temporary
-project and runs this full checker before the write. Any checker error denies
-the edit. For partial or ambiguous patches, the hook does not guess the final
-file; it falls back to the high-confidence lexical deny list. The
-`PostToolUse` hook reruns the checker on the written file, reports warnings,
+For Codex `Write`, `Edit`, `MultiEdit`, and `apply_patch` events whose proposed
+content can be reconstructed unambiguously, the `PreToolUse` hook passes the
+real project as `--root` and the proposed files as `--overlay`, then runs this
+full checker before the write; `project.godot` joins the reported targets so a
+Godot 4.x manifest rejects even a clean-looking 3.x script. Any checker error
+denies the edit. For partial or ambiguous patches, the hook does not guess the
+final file; it falls back to the high-confidence lexical deny list and still
+reads `project.godot` from disk to reject 4.x projects. The
+`PostToolUse` hook reruns the checker on the written files, reports warnings,
 and returns a blocking reason when errors remain, so the agent must fix them
-before continuing; it cannot undo the write. Hooks are prevention and
-feedback, not proof that the project runs. The guard covers Codex `Write`,
-`Edit`, and `apply_patch` calls; Godot files written by shell commands bypass
-it, so run the checker command directly after those writes.
+before continuing; it cannot undo the write. If the checker is missing, times
+out, or exits with status `2`, the pre-write hook does not deny on that basis
+alone: it keeps the lexical deny list and tells the agent to run the checker
+manually. `PostToolUse` falls back to the lexical rules on the written files
+in the same situation. Hooks are prevention and feedback, not proof that the
+project runs. Godot files written by shell commands bypass the guard, so run
+the checker command directly after those writes.
 
 ## Final gate
 
