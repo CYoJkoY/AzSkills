@@ -114,12 +114,14 @@ static command inspection cannot see that content.
 
 The `PostToolUse` hook reruns the checker on written files, reports warnings,
 and returns a blocking reason when errors remain, so the agent must fix them
-before continuing; it cannot undo the write. If the checker is missing, times
-out, or exits with status `2`, the pre-write hook does not deny on that basis
-alone: it keeps the lexical deny list and tells the agent to run the checker
-manually. `PostToolUse` falls back to the lexical rules on the written files
-in the same situation. Hooks are prevention and feedback, not proof that the
-project runs; the final gate below remains mandatory.
+before continuing; it cannot undo the write. Removing a Godot file reruns the
+whole project and blocks on `MISSING_*` reference errors, which the removal
+can cause; findings outside that family stay as notes. If the checker is
+missing, times out, or exits with status `2`, the pre-write hook does not deny
+on that basis alone: it keeps the lexical deny list and tells the agent to run
+the checker manually. `PostToolUse` falls back to the lexical rules on the
+written files in the same situation. Hooks are prevention and feedback, not
+proof that the project runs; the final gate below remains mandatory.
 
 ## Final gate
 

@@ -507,11 +507,24 @@ async function findProjectRoot(start) {
 
 async function postCheck(event, files) {
   const existing = [];
+  const deletedRoots = new Map();
   for (const file of files.keys()) {
     const resolved = path.resolve(file);
-    if (isGodotPath(resolved) && await exists(resolved)) existing.push(resolved);
+    if (!isGodotPath(resolved)) continue;
+    if (await exists(resolved)) {
+      existing.push(resolved);
+      continue;
+    }
+    // A removed script or scene can leave ext_resource, preload, load(), or
+    // autoload references dangling, so the whole project re-enters the check.
+    if (path.basename(resolved).toLowerCase() === 'project.godot') continue;
+    const root = await projectRoot(resolved);
+    const relative = relativeToRoot(root, resolved);
+    if (!relative) continue;
+    if (!deletedRoots.has(root)) deletedRoots.set(root, new Set());
+    deletedRoots.get(root).add(relative);
   }
-  if (!existing.length) return { continue: true };
+  if (!existing.length && !deletedRoots.size) return { continue: true };
   const groups = new Map();
   for (const file of existing) {
     const root = await projectRoot(file);
@@ -548,10 +561,29 @@ async function postCheck(event, files) {
     );
     for (const item of errors) failures.push(item.file + ':' + item.line + ':' + item.column + ' ' + item.code + ' - ' + item.message);
   }
+  for (const [root, removed] of deletedRoots) {
+    const { report, unavailable } = runChecker({ root, files: [], timeout: postCheckTimeoutMs });
+    if (unavailable) {
+      messages.push('Godot 3.x checker unavailable after removing ' + [...removed].join(', ') + ': ' + unavailable + '. Run it manually.');
+      continue;
+    }
+    const names = [...removed].map((item) => path.posix.basename(item));
+    const errors = report.errors ?? [];
+    // Block only on missing-path errors that can result from the removal;
+    // unrelated findings in other files stay as notes.
+    const related = errors.filter((item) =>
+      item.code.startsWith('MISSING_') || names.some((name) => item.message.includes(name)),
+    );
+    messages.push(
+      'Godot 3.x reference check after removing ' + [...removed].join(', ') +
+      ': errors=' + errors.length + ', related=' + related.length,
+    );
+    for (const item of related) failures.push(item.file + ':' + item.line + ':' + item.column + ' ' + item.code + ' - ' + item.message);
+  }
   if (failures.length) {
     return {
       decision: 'block',
-      reason: 'Godot 3.x static check found errors in the written content. Fix all of them before continuing:\n' + failures.slice(0, 10).join('\n') + runtimeLimit,
+      reason: 'Godot 3.x static check found errors after the write or delete. Fix all of them before continuing:\n' + failures.slice(0, 10).join('\n') + runtimeLimit,
     };
   }
   return { continue: true, hookSpecificOutput: { hookEventName: event.hook_event_name, additionalContext: messages.join('\n') + runtimeLimit } };

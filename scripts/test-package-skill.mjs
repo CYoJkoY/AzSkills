@@ -493,6 +493,24 @@ try {
   assert.equal(shellPostError.status, 0, shellPostError.stderr);
   assert.equal(JSON.parse(shellPostError.stdout).decision, 'block');
   assert.match(JSON.parse(shellPostError.stdout).reason, /UNKNOWN_SIGNAL_TARGET/);
+  const deleteProject = path.join(temp, 'godot-delete-project');
+  await mkdir(deleteProject, { recursive: true });
+  await writeFile(path.join(deleteProject, 'project.godot'), 'config_version=4\n');
+  await writeFile(
+    path.join(deleteProject, 'Main.tscn'),
+    '[gd_scene load_steps=2 format=2]\n\n[ext_resource path="res://Removed.gd" type="Script" id=1]\n\n[node name="Main" type="Node2D"]\n',
+  );
+  await writeFile(path.join(deleteProject, 'Removed.gd'), 'extends Node\n');
+  await rm(path.join(deleteProject, 'Removed.gd'));
+  const postDelete = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'apply_patch',
+    cwd: deleteProject,
+    tool_input: { command: patchBody('*** Delete File: Removed.gd') },
+  });
+  assert.equal(postDelete.status, 0, postDelete.stderr);
+  assert.equal(JSON.parse(postDelete.stdout).decision, 'block');
+  assert.match(JSON.parse(postDelete.stdout).reason, /MISSING_SCENE_SCRIPT_PATH/);
   const godotCheck = spawnSync(process.execPath, [path.join(plugin, 'godot-3-dev/scripts/check-godot-3x.mjs'), '--self-test'], { encoding: 'utf8' });
   assert.equal(godotCheck.status, 0, godotCheck.stderr);
   // Execute the declared commands, including their quoting, from an unrelated cwd.
