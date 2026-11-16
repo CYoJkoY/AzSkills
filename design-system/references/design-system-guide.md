@@ -17,7 +17,7 @@ a root attribute; `data-surface="editorial"` remains compatible.
 - wabi-press-theme.ts retains its existing exports, storage key and data-theme API.
 - preview/index.html opens in reading mode without a surface attribute and
   switches to the same palette in a dense tool shell.
-- tui/preview.mjs maps material roles to ANSI; terminal font/background stay native.
+- tui/preview.ts maps material roles to ANSI; terminal font/background stay native.
 
 Use `data-surface="workbench"` on a dense standalone shell. Reading primitives
 also support local articles in a tool document. Keep one canonical palette;

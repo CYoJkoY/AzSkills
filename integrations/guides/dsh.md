@@ -16,7 +16,7 @@
 
 For an interactive setup, run the guided wizard from the AzSkills checkout:
 
-    node scripts/install-skills.mjs
+    node scripts/install-skills.ts
 
 The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.
 

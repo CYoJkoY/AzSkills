@@ -16,13 +16,13 @@
 
 For an interactive setup, run the guided wizard from the AzSkills checkout:
 
-    node scripts/install-skills.mjs
+    node scripts/install-skills.ts
 
 The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.
 
 Run the dependency-free server from the AzSkills checkout:
 
-    node scripts/azskills-mcp.mjs
+    node scripts/azskills-mcp.ts
 
 Register it as a stdio MCP server named azskills. Example configuration:
 
@@ -30,7 +30,7 @@ Register it as a stdio MCP server named azskills. Example configuration:
       "mcpServers": {
         "azskills": {
           "command": "node",
-          "args": ["<AzSkills>/scripts/azskills-mcp.mjs"]
+          "args": ["<AzSkills>/scripts/azskills-mcp.ts"]
         }
       }
     }

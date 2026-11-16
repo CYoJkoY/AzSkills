@@ -212,7 +212,7 @@ template, and rewrites the rest:
 | Upstream path | Treatment in AzSkills |
 | :--- | :--- |
 | `assets/editable-resume-base.html` | Adapted as `resume-evidence-workflow/assets/editable-resume-base.html`. The editing, copy, fitting, and print logic is preserved; the editor chrome uses AzSkills semantic token roles, grouped controls, and explicit focus, pressed, and disabled states. Resume paper styles are unchanged. |
-| `tests/copy-description.test.cjs` | Copied unchanged as `resume-evidence-workflow/tests/copy-description.test.cjs`. |
+| `tests/copy-description.test.cjs` | Ported to `resume-evidence-workflow/tests/copy-description.test.ts`; the module syntax and type annotations changed, and the port adds assertions plus guards for the same behaviours the original exercised. |
 | `SKILL.md` and `references/` | Rewritten as one canonical contract with reference modules, modes, gates, and an output contract that match the AzSkills Skill system. |
 | `README.md`, `agents/openai.yaml`, and the support images | Not carried over. The upstream README is a standalone project page, the agent manifest is runtime-specific, and the donation QR images and promotional calls to action are excluded. |
 

@@ -232,7 +232,7 @@ Test before delivery:
 15. the fallback selects the field when clipboard access is denied;
 16. the file opens from a standalone folder with no console error.
 
-Run `node tests/copy-description.test.cjs` for the DOM-extraction regression tests. It
+Run `node tests/copy-description.test.ts` for the DOM-extraction regression tests. It
 covers grouping, metadata exclusion, ordering, live edits, and per-page print
 preflight. It does not replace browser clipboard, fitting, or print verification.
 

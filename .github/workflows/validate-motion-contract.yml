@@ -25,6 +25,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.18
+
       - name: Validate motion Skill contracts
         shell: bash
         run: |
@@ -64,7 +69,7 @@ jobs:
           grep -q '^# Icon Morphing Reference$' ui-motion/references/icon-morphing.md
           grep -q '^## Interruptibility$' ui-motion/references/icon-morphing.md
 
-          node scripts/validate-skills.mjs
+          node scripts/validate-skills.ts
 
       - name: Validate cross-skill composition
         shell: bash

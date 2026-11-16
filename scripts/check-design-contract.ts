@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 
-const read = (path) => readFileSync(new URL("../" + path, import.meta.url), "utf8");
+const read = (path: string): string => readFileSync(new URL("../" + path, import.meta.url), "utf8");
 for (const path of ["design-system/references/design-md-adapter.md", "design-system/references/design-md-schema.md", "design-system/references/source-format-matrix.md", "design-system/wabi-press-theme.ts"]) {
   assert.ok(existsSync(new URL("../" + path, import.meta.url)), "Missing compatibility entry: " + path);
 }
@@ -30,10 +30,13 @@ assert.match(css, /prefers-reduced-motion/);
 assert.doesNotMatch(css, /#(?:0B57D0|A8C7FA|F7F8FA|18191C)/i);
 assert.doesNotMatch(css, /html\[data-surface="editorial"\]\s*\{/);
 const preview = read("design-system/preview/index.html");
-const root = preview.match(/<html\b[^>]*>/)[0];
+const root = preview.match(/<html\b[^>]*>/)?.[0];
+assert.ok(root, "Preview must declare an <html> element.");
 assert.doesNotMatch(root, /data-surface=/, "Default preview must not require an opt-in attribute.");
 assert.match(preview, /id="workbench-view"[^>]* hidden/);
-assert.doesNotMatch(preview.match(/<div id="editorial-view"[^>]*>/)[0], /hidden/);
+const editorialView = preview.match(/<div id="editorial-view"[^>]*>/)?.[0];
+assert.ok(editorialView, "Preview must declare the editorial view.");
+assert.doesNotMatch(editorialView, /hidden/);
 for (const id of ["skill-search", "theme-toggle", "density", "surface-workbench", "surface-editorial"]) {
   assert.ok(preview.includes('id="' + id + '"'), "Missing interactive preview: " + id);
 }

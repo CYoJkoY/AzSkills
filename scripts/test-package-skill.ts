@@ -4,14 +4,25 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
-import { packageSkill, packageSkillArchive, validatePackagedSkill } from './package-skill.mjs';
-import { packageCodexPlugin } from './package-plugin.mjs';
+import { packageSkill, packageSkillArchive, validatePackagedSkill } from './package-skill.ts';
+import { packageCodexPlugin } from './package-plugin.ts';
+
+interface HookEntry {
+  command: string;
+}
+
+interface HookGroup {
+  matcher?: string;
+  hooks: HookEntry[];
+}
+
+type HookFile = Record<string, HookGroup[]>;
 
 const temp = await mkdtemp(path.join(os.tmpdir(), 'azskills-package-'));
 const root = path.join(temp, 'repository');
 const output = path.join(temp, 'output');
 const source = path.join(root, 'fixture');
-let inTreeOutput;
+let inTreeOutput: string | undefined;
 try {
   await mkdir(path.join(source, 'references'), { recursive: true });
   await mkdir(path.join(root, 'integrations'), { recursive: true });
@@ -82,7 +93,7 @@ try {
   assert.match(pluginHooks.PostToolUse[0].matcher, /Bash/);
   assert.match(pluginHooks.PostToolUse[1].matcher, /wait_agent/);
   for (const event of ['SessionStart', 'UserPromptSubmit']) {
-    const result = spawnSync(process.execPath, [path.join(taste, 'hooks/steer.mjs')], {
+    const result = spawnSync(process.execPath, [path.join(taste, 'hooks/steer.ts')], {
       encoding: 'utf8',
       input: JSON.stringify({ hook_event_name: event, session_id: 'main', turn_id: 'turn-1', prompt: 'Build this' }),
       env: { ...process.env, PLUGIN_ROOT: plugin },
@@ -101,14 +112,14 @@ try {
   });
   assert.equal(declaredTasteHook.status, 0, declaredTasteHook.stderr);
   assert.match(JSON.parse(declaredTasteHook.stdout).hookSpecificOutput.additionalContext, /# GPT with Taste/);
-  const subStart = spawnSync(process.execPath, [path.join(taste, 'hooks/steer.mjs')], {
+  const subStart = spawnSync(process.execPath, [path.join(taste, 'hooks/steer.ts')], {
     encoding: 'utf8',
     input: JSON.stringify({ hook_event_name: 'SubagentStart', session_id: 'child-session', turn_id: 'turn-2', agent_id: 'child' }),
     env: { ...process.env, PLUGIN_ROOT: plugin, PLUGIN_DATA: temp },
   });
   assert.equal(subStart.status, 0, subStart.stderr);
   assert.match(JSON.parse(subStart.stdout).hookSpecificOutput.additionalContext, /<gpt-with-taste-sub-steer>/);
-  const agentResult = spawnSync(process.execPath, [path.join(taste, 'hooks/steer.mjs')], {
+  const agentResult = spawnSync(process.execPath, [path.join(taste, 'hooks/steer.ts')], {
     encoding: 'utf8',
     input: JSON.stringify({ hook_event_name: 'PostToolUse', tool_name: 'wait_agent', tool_response: { timed_out: false, status: { child: { completed: 'Done' } } } }),
     env: { ...process.env, PLUGIN_ROOT: plugin },
@@ -123,7 +134,7 @@ try {
   assert.equal(repositoryMarketplace.plugins[0].source.path, './');
   assert.ok((await readdir(path.join(plugin, 'skills/azskills'))).includes('SKILL.md'));
   assert.ok((await readdir(path.join(plugin, 'skills/az-clean-code'))).includes('SKILL.md'));
-  const hook = spawnSync(process.execPath, [path.join(plugin, 'codex-plugin/hooks/session-start.mjs')], {
+  const hook = spawnSync(process.execPath, [path.join(plugin, 'codex-plugin/hooks/session-start.ts')], {
     encoding: 'utf8',
     env: { ...process.env, PLUGIN_ROOT: plugin },
   });
@@ -132,14 +143,14 @@ try {
   assert.equal(hookOutput.hookSpecificOutput.hookEventName, 'SessionStart');
   assert.match(hookOutput.hookSpecificOutput.additionalContext, /do not wait for an explicit AzSkills invocation/);
   assert.match(hookOutput.hookSpecificOutput.additionalContext, /# AzSkills/);
-  const checkoutHook = spawnSync(process.execPath, [path.join(repository, 'codex-plugin/hooks/session-start.mjs')], {
+  const checkoutHook = spawnSync(process.execPath, [path.join(repository, 'codex-plugin/hooks/session-start.ts')], {
     encoding: 'utf8',
     env: { ...process.env, PLUGIN_ROOT: repository },
   });
   assert.equal(checkoutHook.status, 0, checkoutHook.stderr);
   assert.match(JSON.parse(checkoutHook.stdout).hookSpecificOutput.additionalContext, /# AzSkills/);
-  const guard = path.join(plugin, 'codex-plugin/hooks/godot3-guard.mjs');
-  const patchBody = (...lines) => ['*** Begin Patch', ...lines, '*** End Patch'].join('\n');
+  const guard = path.join(plugin, 'codex-plugin/hooks/godot3-guard.ts');
+  const patchBody = (...lines: string[]): string => ['*** Begin Patch', ...lines, '*** End Patch'].join('\n');
   const deniedPatch = spawnSync(process.execPath, [guard], {
     encoding: 'utf8',
     input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'apply_patch', tool_input: { patch: patchBody('*** Update File: Player.gd', '@@', '+\t._ready()') } }),
@@ -174,7 +185,7 @@ try {
   await mkdir(prewriteProject, { recursive: true });
   await writeFile(path.join(prewriteProject, 'project.godot'), 'config_version=4\n');
   const prewriteScript = path.join(prewriteProject, 'Player.gd');
-  const runGuard = (event) => spawnSync(process.execPath, [guard], {
+  const runGuard = (event: unknown) => spawnSync(process.execPath, [guard], {
     encoding: 'utf8',
     input: JSON.stringify(event),
     env: { ...process.env, PLUGIN_ROOT: plugin },
@@ -568,7 +579,7 @@ try {
   assert.equal(postDeleteUnrelatedError.status, 0, postDeleteUnrelatedError.stderr);
   assert.equal(JSON.parse(postDeleteUnrelatedError.stdout).continue, true);
   assert.match(JSON.parse(postDeleteUnrelatedError.stdout).hookSpecificOutput.additionalContext, /errors=1, related=0/);
-  const godotCheck = spawnSync(process.execPath, [path.join(plugin, 'godot-3-dev/scripts/check-godot-3x.mjs'), '--self-test'], { encoding: 'utf8' });
+  const godotCheck = spawnSync(process.execPath, [path.join(plugin, 'godot-3-dev/scripts/check-godot-3x.ts'), '--self-test'], { encoding: 'utf8' });
   assert.equal(godotCheck.status, 0, godotCheck.stderr);
   // Execute the declared commands, including their quoting, from an unrelated cwd.
   for (const pluginRoot of [plugin, repository]) {
@@ -596,7 +607,7 @@ try {
         assert.match(context.additionalContext, /# AzSkills/);
       }
     }
-    const unrelated = spawnSync(process.execPath, [path.join(pluginRoot, 'codex-plugin/hooks/session-start.mjs'), 'UserPromptSubmit'], {
+    const unrelated = spawnSync(process.execPath, [path.join(pluginRoot, 'codex-plugin/hooks/session-start.ts'), 'UserPromptSubmit'], {
       cwd: temp, encoding: 'utf8', input: JSON.stringify({ prompt: 'Explain the architecture concept' }),
       env: { ...process.env, PLUGIN_ROOT: pluginRoot },
     });
@@ -611,16 +622,16 @@ try {
     filter(source) {
       const relative = path.relative(repository, source);
       if (!relative) return true;
-      const top = relative.split(path.sep)[0];
+      const top = relative.split(path.sep)[0] ?? '';
       return top !== '.git' && top !== 'dist' && top !== 'node_modules' && !top.startsWith('.tmp_');
     },
   });
   const cloneMarketplace = JSON.parse(await readFile(path.join(cleanClone, '.agents/plugins/marketplace.json'), 'utf8'));
   const clonePlugin = path.resolve(cleanClone, cloneMarketplace.plugins[0].source.path);
-  for (const required of ['.codex-plugin/plugin.json', 'SKILL.md', 'skills/azskills/SKILL.md', 'skills/az-clean-code/SKILL.md', 'codex-plugin/hooks/hooks.json', 'codex-plugin/hooks/session-start.mjs', 'codex-plugin/hooks/godot3-guard.mjs', 'godot-3-dev/scripts/check-godot-3x.mjs', 'godot-3-dev/scripts/godot3-lexical.mjs', 'godot-3-dev/references/api-3.6.json', 'codex-plugin/taste/hooks/steer.mjs']) {
+  for (const required of ['.codex-plugin/plugin.json', 'SKILL.md', 'skills/azskills/SKILL.md', 'skills/az-clean-code/SKILL.md', 'codex-plugin/hooks/hooks.json', 'codex-plugin/hooks/session-start.ts', 'codex-plugin/hooks/godot3-guard.ts', 'godot-3-dev/scripts/check-godot-3x.ts', 'godot-3-dev/scripts/godot3-lexical.ts', 'godot-3-dev/references/api-3.6.json', 'codex-plugin/taste/hooks/steer.ts']) {
     await stat(path.join(clonePlugin, required));
   }
-  const cloneHooks = JSON.parse(await readFile(path.join(clonePlugin, 'codex-plugin/hooks/hooks.json'), 'utf8')).hooks;
+  const cloneHooks = (JSON.parse(await readFile(path.join(clonePlugin, 'codex-plugin/hooks/hooks.json'), 'utf8')) as { hooks: HookFile }).hooks;
   for (const groups of Object.values(cloneHooks)) {
     for (const group of groups) {
       for (const hook of group.hooks) {
@@ -631,7 +642,7 @@ try {
     }
   }
   console.log('Clean checkout marketplace and hook command paths resolve without dist.');
-  const pluginBuildResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.mjs'), '--output', pluginBuild], { encoding: 'utf8' });
+  const pluginBuildResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.ts'), '--output', pluginBuild], { encoding: 'utf8' });
   assert.equal(pluginBuildResult.status, 0, pluginBuildResult.stderr);
   const pluginExpanded = path.join(temp, 'plugin-extracted');
   const pluginArchive = path.join(pluginBuild, 'azskills-plugin.zip');
@@ -647,17 +658,20 @@ try {
   // Resolve the repository marketplace against the build tree, as a local install does.
   const builtPlugin = path.join(pluginBuild, 'azskills-marketplace/plugins/azskills');
   assert.deepEqual(JSON.parse(await readFile(path.join(builtPlugin, '.codex-plugin/plugin.json'), 'utf8')), pluginManifest);
-  const installedHook = spawnSync(process.execPath, [path.join(pluginExpanded, 'codex-plugin/hooks/session-start.mjs')], {
+  const installedHook = spawnSync(process.execPath, [path.join(pluginExpanded, 'codex-plugin/hooks/session-start.ts')], {
     cwd: temp, encoding: 'utf8', env: { ...process.env, PLUGIN_ROOT: pluginExpanded },
   });
   assert.equal(installedHook.status, 0, installedHook.stderr);
   assert.match(JSON.parse(installedHook.stdout).hookSpecificOutput.additionalContext, /# AzSkills/);
-  const collisionResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.mjs'), '--output', pluginBuild], { encoding: 'utf8' });
+  const collisionResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.ts'), '--output', pluginBuild], { encoding: 'utf8' });
   assert.notEqual(collisionResult.status, 0, 'Packaging must not replace existing deliverables');
   assert.match(collisionResult.stderr, /Output already exists/);
+  const emptyOutputResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.ts'), '--output', ''], { encoding: 'utf8' });
+  assert.notEqual(emptyOutputResult.status, 0, 'Packaging must reject an empty --output value');
+  assert.match(emptyOutputResult.stderr, /--output requires a directory/);
   await mkdir(path.join(repository, 'dist'), { recursive: true });
   inTreeOutput = await mkdtemp(path.join(repository, 'dist', '.azskills-package-test-'));
-  const inTreeBuild = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.mjs'), '--output', inTreeOutput], { encoding: 'utf8' });
+  const inTreeBuild = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.ts'), '--output', inTreeOutput], { encoding: 'utf8' });
   assert.equal(inTreeBuild.status, 0, inTreeBuild.stderr);
   assert.deepEqual(JSON.parse(await readFile(path.join(inTreeOutput, 'azskills-marketplace/plugins/azskills/.codex-plugin/plugin.json'), 'utf8')), pluginManifest);
   console.log('Codex plugin packaging collision guard passed.');
@@ -679,8 +693,8 @@ try {
     : spawnSync('unzip', ['-q', unified, '-d', extracted], { encoding: 'utf8' });
   if (extraction.error) throw extraction.error;
   assert.equal(extraction.status, 0, extraction.stderr);
-  const paths = [];
-  async function collect(directory) {
+  const paths: string[] = [];
+  async function collect(directory: string): Promise<void> {
     for (const item of await readdir(directory, { withFileTypes: true })) {
       const full = path.join(directory, item.name);
       if (item.isDirectory()) await collect(full);
@@ -691,7 +705,7 @@ try {
   assert.deepEqual(paths.filter(p => /(^|\/)skill\.md$/i.test(p)).sort(), ['SKILL.md', 'az-clean-code/SKILL.md']);
   assert.ok(paths.every(p => !/^(\.git|dist|node_modules)\//.test(p)));
   const registry = JSON.parse(await readFile(path.join(repository, 'skills.json'), 'utf8'));
-  for (const module of registry.modules) assert.ok(paths.includes(module.path), module.path);
+  for (const module of registry.modules as { path: string }[]) assert.ok(paths.includes(module.path), module.path);
   assert.deepEqual(JSON.parse(await readFile(path.join(extracted, 'skills.json'), 'utf8')).aliases, registry.aliases);
   assert.deepEqual(await readFile(path.join(extracted, 'ui-design/references/ux/overview.md')), await readFile(path.join(repository, 'ui-design/references/ux/overview.md')));
   await validatePackagedSkill(extracted);

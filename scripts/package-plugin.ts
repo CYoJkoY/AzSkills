@@ -2,7 +2,9 @@ import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
-import { writeSkillZip } from './package-skill.mjs';
+import { writeSkillZip } from './package-skill.ts';
+import { errorCode, readJson } from './runtime.ts';
+import type { SkillCatalog } from './types.ts';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -14,15 +16,27 @@ const requiredPluginFiles = [
   'skills/az-clean-code/SKILL.md',
   'az-clean-code/SKILL.md',
   'codex-plugin/hooks/hooks.json',
-  'codex-plugin/hooks/session-start.mjs',
-  'codex-plugin/hooks/godot3-guard.mjs',
-  'godot-3-dev/scripts/check-godot-3x.mjs',
-  'godot-3-dev/scripts/godot3-lexical.mjs',
+  'codex-plugin/hooks/session-start.ts',
+  'codex-plugin/hooks/godot3-guard.ts',
+  'godot-3-dev/scripts/check-godot-3x.ts',
+  'godot-3-dev/scripts/godot3-lexical.ts',
   'godot-3-dev/references/api-3.6.json',
-  'codex-plugin/taste/hooks/steer.mjs',
+  'codex-plugin/taste/hooks/steer.ts',
 ];
 
-export async function packageCodexPlugin(repositoryRoot, outputDirectory) {
+interface PluginPackage {
+  marketplace: string;
+  plugin: string;
+}
+
+interface PluginManifest {
+  name: string;
+  version: string;
+  hooks: string;
+  interface: Record<string, string>;
+}
+
+export async function packageCodexPlugin(repositoryRoot: string, outputDirectory: string): Promise<PluginPackage> {
   const base = path.resolve(repositoryRoot);
   const output = path.resolve(outputDirectory);
   const plugin = path.join(output, 'plugins', 'azskills');
@@ -37,8 +51,8 @@ export async function packageCodexPlugin(repositoryRoot, outputDirectory) {
     if (!present) throw new Error('Plugin package is missing ' + required);
   }
 
-  const manifest = JSON.parse(await readFile(path.join(plugin, '.codex-plugin/plugin.json'), 'utf8'));
-  const registry = JSON.parse(await readFile(path.join(plugin, 'skills.json'), 'utf8'));
+  const manifest = await readJson<PluginManifest>(path.join(plugin, '.codex-plugin/plugin.json'));
+  const registry = await readJson<SkillCatalog>(path.join(plugin, 'skills.json'));
   if (manifest.name !== 'azskills' || manifest.version !== registry.version) throw new Error('Plugin and AzSkills versions must match');
 
   const marketplace = {
@@ -60,8 +74,9 @@ export async function packageCodexPlugin(repositoryRoot, outputDirectory) {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
   const index = args.indexOf('--output');
-  const outputRoot = path.resolve(index >= 0 ? args[index + 1] : path.join(root, 'dist'));
-  if (index >= 0 && (!args[index + 1] || args[index + 1].startsWith('--'))) throw new Error('--output requires a directory');
+  const outputArgument = index >= 0 ? args[index + 1] : undefined;
+  if (index >= 0 && (!outputArgument || outputArgument.startsWith('--'))) throw new Error('--output requires a directory');
+  const outputRoot = path.resolve(outputArgument ?? path.join(root, 'dist'));
   await mkdir(outputRoot, { recursive: true });
   const destination = path.join(outputRoot, 'azskills-marketplace');
   const archivePath = path.join(outputRoot, 'azskills-plugin.zip');
@@ -70,7 +85,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       await stat(target);
       throw new Error('Output already exists; choose a fresh directory: ' + target);
     } catch (error) {
-      if (error.code !== 'ENOENT') throw error;
+      if (errorCode(error) !== 'ENOENT') throw error;
     }
   }
   const staging = await mkdtemp(path.join(tmpdir(), 'azskills-plugin-'));

@@ -3,7 +3,7 @@
 Use the checker before returning or accepting any Godot 3.x code change:
 
 ```text
-node "<skill-root>/godot-3-dev/scripts/check-godot-3x.mjs" --root "<project>" --api "<skill-root>/godot-3-dev/references/api-3.6.json" --json
+node "<skill-root>/godot-3-dev/scripts/check-godot-3x.ts" --root "<project>" --api "<skill-root>/godot-3-dev/references/api-3.6.json" --json
 ```
 
 ## Options
@@ -64,7 +64,7 @@ The checker ships with 38 fixtures that assert clean 3.x code passes and known
 regressions fail:
 
 ```text
-node godot-3-dev/scripts/check-godot-3x.mjs --self-test
+node godot-3-dev/scripts/check-godot-3x.ts --self-test
 ```
 
 The API snapshot is generated from the official `3.6-stable` Godot source:
@@ -75,7 +75,7 @@ https://github.com/godotengine/godot/blob/3.6-stable/modules/gdscript/gdscript_f
 ```
 
 The bundled index is a generated data file, not a replacement for the engine.
-Regenerate it with `node godot-3-dev/scripts/build-api-index.mjs` when the
+Regenerate it with `node godot-3-dev/scripts/build-api-index.ts` when the
 source snapshot is intentionally refreshed.
 
 ## Limits

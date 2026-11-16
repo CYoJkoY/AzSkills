@@ -1,7 +1,10 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { readJson } from './runtime.ts';
+import type { SkillCatalog } from './types.ts';
+
 const root = new URL('../', import.meta.url);
-const registry = JSON.parse(await readFile(new URL('skills.json', root), 'utf8'));
+const registry = await readJson<SkillCatalog>(fileURLToPath(new URL('skills.json', root)));
 const content = [
   '# AzSkills routing', '',
   'Choose by the requested output. These are internal modules, not installable skills.', '',
@@ -14,6 +17,6 @@ const content = [
 ].join('\n');
 const output = new URL('references/routing.md', root);
 if (process.argv.includes('--check')) {
-  if ((await readFile(output, 'utf8')).replace(/\r\n/g, '\n') !== content) throw new Error('Routing is stale: run node scripts/generate-routing.mjs');
+  if ((await readFile(output, 'utf8')).replace(/\r\n/g, '\n') !== content) throw new Error('Routing is stale: run node scripts/generate-routing.ts');
 } else await writeFile(output, content);
 console.log('Routing is current: ' + fileURLToPath(output));

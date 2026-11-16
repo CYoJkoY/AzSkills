@@ -4,26 +4,45 @@ import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { errorCode, readJson } from './runtime.ts';
+import type { RollbackState, SkillManifest } from './types.ts';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const temp = await mkdtemp(path.join(tmpdir(), 'azskills-lifecycle-'));
-const exists = file => stat(file).then(() => true, e => { if (e.code === 'ENOENT') return false; throw e; });
-async function manifests(dir) {
-  const output = [];
-  for (const item of await readdir(dir, { withFileTypes: true })) {
-    const full = path.join(dir, item.name);
+const exists = async (file: string): Promise<boolean> => {
+  try {
+    await stat(file);
+    return true;
+  } catch (error) {
+    if (errorCode(error) === 'ENOENT') return false;
+    throw error;
+  }
+};
+
+async function manifests(directory: string): Promise<string[]> {
+  const output: string[] = [];
+  for (const item of await readdir(directory, { withFileTypes: true })) {
+    const full = path.join(directory, item.name);
     if (item.isDirectory()) output.push(...await manifests(full));
     else if (item.name.toLowerCase() === 'skill.md') output.push(full);
   }
   return output;
 }
-function cli(target, options = [], pass = true) {
-  const result = spawnSync(process.execPath, ['scripts/install-skills.mjs', '--target', target, ...options], { cwd: root, encoding: 'utf8', timeout: 30000 });
+
+function cli(target: string, options: string[] = [], pass = true): string {
+  const result = spawnSync(process.execPath, ['scripts/install-skills.ts', '--target', target, ...options], { cwd: root, encoding: 'utf8', timeout: 30000 });
   if (result.error) throw result.error;
   assert.equal(result.status === 0, pass, result.stdout + result.stderr);
   return result.stdout + result.stderr;
 }
-const manifestFile = target => path.join(target, '.azskills-manifest.json');
+
+const manifestFile = (target: string): string => path.join(target, '.azskills-manifest.json');
+const readManifest = async (target: string): Promise<SkillManifest> => readJson<SkillManifest>(manifestFile(target));
+const requireRollback = (manifest: SkillManifest): RollbackState => {
+  assert.ok(manifest.lastRun, 'Run must record a rollback snapshot.');
+  return manifest.lastRun;
+};
+
 try {
   const target = path.join(temp, 'fresh', 'skills');
   cli(target, ['--dry-run']);
@@ -31,7 +50,7 @@ try {
   cli(target, [], false);
   assert.equal(await exists(target), false, 'Missing confirmation must not write');
   cli(target, ['--skills', 'ui-aesthetics', '--yes']);
-  assert.deepEqual((await manifests(target)).map(f => path.relative(target, f)).sort(), [path.join('azskills', 'SKILL.md'), path.join('azskills', 'az-clean-code', 'SKILL.md')].sort());
+  assert.deepEqual((await manifests(target)).map((file) => path.relative(target, file)).sort(), [path.join('azskills', 'SKILL.md'), path.join('azskills', 'az-clean-code', 'SKILL.md')].sort());
   const installed = path.join(target, 'azskills');
   const unrelated = path.join(temp, 'unrelated-skill');
   await mkdir(unrelated);
@@ -57,7 +76,7 @@ try {
   cli(target, ['--rollback', '--yes']);
   assert.equal(await readFile(path.join(installed, 'SKILL.md'), 'utf8'), 'local edit');
 
-  for (const schemaVersion of [1, 2]) {
+  for (const schemaVersion of [1, 2] as const) {
     const legacy = path.join(temp, 'legacy-' + schemaVersion, 'skills');
     const ids = ['architecture', 'retired-module', 'ui-aesthetics'];
     for (const id of ids) {
@@ -73,8 +92,9 @@ try {
     assert.equal((await manifests(legacy)).length, 4);
     cli(legacy, ['--yes']);
     assert.equal((await manifests(legacy)).length, 2, 'Migration must also move legacy backups out of scan root');
-    const data = JSON.parse(await readFile(manifestFile(legacy), 'utf8'));
-    assert.equal(path.relative(legacy, data.lastRun.directory).startsWith('..'), true);
+    const data = await readManifest(legacy);
+    const lastRun = requireRollback(data);
+    assert.equal(path.relative(legacy, lastRun.directory).startsWith('..'), true);
     assert.deepEqual(data.skills, ['azskills']);
     cli(legacy, ['--verify']);
     cli(legacy, ['--rollback', '--yes']);
@@ -97,8 +117,8 @@ try {
   cli(recovery, ['--yes']);
   await writeFile(path.join(recovery, 'azskills', 'SKILL.md'), 'changed');
   cli(recovery, ['--yes']);
-  const state = JSON.parse(await readFile(manifestFile(recovery), 'utf8'));
-  await rm(path.join(state.lastRun.directory, 'azskills', 'SKILL.md'));
+  const state = requireRollback(await readManifest(recovery));
+  await rm(path.join(state.directory, 'azskills', 'SKILL.md'));
   const before = await readFile(path.join(recovery, 'azskills', 'SKILL.md'), 'utf8');
   cli(recovery, ['--rollback', '--yes'], false);
   assert.equal(await readFile(path.join(recovery, 'azskills', 'SKILL.md'), 'utf8'), before, 'Missing snapshot must fail before mutation');
@@ -107,7 +127,7 @@ try {
   cli(failedUpdate, ['--yes']);
   await writeFile(path.join(failedUpdate, 'azskills', 'SKILL.md'), 'preserve after copy failure');
   const priorManifest = await readFile(manifestFile(failedUpdate), 'utf8');
-  const preload = path.join(temp, 'fail-copy.mjs');
+  const preload = path.join(temp, 'fail-copy.mts');
   await writeFile(preload, [
     'import fs from "node:fs/promises";',
     'import { syncBuiltinESMExports } from "node:module";',
@@ -117,7 +137,7 @@ try {
     '  return cp(source, destination, options);',
     '}; syncBuiltinESMExports();',
   ].join('\n'));
-  const failure = spawnSync(process.execPath, ['--import', pathToFileURL(preload).href, 'scripts/install-skills.mjs', '--target', failedUpdate, '--yes'], {
+  const failure = spawnSync(process.execPath, ['--import', pathToFileURL(preload).href, 'scripts/install-skills.ts', '--target', failedUpdate, '--yes'], {
     cwd: root, encoding: 'utf8', timeout: 30000, env: { ...process.env, AZSKILLS_FAIL_DESTINATION: path.join(failedUpdate, 'azskills') },
   });
   if (failure.error) throw failure.error;

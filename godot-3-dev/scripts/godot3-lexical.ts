@@ -204,10 +204,30 @@ export const fourXFallbackRules = [
   },
 ];
 
+export interface TokenRule {
+  pattern: RegExp;
+  code: string;
+  message: string;
+  hint?: string;
+}
+
+export interface TokenIssue {
+  index: number;
+  code: string;
+  message: string;
+  hint: string | null;
+  text: string;
+}
+
+export interface VirtualRecallIssue {
+  index: number;
+  name: string;
+}
+
 // Blank out comments and string bodies so token checks only see real code.
 // GDScript 3.x strings may be single-quoted, double-quoted, or triple-quoted,
 // and triple-quoted strings may span lines, so all three forms are tracked.
-export function maskCommentsAndStrings(text) {
+export function maskCommentsAndStrings(text: string): string {
   let output = '';
   let state = 'code';
   let quote = '';
@@ -259,16 +279,16 @@ export function maskCommentsAndStrings(text) {
   return output;
 }
 
-export function findTokenIssues(mask, rules = fourXTokenRules) {
-  const found = [];
-  const seen = new Set();
+export function findTokenIssues(mask: string, rules: readonly TokenRule[] = fourXTokenRules): TokenIssue[] {
+  const found: TokenIssue[] = [];
+  const seen = new Set<string>();
   for (const rule of rules) {
     for (const match of mask.matchAll(rule.pattern)) {
       const key = rule.code + ':' + match.index;
       if (seen.has(key)) continue;
       seen.add(key);
       found.push({
-        index: match.index,
+        index: match.index ?? 0,
         code: rule.code,
         message: rule.message,
         hint: rule.hint ?? null,
@@ -279,14 +299,14 @@ export function findTokenIssues(mask, rules = fourXTokenRules) {
   return found.sort((left, right) => left.index - right.index);
 }
 
-export function findLexicalViolations(mask) {
+export function findLexicalViolations(mask: string): TokenIssue[] {
   return findTokenIssues(mask, [...fourXTokenRules, ...fourXFallbackRules]);
 }
 
-export function findVirtualRecalls(mask) {
+export function findVirtualRecalls(mask: string): VirtualRecallIssue[] {
   const pattern = new RegExp('\\.\\s*_(' + virtualRecallNames.join('|') + ')\\s*\\(', 'g');
   return [...mask.matchAll(pattern)].map((match) => ({
-    index: match.index,
-    name: match[1],
+    index: match.index ?? 0,
+    name: match[1] ?? '',
   }));
 }

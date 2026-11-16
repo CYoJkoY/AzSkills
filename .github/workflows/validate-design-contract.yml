@@ -8,8 +8,8 @@ on:
       - "references/**"
       - "SKILL.md"
       - "DESIGN.md"
-      - "scripts/check-editorial.mjs"
-      - "scripts/check-design-contract.mjs"
+      - "scripts/check-editorial.ts"
+      - "scripts/check-design-contract.ts"
       - ".github/badges/**"
       - "assets/**"
       - "frontend-slides/**"
@@ -39,13 +39,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.18
 
       - name: Validate canonical contract and implementation
-        run: node scripts/check-design-contract.mjs
+        run: node scripts/check-design-contract.ts
 
       - name: Validate terminal rendering and accessible states
-        run: node design-system/tui/preview.mjs --check
+        run: node design-system/tui/preview.ts --check
 
       - name: Validate contrast and report token parity
-        run: node scripts/check-editorial.mjs
+        run: node scripts/check-editorial.ts

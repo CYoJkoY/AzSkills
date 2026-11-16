@@ -97,7 +97,7 @@ velocity in 3.x.
 Before returning code, run the bundled deterministic checker against the project:
 
 ```text
-node "<skill-root>/godot-3-dev/scripts/check-godot-3x.mjs" --root "<project>" --api "<skill-root>/godot-3-dev/references/api-3.6.json" --json
+node "<skill-root>/godot-3-dev/scripts/check-godot-3x.ts" --root "<project>" --api "<skill-root>/godot-3-dev/references/api-3.6.json" --json
 ```
 
 The checker uses an official Godot 3.6 API snapshot and catches re-called

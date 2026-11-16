@@ -3,63 +3,69 @@ import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, lstat, writeFile } fro
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { errorCode, errorMessage, readJson } from './runtime.ts';
+import type { SkillCatalog } from './types.ts';
 
-const inside = (base, candidate) => {
+const inside = (base: string, candidate: string): boolean => {
   const relative = path.relative(base, candidate);
   return relative === '' || (relative !== '..' && !relative.startsWith('..' + path.sep) && !path.isAbsolute(relative));
 };
 
-async function filesUnder(directory, base = directory) {
-  const files = [];
+async function filesUnder(directory: string): Promise<string[]> {
+  const files: string[] = [];
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const file = path.join(directory, entry.name);
     if (entry.isSymbolicLink()) throw new Error('Skill package does not follow symbolic links: ' + file);
-    if (entry.isDirectory()) files.push(...await filesUnder(file, base));
+    if (entry.isDirectory()) files.push(...await filesUnder(file));
     else if (entry.isFile()) files.push(file);
     else throw new Error('Skill package contains an unsupported filesystem entry: ' + file);
   }
   return files;
 }
 
-function parts(target) {
+function parts(target: string): { pathname: string; suffix: string } {
   const index = target.search(/[?#]/);
   return { pathname: index < 0 ? target : target.slice(0, index), suffix: index < 0 ? '' : target.slice(index) };
 }
 
-function isExternal(target) {
+function isExternal(target: string): boolean {
   return !target || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(target);
 }
 
-function markdownTargets(content) {
+function markdownTargets(content: string): string[] {
   let fence = '';
-  const targets = [];
+  const targets: string[] = [];
   for (const line of content.split(/\r?\n/)) {
     const marker = new RegExp('^\\s{0,3}([' + String.fromCharCode(96) + '~]{3,})').exec(line)?.[1];
     if (marker) {
-      if (!fence) fence = marker[0];
-      else if (marker[0] === fence) fence = '';
+      if (!fence) fence = marker.slice(0, 1);
+      else if (marker.slice(0, 1) === fence) fence = '';
       continue;
     }
     if (fence) continue;
-    for (const match of line.matchAll(/\]\((<[^>]+>|[^\s)]+)(?:\s+[^)]*)?\)/g)) targets.push(match[1]);
+    for (const match of line.matchAll(/\]\((<[^>]+>|[^\s)]+)(?:\s+[^)]*)?\)/g)) {
+      if (match[1]) targets.push(match[1]);
+    }
   }
   return targets;
 }
 
-function htmlTargets(content) {
+function htmlTargets(content: string): string[] {
   let fence = '';
-  const targets = [];
+  const targets: string[] = [];
   for (const line of content.split(/\r?\n/)) {
     const marker = new RegExp('^\\s{0,3}([' + String.fromCharCode(96) + '~]{3,})').exec(line)?.[1];
     if (marker) {
-      if (!fence) fence = marker[0];
-      else if (marker[0] === fence) fence = '';
+      if (!fence) fence = marker.slice(0, 1);
+      else if (marker.slice(0, 1) === fence) fence = '';
       continue;
     }
     if (fence) continue;
-    for (const match of line.matchAll(/\b(?:src|href)\s*=\s*(["'])(.*?)\1/gi)) targets.push(match[2]);
+    for (const match of line.matchAll(/\b(?:src|href)\s*=\s*(["'])(.*?)\1/gi)) {
+      if (match[2]) targets.push(match[2]);
+    }
     for (const match of line.matchAll(/\bsrcset\s*=\s*(["'])(.*?)\1/gi)) {
-      for (const candidate of match[2].split(',')) {
+      for (const candidate of (match[2] ?? '').split(',')) {
         const target = candidate.trim().split(/\s+/)[0];
         if (target) targets.push(target);
       }
@@ -68,11 +74,19 @@ function htmlTargets(content) {
   return targets;
 }
 
-function localOutputTarget(target, sourceFile, outputFile, root, skillRoot, supportRoot, outputSkill) {
+function localOutputTarget(
+  target: string,
+  sourceFile: string,
+  outputFile: string,
+  root: string,
+  skillRoot: string,
+  supportRoot: string,
+  outputSkill: string,
+): string | null {
   if (isExternal(target)) return null;
   const { pathname, suffix } = parts(target);
   if (!pathname) return null;
-  let decoded;
+  let decoded: string;
   try { decoded = decodeURIComponent(pathname); } catch { decoded = pathname; }
   const resolved = path.resolve(path.dirname(sourceFile), decoded);
   if (!inside(root, resolved)) return null;
@@ -86,18 +100,27 @@ function localOutputTarget(target, sourceFile, outputFile, root, skillRoot, supp
   return relative.split('/').map(encodeURIComponent).join('/') + suffix;
 }
 
-function processMarkdown(content, sourceFile, outputFile, root, skillRoot, supportRoot, outputSkill, rewrite) {
+function processMarkdown(
+  content: string,
+  sourceFile: string,
+  outputFile: string,
+  root: string,
+  skillRoot: string,
+  supportRoot: string,
+  outputSkill: string,
+  rewrite: boolean,
+): string {
   let fence = '';
   const lines = content.split(/(?<=\n)/);
   return lines.map((line) => {
     const marker = new RegExp('^\\s{0,3}([' + String.fromCharCode(96) + '~]{3,})').exec(line)?.[1];
     if (marker) {
-      if (!fence) fence = marker[0];
-      else if (marker[0] === fence) fence = '';
+      if (!fence) fence = marker.slice(0, 1);
+      else if (marker.slice(0, 1) === fence) fence = '';
       return line;
     }
     if (fence) return line;
-    let rewritten = line.replace(/(\]\()(<[^>]+>|[^\s)]+)(\s+[^)]*)?(\))/g, (whole, start, raw, title = '', end) => {
+    let rewritten = line.replace(/(\]\()(<[^>]+>|[^\s)]+)(\s+[^)]*)?(\))/g, (whole: string, start: string, raw: string, title = '', end: string): string => {
       const angled = raw.startsWith('<') && raw.endsWith('>');
       const target = angled ? raw.slice(1, -1) : raw;
       if (!rewrite) return whole;
@@ -106,16 +129,16 @@ function processMarkdown(content, sourceFile, outputFile, root, skillRoot, suppo
       return start + (angled ? '<' + encoded + '>' : encoded) + title + end;
     });
     if (rewrite) {
-      rewritten = rewritten.replace(/(\b(?:src|href)\s*=\s*)(["'])(.*?)\2/gi, (whole, prefix, quote, target) => {
+      rewritten = rewritten.replace(/(\b(?:src|href)\s*=\s*)(["'])(.*?)\2/gi, (whole: string, prefix: string, quote: string, target: string): string => {
         const encoded = localOutputTarget(target, sourceFile, outputFile, root, skillRoot, supportRoot, outputSkill);
         return encoded ? prefix + quote + encoded + quote : whole;
       });
-      rewritten = rewritten.replace(/(\bsrcset\s*=\s*)(["'])(.*?)\2/gi, (whole, prefix, quote, value) => {
+      rewritten = rewritten.replace(/(\bsrcset\s*=\s*)(["'])(.*?)\2/gi, (whole: string, prefix: string, quote: string, value: string): string => {
         const updated = value.split(',').map((candidate) => {
           const match = /^(\s*)(\S+)(.*)$/.exec(candidate);
           if (!match) return candidate;
-          const encoded = localOutputTarget(match[2], sourceFile, outputFile, root, skillRoot, supportRoot, outputSkill);
-          return encoded ? match[1] + encoded + match[3] : candidate;
+          const encoded = localOutputTarget(match[2] ?? '', sourceFile, outputFile, root, skillRoot, supportRoot, outputSkill);
+          return encoded ? (match[1] ?? '') + encoded + (match[3] ?? '') : candidate;
         }).join(',');
         return prefix + quote + updated + quote;
       });
@@ -124,9 +147,9 @@ function processMarkdown(content, sourceFile, outputFile, root, skillRoot, suppo
   }).join('');
 }
 
-export async function validatePackagedSkill(skillDirectory) {
+export async function validatePackagedSkill(skillDirectory: string): Promise<void> {
   const base = path.resolve(skillDirectory);
-  const errors = [];
+  const errors: string[] = [];
   for (const file of await filesUnder(base)) {
     if (!file.toLowerCase().endsWith('.md')) continue;
     const content = await readFile(file, 'utf8');
@@ -135,7 +158,7 @@ export async function validatePackagedSkill(skillDirectory) {
       if (isExternal(target)) continue;
       const { pathname } = parts(target);
       if (!pathname) continue;
-      let decoded;
+      let decoded: string;
       try { decoded = decodeURIComponent(pathname); } catch { decoded = pathname; }
       const resolved = path.resolve(path.dirname(file), decoded);
       if (!inside(base, resolved)) errors.push(path.relative(base, file) + ': link escapes package: ' + target);
@@ -145,7 +168,7 @@ export async function validatePackagedSkill(skillDirectory) {
   if (errors.length) throw new Error('Incomplete skill package: ' + errors.join('; '));
 }
 
-export async function packageSkill(root, id, outputDirectory) {
+export async function packageSkill(root: string, id: string, outputDirectory: string): Promise<string> {
   if (id === 'azskills') return packageAzSkills(root, outputDirectory);
   const base = path.resolve(root);
   const sourceSkill = path.resolve(base, id);
@@ -157,10 +180,10 @@ export async function packageSkill(root, id, outputDirectory) {
   await cp(sourceSkill, outputSkill, { recursive: true, errorOnExist: true });
 
   const queue = await filesUnder(sourceSkill);
-  const processed = new Set();
+  const processed = new Set<string>();
   while (queue.length) {
     const sourceFile = queue.shift();
-    if (processed.has(sourceFile) || !sourceFile.toLowerCase().endsWith('.md')) continue;
+    if (!sourceFile || processed.has(sourceFile) || !sourceFile.toLowerCase().endsWith('.md')) continue;
     processed.add(sourceFile);
     const outputFile = inside(sourceSkill, sourceFile)
       ? path.join(outputSkill, path.relative(sourceSkill, sourceFile))
@@ -174,13 +197,14 @@ export async function packageSkill(root, id, outputDirectory) {
       if (isExternal(target)) continue;
       const { pathname } = parts(target);
       if (!pathname) continue;
-      let decoded;
+      let decoded: string;
       try { decoded = decodeURIComponent(pathname); } catch { decoded = pathname; }
       const sourceTarget = path.resolve(path.dirname(sourceFile), decoded);
       if (!inside(base, sourceTarget) || inside(sourceSkill, sourceTarget)) continue;
-      let info;
-      try { info = await stat(sourceTarget); }
-      catch (error) { if (error.code === 'ENOENT') throw new Error(id + ': missing linked file: ' + path.relative(base, sourceTarget)); throw error; }
+      const info = await stat(sourceTarget).catch((error: unknown) => {
+        if (errorCode(error) === 'ENOENT') throw new Error(id + ': missing linked file: ' + path.relative(base, sourceTarget));
+        throw error;
+      });
       const outputTarget = path.join(supportRoot, path.relative(base, sourceTarget));
       await mkdir(path.dirname(outputTarget), { recursive: true });
       if (info.isDirectory()) {
@@ -196,26 +220,26 @@ export async function packageSkill(root, id, outputDirectory) {
   return outputSkill;
 }
 
-async function packageAzSkills(root, outputDirectory) {
+async function packageAzSkills(root: string, outputDirectory: string): Promise<string> {
   const base = path.resolve(root);
   const output = path.resolve(outputDirectory, 'azskills');
   if (inside(output, base) || inside(base, output)) throw new Error('Staging must be outside the source tree');
-  const registry = JSON.parse(await readFile(path.join(base, 'skills.json'), 'utf8'));
+  const registry = await readJson<SkillCatalog>(path.join(base, 'skills.json'));
   const moduleDirectories = new Set(registry.modules.map(m => m.id));
   const names = ['SKILL.md', 'skills.json', 'README.md', 'SKILL-SYSTEM.md', 'DESIGN.md', 'design-intelligence.md',
+    'package.json', 'tsconfig.json',
     'THIRD_PARTY_NOTICES.md', 'LICENSE', 'references', 'scripts', 'integrations', 'assets', 'docs', 'codex-plugin/taste',
     ...registry.modules.map(m => m.id)];
   await mkdir(output, { recursive: true });
   for (const name of names) {
     const source = path.join(base, name);
     // Inspect before copying: neither source files nor nested links may escape.
-    let info;
-    try { info = await lstat(source); }
-    catch (error) {
+    const info = await lstat(source).catch((error: unknown) => {
       // Modules without supporting files have no directory in a Git checkout.
-      if (error.code === 'ENOENT' && moduleDirectories.has(name)) continue;
+      if (errorCode(error) === 'ENOENT' && moduleDirectories.has(name)) return null;
       throw error;
-    }
+    });
+    if (info === null) continue;
     if (info.isSymbolicLink()) throw new Error('Symbolic source: ' + name);
     if (info.isDirectory()) await filesUnder(source);
     await cp(source, path.join(output, name), { recursive: true, errorOnExist: true, force: false });
@@ -227,7 +251,7 @@ async function packageAzSkills(root, outputDirectory) {
   return output;
 }
 
-function crc32(buffer) {
+function crc32(buffer: Buffer): number {
   let value = 0xffffffff;
   for (const byte of buffer) {
     value ^= byte;
@@ -237,7 +261,7 @@ function crc32(buffer) {
 }
 
 // Sorted entries with fixed timestamps make repeated archives byte-identical.
-export async function writeSkillZip(directory, archive) {
+export async function writeSkillZip(directory: string, archive: string): Promise<{ archive: string; files: number }> {
   const normalized = path.resolve(archive);
   const parent = path.dirname(normalized);
   const packaged = path.resolve(directory);
@@ -246,8 +270,8 @@ export async function writeSkillZip(directory, archive) {
     source: file,
   })).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
   if (files.length > 0xffff) throw new Error('Skill bundle has too many files for a zip archive: ' + files.length);
-  const local = [];
-  const central = [];
+  const local: Buffer[] = [];
+  const central: Buffer[] = [];
   let offset = 0;
   for (const file of files) {
     const text = await readFile(file.source);
@@ -279,7 +303,7 @@ export async function writeSkillZip(directory, archive) {
     offset += header.length + name.length + data.length;
     if (text.length > 0xffffffff || data.length > 0xffffffff || offset > 0xffffffff) throw new Error('Skill bundle is too large for a zip archive: ' + file.name);
   }
-  const centralSize = central.reduce((size, part) => size + part.length, 0);
+  const centralSize = central.reduce((size: number, part: Buffer) => size + part.length, 0);
   const end = Buffer.alloc(22);
   end.writeUInt32LE(0x06054b50, 0);
   end.writeUInt16LE(files.length, 8);
@@ -291,7 +315,7 @@ export async function writeSkillZip(directory, archive) {
   return { archive: normalized, files: files.length };
 }
 
-export async function packageSkillArchive(root, id, stagingDirectory, archive) {
+export async function packageSkillArchive(root: string, id: string, stagingDirectory: string, archive: string): Promise<{ archive: string; files: number }> {
   const packaged = await packageSkill(root, id, stagingDirectory);
   return writeSkillZip(packaged, archive);
 }
@@ -299,26 +323,31 @@ export async function packageSkillArchive(root, id, stagingDirectory, archive) {
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const args = process.argv.slice(2);
-  const option = (key) => { const index = args.indexOf(key); const result = index < 0 ? '' : args[index + 1]; if (index >= 0 && (!result || result.startsWith('--'))) throw new Error(key + ' requires a value'); return result; };
+  const option = (key: string): string => {
+    const index = args.indexOf(key);
+    const result = index < 0 ? '' : args[index + 1];
+    if (index >= 0 && (!result || result.startsWith('--'))) throw new Error(key + ' requires a value');
+    return result ?? '';
+  };
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: node scripts/package-skill.mjs [--skill azskills] [--output <directory>]\nExports one complete azskills.zip with on-demand internal modules.');
+    console.log('Usage: node scripts/package-skill.ts [--skill azskills] [--output <directory>]\nExports one complete azskills.zip with on-demand internal modules.');
     process.exit(0);
   }
   try {
     const root = path.resolve(option('--root') || path.dirname(path.dirname(fileURLToPath(import.meta.url))));
     const id = option('--skill');
     const output = path.resolve(option('--output') || path.join(root, 'dist', 'skills'));
-    const registry = JSON.parse(await readFile(path.join(root, 'skills.json'), 'utf8'));
+    const registry = await readJson<SkillCatalog>(path.join(root, 'skills.json'));
     const ids = ['azskills', ...registry.modules.map(m => m.id), ...registry.aliases.map(a => a.id)];
     if (id && !ids.includes(id)) throw new Error('Unknown module or entry: ' + id);
     if (id && id !== 'azskills') console.error('Legacy module selection exports the complete azskills bundle.');
     const selected = id === 'az-clean-code' ? [id] : ['azskills'];
     await mkdir(output, { recursive: true });
     const staging = await mkdtemp(path.join(tmpdir(), 'azskills-export-'));
-    const archives = [];
+    const archives: Array<{ archive: string; files: number }> = [];
     try {
       for (const item of selected) archives.push(await packageSkillArchive(root, item, staging, path.join(output, item + '.zip')));
     } finally { await rm(staging, { recursive: true, force: true }); }
     console.log('Exported ' + archives.length + ' Skill bundle(s) to ' + output);
-  } catch (error) { console.error('AzSkills packaging failed: ' + error.message); process.exitCode = 1; }
+  } catch (error) { console.error('AzSkills packaging failed: ' + errorMessage(error)); process.exitCode = 1; }
 }

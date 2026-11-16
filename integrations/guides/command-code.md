@@ -16,17 +16,17 @@
 
 For an interactive setup, run the guided wizard from the AzSkills checkout:
 
-    node scripts/install-skills.mjs
+    node scripts/install-skills.ts
 
 The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.
 
 From the AzSkills checkout, install into a project skill directory:
 
-    node scripts/install-skills.mjs --tool command-code --mode project --project /path/to/project
+    node scripts/install-skills.ts --tool command-code --mode project --project /path/to/project
 
 Install for the current user instead:
 
-    node scripts/install-skills.mjs --tool command-code --mode user
+    node scripts/install-skills.ts --tool command-code --mode user
 
 Use --target to place the skill folder somewhere other than the default target. Use --dry-run to inspect without writing, --all-skills as a legacy shorthand for the complete AzSkills bundle, --rollback to restore the previous run, and --uninstall to remove only manifest-managed skill directories. Non-interactive writes require --yes after reviewing the preview.
 
@@ -43,4 +43,4 @@ Restart Command Code and confirm the skill is discoverable.
 
 Use the manifest-based uninstaller so files not owned by AzSkills are preserved:
 
-    node scripts/install-skills.mjs --uninstall --target /path/to/project/.commandcode/skills
+    node scripts/install-skills.ts --uninstall --target /path/to/project/.commandcode/skills

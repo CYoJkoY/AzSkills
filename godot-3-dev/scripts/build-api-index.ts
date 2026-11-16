@@ -6,7 +6,7 @@
  * Source: https://github.com/godotengine/godot/tree/3.6-stable/doc/classes
  *
  * Usage:
- *   node godot-3-dev/scripts/build-api-index.mjs [--ref 3.6-stable] [--out <file>]
+ *   node godot-3-dev/scripts/build-api-index.ts [--ref 3.6-stable] [--out <file>]
  */
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -20,7 +20,24 @@ const defaultOut = path.join(root, 'godot-3-dev', 'references', 'api-3.6.json');
 const ref = valueOf('--ref') ?? '3.6-stable';
 const out = path.resolve(valueOf('--out') ?? defaultOut);
 
-function valueOf(flag) {
+interface ClassEntry {
+  inherits: string | null;
+  methods: string[];
+  properties: string[];
+  signals: string[];
+  constants: string[];
+  vararg?: string[];
+  virtual?: string[];
+  source?: string;
+}
+
+interface ParsedClass {
+  name: string | undefined;
+  version: string | null;
+  entry: ClassEntry;
+}
+
+function valueOf(flag: string): string | null {
   const index = process.argv.indexOf(flag);
   if (index < 0) return null;
   const value = process.argv[index + 1];
@@ -28,58 +45,60 @@ function valueOf(flag) {
   return value;
 }
 
-function decode(text) {
+function decode(text: string): string {
   return text
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
-    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number(code)))
     .replace(/&amp;/g, '&');
 }
 
-function attributes(tag) {
-  const result = {};
+function attributes(tag: string): Record<string, string> {
+  const result: Record<string, string> = {};
   for (const match of tag.matchAll(/([A-Za-z_][\w:-]*)\s*=\s*"([^"]*)"/g)) {
-    result[match[1]] = decode(match[2]);
+    const key = match[1];
+    const value = match[2];
+    if (key !== undefined && value !== undefined) result[key] = decode(value);
   }
   return result;
 }
 
-function uniqueSorted(values) {
+function uniqueSorted(values: Iterable<string>): string[] {
   return [...new Set(values)].sort();
 }
 
-function parseClass(xml) {
+function parseClass(xml: string): ParsedClass {
   const classTag = /<class\b([^>]*)>/.exec(xml);
   if (!classTag) throw new Error('missing <class> element');
-  const head = attributes(classTag[1]);
-  const methods = [];
-  const virtuals = [];
-  const vararg = [];
+  const head = attributes(classTag[1] ?? '');
+  const methods: string[] = [];
+  const virtuals: string[] = [];
+  const vararg: string[] = [];
   for (const match of xml.matchAll(/<method\b([^>]*)>([\s\S]*?)<\/method>/g)) {
-    const meta = attributes(match[1]);
+    const meta = attributes(match[1] ?? '');
     if (!meta.name) continue;
     methods.push(meta.name);
     if (meta.qualifiers && meta.qualifiers.includes('virtual')) virtuals.push(meta.name);
     if ((meta.qualifiers ?? '').includes('vararg')) vararg.push(meta.name);
   }
-  const properties = [];
+  const properties: string[] = [];
   for (const match of xml.matchAll(/<member\b([^>]*)>/g)) {
-    const meta = attributes(match[1]);
+    const meta = attributes(match[1] ?? '');
     if (meta.name) properties.push(meta.name);
   }
-  const signals = [];
+  const signals: string[] = [];
   for (const match of xml.matchAll(/<signal\b([^>]*)>/g)) {
-    const meta = attributes(match[1]);
+    const meta = attributes(match[1] ?? '');
     if (meta.name) signals.push(meta.name);
   }
-  const constants = [];
+  const constants: string[] = [];
   for (const match of xml.matchAll(/<constant\b([^>]*)>/g)) {
-    const meta = attributes(match[1]);
+    const meta = attributes(match[1] ?? '');
     if (meta.name) constants.push(meta.name);
   }
-  const entry = {
+  const entry: ClassEntry = {
     inherits: head.inherits ?? null,
     methods: uniqueSorted(methods),
     properties: uniqueSorted(properties),
@@ -91,8 +110,8 @@ function parseClass(xml) {
   return { name: head.name, version: head.version ?? null, entry };
 }
 
-function tarEntries(buffer) {
-  const entries = new Map();
+function tarEntries(buffer: Buffer): Map<string, Buffer> {
+  const entries = new Map<string, Buffer>();
   let offset = 0;
   while (offset + 512 <= buffer.length) {
     const header = buffer.subarray(offset, offset + 512);
@@ -109,18 +128,25 @@ function tarEntries(buffer) {
   return entries;
 }
 
-async function downloadClasses() {
+interface DownloadedClasses {
+  classes: [string, string][];
+  builtins: string[];
+  settings: string[];
+}
+
+async function downloadClasses(): Promise<DownloadedClasses> {
   const url = 'https://codeload.github.com/godotengine/godot/tar.gz/refs/tags/' + ref;
   const response = await fetch(url, { headers: { 'user-agent': 'AzSkills-godot-api-index' } });
   if (!response.ok) throw new Error('HTTP ' + response.status + ' downloading ' + url);
   const archive = gunzipSync(Buffer.from(await response.arrayBuffer()));
   const entries = tarEntries(archive);
-  const classes = [];
-  let gdscriptFunctions = null;
-  const sourceFiles = [];
+  const classes: [string, string][] = [];
+  let gdscriptFunctions: string | null = null;
+  const sourceFiles: string[] = [];
   for (const [name, data] of entries) {
     const match = /^[^/]+\/doc\/classes\/([^/]+)\.xml$/.exec(name);
-    if (match) classes.push([match[1], data.toString('utf8')]);
+    const className = match?.[1];
+    if (className !== undefined) classes.push([className, data.toString('utf8')]);
     if (/^[^/]+\/modules\/gdscript\/gdscript_functions\.cpp$/.test(name)) {
       gdscriptFunctions = data.toString('utf8');
     }
@@ -138,13 +164,13 @@ async function downloadClasses() {
 
 // The class reference does not list every ProjectSettings key, so read the
 // GLOBAL_DEF calls the engine uses to register them.
-function parseProjectSettings(sources) {
-  const settings = [];
+function parseProjectSettings(sources: string[]): string[] {
+  const settings: string[] = [];
   const call = /GLOBAL_DEF(?:_RST|_NOVAL|_BASIC|_CUSTOM)?\s*\(/g;
   for (const source of sources) {
     for (const match of source.matchAll(call)) {
       let depth = 1;
-      let index = match.index + match[0].length;
+      let index = (match.index ?? 0) + match[0].length;
       const start = index;
       while (index < source.length && depth > 0) {
         const char = source[index];
@@ -169,26 +195,29 @@ function parseProjectSettings(sources) {
       const literals = [...body.matchAll(/"([^"\\]*)"|'([^'\\]*)'/g)]
         .map((literal) => literal[1] ?? literal[2])
         .filter((value) => value && /^[A-Za-z0-9_]+\/[A-Za-z0-9_./-]+$/.test(value));
-      if (literals.length) settings.push(literals[0]);
+      const first = literals[0];
+      if (first !== undefined) settings.push(first);
     }
   }
   return uniqueSorted(settings);
 }
 
-function parseGdscriptFunctions(source) {
+function parseGdscriptFunctions(source: string): string[] {
   const table = /static const char \*_names\[FUNC_MAX\]\s*=\s*\{([\s\S]*?)\};/.exec(source);
   if (!table) throw new Error('cannot locate the GDScript built-in function table');
-  const names = [...table[1].matchAll(/"([a-z_][a-z0-9_]*)"/g)].map((match) => match[1]);
+  const names = [...(table[1] ?? '').matchAll(/"([a-z_][a-z0-9_]*)"/g)]
+    .map((match) => match[1])
+    .filter((name): name is string => name !== undefined);
   if (names.length < 50) throw new Error('Suspiciously few GDScript built-ins: ' + names.length);
   return uniqueSorted(names);
 }
 
-async function main() {
+async function main(): Promise<void> {
   const { classes: files, builtins, settings } = await downloadClasses();
   if (files.length < 300) throw new Error('Suspiciously few class files: ' + files.length);
   if (settings.length < 200) throw new Error('Suspiciously few project settings: ' + settings.length);
   const parsed = files.map(([, xml]) => parseClass(xml));
-  const classes = {};
+  const classes: Record<string, ClassEntry> = {};
   let engineVersion = '3.6';
   for (const item of parsed) {
     if (!item.name) throw new Error('Class without a name');
