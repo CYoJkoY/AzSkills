@@ -253,6 +253,53 @@ try {
   });
   assert.equal(nonGodotWrite.status, 0, nonGodotWrite.stderr);
   assert.equal(JSON.parse(nonGodotWrite.stdout).continue, true);
+  const badScene = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Write',
+    tool_input: {
+      file_path: path.join(prewriteProject, 'Bad.tscn'),
+      content: '[gd_scene format=3]\n\n[node name="Root" type="Node"]\n',
+    },
+  });
+  assert.equal(badScene.status, 0, badScene.stderr);
+  assert.equal(JSON.parse(badScene.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  assert.match(JSON.parse(badScene.stdout).hookSpecificOutput.permissionDecisionReason, /WRONG_SCENE_FORMAT/);
+  const cleanScene = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Write',
+    tool_input: {
+      file_path: path.join(prewriteProject, 'Good.tscn'),
+      content: '[gd_scene format=2]\n\n[node name="Root" type="Node"]\n',
+    },
+  });
+  assert.equal(cleanScene.status, 0, cleanScene.stderr);
+  assert.equal(JSON.parse(cleanScene.stdout).continue, true);
+  const multiClean = path.join(prewriteProject, 'MultiClean.gd');
+  const multiBad = path.join(prewriteProject, 'MultiBad.gd');
+  await writeFile(multiClean, 'extends Node\n');
+  await writeFile(multiBad, 'extends Node\n\nfunc _ready():\n\tprint("ok")\n');
+  const multiFilePatch = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'apply_patch',
+    tool_input: {
+      patch: patchBody(
+        '*** Update File: ' + multiClean,
+        '@@',
+        ' extends Node',
+        '+',
+        '+func _ready():',
+        '+\tprint("ok")',
+        '*** Update File: ' + multiBad,
+        '@@',
+        '-\tprint("ok")',
+        '+\tconnect("ready", self, "_missing")',
+      ),
+    },
+  });
+  assert.equal(multiFilePatch.status, 0, multiFilePatch.stderr);
+  const multiFileReason = JSON.parse(multiFilePatch.stdout).hookSpecificOutput.permissionDecisionReason;
+  assert.match(multiFileReason, /MultiBad\.gd/);
+  assert.doesNotMatch(multiFileReason, /MultiClean\.gd/);
   await writeFile(prewriteScript, 'extends Node\n\nfunc _ready():\n\tconnect("ready", self, "_missing")\n');
   const postWriteError = runGuard({
     hook_event_name: 'PostToolUse',
