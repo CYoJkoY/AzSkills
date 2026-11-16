@@ -150,6 +150,127 @@ try {
   });
   assert.equal(allowedPatch.status, 0, allowedPatch.stderr);
   assert.equal(JSON.parse(allowedPatch.stdout).continue, true);
+  const prewriteProject = path.join(temp, 'godot-prewrite-project');
+  await mkdir(prewriteProject, { recursive: true });
+  await writeFile(path.join(prewriteProject, 'project.godot'), 'config_version=4\n');
+  const prewriteScript = path.join(prewriteProject, 'Player.gd');
+  const runGuard = (event) => spawnSync(process.execPath, [guard], {
+    encoding: 'utf8',
+    input: JSON.stringify(event),
+    env: { ...process.env, PLUGIN_ROOT: plugin },
+  });
+  const checkerOnlyWrite = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Write',
+    tool_input: {
+      file_path: prewriteScript,
+      content: 'extends Node\n\nfunc _ready():\n\tconnect("ready", self, "_missing")\n',
+    },
+  });
+  assert.equal(checkerOnlyWrite.status, 0, checkerOnlyWrite.stderr);
+  assert.equal(JSON.parse(checkerOnlyWrite.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  assert.match(JSON.parse(checkerOnlyWrite.stdout).hookSpecificOutput.permissionDecisionReason, /UNKNOWN_SIGNAL_TARGET/);
+  const cleanWrite = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Write',
+    tool_input: {
+      file_path: prewriteScript,
+      content: 'extends Node\n\nfunc _ready():\n\tprint("ok")\n',
+    },
+  });
+  assert.equal(cleanWrite.status, 0, cleanWrite.stderr);
+  assert.equal(JSON.parse(cleanWrite.stdout).continue, true);
+  await writeFile(prewriteScript, 'extends Node\n\nfunc _ready():\n\tprint("ok")\n');
+  const checkerOnlyEdit = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Edit',
+    tool_input: {
+      file_path: prewriteScript,
+      old_string: 'print("ok")',
+      new_string: 'connect("ready", self, "_missing")',
+      replace_all: false,
+    },
+  });
+  assert.equal(checkerOnlyEdit.status, 0, checkerOnlyEdit.stderr);
+  assert.equal(JSON.parse(checkerOnlyEdit.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  const checkerOnlyPatch = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'apply_patch',
+    tool_input: {
+      patch: patchBody(
+        '*** Update File: ' + prewriteScript,
+        '@@',
+        '-\tprint("ok")',
+        '+\tconnect("ready", self, "_missing")',
+      ),
+    },
+  });
+  assert.equal(checkerOnlyPatch.status, 0, checkerOnlyPatch.stderr);
+  assert.equal(JSON.parse(checkerOnlyPatch.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  const incompletePatch = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'apply_patch',
+    tool_input: { patch: patchBody('*** Update File: ' + prewriteScript, '@@', '+\tconnect("ready", self, "_missing")') },
+  });
+  assert.equal(incompletePatch.status, 0, incompletePatch.stderr);
+  assert.equal(JSON.parse(incompletePatch.stdout).continue, true);
+  const existingErrorScript = path.join(prewriteProject, 'ExistingError.gd');
+  await writeFile(existingErrorScript, 'extends Node\n\nfunc _ready():\n\tconnect("ready", self, "_missing")\n');
+  const existingErrorPatch = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'apply_patch',
+    tool_input: {
+      patch: patchBody(
+        '*** Update File: ' + existingErrorScript,
+        '@@',
+        ' func _ready():',
+        '+\tprint("still here")',
+        '\tconnect("ready", self, "_missing")',
+      ),
+    },
+  });
+  assert.equal(existingErrorPatch.status, 0, existingErrorPatch.stderr);
+  assert.equal(JSON.parse(existingErrorPatch.stdout).hookSpecificOutput.permissionDecision, 'deny');
+  assert.match(JSON.parse(existingErrorPatch.stdout).hookSpecificOutput.permissionDecisionReason, /UNKNOWN_SIGNAL_TARGET/);
+  const relativeCleanWrite = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Write',
+    cwd: prewriteProject,
+    tool_input: {
+      file_path: 'Relative.gd',
+      content: 'extends Node\n\nfunc _ready():\n\tprint("ok")\n',
+    },
+  });
+  assert.equal(relativeCleanWrite.status, 0, relativeCleanWrite.stderr);
+  assert.equal(JSON.parse(relativeCleanWrite.stdout).continue, true);
+  const nonGodotWrite = runGuard({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Write',
+    tool_input: {
+      file_path: path.join(prewriteProject, 'notes.txt'),
+      content: 'instantiate() is documented here as a Godot 4.x example.\n',
+    },
+  });
+  assert.equal(nonGodotWrite.status, 0, nonGodotWrite.stderr);
+  assert.equal(JSON.parse(nonGodotWrite.stdout).continue, true);
+  await writeFile(prewriteScript, 'extends Node\n\nfunc _ready():\n\tconnect("ready", self, "_missing")\n');
+  const postWriteError = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'Write',
+    tool_input: { file_path: prewriteScript, content: '' },
+  });
+  assert.equal(postWriteError.status, 0, postWriteError.stderr);
+  assert.equal(JSON.parse(postWriteError.stdout).decision, 'block');
+  assert.match(JSON.parse(postWriteError.stdout).reason, /UNKNOWN_SIGNAL_TARGET/);
+  await writeFile(prewriteScript, 'extends Node\n\nfunc _ready():\n\tprint("ok")\n');
+  const postWriteClean = runGuard({
+    hook_event_name: 'PostToolUse',
+    tool_name: 'Write',
+    tool_input: { file_path: prewriteScript, content: '' },
+  });
+  assert.equal(postWriteClean.status, 0, postWriteClean.stderr);
+  assert.equal(JSON.parse(postWriteClean.stdout).continue, true);
+  assert.match(JSON.parse(postWriteClean.stdout).hookSpecificOutput.additionalContext, /errors=0/);
   const godotCheck = spawnSync(process.execPath, [path.join(plugin, 'godot-3-dev/scripts/check-godot-3x.mjs'), '--self-test'], { encoding: 'utf8' });
   assert.equal(godotCheck.status, 0, godotCheck.stderr);
   // Execute the declared commands, including their quoting, from an unrelated cwd.

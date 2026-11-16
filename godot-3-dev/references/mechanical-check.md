@@ -67,9 +67,17 @@ autoload availability, project loading, or physics behavior. An unknown class
 may also be a project-defined class or an add-on class. Review warnings and
 use `--strict` when those warnings must block delivery.
 
-The `PreToolUse` hook blocks high-confidence invalid Godot patches. The
-`PostToolUse` hook runs the checker and reports findings without blocking the
-edit. Hooks are prevention and feedback, not proof that the project runs.
+For Codex `Write`, `Edit`, and `apply_patch` events whose proposed content can
+be reconstructed unambiguously, the `PreToolUse` hook stages a temporary
+project and runs this full checker before the write. Any checker error denies
+the edit. For partial or ambiguous patches, the hook does not guess the final
+file; it falls back to the high-confidence lexical deny list. The
+`PostToolUse` hook reruns the checker on the written file, reports warnings,
+and returns a blocking reason when errors remain, so the agent must fix them
+before continuing; it cannot undo the write. Hooks are prevention and
+feedback, not proof that the project runs. The guard covers Codex `Write`,
+`Edit`, and `apply_patch` calls; Godot files written by shell commands bypass
+it, so run the checker command directly after those writes.
 
 ## Final gate
 
