@@ -6,7 +6,7 @@
   "description": "AzSkills workflows and GPT with Taste behavior for Codex.",
   "license": "MIT",
   "engines": {
-    "node": ">=22.18.0"
+    "node": "^22.18.0 || >=23.6.0"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

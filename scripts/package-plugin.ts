@@ -75,8 +75,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const args = process.argv.slice(2);
   const index = args.indexOf('--output');
   const outputArgument = index >= 0 ? args[index + 1] : undefined;
-  if (outputArgument !== undefined && outputArgument.startsWith('--')) throw new Error('--output requires a directory');
-  if (index >= 0 && outputArgument === undefined) throw new Error('--output requires a directory');
+  if (index >= 0 && (!outputArgument || outputArgument.startsWith('--'))) throw new Error('--output requires a directory');
   const outputRoot = path.resolve(outputArgument ?? path.join(root, 'dist'));
   await mkdir(outputRoot, { recursive: true });
   const destination = path.join(outputRoot, 'azskills-marketplace');

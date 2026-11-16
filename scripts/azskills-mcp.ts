@@ -138,9 +138,9 @@ async function dispatch(request: JsonRpcRequest): Promise<unknown> {
   }
   if (method === 'tools/call') {
     if (params.name !== 'azskills') throw new Error('Unknown tool: ' + String(params.name));
-    const args = params.arguments;
-    if (!isRecord(args)) throw new Error('Arguments must be an object');
+    const args = params.arguments ?? {};
     try {
+      if (!isRecord(args)) throw new Error('Arguments must be an object');
       return await call(args);
     } catch (error) {
       return { ...textResult(errorMessage(error)), isError: true };

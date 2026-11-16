@@ -666,6 +666,9 @@ try {
   const collisionResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.ts'), '--output', pluginBuild], { encoding: 'utf8' });
   assert.notEqual(collisionResult.status, 0, 'Packaging must not replace existing deliverables');
   assert.match(collisionResult.stderr, /Output already exists/);
+  const emptyOutputResult = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.ts'), '--output', ''], { encoding: 'utf8' });
+  assert.notEqual(emptyOutputResult.status, 0, 'Packaging must reject an empty --output value');
+  assert.match(emptyOutputResult.stderr, /--output requires a directory/);
   await mkdir(path.join(repository, 'dist'), { recursive: true });
   inTreeOutput = await mkdtemp(path.join(repository, 'dist', '.azskills-package-test-'));
   const inTreeBuild = spawnSync(process.execPath, [path.join(repository, 'scripts/package-plugin.ts'), '--output', inTreeOutput], { encoding: 'utf8' });
