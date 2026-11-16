@@ -8,7 +8,13 @@
  *
  * Usage:
  *   node check-godot-3x.mjs --root <project> [--api <api-3.6.json>]
- *     [--files a.gd,b.tscn] [--json] [--strict] [--self-test]
+ *     [--overlay <dir>] [--files a.gd,b.tscn] [--json] [--strict] [--self-test]
+ *
+ * Every Godot file under --root is read so inheritance chains, signals, and
+ * `res://` targets resolve project-wide; --files only selects which files may
+ * produce findings. --overlay points at a directory that holds proposed
+ * contents at paths relative to --root, so a write can be checked before it
+ * lands without copying the project.
  *
  * Exit codes: 0 clean, 1 errors found, 2 usage or index failure.
  */
@@ -17,110 +23,20 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import {
+  findTokenIssues,
+  findVirtualRecalls,
+  maskCommentsAndStrings,
+} from './godot3-lexical.mjs';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultApi = path.join(scriptDirectory, '..', 'references', 'api-3.6.json');
-const ignoredDirectories = new Set(['.git', '.godot', '.import', 'addons', 'node_modules']);
+// Directories that never contain project scripts.
+const ignoredDirectories = new Set(['.git', '.godot', '.import', 'node_modules']);
+// Third-party add-ons are indexed for context but are not reported by default.
+const unreportedDirectories = new Set(['addons']);
 const gdExtensions = new Set(['.gd']);
 const sceneExtensions = new Set(['.tscn', '.escn']);
-
-const virtualRecalls = [
-  '_ready',
-  '_enter_tree',
-  '_exit_tree',
-  '_process',
-  '_physics_process',
-  '_fixed_process',
-  '_input',
-  '_unhandled_input',
-  '_unhandled_key_input',
-  '_notification',
-  '_draw',
-  '_gui_input',
-  '_input_event',
-  '_integrate_forces',
-  '_set',
-  '_get',
-  '_get_property_list',
-];
-
-const fourXTokens = [
-  {
-    // GDScript 3.x has no annotation syntax at all, so any `@name` token is 4.x.
-    pattern: /(^|[^\w.@])@[A-Za-z_]\w*/g,
-    code: 'GODOT4_ANNOTATION',
-    message: 'Godot 4.x annotation',
-    hint: '3.x uses bare `tool` and `onready`/`export(type)` without `@`; there is no `@warning_ignore`.',
-  },
-  {
-    pattern: /(^|[^\w.])await\b/g,
-    code: 'GODOT4_AWAIT',
-    message: 'Godot 4.x `await`',
-    hint: '3.x uses `yield(object, "signal")`.',
-  },
-  {
-    pattern: /(^|[^\w])Callable\b/g,
-    code: 'GODOT4_CALLABLE',
-    message: 'Godot 4.x Callable type',
-    hint: '3.x connects with `connect("sig", self, "method")`.',
-  },
-  {
-    pattern: /(^|[^\w])StringName\b/g,
-    code: 'GODOT4_STRINGNAME',
-    message: 'Godot 4.x StringName type',
-    hint: '3.x uses plain String values.',
-  },
-  {
-    pattern:
-      /\b(?:Packed(?:String|Byte|Int32|Int64|Float32|Float64|Vector2|Vector3|Vector4|Color|Basis|Quaternion|Transform2D|Transform3D)Array)\b/g,
-    code: 'GODOT4_PACKED_ARRAY',
-    message: 'Godot 4.x packed array type',
-    hint: '3.x uses `Pool*Array` such as PoolStringArray or PoolByteArray.',
-  },
-  {
-    pattern: /\bArray\s*\[\s*[A-Za-z_][\w.]*\s*\]/g,
-    code: 'GODOT4_TYPED_ARRAY',
-    message: 'Godot 4.x typed collection',
-    hint: '3.x collections are untyped: `var items = []`.',
-  },
-  {
-    pattern: /\bDictionary\s*\[/g,
-    code: 'GODOT4_TYPED_DICTIONARY',
-    message: 'Godot 4.x typed dictionary',
-    hint: '3.x has untyped `Dictionary`.',
-  },
-  {
-    pattern: /(^|[^\w.@])super\s*[.(]/g,
-    code: 'GODOT4_SUPER',
-    message: 'Godot 4.x `super` call',
-    hint: '3.x uses `._method()` for ordinary base methods only.',
-  },
-  {
-    pattern: /(^|[^\w.])func\s*\(/g,
-    code: 'GODOT4_LAMBDA',
-    message: 'Godot 4.x lambda',
-    hint: '3.x has no lambdas; use a named method or FuncRef.',
-  },
-  {
-    pattern: /\.\s*emit\s*\(/g,
-    code: 'GODOT4_SIGNAL_EMIT',
-    message: 'Godot 4.x signal emit',
-    hint: '3.x emits with `emit_signal("name", args)`.',
-  },
-  {
-    pattern: /\bconnect\s*\(\s*self\s*\./g,
-    code: 'GODOT4_CONNECT_SELF',
-    message: 'Godot 4.x Callable connection',
-    hint: '3.x uses `connect("signal", self, "method")`.',
-  },
-  {
-    // 3.x signal parameters are untyped: `signal died`.
-    pattern: /\bsignal\s+[A-Za-z_]\w*\s*\(\s*[A-Za-z_]\w*\s*:/g,
-    code: 'GODOT4_SIGNAL_SIGNATURE',
-    message: 'Godot 4.x typed signal parameter',
-    hint: '3.x signals declare untyped parameters, for example `signal died(who)`.',
-  },
-];
 
 const fourXClasses = [
   'Node3D',
@@ -144,14 +60,10 @@ const fourXClasses = [
   'FileAccess',
   'DirAccess',
   'DisplayServer',
-  'AnimationPlayer3D',
   'GPUParticles3D',
   'CPUParticles3D',
   'World3D',
-  'WorldEnvironment3D',
-  'Sprite3D',
-  'MultiMesh3D',
-  'AudioStreamPlayer3D',
+  'MultiMeshInstance3D',
   'NavigationRegion3D',
   'NavigationAgent3D',
   // 4.x-only singletons and value types whose 3.x names differ.
@@ -169,14 +81,11 @@ const fourXClasses = [
   'Vector4i',
   'Rect2i',
   'Projection',
-  'PackedDataContainerRef',
   'Sprite2D',
   'AnimatedSprite2D',
   'TileMapLayer',
   'PointLight2D',
   'GPUParticles2D',
-  'ShapeCast2D',
-  'NavigationObstacle2D',
   'NavigationObstacle3D',
   'Skeleton3D',
   'BoneAttachment3D',
@@ -376,62 +285,6 @@ function locate(starts, offset) {
   return { line: low + 1, column: offset - starts[low] + 1 };
 }
 
-// Blank out comments and string bodies so token checks only see real code.
-// GDScript 3.x strings may be single-quoted, double-quoted, or triple-quoted,
-// and triple-quoted strings may span lines, so all three forms are tracked.
-function stripCommentsAndStrings(text) {
-  let output = '';
-  let state = 'code';
-  let quote = '';
-  for (let index = 0; index < text.length; index += 1) {
-    const char = text[index];
-    const triple = text.slice(index, index + 3);
-    if (state === 'code') {
-      if (char === '#') {
-        state = 'comment';
-        continue;
-      }
-      if (triple === '"""' || triple === "'''") {
-        quote = triple;
-        state = 'string';
-        output += triple;
-        index += 2;
-        continue;
-      }
-      if (char === '"' || char === "'") {
-        quote = char;
-        state = 'string';
-        output += char;
-        continue;
-      }
-      output += char;
-      continue;
-    }
-    if (state === 'comment') {
-      if (char === '\n') {
-        state = 'code';
-        output += char;
-      } else output += ' ';
-      continue;
-    }
-    // Inside a string literal.
-    if (char === '\\') {
-      output += '  ';
-      index += 1;
-      continue;
-    }
-    if (quote.length === 3 ? triple === quote : char === quote) {
-      state = 'code';
-      output += quote;
-      if (quote.length === 3) index += 2;
-      quote = '';
-      continue;
-    }
-    output += char === '\n' ? '\n' : ' ';
-  }
-  return output;
-}
-
 class ApiIndex {
   constructor(data) {
     this.data = data;
@@ -477,6 +330,118 @@ class ApiIndex {
     }
     return false;
   }
+}
+
+// Project-wide symbol index. `extends "res://Base.gd"` and methods or signals
+// declared by a base script only exist in another file, so a single-file check
+// reports valid 3.x code as broken. The index resolves script paths,
+// `class_name` owners, `preload` aliases, and inheritance chains without
+// copying the project.
+class ProjectIndex {
+  constructor(root, api) {
+    this.root = root;
+    this.api = api;
+    // Keyed by project-relative POSIX path so overlay and real files agree.
+    this.scripts = new Map();
+    this.classOwners = new Map();
+    this.classNames = new Set();
+    this.autoloads = new Set();
+  }
+
+  addScript(relativePath, text) {
+    const rel = normalizeRelative(relativePath);
+    const record = {
+      file: rel,
+      classNames: new Set(),
+      methods: new Set(),
+      signals: new Set(),
+      extendsTarget: null,
+      aliases: new Map(),
+    };
+    // The mask keeps every offset identical while blanking comments and string
+    // bodies, so keywords are located in the mask and parsed from the text.
+    // Parsing the raw text directly would also match `# extends "..."` notes.
+    const body = maskCommentsAndStrings(text);
+    // Only top-level declarations join the inheritance chain; inner classes
+    // may legally reuse a name and must not leak into the parent's surface.
+    for (const match of body.matchAll(/^class_name[ \t]+([A-Za-z_]\w*)/gm)) record.classNames.add(match[1]);
+    for (const match of body.matchAll(/^(?:static[ \t]+)?func[ \t]+([A-Za-z_]\w*)/gm)) record.methods.add(match[1]);
+    for (const match of body.matchAll(/^signal[ \t]+([A-Za-z_]\w*)/gm)) record.signals.add(match[1]);
+    const extendsAt = /^extends\b/m.exec(body);
+    if (extendsAt) {
+      const extendsMatch = /^extends[ \t]+(?:"([^"]+)"|([A-Za-z_][\w.]*))/.exec(text.slice(extendsAt.index));
+      if (extendsMatch) record.extendsTarget = extendsMatch[1] ?? extendsMatch[2];
+    }
+    for (const match of body.matchAll(/^(?:const|var)[ \t]+([A-Za-z_]\w*)[ \t]*=[ \t]*preload[ \t]*\(/gm)) {
+      const target = /^(?:const|var)[ \t]+[A-Za-z_]\w*[ \t]*=[ \t]*preload[ \t]*\([ \t]*"([^"]+)"/.exec(text.slice(match.index));
+      if (target) record.aliases.set(match[1], target[1]);
+    }
+    this.scripts.set(rel, record);
+    for (const name of record.classNames) {
+      this.classNames.add(name);
+      if (!this.classOwners.has(name)) this.classOwners.set(name, rel);
+    }
+  }
+
+  addProjectGodot(text) {
+    let section = '';
+    for (const line of text.split(/\r?\n/)) {
+      const header = /^\s*\[([^\]]+)\]\s*$/.exec(line);
+      if (header) {
+        section = header[1].trim();
+        continue;
+      }
+      if (section !== 'autoload') continue;
+      const match = /^\s*([A-Za-z_]\w*)\s*=/.exec(line);
+      if (match) this.autoloads.add(match[1]);
+    }
+  }
+
+  scriptRelative(fromRelative, target) {
+    if (!target) return null;
+    const alias = this.scripts.get(normalizeRelative(fromRelative))?.aliases.get(target);
+    const value = alias ?? target;
+    if (value.startsWith('res://')) return normalizeRelative(value.slice('res://'.length));
+    if (/\.gd$/i.test(value)) return normalizeRelative(path.posix.join(path.posix.dirname(normalizeRelative(fromRelative)), value));
+    return null;
+  }
+
+  resolveScript(fromRelative, target) {
+    if (!target) return null;
+    const direct = this.scriptRelative(fromRelative, target);
+    if (direct && this.scripts.has(direct)) return direct;
+    return this.classOwners.get(target) ?? null;
+  }
+
+  ancestry(relativePath) {
+    const methods = new Set();
+    const signals = new Set();
+    const classNames = new Set();
+    const engineBases = [];
+    const unresolved = [];
+    const seen = new Set();
+    let record = this.scripts.get(normalizeRelative(relativePath));
+    while (record && !seen.has(record.file)) {
+      seen.add(record.file);
+      for (const name of record.methods) methods.add(name);
+      for (const name of record.signals) signals.add(name);
+      for (const name of record.classNames) classNames.add(name);
+      if (!record.extendsTarget) break;
+      const parent = this.resolveScript(record.file, record.extendsTarget);
+      if (!parent) {
+        if (this.api.hasClass(record.extendsTarget)) engineBases.push(record.extendsTarget);
+        else unresolved.push({ file: record.file, target: record.extendsTarget });
+        break;
+      }
+      record = this.scripts.get(parent);
+    }
+    return { methods, signals, classNames, engineBases, unresolved };
+  }
+}
+
+function normalizeRelative(value) {
+  const normalized = path.posix.normalize(String(value).split(path.sep).join('/'));
+  return normalized.replace(/^\.\//, '');
 }
 
 function createReport() {
@@ -580,7 +545,7 @@ function checkProjectSettings(report, file, text, api) {
   });
 }
 
-function checkScene(report, file, text, api) {
+function checkScene(report, file, text, api, projectClasses) {
   const starts = lineStarts(text);
   const header = /\[gd_scene\b([^\]]*)\]/.exec(text);
   if (!header) {
@@ -637,6 +602,8 @@ function checkScene(report, file, text, api) {
     const type = match[1];
     if (api.hasClass(type)) {
       report.verified.push(file + ': node type ' + type);
+    } else if (projectClasses.has(type)) {
+      report.verified.push(file + ': project class ' + type);
     } else if (fourXClasses.includes(type) || /3D$/.test(type)) {
       addIssue(
         report,
@@ -673,24 +640,21 @@ function checkScene(report, file, text, api) {
 }
 
 function checkTokens(report, file, mask, starts) {
-  for (const rule of fourXTokens) {
-    for (const match of mask.matchAll(rule.pattern)) {
-      addIssue(report, file, starts, match.index, rule.code, rule.message + ': ' + match[0].trim(), rule.hint);
-    }
+  for (const issue of findTokenIssues(mask)) {
+    addIssue(report, file, starts, issue.index, issue.code, issue.message + ': ' + issue.text, issue.hint);
   }
 }
 
 function checkVirtualRecalls(report, file, mask, starts) {
-  const pattern = new RegExp('\\.\\s*(' + virtualRecalls.join('|') + ')\\s*\\(', 'g');
-  for (const match of mask.matchAll(pattern)) {
+  for (const match of findVirtualRecalls(mask)) {
     addIssue(
       report,
       file,
       starts,
       match.index,
       'VIRTUAL_RECALL',
-      'engine-dispatched virtual is re-called: .' + match[1] + '()',
-      'The engine already calls every script level of ' + match[1] + '. Remove the call; share work through a named method.',
+      'engine-dispatched virtual is re-called: ._' + match.name + '()',
+      'The engine already calls every script level of _' + match.name + '. Remove the call; share work through a named method.',
     );
   }
 }
@@ -900,7 +864,8 @@ function checkDeclarationPlacement(report, file, mask, starts) {
     );
   }
   const seen = new Map();
-  for (const match of mask.matchAll(/^[ \t]*(?:static[ \t]+)?func[ \t]+([A-Za-z_]\w*)/gm)) {
+  // Inner classes are separate scopes, so only top-level definitions collide.
+  for (const match of mask.matchAll(/^(?:static[ \t]+)?func[ \t]+([A-Za-z_]\w*)/gm)) {
     const name = match[1];
     if (seen.has(name)) {
       addIssue(
@@ -918,13 +883,24 @@ function checkDeclarationPlacement(report, file, mask, starts) {
   }
 }
 
-function checkSignalTargets(report, file, text, mask, starts, api, baseClasses, customMethods) {
-  const declaredSignals = new Set([...mask.matchAll(/^[ \t]*signal[ \t]+([A-Za-z_]\w*)/gm)].map((match) => match[1]));
-  const connectPattern = /\bconnect\s*\(\s*"([A-Za-z_]\w*)"\s*,\s*(self|"[^"]*"|[A-Za-z_][\w.]*)\s*,\s*"([A-Za-z_]\w*)"/g;
-  for (const match of text.matchAll(connectPattern)) {
-    const method = match[3];
-    const target = match[2];
-    if (target !== 'self') continue;
+// Comments and string bodies must never create a finding, so every match is
+// located in the mask and then parsed from the original text at that offset.
+function maskedMatches(text, mask, opener, parser) {
+  const found = [];
+  for (const match of mask.matchAll(opener)) {
+    const parsed = parser(text.slice(match.index));
+    if (parsed) found.push({ index: match.index, groups: parsed });
+  }
+  return found;
+}
+
+function checkSignalTargets(report, file, text, mask, starts, api, baseClasses, customMethods, declaredSignals) {
+  const connectPattern = /\bconnect\s*\(/g;
+  for (const match of maskedMatches(text, mask, connectPattern, (slice) =>
+    /^connect\s*\(\s*"([A-Za-z_]\w*)"\s*,\s*(self|"[^"]*"|[A-Za-z_][\w.]*)\s*,\s*"([A-Za-z_]\w*)"/.exec(slice),
+  )) {
+    const method = match.groups[3];
+    if (match.groups[2] !== 'self') continue;
     if (customMethods.has(method)) continue;
     if (baseClasses.some((name) => api.hasMember(name, method))) continue;
     addIssue(
@@ -934,11 +910,14 @@ function checkSignalTargets(report, file, text, mask, starts, api, baseClasses, 
       match.index,
       'UNKNOWN_SIGNAL_TARGET',
       'connect() targets missing method ' + method + '() on self',
-      'Declare ' + method + '() in this script; Godot 3.x reports a failed connection at runtime.',
+      'Declare ' + method + '() in this script or a base script; Godot 3.x reports a failed connection at runtime.',
     );
   }
-  for (const match of text.matchAll(/\bemit_signal\s*\(\s*"([A-Za-z_]\w*)"/g)) {
-    const signal = match[1];
+  const emitPattern = /\bemit_signal\s*\(/g;
+  for (const match of maskedMatches(text, mask, emitPattern, (slice) =>
+    /^emit_signal\s*\(\s*"([A-Za-z_]\w*)"/.exec(slice),
+  )) {
+    const signal = match.groups[1];
     if (declaredSignals.has(signal)) continue;
     if (baseClasses.some((name) => api.classes[name]?.signals?.includes(signal))) continue;
     addIssue(
@@ -948,7 +927,44 @@ function checkSignalTargets(report, file, text, mask, starts, api, baseClasses, 
       match.index,
       'UNDECLARED_SIGNAL',
       'emit_signal() names undeclared signal ' + signal,
-      'Declare `signal ' + signal + '` in this script; Godot 3.x cannot emit an undeclared signal.',
+      'Declare `signal ' + signal + '` in this script or a base script; Godot 3.x cannot emit an undeclared signal.',
+    );
+  }
+}
+
+function checkScriptPaths(report, file, text, mask, starts, index) {
+  const extendsPattern = /^[ \t]*extends\b/gm;
+  for (const match of maskedMatches(text, mask, extendsPattern, (slice) =>
+    /^[ \t]*extends[ \t]+"([^"]+)"/.exec(slice),
+  )) {
+    const target = match.groups[1];
+    if (!/\.gd$/i.test(target)) continue;
+    if (index.resolveScript(file, target)) continue;
+    addIssue(
+      report,
+      file,
+      starts,
+      match.index,
+      'MISSING_EXTENDS_PATH',
+      'extends targets missing script ' + target,
+      'Godot 3.x fails to load the script when the base path does not exist.',
+    );
+  }
+  const preloadPattern = /\bpreload\s*\(/g;
+  for (const match of maskedMatches(text, mask, preloadPattern, (slice) =>
+    /^preload\s*\(\s*"([^"]+)"/.exec(slice),
+  )) {
+    const target = match.groups[1];
+    if (!/\.gd$/i.test(target)) continue;
+    if (index.resolveScript(file, target)) continue;
+    addIssue(
+      report,
+      file,
+      starts,
+      match.index,
+      'MISSING_PRELOAD_PATH',
+      'preload() targets missing script ' + target,
+      '3.x resolves preload at parse time, so a missing path is a hard parse error.',
     );
   }
 }
@@ -971,10 +987,15 @@ function checkMoveAndSlide(report, file, text, mask, starts) {
   }
 }
 
-function checkGdScript(report, file, text, mask, starts, api, projectClasses) {
+function checkGdScript(report, file, text, mask, starts, api, context) {
   const declared = collectDeclarations(mask);
-  const customMethods = new Set(declared.methods);
-  const declaredClasses = new Set([...declared.classes, ...projectClasses]);
+  const ancestry = context.index.ancestry(file);
+  // Methods and signals resolve through the whole script inheritance chain, so
+  // a callback declared by a base script is not a missing target here.
+  const customMethods = new Set([...declared.methods, ...ancestry.methods]);
+  const declaredSignals = new Set(ancestry.signals);
+  for (const match of mask.matchAll(/^signal[ \t]+([A-Za-z_]\w*)/gm)) declaredSignals.add(match[1]);
+  const declaredClasses = new Set([...declared.classes, ...context.projectClasses, ...ancestry.classNames]);
   checkTokens(report, file, mask, starts);
   checkMemberCalls(report, file, mask, starts, api, customMethods);
   checkVirtualRecalls(report, file, mask, starts);
@@ -982,11 +1003,14 @@ function checkGdScript(report, file, text, mask, starts, api, projectClasses) {
   checkCalls(report, file, mask, starts, api, declaredClasses, customMethods);
   checkIndentation(report, file, mask, starts);
   checkDeclarationPlacement(report, file, mask, starts);
-  const baseClasses = [];
-  for (const match of mask.matchAll(/^\s*extends\s+([A-Za-z_][\w.]*)/gm)) {
-    const name = match[1];
+  checkScriptPaths(report, file, text, mask, starts, context.index);
+  const baseClasses = [...ancestry.engineBases];
+  for (const match of maskedMatches(text, mask, /^[ \t]*extends\b/gm, (slice) =>
+    /^[ \t]*extends[ \t]+([A-Za-z_][\w.]*)/.exec(slice),
+  )) {
+    const name = match.groups[1];
     if (api.hasClass(name)) {
-      baseClasses.push(name);
+      if (!baseClasses.includes(name)) baseClasses.push(name);
       report.verified.push(file + ': extends ' + name);
       continue;
     }
@@ -1001,7 +1025,7 @@ function checkGdScript(report, file, text, mask, starts, api, projectClasses) {
       'It may be a project class or script path; confirm it exists.',
     );
   }
-  checkSignalTargets(report, file, text, mask, starts, api, baseClasses, customMethods);
+  checkSignalTargets(report, file, text, mask, starts, api, baseClasses, customMethods, declaredSignals);
   for (const match of mask.matchAll(/\bvar\s+[A-Za-z_]\w*\s*:\s*([A-Za-z_][\w.]*)/g)) {
     const name = match[1];
     if (api.hasClass(name) || declaredClasses.has(name)) continue;
@@ -1055,49 +1079,93 @@ async function loadIndex(file) {
   return new ApiIndex(data);
 }
 
-async function collectFiles(root, explicit) {
-  const files = [];
-  if (explicit && explicit.length) {
-    for (const entry of explicit) {
-      const resolved = path.resolve(root, entry);
-      const info = await stat(resolved).catch(() => null);
-      if (!info) throw new UsageError('file not found: ' + resolved);
-      if (info.isFile()) files.push(resolved);
-    }
-    return files;
-  }
-  for await (const file of walk(root)) {
-    const base = path.basename(file);
-    const extension = path.extname(file).toLowerCase();
-    if (base === 'project.godot') files.push(file);
-    else if (gdExtensions.has(extension) || sceneExtensions.has(extension)) files.push(file);
-  }
-  return files;
+function isGodotFileName(file) {
+  const base = path.basename(file).toLowerCase();
+  const extension = path.extname(file).toLowerCase();
+  return base === 'project.godot' || gdExtensions.has(extension) || sceneExtensions.has(extension);
 }
 
-async function runCheck({ root, apiPath, files, strict }) {
+// Every Godot file participates in the symbol index, including files that the
+// caller does not want reported. `overlay` supplies proposed contents at paths
+// relative to `root` and always wins over the on-disk file.
+async function collectProjectFiles(root, overlay) {
+  if (overlay) {
+    const relativeToRoot = path.relative(root, overlay);
+    const relativeOverlay = path.relative(overlay, root);
+    const nested = (value) => value === '' || (!value.startsWith('..') && !path.isAbsolute(value));
+    if (nested(relativeToRoot) || nested(relativeOverlay)) {
+      throw new UsageError('--overlay must be a separate directory, not inside --root or around it');
+    }
+  }
+  const found = new Map();
+  const record = (relative, absolute, isOverlay) => {
+    const entry = found.get(relative) ?? { rootFile: null, overlayFile: null };
+    if (isOverlay) entry.overlayFile = absolute;
+    else entry.rootFile = absolute;
+    found.set(relative, entry);
+  };
+  for await (const file of walk(root)) {
+    if (!isGodotFileName(file)) continue;
+    record(normalizeRelative(path.relative(root, file).split(path.sep).join('/')), file, false);
+  }
+  if (overlay) {
+    for await (const file of walk(overlay)) {
+      if (!isGodotFileName(file)) continue;
+      record(normalizeRelative(path.relative(overlay, file).split(path.sep).join('/')), file, true);
+    }
+  }
+  return found;
+}
+
+async function runCheck({ root, overlay, apiPath, files, strict }) {
   const api = await loadIndex(apiPath);
   const report = createReport();
-  const targets = await collectFiles(root, files);
-  if (targets.length === 0) throw new UsageError('no Godot 3.x files found under ' + root);
-  const contents = [];
-  const projectClasses = new Set();
-  for (const file of targets) {
-    const text = (await readFile(file, 'utf8')).replace(/\r\n/g, '\n');
-    contents.push({ file, text });
-    for (const match of text.matchAll(/^\s*class_name\s+([A-Za-z_]\w*)/gm)) projectClasses.add(match[1]);
+  const projectFiles = await collectProjectFiles(root, overlay);
+  if (projectFiles.size === 0) throw new UsageError('no Godot 3.x files found under ' + root);
+  const index = new ProjectIndex(root, api);
+  const texts = new Map();
+  for (const [relative, entry] of projectFiles) {
+    const source = entry.overlayFile ?? entry.rootFile;
+    if (!source) continue;
+    texts.set(relative, (await readFile(source, 'utf8')).replace(/\r\n/g, '\n'));
   }
-  for (const { file, text } of contents) {
-    const extension = path.extname(file).toLowerCase();
-    if (path.basename(file) === 'project.godot') {
+  for (const [relative, text] of texts) {
+    if (path.posix.basename(relative) === 'project.godot') {
+      index.addProjectGodot(text);
+      continue;
+    }
+    if (gdExtensions.has(path.posix.extname(relative).toLowerCase())) index.addScript(relative, text);
+  }
+  let targets;
+  if (files.length) {
+    targets = [];
+    for (const entry of files) {
+      const relative = normalizeRelative(entry);
+      if (!projectFiles.has(relative)) {
+        throw new UsageError('--files entry is not a Godot file under --root: ' + relative);
+      }
+      if (!targets.includes(relative)) targets.push(relative);
+    }
+  } else {
+    targets = [...projectFiles.keys()]
+      .filter((relative) => !unreportedDirectories.has(relative.split('/')[0]))
+      .sort();
+  }
+  if (targets.length === 0) throw new UsageError('no Godot 3.x files found under ' + root);
+  const context = { projectClasses: new Set([...index.classNames, ...index.autoloads]), index };
+  for (const file of targets) {
+    const text = texts.get(file);
+    if (text == null) continue;
+    const extension = path.posix.extname(file).toLowerCase();
+    if (path.posix.basename(file) === 'project.godot') {
       checkProjectGodotText(report, file, text, api);
     } else if (gdExtensions.has(extension)) {
       const starts = lineStarts(text);
-      const mask = stripCommentsAndStrings(text);
-      checkGdScript(report, file, text, mask, starts, api, projectClasses);
+      const mask = maskCommentsAndStrings(text);
+      checkGdScript(report, file, text, mask, starts, api, context);
       checkMoveAndSlide(report, file, text, mask, starts);
     } else if (sceneExtensions.has(extension)) {
-      checkScene(report, file, text, api);
+      checkScene(report, file, text, api, context.projectClasses);
     }
     report.checked.push(file);
   }
@@ -1109,11 +1177,10 @@ async function runCheck({ root, apiPath, files, strict }) {
   return { report, targets };
 }
 
-function formatReport(report, targets, root) {
-  const relative = (file) => path.relative(root, file).split(path.sep).join('/') || file;
+function formatReport(report, targets) {
   const lines = [];
   const describe = (issue, level) =>
-    relative(issue.file) +
+    issue.file +
     ':' +
     issue.line +
     ':' +
@@ -1140,7 +1207,7 @@ function formatReport(report, targets, root) {
   );
   lines.push(
     report.errors.length === 0
-      ? 'Static checks passed. Runtime semantics, typed-member resolution, and resource paths still require the Godot 3.6 parser or a headless run.'
+      ? 'Static checks passed. Runtime semantics, call signatures, and non-script resources still require the Godot 3.6 parser or a headless run.'
       : 'Static checks failed. Fix every error before running the Godot 3.6 parser.',
   );
   return lines.join('\n');
@@ -1176,16 +1243,97 @@ const fixtures = [
   {
     name: 'virtual-recall',
     files: {
+      'Enemy.gd': 'extends Node\n',
       'Boss.gd':
         'extends "res://Enemy.gd"\n\nfunc _ready():\n\t._ready()\n\nfunc _physics_process(delta):\n\t._physics_process(delta)\n\tpass\n',
     },
     expect: 'fail',
+    expectCodes: ['VIRTUAL_RECALL'],
+  },
+  {
+    name: 'inherited-signal-target-ok',
+    files: {
+      'Base.gd': 'extends Node\n\nfunc _on_timer_timeout():\n\tpass\n',
+      'Child.gd':
+        'extends "res://Base.gd"\n\nfunc _ready():\n\tconnect("timeout", self, "_on_timer_timeout")\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'inherited-signal-emit-ok',
+    files: {
+      'Base.gd': 'extends Node\n\nsignal done\n',
+      'Child.gd': 'extends "res://Base.gd"\n\nfunc finish():\n\temit_signal("done")\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'missing-extends-path',
+    files: { 'Orphan.gd': 'extends "res://Missing.gd"\n\nfunc run():\n\tpass\n' },
+    expect: 'fail',
+    expectCodes: ['MISSING_EXTENDS_PATH'],
+  },
+  {
+    name: 'missing-preload-path',
+    files: { 'Loader.gd': 'extends Node\n\nconst Missing = preload("res://Missing.gd")\n' },
+    expect: 'fail',
+    expectCodes: ['MISSING_PRELOAD_PATH'],
+  },
+  {
+    name: 'commented-paths-ok',
+    files: {
+      'Note.gd':
+        'extends Node\n\n# extends "res://Gone.gd" and preload("res://Gone.gd")\nvar note = \'preload("res://Gone.gd")\'\n\nfunc _ready():\n\tprint(note)\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'inner-class-duplicate-ok',
+    files: {
+      'Outer.gd':
+        'extends Node\n\nclass Left:\n\tfunc run():\n\t\tpass\n\nclass Right:\n\tfunc run():\n\t\tpass\n\nfunc run():\n\tpass\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'overlay-base-script',
+    files: { 'Child.gd': 'extends "res://Base.gd"\n\nfunc _ready():\n\tconnect("timeout", self, "_on_timeout")\n' },
+    overlay: { 'Base.gd': 'extends Node\n\nfunc _on_timeout():\n\tpass\n' },
+    expect: 'pass',
+  },
+  {
+    name: 'overlay-overrides-disk',
+    files: {
+      'Child.gd': 'extends "res://Base.gd"\n\nfunc _ready():\n\tconnect("timeout", self, "_on_timeout")\n',
+      'Base.gd': 'extends Node\n',
+    },
+    overlay: { 'Base.gd': 'extends Node\n\nfunc _on_timeout():\n\tpass\n' },
+    expect: 'pass',
+  },
+  {
+    name: 'files-filter-reports-targets-only',
+    files: {
+      'Clean.gd': 'extends Node\n\nfunc _ready():\n\tprint("ok")\n',
+      'Bad.gd': 'extends Node3D\n\nfunc _ready():\n\tvar scene = preload("res://E.tscn").instantiate()\n\tprint(scene)\n',
+    },
+    files_filter: ['Clean.gd'],
+    expect: 'pass',
+    absentFromReport: ['Bad.gd'],
   },
   {
     name: 'clean-3x-tween',
     files: {
       'Fade.gd':
         'extends Node2D\n\nfunc fade():\n\tvar tween = get_tree().create_tween()\n\ttween.tween_property(self, "modulate:a", 0.0, 0.4)\n\tvar v = Vector2(1, 2).linear_interpolate(Vector2(3, 4), 0.5)\n\tprint(str(v))\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'scene-custom-class-ok',
+    files: {
+      'Turret3D.gd': 'extends Spatial\n\nclass_name Turret3D\n',
+      'Level.tscn':
+        '[gd_scene load_steps=2 format=2]\n\n[ext_resource path="res://Turret3D.gd" type="Script" id=1]\n\n[node name="Turret" type="Turret3D"]\nscript = ExtResource( 1 )\n',
     },
     expect: 'pass',
   },
@@ -1340,10 +1488,36 @@ async function selfTest() {
         await mkdir(path.dirname(target), { recursive: true });
         await writeFile(target, body, 'utf8');
       }
-      const { report } = await runCheck({ root, apiPath: defaultApi, files: [], strict: false });
+      const overlay = fixture.overlay ? path.join(staging, fixture.name + '-overlay') : null;
+      if (overlay) {
+        for (const [name, body] of Object.entries(fixture.overlay)) {
+          const target = path.join(overlay, name);
+          await mkdir(path.dirname(target), { recursive: true });
+          await writeFile(target, body, 'utf8');
+        }
+      }
+      const { report } = await runCheck({
+        root,
+        overlay,
+        apiPath: defaultApi,
+        files: fixture.files_filter ?? [],
+        strict: false,
+      });
       const passed = report.errors.length === 0;
       const expected = fixture.expect === 'pass';
-      if (passed === expected) continue;
+      if (passed === expected) {
+        for (const code of fixture.expectCodes ?? []) {
+          if (!report.errors.some((error) => error.code === code)) {
+            failures.push(fixture.name + ': expected error code ' + code + ' but got [' + report.errors.map((error) => error.code).join(', ') + ']');
+          }
+        }
+        for (const file of fixture.absentFromReport ?? []) {
+          if ([...report.errors, ...report.warnings].some((issue) => issue.file === file)) {
+            failures.push(fixture.name + ': reported ' + file + ' even though --files excluded it');
+          }
+        }
+        continue;
+      }
       failures.push(
         fixture.name +
           ': expected ' +
@@ -1370,7 +1544,7 @@ async function main() {
   const args = process.argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
     console.log(
-      'Usage: node check-godot-3x.mjs --root <project> [--api <api-3.6.json>] [--files a.gd,b.tscn] [--json] [--strict] [--self-test]',
+      'Usage: node check-godot-3x.mjs --root <project> [--api <api-3.6.json>] [--overlay <dir>] [--files a.gd,b.tscn] [--json] [--strict] [--self-test]',
     );
     return;
   }
@@ -1382,32 +1556,38 @@ async function main() {
   const info = await stat(root).catch(() => null);
   if (!info || !info.isDirectory()) throw new UsageError('--root is not a directory: ' + root);
   const apiPath = path.resolve(valueOf(args, '--api') ?? defaultApi);
+  const overlayValue = valueOf(args, '--overlay');
+  const overlay = overlayValue ? path.resolve(overlayValue) : null;
+  if (overlay) {
+    const overlayInfo = await stat(overlay).catch(() => null);
+    if (!overlayInfo || !overlayInfo.isDirectory()) throw new UsageError('--overlay is not a directory: ' + overlay);
+  }
   const fileList = valueOf(args, '--files');
   const files = fileList
     ? fileList
-        .split(',')
+        .split(/[,;]/)
         .map((item) => item.trim())
         .filter(Boolean)
     : [];
-  const { report, targets } = await runCheck({ root, apiPath, files, strict: args.includes('--strict') });
+  const { report, targets } = await runCheck({ root, overlay, apiPath, files, strict: args.includes('--strict') });
   if (args.includes('--json')) {
     process.stdout.write(
       JSON.stringify(
         {
           ok: report.errors.length === 0,
-          checked: targets.map((file) => path.relative(root, file).split(path.sep).join('/')),
+          checked: targets,
           errors: report.errors,
           warnings: report.warnings,
           verified: report.verified,
           limitations:
-            'Static API and syntax checks only. Runtime semantics, dynamic member access, and resource validity require the Godot 3.6 parser or a headless run.',
+            'Static API and syntax checks with project-wide script context. Runtime semantics, call signatures, dynamic access, and non-script resource validity require the Godot 3.6 parser or a headless run.',
         },
         null,
         2,
       ) + '\n',
     );
   } else {
-    process.stdout.write(formatReport(report, targets, root) + '\n');
+    process.stdout.write(formatReport(report, targets) + '\n');
   }
   process.exitCode = report.errors.length === 0 ? 0 : 1;
 }
