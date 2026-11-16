@@ -1,7 +1,7 @@
 ---
 name: godot-3-dev
 description: Write, review, and down-port Godot 3.x (3.6) GDScript and scenes without re-calling engine-dispatched virtuals and without Godot 4.x symbols.
-version: 2.7.0
+version: 2.7.1
 status: module
 family: architecture
 modes: [script, review, port]
@@ -103,8 +103,13 @@ node "<skill-root>/godot-3-dev/scripts/check-godot-3x.mjs" --root "<project>" --
 The checker uses an official Godot 3.6 API snapshot and catches re-called
 virtuals, Godot 4.x syntax and symbols, scene format drift, unknown scene node
 types, project-setting drift, and high-risk 3.x physics mistakes. Treat a
-nonzero exit code as blocking. The checker is static evidence, not a runtime
-proof: run the project or the editor script parser and report the real result.
+nonzero exit code as blocking. In Codex, the `PreToolUse` guard runs this
+checker on reconstructable `Write`, `Edit`, and `apply_patch` content before
+write and denies checker errors; partial or ambiguous patches fall back to the
+high-confidence lexical guard instead of guessing the final file. After write,
+the hook reruns the checker and blocks further progress while errors remain.
+The checker is static evidence, not a runtime proof: run the project or the
+editor script parser and report the real result.
 
 ### 8. Report the evidence
 
