@@ -86,12 +86,12 @@ async function resource(uri: string): Promise<ResourceData> {
     '.jpg': 'image/jpeg',
     '.pdf': 'application/pdf',
   };
-  const mime = mimeByExtension[ext] ?? 'application/octet-stream';
+  const mime = mimeByExtension[ext];
   if (['.png', '.jpg', '.jpeg', '.webp', '.pdf', '.zip'].includes(ext)) {
-    return { uri, mimeType: mime, blob: bytes.toString('base64') };
+    return { uri, mimeType: mime ?? 'application/octet-stream', blob: bytes.toString('base64') };
   }
   try {
-    return { uri, mimeType: mime, text: new TextDecoder('utf-8', { fatal: true }).decode(bytes) };
+    return { uri, mimeType: mime ?? 'text/plain', text: new TextDecoder('utf-8', { fatal: true }).decode(bytes) };
   } catch {
     return { uri, mimeType: 'application/octet-stream', blob: bytes.toString('base64') };
   }

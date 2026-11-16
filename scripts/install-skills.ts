@@ -6,7 +6,7 @@ import { stdin, stdout } from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { packageSkill } from './package-skill.ts';
-import { errorCode, errorMessage, readJson } from './runtime.ts';
+import { errorCode, errorMessage, isRecord, readJson } from './runtime.ts';
 import type { IntegrationRegistry, IntegrationTool, RollbackItem, RollbackState, SkillCatalog, SkillManifest } from './types.ts';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -65,7 +65,17 @@ async function equalTree(a: string, b: string): Promise<boolean> {
 interface ManifestState {
   skills: string[];
   raw: string | null;
-  data: SkillManifest | null;
+  data: { schemaVersion: SkillManifest['schemaVersion']; lastRun: unknown } | null;
+}
+
+function parseManifest(raw: string): { schemaVersion: SkillManifest['schemaVersion']; skills: string[]; lastRun: unknown } {
+  const parsed: unknown = JSON.parse(raw);
+  if (!isRecord(parsed)) throw new Error('Invalid AzSkills manifest');
+  const version = parsed.schemaVersion;
+  if (version !== 1 && version !== 2 && version !== 3) throw new Error('Invalid AzSkills manifest');
+  const owned = version === 1 ? parsed.paths : parsed.skills;
+  if (!Array.isArray(owned) || !owned.every((id): id is string => safeId(id)) || new Set(owned).size !== owned.length) throw new Error('Invalid AzSkills manifest');
+  return { schemaVersion: version, skills: owned, lastRun: parsed.lastRun };
 }
 
 async function manifestAt(destination: string): Promise<ManifestState> {
@@ -73,12 +83,8 @@ async function manifestAt(destination: string): Promise<ManifestState> {
   if (!await exists(file)) return { skills: [], raw: null, data: null };
   await regularTree(file);
   const raw = await readFile(file, 'utf8');
-  // The narrow cast is safe because schema and ownership fields are validated below.
-  const data = JSON.parse(raw) as SkillManifest;
-  const skills = data.schemaVersion === 1 ? data.paths : data.skills;
-  const validVersion = data.schemaVersion === 1 || data.schemaVersion === 2 || data.schemaVersion === 3;
-  if (!validVersion || !Array.isArray(skills) || skills.some((id) => !safeId(id)) || new Set(skills).size !== skills.length) throw new Error('Invalid AzSkills manifest');
-  return { skills, raw, data };
+  const data = parseManifest(raw);
+  return { skills: data.skills, raw, data };
 }
 
 async function save(destination: string, raw: string | null): Promise<void> {
@@ -132,26 +138,33 @@ async function snapshot(destination: string, names: string[], previousManifest: 
     manifestHash: previousManifest === null ? null : createHash('sha256').update(previousManifest).digest('hex') };
 }
 
-async function validateSnapshot(destination: string, state: RollbackState): Promise<void> {
-  if (!state || typeof state.directory !== 'string' || !inside(backupBase(destination), path.resolve(state.directory)) || !Array.isArray(state.items)) throw new Error('Invalid rollback snapshot');
+async function validateSnapshot(destination: string, state: unknown): Promise<RollbackState> {
+  if (!isRecord(state) || typeof state.directory !== 'string' || !inside(backupBase(destination), path.resolve(state.directory)) || !Array.isArray(state.items)) throw new Error('Invalid rollback snapshot');
   await regularTree(backupBase(destination));
   await regularTree(state.directory);
   if (typeof state.hadManifest !== 'boolean') throw new Error('Invalid previous manifest');
   if (state.hadManifest) {
+    if (typeof state.manifestHash !== 'string') throw new Error('Invalid previous manifest');
     const previousManifest = await readFile(path.join(state.directory, 'previous-manifest.json'), 'utf8');
     if (createHash('sha256').update(previousManifest).digest('hex') !== state.manifestHash) throw new Error('Previous manifest integrity check failed');
-    // The narrow cast is safe because schema and ownership fields are validated below.
-    const prior = JSON.parse(previousManifest) as SkillManifest;
-    const ids = prior.schemaVersion === 1 ? prior.paths : prior.skills;
-    if (!(prior.schemaVersion === 1 || prior.schemaVersion === 2 || prior.schemaVersion === 3) || !Array.isArray(ids) || ids.some((id) => !safeId(id))) throw new Error('Invalid previous ownership');
+    parseManifest(previousManifest);
   }
   const seen = new Set<string>();
+  const items: RollbackItem[] = [];
   for (const item of state.items) {
-    if ((!safeId(item.id) && item.id !== backupName) || seen.has(item.id) || typeof item.existed !== 'boolean') throw new Error('Invalid rollback item');
+    if (!isRecord(item) || (!safeId(item.id) && item.id !== backupName) || seen.has(item.id) || typeof item.existed !== 'boolean') throw new Error('Invalid rollback item');
+    if (item.hash !== null && typeof item.hash !== 'string') throw new Error('Invalid rollback item');
     seen.add(item.id);
     if (item.existed && await treeHash(path.join(state.directory, item.id)) !== item.hash) throw new Error('Rollback backup integrity check failed: ' + item.id);
     if (await exists(path.join(destination, item.id))) await regularTree(path.join(destination, item.id));
+    items.push({ id: item.id, existed: item.existed, hash: item.hash });
   }
+  return {
+    directory: state.directory,
+    items,
+    hadManifest: state.hadManifest,
+    manifestHash: typeof state.manifestHash === 'string' ? state.manifestHash : null,
+  };
 }
 
 async function restore(destination: string, state: RollbackState): Promise<void> {
@@ -179,9 +192,9 @@ async function maintain(destination: string, action: string, packaged: string | 
     if (await exists(owned)) await regularTree(owned);
   }
   if (action === 'rollback') {
-    const state = manifest.data?.schemaVersion === 3 ? manifest.data.lastRun : null;
-    if (!state) throw new Error('No current rollback snapshot; use the previous installer for legacy rollback records');
-    await validateSnapshot(destination, state);
+    const candidate = manifest.data?.schemaVersion === 3 ? manifest.data.lastRun : null;
+    if (!candidate) throw new Error('No current rollback snapshot; use the previous installer for legacy rollback records');
+    const state = await validateSnapshot(destination, candidate);
     console.log('Preview: restore ' + state.items.map((item) => item.id).join(', ') + ' at ' + destination);
     if (!await confirm()) return;
     const rescue = await snapshot(destination, state.items.map((item) => item.id), manifest.raw);
