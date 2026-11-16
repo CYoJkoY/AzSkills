@@ -72,7 +72,7 @@ The CSS file is the executable source of truth. These semantic roles are normati
 Canonical paper, ink, pigment and reading tokens live at `:root` in
 `design-system/wabi-press.css`; `:root[data-theme="dark"]` remaps material values.
 The report template must match them. The pigment table below documents both
-themes; `scripts/check-editorial.mjs` verifies text contrast and report parity.
+themes; `scripts/check-editorial.ts` verifies text contrast and report parity.
 
 ~~~css
 :root {
@@ -235,7 +235,7 @@ A group outline with no visible children is a bug: if the parts are not independ
 
 The terminal target reuses the workbench vocabulary. It does not simulate a GUI: no pixel dimensions, rounded corners, shadows, hover, or font choice. A TUI is successful when a keyboard user can identify context, move, filter, read, and act without colour or a mouse.
 
-Executable preview: `node design-system/tui/preview.mjs --width 120 --color truecolor`. The renderer accepts 24-240 columns; the `--check` matrix covers 40-160 columns, and plain narrow output covers 24-39 columns. It fails on width overflow, ANSI leakage, missing state cues, or missing required labels.
+Executable preview: `node design-system/tui/preview.ts --width 120 --color truecolor`. The renderer accepts 24-240 columns; the `--check` matrix covers 40-160 columns, and plain narrow output covers 24-39 columns. It fails on width overflow, ANSI leakage, missing state cues, or missing required labels.
 
 ### Cell grid and width classes
 
@@ -527,7 +527,7 @@ The reference contributes proven workbench structure and interaction patterns. A
 - [ ] Selection exposes a non-colour cue; grouped selection shows child markers and a count.
 - [ ] The scenario matrix was applied: no workbench chrome reached slides, identity, or editorial surfaces.
 - [ ] The default needs no attribute; explicit editorial is compatible; workbench shares its palette.
-- [ ] The TUI preview passes `node design-system/tui/preview.mjs --check` across 40-160 columns.
+- [ ] The TUI preview passes `node design-system/tui/preview.ts --check` across 40-160 columns.
 - [ ] TUI plain mode contains no ANSI sequences and no non-ASCII glyphs; critical state remains readable.
 - [ ] TUI selection, focus, success, warning, and error survive `NO_COLOR` and a light or dark terminal palette.
 - [ ] CJK width, grapheme-safe truncation, and escape-sequence sanitization are covered.

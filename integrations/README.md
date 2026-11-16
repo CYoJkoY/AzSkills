@@ -40,15 +40,15 @@ Manual import is used only where the vendor workflow is UI-based or not publicly
 
 Start the interactive setup and maintenance wizard:
 
-    node scripts/install-skills.mjs
+    node scripts/install-skills.ts
 
 Or select a client and scope explicitly:
 
-    node scripts/install-skills.mjs --list
-    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills azskills --dry-run
-    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills azskills --yes
-    node scripts/package-skill.mjs --skill azskills --output /path/to/exports
-    node scripts/install-skills.mjs --rollback --target /path/to/project/.agents/skills --yes
-    node scripts/install-skills.mjs --uninstall --target /path/to/project/.agents/skills --yes
+    node scripts/install-skills.ts --list
+    node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --skills azskills --dry-run
+    node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --skills azskills --yes
+    node scripts/package-skill.ts --skill azskills --output /path/to/exports
+    node scripts/install-skills.ts --rollback --target /path/to/project/.agents/skills --yes
+    node scripts/install-skills.ts --uninstall --target /path/to/project/.agents/skills --yes
 
-See [tool installers](../scripts/install-skills.mjs) and the [MCP server](../scripts/azskills-mcp.mjs).
+See [tool installers](../scripts/install-skills.ts) and the [MCP server](../scripts/azskills-mcp.ts).

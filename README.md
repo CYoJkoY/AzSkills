@@ -12,11 +12,11 @@ AzSkills installs as a single `azskills` folder with one root `SKILL.md`. Descri
 
 ## Install
 
-Requires Node.js 22 or later. From this checkout:
+Requires Node.js 22.18 or later, because the scripts run as native TypeScript. From this checkout:
 
 ```sh
-node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --dry-run
-node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --yes
+node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --dry-run
+node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --yes
 ```
 
 The resulting entry is `/path/to/project/.agents/skills/azskills/SKILL.md`. Use `--mode user` for the client user directory, `--target <skills-root>` to override the destination, or `--list` to see supported clients. Running without arguments opens a client-selection prompt. The default scope is user. Every selection installs the same complete bundle.
@@ -28,15 +28,15 @@ codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
 ```
 
 ```sh
-node scripts/package-plugin.mjs --output /path/to/fresh/exports
+node scripts/package-plugin.ts --output /path/to/fresh/exports
 codex plugin marketplace add /path/to/fresh/exports/azskills-marketplace
 ```
 
 The repository root is the plugin root. Its `.agents/plugins/marketplace.json` points to `./`, so a Git clone already contains `.codex-plugin/plugin.json`, `codex-plugin/hooks`, the canonical `SKILL.md`, and the `skills/` entries Codex discovers. The default build mirrors that layout under `dist/azskills-marketplace/plugins/azskills`; with a custom `--output` directory, import the generated marketplace instead.
 
-Install AzSkills from the marketplace in Codex and review/trust its `SessionStart`, `UserPromptSubmit`, `SubagentStart`, `PreToolUse`, and `PostToolUse` hooks when prompted. The package uses the supported `.codex-plugin/plugin.json` manifest with a direct `hooks` path because current Codex CLI hook discovery does not reliably read hooks from Agent Plugins root manifests. After trust, AzSkills routing and GPT with Taste behavior are supplied automatically. SessionStart restores routing context and loads the Taste Main recipe; UserPromptSubmit applies both routing reminders and routes matching code tasks to Az Clean Code; the Godot 3.x guard checks the canonical Codex `apply_patch` command (`Write`/`Edit` are matcher aliases, and synthetic `MultiEdit` events are still understood) against the real project and `project.godot` when it can reconstruct the proposed content, denies checker errors, falls back to high-confidence lexical blocking for partial or ambiguous patches or an unavailable checker, denies shell commands that appear to write Godot files, reruns the checker after shell commands that show write evidence rather than after every read, and blocks further progress after write when static errors remain; SubagentStart and completed local-agent waits apply Taste steering. Hooks require Node.js on PATH and support installation paths containing spaces. The plugin bundles its AzSkills icon for the composer and plugin details. The regular installer above installs a skill folder without these hooks. See the [Codex upgrade and verification guide](integrations/guides/codex.md) to replace a cached installation and verify eight handlers across five events.
+Install AzSkills from the marketplace in Codex and review/trust its `SessionStart`, `UserPromptSubmit`, `SubagentStart`, `PreToolUse`, and `PostToolUse` hooks when prompted. The package uses the supported `.codex-plugin/plugin.json` manifest with a direct `hooks` path because current Codex CLI hook discovery does not reliably read hooks from Agent Plugins root manifests. After trust, AzSkills routing and GPT with Taste behavior are supplied automatically. SessionStart restores routing context and loads the Taste Main recipe; UserPromptSubmit applies both routing reminders and routes matching code tasks to Az Clean Code; the Godot 3.x guard checks the canonical Codex `apply_patch` command (`Write`/`Edit` are matcher aliases, and synthetic `MultiEdit` events are still understood) against the real project and `project.godot` when it can reconstruct the proposed content, denies checker errors, falls back to high-confidence lexical blocking for partial or ambiguous patches or an unavailable checker, denies shell commands that appear to write Godot files, reruns the checker after shell commands that show write evidence rather than after every read, and blocks further progress after write when static errors remain; SubagentStart and completed local-agent waits apply Taste steering. Hooks require Node.js 22.18 or newer on PATH and support installation paths containing spaces. The plugin bundles its AzSkills icon for the composer and plugin details. The regular installer above installs a skill folder without these hooks. See the [Codex upgrade and verification guide](integrations/guides/codex.md) to replace a cached installation and verify eight handlers across five events.
 
-For archive import, run `node scripts/package-skill.mjs --output /path/to/exports` and import `azskills.zip`. The ZIP has the AzSkills root entry and the standalone `az-clean-code/SKILL.md`, plus supporting files. To export only Az Clean Code, run `node scripts/package-skill.mjs --skill az-clean-code --output /path/to/exports`. Install the complete archive, not the manifest alone. Use a fresh export directory; pre-existing older archives are not removed automatically.
+For archive import, run `node scripts/package-skill.ts --output /path/to/exports` and import `azskills.zip`. The ZIP has the AzSkills root entry and the standalone `az-clean-code/SKILL.md`, plus supporting files. To export only Az Clean Code, run `node scripts/package-skill.ts --skill az-clean-code --output /path/to/exports`. Install the complete archive, not the manifest alone. Use a fresh export directory; pre-existing older archives are not removed automatically.
 
 See [client integration guides](integrations/README.md) for Codex plugin setup, skill folders, manual import, and MCP configuration. Client discovery depends on the client scan scope and may require a restart. The installer verifies local contents separately from actual client discovery and invocation.
 
@@ -57,9 +57,9 @@ The installer migrates entries recorded in an older `.azskills-manifest.json` to
 Backups live outside the scan root, in a sibling `.<skills-root-name>-azskills-backups` directory. Existing in-root AzSkills backups move there during migration so their old manifests cannot be rediscovered. Rollback restores the previous entries, previous manifest bytes, and previous in-root backup location, so it intentionally restores the previous discovery behavior too.
 
 ```sh
-node scripts/install-skills.mjs --verify --target /path/to/skills
-node scripts/install-skills.mjs --rollback --target /path/to/skills --yes
-node scripts/install-skills.mjs --uninstall --target /path/to/skills --yes
+node scripts/install-skills.ts --verify --target /path/to/skills
+node scripts/install-skills.ts --rollback --target /path/to/skills --yes
+node scripts/install-skills.ts --uninstall --target /path/to/skills --yes
 ```
 
 Uninstall backs up and removes managed entries. Rollback restores the immediately preceding operation; an unchanged install preserves the existing rollback point. Backups are retained for recovery and are not automatically purged. A missing or modified rollback snapshot requires manual recovery; legacy rollback records use the previous installer.
@@ -108,20 +108,22 @@ These contracts are ordinary Markdown files. They retain their domain workflows 
 
 ## MCP
 
-Register `node scripts/azskills-mcp.mjs` as a stdio server named `azskills`. It lists one tool and one public resource. Call `azskills` with `action: entry` to start, `route` for the routing table, `module` plus `id` (optionally `mode`) for one contract, or `file` plus a bundle-relative `path` for supporting content. Paths are matched against packaged files; arbitrary filesystem access is unavailable. Binary files return embedded resources. Supporting resource URIs use `azskills://skills/azskills/<encoded/path>`.
+Register `node scripts/azskills-mcp.ts` as a stdio server named `azskills`. It lists one tool and one public resource. Call `azskills` with `action: entry` to start, `route` for the routing table, `module` plus `id` (optionally `mode`) for one contract, or `file` plus a bundle-relative `path` for supporting content. Paths are matched against packaged files; arbitrary filesystem access is unavailable. Binary files return embedded resources. Supporting resource URIs use `azskills://skills/azskills/<encoded/path>`.
 
 ## Contributing and verification
 
 See [module system](SKILL-SYSTEM.md), [design contract](DESIGN.md), [design intelligence](design-intelligence.md), [migration and version plan](docs/single-entry-migration.md), and [third-party notices](THIRD_PARTY_NOTICES.md). License: [MIT](LICENSE).
 
+After `npm ci`, `npm run check` runs the type check, validators, and tests. The individual commands are:
+
 ```sh
-node scripts/generate-routing.mjs --check
-node scripts/validate-skills.mjs
-node scripts/validate-integrations.mjs
-node scripts/test-package-skill.mjs
-node scripts/test-install-skills.mjs
-node scripts/test-azskills-mcp.mjs
-node design-system/tui/preview.mjs --check
+node scripts/generate-routing.ts --check
+node scripts/validate-skills.ts
+node scripts/validate-integrations.ts
+node scripts/test-package-skill.ts
+node scripts/test-install-skills.ts
+node scripts/test-azskills-mcp.ts
+node design-system/tui/preview.ts --check
 ```
 
 The terminal preview is an internal module catalog for contributors; it is not the client skill panel.

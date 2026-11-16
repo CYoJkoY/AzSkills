@@ -160,7 +160,7 @@ shorten a rule until it becomes ambiguous.
 2. Add the internal module or mode to the registry.
 3. Write or update the contract and references.
 4. Update routing, catalog, and notices.
-5. Run `node scripts/validate-skills.mjs` and `node design-system/tui/preview.mjs --check`.
+5. Run `node scripts/validate-skills.ts` and `node design-system/tui/preview.ts --check`.
 6. Wait for CI. Do not merge without manual review.
 
 ## Validation
@@ -177,7 +177,7 @@ The validator enforces the machine-checkable part of this document:
 - link integrity in the root system, design, and provenance documents.
 - internal module choices in issue templates.
 
-CI also runs `node design-system/tui/preview.mjs --check`, which fails when the
+CI also runs `node design-system/tui/preview.ts --check`, which fails when the
 terminal preview drifts from the registry.
 
 Passing validation does not prove design quality. It proves the assembly is

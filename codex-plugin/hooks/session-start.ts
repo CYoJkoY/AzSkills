@@ -1,6 +1,10 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 const pluginRoot = process.env.PLUGIN_ROOT;
 if (!pluginRoot) throw new Error('PLUGIN_ROOT is required');
 const event = process.argv[2] ?? 'SessionStart';
@@ -10,8 +14,8 @@ for await (const chunk of process.stdin) input += chunk;
 let prompt = '';
 if (input.trim()) {
   try {
-    const payload = JSON.parse(input);
-    if (typeof payload.prompt === 'string') prompt = payload.prompt;
+    const payload: unknown = JSON.parse(input);
+    if (isRecord(payload) && typeof payload.prompt === 'string') prompt = payload.prompt;
   } catch {
     // Hook input is optional for startup and malformed input must not block routing.
   }
@@ -26,7 +30,7 @@ for (const directory of entryDirectories) {
     skillRoot = directory;
     break;
   } catch (error) {
-    if (error.code !== 'ENOENT') throw error;
+    if (!isRecord(error) || error.code !== 'ENOENT') throw error;
   }
 }
 if (!entry) throw new Error('AzSkills SKILL.md is missing from ' + pluginRoot);
@@ -39,7 +43,7 @@ const cleanCodeContext = cleanCodeMatch
 const godot3Match = event === 'UserPromptSubmit' && (/(^|[^a-z])(godot|gdscript)([^a-z]|$)/i.test(prompt) || /\.(gd|tscn)\b/i.test(prompt));
 const godot3Entry = path.join(skillRoot, 'references', 'modules', 'godot-3-dev.md');
 const godot3Context = godot3Match
-  ? ' This request matches Godot 3.x work. Read ' + godot3Entry + ' and follow its virtual-call and 3.6 API rules before writing any GDScript; never re-call ._ready() or ._physics_process(), and use only Godot 3.6 symbols. After writing or editing any .gd, .tscn, .escn, or project.godot, run: node "' + path.join(skillRoot, 'godot-3-dev', 'scripts', 'check-godot-3x.mjs') + '" --root "<project>" --api "' + path.join(skillRoot, 'godot-3-dev', 'references', 'api-3.6.json') + '" --json. Treat any error as blocking and report the actual command, exit code, findings, and unverified items.'
+  ? ' This request matches Godot 3.x work. Read ' + godot3Entry + ' and follow its virtual-call and 3.6 API rules before writing any GDScript; never re-call ._ready() or ._physics_process(), and use only Godot 3.6 symbols. After writing or editing any .gd, .tscn, .escn, or project.godot, run: node "' + path.join(skillRoot, 'godot-3-dev', 'scripts', 'check-godot-3x.ts') + '" --root "<project>" --api "' + path.join(skillRoot, 'godot-3-dev', 'references', 'api-3.6.json') + '" --json. Treat any error as blocking and report the actual command, exit code, findings, and unverified items.'
   : '';
 const additionalContext = event === 'UserPromptSubmit'
   ? 'For this request, proactively apply AzSkills when its capabilities match the requested outcome. Read ' + path.join(skillRoot, 'SKILL.md') + ' if the entry is not already in context, select one owning module, and load only its required references. Follow user and repository instructions.' + cleanCodeContext + godot3Context

@@ -139,7 +139,7 @@ horizontal overflow at 320 CSS px.
 
 The workbench contract includes a terminal render target defined in
 [`DESIGN.md`](../../DESIGN.md#terminal--tui-contract). The executable preview is
-[`tui/preview.mjs`](../../design-system/tui/preview.mjs). It uses cell and row geometry, ANSI
+[`tui/preview.ts`](../../design-system/tui/preview.ts). It uses cell and row geometry, ANSI
 semantic roles, ASCII fallbacks, and `NO_COLOR` plain mode. It is not a third
 CSS layer or a separate palette; the workbench information architecture remains
 the source of truth.
@@ -181,4 +181,4 @@ only the decisions that change the artifact.
 - `../../design-system/references/design-md-adapter.md` - source-to-contract adapter.
 - `../../design-system/references/design-md-schema.md` - DESIGN.md schema reference.
 - `../../design-system/references/source-format-matrix.md` - source class matrix.
-- [`tui/preview.mjs`](../../design-system/tui/preview.mjs) - executable terminal preview and conformance gate.
+- [`tui/preview.ts`](../../design-system/tui/preview.ts) - executable terminal preview and conformance gate.

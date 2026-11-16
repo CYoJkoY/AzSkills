@@ -9,7 +9,58 @@ import {
   findVirtualRecalls,
   fourXSceneTypes,
   maskCommentsAndStrings,
-} from '../../godot-3-dev/scripts/godot3-lexical.mjs';
+} from '../../godot-3-dev/scripts/godot3-lexical.ts';
+import { errorMessage, isRecord } from '../../scripts/runtime.ts';
+import type { HookEvent } from '../../scripts/types.ts';
+
+interface Violation {
+  file: string;
+  code: string;
+  message: string;
+}
+
+interface CheckerFinding {
+  file: string;
+  line: number;
+  column: number;
+  code: string;
+  message: string;
+}
+
+interface CheckerReport {
+  errors?: CheckerFinding[];
+  warnings?: CheckerFinding[];
+  checked?: string[];
+}
+
+interface CheckerResult {
+  report?: CheckerReport;
+  unavailable?: string;
+}
+
+interface PatchSection {
+  action: string | undefined;
+  file: string;
+  lines: string[];
+}
+
+interface HunkHeader {
+  oldStart: number;
+  oldCount: number;
+  newStart: number;
+  newCount: number;
+}
+
+interface Hunk {
+  header: HunkHeader | null;
+  old: string[];
+  next: string[];
+}
+
+interface ProposedEntry {
+  file: string;
+  content: string;
+}
 
 const pluginRoot = process.env.PLUGIN_ROOT;
 if (!pluginRoot) throw new Error('PLUGIN_ROOT is required');
@@ -20,33 +71,44 @@ const postCheckTimeoutMs = 30000;
 const checkerMaxBuffer = 16 * 1024 * 1024;
 const runtimeLimit = '\nStatic checks do not prove runtime semantics; run the Godot 3.6 parser or headless project check.';
 
-function isGodotPath(file) {
+function isGodotPath(file: string): boolean {
   const base = path.basename(file).toLowerCase();
   return base === 'project.godot' || godotExtensions.has(path.extname(file).toLowerCase());
 }
 
-function parseInput() {
-  let raw = '';
-  return (async () => {
-    for await (const chunk of process.stdin) raw += chunk;
-    if (!raw.trim()) return {};
-    // Malformed input must never block unrelated edits; only parsed Godot
-    // content is allowed to deny a write.
-    try { return JSON.parse(raw); } catch { return {}; }
-  })();
+function toolInput(event: HookEvent): Record<string, unknown> {
+  return isRecord(event.tool_input) ? event.tool_input : {};
 }
 
-function patchFiles(patch, event) {
-  const files = new Map();
-  let current = null;
+async function parseInput(): Promise<HookEvent> {
+  let raw = '';
+  for await (const chunk of process.stdin) raw += String(chunk);
+  if (!raw.trim()) return { hook_event_name: '' };
+  // Malformed input must never block unrelated edits; only parsed Godot
+  // content is allowed to deny a write.
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) return { hook_event_name: '' };
+    const name = parsed.hook_event_name;
+    return { ...parsed, hook_event_name: typeof name === 'string' ? name : '' };
+  } catch {
+    return { hook_event_name: '' };
+  }
+}
+
+function patchFiles(patch: unknown, event: HookEvent): Map<string, string[]> {
+  const files = new Map<string, string[]>();
+  let current: string | null = null;
   for (const line of String(patch ?? '').split(/\r?\n/)) {
     const section = /^\*\*\* (?:Add|Update|Delete) File: (.+)$/.exec(line);
     if (section) {
-      current = resolveToolPath(section[1].trim(), event);
+      const target = (section[1] ?? '').trim();
+      current = resolveToolPath(target, event);
       if (!files.has(current)) files.set(current, []);
       continue;
     }
-    if (current && line.startsWith('+')) files.get(current).push(line.slice(1));
+    if (current === null) continue;
+    if (line.startsWith('+')) files.get(current)?.push(line.slice(1));
   }
   return files;
 }
@@ -54,33 +116,33 @@ function patchFiles(patch, event) {
 // Codex serializes the canonical `apply_patch` call as `{ "command": patch }`.
 // Older hook payloads and synthetic events use `patch` or `input`; accepting all
 // three keeps real Codex and portable events on the same checker path.
-function patchText(input) {
+function patchText(input: Record<string, unknown>): string {
   if (typeof input.patch === 'string') return input.patch;
   if (typeof input.command === 'string') return input.command;
   if (typeof input.input === 'string') return input.input;
   return '';
 }
 
-function changedFiles(event) {
-  const input = event.tool_input ?? {};
+function changedFiles(event: HookEvent): Map<string, string[]> {
+  const input = toolInput(event);
   if (event.tool_name === 'apply_patch') return patchFiles(patchText(input), event);
   const file = input.file_path ?? input.path ?? input.filePath;
   if (!file) return new Map();
   if (event.tool_name === 'MultiEdit') {
-    const lines = [];
+    const lines: string[] = [];
     for (const edit of Array.isArray(input.edits) ? input.edits : []) {
-      if (edit && typeof edit.new_string === 'string') lines.push(...edit.new_string.split(/\r?\n/));
+      if (isRecord(edit) && typeof edit.new_string === 'string') lines.push(...edit.new_string.split(/\r?\n/));
     }
     return new Map([[resolveToolPath(file, event), lines]]);
   }
   const content = input.content ?? input.new_string;
-  return new Map([[resolveToolPath(file, event), content == null ? [] : String(content).split(/\r?\n/)]])
+  return new Map([[resolveToolPath(file, event), content == null ? [] : String(content).split(/\r?\n/)]]);
 }
 
 // Shell writes cannot be reconstructed before execution, so the guard only
 // blocks commands that both name a Godot file and carry a high-confidence
 // write shape. Reads such as `Get-Content Player.gd` stay allowed.
-const shellWriteIndicators = [
+const shellWriteIndicators: { pattern: RegExp; label: string }[] = [
   { pattern: /\b(?:Set-Content|Add-Content|Out-File|Tee-Object)\b/i, label: 'PowerShell content cmdlet' },
   { pattern: /\b(?:Copy-Item|Move-Item|New-Item|cp|mv|copy|move|rsync|scp)\b/i, label: 'file copy, move, or create command' },
   { pattern: /\b(?:writeFileSync|writeFile|appendFileSync|appendFile|createWriteStream)\b/, label: 'Node write API' },
@@ -92,7 +154,7 @@ const shellWriteIndicators = [
   { pattern: /(?:^|[^-\w])patch\b/i, label: 'patch application' },
 ];
 
-function godotToken(value) {
+function godotToken(value: string): string | null {
   const cleaned = value.replace(/^["'`(]+|["'`),;:]+$/g, '').replace(/:\d+$/, '');
   if (!cleaned) return null;
   const base = cleaned.toLowerCase();
@@ -102,8 +164,8 @@ function godotToken(value) {
 // Split on path separators, commas, and `=` so `--files=a.gd,b.gd` still
 // yields both targets. Quoted prose is tokenized too; the write-shape gate
 // keeps a mention inside a commit message from denying on its own.
-function shellGodotPaths(command) {
-  const found = [];
+function shellGodotPaths(command: unknown): string[] {
+  const found: string[] = [];
   for (const match of String(command ?? '').matchAll(/[^\s"'`|;&<>()]+/g)) {
     for (const part of match[0].split(/[\\/,=]/)) {
       const token = godotToken(part);
@@ -113,15 +175,16 @@ function shellGodotPaths(command) {
   return found;
 }
 
-function redirectTargets(command) {
-  const targets = [];
+function redirectTargets(command: unknown): string[] {
+  const targets: string[] = [];
   for (const match of String(command ?? '').matchAll(/(?:^|[^<>])(?:>>?)\s*("[^"]+"|'[^']+'|[^\s<>|;&]+)/g)) {
-    targets.push(match[1]);
+    const target = match[1];
+    if (target !== undefined) targets.push(target);
   }
   return targets;
 }
 
-function maskQuotedText(text) {
+function maskQuotedText(text: string): string {
   return text.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`/g, (match) => ' '.repeat(match.length));
 }
 
@@ -129,7 +192,7 @@ const shellInterpreterEval = /\b(?:pwsh|powershell|cmd|bash|sh|zsh|fish|node|den
 
 // A quoted interpreter payload is executable code, so keep it visible to the
 // write indicators. Quoted prose elsewhere, such as a commit message, is not.
-function shellIndicatorText(command) {
+function shellIndicatorText(command: unknown): string {
   const text = String(command ?? '');
   const masked = maskQuotedText(text);
   const evaluated = shellInterpreterEval.exec(masked);
@@ -141,7 +204,7 @@ function shellIndicatorText(command) {
 // Evidence that a shell command may change a file. Read-only commands that
 // merely name Godot files (`Get-Content Player.gd`, `rg -g '*.gd'`) must not
 // rerun the checker and block on pre-existing errors.
-function shellWriteEvidence(command) {
+function shellWriteEvidence(command: unknown): string | null {
   const text = String(command ?? '');
   for (const target of redirectTargets(text)) {
     if (shellGodotPaths(target).length) return 'output redirect into ' + target;
@@ -156,19 +219,20 @@ function shellWriteEvidence(command) {
 // Whole-project post-checks must not turn unrelated shell writes into
 // pre-existing-error failures. They stay useful for rewrites whose targets
 // are not explicit, such as patches, VCS restores, and Godot-file globs.
-function shellWritesGodotProject(command) {
+function shellWritesGodotProject(command: unknown): boolean {
   const text = shellIndicatorText(command);
   return shellGodotPaths(command).length > 0 || /\b(?:git\s+(?:apply|checkout|restore)|patch\b|\*\.(?:gd|tscn|escn)|project\.godot)/i.test(text);
 }
 
-function shellWriteReason(command) {
+function shellWriteReason(command: unknown): string | null {
   const godot = shellGodotPaths(command);
-  if (!godot.length) return null;
+  const first = godot[0];
+  if (first === undefined) return null;
   const evidence = shellWriteEvidence(command);
-  return evidence ? evidence + ' touching ' + godot[0] : null;
+  return evidence ? evidence + ' touching ' + first : null;
 }
 
-function shellDeny(reason) {
+function shellDeny(reason: string): Record<string, unknown> {
   return {
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
@@ -181,7 +245,7 @@ function shellDeny(reason) {
   };
 }
 
-function countOccurrences(text, needle) {
+function countOccurrences(text: string, needle: string): number {
   if (!needle) return 0;
   let count = 0;
   let offset = 0;
@@ -193,18 +257,18 @@ function countOccurrences(text, needle) {
   }
 }
 
-function resolveToolPath(file, event) {
+function resolveToolPath(file: unknown, event: HookEvent): string {
   const value = String(file);
   return path.resolve(event.cwd ? String(event.cwd) : process.cwd(), value);
 }
 
-function toolPath(event) {
-  const input = event.tool_input ?? {};
+function toolPath(event: HookEvent): string | null {
+  const input = toolInput(event);
   const file = input.file_path ?? input.path ?? input.filePath;
   return typeof file === 'string' && file.trim() ? resolveToolPath(file, event) : null;
 }
 
-async function readExisting(file) {
+async function readExisting(file: string): Promise<string | null> {
   try {
     return await readFile(file, 'utf8');
   } catch {
@@ -214,23 +278,23 @@ async function readExisting(file) {
 
 // Apply one Edit-style replacement list in order. Returns null when any step is
 // ambiguous, because a guessed reconstruction would deny a legal write.
-function applyEdits(current, edits) {
+function applyEdits(current: string, edits: unknown[]): string | null {
   let text = current;
   for (const edit of edits) {
-    if (!edit || typeof edit.old_string !== 'string' || typeof edit.new_string !== 'string') return null;
+    if (!isRecord(edit) || typeof edit.old_string !== 'string' || typeof edit.new_string !== 'string') return null;
     const occurrences = countOccurrences(text, edit.old_string);
     if (occurrences === 0) return null;
     if (!edit.replace_all && occurrences !== 1) return null;
-    text = edit.replace_all
+    text = edit.replace_all === true
       ? text.split(edit.old_string).join(edit.new_string)
       : text.replace(edit.old_string, edit.new_string);
   }
   return text;
 }
 
-async function completeToolFiles(event) {
-  const input = event.tool_input ?? {};
-  const output = new Map();
+async function completeToolFiles(event: HookEvent): Promise<Map<string, string>> {
+  const input = toolInput(event);
+  const output = new Map<string, string>();
   const resolved = toolPath(event);
   if (!resolved) return output;
   if ((event.tool_name === 'Write' || event.tool_name === 'Edit') && typeof input.content === 'string') {
@@ -240,7 +304,7 @@ async function completeToolFiles(event) {
   if (event.tool_name !== 'Edit' && event.tool_name !== 'MultiEdit') return output;
   const current = await readExisting(resolved);
   if (current == null) return output;
-  const edits = event.tool_name === 'MultiEdit'
+  const edits: unknown[] = event.tool_name === 'MultiEdit'
     ? (Array.isArray(input.edits) ? input.edits : [])
     : [input];
   if (!edits.length) return output;
@@ -249,13 +313,13 @@ async function completeToolFiles(event) {
   return output;
 }
 
-function parsePatchSections(patch) {
-  const sections = [];
-  let current = null;
+function parsePatchSections(patch: unknown): PatchSection[] {
+  const sections: PatchSection[] = [];
+  let current: PatchSection | null = null;
   for (const line of String(patch ?? '').split(/\r?\n/)) {
     const section = /^\*\*\* (Add|Update|Delete) File: (.+)$/.exec(line);
     if (section) {
-      current = { action: section[1], file: section[2].trim(), lines: [] };
+      current = { action: section[1], file: (section[2] ?? '').trim(), lines: [] };
       sections.push(current);
       continue;
     }
@@ -264,10 +328,10 @@ function parsePatchSections(patch) {
   return sections;
 }
 
-function applyPatchHunks(source, lines) {
+function applyPatchHunks(source: string, lines: string[]): string | null {
   const sourceLines = source.replace(/\r\n/g, '\n').split('\n');
-  const hunks = [];
-  let hunk = null;
+  const hunks: Hunk[] = [];
+  let hunk: Hunk | null = null;
   for (const line of lines) {
     if (line.startsWith('@@')) {
       hunk = { header: parseHunkHeader(line), old: [], next: [] };
@@ -325,7 +389,7 @@ function applyPatchHunks(source, lines) {
   return sourceLines.join('\n');
 }
 
-function parseHunkHeader(line) {
+function parseHunkHeader(line: string): HunkHeader | null {
   const match = /^@@(?:\s+-(\d+)(?:,(\d+))?\s+\+(\d+)(?:,(\d+))?)?\s*@@/.exec(line);
   if (!match || !match[1]) return null;
   return {
@@ -336,10 +400,10 @@ function parseHunkHeader(line) {
   };
 }
 
-async function completePatchFiles(event) {
+async function completePatchFiles(event: HookEvent): Promise<Map<string, string>> {
   if (event.tool_name !== 'apply_patch') return new Map();
-  const output = new Map();
-  for (const section of parsePatchSections(patchText(event.tool_input ?? {}))) {
+  const output = new Map<string, string>();
+  for (const section of parsePatchSections(patchText(toolInput(event)))) {
     const resolved = resolveToolPath(section.file, event);
     if (section.action === 'Delete') continue;
     if (section.action === 'Add') {
@@ -357,15 +421,15 @@ async function completePatchFiles(event) {
   return output;
 }
 
-async function reconstructableFiles(event) {
+async function reconstructableFiles(event: HookEvent): Promise<Map<string, string>> {
   const complete = await completeToolFiles(event);
-  const patchFiles = await completePatchFiles(event);
-  for (const [file, content] of patchFiles) complete.set(file, content);
+  const patchFileMap = await completePatchFiles(event);
+  for (const [file, content] of patchFileMap) complete.set(file, content);
   return complete;
 }
 
-function violations(files) {
-  const found = [];
+function violations(files: Map<string, string[]>): Violation[] {
+  const found: Violation[] = [];
   for (const [file, lines] of files) {
     if (!isGodotPath(file)) continue;
     const text = lines.join('\n');
@@ -382,8 +446,9 @@ function violations(files) {
         found.push({ file, code: 'WRONG_SCENE_FORMAT', message: 'scene format=3 is not Godot 3.x' });
       }
       for (const match of text.matchAll(/\[node\b[^\]]*\btype\s*=\s*"([^"]+)"[^\]]*\]/g)) {
-        if (fourXSceneTypes.has(match[1])) {
-          found.push({ file, code: 'GODOT4_SCENE_TYPE', message: 'scene node type ' + match[1] + ' is Godot 4.x' });
+        const nodeType = match[1];
+        if (nodeType !== undefined && fourXSceneTypes.has(nodeType)) {
+          found.push({ file, code: 'GODOT4_SCENE_TYPE', message: 'scene node type ' + nodeType + ' is Godot 4.x' });
         }
       }
       continue;
@@ -399,7 +464,7 @@ function violations(files) {
   return found;
 }
 
-function projectManifestViolations(file, text) {
+function projectManifestViolations(file: string, text: string): Violation[] {
   if (!/(^|\n)\s*config_version\s*=\s*5\b/.test(maskCommentsAndStrings(text))) return [];
   return [{ file, code: 'GODOT4_PROJECT', message: 'config_version=5 is a Godot 4.x project' }];
 }
@@ -407,9 +472,9 @@ function projectManifestViolations(file, text) {
 // The manifest check must survive an ambiguous patch or a broken checker: in a
 // Godot 4.x project even a clean-looking 3.x script write is wrong. The write
 // itself is excluded so fixing project.godot from 5 to 4 stays possible.
-async function manifestViolations(files) {
-  const found = [];
-  const seen = new Set();
+async function manifestViolations(files: Map<string, string[]>): Promise<Violation[]> {
+  const found: Violation[] = [];
+  const seen = new Set<string>();
   for (const file of files.keys()) {
     if (!isGodotPath(file) || path.basename(file).toLowerCase() === 'project.godot') continue;
     const root = await projectRoot(file);
@@ -421,17 +486,41 @@ async function manifestViolations(files) {
   return found;
 }
 
-function deny(findings) {
+function deny(findings: Violation[]): Record<string, unknown> {
   return { hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: findings.map((item) => item.file + ': ' + item.code + ' - ' + item.message).join('; ') } };
 }
 
-const checkerScript = () => path.join(pluginRoot, 'godot-3-dev', 'scripts', 'check-godot-3x.mjs');
-const apiScript = () => path.join(pluginRoot, 'godot-3-dev', 'references', 'api-3.6.json');
+const checkerScript = (): string => path.join(pluginRoot, 'godot-3-dev', 'scripts', 'check-godot-3x.ts');
+const apiScript = (): string => path.join(pluginRoot, 'godot-3-dev', 'references', 'api-3.6.json');
 
 // Run the full checker with the project on disk as `--root` and the proposed
 // contents as `--overlay`, so inheritance, signals, and res:// targets resolve
 // project-wide without copying the project into a temporary directory.
-function runChecker({ root, overlay, files, timeout }) {
+function checkerFindings(value: unknown): CheckerFinding[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is CheckerFinding =>
+    isRecord(item)
+    && typeof item.file === 'string'
+    && typeof item.line === 'number'
+    && typeof item.column === 'number'
+    && typeof item.code === 'string'
+    && typeof item.message === 'string',
+  );
+}
+
+function toCheckerReport(value: unknown): CheckerReport {
+  if (!isRecord(value)) return {};
+  const report: CheckerReport = {
+    errors: checkerFindings(value.errors),
+    warnings: checkerFindings(value.warnings),
+  };
+  if (Array.isArray(value.checked)) {
+    report.checked = value.checked.filter((item): item is string => typeof item === 'string');
+  }
+  return report;
+}
+
+function runChecker({ root, overlay, files, timeout }: { root: string; overlay?: string; files: string[]; timeout: number }): CheckerResult {
   const args = [checkerScript(), '--root', root, '--api', apiScript(), '--json'];
   if (overlay) args.push('--overlay', overlay);
   if (files.length) args.push('--files', files.join(','));
@@ -444,28 +533,30 @@ function runChecker({ root, overlay, files, timeout }) {
     return { unavailable: result.error?.message ?? (result.stderr || 'exit code 2').trim() };
   }
   try {
-    return { report: JSON.parse(result.stdout) };
+    const parsed: unknown = JSON.parse(result.stdout);
+    return { report: toCheckerReport(parsed) };
   } catch {
     return { unavailable: 'checker returned non-JSON output: ' + String(result.stdout ?? '').slice(0, 200) };
   }
 }
 
-async function preCheck(proposed) {
+async function preCheck(proposed: Map<string, string>): Promise<{ findings: Violation[]; notes: string[] }> {
   const godotFiles = [...proposed.entries()].filter(([file]) => isGodotPath(file));
   if (!godotFiles.length) return { findings: [], notes: [] };
-  const groups = new Map();
+  const groups = new Map<string, ProposedEntry[]>();
   for (const [file, content] of godotFiles) {
     const root = await projectRoot(file);
-    if (!groups.has(root)) groups.set(root, []);
-    groups.get(root).push({ file, content });
+    const entries = groups.get(root) ?? [];
+    entries.push({ file, content });
+    groups.set(root, entries);
   }
-  const findings = [];
-  const notes = [];
+  const findings: Violation[] = [];
+  const notes: string[] = [];
   for (const [root, entries] of groups) {
-    let staging = null;
+    let staging: string | null = null;
     try {
       staging = await mkdtemp(path.join(tmpdir(), 'azskills-godot-precheck-'));
-      const targets = [];
+      const targets: string[] = [];
       for (const entry of entries) {
         const relative = relativeToRoot(root, entry.file);
         if (!relative) continue;
@@ -484,7 +575,7 @@ async function preCheck(proposed) {
         notes.push('Full Godot 3.x checker unavailable for ' + targets.join(', ') + ': ' + unavailable + '. Only lexical checks ran; run the checker manually.');
         continue;
       }
-      for (const issue of report.errors ?? []) {
+      for (const issue of report?.errors ?? []) {
         findings.push({
           file: path.resolve(root, ...issue.file.split('/')),
           code: issue.code,
@@ -492,7 +583,7 @@ async function preCheck(proposed) {
         });
       }
     } catch (error) {
-      notes.push('Full Godot 3.x checker could not stage ' + entries[0].file + ': ' + (error instanceof Error ? error.message : String(error)) + '. Only lexical checks ran.');
+      notes.push('Full Godot 3.x checker could not stage ' + (entries[0]?.file ?? '') + ': ' + errorMessage(error) + '. Only lexical checks ran.');
     } finally {
       if (staging) await rm(staging, { recursive: true, force: true }).catch(() => {});
     }
@@ -501,25 +592,25 @@ async function preCheck(proposed) {
 }
 
 // Project-relative POSIX path, or null when the file is outside the project.
-function relativeToRoot(root, file) {
+function relativeToRoot(root: string, file: string): string | null {
   const relative = path.relative(root, path.resolve(file));
   if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) return null;
   return relative.split(path.sep).join('/');
 }
 
-async function exists(file) {
+async function exists(file: string): Promise<boolean> {
   try { await access(file); return true; } catch { return false; }
 }
 
 // A Godot 4.x project must not receive "clean" 3.x scripts, and a project
 // without `config_version` cannot be proven to be 3.x. Both facts live in
 // project.godot, so it always joins the reported targets when it exists.
-async function includeProjectManifest(root, relativeFiles) {
+async function includeProjectManifest(root: string, relativeFiles: string[]): Promise<void> {
   if (relativeFiles.includes('project.godot')) return;
   if (await exists(path.join(root, 'project.godot'))) relativeFiles.push('project.godot');
 }
 
-async function projectRoot(file) {
+async function projectRoot(file: string): Promise<string> {
   let current = path.resolve(path.dirname(file));
   while (true) {
     if (await exists(path.join(current, 'project.godot'))) return current;
@@ -529,7 +620,7 @@ async function projectRoot(file) {
   }
 }
 
-async function findProjectRoot(start) {
+async function findProjectRoot(start: string): Promise<string | null> {
   let current = path.resolve(start);
   while (true) {
     if (await exists(path.join(current, 'project.godot'))) return current;
@@ -539,9 +630,9 @@ async function findProjectRoot(start) {
   }
 }
 
-async function postCheck(event, files) {
-  const existing = [];
-  const deletedRoots = new Map();
+async function postCheck(event: HookEvent, files: Map<string, string[]>): Promise<Record<string, unknown>> {
+  const existing: string[] = [];
+  const deletedRoots = new Map<string, Set<string>>();
   for (const file of files.keys()) {
     const resolved = path.resolve(file);
     if (!isGodotPath(resolved)) continue;
@@ -555,28 +646,30 @@ async function postCheck(event, files) {
     const root = await projectRoot(resolved);
     const relative = relativeToRoot(root, resolved);
     if (!relative) continue;
-    if (!deletedRoots.has(root)) deletedRoots.set(root, new Set());
-    deletedRoots.get(root).add(relative);
+    const removed = deletedRoots.get(root) ?? new Set<string>();
+    removed.add(relative);
+    deletedRoots.set(root, removed);
   }
   if (!existing.length && !deletedRoots.size) return { continue: true };
-  const groups = new Map();
+  const groups = new Map<string, string[]>();
   for (const file of existing) {
     const root = await projectRoot(file);
     const relative = relativeToRoot(root, file);
     if (!relative) continue;
-    if (!groups.has(root)) groups.set(root, []);
-    groups.get(root).push(relative);
+    const entries = groups.get(root) ?? [];
+    entries.push(relative);
+    groups.set(root, entries);
   }
   for (const [root, relativeFiles] of groups) await includeProjectManifest(root, relativeFiles);
-  const messages = [];
-  const failures = [];
+  const messages: string[] = [];
+  const failures: string[] = [];
   for (const [root, relativeFiles] of groups) {
     const { report, unavailable } = runChecker({ root, files: relativeFiles, timeout: postCheckTimeoutMs });
     if (unavailable) {
       // The write already happened, so blocking on a broken checker only hides
       // the real content. Re-run the lexical rules on the written files instead.
       messages.push('Godot 3.x checker unavailable for ' + relativeFiles.join(', ') + ': ' + unavailable + '. Run it manually.');
-      const fallback = new Map();
+      const fallback = new Map<string, string[]>();
       for (const relative of relativeFiles) {
         const text = await readExisting(path.resolve(root, ...relative.split('/')));
         if (text != null) fallback.set(relative, text.split(/\r?\n/));
@@ -586,8 +679,8 @@ async function postCheck(event, files) {
       }
       continue;
     }
-    const errors = report.errors ?? [];
-    const warnings = report.warnings ?? [];
+    const errors = report?.errors ?? [];
+    const warnings = report?.warnings ?? [];
     messages.push(
       'Godot 3.x static check: ' + relativeFiles.join(', ') +
       '; errors=' + errors.length + ', warnings=' + warnings.length +
@@ -602,7 +695,7 @@ async function postCheck(event, files) {
       continue;
     }
     const names = [...removed].map((item) => path.posix.basename(item));
-    const errors = report.errors ?? [];
+    const errors = report?.errors ?? [];
     // Block only on missing-path errors that can result from the removal;
     // unrelated findings in other files stay as notes.
     const related = errors.filter((item) =>
@@ -626,17 +719,18 @@ async function postCheck(event, files) {
 // Shell tools expose `{ "command": ... }` and no proposed file content. After
 // execution, check the named Godot files, or the whole project for patch and
 // VCS commands that rewrite files without naming them.
-async function shellPostCheck(event) {
-  const command = String(event.tool_input?.command ?? '');
+async function shellPostCheck(event: HookEvent): Promise<Record<string, unknown>> {
+  const command = String(toolInput(event).command ?? '');
   // A read-only command is not a write event, even when it names a Godot file.
   if (!shellWriteEvidence(command)) return { continue: true };
   if (!shellWritesGodotProject(command)) return { continue: true };
-  const files = new Map();
+  const files = new Map<string, string[]>();
   for (const token of shellGodotPaths(command)) files.set(resolveToolPath(token, event), []);
   if (files.size) {
     const result = await postCheck(event, files);
     if (result.decision === 'block') return result;
-    const extra = result.hookSpecificOutput?.additionalContext ?? '';
+    const hookSpecificOutput = isRecord(result.hookSpecificOutput) ? result.hookSpecificOutput : {};
+    const extra = typeof hookSpecificOutput.additionalContext === 'string' ? hookSpecificOutput.additionalContext : '';
     return {
       continue: true,
       hookSpecificOutput: {
@@ -657,7 +751,7 @@ async function shellPostCheck(event) {
       },
     };
   }
-  const errors = report.errors ?? [];
+  const errors = report?.errors ?? [];
   if (errors.length) {
     return {
       decision: 'block',
@@ -672,8 +766,8 @@ async function shellPostCheck(event) {
     hookSpecificOutput: {
       hookEventName: event.hook_event_name,
       additionalContext:
-        'Godot 3.x static check after shell write in ' + root + ': checked=' + report.checked.length +
-        ', errors=0, warnings=' + (report.warnings ?? []).length + '.' + runtimeLimit,
+        'Godot 3.x static check after shell write in ' + root + ': checked=' + (report?.checked ?? []).length +
+        ', errors=0, warnings=' + (report?.warnings ?? []).length + '.' + runtimeLimit,
     },
   };
 }
@@ -681,7 +775,7 @@ async function shellPostCheck(event) {
 const event = await parseInput();
 if (event.tool_name === 'Bash') {
   if (event.hook_event_name === 'PreToolUse') {
-    const reason = shellWriteReason(event.tool_input?.command);
+    const reason = shellWriteReason(toolInput(event).command);
     process.stdout.write(JSON.stringify(reason ? shellDeny(reason) : { continue: true }));
   } else if (event.hook_event_name === 'PostToolUse') {
     process.stdout.write(JSON.stringify(await shellPostCheck(event)));

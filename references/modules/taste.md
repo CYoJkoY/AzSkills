@@ -67,4 +67,4 @@ Hooks emit Codex `hookSpecificOutput` with the originating `hookEventName` and `
 - [Main behavior](../../codex-plugin/taste/recipe/main.md)
 - [Subagent behavior](../../codex-plugin/taste/recipe/sub.md)
 - [Independent behavior](../../codex-plugin/taste/recipe/independent.md)
-- [Hook implementation](../../codex-plugin/taste/hooks/steer.mjs)
+- [Hook implementation](../../codex-plugin/taste/hooks/steer.ts)

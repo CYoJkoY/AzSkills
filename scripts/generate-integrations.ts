@@ -1,13 +1,15 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { errorCode, readJson } from './runtime.ts';
+import type { IntegrationMechanism, IntegrationRegistry, IntegrationTool } from './types.ts';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const registryPath = path.join(root, 'integrations/tools.json');
-const registry = JSON.parse(await readFile(registryPath, 'utf8'));
+const registry = await readJson<IntegrationRegistry>(registryPath);
 const check = process.argv.includes('--check');
 
-const labels = {
+const labels: Record<IntegrationMechanism, string> = {
   'native-skills': 'Native skill folder',
   'shared-skills': 'Shared skills folder',
   'codex-plugin': 'Codex plugin with session hook',
@@ -15,8 +17,8 @@ const labels = {
   mcp: 'MCP server',
 };
 
-const guide = (tool) => {
-  const lines = [];
+const guide = (tool: IntegrationTool): string => {
+  const lines: string[] = [];
   lines.push('# ' + tool.name);
   lines.push('');
   lines.push('[Back to integrations](../README.md) | [Repository README](../../README.md)');
@@ -38,40 +40,40 @@ const guide = (tool) => {
     lines.push('');
     lines.push('    codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git');
     lines.push('');
-    lines.push('    node scripts/package-plugin.mjs');
+    lines.push('    node scripts/package-plugin.ts');
     lines.push('    codex plugin marketplace add ./dist/azskills-marketplace');
     lines.push('');
     lines.push('The repository root is the plugin root. Its .agents/plugins/marketplace.json points to ./, so a Git clone already contains .codex-plugin/plugin.json, codex-plugin/hooks, the canonical SKILL.md, and the skills entries Codex discovers. The default build mirrors that layout under dist/azskills-marketplace/plugins/azskills; with a custom --output directory, import the generated azskills-marketplace directory instead.');
     lines.push('');
-    lines.push('Install AzSkills from the marketplace in Codex. Review and trust the bundled hooks when prompted. The package uses the supported `.codex-plugin/plugin.json` manifest with a direct `hooks` path. Codex 0.167.0-alpha.4.1 discovers all eight handlers in this format but silently omits them from the Agent Plugins root manifest ([upstream issue](https://github.com/openai/codex/issues/59516)). Keep a root `plugin.json` out of the plugin root; adding a compatibility manifest alongside `.codex-plugin` does not select the compatibility loader. Once trusted, matching requests need no explicit invocation. SessionStart restores routing context; UserPromptSubmit applies routing and code-task guidance; the Godot 3.x guard checks the canonical `apply_patch` command (`Write`/`Edit` are matcher aliases; synthetic `MultiEdit` events still work) against the real project and `project.godot` when it can reconstruct the proposed content, denies checker errors in PreToolUse, falls back to high-confidence lexical blocking for partial or ambiguous patches or an unavailable checker, denies shell commands that appear to write Godot files, reruns the checker after shell commands that show write evidence, and blocks further progress in PostToolUse while static errors remain; SubagentStart and the wait-agent PostToolUse handler apply Taste steering. Hooks require Node.js on PATH and support installation paths containing spaces.');
+    lines.push('Install AzSkills from the marketplace in Codex. Review and trust the bundled hooks when prompted. The package uses the supported `.codex-plugin/plugin.json` manifest with a direct `hooks` path. Codex 0.167.0-alpha.4.1 discovers all eight handlers in this format but silently omits them from the Agent Plugins root manifest ([upstream issue](https://github.com/openai/codex/issues/59516)). Keep a root `plugin.json` out of the plugin root; adding a compatibility manifest alongside `.codex-plugin` does not select the compatibility loader. Once trusted, matching requests need no explicit invocation. SessionStart restores routing context; UserPromptSubmit applies routing and code-task guidance; the Godot 3.x guard checks the canonical `apply_patch` command (`Write`/`Edit` are matcher aliases; synthetic `MultiEdit` events still work) against the real project and `project.godot` when it can reconstruct the proposed content, denies checker errors in PreToolUse, falls back to high-confidence lexical blocking for partial or ambiguous patches or an unavailable checker, denies shell commands that appear to write Godot files, reruns the checker after shell commands that show write evidence, and blocks further progress in PostToolUse while static errors remain; SubagentStart and the wait-agent PostToolUse handler apply Taste steering. Hooks require Node.js 22.18 or newer on PATH and support installation paths containing spaces.');
     lines.push('');
     lines.push('When upgrading from an earlier release, refresh the marketplace source and update or reinstall AzSkills in Codex. Confirm the installed plugin reports 2.7.1 or later; changing the checkout alone does not replace a cached installation. Hook trust is keyed to the handler hash, so an upgrade that changes `hooks.json` or a bundled script marks the hooks for review again; re-trust them before expecting them to run. Open the hook list (or `/hooks` in the CLI): expect eight handlers across SessionStart, UserPromptSubmit, SubagentStart, PreToolUse, and PostToolUse, visible even before trust. Review and trust the commands, then start a new session. An empty list indicates discovery or installation trouble; visible untrusted hooks require trust before execution.');
   } else if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
     lines.push('For an interactive setup, run the guided wizard from the AzSkills checkout:');
     lines.push('');
-    lines.push('    node scripts/install-skills.mjs');
+    lines.push('    node scripts/install-skills.ts');
     lines.push('');
     lines.push('The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.');
     lines.push('');
     lines.push('From the AzSkills checkout, install into a project skill directory:');
     lines.push('');
-    lines.push('    node scripts/install-skills.mjs --tool ' + tool.id + ' --mode project --project /path/to/project');
+    lines.push('    node scripts/install-skills.ts --tool ' + tool.id + ' --mode project --project /path/to/project');
     lines.push('');
     lines.push('Install for the current user instead:');
     lines.push('');
-    lines.push('    node scripts/install-skills.mjs --tool ' + tool.id + ' --mode user');
+    lines.push('    node scripts/install-skills.ts --tool ' + tool.id + ' --mode user');
     lines.push('');
     lines.push('Use --target to place the skill folder somewhere other than the default target. Use --dry-run to inspect without writing, --all-skills as a legacy shorthand for the complete AzSkills bundle, --rollback to restore the previous run, and --uninstall to remove only manifest-managed skill directories. Non-interactive writes require --yes after reviewing the preview.');
   } else if (tool.mechanism === 'mcp') {
     lines.push('For an interactive setup, run the guided wizard from the AzSkills checkout:');
     lines.push('');
-    lines.push('    node scripts/install-skills.mjs');
+    lines.push('    node scripts/install-skills.ts');
     lines.push('');
     lines.push('The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.');
     lines.push('');
     lines.push('Run the dependency-free server from the AzSkills checkout:');
     lines.push('');
-    lines.push('    node scripts/azskills-mcp.mjs');
+    lines.push('    node scripts/azskills-mcp.ts');
     lines.push('');
     lines.push('Register it as a stdio MCP server named azskills. Example configuration:');
     lines.push('');
@@ -79,7 +81,7 @@ const guide = (tool) => {
     lines.push('      "mcpServers": {');
     lines.push('        "azskills": {');
     lines.push('          "command": "node",');
-    lines.push('          "args": ["<AzSkills>/scripts/azskills-mcp.mjs"]');
+    lines.push('          "args": ["<AzSkills>/scripts/azskills-mcp.ts"]');
     lines.push('        }');
     lines.push('      }');
     lines.push('    }');
@@ -88,7 +90,7 @@ const guide = (tool) => {
   } else {
     lines.push('For an interactive setup, run the guided wizard from the AzSkills checkout:');
     lines.push('');
-    lines.push('    node scripts/install-skills.mjs');
+    lines.push('    node scripts/install-skills.ts');
     lines.push('');
     lines.push('The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.');
     lines.push('');
@@ -124,7 +126,7 @@ const guide = (tool) => {
   } else if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
     lines.push('Use the manifest-based uninstaller so files not owned by AzSkills are preserved:');
     lines.push('');
-    lines.push('    node scripts/install-skills.mjs --uninstall --target /path/to/project/' + tool.target);
+    lines.push('    node scripts/install-skills.ts --uninstall --target /path/to/project/' + tool.target);
   } else if (tool.mechanism === 'mcp') {
     lines.push('Remove the azskills MCP server entry from the client settings and restart the client.');
   } else {
@@ -151,23 +153,23 @@ const index = () => {
     '',
     'Start the interactive setup and maintenance wizard:',
     '',
-    '    node scripts/install-skills.mjs',
+    '    node scripts/install-skills.ts',
     '',
     'Or select a client and scope explicitly:',
     '',
-    '    node scripts/install-skills.mjs --list',
-    '    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills azskills --dry-run',
-    '    node scripts/install-skills.mjs --tool codex --mode project --project /path/to/project --skills azskills --yes',
-    '    node scripts/package-skill.mjs --skill azskills --output /path/to/exports',
-    '    node scripts/install-skills.mjs --rollback --target /path/to/project/.agents/skills --yes',
-    '    node scripts/install-skills.mjs --uninstall --target /path/to/project/.agents/skills --yes',
+    '    node scripts/install-skills.ts --list',
+    '    node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --skills azskills --dry-run',
+    '    node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --skills azskills --yes',
+    '    node scripts/package-skill.ts --skill azskills --output /path/to/exports',
+    '    node scripts/install-skills.ts --rollback --target /path/to/project/.agents/skills --yes',
+    '    node scripts/install-skills.ts --uninstall --target /path/to/project/.agents/skills --yes',
     '',
-    'See [tool installers](../scripts/install-skills.mjs) and the [MCP server](../scripts/azskills-mcp.mjs).',
+    'See [tool installers](../scripts/install-skills.ts) and the [MCP server](../scripts/azskills-mcp.ts).',
     '',
   ].join('\n');
 };
 
-const files = new Map();
+const files = new Map<string, string>();
 files.set(path.join(root, 'integrations/README.md'), index());
 for (const tool of registry.tools) files.set(path.join(root, 'integrations/guides', tool.id + '.md'), guide(tool));
 
@@ -175,11 +177,11 @@ await mkdir(path.join(root, 'integrations/guides'), { recursive: true });
 let stale = false;
 for (const [file, content] of files) {
   let current = null;
-  try { current = await readFile(file, 'utf8'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  try { current = await readFile(file, 'utf8'); } catch (error) { if (errorCode(error) !== 'ENOENT') throw error; }
   if (current === null || current.replace(/\r\n/g, '\n') !== content) {
     stale = true;
     if (!check) await writeFile(file, content, 'utf8');
   }
 }
-if (check && stale) throw new Error('Generated integration guides are stale. Run node scripts/generate-integrations.mjs');
+if (check && stale) throw new Error('Generated integration guides are stale. Run node scripts/generate-integrations.ts');
 console.log(check ? 'Integration guides are current.' : 'Generated ' + files.size + ' integration files.');
