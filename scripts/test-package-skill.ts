@@ -613,6 +613,35 @@ try {
     });
     assert.equal(unrelated.status, 0, unrelated.stderr);
     assert.doesNotMatch(JSON.parse(unrelated.stdout).hookSpecificOutput.additionalContext, /Az Clean Code/);
+    assert.doesNotMatch(JSON.parse(unrelated.stdout).hookSpecificOutput.additionalContext, /style-presets/);
+    const stylePrompts: [string, RegExp][] = [
+      ['Restyle this dashboard with BioRender', /catalog\.md/],
+      ['Build a bio-render landing section', /catalog\.md/],
+      ['Use the cobalt kit preset for the assay table', /catalog\.md/],
+      ['Add a spinner while the report saves', /loaders\.css/],
+      ['Give me a CSS loader for the upload card', /loaders\.css/],
+      ['这个列表需要骨架屏', /loaders\.css/],
+    ];
+    for (const [promptText, expected] of stylePrompts) {
+      const styled = spawnSync(process.execPath, [path.join(pluginRoot, 'codex-plugin/hooks/session-start.ts'), 'UserPromptSubmit'], {
+        cwd: temp, encoding: 'utf8', input: JSON.stringify({ prompt: promptText }),
+        env: { ...process.env, PLUGIN_ROOT: pluginRoot },
+      });
+      assert.equal(styled.status, 0, styled.stderr);
+      const context = JSON.parse(styled.stdout).hookSpecificOutput.additionalContext;
+      assert.match(context, /references[\\/]modules[\\/]style-presets\.md/, promptText);
+      assert.match(context, expected, promptText);
+      assert.doesNotMatch(context, /# AzSkills/, promptText);
+    }
+    // A code task that happens to use the word "loader" must not pull in style routing.
+    for (const promptText of ['Refactor the module loader in the bundler', 'Explain the architecture concept']) {
+      const plain = spawnSync(process.execPath, [path.join(pluginRoot, 'codex-plugin/hooks/session-start.ts'), 'UserPromptSubmit'], {
+        cwd: temp, encoding: 'utf8', input: JSON.stringify({ prompt: promptText }),
+        env: { ...process.env, PLUGIN_ROOT: pluginRoot },
+      });
+      assert.equal(plain.status, 0, plain.stderr);
+      assert.doesNotMatch(JSON.parse(plain.stdout).hookSpecificOutput.additionalContext, /style-presets/, promptText);
+    }
   }
   console.log('Codex plugin package and SessionStart context assertions passed.');
   // A clean checkout has no ignored dist directory, so the marketplace must resolve inside it.
