@@ -19,7 +19,7 @@ export const FIGURE_SUBJECTS = [
 
 export const FIGURE_ACTIONS = [
   "draw", "redraw", "illustrate", "make", "create", "generate", "produce",
-  "绘图", "画图", "画一", "画个", "画出", "绘制", "重绘", "重画", "重新画",
+  "绘图", "画图", "画一", "画个", "画出", "画成", "绘制", "重绘", "重画", "重新画",
   "生成", "制作", "做个", "做一个",
 ] as const;
 
@@ -221,7 +221,9 @@ export function isScientificFigureRequest(prompt: string): boolean {
     return true;
   }
   if (editAction.test(scope) && editArtifact.test(scope)) return true;
-  if (deicticReference.test(scope) && redrawAction.test(scope)) return true;
+  if (deicticReference.test(scope) && (redrawAction.test(scope) || (action.test(scope) && artifact.test(scope)))) {
+    return true;
+  }
   if (pronounReference.test(scope) && redrawAction.test(scope) && conversionPhrase.test(scope)) return true;
   return scope.split(/[\n。！？!?]/).some(sentenceHasIntent);
 }

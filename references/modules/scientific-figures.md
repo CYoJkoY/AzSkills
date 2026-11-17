@@ -92,8 +92,8 @@ already names a figure artifact routes through the artifact branch whatever its
 subject, which is pre-existing behaviour rather than this compound rule.
 
 A supplied figure is usually pointed at instead of named, so a pointing phrase
-plus a redraw verb routes without any subject: "redraw this figure" and
-"redraw it as an editable svg". A bare pronoun counts only when the sentence
+plus a drawing verb routes without any subject: "redraw this figure" and
+"draw this figure". A bare pronoun counts only when the sentence
 also names the target format, which is how "redraw this as editable svg" reaches
 the module while "redraw this chart" and "turn this editable svg into a png"
 stay out. The pointing list is compound on purpose, since a bare Chinese
