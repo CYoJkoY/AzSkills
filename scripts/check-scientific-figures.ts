@@ -345,6 +345,8 @@ async function checkTriggers(): Promise<number> {
     "画出产品的 logo",
     "做一个电路通路图",
     "画出销售渠道通路的示意图",
+    "画一个神经网络结构图",
+    "画一张系统架构图",
   ]) {
     assert.ok(!isScientificFigureRequest(prompt), "unrelated request routed as a figure: " + prompt);
     prompts += 1;
