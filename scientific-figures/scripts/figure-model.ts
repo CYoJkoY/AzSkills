@@ -579,6 +579,12 @@ export function textWidth(content: string, sizePt: number, policy: Policy): numb
 export interface WrapOptions {
   sizePt: number;
   maxWidth: number;
+  /**
+   * Hard character cap per line. The checker gates note and label roles by
+   * character count, so wrapping by width alone can emit a line the checker
+   * then rejects. Passing the same limit here keeps render and gate aligned.
+   */
+  maxChars?: number;
 }
 
 interface WrapState {
@@ -591,19 +597,26 @@ function flushLine(state: WrapState): void {
   state.current = "";
 }
 
+const lineLength = (line: string): number => Array.from(line).length;
+
+function fits(current: string, addition: string, context: WrapOptions & { policy: Policy }): boolean {
+  const candidate = current + addition;
+  if (textWidth(candidate, context.sizePt, context.policy) > context.maxWidth) return false;
+  return context.maxChars === undefined || lineLength(candidate) <= context.maxChars;
+}
+
 function appendToken(token: string, state: WrapState, context: WrapOptions & { policy: Policy }): void {
   if (/^\s+$/.test(token)) {
     if (state.current !== "") state.current += " ";
     return;
   }
-  const { sizePt, maxWidth, policy } = context;
-  if (state.current !== "" && textWidth(state.current + token, sizePt, policy) <= maxWidth) {
+  if (state.current !== "" && fits(state.current, token, context)) {
     state.current += token;
     return;
   }
   flushLine(state);
   for (const character of token) {
-    if (state.current !== "" && textWidth(state.current + character, sizePt, policy) > maxWidth) flushLine(state);
+    if (state.current !== "" && !fits(state.current, character, context)) flushLine(state);
     state.current += character;
   }
 }

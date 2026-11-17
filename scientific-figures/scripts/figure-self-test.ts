@@ -341,6 +341,20 @@ export function runSelfTest(render: Renderer): void {
   assert.deepEqual(wrapText("\u{1D6FC}".repeat(3), { sizePt: 8, maxWidth: 8 }, policy), ["\u{1D6FC}", "\u{1D6FC}", "\u{1D6FC}"]);
   assert.deepEqual(wrapText(" \t \n ", { sizePt: 8, maxWidth: 52 }, policy), []);
   assert.deepEqual(wrapText("  IL6    IL6  ", { sizePt: 8, maxWidth: 15 }, policy), ["IL6", "IL6"]);
+  /*
+   * A character cap is a second, independent limit: width alone can admit a
+   * line the checker rejects, so the same cap has to reach the wrapper.
+   */
+  const capped = wrapText("alpha beta gamma delta", { sizePt: 8, maxWidth: 400, maxChars: 10 }, policy);
+  assert.ok(capped.length > 1, "a character cap did not break a fitting line");
+  for (const line of capped) {
+    assert.ok(Array.from(line).length <= 10, "a wrapped line ignored the character cap: " + line);
+  }
+  assert.deepEqual(
+    wrapText("IL6JAK2STAT3", { sizePt: 8, maxWidth: 400, maxChars: 4 }, policy),
+    ["IL6J", "AK2S", "TAT3"],
+    "a character cap splits an unbroken token exactly at the limit",
+  );
 
   // Renderer-generated wrapper and derived ids are reserved before input ids.
   const reservedScene = (nodes: unknown[], labels: unknown[] = []): unknown => ({

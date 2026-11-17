@@ -230,6 +230,14 @@ function checkExampleAndCli(): Promise<number> {
       assert.equal(check.status, 0, "check-figure.ts rejected the shipped example: " + check.stdout);
       const report = JSON.parse(check.stdout) as { errors: number; findings: Array<{ rule: string; severity: string }> };
       assert.equal(report.errors, 0, "example report carries errors");
+      /*
+       * The shipped example is the user-facing starting point, so it has to
+       * satisfy every gate the checker advertises. Wrapping by width alone let
+       * its own note line exceed the character cap, which is the kind of
+       * self-contradiction a reader trusts us not to ship.
+       */
+      const warnings = report.findings.filter((finding) => finding.severity === "warning");
+      assert.deepEqual(warnings, [], "example report carries warnings: " + JSON.stringify(warnings));
 
       const canvas = asRecord(example, "example scene")["canvas"];
       const width = asRecord(canvas, "example canvas")["width"];

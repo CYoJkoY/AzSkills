@@ -66,6 +66,22 @@ const roleSize = (role: string, policy: Policy): number => {
   }
 };
 
+/**
+ * The checker caps note and label lines by character count, so wrapping has to
+ * honour the same cap. Without it the renderer emits a line the gate rejects,
+ * which is how the shipped example warned about its own note.
+ */
+const roleMaxChars = (role: string, policy: Policy): number | undefined => {
+  switch (role) {
+    case "note":
+      return policy.text.maxCharsPerLineNote;
+    case "label":
+      return policy.text.maxCharsPerLineLabel;
+    default:
+      return undefined;
+  }
+};
+
 const strokeWidth = (style: string, policy: Policy): number => {
   switch (style) {
     case "hairline":
@@ -378,7 +394,11 @@ function renderNodeLabel(node: SceneNode, context: RenderContext, out: string[])
   const size = policy.type.labelPt;
   const anchor = node.labelPlacement === "inside" ? "middle" : "start";
   const x = anchor === "middle" ? area.x + area.width / 2 : area.x;
-  const lines = wrapText(node.label, { sizePt: size, maxWidth: area.width }, policy);
+  const lines = wrapText(
+    node.label,
+    { sizePt: size, maxWidth: area.width, maxChars: roleMaxChars("label", policy) },
+    policy,
+  );
   const detailLines = wrapText(node.detail, { sizePt: policy.type.notePt, maxWidth: area.width }, policy);
   const total = lines.length + detailLines.length;
   const firstY =
@@ -724,7 +744,11 @@ export function renderScene(scene: Scene, policy: Policy): string {
     for (const item of scene.labels) {
       const size = roleSize(item.role, policy);
       const tone = palette[item.tone] ?? palette["ink"] ?? "#000000";
-      const lines = wrapText(item.text, { sizePt: size, maxWidth: item.maxWidth ?? scene.canvas.width }, policy);
+      const lines = wrapText(
+        item.text,
+        { sizePt: size, maxWidth: item.maxWidth ?? scene.canvas.width, maxChars: roleMaxChars(item.role, policy) },
+        policy,
+      );
       out.push(
         "<g" + attribute("id", "label-" + item.id) + attribute("data-role", item.role) + attribute("data-tone", item.tone) + ">",
       );
