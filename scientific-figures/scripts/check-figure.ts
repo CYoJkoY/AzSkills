@@ -719,6 +719,12 @@ function checkBounds(root: XmlElement, canvas: CanvasSize, inspection: Inspectio
     if (drift > 0.01) inspection.add("canvas", "width=" + declaredWidth + " disagrees with viewBox width=" + canvas.width, "warning");
   }
   for (const element of inspection.document.elements) {
+    /*
+     * A template inside `defs` is not painted where it is declared, so its
+     * geometry cannot clip against this canvas. Reporting it would fail a
+     * legitimate symbol that is placed elsewhere with a transform.
+     */
+    if (isUnpainted(inspection.document, element)) continue;
     const bounds = elementBounds(inspection.document, element, inspection.policy);
     if (bounds === null) continue;
     reportOverflow(element, canvas, bounds, inspection);

@@ -254,6 +254,10 @@ assertClean(
   "Geometry declared inside defs is not read as a painted background",
 );
 assertClean(
+  documentWith('<defs><path id="symbol-curve" d="M 900 500 L 1200 700" stroke="#12212F" fill="none"/></defs>'),
+  "A path template inside defs is not clipped against the canvas",
+);
+assertClean(
   documentWith(
     [
       '<g id="objects"><g id="dark-band"><rect x="40" y="150" width="400" height="120" fill="#101820"/></g></g>',
