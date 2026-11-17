@@ -220,6 +220,33 @@ assert.ok(rules(veil("#12212F", "1", "#2A3440")).includes("contrast"), "An opaqu
 assertClean(veil("#12212F", "0.5", "#12212F"), "A half-opacity veil is composited against the page, not read as its own ink");
 assert.ok(rules(veil("#FFFFFF", "0.95", "#EEF2F6")).includes("contrast"), "Light text under a near-white veil still fails");
 
+// Surfaces composite in paint order, so a later scrim wins over a smaller node.
+function layered(first: string, second: string, textFill: string): string {
+  return documentWith(
+    [
+      '<g id="objects">' + first + second + "</g>",
+      '<g id="late-labels"><g id="label-late"><text x="140" y="160" font-size="10" fill="' + textFill + '"><tspan x="140" dy="0">Late label</tspan></text></g></g>',
+    ].join("\n"),
+  );
+}
+const darkNode = '<g id="node-dark"><rect x="100" y="100" width="200" height="120" fill="#101820"/></g>';
+const wideScrim = '<g id="scrim"><rect x="40" y="60" width="560" height="280" fill="#FFFFFF" fill-opacity="0.9"/></g>';
+assertClean(layered(darkNode, wideScrim, "#12212F"), "A scrim painted over a node composites lighter than the node");
+assert.ok(
+  rules(layered(darkNode, wideScrim, "#F7F9FC")).includes("contrast"),
+  "Light text is still measured against the scrim that was painted last, not the node beneath",
+);
+assertClean(layered(wideScrim, darkNode, "#F7F9FC"), "A node painted over a scrim composites darker than the scrim");
+assertClean(
+  documentWith(
+    [
+      '<defs><rect x="0" y="0" width="640" height="400" fill="#101820"/></defs>',
+      '<g id="defs-labels"><g id="label-defs"><text x="60" y="200" font-size="10" fill="#12212F"><tspan x="60" dy="0">Clean</tspan></text></g></g>',
+    ].join("\n"),
+  ),
+  "Geometry declared inside defs is not read as a painted background",
+);
+
 // A legend paints last, so content under its strip is already covered.
 const legendStrip =
   '<g id="legend"><g id="legend-one" data-kind="legend-item" data-tone="accent"><rect x="480" y="356" width="10" height="10" fill="#E8EEF6"/>' +

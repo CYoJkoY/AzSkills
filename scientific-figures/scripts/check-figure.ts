@@ -21,7 +21,6 @@ import { contrastRatio, type Rgb } from "./color-contrast.ts";
 import { type Policy, loadPolicy, textWidth } from "./figure-model.ts";
 import {
   commandCount,
-  elementArea,
   elementExtent,
   elementVerticalBounds,
   elementWidth,
@@ -61,7 +60,6 @@ interface CanvasSize {
 interface Surface {
   colour: Rgb;
   alpha: number;
-  area: number;
   /** The page itself rather than an object tint, so the canvas floor applies. */
   page: boolean;
   contains: (x: number, y: number) => boolean;
@@ -308,10 +306,34 @@ function checkLayers(inspection: Inspection): void {
   if (unnamed > 0) inspection.add("layers", unnamed + " <g> layer(s) have no id", "warning");
 }
 
+/**
+ * Geometry inside `defs`, `clipPath`, `mask`, `pattern`, `marker`, and `symbol`
+ * is never painted where it is declared. Counting it as a readable background
+ * would report contrast for a colour no reader ever sees.
+ */
+const UNPAINTED_CONTAINERS = new Set(["defs", "clippath", "mask", "pattern", "marker", "symbol"]);
+
+function isUnpainted(document: XmlDocument, element: XmlElement): boolean {
+  let index = element.parent;
+  while (index !== null) {
+    const ancestor = document.elements[index];
+    if (ancestor === undefined) return false;
+    if (UNPAINTED_CONTAINERS.has(ancestor.name.toLowerCase())) return true;
+    index = ancestor.parent;
+  }
+  return false;
+}
+
+/**
+ * Collect the painted surfaces in document order, which is paint order for SVG.
+ * Sorting by area instead put a small node above the wide scrim that covers it,
+ * so a correctly composited label was measured against the wrong layer.
+ */
 function buildSurfaces(document: XmlDocument, canvas: CanvasSize): Surface[] {
   const surfaces: Surface[] = [];
   for (const element of document.elements) {
     if (element.name !== "rect" && element.name !== "circle" && element.name !== "ellipse") continue;
+    if (isUnpainted(document, element)) continue;
     const colour = parseColour(element.attributes["fill"]);
     if (!colour) continue;
     const alpha = Number(element.attributes["fill-opacity"] ?? "1");
@@ -319,12 +341,11 @@ function buildSurfaces(document: XmlDocument, canvas: CanvasSize): Surface[] {
     surfaces.push({
       colour,
       alpha: Math.min(1, alpha),
-      area: elementArea(element),
       page: coversCanvas(element, canvas),
       contains: (x, y) => pointInElement(element, x, y),
     });
   }
-  return surfaces.sort((left, right) => right.area - left.area);
+  return surfaces;
 }
 
 function coversCanvas(element: XmlElement, canvas: CanvasSize): boolean {

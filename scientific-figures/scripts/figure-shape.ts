@@ -28,13 +28,6 @@ export function pointInElement(element: XmlElement, x: number, y: number): boole
   return dx * dx + dy * dy <= 1;
 }
 
-export function elementArea(element: XmlElement): number {
-  if (element.name === "rect") return Math.max(1, (numberAttribute(element, "width") ?? 0) * (numberAttribute(element, "height") ?? 0));
-  if (element.name === "circle") return Math.max(1, Math.PI * (numberAttribute(element, "r") ?? 0) ** 2);
-  if (element.name === "ellipse") return Math.max(1, Math.PI * (numberAttribute(element, "rx") ?? 0) * (numberAttribute(element, "ry") ?? 0));
-  return Number.MAX_SAFE_INTEGER;
-}
-
 export function elementWidth(element: XmlElement): number {
   const width = numberAttribute(element, "width");
   if (width !== null) return width;
