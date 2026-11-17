@@ -9,7 +9,7 @@
 
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { PRESET_TRIGGERS, isLoaderRequest } from "../references/style-presets/style-triggers.ts";
+import { PRESET_TRIGGERS, STYLE_INTENT_PATTERN, isLoaderRequest } from "../references/style-presets/style-triggers.ts";
 
 const read = (path: string): string =>
   readFileSync(new URL(`../${path}`, import.meta.url), "utf8").replace(/\r\n/g, "\n");
@@ -112,19 +112,95 @@ assert.match(css, /prefers-reduced-motion/, "Missing reduced-motion handling");
 assert.doesNotMatch(css, /(^|\n):root\s*\{/, "Preset must not write :root");
 
 // Every primitive rule is scoped, so the pack cannot leak into a host page.
+/*
+ * A selector list may span lines, so splitting on lines misses every selector
+ * before the last one. Parse the block structure instead: the prelude is all
+ * text between the previous terminator and the opening brace.
+ */
+interface CssRule {
+  chain: readonly string[];
+  prelude: string;
+}
+
+const closingBrace = (source: string, open: number): number => {
+  let depth = 0;
+  for (let index = open; index < source.length; index += 1) {
+    if (source[index] === "{") depth += 1;
+    else if (source[index] === "}") {
+      depth -= 1;
+      if (depth === 0) return index;
+    }
+  }
+  throw new Error("Unbalanced braces at offset " + open);
+};
+
+function parseRules(source: string, from = 0, to = source.length, chain: readonly string[] = []): CssRule[] {
+  const rules: CssRule[] = [];
+  let prelude = "";
+  let index = from;
+  while (index < to) {
+    const char = source[index];
+    if (char === "{") {
+      const head = prelude.trim();
+      prelude = "";
+      const end = closingBrace(source, index);
+      if (head.startsWith("@")) rules.push(...parseRules(source, index + 1, end, [...chain, head]));
+      else if (head) rules.push({ chain, prelude: head });
+      index = end + 1;
+      continue;
+    }
+    if (char === "}" || (char === ";" && prelude.trim().startsWith("@"))) {
+      prelude = "";
+      index += 1;
+      continue;
+    }
+    prelude += char;
+    index += 1;
+  }
+  return rules;
+}
+
+/** Split a selector list on top-level commas; `:is(a, b)` stays one selector. */
+const splitSelectors = (prelude: string): string[] => {
+  const parts: string[] = [];
+  let depth = 0;
+  let current = "";
+  for (const char of prelude) {
+    if (char === "(" || char === "[") depth += 1;
+    if (char === ")" || char === "]") depth -= 1;
+    if (char === "," && depth === 0) {
+      parts.push(current);
+      current = "";
+      continue;
+    }
+    current += char;
+  }
+  parts.push(current);
+  return parts.map((part) => part.trim()).filter(Boolean);
+};
+
+const NESTING_AT_RULES = [/^@media\b/, /^@supports\b/, /^@layer\b/, /^@container\b/];
+const SCOPED_SELECTOR = /^\[data-style="cobalt-kit"\]/;
+const DARK_ROOT_SELECTOR = /^:root\[data-theme="dark"\] \[data-style="cobalt-kit"\]/;
+
 const scopedPrimitives = css.slice(primitivesBodyFrom).replace(/\/\*[\s\S]*?\*\//g, "");
-for (const match of scopedPrimitives.matchAll(/(^|\n)([^{}\n][^{}\n]*)\{/g)) {
-  const selectorList = (match[2] ?? "").trim();
-  if (selectorList.startsWith("@")) continue;
-  for (const selector of selectorList.split(",")) {
-    const trimmed = selector.trim();
-    if (!trimmed) continue;
+let checkedSelectors = 0;
+for (const rule of parseRules(scopedPrimitives)) {
+  // Keyframe steps, font-face descriptors, and page rules carry no host selector.
+  if (!rule.chain.every((at) => NESTING_AT_RULES.some((pattern) => pattern.test(at)))) continue;
+  for (const selector of splitSelectors(rule.prelude)) {
     assert.ok(
-      trimmed.startsWith('[data-style="cobalt-kit"]') || trimmed.startsWith(':root[data-theme="dark"] [data-style="cobalt-kit"]'),
-      "Unscoped primitive selector: " + trimmed,
+      SCOPED_SELECTOR.test(selector) || DARK_ROOT_SELECTOR.test(selector),
+      "Unscoped primitive selector: " + selector,
     );
+    checkedSelectors += 1;
   }
 }
+assert.ok(checkedSelectors >= 30, "Primitive scope check inspected too few selectors: " + checkedSelectors);
+assert.ok(
+  splitSelectors('[data-style="cobalt-kit"] .a,\n[data-style="cobalt-kit"] .b').length === 2,
+  "Selector-list splitting must be top-level only",
+);
 
 // Dark theme resolves through the shipped controller as well as the same element.
 assert.match(
@@ -137,6 +213,14 @@ assert.match(
   /@media \(pointer: coarse\)\s*\{[\s\S]*?--ck-control-height:\s*var\(--ck-touch-target\)/,
   "The documented 44px touch floor must be applied, not only declared",
 );
+// The touch floor is a value contract: prove the token itself reaches 44px.
+const touchTarget = /^(\d+(?:\.\d+)?)px$/.exec(light["--ck-touch-target"] ?? "");
+assert.ok(touchTarget, "Missing --ck-touch-target geometry token: " + (light["--ck-touch-target"] ?? "absent"));
+assert.ok(Number(touchTarget[1]) >= 44, "--ck-touch-target must hold the 44px floor: " + touchTarget[0]);
+assert.ok(
+  parseFloat(light["--ck-control-height"] ?? "0") < 44,
+  "The compact desktop control height must stay below the touch floor so the media query has work to do",
+);
 
 // Selection state is carried by a native control, not by invalid ARIA on a div.
 assert.doesNotMatch(css, /\.ck-selection\[aria-selected/, "Selection must not key off aria-selected on a generic element");
@@ -144,12 +228,14 @@ assert.match(css, /\.ck-selection__input:checked/, "Selection must key off a nat
 
 // Loader layer: eight variants, shared tokens, accessible label, reduced motion.
 const variants = ["ring", "arc", "dots", "bars", "sweep", "squish", "orbit", "meter"];
+const catalogRows = catalog.split("\n").filter((line) => /^\| `[a-z-]+` \|/.test(line));
+assert.equal(catalogRows.length, 2, "The catalog must document exactly the shipped presets");
+const loaderReference = read("style-presets/references/loaders.md");
 for (const variant of variants) {
   assert.ok(loaders.includes(`.sp-loader--${variant}`), `Missing loader variant: ${variant}`);
   assert.ok(gallery.includes(`["${variant}"`), `Gallery is missing loader variant: ${variant}`);
-  assert.ok(catalog.length > 0);
+  assert.ok(loaderReference.includes("`sp-loader--" + variant + "`"), `Loader reference omits: ${variant}`);
 }
-const loaderReference = read("style-presets/references/loaders.md");
 for (const token of ["--sp-size", "--sp-stroke", "--sp-gap", "--sp-color", "--sp-track", "--sp-shine", "--sp-duration", "--sp-value"]) {
   assert.ok(loaders.includes(`var(${token},`), `Loader must read ${token} with a fallback so an ancestor value survives`);
   assert.ok(loaderReference.includes(token), `Loader reference omits ${token}`);
@@ -187,15 +273,28 @@ assert.match(
 );
 assert.match(loaders, /@media \(forced-colors: active\)/, "Missing forced-colors handling");
 
-// A loader animation composites; a layout property in a keyframe would re-run
-// layout inside the table or toolbar that hosts the indicator.
+/*
+ * A layout property in a keyframe re-runs layout inside whatever table or
+ * toolbar hosts the indicator, every frame. Paint-only properties such as
+ * `background-size` and `border-radius` are allowed because each variant is a
+ * single small element with `contain: layout`; a geometric property is not.
+ */
+const LAYOUT_PROPERTY =
+  /(?:^|[\s;{])(?:inset(?:-block(?:-start|-end)?|-inline(?:-start|-end)?)?|inline-size|block-size|min-inline-size|min-block-size|max-inline-size|max-block-size|min-width|min-height|max-width|max-height|width|height|margin(?:-(?:block|inline)(?:-(?:start|end))?|-(?:top|right|bottom|left))?|padding(?:-(?:block|inline)(?:-(?:start|end))?|-(?:top|right|bottom|left))?|top|right|bottom|left|grid-(?:template-)?(?:rows|columns)|flex-basis|gap|row-gap|column-gap)\s*:/;
+let keyframesChecked = 0;
 for (const keyframes of loaders.matchAll(/@keyframes\s+[\w-]+\s*\{([\s\S]*?)\n\}/g)) {
   const body = (keyframes[1] ?? "").replace(/\/\*[\s\S]*?\*\//g, "");
-  assert.doesNotMatch(
-    body,
-    /(^|\s)(inset-block|inset-inline|inset|inline-size|block-size|width|height|margin|padding|top|left|right|bottom)\s*:/,
-    "Loader keyframes must animate transform, opacity, or paint-free properties only",
-  );
+  assert.doesNotMatch(body, LAYOUT_PROPERTY, "Loader keyframes must not animate a layout property");
+  keyframesChecked += 1;
+}
+assert.ok(keyframesChecked >= 8, "Expected a keyframe block per loader variant: " + keyframesChecked);
+// Prove the deny list catches the property families a keyframe could quietly
+// regress into; a bare list without a probe would pass on a regex typo.
+for (const probe of ["margin-block-end: 4px", "inset-block-start: 1px", "max-width: 9px", "padding-inline: 2px", "inline-size: 3px"]) {
+  assert.ok(LAYOUT_PROPERTY.test("\n  " + probe), "Layout deny list must catch " + probe);
+}
+for (const allowed of ["transform: scale(1.1)", "background-size: 4px 4px", "border-radius: 26%"]) {
+  assert.ok(!LAYOUT_PROPERTY.test("\n  " + allowed), "Layout deny list must not reject a paint-only property: " + allowed);
 }
 
 // Documented triggers, catalog rows, and routed phrases come from one source.
@@ -218,6 +317,23 @@ const codePrompts = [
 ];
 for (const prompt of codePrompts) {
   assert.ok(!isLoaderRequest(prompt), "Code task routed as a loader request: " + prompt);
+}
+// A hyphenated package name is a build-tool loader even with no other context.
+for (const prompt of [
+  "Add css-loader to the build config",
+  "Add sass-loader for the SCSS build",
+  "Use style-loader for the stylesheet",
+  "Add vue-loader for the SFC pipeline",
+  "Swap to esbuild-loader in the prod config",
+]) {
+  assert.ok(!isLoaderRequest(prompt), "Package loader routed as a UI loader: " + prompt);
+}
+// The noun guard also keeps a longer word from smuggling in a preset trigger.
+for (const prompt of [
+  "Explain the collab canvas layout",
+  "Switch the lifestyle preset to dark",
+]) {
+  assert.ok(!STYLE_INTENT_PATTERN.test(prompt), "Substring routed as a preset request: " + prompt);
 }
 
 // Preview wires both layers, both themes, and both controls.

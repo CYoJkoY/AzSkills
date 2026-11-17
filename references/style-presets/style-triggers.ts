@@ -63,6 +63,14 @@ export const LOADER_CODE_CONTEXT: readonly string[] = [
   "json loader", "file loader",
 ];
 
+/**
+ * Package names that end in `-loader` belong to a build toolchain, not to a UI.
+ * Hyphenated names such as `css-loader`, `sass-loader`, `style-loader`, or
+ * `vue-loader` read as a bare loader noun to a word-boundary match, so the
+ * hyphenated family is detected by shape instead of by an open-ended list.
+ */
+export const LOADER_PACKAGE_PATTERN: RegExp = /(?:^|[^\w-])[a-z][\w.]*-loaders?(?![\w-])/i;
+
 /** CJK loader nouns route without an English asking verb. */
 export const LOADER_CJK_INDICATORS: readonly string[] = [
   "骨架屏", "加载动画", "加载指示", "加载状态", "菊花图",
@@ -73,11 +81,22 @@ export const LOADER_LIBRARY_TRIGGERS: readonly string[] = ["css loaders", "css-l
 
 const escapeLiteral = (literal: string): string => literal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+/**
+ * Wrap an ASCII phrase in guards so a longer word cannot smuggle it in:
+ * `collab canvas` must not reach `lab canvas`, and `lifestyle preset` must not
+ * reach `style preset`. A leading hyphen is excluded too, so a `-loader` package
+ * name never reads as a UI noun. CJK phrases carry no word boundaries and stay
+ * unwrapped.
+ */
+const bounded = (literal: string): string =>
+  /[^\x00-\x7F]/.test(literal) ? escapeLiteral(literal) : "(?<![\\w-])" + escapeLiteral(literal) + "(?!\\w)";
+
+/** Escape, then bound, then order longest-first so no phrase is shadowed. */
 const alternation = (literals: readonly string[]): string =>
-  literals.map(escapeLiteral).sort((left, right) => right.length - left.length).join("|");
+  [...literals].sort((left, right) => right.length - left.length).map(bounded).join("|");
 
 const verbThen = (nouns: readonly string[]): string =>
-  "\\b(?:" + alternation(LOADER_VERBS) + ")\\b[^.\\n]{0,40}?\\b(?:" + alternation(nouns) + ")\\b";
+  "(?<![\\w-])(?:" + alternation(LOADER_VERBS) + ")(?![\\w-])[^.\\n]{0,40}?(?:" + alternation(nouns) + ")";
 
 /** Every phrase that resolves to a named preset or to the catalog. */
 export const STYLE_INTENT_PATTERN: RegExp = new RegExp(
@@ -109,5 +128,5 @@ export const LOADER_CODE_CONTEXT_PATTERN: RegExp = new RegExp(
 export function isLoaderRequest(prompt: string): boolean {
   if (LOADER_STRONG_PATTERN.test(prompt)) return true;
   if (!LOADER_NOUN_PATTERN.test(prompt)) return false;
-  return !LOADER_CODE_CONTEXT_PATTERN.test(prompt);
+  return !LOADER_CODE_CONTEXT_PATTERN.test(prompt) && !LOADER_PACKAGE_PATTERN.test(prompt);
 }

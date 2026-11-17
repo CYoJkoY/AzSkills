@@ -643,6 +643,12 @@ try {
     for (const promptText of [
       'Refactor the module loader in the bundler',
       'Upgrade css-loader to v7 in the bundler config',
+      'Add css-loader to the build config',
+      'Add sass-loader for the SCSS build',
+      'Use style-loader for the stylesheet',
+      'Add vue-loader for the SFC pipeline',
+      'Explain the collab canvas layout',
+      'Switch the lifestyle preset to dark',
       'Fix the loading state bug in the auth store',
       'Rename the spinner module in the settings service',
       'The progress indicator field in the CSV is empty',

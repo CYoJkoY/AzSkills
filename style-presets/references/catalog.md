@@ -52,7 +52,7 @@ level, and the notice file records the provenance.
    and provenance level.
 3. Write `style-presets/assets/<id>.css` scoped to `[data-style="<id>"]`.
 4. Add one catalog row with stable triggers.
-5. Add the trigger to `codex-plugin/hooks/style-triggers.ts`. The hook and the
+5. Add the trigger to `references/style-presets/style-triggers.ts`. The hook and the
    validator both read that file, so a phrase listed above and a phrase that
    routes cannot disagree.
 6. Verify both themes at 4.5:1, then render the gallery.
