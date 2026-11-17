@@ -315,6 +315,12 @@ async function checkTriggers(): Promise<number> {
     "生成一张细胞示意图",
     "画一个细胞信号通路示意图",
     "帮我把这张机制图重绘成可编辑的矢量图",
+    "画出 IL-6 经 JAK2/STAT3 通路的示意图，输出可编辑 SVG",
+    "画出 p53 通路的示意图",
+    "画一张肿瘤微环境示意图",
+    "帮我做个免疫细胞示意图",
+    "画一幅神经突触示意图",
+    "做一个细胞实验的流程图",
   ]) {
     assert.ok(isScientificFigureRequest(prompt), "figure request is not routed: " + prompt);
     prompts += 1;
@@ -334,6 +340,9 @@ async function checkTriggers(): Promise<number> {
     "How do I open an editable SVG in Illustrator?",
     "Why is this editable SVG so large?",
     "Convert this PNG with our image-to-vector service",
+    "解释一下 JAK2/STAT3 通路的作用",
+    "分析一下这个通路图的配色",
+    "画出产品的 logo",
   ]) {
     assert.ok(!isScientificFigureRequest(prompt), "unrelated request routed as a figure: " + prompt);
     prompts += 1;

@@ -76,6 +76,16 @@ SVG", or a Chinese request pairing a cell or research topic with a drawing
 verb. Other clients use the same description, routing table, and aliases;
 only Codex installs the prompt hook.
 
+Chinese matching needs both an action and a subject. Besides the original
+draw-and-build verbs, the action set accepts first-person result phrasing such
+as "draw out" and "make me one", and the subject set accepts a bare pathway
+noun plus pathology and anatomy nouns: tumour, immune, microenvironment,
+synapse, neuron, vessel, cardiac, metabolic, gene, virus, bacteria, and drug.
+The literals live in the trigger source above, so this paragraph cannot
+disagree with what routes. A subject without a drawing action stays a
+question: asking what a pathway does, or why a pathway figure uses a colour,
+is analysis rather than a figure request.
+
 ## Quality gates
 
 - [ ] The source inventory matches the output's panels, objects, labels, units, arrows, and legend.

@@ -10,13 +10,16 @@ export const FIGURE_SUBJECTS = [
   "medical", "medicine", "biomedical", "biology", "biological", "scientific", "research",
   "cell", "cells", "receptor", "signaling", "signalling", "pathway", "protein", "antibody", "dna",
   "heart", "brain", "kidney", "liver", "lung", "tissue", "organ", "anatomy",
-  "医学", "科研", "生物", "细胞", "受体", "信号通路", "蛋白", "抗体", "实验",
+  "gene", "virus", "bacteria", "tumour", "tumor", "immune", "synapse", "neuron", "vessel",
+  "医学", "科研", "生物", "细胞", "受体", "信号通路", "通路", "蛋白", "抗体", "实验",
   "心脏", "大脑", "肾脏", "肝脏", "肺", "组织", "器官", "解剖",
+  "肿瘤", "免疫", "微环境", "突触", "神经", "血管", "心肌", "代谢", "基因",
+  "病毒", "细菌", "药物", "疾病", "病理",
 ] as const;
 
 export const FIGURE_ACTIONS = [
   "draw", "redraw", "illustrate", "make", "create", "generate", "produce",
-  "绘图", "画图", "画一", "画个", "绘制", "重绘", "生成", "制作",
+  "绘图", "画图", "画一", "画个", "画出", "绘制", "重绘", "生成", "制作", "做个", "做一个",
 ] as const;
 
 export const FIGURE_ARTIFACTS = [
