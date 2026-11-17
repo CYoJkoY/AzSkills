@@ -13,6 +13,10 @@ Catalog-level phrases route to this list rather than to one preset: `style
 preset`, `style presets`, `style catalog`, `style-catalog`, `preset catalog`,
 `风格目录`, `样式目录`, `设计风格`, `风格预设`, `样式预设`.
 
+Loader requests route to the loader library rather than to a preset: see
+[`loaders.md`](loaders.md) for the routed English and Chinese phrasing, and
+nothing here re-states those literals.
+
 ## Selection
 
 ```text

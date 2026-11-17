@@ -349,6 +349,10 @@ const loaderPrompts = [
   "Add a spinner while the database query runs and keep the layout still",
   "数据库查询的时候显示加载动画",
   "给这个 Vite 应用的上传按钮加个加载状态",
+  "给这个提交按钮加一个 ring 进度加载器，遵循 Cobalt Kit 配色",
+  "给列表加个进度加载器",
+  "加一个 spinner",
+  "放个 spinner 到面板顶部",
 ];
 for (const prompt of loaderPrompts) {
   assert.ok(isLoaderRequest(prompt), "Loader request not routed: " + prompt);

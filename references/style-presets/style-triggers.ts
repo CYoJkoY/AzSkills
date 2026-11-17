@@ -94,8 +94,22 @@ export const LOADER_PACKAGE_PATTERN: RegExp = /(?:^|[^\w-])[a-z][\w.]*-loaders?(
 
 /** CJK loader nouns route without an English asking verb. */
 export const LOADER_CJK_INDICATORS: readonly string[] = [
-  "骨架屏", "加载动画", "加载指示", "菊花图",
+  "骨架屏", "加载动画", "加载指示器", "加载指示", "进度加载器", "菊花图",
 ];
+
+/**
+ * Chinese asking verbs that introduce a loader. The English verb list cannot
+ * cover a mixed sentence such as "加一个 spinner", where the verb is Chinese
+ * and the noun is not. A bare Chinese "写" stays out: "写一个模块加载器" is a
+ * module, not a UI indicator.
+ */
+export const LOADER_CJK_VERBS: readonly string[] = [
+  "添加", "加上", "加一个", "加个", "来个", "做一个", "做个", "放一个", "放个",
+  "加", "需要", "显示", "展示",
+];
+
+/** Unambiguous English indicators that a Chinese asking verb may introduce. */
+export const LOADER_CJK_VERB_NOUNS: readonly string[] = ["spinners", "spinner", "skeletons", "skeleton"];
 
 /** A named library request, e.g. "use css loaders from css-loaders.com". */
 export const LOADER_LIBRARY_TRIGGERS: readonly string[] = ["css loaders", "css-loaders", "css-loaders.com"];
@@ -119,6 +133,14 @@ const alternation = (literals: readonly string[]): string =>
 const verbThen = (nouns: readonly string[]): string =>
   "(?<![\\w-])(?:" + alternation(LOADER_VERBS) + ")(?![\\w-])[^.\\n]{0,40}?(?:" + alternation(nouns) + ")";
 
+/**
+ * A Chinese asking verb carries no word boundary to anchor on, so the span is
+ * kept tight: one short gap between the verb and the English indicator keeps
+ * "加一个 spinner" routed without letting a long clause reach an unrelated noun.
+ */
+const cjkVerbThen = (nouns: readonly string[]): string =>
+  "(?:" + alternation(LOADER_CJK_VERBS) + ")[^.\\n]{0,12}?(?:" + alternation(nouns) + ")";
+
 /** Every phrase that resolves to a named preset or to the catalog. */
 export const STYLE_INTENT_PATTERN: RegExp = new RegExp(
   alternation([
@@ -132,6 +154,7 @@ export const STYLE_INTENT_PATTERN: RegExp = new RegExp(
 export const LOADER_STRONG_PATTERN: RegExp = new RegExp(
   [
     verbThen(LOADER_INDICATORS),
+    cjkVerbThen(LOADER_CJK_VERB_NOUNS),
     alternation(LOADER_CJK_INDICATORS),
     alternation(LOADER_LIBRARY_TRIGGERS),
   ].join("|"),
