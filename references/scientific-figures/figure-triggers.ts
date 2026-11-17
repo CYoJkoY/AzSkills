@@ -10,13 +10,16 @@ export const FIGURE_SUBJECTS = [
   "medical", "medicine", "biomedical", "biology", "biological", "scientific", "research",
   "cell", "cells", "receptor", "signaling", "signalling", "pathway", "protein", "antibody", "dna",
   "heart", "brain", "kidney", "liver", "lung", "tissue", "organ", "anatomy",
-  "医学", "科研", "生物", "细胞", "受体", "信号通路", "蛋白", "抗体", "实验",
+  "gene", "virus", "bacteria", "tumour", "tumor", "immune", "synapse", "neuron", "vessel",
+  "医学", "科研", "生物", "细胞", "受体", "信号通路", "通路", "蛋白", "抗体", "实验",
   "心脏", "大脑", "肾脏", "肝脏", "肺", "组织", "器官", "解剖",
+  "肿瘤", "免疫", "微环境", "突触", "神经元", "神经系统", "血管", "心肌", "代谢", "基因",
+  "病毒", "细菌", "药物", "疾病", "病理",
 ] as const;
 
 export const FIGURE_ACTIONS = [
   "draw", "redraw", "illustrate", "make", "create", "generate", "produce",
-  "绘图", "画图", "画一", "画个", "绘制", "重绘", "生成", "制作",
+  "绘图", "画图", "画一", "画个", "画出", "绘制", "重绘", "生成", "制作", "做个", "做一个",
 ] as const;
 
 export const FIGURE_ARTIFACTS = [
@@ -88,16 +91,32 @@ const editArtifact = phrasePattern(FIGURE_EDIT_ARTIFACTS);
 const sentenceHasIntent = (sentence: string): boolean =>
   subject.test(sentence) && (editAction.test(sentence) || (action.test(sentence) && artifact.test(sentence)));
 
+/**
+ * A bare `通路` is a pathway in biology, a circuit in electronics, and a
+ * channel in sales. Only the biological sense belongs here, so a qualifying
+ * non-biological compound is blanked before subject matching. Blanking keeps
+ * a real subject elsewhere in the sentence able to route the request, so
+ * "细胞通信通路" still routes on `细胞`. `通信` is blanked because the bare
+ * compound normally means a telecom channel; the biology sense survives only
+ * when the sentence names its own subject.
+ */
+const NON_BIOLOGICAL_PATHWAY =
+  /(?:电路|线路|油路|气路|水路|营销|渠道|分销|交通|通信|网络|物流|销售|供水|供气|暖通)通路/g;
+
+const withoutNonBiologicalPathway = (prompt: string): string =>
+  prompt.replace(NON_BIOLOGICAL_PATHWAY, " ");
+
 const isInformationalOnly = (prompt: string): boolean =>
   informational.test(prompt) && !action.test(prompt);
 
 export function isScientificFigureRequest(prompt: string): boolean {
   if (drawingRefusal.test(prompt)) return false;
-  if (isInformationalOnly(prompt)) return false;
-  if (namedFigure.test(prompt)) return true;
-  if (conversionPhrase.test(prompt) && conversionAction.test(prompt) && (conversionReference.test(prompt) || subject.test(prompt))) {
+  const scope = withoutNonBiologicalPathway(prompt);
+  if (isInformationalOnly(scope)) return false;
+  if (namedFigure.test(scope)) return true;
+  if (conversionPhrase.test(scope) && conversionAction.test(scope) && (conversionReference.test(scope) || subject.test(scope))) {
     return true;
   }
-  if (editAction.test(prompt) && editArtifact.test(prompt)) return true;
-  return prompt.split(/[\n。！？!?]/).some(sentenceHasIntent);
+  if (editAction.test(scope) && editArtifact.test(scope)) return true;
+  return scope.split(/[\n。！？!?]/).some(sentenceHasIntent);
 }

@@ -349,6 +349,17 @@ const loaderPrompts = [
   "Add a spinner while the database query runs and keep the layout still",
   "数据库查询的时候显示加载动画",
   "给这个 Vite 应用的上传按钮加个加载状态",
+  "给这个提交按钮加一个 ring 进度加载器，遵循 Cobalt Kit 配色",
+  "给列表加个进度加载器",
+  "加一个 spinner",
+  "放个 spinner 到面板顶部",
+  "给这个 Vite 应用的上传按钮加个 spinner",
+  "在 Vite 应用的按钮上加个 spinner",
+  "在这个 Vite 配置面板里加个 spinner",
+  "在 webpack 配置面板上加个 spinner",
+  "给构建配置页面加个 spinner",
+  "给 Vite 配置弹窗加个 spinner",
+  "给 webpack 配置窗口加个 spinner",
 ];
 for (const prompt of loaderPrompts) {
   assert.ok(isLoaderRequest(prompt), "Loader request not routed: " + prompt);
@@ -376,6 +387,14 @@ const codePrompts = [
   "Add a loader to the parser AST",
   "Add a spinner to the backend job model once the import finishes",
   "Add a loader to deserialize YAML configuration after the migration",
+  "需要把 spinner 从 webpack 配置里删掉",
+  "把 webpack 配置里的 spinner 删掉",
+  "在 webpack 配置的按钮组件里加个 spinner 配置项",
+  "给 Vite 插件源码里的 spinner 组件补个单元测试",
+  "给 Vite 的 spinner 配置文件补个默认值",
+  "给数据库任务列表添加 spinner 字段",
+  "给后端任务模型加个 spinner 枚举",
+  "在 schema 里给列表加个 spinner 字段",
 ];
 for (const prompt of codePrompts) {
   assert.ok(!isLoaderRequest(prompt), "Code task routed as a loader request: " + prompt);

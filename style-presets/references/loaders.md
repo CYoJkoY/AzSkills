@@ -30,6 +30,30 @@ say so.
 Show a loader only after the operation has been pending long enough to matter -
 roughly 300ms. A flash of spinner on every keystroke reads as instability.
 
+## What routes here
+
+An English asking verb (`add`, `need`, `show`, `use`, `replace`, ...) followed
+within a short span by a loader noun routes: `spinner`, `loader`, `loading
+indicator`, `progress indicator`, `skeleton screen`, `loading animation`, or
+`loading state`. Chinese phrasing routes either by a named indicator
+(`骨架屏`, `加载动画`, `加载指示器`, `进度加载器`, `进度指示器`, `菊花图`) or
+by an asking verb (`加`, `加个`, `加一个`, `添加`, `来个`, `做个`, `需要`,
+`显示`) within a short span of an English `spinner` or `skeleton`. That is why
+"给这个提交按钮加一个 ring 进度加载器" and "加一个 spinner" both reach this
+module.
+
+A build-tool loader stays out: `css-loader`, `sass-loader`, `style-loader`,
+`esbuild-loader`, `module loader`, and any request that names a backend table,
+schema, enum, column, or parser. `Add a loader to deserialize YAML` is a data
+task, not a visual one. The same holds when a toolchain owns the noun: a
+surface word inside "the webpack config", "the Vite plugin", or "the build
+source" names code rather than a screen, so "在 webpack 配置的按钮组件里加个
+spinner 配置项" edits a file while "在 Vite 应用的按钮上加个 spinner" renders.
+A toolchain that modifies a screen is the exception, since a screen suffix such
+as "配置面板", "配置界面", "配置弹窗", or "配置窗口" names UI: "在这个 Vite
+配置面板里加个 spinner" renders, while "给 Vite 的 spinner 配置文件补个默认值"
+does not.
+
 ## Tokens
 
 | Token | Default | Meaning |
