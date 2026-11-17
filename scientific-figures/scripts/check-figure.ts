@@ -19,7 +19,18 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { contrastRatio, type Rgb } from "./color-contrast.ts";
 import { type Policy, loadPolicy, textWidth } from "./figure-model.ts";
-import { commandCount, elementArea, elementVerticalBounds, elementWidth, groupShape, numberAttribute, pointInElement, type VerticalBounds } from "./figure-shape.ts";
+import {
+  commandCount,
+  elementArea,
+  elementExtent,
+  elementVerticalBounds,
+  elementWidth,
+  groupShape,
+  numberAttribute,
+  pointInElement,
+  type Extent,
+  type VerticalBounds,
+} from "./figure-shape.ts";
 import { parseXml, type XmlDocument, type XmlElement } from "./xml-document.ts";
 
 export type Severity = "error" | "warning" | "info";
@@ -49,8 +60,17 @@ interface CanvasSize {
 
 interface Surface {
   colour: Rgb;
+  alpha: number;
   area: number;
+  /** The page itself rather than an object tint, so the canvas floor applies. */
+  page: boolean;
   contains: (x: number, y: number) => boolean;
+}
+
+interface ResolvedSurface {
+  colour: Rgb;
+  /** True when only the page background was composited at this point. */
+  page: boolean;
 }
 
 interface AttributeSubject {
@@ -151,7 +171,50 @@ function checkAttribute(subject: AttributeSubject, policy: Policy, add: Inspecti
     add("raster", "<" + subject.element.name + "> embeds a " + lowered + " payload from a URL");
   }
   if (lowered === "style") checkStyleProperties(subject, policy, add);
+  if (lowered === "d") checkPathData(subject, policy, add);
   checkUrlSchemes(subject, policy, add);
+}
+
+/** Tokens that only appear when path data carries a bitmap or a foreign payload. */
+function checkPathData(subject: AttributeSubject, policy: Policy, add: Inspection["add"]): void {
+  const lowered = subject.value.toLowerCase();
+  for (const token of policy.forbidden.pathData) {
+    if (lowered.includes(token.toLowerCase())) {
+      add("raster", "<" + subject.element.name + "> path data in " + subject.key + " carries " + token);
+    }
+  }
+}
+
+/**
+ * A `<style>` block is a stylesheet, not an attribute, so the attribute gate
+ * never sees it. External imports, embedded payloads, and filter effects hide
+ * there just as easily, and the document still renders as if it were clean.
+ */
+function checkStyleBlock(element: XmlElement, inspection: Inspection): void {
+  const css = element.text;
+  if (css.trim() === "") return;
+  const lowered = css.toLowerCase();
+  if (lowered.includes("@import")) {
+    inspection.add("raster", "<style> at line " + element.line + " imports a remote stylesheet with @import");
+  }
+  for (const scheme of inspection.policy.forbidden.urlSchemes) {
+    if (lowered.includes("url(" ) && lowered.includes(scheme)) {
+      inspection.add("raster", "<style> at line " + element.line + " points at a " + scheme + " resource");
+    }
+  }
+  for (const token of inspection.policy.forbidden.pathData) {
+    if (lowered.includes(token.toLowerCase())) {
+      inspection.add("raster", "<style> at line " + element.line + " carries " + token);
+    }
+  }
+  for (const property of inspection.policy.forbidden.styleProperties) {
+    if (new RegExp("(?:^|[;{\\s])" + property + "\\s*:", "i").test(css)) {
+      inspection.add("raster", "<style> at line " + element.line + " applies " + property);
+    }
+  }
+  if (/url\(\s*['"]?#/i.test(css)) {
+    inspection.add("raster", "<style> at line " + element.line + " references a paint server the checker cannot resolve");
+  }
 }
 
 function checkAttributes(element: XmlElement, forbidden: ReadonlySet<string>, inspection: Inspection): void {
@@ -167,6 +230,7 @@ function checkForbidden(inspection: Inspection): void {
   for (const element of inspection.document.elements) {
     checkElement(element, forbiddenElements, inspection.add);
     checkAttributes(element, forbiddenAttributes, inspection);
+    if (element.name === "style") checkStyleBlock(element, inspection);
   }
 }
 
@@ -213,6 +277,9 @@ function checkAccessibility(root: XmlElement, inspection: Inspection): void {
   if (inspection.policy.verification.requireAria && !root.attributes["aria-label"] && !root.attributes["aria-labelledby"]) {
     inspection.add("a11y", '<svg> needs aria-label or aria-labelledby so a screen reader can name the figure');
   }
+  if (inspection.policy.verification.requireTitle && !inspection.document.elements.some((element) => element.name === "title")) {
+    inspection.add("a11y", "the document has no <title>, so a reader gets the file name instead of the figure purpose");
+  }
   const labelledBy = root.attributes["aria-labelledby"];
   if (!labelledBy) return;
   const ids = new Set(inspection.document.elements.map((element) => element.attributes["id"]).filter((id): id is string => id !== undefined));
@@ -241,7 +308,7 @@ function checkLayers(inspection: Inspection): void {
   if (unnamed > 0) inspection.add("layers", unnamed + " <g> layer(s) have no id", "warning");
 }
 
-function buildSurfaces(document: XmlDocument): Surface[] {
+function buildSurfaces(document: XmlDocument, canvas: CanvasSize): Surface[] {
   const surfaces: Surface[] = [];
   for (const element of document.elements) {
     if (element.name !== "rect" && element.name !== "circle" && element.name !== "ellipse") continue;
@@ -249,17 +316,41 @@ function buildSurfaces(document: XmlDocument): Surface[] {
     if (!colour) continue;
     const alpha = Number(element.attributes["fill-opacity"] ?? "1");
     if (!Number.isFinite(alpha) || alpha <= 0) continue;
-    surfaces.push({ colour, area: elementArea(element), contains: (x, y) => pointInElement(element, x, y) });
+    surfaces.push({
+      colour,
+      alpha: Math.min(1, alpha),
+      area: elementArea(element),
+      page: coversCanvas(element, canvas),
+      contains: (x, y) => pointInElement(element, x, y),
+    });
   }
   return surfaces.sort((left, right) => right.area - left.area);
 }
 
-function surfaceAt(surfaces: readonly Surface[], x: number, y: number): Rgb | null {
-  let resolved: Rgb | null = null;
-  for (const surface of surfaces) {
-    if (surface.contains(x, y)) resolved = surface.colour;
+function coversCanvas(element: XmlElement, canvas: CanvasSize): boolean {
+  if (element.name !== "rect" || canvas.width <= 0 || canvas.height <= 0) return false;
+  const left = numberAttribute(element, "x") ?? 0;
+  const top = numberAttribute(element, "y") ?? 0;
+  return left <= 0 && top <= 0 && left + (numberAttribute(element, "width") ?? 0) >= canvas.width && top + (numberAttribute(element, "height") ?? 0) >= canvas.height;
+}
+
+/**
+ * Composite every covering surface in paint order. A tint layer at 8% opacity
+ * over white is nearly white; reading its own RGB as the background reports a
+ * contrast failure the reader never sees, and the reverse error hides a real one.
+ */
+function surfaceAt(surfaces: readonly Surface[], x: number, y: number): ResolvedSurface | null {
+  const covering = surfaces.filter((surface) => surface.contains(x, y));
+  if (covering.length === 0) return null;
+  let colour: Rgb = { r: 255, g: 255, b: 255 };
+  for (const surface of covering) {
+    colour = {
+      r: colour.r * (1 - surface.alpha) + surface.colour.r * surface.alpha,
+      g: colour.g * (1 - surface.alpha) + surface.colour.g * surface.alpha,
+      b: colour.b * (1 - surface.alpha) + surface.colour.b * surface.alpha,
+    };
   }
-  return resolved;
+  return { colour, page: covering.every((surface) => surface.page) };
 }
 
 function checkTextContrast(text: XmlElement, surfaces: readonly Surface[], inspection: Inspection): TextResult {
@@ -280,22 +371,59 @@ function checkTextContrast(text: XmlElement, surfaces: readonly Surface[], inspe
   const y = numberAttribute(text, "y") ?? 0;
   const surface = surfaceAt(surfaces, x, y - size * 0.35);
   if (!surface) return { checked: false, smallest: size };
-  const ratio = contrastRatio(fill, surface);
-  if (ratio < inspection.policy.contrast.textOnTint) {
-    inspection.add("contrast", "<text> at line " + text.line + " (" + JSON.stringify(content.slice(0, 28)) + ") is " + ratio.toFixed(2) + ":1 on " + toHex(surface) + "; the floor is " + inspection.policy.contrast.textOnTint + ":1");
+  const floor = surface.page ? inspection.policy.contrast.textOnCanvas : inspection.policy.contrast.textOnTint;
+  const ratio = contrastRatio(fill, surface.colour);
+  if (ratio < floor) {
+    inspection.add("contrast", "<text> at line " + text.line + " (" + JSON.stringify(content.slice(0, 28)) + ") is " + ratio.toFixed(2) + ":1 on " + toHex(surface.colour) + "; the floor is " + floor + ":1");
   }
   return { checked: true, smallest: size };
 }
 
-function checkTextContrasts(inspection: Inspection): void {
+function checkTextContrasts(inspection: Inspection, canvas: CanvasSize): void {
   const texts = inspection.document.elements.filter((element) => element.name === "text");
   if (texts.length < inspection.policy.verification.minLabels) inspection.add("text", "the figure has " + texts.length + " <text> element(s); text must stay real text, never outlined paths");
-  const surfaces = buildSurfaces(inspection.document);
+  const surfaces = buildSurfaces(inspection.document, canvas);
   const results = texts.map((text) => checkTextContrast(text, surfaces, inspection));
   const checked = results.filter((result) => result.checked).length;
   if (checked === 0) return;
   const smallest = Math.min(...results.map((result) => result.smallest));
   inspection.add("contrast", "checked " + checked + " label(s); smallest font " + smallest + "pt", "info");
+}
+
+/** The nearest group that declares what a text run is, so notes get their own measure. */
+function textRole(document: XmlDocument, text: XmlElement): string {
+  let index = text.parent;
+  while (index !== null) {
+    const group = document.elements[index];
+    if (group === undefined) return "";
+    const role = group.attributes["data-role"];
+    if (role !== undefined) return role;
+    if (group.attributes["data-kind"] === "node-label") return "label";
+    index = group.parent;
+  }
+  return "";
+}
+
+/**
+ * Line length is a typographic limit, not a geometry one: a 140-character note
+ * can fit its box and still be unreadable. Notes and labels carry separate
+ * policy limits so a caption is not forced into a swatch's measure.
+ */
+function checkLineLengths(inspection: Inspection): void {
+  const limits: Record<string, number> = {
+    note: inspection.policy.text.maxCharsPerLineNote,
+    label: inspection.policy.text.maxCharsPerLineLabel,
+  };
+  for (const text of inspection.document.elements) {
+    if (text.name !== "text") continue;
+    const limit = limits[textRole(inspection.document, text)];
+    if (limit === undefined) continue;
+    for (const line of collectLines(inspection.document, text)) {
+      const length = Array.from(line).length;
+      if (length <= limit) continue;
+      inspection.add("text", "line at " + text.line + " runs " + length + " characters; " + textRole(inspection.document, text) + " lines stop being scannable past " + limit, "warning");
+    }
+  }
 }
 
 function labelSubject(document: XmlDocument, text: XmlElement, byId: ReadonlyMap<string, XmlElement>): LabelSubject | undefined {
@@ -348,6 +476,9 @@ function checkLabelHeight(subject: LabelSubject, inspection: Inspection): void {
   const shape = elementVerticalBounds(subject.shape);
   const top = shape.top + inspection.policy.layout.labelPadPt;
   const bottom = shape.bottom - inspection.policy.layout.labelPadPt;
+  // A membrane band or a DNA strand is thinner than two label pads: it has no
+  // vertical room for an inside label at all, so the height gate cannot apply.
+  if (bottom <= top) return;
   const tolerance = Math.max(0, bottom - top) * Math.max(0, inspection.policy.text.maxOverflowRatio - 1) / 2;
   if (bounds.top >= top - tolerance && bounds.bottom <= bottom + tolerance) return;
   inspection.add(
@@ -423,22 +554,126 @@ function legendItems(document: XmlDocument): number {
   return document.elements.filter((element) => element.attributes["data-kind"] === "legend-item").length;
 }
 
+function union(extents: readonly Extent[]): Extent | null {
+  if (extents.length === 0) return null;
+  return extents.reduce((left, right) => ({
+    left: Math.min(left.left, right.left),
+    right: Math.max(left.right, right.right),
+    top: Math.min(left.top, right.top),
+    bottom: Math.max(left.bottom, right.bottom),
+  }));
+}
+
+function intersects(left: Extent, right: Extent, tolerance: number): boolean {
+  return Math.min(left.right, right.right) - Math.max(left.left, right.left) > tolerance &&
+    Math.min(left.bottom, right.bottom) - Math.max(left.top, right.top) > tolerance;
+}
+
+/**
+ * The legend is painted last, so anything else inside its strip is already
+ * covered. Measuring the painted legend rather than a second copy of the layout
+ * math keeps the gate honest when the legend wraps to a second row.
+ */
+/**
+ * Painted content is the leaves of the `objects` and `labels` layers. Shapes are
+ * skipped when an ancestor carries a transform, because the checker does not
+ * model that matrix and must not invent an overlap from unrotated geometry.
+ */
+function contentLeaves(document: XmlDocument): XmlElement[] {
+  const layers = new Set(["objects", "labels"]);
+  const members: XmlElement[] = [];
+  const walk = (index: number, inside: boolean, transformed: boolean): void => {
+    const element = document.elements[index];
+    if (element === undefined) return;
+    const member = inside || layers.has(element.attributes["id"] ?? "");
+    const moved = transformed || element.attributes["transform"] !== undefined;
+    if (member && !moved && !["g", "svg", "title", "desc"].includes(element.name)) members.push(element);
+    for (const child of element.children) walk(child, member, moved);
+  };
+  for (const root of document.roots) walk(root, false, false);
+  return members;
+}
+
+function checkLegendOverlap(inspection: Inspection): void {
+  const legend = inspection.document.elements.find((element) => element.attributes["id"] === "legend");
+  if (legend === undefined) return;
+  const painted: Extent[] = [];
+  const collect = (index: number): void => {
+    const element = inspection.document.elements[index];
+    if (element === undefined) return;
+    const bounds = elementBounds(inspection.document, element, inspection.policy);
+    if (bounds !== null) painted.push(bounds);
+    for (const child of element.children) collect(child);
+  };
+  collect(inspection.document.elements.indexOf(legend));
+  const band = union(painted);
+  if (band === null) return;
+  const tolerance = inspection.policy.layout.labelPadPt / 2;
+  for (const element of contentLeaves(inspection.document)) {
+    const bounds = elementBounds(inspection.document, element, inspection.policy);
+    if (bounds === null || !intersects(bounds, band, tolerance)) continue;
+    inspection.add(
+      "legend",
+      "<" + element.name + "> at line " + element.line + " overlaps the legend strip (y=" + band.top.toFixed(1) + "-" + band.bottom.toFixed(1) + "); the legend paints last and covers it",
+    );
+  }
+}
+
 function checkLegend(inspection: Inspection): void {
   const threshold = inspection.policy.verification.requireLegendWhenTones;
   const tones = objectTones(inspection.document);
   if (threshold > 0 && legendItems(inspection.document) === 0 && tones.size >= threshold) {
     inspection.add("legend", tones.size + " figure tone(s) need a legend; " + threshold + " distinct tones is the threshold");
   }
+  checkLegendOverlap(inspection);
 }
 
-function checkHorizontal(element: XmlElement, width: number, inspection: Inspection): void {
-  const x = numberAttribute(element, "x") ?? numberAttribute(element, "cx") ?? 0;
-  if (x < -width * 0.02 || x > width * 1.02) inspection.add("canvas", "<" + element.name + "> at line " + element.line + " sits outside the canvas horizontally", "warning");
+/**
+ * Text is measured from its anchor and estimated advance; every other primitive
+ * from its own extent. Anchors alone miss a wide rect placed just off the right
+ * edge and a tall one hanging past the bottom, which is exactly the clipping a
+ * reader notices first.
+ */
+function textExtent(document: XmlDocument, text: XmlElement, policy: Policy): Extent | null {
+  const content = collectLines(document, text);
+  if (content.length === 0) return null;
+  const size = numberAttribute(text, "font-size") ?? 0;
+  if (size <= 0) return null;
+  const x = numberAttribute(text, "x") ?? 0;
+  const y = numberAttribute(text, "y") ?? 0;
+  const widest = Math.max(...content.map((line) => textWidth(line, size, policy)));
+  const anchor = text.attributes["text-anchor"] ?? "start";
+  const left = anchor === "middle" ? x - widest / 2 : anchor === "end" ? x - widest : x;
+  const vertical = textVerticalBounds(document, text);
+  return {
+    left,
+    right: left + widest,
+    top: vertical?.top ?? y - size,
+    bottom: vertical?.bottom ?? y,
+  };
 }
 
-function checkVertical(element: XmlElement, height: number, inspection: Inspection): void {
-  const y = numberAttribute(element, "y") ?? numberAttribute(element, "cy") ?? 0;
-  if (y < -height * 0.02 || y > height * 1.02) inspection.add("canvas", "<" + element.name + "> at line " + element.line + " sits outside the canvas vertically", "warning");
+function elementBounds(document: XmlDocument, element: XmlElement, policy: Policy): Extent | null {
+  return element.name === "text" ? textExtent(document, element, policy) : elementExtent(element);
+}
+
+function reportOverflow(element: XmlElement, canvas: CanvasSize, bounds: Extent, inspection: Inspection): void {
+  const horizontal = Math.max(0, -bounds.left, bounds.right - canvas.width);
+  const vertical = Math.max(0, -bounds.top, bounds.bottom - canvas.height);
+  if (horizontal <= canvas.width * 0.02 && vertical <= canvas.height * 0.02) return;
+  const parts: string[] = [];
+  if (horizontal > canvas.width * 0.02) parts.push("x=" + bounds.left.toFixed(1) + "-" + bounds.right.toFixed(1));
+  if (vertical > canvas.height * 0.02) parts.push("y=" + bounds.top.toFixed(1) + "-" + bounds.bottom.toFixed(1));
+  /*
+   * Shape extents are exact; text advance is estimated from the policy ratio.
+   * A deterministic clip blocks the figure, an estimated one is reported for
+   * review so a wide glyph does not fail an otherwise valid label.
+   */
+  inspection.add(
+    "canvas",
+    "<" + element.name + "> at line " + element.line + " extends past the " + canvas.width + "x" + canvas.height + " canvas (" + parts.join(", ") + ")",
+    element.name === "text" ? "warning" : "error",
+  );
 }
 
 function checkBounds(root: XmlElement, canvas: CanvasSize, inspection: Inspection): void {
@@ -449,9 +684,9 @@ function checkBounds(root: XmlElement, canvas: CanvasSize, inspection: Inspectio
     if (drift > 0.01) inspection.add("canvas", "width=" + declaredWidth + " disagrees with viewBox width=" + canvas.width, "warning");
   }
   for (const element of inspection.document.elements) {
-    if (!["rect", "circle", "ellipse", "text"].includes(element.name)) continue;
-    checkHorizontal(element, canvas.width, inspection);
-    checkVertical(element, canvas.height, inspection);
+    const bounds = elementBounds(inspection.document, element, inspection.policy);
+    if (bounds === null) continue;
+    reportOverflow(element, canvas, bounds, inspection);
   }
 }
 
@@ -485,7 +720,8 @@ export function inspectFigure(svg: string, policy: Policy, options: InspectOptio
   checkAccessibility(root, inspection);
   checkIds(inspection);
   checkLayers(inspection);
-  checkTextContrasts(inspection);
+  checkTextContrasts(inspection, canvas);
+  checkLineLengths(inspection);
   checkOverflow(inspection);
   checkPaths(inspection);
   checkLegend(inspection);
@@ -550,12 +786,14 @@ export function runSelfTest(): void {
   const probes: Array<{ name: string; svg: string; rule: string }> = [
     { name: "embedded raster", svg: clean.replace("</g></g>\n<g id=\"connectors\">", "</g><image href=\"data:image/png;base64,AAAA\"/></g>\n<g id=\"connectors\">"), rule: "raster" },
     { name: "external href", svg: clean.replace('<rect x="0" y="0"', '<rect href="https://example.com/a.png" x="0" y="0"'), rule: "link" },
+    { name: "stylesheet import", svg: clean.replace("</svg>", '<style>@import url("https://example.com/a.css");</style></svg>'), rule: "raster" },
     { name: "duplicate id", svg: clean.replace('id="labels"', 'id="objects"'), rule: "ids" },
     { name: "monolithic trace", svg: clean.replace('</svg>', '<path d="' + "M 0 0 L 1 1 ".repeat(150) + '"/></svg>'), rule: "trace" },
     { name: "outlined text", svg: clean.replace(/<text[\s\S]*?<\/text>/g, ""), rule: "text" },
     { name: "tiny type", svg: clean.replace('font-size="8"', 'font-size="3"'), rule: "text" },
     { name: "low contrast", svg: clean.replace('fill="#12212F" text-anchor', 'fill="#E8EEF6" text-anchor'), rule: "contrast" },
     { name: "ratio drift", svg: clean.replace('viewBox="0 0 640 400"', 'viewBox="0 0 640 120"'), rule: "canvas" },
+    { name: "clipped shape", svg: clean.replace('<rect x="10" y="10" width="300" height="200"', '<rect x="600" y="10" width="300" height="200"'), rule: "canvas" },
     { name: "unbalanced tag", svg: clean.replace("</g>\n</svg>", "</svg>"), rule: "xml" },
   ];
   for (const probe of probes) {

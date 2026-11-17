@@ -2,14 +2,8 @@
   "$comment": "Single source for figure geometry, palette, type scale, and the numeric thresholds the checker enforces. Editing a limit here changes both the render defaults and the gate.",
   "version": "1.0.0",
   "canvas": {
-    "singleColumnMm": 85,
-    "doubleColumnMm": 170,
-    "mmPerInch": 25.4,
-    "maxSingleColumnMm": 85,
-    "maxDoubleColumnMm": 180,
     "minRatio": 0.25,
     "maxRatio": 4,
-    "defaultRatio": 1.6,
     "minSidePt": 240,
     "strokeMinPt": 0.5,
     "strokeDefaultPt": 1
@@ -22,7 +16,6 @@
     "footerPt": 6.5,
     "minPt": 6,
     "family": "'Helvetica Neue', Helvetica, Arial, sans-serif",
-    "monoFamily": "'SF Mono', Menlo, Consolas, monospace",
     "charWidthRatio": 0.55,
     "lineHeight": 1.25
   },
@@ -97,9 +90,7 @@
   },
   "contrast": {
     "textOnCanvas": 4.5,
-    "textOnTint": 4.5,
-    "strokeOnCanvas": 3,
-    "accentOnCanvas": 3
+    "textOnTint": 4.5
   },
   "layout": {
     "marginPt": 8,
@@ -129,9 +120,7 @@
   "text": {
     "maxOverflowRatio": 1.02,
     "maxCharsPerLineNote": 64,
-    "maxCharsPerLineLabel": 40,
-    "forbidOutlinedText": true,
-    "requireTextElementsForLabels": true
+    "maxCharsPerLineLabel": 40
   },
   "verification": {
     "minLabels": 1,

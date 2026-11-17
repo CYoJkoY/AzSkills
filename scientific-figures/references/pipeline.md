@@ -27,7 +27,8 @@ installs tools, downloads assets, or contacts a remote service.
 The schema is the input contract. A scene has a canvas and nodes; optional
 panels, connectors, free labels, and legend items add structure. Supported
 node kinds are `shape`, `cell`, `nucleus`, `vesicle`, `membrane`, `receptor`,
-`protein`, `channel`, `antibody`, `dna`, `well`, `badge`, and `text`.
+`protein`, `channel`, `antibody`, `dna`, `well`, and `badge`. Pure typography is
+a scene label rather than a node, so text is never drawn as a filled box.
 
 Connectors name source and target node ids. Optional sides choose attachment
 points; explicit coordinates require both `x` and `y`. Routes are straight or elbow. Arrow kinds are `flow`, `activation`,
@@ -50,7 +51,8 @@ policy. Preserve source colors during redraws; construct custom SVG directly
 when a default theme or primitive cannot faithfully describe the source.
 
 The policy centralizes typography, stroke sizes, palettes, tints, layout
-limits, and checker thresholds. A policy change affects both rendering and
+limits, and checker thresholds, including the per-panel node ceiling and the
+note and label line-length caps. A policy change affects both rendering and
 verification; do not relax a threshold merely to pass a defective figure.
 No BioRender icon, illustration library, or upstream asset ships here.
 
@@ -58,11 +60,15 @@ No BioRender icon, illustration library, or upstream asset ships here.
 
 The checker detects malformed XML, raster/external content, duplicate ids,
 missing editable structure, tiny type, supported explicit-color contrast
-failures, approximate label overflow, and flattened traces. It is a bounded
-static check. Browser CSS inheritance, complex SVG transforms, visual
-occlusion, font substitution, exact glyph metrics, and scientific truth still
-require actual render inspection and source comparison. Do not describe a
-zero-error report as a universal SVG certification or publication approval.
+failures on the composited background, approximate label overflow, line-length
+limits, content hidden under the legend strip, and flattened traces. It reads
+`<style>` bodies as well as attributes, so a stylesheet cannot smuggle an
+import, a data payload, or a filter past the raster gate. It is a bounded
+static check. Browser CSS inheritance, complex SVG transforms, text the
+checker cannot measure, font substitution, exact glyph metrics, and scientific
+truth still require actual render inspection and source comparison. Do not
+describe a zero-error report as a universal SVG certification or publication
+approval.
 
 An SVG preview can be rendered by a browser or an installed SVG-capable
 program. Keep the SVG itself as the editable deliverable; raster previews

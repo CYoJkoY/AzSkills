@@ -33,8 +33,7 @@ export type NodeKind =
   | "antibody"
   | "dna"
   | "well"
-  | "badge"
-  | "text";
+  | "badge";
 
 export type ArrowKind = "flow" | "activation" | "inhibition" | "transport" | "conversion" | "feedback";
 export type Side = "top" | "right" | "bottom" | "left";
@@ -132,7 +131,6 @@ export interface Policy {
     footerPt: number;
     minPt: number;
     family: string;
-    monoFamily: string;
     charWidthRatio: number;
     lineHeight: number;
   };
@@ -143,8 +141,6 @@ export interface Policy {
   contrast: {
     textOnCanvas: number;
     textOnTint: number;
-    strokeOnCanvas: number;
-    accentOnCanvas: number;
   };
   layout: {
     marginPt: number;
@@ -175,8 +171,6 @@ export interface Policy {
     maxOverflowRatio: number;
     maxCharsPerLineNote: number;
     maxCharsPerLineLabel: number;
-    forbidOutlinedText: boolean;
-    requireTextElementsForLabels: boolean;
   };
   verification: {
     minLabels: number;
@@ -228,7 +222,7 @@ export function resolvePalette(policy: Policy, theme: string): ResolvedPalette {
 const TONES: readonly Tone[] = ["ink", "muted", "accent", "accent-2", "success", "warning", "danger", "neutral"];
 const NODE_KINDS: readonly NodeKind[] = [
   "shape", "cell", "nucleus", "vesicle", "membrane", "receptor", "protein",
-  "channel", "antibody", "dna", "well", "badge", "text",
+  "channel", "antibody", "dna", "well", "badge",
 ];
 const ARROW_KINDS: readonly ArrowKind[] = ["flow", "activation", "inhibition", "transport", "conversion", "feedback"];
 const LABEL_ROLES: readonly LabelRole[] = ["title", "subtitle", "panel", "label", "note", "legend"];
@@ -389,6 +383,21 @@ export function parseScene(value: unknown, policy: Policy): Scene {
   });
 
   const nodeIds = new Set(nodes.map((node) => node.id));
+  for (const panel of panels) {
+    const owned = nodes.filter((node) =>
+      node.box.x + node.box.width / 2 >= panel.box.x &&
+      node.box.x + node.box.width / 2 <= panel.box.x + panel.box.width &&
+      node.box.y + node.box.height / 2 >= panel.box.y &&
+      node.box.y + node.box.height / 2 <= panel.box.y + panel.box.height,
+    );
+    if (owned.length > policy.layout.maxNodesPerPanel) {
+      fail(
+        "scene.panels[" + panels.indexOf(panel) + "]",
+        "holds " + owned.length + " nodes; limit is " + policy.layout.maxNodesPerPanel + " so the panel stays readable at print size",
+      );
+    }
+  }
+
   const arrows: SceneArrow[] = list(value, "arrows", { max: policy.layout.maxArrows, path: "scene" }).map((raw, index) => {
     const path = "scene.arrows[" + index + "]";
     if (!isRecord(raw)) fail(path, "must be an object");
@@ -476,14 +485,12 @@ export interface LegendLayout {
   slots: readonly LegendSlot[];
   rowHeight: number;
   rows: number;
-  /** The reserved strip; figure content must not enter it. */
-  band: Box;
 }
 
 /**
- * Pack legend entries into right-aligned rows. One layout function feeds both the
- * renderer and the overlap gate, so the reserved strip and the drawn strip are
- * the same rectangle by construction.
+ * Pack legend entries into right-aligned rows. The checker measures the painted
+ * legend group instead of re-deriving this layout, so the strip it guards and
+ * the strip the reader sees are the same rectangle.
  */
 export function layoutLegend(
   legend: readonly LegendItem[],
@@ -530,12 +537,6 @@ export function layoutLegend(
     slots,
     rowHeight,
     rows: packing.length,
-    band: {
-      x: 0,
-      y: canvas.height - policy.layout.marginPt - rowHeight * packing.length,
-      width: canvas.width,
-      height: rowHeight * packing.length,
-    },
   };
 }
 

@@ -88,7 +88,7 @@
           "enum": [
             "shape", "cell", "nucleus", "vesicle", "membrane",
             "receptor", "protein", "channel", "antibody", "dna",
-            "well", "badge", "text"
+            "well", "badge"
           ]
         },
         "box": { "$ref": "#/$defs/box" },

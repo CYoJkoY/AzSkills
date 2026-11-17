@@ -184,6 +184,80 @@ const simplePath = documentWith(
 );
 assert.ok(!rules(simplePath).includes("trace"), "A two-command named curve clears the trace floor");
 
+// A stylesheet is not an attribute: external imports and embedded payloads hid there.
+for (const css of [
+  '@import url("https://evil.example/x.css");',
+  ".n{fill:url(data:image/png;base64,AAA)}",
+  ".n{filter:blur(2px)}",
+] as const) {
+  assert.ok(rules(documentWith("<style>" + css + "</style>")).includes("raster"), "A <style> block bypassed the raster gate: " + css);
+}
+assert.ok(rules(documentWith('<path id="curve-b" d="M 0 0 L 1 1 base64"/>')).includes("raster"), "Path data carrying a raster token is rejected");
+assertClean(documentWith('<g id="curves"><path id="curve-c" d="M 200 50 Q 240 80 280 50" stroke="#12212F" fill="none"/></g>'), "A clean path is not flagged by the payload gate");
+
+// Bounds must cover the painted extent, not just the anchor.
+for (const fragment of [
+  '<g id="objects"><g id="wide"><rect x="600" y="40" width="200" height="40" fill="#DDE8FB"/></g></g>',
+  '<g id="objects"><g id="tall"><rect x="40" y="380" width="60" height="120" fill="#DDE8FB"/></g></g>',
+  '<g id="objects"><g id="round"><circle cx="630" cy="200" r="40" fill="#DDE8FB"/></g></g>',
+  '<g id="labels"><g id="label-x"><text x="620" y="200" font-size="10" fill="#12212F"><tspan x="620" dy="0">Overflowing label</tspan></text></g></g>',
+] as const) {
+  assert.ok(rules(documentWith(fragment)).includes("canvas"), "A clipping shape is reported: " + fragment);
+}
+assertClean(documentWith('<g id="objects"><g id="inside"><rect x="400" y="120" width="60" height="40" fill="#DDE8FB"/></g></g>'), "A shape inside the canvas stays quiet");
+
+// Contrast resolves the composited stack, so a light veil is not read as its own RGB.
+function veil(fill: string, opacity: string, textFill: string): string {
+  return documentWith(
+    [
+      '<g id="objects"><g id="veil"><rect x="0" y="290" width="640" height="110" fill="' + fill + '" fill-opacity="' + opacity + '"/></g></g>',
+      '<g id="veil-label"><g id="label-veil"><text x="40" y="340" font-size="10" fill="' + textFill + '"><tspan x="40" dy="0">Veiled</tspan></text></g></g>',
+    ].join("\n"),
+  );
+}
+assertClean(veil("#12212F", "0.08", "#12212F"), "An 8% veil does not manufacture a contrast failure");
+assert.ok(rules(veil("#12212F", "1", "#2A3440")).includes("contrast"), "An opaque dark veil over dark text fails contrast");
+assertClean(veil("#12212F", "0.5", "#12212F"), "A half-opacity veil is composited against the page, not read as its own ink");
+assert.ok(rules(veil("#FFFFFF", "0.95", "#EEF2F6")).includes("contrast"), "Light text under a near-white veil still fails");
+
+// A legend paints last, so content under its strip is already covered.
+const legendStrip =
+  '<g id="legend"><g id="legend-one" data-kind="legend-item" data-tone="accent"><rect x="480" y="356" width="10" height="10" fill="#E8EEF6"/>' +
+  '<text x="494" y="364" font-size="6.5" fill="#12212F"><tspan x="494" dy="0">Signal</tspan></text></g></g>';
+assert.ok(
+  rules(documentWith('<g id="objects"><g id="node-under"><rect x="470" y="340" width="120" height="50" fill="#DDE8FB"/></g></g>\n' + legendStrip)).includes("legend"),
+  "An object under the legend strip is reported as covered",
+);
+assertClean(
+  documentWith('<g id="objects"><g id="node-clear"><rect x="40" y="300" width="120" height="50" fill="#DDE8FB"/></g></g>\n' + legendStrip),
+  "An object clear of the legend strip is not reported",
+);
+
+// A band thinner than two label pads has no vertical room, so it is not overflow.
+assertClean(
+  documentWith(
+    [
+      '<g id="objects"><g id="band"><rect x="100" y="100" width="200" height="8" fill="#E4EBF2"/></g></g>',
+      '<g id="band-label"><g id="obj-label-band" data-for="band" data-placement="inside">',
+      '<text x="200" y="106" font-size="8" fill="#12212F" text-anchor="middle"><tspan x="200" dy="0">membrane</tspan></text>',
+      "</g></g>",
+    ].join("\n"),
+  ),
+  "A membrane-thin band does not report a reversed vertical range",
+);
+
+// Line length is a policy limit, not only a geometry one.
+const longNote = documentWith(
+  '<g id="note-label"><g id="label-note" data-role="note"><text x="20" y="200" font-size="7" fill="#12212F"><tspan x="20" dy="0">' +
+    "a".repeat(policy.text.maxCharsPerLineNote + 1) + "</tspan></text></g></g>",
+);
+assert.ok(rules(longNote).includes("text"), "A note longer than the configured line limit is reported");
+const shortNote = documentWith(
+  '<g id="note-label"><g id="label-note" data-role="note"><text x="20" y="200" font-size="7" fill="#12212F"><tspan x="20" dy="0">' +
+    "a".repeat(policy.text.maxCharsPerLineNote) + "</tspan></text></g></g>",
+);
+assert.ok(!rules(shortNote).includes("text"), "A note at the configured line limit stays clean");
+
 const lowTraceFloor: Policy = { ...policy, forbidden: { ...policy.forbidden, traceShareMinCommands: 2 } };
 assert.ok(inspectFigure(simplePath, lowTraceFloor).some((finding) => finding.rule === "trace"), "The trace-share floor comes from policy rather than a hard-coded constant");
 for (const commands of [policy.forbidden.traceShareMinCommands - 1, policy.forbidden.traceShareMinCommands]) {
@@ -191,4 +265,6 @@ for (const commands of [policy.forbidden.traceShareMinCommands - 1, policy.forbi
   assert.equal(rules(svg).includes("trace"), commands >= policy.forbidden.traceShareMinCommands, "The configured trace floor is inclusive at " + commands + " commands");
 }
 
-console.log("Figure checker regressions passed: XML, prefixed elements, label placement and vertical bounds, configured path floor, and legend threshold.");
+console.log(
+  "Figure checker regressions passed: XML, prefixed elements, stylesheet payloads, painted bounds, composited contrast, label placement and vertical bounds, legend strip and threshold, configured path floor, and line-length policy.",
+);

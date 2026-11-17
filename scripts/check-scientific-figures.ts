@@ -16,6 +16,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   FIGURE_ALIASES,
+  FIGURE_CONVERSION_PHRASES,
   FIGURE_PHRASES,
   isScientificFigureRequest,
 } from "../references/scientific-figures/figure-triggers.ts";
@@ -288,6 +289,11 @@ async function checkTriggers(): Promise<number> {
     assert.ok(isScientificFigureRequest(phrase), "named figure phrase is not routed: " + phrase);
     prompts += 1;
   }
+  // A format phrase alone is a format question, not a request to produce one.
+  for (const phrase of FIGURE_CONVERSION_PHRASES) {
+    assert.ok(!isScientificFigureRequest(phrase), "a bare conversion phrase must not route: " + phrase);
+    prompts += 1;
+  }
   for (const prompt of [
     "Draw the receptor signaling pathway",
     "Redraw this immunofluorescence panel as editable SVG",
@@ -295,6 +301,9 @@ async function checkTriggers(): Promise<number> {
     "Redraw this figure",
     "Draw a diagram of the heart",
     "Create a diagram of a cell",
+    "Redraw this panel as editable SVG",
+    "Convert this pathway figure to an editable svg",
+    "Vectorize this mechanism diagram",
     "生成一张细胞示意图",
     "画一个细胞信号通路示意图",
     "帮我把这张机制图重绘成可编辑的矢量图",
@@ -314,6 +323,9 @@ async function checkTriggers(): Promise<number> {
     "Draw a product logo",
     "Refactor the loading spinner module",
     "Use the BioRender style for this dashboard",
+    "How do I open an editable SVG in Illustrator?",
+    "Why is this editable SVG so large?",
+    "Convert this PNG with our image-to-vector service",
   ]) {
     assert.ok(!isScientificFigureRequest(prompt), "unrelated request routed as a figure: " + prompt);
     prompts += 1;

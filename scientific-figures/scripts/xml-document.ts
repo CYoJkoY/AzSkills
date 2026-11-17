@@ -120,9 +120,21 @@ function closeTag(state: ParserState, name: string, line: number): void {
     state.errors.push("invalid closing tag </" + name + "> at line " + line);
     return;
   }
-  const top = state.stack.pop();
-  if (top === undefined) state.errors.push("stray closing tag </" + name + "> at line " + line);
-  else if (state.elements[top]?.name !== name) state.errors.push("mismatched closing tag </" + name + "> at line " + line);
+  const match = state.stack.findLastIndex((index) => state.elements[index]?.name === name);
+  if (match < 0) {
+    state.errors.push("stray closing tag </" + name + "> at line " + line);
+    return;
+  }
+  /*
+   * Pop only the frames this closing tag actually ends. Popping first and
+   * comparing afterwards detached the parent chain on a mismatch, so a later
+   * check ran against a tree the source never described.
+   */
+  for (const index of state.stack.splice(match)) {
+    const open = state.elements[index];
+    if (open === undefined || open.name === name) continue;
+    state.errors.push("unclosed <" + open.name + "> at line " + open.line + " closed by </" + name + "> at line " + line);
+  }
 }
 
 function appendElement(state: ParserState, node: XmlElement): void {
