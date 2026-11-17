@@ -36,10 +36,11 @@ An English asking verb (`add`, `need`, `show`, `use`, `replace`, ...) followed
 within a short span by a loader noun routes: `spinner`, `loader`, `loading
 indicator`, `progress indicator`, `skeleton screen`, `loading animation`, or
 `loading state`. Chinese phrasing routes either by a named indicator
-(`骨架屏`, `加载动画`, `加载指示器`, `进度加载器`, `菊花图`) or by an asking
-verb (`加`, `加个`, `加一个`, `添加`, `来个`, `做个`, `需要`, `显示`) within
-a short span of an English `spinner` or `skeleton`. That is why "给这个提交按钮
-加一个 ring 进度加载器" and "加一个 spinner" both reach this module.
+(`骨架屏`, `加载动画`, `加载指示器`, `进度加载器`, `进度指示器`, `菊花图`) or
+by an asking verb (`加`, `加个`, `加一个`, `添加`, `来个`, `做个`, `需要`,
+`显示`) within a short span of an English `spinner` or `skeleton`. That is why
+"给这个提交按钮加一个 ring 进度加载器" and "加一个 spinner" both reach this
+module.
 
 A build-tool loader stays out: `css-loader`, `sass-loader`, `style-loader`,
 `esbuild-loader`, `module loader`, and any request that names a backend table,

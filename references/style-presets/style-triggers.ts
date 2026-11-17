@@ -94,7 +94,7 @@ export const LOADER_PACKAGE_PATTERN: RegExp = /(?:^|[^\w-])[a-z][\w.]*-loaders?(
 
 /** CJK loader nouns route without an English asking verb. */
 export const LOADER_CJK_INDICATORS: readonly string[] = [
-  "骨架屏", "加载动画", "加载指示器", "加载指示", "进度加载器", "菊花图",
+  "骨架屏", "加载动画", "加载指示器", "加载指示", "进度加载器", "进度指示器", "菊花图",
 ];
 
 /**
@@ -103,13 +103,13 @@ export const LOADER_CJK_INDICATORS: readonly string[] = [
  * and the noun is not. A bare Chinese "写" stays out: "写一个模块加载器" is a
  * module, not a UI indicator.
  */
-export const LOADER_CJK_VERBS: readonly string[] = [
+const LOADER_CJK_VERBS: readonly string[] = [
   "添加", "加上", "加一个", "加个", "来个", "做一个", "做个", "放一个", "放个",
   "加", "需要", "显示", "展示",
 ];
 
 /** Unambiguous English indicators that a Chinese asking verb may introduce. */
-export const LOADER_CJK_VERB_NOUNS: readonly string[] = ["spinners", "spinner", "skeletons", "skeleton"];
+const LOADER_CJK_VERB_NOUNS: readonly string[] = ["spinners", "spinner", "skeletons", "skeleton"];
 
 /** A named library request, e.g. "use css loaders from css-loaders.com". */
 export const LOADER_LIBRARY_TRIGGERS: readonly string[] = ["css loaders", "css-loaders", "css-loaders.com"];
@@ -154,12 +154,21 @@ export const STYLE_INTENT_PATTERN: RegExp = new RegExp(
 export const LOADER_STRONG_PATTERN: RegExp = new RegExp(
   [
     verbThen(LOADER_INDICATORS),
-    cjkVerbThen(LOADER_CJK_VERB_NOUNS),
     alternation(LOADER_CJK_INDICATORS),
     alternation(LOADER_LIBRARY_TRIGGERS),
   ].join("|"),
   "i",
 );
+
+/**
+ * A mixed-language request pairs a Chinese asking verb with an English noun, so
+ * no English verb guard can reach it. It stays a separate branch because it is
+ * also the weakest signal: a sentence that names a toolchain is talking about
+ * the spinner a build config owns, and "remove the spinner from the webpack
+ * config" must not read as a request to draw one.
+ */
+const LOADER_MIXED_PATTERN: RegExp = new RegExp(cjkVerbThen(LOADER_CJK_VERB_NOUNS), "i");
+const LOADER_TOOL_PATTERN: RegExp = new RegExp(alternation(LOADER_TOOL_CONTEXT), "i");
 
 /** A bare loader noun only routes outside a build-tool context. */
 export const LOADER_NOUN_PATTERN: RegExp = new RegExp(verbThen(LOADER_NOUNS), "i");
@@ -211,6 +220,7 @@ function clauseRoutesLoader(clause: string): boolean {
   if (loaderNonvisualContextPattern.test(clause) && !explicitUi) return false;
   if (LOADER_CODE_CONTEXT_PATTERN.test(clause) && !visual) return false;
   if (LOADER_STRONG_PATTERN.test(clause)) return true;
+  if (LOADER_MIXED_PATTERN.test(clause) && (!LOADER_TOOL_PATTERN.test(clause) || explicitUi)) return true;
   if (!visual) return false;
   if (skeletonPattern.test(clause)) return false;
   if (loaderStatePattern.test(clause)) return true;

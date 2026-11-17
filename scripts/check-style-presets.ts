@@ -380,6 +380,8 @@ const codePrompts = [
   "Add a loader to the parser AST",
   "Add a spinner to the backend job model once the import finishes",
   "Add a loader to deserialize YAML configuration after the migration",
+  "需要把 spinner 从 webpack 配置里删掉",
+  "把 webpack 配置里的 spinner 删掉",
 ];
 for (const prompt of codePrompts) {
   assert.ok(!isLoaderRequest(prompt), "Code task routed as a loader request: " + prompt);
