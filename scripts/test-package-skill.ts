@@ -613,7 +613,7 @@ try {
     });
     assert.equal(unrelated.status, 0, unrelated.stderr);
     assert.doesNotMatch(JSON.parse(unrelated.stdout).hookSpecificOutput.additionalContext, /Az Clean Code/);
-    assert.doesNotMatch(JSON.parse(unrelated.stdout).hookSpecificOutput.additionalContext, /style-presets/);
+    assert.doesNotMatch(JSON.parse(unrelated.stdout).hookSpecificOutput.additionalContext, /names a maintained AzSkills style|needs a loading primitive/);
     const stylePrompts: [string, RegExp][] = [
       ['Restyle this dashboard with BioRender', /catalog\.md/],
       ['Build a bio-render landing section', /catalog\.md/],
@@ -659,7 +659,7 @@ try {
         env: { ...process.env, PLUGIN_ROOT: pluginRoot },
       });
       assert.equal(plain.status, 0, plain.stderr);
-      assert.doesNotMatch(JSON.parse(plain.stdout).hookSpecificOutput.additionalContext, /style-presets/, promptText);
+      assert.doesNotMatch(JSON.parse(plain.stdout).hookSpecificOutput.additionalContext, /names a maintained AzSkills style|needs a loading primitive/, promptText);
     }
   }
   console.log('Codex plugin package and SessionStart context assertions passed.');
