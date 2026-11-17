@@ -60,11 +60,12 @@ export interface Extent {
 /**
  * Axis-aligned box of an elliptical arc from its endpoint parameterization.
  *
- * The arc lies on an ellipse, so the ellipse's own box bounds it. Computing the
- * centre from the endpoints (SVG implementation notes F.6.5) and the ellipse's
- * rotated half-extents gives a box that is still conservative but follows the
- * curve instead of inflating a whole radius around each endpoint. A radius of
- * zero collapses to a straight line, which the endpoints already cover.
+ * The centre comes from SVG implementation notes F.6.5. The arc only sweeps a
+ * slice of that ellipse, so the box is built from the two endpoints plus any
+ * axis extreme the sweep actually crosses. Using the whole ellipse box instead
+ * would report a valid shallow arc as overflow, and one radius around each
+ * endpoint (the previous rule) was worse still. A zero radius collapses to the
+ * straight line between the endpoints, which they already cover.
  */
 function arcExtent(startX: number, startY: number, endX: number, endY: number, radiusX: number, radiusY: number, rotation: number, largeArc: boolean, sweep: boolean): Extent | null {
   if (radiusX <= 0 || radiusY <= 0) return null;
@@ -87,14 +88,40 @@ function arcExtent(startX: number, startY: number, endX: number, endY: number, r
   const cy1 = (-factor * ry * x1) / rx;
   const centreX = cosPhi * cx1 - sinPhi * cy1 + (startX + endX) / 2;
   const centreY = sinPhi * cx1 + cosPhi * cy1 + (startY + endY) / 2;
-  const halfWidth = Math.sqrt(rx * rx * cosPhi * cosPhi + ry * ry * sinPhi * sinPhi);
-  const halfHeight = Math.sqrt(rx * rx * sinPhi * sinPhi + ry * ry * cosPhi * cosPhi);
-  return {
-    left: centreX - halfWidth,
-    right: centreX + halfWidth,
-    top: centreY - halfHeight,
-    bottom: centreY + halfHeight,
+  const pointAt = (angle: number): { x: number; y: number } => {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    return {
+      x: centreX + rx * cos * cosPhi - ry * sin * sinPhi,
+      y: centreY + rx * cos * sinPhi + ry * sin * cosPhi,
+    };
   };
+  const startAngle = Math.atan2((y1 - cy1) / ry, (x1 - cx1) / rx);
+  const endAngle = Math.atan2((-y1 - cy1) / ry, (-x1 - cx1) / rx);
+  let sweepAngle = endAngle - startAngle;
+  if (sweep && sweepAngle < 0) sweepAngle += Math.PI * 2;
+  if (!sweep && sweepAngle > 0) sweepAngle -= Math.PI * 2;
+  const crosses = (angle: number): boolean => {
+    const delta = ((angle - startAngle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+    const span = Math.abs(sweepAngle);
+    return sweepAngle >= 0 ? delta <= span : delta === 0 || Math.PI * 2 - delta <= span;
+  };
+  const points = [pointAt(startAngle), pointAt(startAngle + sweepAngle)];
+  /*
+   * Extrema of the parametric ellipse: dx/dt and dy/dt vanish at these angles.
+   * Only the ones inside the swept range contribute to the box.
+   */
+  for (const candidate of [
+    Math.atan2(-ry * sinPhi, rx * cosPhi),
+    Math.atan2(-ry * sinPhi, rx * cosPhi) + Math.PI,
+    Math.atan2(ry * cosPhi, rx * sinPhi),
+    Math.atan2(ry * cosPhi, rx * sinPhi) + Math.PI,
+  ]) {
+    if (crosses(((candidate % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2))) points.push(pointAt(candidate));
+  }
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  return { left: Math.min(...xs), right: Math.max(...xs), top: Math.min(...ys), bottom: Math.max(...ys) };
 }
 
 /** Point list of `<polyline>`/`<polygon>`: coordinates alternate x, y. */
@@ -114,8 +141,8 @@ export function pointList(element: XmlElement): Array<{ x: number; y: number }> 
 /**
  * Path bounds from the control hull. Cubics stay inside their control points,
  * so a curve never escapes this box; arcs can bulge away from it, so each arc
- * contributes the box of the ellipse it rides on. The result is deliberately
- * generous and is reported as an estimate rather than an exact extent.
+ * contributes the box of the slice it sweeps. Cubic and quadratic hulls stay
+ * generous and are reported as an estimate rather than an exact extent.
  */
 export function pathExtent(element: XmlElement): Extent | null {
   const tokens = (element.attributes["d"] ?? "").match(/[MmZzLlHhVvCcSsQqTtAa]|-?\d*\.?\d+(?:[eE][-+]?\d+)?/g);
@@ -212,7 +239,7 @@ export function pathExtent(element: XmlElement): Extent | null {
     }
   }
   if (points.length === 0) {
-    /* An arc-only path draws no vertex of its own, so its ellipse box is the extent. */
+    /* An arc-only path draws no vertex of its own, so its swept box is the extent. */
     if (arcs.length === 0) return null;
     return {
       left: Math.min(...arcs.map((arc) => arc.left)),

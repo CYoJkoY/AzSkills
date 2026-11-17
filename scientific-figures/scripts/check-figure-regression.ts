@@ -205,7 +205,7 @@ for (const fragment of [
   assert.ok(rules(documentWith(fragment)).includes("canvas"), "A clipping shape is reported: " + fragment);
 }
 assertClean(documentWith('<g id="objects"><g id="inside"><rect x="400" y="120" width="60" height="40" fill="#DDE8FB"/></g></g>'), "A shape inside the canvas stays quiet");
-for (const path of ['M 900 500 L 1200 700', 'M 300 200 A 400 400 0 0 1 320 220']) {
+for (const path of ['M 900 500 L 1200 700', 'M 100 200 A 400 400 0 1 1 200 200']) {
   assert.ok(
     rules(documentWith('<g id="curves"><path id="curve-x" d="' + path + '" stroke="#12212F" fill="none"/></g>')).includes("canvas"),
     "A path drawn off the canvas is reported: " + path,
@@ -336,13 +336,18 @@ for (const commands of [policy.forbidden.traceShareMinCommands - 1, policy.forbi
   assert.equal(rules(svg).includes("trace"), commands >= policy.forbidden.traceShareMinCommands, "The configured trace floor is inclusive at " + commands + " commands");
 }
 /*
- * An arc rides an ellipse, so its box follows the curve instead of one radius
- * around each endpoint. A wide, shallow arc inside the canvas must stay clean;
- * the previous radius-per-endpoint rule reported it as overflow.
+ * An arc only sweeps a slice of its ellipse, so its box follows the swept range
+ * rather than the whole ellipse. A short chord on a huge-radius ellipse bulges
+ * by a couple of units; the whole-ellipse box and the older
+ * one-radius-per-endpoint rule both reported it as a large overflow.
  */
 assertClean(
-  documentWith('<g id="objects"><path id="shallow-arc" d="M 120 200 A 180 40 0 0 1 480 200" fill="none" stroke="#12212F" stroke-width="1"/></g>'),
-  "A shallow arc inside the canvas is not reported as estimated overflow",
+  documentWith('<g id="objects"><path id="shallow-arc" d="M 100 200 A 500 500 0 0 1 200 200" fill="none" stroke="#12212F" stroke-width="1"/></g>'),
+  "A shallow arc on a large-radius ellipse is not reported as estimated overflow",
+);
+assertClean(
+  documentWith('<g id="objects"><path id="rotated-arc" d="M 120 200 A 140 60 30 0 1 320 250" fill="none" stroke="#12212F" stroke-width="1"/></g>'),
+  "A rotated elliptical arc inside the canvas is not reported as estimated overflow",
 );
 assert.ok(
   rules(documentWith('<g id="objects"><path id="outside-arc" d="M 120 200 A 400 300 0 0 1 900 200" fill="none" stroke="#12212F" stroke-width="1"/></g>')).includes("canvas"),
