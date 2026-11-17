@@ -29,6 +29,7 @@ body:
         - az-clean-code
         - godot-3-dev
         - style-presets
+        - scientific-figures
         - application-architecture (alias)
         - frontend-architecture (alias)
         - ui-aesthetics (alias)

@@ -31,6 +31,18 @@ The opt-in `cobalt-kit` preset in `style-presets/` distills the same BioRender o
 
 No BioRender palette value, logo, icon library, illustration, template, screenshot, or stylesheet is reproduced. The aggregator readings above are recorded as `unresolved` in `style-presets/references/cobalt-kit.md` and are not used. BioRender is a trademark of its owner; the preset is not affiliated with or endorsed by that product.
 
+## SciPrism SVG workflow
+
+The `scientific-figures` module is informed by the semantic, editable SVG
+reconstruction workflow at https://github.com/hejin145/sciprism-svg, inspected
+at commit `5b7fa57d5f8d7c517b52f1b97b449cb0c38a989e` on November 17, 2026.
+That snapshot contains prompt instructions and agent metadata, with no license
+file or license grant found. AzSkills does not vendor that prompt text, its
+branding, contact links, or assets. The module instructions, declarative scene
+schema, vector renderer, checker, and tests here are independently authored.
+The `sciprism-svg` name is a routing alias identifying the source workflow;
+it does not imply affiliation or endorsement.
+
 ## Unified `logo-generator`
 
 Informed by:

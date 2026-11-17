@@ -30,6 +30,7 @@ body:
         - az-clean-code
         - godot-3-dev
         - style-presets
+        - scientific-figures
         - design-intelligence (root)
         - Compatibility alias path
         - Shared system file (SKILL-SYSTEM.md or skills.json)

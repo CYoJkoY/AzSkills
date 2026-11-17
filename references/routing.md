@@ -21,6 +21,7 @@ Choose by the requested output. These are internal modules, not installable skil
 | [az-clean-code](modules/az-clean-code.md) | Explicit, flat, reusable code with business data externalized before implementation. | write, review, refactor |
 | [godot-3-dev](modules/godot-3-dev.md) | Godot 3.x GDScript, virtual-call safety, 3.6 API surface, and down-porting. | script, review, port |
 | [style-presets](modules/style-presets.md) | Named visual presets, keyword triggers, preset token packs, and loading indicators. | catalog, apply, loaders, audit |
+| [scientific-figures](modules/scientific-figures.md) | Medical and scientific schematics, faithful redraws, editable SVG, and deterministic figure verification. | redraw, author, verify |
 
 ## Legacy names
 
@@ -43,3 +44,5 @@ Resolve these names inside AzSkills. Do not install additional entrypoints.
 | cobalt-kit | [style-presets](modules/style-presets.md) | apply |
 | css-loaders | [style-presets](modules/style-presets.md) | loaders |
 | style-catalog | [style-presets](modules/style-presets.md) | catalog |
+| sciprism-svg | [scientific-figures](modules/scientific-figures.md) | redraw |
+| sci-figure | [scientific-figures](modules/scientific-figures.md) | author |
