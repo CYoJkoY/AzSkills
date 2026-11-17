@@ -230,12 +230,15 @@ function clauseRoutesLoader(clause: string): boolean {
   // to the backend job model" stays a code task.
   const cjkVerbNoun = LOADER_MIXED_PATTERN.test(clause);
   const toolArtifact = LOADER_TOOL_ARTIFACT_PATTERN.test(clause);
-  const explicitUi = loaderSurfacePattern.test(clause)
-    && (LOADER_STRONG_PATTERN.test(clause) || (cjkVerbNoun && !toolArtifact));
+  const onSurface = loaderSurfacePattern.test(clause);
+  const explicitUi = onSurface && LOADER_STRONG_PATTERN.test(clause);
   if (loaderNonvisualContextPattern.test(clause) && !explicitUi) return false;
   if (LOADER_CODE_CONTEXT_PATTERN.test(clause) && !visual) return false;
   if (LOADER_STRONG_PATTERN.test(clause)) return true;
-  if (cjkVerbNoun && (!LOADER_TOOL_PATTERN.test(clause) || explicitUi)) return true;
+  // The mixed branch is weaker than a named indicator, so it needs a surface
+  // that the toolchain does not own: "给上传按钮加个 spinner" renders, while
+  // "在 webpack 配置的按钮组件里加个 spinner 配置项" edits a file.
+  if (cjkVerbNoun && (!LOADER_TOOL_PATTERN.test(clause) || (onSurface && !toolArtifact))) return true;
   if (!visual) return false;
   if (skeletonPattern.test(clause)) return false;
   if (loaderStatePattern.test(clause)) return true;

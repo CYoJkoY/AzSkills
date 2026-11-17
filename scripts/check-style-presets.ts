@@ -386,6 +386,9 @@ const codePrompts = [
   "把 webpack 配置里的 spinner 删掉",
   "在 webpack 配置的按钮组件里加个 spinner 配置项",
   "给 Vite 插件源码里的 spinner 组件补个单元测试",
+  "给数据库任务列表添加 spinner 字段",
+  "给后端任务模型加个 spinner 枚举",
+  "在 schema 里给列表加个 spinner 字段",
 ];
 for (const prompt of codePrompts) {
   assert.ok(!isLoaderRequest(prompt), "Code task routed as a loader request: " + prompt);
