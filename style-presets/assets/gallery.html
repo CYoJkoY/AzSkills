@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AzSkills style presets - Cobalt Kit and loaders</title>
+<link rel="stylesheet" href="cobalt-kit.css">
+<link rel="stylesheet" href="loaders.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body { margin: 0; }
+
+  body {
+    background: var(--ck-canvas);
+    color: var(--ck-text);
+    font-family: var(--ck-font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell {
+    max-inline-size: 72rem;
+    margin-inline: auto;
+    padding: var(--ck-space-7) var(--ck-space-6) var(--ck-space-10);
+  }
+
+  .masthead {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ck-space-4);
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-block-end: var(--ck-space-5);
+    border-block-end: var(--ck-border-width) solid var(--ck-border);
+  }
+
+  .eyebrow {
+    margin: 0 0 var(--ck-space-1);
+    color: var(--ck-accent-text);
+    font-family: var(--ck-font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+
+  .lede {
+    max-inline-size: 46ch;
+    margin: var(--ck-space-2) 0 0;
+    color: var(--ck-text-secondary);
+    font-size: 0.9375rem;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ck-space-2);
+    align-items: center;
+  }
+
+  .section {
+    padding-block-start: var(--ck-space-7);
+  }
+
+  .section__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ck-space-2) var(--ck-space-4);
+    align-items: baseline;
+    justify-content: space-between;
+    margin-block-end: var(--ck-space-4);
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 620;
+  }
+
+  .section__note {
+    max-inline-size: 48ch;
+    margin: 0;
+    color: var(--ck-text-muted);
+    font-size: 0.8125rem;
+  }
+
+  .swatches {
+    display: grid;
+    gap: var(--ck-space-3);
+    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  }
+
+  .swatch {
+    border: var(--ck-border-width) solid var(--ck-border);
+    border-radius: var(--ck-radius-panel);
+    overflow: clip;
+    background: var(--ck-surface);
+  }
+
+  .swatch__chip {
+    block-size: 2.75rem;
+    border-block-end: var(--ck-border-width) solid var(--ck-border);
+  }
+
+  .swatch__body {
+    display: grid;
+    gap: 0.1rem;
+    padding: var(--ck-space-2) var(--ck-space-3);
+  }
+
+  .swatch__name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  .swatch__value {
+    color: var(--ck-text-muted);
+    font-family: var(--ck-font-mono);
+    font-size: 0.6875rem;
+  }
+
+  .grid-two {
+    display: grid;
+    gap: var(--ck-space-4);
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  }
+
+  .stack {
+    display: grid;
+    gap: var(--ck-space-3);
+    align-content: start;
+  }
+
+  .row-demo .ck-row:last-child { border-block-end: 0; }
+
+  .loaders {
+    display: grid;
+    gap: var(--ck-space-3);
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  }
+
+  .loader-card {
+    display: grid;
+    gap: var(--ck-space-3);
+    justify-items: center;
+    padding: var(--ck-space-4) var(--ck-space-3);
+    border: var(--ck-border-width) solid var(--ck-border);
+    border-radius: var(--ck-radius-panel);
+    background: var(--ck-canvas);
+    text-align: center;
+  }
+
+  .loader-card__stage {
+    display: grid;
+    place-items: center;
+    inline-size: 100%;
+    block-size: 4rem;
+  }
+
+  .loader-card__name {
+    font-family: var(--ck-font-mono);
+    font-size: 0.75rem;
+    color: var(--ck-text);
+  }
+
+  .loader-card__use {
+    color: var(--ck-text-muted);
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .inline-demo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ck-space-3);
+    align-items: center;
+    padding: var(--ck-space-4);
+    border: var(--ck-border-width) solid var(--ck-border);
+    border-radius: var(--ck-radius-panel);
+    background: var(--ck-surface);
+  }
+
+  .meter-demo {
+    display: flex;
+    gap: var(--ck-space-4);
+    align-items: center;
+  }
+
+  .statusline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ck-space-2) var(--ck-space-4);
+    margin-block-start: var(--ck-space-8);
+    padding-block-start: var(--ck-space-4);
+    border-block-start: var(--ck-border-width) solid var(--ck-border);
+    color: var(--ck-text-muted);
+    font-size: 0.75rem;
+  }
+
+  .statusline code {
+    font-family: var(--ck-font-mono);
+    color: var(--ck-text-secondary);
+  }
+
+  @media (max-width: 30rem) {
+    .shell { padding-inline: var(--ck-space-4); }
+    .controls { inline-size: 100%; }
+    .controls .ck-btn { flex: 1 1 auto; }
+  }
+</style>
+</head>
+<body data-style="cobalt-kit">
+<main class="shell">
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">AzSkills preset gallery</p>
+      <h1>Cobalt Kit and the loader library</h1>
+      <p class="lede">One opt-in preset with its own token pack, plus eight loading primitives that inherit the surface ink. Every value, colour, and motion curve here is an AzSkills choice.</p>
+    </div>
+    <div class="controls">
+      <button type="button" class="ck-btn ck-btn--secondary ck-btn--compact" id="theme-toggle" aria-pressed="false">Dark theme</button>
+      <button type="button" class="ck-btn ck-btn--secondary ck-btn--compact" id="motion-toggle" aria-pressed="false">Reduced motion</button>
+    </div>
+  </header>
+
+  <section class="section" aria-labelledby="tokens-heading">
+    <div class="section__head">
+      <h2 id="tokens-heading">Colour roles</h2>
+      <p class="section__note">Text roles hold at least 4.5:1 on canvas, surface, and overlay in both themes. Accent and secondary fills hold 4.5:1 for their labels at rest, hover, and active weights.</p>
+    </div>
+    <div class="swatches" id="swatches"></div>
+  </section>
+
+  <section class="section" aria-labelledby="components-heading">
+    <div class="section__head">
+      <h2 id="components-heading">Primitives</h2>
+      <p class="section__note">A preset ships components, not a page. These are the ones this gallery renders; an artifact emits only what it uses.</p>
+    </div>
+    <div class="grid-two">
+      <div class="ck-card stack">
+        <div class="ck-chip" style="justify-self:start">Actions</div>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--ck-space-2)">
+          <button type="button" class="ck-btn ck-btn--primary">Start run</button>
+          <button type="button" class="ck-btn ck-btn--secondary">Export</button>
+          <button type="button" class="ck-btn ck-btn--secondary" disabled>Disabled</button>
+        </div>
+        <label class="ck-field">
+          <span class="ck-field__label">Sample identifier</span>
+          <input class="ck-field__input" type="text" placeholder="SMP-4021" value="SMP-4021">
+          <span class="ck-field__hint">Case sensitive; matches the plate label.</span>
+        </label>
+        <label class="ck-field is-invalid">
+          <span class="ck-field__label">Assay volume</span>
+          <input class="ck-field__input" type="text" value="0 ul" aria-invalid="true" aria-describedby="volume-error">
+          <span class="ck-field__error" id="volume-error">Volume must be greater than zero.</span>
+        </label>
+      </div>
+      <div class="ck-card stack">
+        <div class="ck-chip" style="justify-self:start">Selection and data</div>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--ck-space-2)">
+          <button type="button" class="ck-chip" aria-pressed="true">HeLa</button>
+          <button type="button" class="ck-chip" aria-pressed="false">HEK 293</button>
+          <button type="button" class="ck-chip" aria-pressed="false">Primary</button>
+        </div>
+        <div class="ck-selection" aria-selected="true">
+          <span class="ck-selection__mark" aria-hidden="true"></span>
+          <span><strong>Plate 04</strong><br><span class="ck-meta">48 wells - 2 repeats</span></span>
+        </div>
+        <div class="ck-selection" aria-selected="false">
+          <span class="ck-selection__mark" aria-hidden="true"></span>
+          <span><strong>Plate 05</strong><br><span class="ck-meta">24 wells - 1 repeat</span></span>
+        </div>
+        <div class="ck-panel row-demo" style="padding:0;overflow:clip">
+          <div class="ck-row"><span>Mean fluorescence</span><span class="ck-row__value">1,284.06</span></div>
+          <div class="ck-row"><span>Standard deviation</span><span class="ck-row__value">41.92</span></div>
+          <div class="ck-row"><span>Signal to noise</span><span class="ck-row__value">7.44</span></div>
+        </div>
+        <p class="ck-meta" style="margin:0">success <span class="ck-status--success">passed</span> - warning <span class="ck-status--warning">drift</span> - danger <span class="ck-status--danger">failed</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="loaders-heading">
+    <div class="section__head">
+      <h2 id="loaders-heading">Loading primitives</h2>
+      <p class="section__note">Each loader is one element plus a status label, sized by <code>--sp-size</code> and tinted by <code>--sp-color</code>. Show one only after the wait has lasted long enough to matter.</p>
+    </div>
+    <div class="loaders" id="loaders"></div>
+    <div class="inline-demo" style="margin-block-start:var(--ck-space-3)">
+      <button type="button" class="ck-btn ck-btn--primary" aria-busy="true">
+        <span class="sp-loader sp-loader--arc" role="status" style="--sp-size:16px;--sp-stroke:2px;--sp-color:var(--ck-on-accent)">
+          <span class="sp-sr-only">Saving plate</span>
+        </span>
+        Saving
+      </button>
+      <div class="meter-demo">
+        <div class="sp-loader sp-loader--meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="42" aria-labelledby="meter-label" style="--sp-size:28px;--sp-value:42;--sp-color:var(--ck-accent)">
+          <span class="sp-sr-only">Uploading figures, 42 percent</span>
+        </div>
+        <span class="ck-meta" id="meter-label">Uploading 24 figures - 42%</span>
+      </div>
+      <div style="display:flex;gap:var(--ck-space-2);align-items:center;color:var(--ck-text-secondary);font-size:0.8125rem">
+        <span class="sp-loader sp-loader--dots" role="status" style="--sp-size:14px;--sp-stroke:2px">
+          <span class="sp-sr-only">Assistant is drafting</span>
+        </span>
+        Assistant is drafting the protocol
+      </div>
+    </div>
+  </section>
+
+  <p class="statusline">
+    <span id="theme-state">Theme: light</span>
+    <span id="motion-state">Motion: full</span>
+    <span>Scope: <code>[data-style="cobalt-kit"]</code></span>
+  </p>
+</main>
+
+<script>
+  const tokens = [
+    ["--ck-canvas", "Canvas"],
+    ["--ck-surface", "Surface"],
+    ["--ck-overlay", "Overlay"],
+    ["--ck-accent", "Accent"],
+    ["--ck-secondary", "Secondary"],
+    ["--ck-tint-accent", "Accent tint"],
+    ["--ck-text", "Text"],
+    ["--ck-text-secondary", "Secondary text"],
+    ["--ck-text-muted", "Muted text"],
+    ["--ck-border-strong", "Border strong"],
+    ["--ck-success", "Success"],
+    ["--ck-warning", "Warning"],
+    ["--ck-danger", "Danger"]
+  ];
+
+  const variants = [
+    ["ring", "Bounded region is busy"],
+    ["arc", "Inline or in a button"],
+    ["dots", "Typing and waiting"],
+    ["bars", "Media or processing"],
+    ["sweep", "Placeholder shimmer"],
+    ["squish", "Playful brand surface"],
+    ["orbit", "One long task"],
+    ["meter", "Known completion value"]
+  ];
+
+  const style = getComputedStyle(document.body);
+  const swatches = document.getElementById("swatches");
+  for (const [token, label] of tokens) {
+    const value = style.getPropertyValue(token).trim().toUpperCase();
+    const card = document.createElement("div");
+    card.className = "swatch";
+    card.innerHTML =
+      '<div class="swatch__chip" style="background:var(' + token + ')"></div>' +
+      '<div class="swatch__body"><span class="swatch__name">' + label +
+      '</span><span class="swatch__value">' + value + "</span></div>";
+    swatches.append(card);
+  }
+
+  const loaderGrid = document.getElementById("loaders");
+  for (const [variant, use] of variants) {
+    const label = "Loading " + variant;
+    const meter = variant === "meter";
+    const card = document.createElement("div");
+    card.className = "loader-card";
+    card.innerHTML =
+      '<div class="loader-card__stage">' +
+      '<div class="sp-loader sp-loader--' + variant + '" role="' + (meter ? "progressbar" : "status") + '"' +
+      (meter ? ' aria-valuemin="0" aria-valuemax="100" aria-valuenow="62" style="--sp-value:62"' : "") +
+      '><span class="sp-sr-only">' + label + "</span></div>" +
+      "</div>" +
+      '<span class="loader-card__name">' + variant + "</span>" +
+      '<span class="loader-card__use">' + use + "</span>";
+    loaderGrid.append(card);
+  }
+
+  const themeButton = document.getElementById("theme-toggle");
+  const motionButton = document.getElementById("motion-toggle");
+  themeButton.addEventListener("click", () => {
+    const dark = document.body.dataset.theme !== "dark";
+    if (dark) document.body.dataset.theme = "dark";
+    else delete document.body.dataset.theme;
+    themeButton.setAttribute("aria-pressed", String(dark));
+    themeButton.textContent = dark ? "Light theme" : "Dark theme";
+    document.getElementById("theme-state").textContent = "Theme: " + (dark ? "dark" : "light");
+  });
+  motionButton.addEventListener("click", () => {
+    const reduce = document.body.dataset.motion !== "reduce";
+    if (reduce) document.body.dataset.motion = "reduce";
+    else delete document.body.dataset.motion;
+    motionButton.setAttribute("aria-pressed", String(reduce));
+    motionButton.textContent = reduce ? "Full motion" : "Reduced motion";
+    document.getElementById("motion-state").textContent = "Motion: " + (reduce ? "reduced" : "full");
+  });
+</script>
+</body>
+</html>

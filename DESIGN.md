@@ -35,7 +35,10 @@ Wabi Press is a maintained AzSkills implementation choice, not a claim about
 historical pigments. Existing repository paper/ink tokens are retained.
 VSCodium / VS Code informs tool navigation and keyboard behavior only.
 BioRender informed token layering, spacing discipline and grouped selection;
-its brand palette, logos and proprietary assets are not part of this system.
+those observations now live in the opt-in
+[`cobalt-kit`](style-presets/references/cobalt-kit.md) preset, not in this
+palette. Its brand palette, logos and proprietary assets are not part of this
+system.
 Evidence and source reconciliation follow `references/modules/design-system.md`.
 
 ## Workbench layout
@@ -510,6 +513,32 @@ checks were actually rendered; a static audit cannot prove readability.
 - VS Code workbench layout documentation: https://code.visualstudio.com/docs/editing/getting-started/userinterface
 
 The reference contributes proven workbench structure and interaction patterns. AzSkills must adapt them to its own skill-discovery and technical-reading tasks rather than copy the editor wholesale.
+
+## Style presets
+
+Wabi Press is the default and the only direction that owns `:root`. Other named
+styles ship as opt-in presets with their own prefixed token pack, and each one
+needs an explicit request, a trigger keyword, or a project identity that already
+points at it. The entry point is
+[`style-presets`](references/modules/style-presets.md); the list is
+[`style-presets/references/catalog.md`](style-presets/references/catalog.md).
+
+| Preset | Scope | Standing |
+| :--- | :--- | :--- |
+| `wabi-press` | `:root` and `.wabi-*` / `.wb-*` primitives | Default for every AzSkills-owned surface |
+| `cobalt-kit` | `[data-style="cobalt-kit"]` | Opt-in; bright cobalt research canvas |
+
+A preset supplies color roles, type roles, spacing rhythm, radius tiers, border
+and depth treatment, control geometry, and component primitives. It never
+supplies a brand palette, logo, icon library, illustration, template screenshot,
+or copied stylesheet. Two presets never share one artifact, and customizing a
+preset means overriding its tokens at a container, not editing the pack.
+
+Loading indicators are a mode of the same module, not a separate owner: eight
+single-element primitives in
+[`style-presets/assets/loaders.css`](style-presets/assets/loaders.css) driven by
+`--sp-*` tokens. Each carries a status label and a reduced-motion pose. Whether
+non-loader motion earns its place stays with `ui-motion`.
 
 ## Visual QA
 

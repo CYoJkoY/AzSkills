@@ -10,7 +10,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "validate": "node scripts/validate-skills.ts && node scripts/generate-routing.ts --check && node scripts/validate-integrations.ts && node scripts/check-design-contract.ts && node scripts/check-editorial.ts",
+    "validate": "node scripts/validate-skills.ts && node scripts/generate-routing.ts --check && node scripts/validate-integrations.ts && node scripts/check-design-contract.ts && node scripts/check-editorial.ts && node scripts/check-style-presets.ts",
     "test": "node resume-evidence-workflow/tests/copy-description.test.ts && node scripts/test-install-skills.ts && node scripts/test-package-skill.ts && node scripts/test-azskills-mcp.ts && node godot-3-dev/scripts/check-godot-3x.ts --self-test && node design-system/tui/preview.ts --check",
     "check": "npm run typecheck && npm run validate && npm run test"
   },

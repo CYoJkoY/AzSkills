@@ -125,7 +125,7 @@ request
 | Family | Internal modules | Purpose |
 | :--- | :--- | :--- |
 | architecture | `architecture` | Runtime, frontend, storage, and process boundaries. |
-| interface | `design-system`, `ui-design`, `ui-motion` | Design contracts, interface execution, and motion. |
+| interface | `design-system`, `ui-design`, `ui-motion`, `style-presets` | Design contracts, interface execution, motion, and named style presets. |
 | visual | `logo-generator`, `photo-abstract-editorial` | Identity and image-led artifacts. |
 | production | `frontend-slides`, `remotion-production` | Timed or staged visual production. |
 | publishing | `readme-craft`, `steam-mod-page`, `localization` | Repository, storefront, and locale delivery. |

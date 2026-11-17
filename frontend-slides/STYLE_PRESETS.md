@@ -32,7 +32,9 @@ AzSkills-owned decks are subject-led. Use **Wabi-Press** as the default editoria
 
 ### When a subject genuinely requires another direction
 
-When the user requests another direction, or the subject's evidence makes Wabi-Press incoherent (for example, a deck that must mimic an external brand the user provides), design a custom direction. In that case it is a one-off art direction for that deck: document the thesis, keep the fixed-stage and accessibility contracts, and never register it as an AzSkills preset or let it leak into owned repository surfaces.
+When the user requests another direction, or the subject's evidence makes Wabi-Press incoherent (for example, a deck that must mimic an external brand the user provides), check the AzSkills preset catalog first ([`style-presets/references/catalog.md`](../style-presets/references/catalog.md)). A maintained preset whose triggers match the request replaces a hand-rolled direction: `cobalt-kit` covers scientific, clinical, and data-instrumented decks that need a bright cool canvas.
+
+Only when no maintained preset fits, design a custom direction. In that case it is a one-off art direction for that deck: document the thesis, keep the fixed-stage and accessibility contracts, and never let it leak into owned repository surfaces. Do not mint a new preset id during a single deck; propose it through the module's catalog workflow instead.
 
 Use indigo for references, ochre for caution and clay for context, following the
 [editorial pigment roles](../DESIGN.md#pigments-and-roles). Keep paper and ink
