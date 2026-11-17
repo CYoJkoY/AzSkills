@@ -91,16 +91,29 @@ const editArtifact = phrasePattern(FIGURE_EDIT_ARTIFACTS);
 const sentenceHasIntent = (sentence: string): boolean =>
   subject.test(sentence) && (editAction.test(sentence) || (action.test(sentence) && artifact.test(sentence)));
 
+/**
+ * A bare `通路` is a pathway in biology, a circuit in electronics, and a
+ * channel in sales. Only the biological sense belongs here, so a qualifying
+ * non-biological compound is blanked before subject matching. Blanking keeps
+ * a real subject elsewhere in the sentence able to route the request.
+ */
+const NON_BIOLOGICAL_PATHWAY =
+  /(?:电路|线路|油路|气路|水路|营销|渠道|分销|交通|通信|网络|物流|销售|供水|供气|暖通)通路/g;
+
+const withoutNonBiologicalPathway = (prompt: string): string =>
+  prompt.replace(NON_BIOLOGICAL_PATHWAY, " ");
+
 const isInformationalOnly = (prompt: string): boolean =>
   informational.test(prompt) && !action.test(prompt);
 
 export function isScientificFigureRequest(prompt: string): boolean {
   if (drawingRefusal.test(prompt)) return false;
-  if (isInformationalOnly(prompt)) return false;
-  if (namedFigure.test(prompt)) return true;
-  if (conversionPhrase.test(prompt) && conversionAction.test(prompt) && (conversionReference.test(prompt) || subject.test(prompt))) {
+  const scope = withoutNonBiologicalPathway(prompt);
+  if (isInformationalOnly(scope)) return false;
+  if (namedFigure.test(scope)) return true;
+  if (conversionPhrase.test(scope) && conversionAction.test(scope) && (conversionReference.test(scope) || subject.test(scope))) {
     return true;
   }
-  if (editAction.test(prompt) && editArtifact.test(prompt)) return true;
-  return prompt.split(/[\n。！？!?]/).some(sentenceHasIntent);
+  if (editAction.test(scope) && editArtifact.test(scope)) return true;
+  return scope.split(/[\n。！？!?]/).some(sentenceHasIntent);
 }

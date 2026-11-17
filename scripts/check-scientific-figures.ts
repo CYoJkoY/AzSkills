@@ -343,6 +343,8 @@ async function checkTriggers(): Promise<number> {
     "解释一下 JAK2/STAT3 通路的作用",
     "分析一下这个通路图的配色",
     "画出产品的 logo",
+    "做一个电路通路图",
+    "画出销售渠道通路的示意图",
   ]) {
     assert.ok(!isScientificFigureRequest(prompt), "unrelated request routed as a figure: " + prompt);
     prompts += 1;
