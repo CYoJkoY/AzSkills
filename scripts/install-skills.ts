@@ -227,7 +227,7 @@ async function maintain(destination: string, action: string, packaged: string | 
 }
 
 async function main(): Promise<void> {
-  if (has('--help') || has('-h')) { console.log('AzSkills 2.7.1: one entry, all internal modules.\nnode scripts/install-skills.ts --tool <id> [--mode user|project] [--project <path>] [--target <skills-root>] [--dry-run|--yes]\nMaintenance: --verify | --uninstall | --rollback with --target.\n--list lists clients; --all selects all clients. Legacy --skills and --all-skills always install the full bundle.'); return; }
+  if (has('--help') || has('-h')) { console.log('AzSkills 2.8.0: one entry, all internal modules.\nnode scripts/install-skills.ts --tool <id> [--mode user|project] [--project <path>] [--target <skills-root>] [--dry-run|--yes]\nMaintenance: --verify | --uninstall | --rollback with --target.\n--list lists clients; --all selects all clients. Legacy --skills and --all-skills always install the full bundle.'); return; }
   if (has('--list')) { for (const tool of tools) console.log(tool.id + '\t' + tool.name + '\t' + tool.mechanism); return; }
   const known = new Set<string>(['azskills', ...catalog.modules.map((module) => module.id), ...catalog.aliases.map((alias) => alias.id)]);
   if (value('--skills').split(',').filter(Boolean).some((id) => !known.has(id.trim()))) throw new Error('Unknown module selection');

@@ -32,9 +32,11 @@ AzSkills-owned decks are subject-led. Use **Wabi-Press** as the default editoria
 
 ### When a subject genuinely requires another direction
 
-When the user requests another direction, or the subject's evidence makes Wabi-Press incoherent (for example, a deck that must mimic an external brand the user provides), design a custom direction. In that case it is a one-off art direction for that deck: document the thesis, keep the fixed-stage and accessibility contracts, and never register it as an AzSkills preset or let it leak into owned repository surfaces.
+When the user requests another direction, or the subject's evidence makes Wabi-Press incoherent (for example, a deck that must mimic an external brand the user provides), check the AzSkills preset catalog first ([`style-presets/references/catalog.md`](../style-presets/references/catalog.md)). A maintained preset whose triggers match the request replaces a hand-rolled direction: `cobalt-kit` covers scientific, clinical, and data-instrumented decks that need a bright cool canvas.
 
-Use indigo for references, ochre for caution and clay for context, following the
+Only when no maintained preset fits, design a custom direction. In that case it is a one-off art direction for that deck: document the thesis, keep the fixed-stage and accessibility contracts, and never let it leak into owned repository surfaces. Do not mint a new preset id during a single deck; propose it through the module's catalog workflow instead.
+
+For Wabi-Press decks, use indigo for references, ochre for caution and clay for context, following the
 [editorial pigment roles](../DESIGN.md#pigments-and-roles). Keep paper and ink
 dominant; extra colors need a content role and a matching text label.
 
@@ -50,7 +52,12 @@ Limit the deck to these three roles. No fourth family without a compelling, docu
 
 ## Palette Discipline
 
-Do not distribute colors evenly across all elements. Use semantic roles:
+The paper, ink, and cinnabar rules below apply only to Wabi-Press. Cobalt Kit
+decks use their own [palette and roles](../style-presets/references/cobalt-kit.md)
+from [`cobalt-kit.css`](../style-presets/assets/cobalt-kit.css), including its
+cool white canvas and `--ck-*` tokens.
+
+For Wabi-Press, do not distribute colors evenly across all elements. Use semantic roles:
 
 - canvas (washi `#F5F3EC` / inkstone `#131416`)
 - surface (`#FAF9F5` / `#1B1C20`)
@@ -78,7 +85,7 @@ When producing style previews for a user, keep Wabi-Press as the default and dif
 
 Do not use Inter/Roboto/Arial/system fonts as expressive headline faces (the body stack is not a display face), purple-gradient-on-white clichés, decorative blobs without purpose, all-centered layouts, excessive glassmorphism, default chart styling, spring/bounce motion, or motion on every element.
 
-The final question is not "does this look stylish?" It is "does every visual decision support the deck's message, and does it read as the chosen direction?" Wabi-Press is the answer unless a stronger brief establishes a documented one-off direction.
+The final question is not "does this look stylish?" It is "does every visual decision support the deck's message, and does it read as the chosen direction?" Use Wabi-Press unless the brief establishes another maintained preset or a documented one-off direction.
 
 ## CSS Gotcha
 

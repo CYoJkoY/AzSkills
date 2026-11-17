@@ -6,7 +6,7 @@
   <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: one entry with specialized internal modules" width="100%">
 </picture>
 
-Version **2.7.1**. One entry in your client, specialized capabilities inside.
+Version **2.8.0**. One entry in your client, specialized capabilities inside.
 
 AzSkills installs as a single `azskills` folder with one root `SKILL.md`. Describe the result you want; the entry routes to the relevant internal module and loads only the necessary references. Internal module names are workflow choices, not additional skills to install. The `az-clean-code` package is also available as a standalone Skill.
 
@@ -87,6 +87,7 @@ These contracts are ordinary Markdown files. They retain their domain workflows 
 | Operations | [`taste`](references/modules/taste.md) | main, subagent, independent | Judgment, collaboration, and execution behavior automatically supplied by Codex hooks. |
 | Architecture | [`az-clean-code`](references/modules/az-clean-code.md) | write, review, refactor | Explicit code, flat control flow, reuse, and business data externalized before coding. |
 | Architecture | [`godot-3-dev`](references/modules/godot-3-dev.md) | script, review, port | Godot 3.x GDScript, virtual-call safety, the 3.6 API surface, and down-porting. |
+| Interface | [`style-presets`](references/modules/style-presets.md) | catalog, apply, loaders, audit | Named visual presets, keyword triggers, preset token packs, and loading indicators. |
 <!-- SKILL-CATALOG:END -->
 
 ## Legacy names
@@ -104,6 +105,11 @@ These contracts are ordinary Markdown files. They retain their domain workflows 
 | `svg-animation` | [`ui-motion`](references/modules/ui-motion.md) | svg |
 | `ip-as-logo` | [`logo-generator`](references/modules/logo-generator.md) | character |
 | `l13n` | [`localization`](references/modules/localization.md) | translate |
+| `biorender` | [`style-presets`](references/modules/style-presets.md) | apply |
+| `biorender-style` | [`style-presets`](references/modules/style-presets.md) | apply |
+| `cobalt-kit` | [`style-presets`](references/modules/style-presets.md) | apply |
+| `css-loaders` | [`style-presets`](references/modules/style-presets.md) | loaders |
+| `style-catalog` | [`style-presets`](references/modules/style-presets.md) | catalog |
 <!-- SKILL-ALIASES:END -->
 
 ## MCP

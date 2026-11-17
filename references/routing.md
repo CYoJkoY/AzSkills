@@ -20,6 +20,7 @@ Choose by the requested output. These are internal modules, not installable skil
 | [taste](modules/taste.md) | GPT with Taste judgment, collaboration, and execution behavior. | main, subagent, independent |
 | [az-clean-code](modules/az-clean-code.md) | Explicit, flat, reusable code with business data externalized before implementation. | write, review, refactor |
 | [godot-3-dev](modules/godot-3-dev.md) | Godot 3.x GDScript, virtual-call safety, 3.6 API surface, and down-porting. | script, review, port |
+| [style-presets](modules/style-presets.md) | Named visual presets, keyword triggers, preset token packs, and loading indicators. | catalog, apply, loaders, audit |
 
 ## Legacy names
 
@@ -37,3 +38,8 @@ Resolve these names inside AzSkills. Do not install additional entrypoints.
 | svg-animation | [ui-motion](modules/ui-motion.md) | svg |
 | ip-as-logo | [logo-generator](modules/logo-generator.md) | character |
 | l13n | [localization](modules/localization.md) | translate |
+| biorender | [style-presets](modules/style-presets.md) | apply |
+| biorender-style | [style-presets](modules/style-presets.md) | apply |
+| cobalt-kit | [style-presets](modules/style-presets.md) | apply |
+| css-loaders | [style-presets](modules/style-presets.md) | loaders |
+| style-catalog | [style-presets](modules/style-presets.md) | catalog |

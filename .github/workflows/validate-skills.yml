@@ -18,6 +18,8 @@ on:
       - "tsconfig.json"
       - "codex-plugin/**"
       - "godot-3-dev/**"
+      - "style-presets/**"
+      - "references/style-presets/**"
       - "integrations/**"
       - "README.md"
       - "assets/**"
@@ -59,6 +61,9 @@ jobs:
 
       - name: Test editable resume copy behavior
         run: node resume-evidence-workflow/tests/copy-description.test.ts
+
+      - name: Validate style presets and loader layer
+        run: node scripts/check-style-presets.ts
 
       - name: Validate integration registry and guides
         run: node scripts/validate-integrations.ts

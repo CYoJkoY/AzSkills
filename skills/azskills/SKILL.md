@@ -1,7 +1,7 @@
 ---
 name: azskills
-description: Build and review software architecture, clean code, Godot 3.x game code, interfaces, design systems, motion, logos, editorial images, HTML slides, video, README pages, Steam pages, game localization, resumes, AI client setup, and GPT with Taste behavior. Routes each task to one internal module and loads references on demand.
-version: 2.7.1
+description: Build and review architecture, clean code, Godot 3.x, interfaces, design systems, style presets, loaders, motion, logos, editorial images, slides, video, README and Steam pages, localization, resumes, AI setup, and GPT with Taste behavior. Routes one owning module per task and loads references on demand.
+version: 2.8.0
 ---
 
 # AzSkills

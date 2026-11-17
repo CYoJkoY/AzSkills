@@ -25,6 +25,12 @@ The repository's interface contract (`DESIGN.md` and `design-system/`) was infor
 
 AzSkills is not affiliated with or endorsed by either project. Values were read from publicly served stylesheets and observed interface behaviour at the time of review. Third-party colour aggregators disagree with the target stylesheet on BioRender's primary blue (`#2571B7` and `#0373DF` both appear); those readings are marked **unconfirmed** in `DESIGN.md` and are not used as tokens. No BioRender artwork, icon library, illustration, template, or copy is included in this repository.
 
+### Cobalt Kit distillation
+
+The opt-in `cobalt-kit` preset in `style-presets/` distills the same BioRender observations into a reusable AzSkills style: bright cobalt primary, one violet secondary, a cool white canvas, a 4px rhythm, pill controls, and flat depth. Every colour, type, geometry, and component value is an AzSkills choice.
+
+No BioRender palette value, logo, icon library, illustration, template, screenshot, or stylesheet is reproduced. The aggregator readings above are recorded as `unresolved` in `style-presets/references/cobalt-kit.md` and are not used. BioRender is a trademark of its owner; the preset is not affiliated with or endorsed by that product.
+
 ## Unified `logo-generator`
 
 Informed by:
@@ -191,6 +197,12 @@ Informed by:
 - https://github.com/ZzzLc0405/photo-abstract-editorial
 
 The AzSkills version independently expresses the core workflow of preserving a source photograph while deriving a restrained abstract editorial panel from observed spatial, tonal, and color relationships.
+
+## Loader technique provenance
+
+`style-presets/assets/loaders.css` supplies eight loading primitives as part of the `style-presets` module. The techniques - conic-gradient rings, stroke-dash arcs, staggered dot pulses, bar waves, sweep highlights, squish morphs, orbit dots, and conic progress meters - are common pure-CSS constructions shown across public loader galleries, including css-loaders.com by Temani Afif (https://css-loaders.com).
+
+No stylesheet, example, or snippet from that site is reproduced. The gallery's licence is not documented publicly, so it was treated as technique inspiration only. Every variant here is written against AzSkills `--sp-*` tokens with its own geometry, timing, status semantics, and reduced-motion pose.
 
 ## Licensing note
 

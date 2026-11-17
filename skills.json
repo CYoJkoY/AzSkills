@@ -91,13 +91,43 @@
       "status": "alias",
       "canonical": "localization",
       "mode": "translate"
+    },
+    {
+      "id": "biorender",
+      "status": "alias",
+      "canonical": "style-presets",
+      "mode": "apply"
+    },
+    {
+      "id": "biorender-style",
+      "status": "alias",
+      "canonical": "style-presets",
+      "mode": "apply"
+    },
+    {
+      "id": "cobalt-kit",
+      "status": "alias",
+      "canonical": "style-presets",
+      "mode": "apply"
+    },
+    {
+      "id": "css-loaders",
+      "status": "alias",
+      "canonical": "style-presets",
+      "mode": "loaders"
+    },
+    {
+      "id": "style-catalog",
+      "status": "alias",
+      "canonical": "style-presets",
+      "mode": "catalog"
     }
   ],
-  "version": "2.7.1",
+  "version": "2.8.0",
   "entry": {
     "id": "azskills",
     "path": "SKILL.md",
-    "version": "2.7.1"
+    "version": "2.8.0"
   },
   "modules": [
     {
@@ -344,6 +374,15 @@
       "modes": ["script", "review", "port"],
       "role": "Godot 3.x GDScript, virtual-call safety, 3.6 API surface, and down-porting.",
       "composes": ["az-clean-code", "architecture"]
+    },
+    {
+      "id": "style-presets",
+      "path": "references/modules/style-presets.md",
+      "status": "module",
+      "family": "interface",
+      "modes": ["catalog", "apply", "loaders", "audit"],
+      "role": "Named visual presets, keyword triggers, preset token packs, and loading indicators.",
+      "composes": ["design-system", "ui-design", "ui-motion", "frontend-slides"]
     }
   ]
 }

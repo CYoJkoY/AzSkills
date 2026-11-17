@@ -142,6 +142,7 @@ body:
         - taste
         - az-clean-code
         - godot-3-dev
+        - style-presets
         - None / Standalone
     validations:
       required: false

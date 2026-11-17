@@ -613,6 +613,54 @@ try {
     });
     assert.equal(unrelated.status, 0, unrelated.stderr);
     assert.doesNotMatch(JSON.parse(unrelated.stdout).hookSpecificOutput.additionalContext, /Az Clean Code/);
+    assert.doesNotMatch(JSON.parse(unrelated.stdout).hookSpecificOutput.additionalContext, /names a maintained AzSkills style|needs a loading primitive/);
+    const stylePrompts: [string, RegExp][] = [
+      ['Restyle this dashboard with BioRender', /catalog\.md/],
+      ['Build a bio-render landing section', /catalog\.md/],
+      ['Use the cobalt kit preset for the assay table', /catalog\.md/],
+      ['Use the cobalt preset for this table', /catalog\.md/],
+      ['Apply wabi-press tokens to the report', /catalog\.md/],
+      ['Give the deck a lab canvas', /catalog\.md/],
+      ['Switch to the research canvas style', /catalog\.md/],
+      ['Restyle this page in paper and ink', /catalog\.md/],
+      ['Open the style-catalog', /catalog\.md/],
+      ['Add a spinner while the report saves', /loaders\.css/],
+      ['Give me a CSS loader for the upload card', /loaders\.css/],
+      ['这个列表需要骨架屏', /loaders\.css/],
+    ];
+    for (const [promptText, expected] of stylePrompts) {
+      const styled = spawnSync(process.execPath, [path.join(pluginRoot, 'codex-plugin/hooks/session-start.ts'), 'UserPromptSubmit'], {
+        cwd: temp, encoding: 'utf8', input: JSON.stringify({ prompt: promptText }),
+        env: { ...process.env, PLUGIN_ROOT: pluginRoot },
+      });
+      assert.equal(styled.status, 0, styled.stderr);
+      const context = JSON.parse(styled.stdout).hookSpecificOutput.additionalContext;
+      assert.match(context, /references[\\/]modules[\\/]style-presets\.md/, promptText);
+      assert.match(context, expected, promptText);
+      assert.doesNotMatch(context, /# AzSkills/, promptText);
+    }
+    // A code task that happens to use the word "loader" must not pull in style routing.
+    for (const promptText of [
+      'Refactor the module loader in the bundler',
+      'Upgrade css-loader to v7 in the bundler config',
+      'Add css-loader to the build config',
+      'Add sass-loader for the SCSS build',
+      'Use style-loader for the stylesheet',
+      'Add vue-loader for the SFC pipeline',
+      'Explain the collab canvas layout',
+      'Switch the lifestyle preset to dark',
+      'Fix the loading state bug in the auth store',
+      'Rename the spinner module in the settings service',
+      'The progress indicator field in the CSV is empty',
+      'Explain the architecture concept',
+    ]) {
+      const plain = spawnSync(process.execPath, [path.join(pluginRoot, 'codex-plugin/hooks/session-start.ts'), 'UserPromptSubmit'], {
+        cwd: temp, encoding: 'utf8', input: JSON.stringify({ prompt: promptText }),
+        env: { ...process.env, PLUGIN_ROOT: pluginRoot },
+      });
+      assert.equal(plain.status, 0, plain.stderr);
+      assert.doesNotMatch(JSON.parse(plain.stdout).hookSpecificOutput.additionalContext, /names a maintained AzSkills style|needs a loading primitive/, promptText);
+    }
   }
   console.log('Codex plugin package and SessionStart context assertions passed.');
   // A clean checkout has no ignored dist directory, so the marketplace must resolve inside it.

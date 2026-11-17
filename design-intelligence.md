@@ -84,6 +84,7 @@ owners that inherit this visual layer:
 | DESIGN.md source, tokens, semantics, provenance | `design-system` |
 | Interface hierarchy, components, states, responsive behavior | `ui-design` |
 | Motion construction, review, audit, SVG | `ui-motion` |
+| Named style preset, keyword trigger, preset token pack, loader primitive | `style-presets` |
 | Identity, logo, character mark | `logo-generator` |
 | Photograph-derived abstract editorial treatment | `photo-abstract-editorial` |
 | Slide narrative, responsive HTML reports and composition | `frontend-slides` |

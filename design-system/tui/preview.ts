@@ -235,6 +235,13 @@ const MODULES: readonly SkillEntry[] = [
     when: "Use when a task targets Godot 3.x, GDScript, scenes, or 4.x down-porting.",
     contract: "No re-called virtuals. 3.6-only symbols. Version pinned before code.",
   },
+  {
+    name: "style-presets",
+    group: "INTERFACE",
+    purpose: "Resolve a named style, a keyword, or a loading state to one maintained preset.",
+    when: "Use when a request names a style or needs a loader, spinner, or progress indicator.",
+    contract: "One preset per artifact. Prefixed tokens. Both themes verified. Reduced-motion pose.",
+  },
 ];
 
 const DEFAULT_SELECTED = "ui-design";
