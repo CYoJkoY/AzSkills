@@ -336,7 +336,13 @@ function buildSurfaces(document: XmlDocument, canvas: CanvasSize): Surface[] {
     if (isUnpainted(document, element)) continue;
     const colour = parseColour(element.attributes["fill"]);
     if (!colour) continue;
-    const alpha = Number(element.attributes["fill-opacity"] ?? "1");
+    /*
+     * `opacity` applies to the whole element and `fill-opacity` only to its
+     * paint, but the checker reads a flat fill, so their product is the
+     * coverage a label actually sees. Reading just one of them let an
+     * `opacity="0.08"` veil count as opaque.
+     */
+    const alpha = Number(element.attributes["fill-opacity"] ?? "1") * Number(element.attributes["opacity"] ?? "1");
     if (!Number.isFinite(alpha) || alpha <= 0) continue;
     surfaces.push({
       colour,

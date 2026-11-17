@@ -253,6 +253,16 @@ assertClean(
   ),
   "Geometry declared inside defs is not read as a painted background",
 );
+assertClean(
+  documentWith(
+    [
+      '<g id="objects"><g id="dark-band"><rect x="40" y="150" width="400" height="120" fill="#101820"/></g></g>',
+      '<g id="veil-opacity"><g id="scrim-opacity"><rect x="40" y="150" width="400" height="120" fill="#FFFFFF" opacity="0.9"/></g></g>',
+      '<g id="opacity-labels"><g id="label-opacity"><text x="60" y="200" font-size="10" fill="#12212F"><tspan x="60" dy="0">Covered</tspan></text></g></g>',
+    ].join("\n"),
+  ),
+  "An element-level opacity veil is composited like a fill-opacity veil",
+);
 
 // A legend paints last, so content under its strip is already covered.
 const legendStrip =
