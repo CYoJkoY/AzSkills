@@ -193,7 +193,12 @@ const FIGURE_PROCESS_NOUNS = [
   "过程", "步骤", "原理", "耗时", "多久", "多长", "时间", "历史", "思路", "代价", "开销",
 ] as const;
 const processNoun = phrasePattern(FIGURE_PROCESS_NOUNS);
-const PROCESS_NOUN_WINDOW = 8;
+
+/** The rest of the clause, which is how far a topic noun can sit from its verb. */
+const clauseTail = (text: string): string => {
+  const breakIndex = text.search(CLAUSE_BREAK);
+  return breakIndex === -1 ? text : text.slice(0, breakIndex);
+};
 
 const narratesDrawing = (prompt: string): boolean => {
   const explaining = informational.exec(prompt);
@@ -202,10 +207,10 @@ const narratesDrawing = (prompt: string): boolean => {
   if (drawing === null || drawing.index < explaining.index) return false;
   const between = prompt.slice(explaining.index + explaining[0].length, drawing.index);
   if (CLAUSE_BREAK.test(between)) return false;
-  const drawingEnd = drawing.index + drawing[0].length;
-  const noun = processNoun.exec(prompt.slice(drawingEnd, drawingEnd + PROCESS_NOUN_WINDOW));
+  const tail = clauseTail(prompt.slice(drawing.index + drawing[0].length));
+  const noun = processNoun.exec(tail);
   if (noun === null) return false;
-  const rest = prompt.slice(drawingEnd + noun.index + noun[0].length);
+  const rest = tail.slice(noun.index + noun[0].length);
   if (artifact.test(rest)) return false;
   return !action.test(rest) && !editAction.test(rest);
 };
