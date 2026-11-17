@@ -205,6 +205,13 @@ for (const fragment of [
   assert.ok(rules(documentWith(fragment)).includes("canvas"), "A clipping shape is reported: " + fragment);
 }
 assertClean(documentWith('<g id="objects"><g id="inside"><rect x="400" y="120" width="60" height="40" fill="#DDE8FB"/></g></g>'), "A shape inside the canvas stays quiet");
+for (const path of ['M 900 500 L 1200 700', 'M 300 200 A 400 400 0 0 1 320 220']) {
+  assert.ok(
+    rules(documentWith('<g id="curves"><path id="curve-x" d="' + path + '" stroke="#12212F" fill="none"/></g>')).includes("canvas"),
+    "A path drawn off the canvas is reported: " + path,
+  );
+}
+assertClean(documentWith('<g id="curves"><path id="curve-y" d="M 100 100 C 140 60 200 60 240 100" stroke="#12212F" fill="none"/></g>'), "A path inside the canvas stays quiet");
 
 // Contrast resolves the composited stack, so a light veil is not read as its own RGB.
 function veil(fill: string, opacity: string, textFill: string): string {
@@ -284,6 +291,14 @@ const shortNote = documentWith(
     "a".repeat(policy.text.maxCharsPerLineNote) + "</tspan></text></g></g>",
 );
 assert.ok(!rules(shortNote).includes("text"), "A note at the configured line limit stays clean");
+const unroledLabel = [
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400" role="img" aria-label="Loose label">',
+  '<g id="background"><rect x="0" y="0" width="640" height="400" fill="#FFFFFF"/></g>',
+  '<g id="labels"><g id="label-free"><text x="20" y="200" font-size="7" fill="#12212F"><tspan x="20" dy="0">' +
+    "a".repeat(policy.text.maxCharsPerLineLabel + 1) + "</tspan></text></g></g>",
+  "</svg>",
+].join("\n");
+assert.ok(rules(unroledLabel).includes("text"), "Text in the labels layer is measured even without data-role");
 
 const lowTraceFloor: Policy = { ...policy, forbidden: { ...policy.forbidden, traceShareMinCommands: 2 } };
 assert.ok(inspectFigure(simplePath, lowTraceFloor).some((finding) => finding.rule === "trace"), "The trace-share floor comes from policy rather than a hard-coded constant");

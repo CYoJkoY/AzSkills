@@ -420,6 +420,12 @@ function textRole(document: XmlDocument, text: XmlElement): string {
     const role = group.attributes["data-role"];
     if (role !== undefined) return role;
     if (group.attributes["data-kind"] === "node-label") return "label";
+    /*
+     * Text inside the labels layer is a label even when the author omitted
+     * `data-role`; without this fallback a long hand-written caption escaped the
+     * label measure entirely, so the advertised line-length cap had a hole.
+     */
+    if (group.attributes["id"] === "labels") return "label";
     index = group.parent;
   }
   return "";
@@ -686,14 +692,16 @@ function reportOverflow(element: XmlElement, canvas: CanvasSize, bounds: Extent,
   if (horizontal > canvas.width * 0.02) parts.push("x=" + bounds.left.toFixed(1) + "-" + bounds.right.toFixed(1));
   if (vertical > canvas.height * 0.02) parts.push("y=" + bounds.top.toFixed(1) + "-" + bounds.bottom.toFixed(1));
   /*
-   * Shape extents are exact; text advance is estimated from the policy ratio.
-   * A deterministic clip blocks the figure, an estimated one is reported for
-   * review so a wide glyph does not fail an otherwise valid label.
+   * Rect, circle, ellipse, line, polyline, and polygon extents are exact; text
+   * advance and the path control hull are estimates. A deterministic clip
+   * blocks the figure, an estimated one is reported for review so a wide glyph
+   * or an arc radius does not fail an otherwise valid element.
    */
+  const estimated = element.name === "text" || element.name === "path";
   inspection.add(
     "canvas",
-    "<" + element.name + "> at line " + element.line + " extends past the " + canvas.width + "x" + canvas.height + " canvas (" + parts.join(", ") + ")",
-    element.name === "text" ? "warning" : "error",
+    "<" + element.name + "> at line " + element.line + " extends past the " + canvas.width + "x" + canvas.height + " canvas (" + parts.join(", ") + ")" + (estimated ? ", estimated from the control hull" : ""),
+    estimated ? "warning" : "error",
   );
 }
 

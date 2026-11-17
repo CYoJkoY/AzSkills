@@ -72,6 +72,108 @@ export function pointList(element: XmlElement): Array<{ x: number; y: number }> 
 }
 
 /**
+ * Path bounds from the control hull. Cubics stay inside their control points,
+ * so a curve never escapes this box; arcs can bulge away from it, so the radius
+ * is added around both endpoints. The result is deliberately generous and is
+ * reported as an estimate rather than an exact extent.
+ */
+export function pathExtent(element: XmlElement): Extent | null {
+  const tokens = (element.attributes["d"] ?? "").match(/[MmZzLlHhVvCcSsQqTtAa]|-?\d*\.?\d+(?:[eE][-+]?\d+)?/g);
+  if (tokens === null) return null;
+  const points: Array<{ x: number; y: number }> = [];
+  let cursorX = 0;
+  let cursorY = 0;
+  let startX = 0;
+  let startY = 0;
+  let index = 0;
+  let command = "";
+  const next = (): number => {
+    const value = Number(tokens[index] ?? "0");
+    index += 1;
+    return Number.isFinite(value) ? value : 0;
+  };
+  while (index < tokens.length) {
+    const token = tokens[index] ?? "";
+    if (/[MmZzLlHhVvCcSsQqTtAa]/.test(token)) {
+      command = token;
+      index += 1;
+      if (/[Zz]/.test(command)) {
+        points.push({ x: startX, y: startY });
+        cursorX = startX;
+        cursorY = startY;
+        continue;
+      }
+    }
+    const relative = command === command.toLowerCase();
+    const originX = relative ? cursorX : 0;
+    const originY = relative ? cursorY : 0;
+    switch (command.toUpperCase()) {
+      case "M":
+      case "L":
+      case "T": {
+        cursorX = originX + next();
+        cursorY = originY + next();
+        if (command.toUpperCase() === "M") {
+          startX = cursorX;
+          startY = cursorY;
+          command = relative ? "l" : "L";
+        }
+        points.push({ x: cursorX, y: cursorY });
+        break;
+      }
+      case "H": {
+        cursorX = originX + next();
+        points.push({ x: cursorX, y: cursorY });
+        break;
+      }
+      case "V": {
+        cursorY = originY + next();
+        points.push({ x: cursorX, y: cursorY });
+        break;
+      }
+      case "C": {
+        for (let pair = 0; pair < 2; pair += 1) {
+          points.push({ x: originX + next(), y: originY + next() });
+        }
+        cursorX = originX + next();
+        cursorY = originY + next();
+        points.push({ x: cursorX, y: cursorY });
+        break;
+      }
+      case "S":
+      case "Q": {
+        points.push({ x: originX + next(), y: originY + next() });
+        cursorX = originX + next();
+        cursorY = originY + next();
+        points.push({ x: cursorX, y: cursorY });
+        break;
+      }
+      case "A": {
+        const radiusX = Math.abs(next());
+        const radiusY = Math.abs(next());
+        next();
+        next();
+        next();
+        cursorX = originX + next();
+        cursorY = originY + next();
+        const bulge = Math.max(radiusX, radiusY);
+        points.push({ x: cursorX - bulge, y: cursorY - bulge });
+        points.push({ x: cursorX + bulge, y: cursorY + bulge });
+        points.push({ x: cursorX - bulge, y: cursorY + bulge });
+        points.push({ x: cursorX + bulge, y: cursorY - bulge });
+        break;
+      }
+      default:
+        index += 1;
+    }
+  }
+  if (points.length === 0) return null;
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  return { left: Math.min(...xs), right: Math.max(...xs), top: Math.min(...ys), bottom: Math.max(...ys) };
+}
+
+/**
  * Axis-aligned extent of one drawn element. `<text>` needs font metrics, so it
  * is resolved by the checker; every geometric primitive is answered here.
  */
@@ -107,6 +209,7 @@ export function elementExtent(element: XmlElement): Extent | null {
     const ys = points.map((point) => point.y);
     return { left: Math.min(...xs), right: Math.max(...xs), top: Math.min(...ys), bottom: Math.max(...ys) };
   }
+  if (element.name === "path") return pathExtent(element);
   return null;
 }
 
