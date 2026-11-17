@@ -123,6 +123,7 @@
     "pathData": ["<image", "data:image", "base64"],
     "styleProperties": ["filter", "backdrop-filter"],
     "maxSinglePathCommands": 240,
+    "traceShareMinCommands": 24,
     "maxPathShare": 0.5
   },
   "text": {

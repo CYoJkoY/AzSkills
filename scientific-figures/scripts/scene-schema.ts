@@ -24,21 +24,32 @@ function reject(location: string, message: string): never {
   throw new Error(location + ": " + message);
 }
 
+function checkDependencies(value: Record<string, unknown>, requirement: { key: string; dependencies: readonly string[] }, location: string): void {
+  if (!Object.hasOwn(value, requirement.key)) return;
+  for (const dependency of requirement.dependencies) {
+    if (!Object.hasOwn(value, dependency)) reject(location + "." + dependency, "is required with " + requirement.key);
+  }
+}
+
 function checkObject(value: Record<string, unknown>, rule: SchemaRule, location: string): void {
   for (const key of rule.required ?? []) {
     if (!Object.hasOwn(value, key)) reject(location + "." + key, "is required");
   }
   for (const [key, dependencies] of Object.entries(rule.dependentRequired ?? {})) {
-    if (!Object.hasOwn(value, key)) continue;
-    for (const dependency of dependencies) {
-      if (!Object.hasOwn(value, dependency)) reject(location + "." + dependency, "is required with " + key);
-    }
+    checkDependencies(value, { key, dependencies }, location);
   }
   for (const [key, item] of Object.entries(value)) {
     const child = rule.properties?.[key];
     if (child === undefined && rule.additionalProperties === false) reject(location + "." + key, "is not a recognized field");
     if (child !== undefined) checkValue(item, child, location + "." + key);
   }
+}
+
+function checkArray(value: readonly unknown[], rule: SchemaRule, location: string): void {
+  if (rule.maxItems !== undefined && value.length > rule.maxItems) reject(location, "exceeds maxItems " + rule.maxItems);
+  const itemRule = rule.items;
+  if (itemRule === undefined) return;
+  value.forEach((item, index) => checkValue(item, itemRule, location + "[" + index + "]"));
 }
 
 function checkString(value: string, rule: SchemaRule, location: string): void {
@@ -66,8 +77,7 @@ function checkValue(value: unknown, source: SchemaRule, location: string): void 
   }
   if (rule.type === "array") {
     if (!Array.isArray(value)) reject(location, "must be an array");
-    if (rule.maxItems !== undefined && value.length > rule.maxItems) reject(location, "exceeds maxItems " + rule.maxItems);
-    if (rule.items !== undefined) value.forEach((item: unknown, index: number) => checkValue(item, rule.items ?? {}, location + "[" + index + "]"));
+    checkArray(value, rule, location);
     return;
   }
   if (typeof value !== rule.type) reject(location, "must be " + rule.type);

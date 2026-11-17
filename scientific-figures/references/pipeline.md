@@ -13,6 +13,7 @@ node scientific-figures/scripts/check-figure.ts --svg figure.svg --json
 node scientific-figures/scripts/check-figure.ts --svg figure.svg --reference 640x400 --json
 node scientific-figures/scripts/render-figure.ts --self-test
 node scientific-figures/scripts/check-figure.ts --self-test
+node scientific-figures/scripts/check-figure-regression.ts
 ```
 
 The renderer validates scene input and writes independently editable panels,

@@ -115,6 +115,7 @@ function checkSelfTests(): void {
   for (const [name, marker] of [
     ["render-figure.ts", /Figure renderer passed/],
     ["check-figure.ts", /Figure checker passed/],
+    ["check-figure-regression.ts", /Figure checker regressions passed/],
   ] as const) {
     const result = runScript(name, ["--self-test"]);
     assert.equal(result.status, 0, name + " --self-test failed: " + result.stderr);
@@ -291,6 +292,10 @@ async function checkTriggers(): Promise<number> {
     "Draw the receptor signaling pathway",
     "Redraw this immunofluorescence panel as editable SVG",
     "Diagram this cell membrane transport mechanism",
+    "Redraw this figure",
+    "Draw a diagram of the heart",
+    "Create a diagram of a cell",
+    "生成一张细胞示意图",
     "画一个细胞信号通路示意图",
     "帮我把这张机制图重绘成可编辑的矢量图",
   ]) {
@@ -299,8 +304,13 @@ async function checkTriggers(): Promise<number> {
   }
   for (const prompt of [
     "Explain the cell cycle",
+    "Explain this pathway diagram",
+    "Create a medical dashboard",
+    "Generate a research summary",
+    "Create a report about the cell pathway",
     "Animate this svg",
     "Summarize this paper about receptor signaling",
+    "帮我解释这张机制图，不要绘图",
     "Draw a product logo",
     "Refactor the loading spinner module",
     "Use the BioRender style for this dashboard",
@@ -325,6 +335,10 @@ async function checkAscii(): Promise<number> {
     "scientific-figures/scripts/scene-schema.ts",
     "scientific-figures/scripts/figure-self-test.ts",
     "scientific-figures/scripts/figure-fixtures.ts",
+    "scientific-figures/scripts/figure-shape.ts",
+    "scientific-figures/scripts/xml-document.ts",
+    "scientific-figures/scripts/color-contrast.ts",
+    "scientific-figures/scripts/check-figure-regression.ts",
     "references/scientific-figures/figure-triggers.ts",
   ];
   for (const file of files) {

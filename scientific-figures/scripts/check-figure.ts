@@ -17,7 +17,10 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { contrastRatio, type Rgb } from "./color-contrast.ts";
 import { type Policy, loadPolicy, textWidth } from "./figure-model.ts";
+import { commandCount, elementArea, elementVerticalBounds, elementWidth, groupShape, numberAttribute, pointInElement, type VerticalBounds } from "./figure-shape.ts";
+import { parseXml, type XmlDocument, type XmlElement } from "./xml-document.ts";
 
 export type Severity = "error" | "warning" | "info";
 
@@ -27,173 +30,44 @@ export interface Finding {
   message: string;
 }
 
-interface XmlElement {
-  name: string;
-  attributes: Record<string, string>;
-  parent: number | null;
-  children: number[];
-  text: string;
-  selfClosing: boolean;
-  /** 1-based source line, for a finding the user can jump to. */
-  line: number;
+export interface InspectOptions {
+  /** Reference pixel dimensions, when the figure redraws a supplied image. */
+  reference?: { width: number; height: number } | null;
 }
 
-interface Document {
-  elements: XmlElement[];
-  roots: number[];
-  errors: string[];
+interface Inspection {
+  document: XmlDocument;
+  policy: Policy;
+  reference?: { width: number; height: number } | null;
+  add: (rule: string, message: string, severity?: Severity) => void;
 }
 
-const NAME = /^[A-Za-z_][\w:.-]*/;
-
-/** A deliberately small XML reader: enough to prove well-formedness and walk structure. */
-function parseXml(source: string): Document {
-  const elements: XmlElement[] = [];
-  const roots: number[] = [];
-  const stack: number[] = [];
-  const errors: string[] = [];
-  let index = 0;
-  while (index < source.length) {
-    const open = source.indexOf("<", index);
-    if (open < 0) {
-      appendText(source.slice(index));
-      break;
-    }
-    if (open > index) appendText(source.slice(index, open));
-    if (source.startsWith("<!--", open)) {
-      const end = source.indexOf("-->", open + 4);
-      if (end < 0) {
-        errors.push("unterminated comment at line " + lineOf(open));
-        break;
-      }
-      index = end + 3;
-      continue;
-    }
-    if (source.startsWith("<![CDATA[", open)) {
-      const end = source.indexOf("]]>", open + 9);
-      if (end < 0) {
-        errors.push("unterminated CDATA at line " + lineOf(open));
-        break;
-      }
-      appendText(source.slice(open + 9, end));
-      index = end + 3;
-      continue;
-    }
-    if (source.startsWith("<?", open)) {
-      const end = source.indexOf("?>", open + 2);
-      if (end < 0) {
-        errors.push("unterminated processing instruction at line " + lineOf(open));
-        break;
-      }
-      index = end + 2;
-      continue;
-    }
-    if (source.startsWith("<!", open)) {
-      const end = source.indexOf(">", open + 2);
-      if (end < 0) {
-        errors.push("unterminated declaration at line " + lineOf(open));
-        break;
-      }
-      index = end + 1;
-      continue;
-    }
-    const end = source.indexOf(">", open);
-    if (end < 0) {
-      errors.push("unterminated tag at line " + lineOf(open));
-      break;
-    }
-    const raw = source.slice(open + 1, end);
-    const line = lineOf(open);
-    if (raw.startsWith("/")) {
-      const name = raw.slice(1).trim();
-      const top = stack.pop();
-      if (top === undefined) errors.push("stray closing tag </" + name + "> at line " + line);
-      else if (elements[top]?.name !== name) {
-        errors.push("mismatched tag: expected </" + (elements[top]?.name ?? "?") + "> but found </" + name + "> at line " + line);
-      }
-      index = end + 1;
-      continue;
-    }
-    const selfClosing = raw.endsWith("/");
-    const body = selfClosing ? raw.slice(0, -1) : raw;
-    const nameMatch = NAME.exec(body);
-    if (!nameMatch) {
-      errors.push("unreadable tag at line " + line);
-      index = end + 1;
-      continue;
-    }
-    const name = nameMatch[0];
-    const attributes: Record<string, string> = {};
-    let cursor = name.length;
-    while (cursor < body.length) {
-      while (cursor < body.length && /\s/.test(body[cursor] ?? "")) cursor += 1;
-      if (cursor >= body.length) break;
-      const keyMatch = /^[^\s=/>]+/.exec(body.slice(cursor));
-      if (!keyMatch) {
-        errors.push("unreadable attribute in <" + name + "> at line " + line);
-        break;
-      }
-      const key = keyMatch[0];
-      cursor += key.length;
-      while (cursor < body.length && /\s/.test(body[cursor] ?? "")) cursor += 1;
-      if (body[cursor] !== "=") {
-        errors.push("attribute " + key + " in <" + name + "> has no value at line " + line);
-        break;
-      }
-      cursor += 1;
-      while (cursor < body.length && /\s/.test(body[cursor] ?? "")) cursor += 1;
-      const quote = body[cursor];
-      if (quote !== '"' && quote !== "'") {
-        errors.push("attribute " + key + " in <" + name + "> is unquoted at line " + line);
-        break;
-      }
-      const close = body.indexOf(quote, cursor + 1);
-      if (close < 0) {
-        errors.push("attribute " + key + " in <" + name + "> is unterminated at line " + line);
-        break;
-      }
-      if (key in attributes) errors.push("duplicate attribute " + key + " in <" + name + "> at line " + line);
-      attributes[key] = body.slice(cursor + 1, close);
-      cursor = close + 1;
-    }
-    const parent = stack.length > 0 ? stack[stack.length - 1] ?? null : null;
-    const node: XmlElement = { name, attributes, parent, children: [], text: "", selfClosing, line };
-    elements.push(node);
-    const own = elements.length - 1;
-    if (parent === null) roots.push(own);
-    else elements[parent]?.children.push(own);
-    if (!selfClosing) stack.push(own);
-    index = end + 1;
-    continue;
-  }
-  if (stack.length > 0) {
-    for (const open of stack) errors.push("unclosed <" + (elements[open]?.name ?? "?") + "> at line " + (elements[open]?.line ?? 0));
-  }
-  return { elements, roots, errors };
-
-  function appendText(raw: string): void {
-    const top = stack[stack.length - 1];
-    if (top === undefined) {
-      if (raw.trim()) errors.push("text outside the root element: " + JSON.stringify(raw.trim().slice(0, 40)));
-      return;
-    }
-    const target = elements[top];
-    if (target) target.text += raw;
-  }
-
-  function lineOf(offset: number): number {
-    let line = 1;
-    for (let cursor = 0; cursor < offset && cursor < source.length; cursor += 1) {
-      if (source[cursor] === "\n") line += 1;
-    }
-    return line;
-  }
+interface CanvasSize {
+  width: number;
+  height: number;
 }
 
-interface Rgb {
-  r: number;
-  g: number;
-  b: number;
+interface Surface {
+  colour: Rgb;
+  area: number;
+  contains: (x: number, y: number) => boolean;
+}
+
+interface AttributeSubject {
+  element: XmlElement;
+  key: string;
+  value: string;
+}
+
+interface TextResult {
+  checked: boolean;
+  smallest: number;
+}
+
+interface LabelSubject {
+  text: XmlElement;
+  shape: XmlElement;
+  placement: string | undefined;
 }
 
 const NAMED: Record<string, string> = {
@@ -221,29 +95,9 @@ function parseColour(value: string | undefined): Rgb | null {
     return { r: parseInt(hex.slice(0, 2), 16), g: parseInt(hex.slice(2, 4), 16), b: parseInt(hex.slice(4, 6), 16) };
   }
   const functional = /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/.exec(named);
-  if (functional) {
-    return { r: Number(functional[1]), g: Number(functional[2]), b: Number(functional[3]) };
-  }
+  if (functional) return { r: Number(functional[1]), g: Number(functional[2]), b: Number(functional[3]) };
   return null;
 }
-
-const channel = (value: number): number => {
-  const normalized = value / 255;
-  return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
-};
-
-const luminance = (colour: Rgb): number => 0.2126 * channel(colour.r) + 0.7152 * channel(colour.g) + 0.0722 * channel(colour.b);
-
-function contrast(foreground: Rgb, background: Rgb): number {
-  const [light, dark] = [luminance(foreground), luminance(background)].sort((left, right) => right - left);
-  return ((light ?? 0) + 0.05) / ((dark ?? 1) + 0.05);
-}
-
-const mix = (foreground: Rgb, background: Rgb, alpha: number): Rgb => ({
-  r: foreground.r * alpha + background.r * (1 - alpha),
-  g: foreground.g * alpha + background.g * (1 - alpha),
-  b: foreground.b * alpha + background.b * (1 - alpha),
-});
 
 const toHex = (colour: Rgb): string =>
   "#" +
@@ -251,56 +105,12 @@ const toHex = (colour: Rgb): string =>
     .map((value) => Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, "0"))
     .join("");
 
-interface Surface {
-  colour: Rgb;
-  area: number;
-  contains: (x: number, y: number) => boolean;
-}
-
-const pointInElement = (element: XmlElement, x: number, y: number): boolean => {
-  const number = (key: string): number | null => {
-    const value = element.attributes[key];
-    if (value === undefined) return null;
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-  };
-  if (element.name === "rect") {
-    const left = number("x") ?? 0;
-    const top = number("y") ?? 0;
-    const width = number("width") ?? 0;
-    const height = number("height") ?? 0;
-    return x >= left && x <= left + width && y >= top && y <= top + height;
-  }
-  if (element.name === "circle" || element.name === "ellipse") {
-    const radiusX = element.name === "circle" ? number("r") ?? 0 : number("rx") ?? 0;
-    const radiusY = element.name === "circle" ? number("r") ?? 0 : number("ry") ?? 0;
-    if (radiusX <= 0 || radiusY <= 0) return false;
-    const dx = (x - (number("cx") ?? 0)) / radiusX;
-    const dy = (y - (number("cy") ?? 0)) / radiusY;
-    return dx * dx + dy * dy <= 1;
-  }
-  return false;
-};
-
-const elementArea = (element: XmlElement): number => {
-  const number = (key: string): number => Number(element.attributes[key] ?? 0) || 0;
-  if (element.name === "rect") return Math.max(1, number("width") * number("height"));
-  if (element.name === "circle") return Math.max(1, Math.PI * (number("r") ** 2));
-  if (element.name === "ellipse") return Math.max(1, Math.PI * number("rx") * number("ry"));
-  return Number.MAX_SAFE_INTEGER;
-};
-
-export interface InspectOptions {
-  /** Reference pixel dimensions, when the figure redraws a supplied image. */
-  reference?: { width: number; height: number } | null;
-}
-
 /**
  * Visible text of a `<text>` element. A renderer puts each line in a `<tspan>`,
  * so the element's own text is normally empty; reading it alone would report
  * every real label as blank.
  */
-function collectLines(document: Document, element: XmlElement): string[] {
+function collectLines(document: XmlDocument, element: XmlElement): string[] {
   const lines: string[] = [];
   const own = element.text.replace(/\s+/g, " ").trim();
   if (own) lines.push(own);
@@ -313,6 +123,352 @@ function collectLines(document: Document, element: XmlElement): string[] {
   return lines;
 }
 
+function checkElement(element: XmlElement, forbidden: ReadonlySet<string>, add: Inspection["add"]): void {
+  const name = element.name.slice(element.name.lastIndexOf(":") + 1).toLowerCase();
+  if (forbidden.has(name)) add("raster", "<" + name + "> is not allowed: the figure must stay vector-editable");
+  if (name === "filter" || name === "feimage") add("raster", "<" + name + "> fakes pixels the vector layer cannot explain");
+}
+
+function checkStyleProperties(subject: AttributeSubject, policy: Policy, add: Inspection["add"]): void {
+  for (const property of policy.forbidden.styleProperties) {
+    if (new RegExp("(?:^|;)\\s*" + property + "\\s*:", "i").test(subject.value)) {
+      add("raster", "<" + subject.element.name + "> uses " + property + " in style");
+    }
+  }
+}
+
+function checkUrlSchemes(subject: AttributeSubject, policy: Policy, add: Inspection["add"]): void {
+  const lowered = subject.key.toLowerCase();
+  if (lowered !== "href" && lowered !== "src" && !lowered.includes("href")) return;
+  for (const scheme of policy.forbidden.urlSchemes) {
+    if (subject.value.toLowerCase().includes(scheme)) add("raster", "<" + subject.element.name + "> points at a " + scheme + " resource");
+  }
+}
+
+function checkAttribute(subject: AttributeSubject, policy: Policy, add: Inspection["add"]): void {
+  const lowered = subject.key.toLowerCase();
+  if ((lowered === "style" || lowered === "fill" || lowered === "stroke") && /url\(\s*['"]?(?:data|https?|file):/i.test(subject.value)) {
+    add("raster", "<" + subject.element.name + "> embeds a " + lowered + " payload from a URL");
+  }
+  if (lowered === "style") checkStyleProperties(subject, policy, add);
+  checkUrlSchemes(subject, policy, add);
+}
+
+function checkAttributes(element: XmlElement, forbidden: ReadonlySet<string>, inspection: Inspection): void {
+  for (const [key, value] of Object.entries(element.attributes)) {
+    if (forbidden.has(key.toLowerCase())) inspection.add("link", "<" + element.name + "> carries " + key + ", which can point at an external asset");
+    checkAttribute({ element, key, value }, inspection.policy, inspection.add);
+  }
+}
+
+function checkForbidden(inspection: Inspection): void {
+  const forbiddenElements = new Set(inspection.policy.forbidden.elements.map((name) => name.toLowerCase()));
+  const forbiddenAttributes = new Set(inspection.policy.forbidden.attributes.map((name) => name.toLowerCase()));
+  for (const element of inspection.document.elements) {
+    checkElement(element, forbiddenElements, inspection.add);
+    checkAttributes(element, forbiddenAttributes, inspection);
+  }
+}
+
+function checkReference(ratio: number, inspection: Inspection): void {
+  const reference = inspection.reference;
+  if (!reference) return;
+  const expected = reference.width / reference.height;
+  const drift = Math.abs(ratio - expected) / expected;
+  if (drift > 0.01) inspection.add("canvas", "ratio " + ratio.toFixed(3) + " drifts " + (drift * 100).toFixed(1) + "% from the reference " + expected.toFixed(3));
+}
+
+function checkCanvasRatio(width: number, height: number, inspection: Inspection): void {
+  const ratio = width / height;
+  if (ratio < inspection.policy.canvas.minRatio || ratio > inspection.policy.canvas.maxRatio) {
+    inspection.add("canvas", "ratio " + ratio.toFixed(2) + " is outside " + inspection.policy.canvas.minRatio + "-" + inspection.policy.canvas.maxRatio);
+  }
+  if (Math.min(width, height) < inspection.policy.canvas.minSidePt) {
+    inspection.add("canvas", "the short side is " + Math.min(width, height) + "pt; below " + inspection.policy.canvas.minSidePt + "pt strokes and 6pt type stop being legible in print");
+  }
+  checkReference(ratio, inspection);
+}
+
+function checkCanvas(root: XmlElement, inspection: Inspection): CanvasSize {
+  const viewBox = root.attributes["viewBox"];
+  if (inspection.policy.verification.requireViewBox && !viewBox) inspection.add("canvas", "<svg> has no viewBox, so it cannot scale");
+  if (!viewBox) return { width: 0, height: 0 };
+  const parts = viewBox.split(/[\s,]+/).filter(Boolean).map(Number);
+  if (parts.length !== 4 || parts.some((value) => !Number.isFinite(value))) {
+    inspection.add("canvas", "viewBox must hold four numbers: " + viewBox);
+    return { width: 0, height: 0 };
+  }
+  const width = parts[2] ?? 0;
+  const height = parts[3] ?? 0;
+  if (width <= 0 || height <= 0) {
+    inspection.add("canvas", "viewBox width and height must be positive");
+    return { width: 0, height: 0 };
+  }
+  checkCanvasRatio(width, height, inspection);
+  return { width, height };
+}
+
+function checkAccessibility(root: XmlElement, inspection: Inspection): void {
+  if (inspection.policy.verification.requireRoleImg && root.attributes["role"] !== "img") inspection.add("a11y", '<svg> needs role="img"');
+  if (inspection.policy.verification.requireAria && !root.attributes["aria-label"] && !root.attributes["aria-labelledby"]) {
+    inspection.add("a11y", '<svg> needs aria-label or aria-labelledby so a screen reader can name the figure');
+  }
+  const labelledBy = root.attributes["aria-labelledby"];
+  if (!labelledBy) return;
+  const ids = new Set(inspection.document.elements.map((element) => element.attributes["id"]).filter((id): id is string => id !== undefined));
+  if (!ids.has(labelledBy)) inspection.add("a11y", "aria-labelledby points at a missing id: " + labelledBy);
+}
+
+function checkIds(inspection: Inspection): void {
+  const ids = new Map<string, number>();
+  for (const element of inspection.document.elements) {
+    const id = element.attributes["id"];
+    if (id === undefined) continue;
+    if (inspection.policy.verification.uniqueIds && ids.has(id)) inspection.add("ids", "duplicate id " + JSON.stringify(id) + " at line " + element.line);
+    ids.set(id, element.line);
+    if (inspection.policy.verification.idPattern && !new RegExp(inspection.policy.verification.idPattern).test(id)) {
+      inspection.add("ids", "id " + JSON.stringify(id) + " does not match " + inspection.policy.verification.idPattern, "warning");
+    }
+  }
+}
+
+function checkLayers(inspection: Inspection): void {
+  const groups = inspection.document.elements.filter((element) => element.name === "g").length;
+  if (groups < inspection.policy.verification.minGroups) {
+    inspection.add("layers", "only " + groups + " <g> layer(s); at least " + inspection.policy.verification.minGroups + " named groups keep the figure editable");
+  }
+  const unnamed = inspection.document.elements.filter((element) => element.name === "g" && !element.attributes["id"]).length;
+  if (unnamed > 0) inspection.add("layers", unnamed + " <g> layer(s) have no id", "warning");
+}
+
+function buildSurfaces(document: XmlDocument): Surface[] {
+  const surfaces: Surface[] = [];
+  for (const element of document.elements) {
+    if (element.name !== "rect" && element.name !== "circle" && element.name !== "ellipse") continue;
+    const colour = parseColour(element.attributes["fill"]);
+    if (!colour) continue;
+    const alpha = Number(element.attributes["fill-opacity"] ?? "1");
+    if (!Number.isFinite(alpha) || alpha <= 0) continue;
+    surfaces.push({ colour, area: elementArea(element), contains: (x, y) => pointInElement(element, x, y) });
+  }
+  return surfaces.sort((left, right) => right.area - left.area);
+}
+
+function surfaceAt(surfaces: readonly Surface[], x: number, y: number): Rgb | null {
+  let resolved: Rgb | null = null;
+  for (const surface of surfaces) {
+    if (surface.contains(x, y)) resolved = surface.colour;
+  }
+  return resolved;
+}
+
+function checkTextContrast(text: XmlElement, surfaces: readonly Surface[], inspection: Inspection): TextResult {
+  const size = numberAttribute(text, "font-size");
+  if (size === null || size <= 0) {
+    inspection.add("text", "<text> at line " + text.line + " has no numeric font-size");
+    return { checked: false, smallest: Number.POSITIVE_INFINITY };
+  }
+  if (size < inspection.policy.type.minPt) inspection.add("text", "<text> at line " + text.line + " is " + size + "pt; the floor is " + inspection.policy.type.minPt + "pt");
+  const content = collectLines(inspection.document, text).join(" ");
+  if (!content) {
+    inspection.add("text", "<text> at line " + text.line + " is empty");
+    return { checked: false, smallest: size };
+  }
+  const fill = parseColour(text.attributes["fill"]);
+  if (!fill) return { checked: false, smallest: size };
+  const x = numberAttribute(text, "x") ?? 0;
+  const y = numberAttribute(text, "y") ?? 0;
+  const surface = surfaceAt(surfaces, x, y - size * 0.35);
+  if (!surface) return { checked: false, smallest: size };
+  const ratio = contrastRatio(fill, surface);
+  if (ratio < inspection.policy.contrast.textOnTint) {
+    inspection.add("contrast", "<text> at line " + text.line + " (" + JSON.stringify(content.slice(0, 28)) + ") is " + ratio.toFixed(2) + ":1 on " + toHex(surface) + "; the floor is " + inspection.policy.contrast.textOnTint + ":1");
+  }
+  return { checked: true, smallest: size };
+}
+
+function checkTextContrasts(inspection: Inspection): void {
+  const texts = inspection.document.elements.filter((element) => element.name === "text");
+  if (texts.length < inspection.policy.verification.minLabels) inspection.add("text", "the figure has " + texts.length + " <text> element(s); text must stay real text, never outlined paths");
+  const surfaces = buildSurfaces(inspection.document);
+  const results = texts.map((text) => checkTextContrast(text, surfaces, inspection));
+  const checked = results.filter((result) => result.checked).length;
+  if (checked === 0) return;
+  const smallest = Math.min(...results.map((result) => result.smallest));
+  inspection.add("contrast", "checked " + checked + " label(s); smallest font " + smallest + "pt", "info");
+}
+
+function labelSubject(document: XmlDocument, text: XmlElement, byId: ReadonlyMap<string, XmlElement>): LabelSubject | undefined {
+  const parent = text.parent === null ? undefined : document.elements[text.parent];
+  if (parent === undefined || parent.name !== "g") return undefined;
+  const targetId = parent.attributes["data-for"];
+  const target = targetId === undefined ? parent : byId.get(targetId) ?? parent;
+  const shape = groupShape(document, target);
+  if (shape === undefined) return undefined;
+  return { text, shape, placement: parent.attributes["data-placement"] };
+}
+
+function checkLabelLines(subject: LabelSubject, inspection: Inspection): void {
+  const { text, shape } = subject;
+  const available = elementWidth(shape) - inspection.policy.layout.labelPadPt * 2;
+  if (available <= 0) return;
+  const size = numberAttribute(text, "font-size") ?? 0;
+  for (const line of collectLines(inspection.document, text)) {
+    const estimated = textWidth(line, size, inspection.policy);
+    if (estimated <= available * inspection.policy.text.maxOverflowRatio) continue;
+    inspection.add(
+      "overflow",
+      "label " + JSON.stringify(line.slice(0, 24)) + " at line " + text.line + " needs " + Math.round(estimated) + "pt but the object allows " + Math.round(available) + "pt",
+    );
+  }
+}
+
+function textVerticalBounds(document: XmlDocument, text: XmlElement): VerticalBounds | null {
+  let baseline = numberAttribute(text, "y") ?? 0;
+  const size = numberAttribute(text, "font-size") ?? 0;
+  let top = Number.POSITIVE_INFINITY;
+  let bottom = Number.NEGATIVE_INFINITY;
+  const spans = text.children.map((index) => document.elements[index]).filter((element) => element?.name === "tspan");
+  for (const element of [text, ...spans]) {
+    if (element === undefined) continue;
+    baseline = (numberAttribute(element, "y") ?? baseline) + (numberAttribute(element, "dy") ?? 0);
+    if (element.text.trim() === "") continue;
+    const fontSize = numberAttribute(element, "font-size") ?? size;
+    const middle = baseline - fontSize * 0.35;
+    top = Math.min(top, middle - fontSize / 2);
+    bottom = Math.max(bottom, middle + fontSize / 2);
+  }
+  if (!Number.isFinite(top)) return null;
+  return { top, bottom };
+}
+
+function checkLabelHeight(subject: LabelSubject, inspection: Inspection): void {
+  const bounds = textVerticalBounds(inspection.document, subject.text);
+  if (bounds === null) return;
+  const shape = elementVerticalBounds(subject.shape);
+  const top = shape.top + inspection.policy.layout.labelPadPt;
+  const bottom = shape.bottom - inspection.policy.layout.labelPadPt;
+  const tolerance = Math.max(0, bottom - top) * Math.max(0, inspection.policy.text.maxOverflowRatio - 1) / 2;
+  if (bounds.top >= top - tolerance && bounds.bottom <= bottom + tolerance) return;
+  inspection.add(
+    "overflow",
+    "label at line " + subject.text.line + " spans y=" + bounds.top.toFixed(1) + "-" + bounds.bottom.toFixed(1) + "pt but the object allows y=" + top.toFixed(1) + "-" + bottom.toFixed(1) + "pt",
+  );
+}
+
+function isInsideLabel(subject: LabelSubject): boolean {
+  if (subject.placement !== undefined) return subject.placement === "inside";
+  const size = numberAttribute(subject.text, "font-size");
+  const x = numberAttribute(subject.text, "x");
+  const y = numberAttribute(subject.text, "y");
+  if (size === null || size <= 0 || x === null || y === null) return false;
+  return pointInElement(subject.shape, x, y - size * 0.35);
+}
+
+function checkOverflow(inspection: Inspection): void {
+  const texts = inspection.document.elements.filter((element) => element.name === "text");
+  const byId = new Map(
+    inspection.document.elements
+      .filter((element) => element.attributes["id"] !== undefined)
+      .map((element) => [element.attributes["id"] as string, element] as const),
+  );
+  for (const text of texts) {
+    const subject = labelSubject(inspection.document, text, byId);
+    if (subject === undefined || !isInsideLabel(subject)) continue;
+    checkLabelLines(subject, inspection);
+    checkLabelHeight(subject, inspection);
+  }
+}
+
+function checkPaths(inspection: Inspection): void {
+  const paths = inspection.document.elements.filter((element) => element.name === "path");
+  let total = 0;
+  let largest = 0;
+  for (const element of paths) {
+    const commands = commandCount(element.attributes["d"] ?? "");
+    total += commands;
+    largest = Math.max(largest, commands);
+    if (commands > inspection.policy.forbidden.maxSinglePathCommands) {
+      inspection.add(
+        "trace",
+        "<path> at line " + element.line + " has " + commands + " commands; over " + inspection.policy.forbidden.maxSinglePathCommands + " it is a flattened trace, not editable artwork",
+      );
+    }
+  }
+  if (total > 0 && largest >= inspection.policy.forbidden.traceShareMinCommands && largest / total > inspection.policy.forbidden.maxPathShare && paths.length < 8) {
+    inspection.add(
+      "trace",
+      "one path carries " + Math.round((largest / total) * 100) + "% of all path commands across " + paths.length + " path(s); split it into named objects",
+    );
+  }
+  if (paths.length === 0 && inspection.document.elements.length < 4) inspection.add("structure", "the document draws nothing: no shapes and no text");
+}
+
+/**
+ * Colour coding is a property of object geometry. The renderer reserves the
+ * `objects` layer for those groups; connector ink and text tones are not a
+ * legend's subject.
+ */
+function objectTones(document: XmlDocument): Set<string> {
+  const layer = document.elements.find((element) => element.attributes["id"] === "objects");
+  const tones = new Set<string>();
+  for (const index of layer?.children ?? []) {
+    const tone = document.elements[index]?.attributes["data-tone"];
+    if (tone !== undefined) tones.add(tone);
+  }
+  return tones;
+}
+
+function legendItems(document: XmlDocument): number {
+  return document.elements.filter((element) => element.attributes["data-kind"] === "legend-item").length;
+}
+
+function checkLegend(inspection: Inspection): void {
+  const threshold = inspection.policy.verification.requireLegendWhenTones;
+  const tones = objectTones(inspection.document);
+  if (threshold > 0 && legendItems(inspection.document) === 0 && tones.size >= threshold) {
+    inspection.add("legend", tones.size + " figure tone(s) need a legend; " + threshold + " distinct tones is the threshold");
+  }
+}
+
+function checkHorizontal(element: XmlElement, width: number, inspection: Inspection): void {
+  const x = numberAttribute(element, "x") ?? numberAttribute(element, "cx") ?? 0;
+  if (x < -width * 0.02 || x > width * 1.02) inspection.add("canvas", "<" + element.name + "> at line " + element.line + " sits outside the canvas horizontally", "warning");
+}
+
+function checkVertical(element: XmlElement, height: number, inspection: Inspection): void {
+  const y = numberAttribute(element, "y") ?? numberAttribute(element, "cy") ?? 0;
+  if (y < -height * 0.02 || y > height * 1.02) inspection.add("canvas", "<" + element.name + "> at line " + element.line + " sits outside the canvas vertically", "warning");
+}
+
+function checkBounds(root: XmlElement, canvas: CanvasSize, inspection: Inspection): void {
+  if (canvas.width <= 0 || canvas.height <= 0) return;
+  const declaredWidth = Number(root.attributes["width"] ?? "");
+  if (Number.isFinite(declaredWidth) && declaredWidth > 0) {
+    const drift = Math.abs(declaredWidth - canvas.width) / canvas.width;
+    if (drift > 0.01) inspection.add("canvas", "width=" + declaredWidth + " disagrees with viewBox width=" + canvas.width, "warning");
+  }
+  for (const element of inspection.document.elements) {
+    if (!["rect", "circle", "ellipse", "text"].includes(element.name)) continue;
+    checkHorizontal(element, canvas.width, inspection);
+    checkVertical(element, canvas.height, inspection);
+  }
+}
+
+function resolveSvgRoot(document: XmlDocument, add: Inspection["add"]): XmlElement | undefined {
+  if (document.roots.length === 0) {
+    add("xml", "the document has no root element");
+    return undefined;
+  }
+  if (document.roots.length > 1) add("xml", "the document has " + document.roots.length + " root elements");
+  const root = document.elements[document.roots[0] ?? -1];
+  if (!root || root.name !== "svg") {
+    add("xml", "the root element must be <svg>");
+    return undefined;
+  }
+  return root;
+}
+
 /** Inspect one SVG document against the figure policy. */
 export function inspectFigure(svg: string, policy: Policy, options: InspectOptions = {}): Finding[] {
   const findings: Finding[] = [];
@@ -321,247 +477,19 @@ export function inspectFigure(svg: string, policy: Policy, options: InspectOptio
   };
   const document = parseXml(svg);
   for (const error of document.errors) add("xml", error);
-  if (document.roots.length === 0) {
-    add("xml", "the document has no root element");
-    return findings;
-  }
-  if (document.roots.length > 1) add("xml", "the document has " + document.roots.length + " root elements");
-  const rootIndex = document.roots[0];
-  const root = rootIndex === undefined ? undefined : document.elements[rootIndex];
-  if (!root || root.name !== "svg") {
-    add("xml", "the root element must be <svg>");
-    return findings;
-  }
-
-  const forbiddenElements = new Set(policy.forbidden.elements.map((name) => name.toLowerCase()));
-  const forbiddenAttributes = new Set(policy.forbidden.attributes.map((name) => name.toLowerCase()));
-  for (const element of document.elements) {
-    const name = element.name.toLowerCase();
-    if (forbiddenElements.has(name)) add("raster", "<" + name + "> is not allowed: the figure must stay vector-editable", "error");
-    if (name === "filter" || name === "feimage") {
-      add("raster", "<" + name + "> fakes pixels the vector layer cannot explain");
-    }
-    for (const [key, value] of Object.entries(element.attributes)) {
-      const lowered = key.toLowerCase();
-      if (forbiddenAttributes.has(lowered)) add("link", "<" + name + "> carries " + key + ", which can point at an external asset");
-      if ((lowered === "style" || lowered === "fill" || lowered === "stroke") && /url\(\s*['"]?(?:data|https?|file):/i.test(value)) {
-        add("raster", "<" + name + "> embeds a " + lowered + " payload from a URL");
-      }
-      if (lowered === "style") {
-        for (const property of policy.forbidden.styleProperties) {
-          if (new RegExp("(?:^|;)\\s*" + property + "\\s*:", "i").test(value)) {
-            add("raster", "<" + name + "> uses " + property + " in style");
-          }
-        }
-      }
-      for (const scheme of policy.forbidden.urlSchemes) {
-        if (value.toLowerCase().includes(scheme) && (lowered === "href" || lowered === "src" || lowered.includes("href"))) {
-          add("raster", "<" + name + "> points at a " + scheme + " resource");
-        }
-      }
-    }
-  }
-
-  const viewBox = root.attributes["viewBox"];
-  if (policy.verification.requireViewBox && !viewBox) add("canvas", "<svg> has no viewBox, so it cannot scale");
-  let canvasWidth = 0;
-  let canvasHeight = 0;
-  if (viewBox) {
-    const parts = viewBox.split(/[\s,]+/).filter(Boolean).map(Number);
-    if (parts.length !== 4 || parts.some((value) => !Number.isFinite(value))) {
-      add("canvas", "viewBox must hold four numbers: " + viewBox);
-    } else {
-      const [, , width = 0, height = 0] = parts;
-      canvasWidth = width;
-      canvasHeight = height;
-      if (width <= 0 || height <= 0) add("canvas", "viewBox width and height must be positive");
-      else {
-        const ratio = width / height;
-        if (ratio < policy.canvas.minRatio || ratio > policy.canvas.maxRatio) {
-          add("canvas", "ratio " + ratio.toFixed(2) + " is outside " + policy.canvas.minRatio + "-" + policy.canvas.maxRatio);
-        }
-        if (Math.min(width, height) < policy.canvas.minSidePt) {
-          add("canvas", "the short side is " + Math.min(width, height) + "pt; below " + policy.canvas.minSidePt + "pt strokes and 6pt type stop being legible in print");
-        }
-        if (options.reference) {
-          const expected = options.reference.width / options.reference.height;
-          const drift = Math.abs(ratio - expected) / expected;
-          if (drift > 0.01) {
-            add("canvas", "ratio " + ratio.toFixed(3) + " drifts " + (drift * 100).toFixed(1) + "% from the reference " + expected.toFixed(3));
-          }
-        }
-      }
-    }
-  }
-  if (policy.verification.requireRoleImg && root.attributes["role"] !== "img") {
-    add("a11y", '<svg> needs role="img"');
-  }
-  if (policy.verification.requireAria && !root.attributes["aria-label"] && !root.attributes["aria-labelledby"]) {
-    add("a11y", '<svg> needs aria-label or aria-labelledby so a screen reader can name the figure');
-  }
-  const labelledBy = root.attributes["aria-labelledby"];
-  const ids = new Map<string, number>();
-  for (const element of document.elements) {
-    const id = element.attributes["id"];
-    if (id === undefined) continue;
-    if (policy.verification.uniqueIds && ids.has(id)) add("ids", "duplicate id " + JSON.stringify(id) + " at line " + element.line);
-    ids.set(id, element.line);
-    if (policy.verification.idPattern && !new RegExp(policy.verification.idPattern).test(id)) {
-      add("ids", "id " + JSON.stringify(id) + " does not match " + policy.verification.idPattern, "warning");
-    }
-  }
-  if (labelledBy && !ids.has(labelledBy)) add("a11y", "aria-labelledby points at a missing id: " + labelledBy);
-
-  const groups = document.elements.filter((element) => element.name === "g").length;
-  if (groups < policy.verification.minGroups) {
-    add("layers", ("only " + groups + " <g> layer(s); at least " + policy.verification.minGroups + " named groups keep the figure editable"));
-  }
-  const unnamed = document.elements.filter((element) => element.name === "g" && !element.attributes["id"]).length;
-  if (unnamed > 0) add("layers", unnamed + " <g> layer(s) have no id", "warning");
-
-  const texts = document.elements.filter((element) => element.name === "text");
-  if (texts.length < policy.verification.minLabels) {
-    add("text", "the figure has " + texts.length + " <text> element(s); text must stay real text, never outlined paths");
-  }
-  const surfaces: Surface[] = [];
-  for (const element of document.elements) {
-    if (element.name !== "rect" && element.name !== "circle" && element.name !== "ellipse") continue;
-    const colour = parseColour(element.attributes["fill"]);
-    if (!colour) continue;
-    const alpha = Number(element.attributes["fill-opacity"] ?? "1");
-    if (!Number.isFinite(alpha) || alpha <= 0) continue;
-    const area = elementArea(element);
-    surfaces.push({
-      colour,
-      area,
-      contains: (x, y) => pointInElement(element, x, y),
-    });
-  }
-  surfaces.sort((left, right) => right.area - left.area);
-  const surfaceAt = (x: number, y: number): Rgb | null => {
-    let resolved: Rgb | null = null;
-    for (const surface of surfaces) {
-      if (surface.contains(x, y)) resolved = surface.colour;
-    }
-    return resolved;
-  };
-
-  let checkedText = 0;
-  let smallestFont = Number.POSITIVE_INFINITY;
-  for (const text of texts) {
-    const size = Number(text.attributes["font-size"] ?? "");
-    if (!Number.isFinite(size) || size <= 0) {
-      add("text", "<text> at line " + text.line + " has no numeric font-size");
-      continue;
-    }
-    smallestFont = Math.min(smallestFont, size);
-    if (size < policy.type.minPt) {
-      add("text", "<text> at line " + text.line + " is " + size + "pt; the floor is " + policy.type.minPt + "pt");
-    }
-    const content = collectLines(document, text).join(" ");
-    if (!content) {
-      add("text", "<text> at line " + text.line + " is empty");
-      continue;
-    }
-    const fill = parseColour(text.attributes["fill"]);
-    if (!fill) continue;
-    const x = Number(text.attributes["x"] ?? "0");
-    const y = Number(text.attributes["y"] ?? "0");
-    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
-    const surface = surfaceAt(x, y - size * 0.35);
-    if (!surface) continue;
-    const ratio = contrast(fill, surface);
-    if (ratio < policy.contrast.textOnTint) {
-      add(
-        "contrast",
-        "<text> at line " + text.line + " (" + JSON.stringify(content.slice(0, 28)) + ") is " + ratio.toFixed(2) + ":1 on " + toHex(surface) + "; the floor is " + policy.contrast.textOnTint + ":1",
-      );
-    }
-    checkedText += 1;
-  }
-
-  // Overflow: a label drawn inside a shape must fit that shape's padded box.
-  // A caption placed beside or below an object is measured against its own line
-  // length instead, so a small icon is not held responsible for its label.
-  const shapeOf = (element: XmlElement): XmlElement | undefined =>
-    element.children.map((index) => document.elements[index]).find((child) => child !== undefined && ["rect", "ellipse", "circle"].includes(child.name));
-  for (const text of texts) {
-    const parentIndex = text.parent;
-    const parent = parentIndex === null ? undefined : document.elements[parentIndex];
-    if (!parent || parent.name !== "g") continue;
-    const shape = shapeOf(parent);
-    if (!shape) continue;
-    const size = Number(text.attributes["font-size"] ?? "0");
-    if (!Number.isFinite(size) || size <= 0) continue;
-    const textX = Number(text.attributes["x"] ?? "0");
-    const textY = Number(text.attributes["y"] ?? "0");
-    if (!pointInElement(shape, textX, textY - size * 0.35)) continue;
-    const width = Number(shape.attributes["width"] ?? (Number(shape.attributes["rx"] ?? shape.attributes["r"] ?? "0") * 2));
-    if (!Number.isFinite(width) || width <= 0) continue;
-    const available = width - policy.layout.labelPadPt * 2;
-    if (available <= 0) continue;
-    for (const line of collectLines(document, text)) {
-      const estimated = textWidth(line, size, policy);
-      if (estimated > available * policy.text.maxOverflowRatio) {
-        add(
-          "overflow",
-          "label " + JSON.stringify(line.slice(0, 24)) + " at line " + text.line + " needs " + Math.round(estimated) + "pt but the object allows " + Math.round(available) + "pt",
-        );
-      }
-    }
-  }
-  if (checkedText > 0) {
-    findings.push({
-      rule: "contrast",
-      severity: "info",
-      message: "checked " + checkedText + " label(s); smallest font " + (Number.isFinite(smallestFont) ? smallestFont + "pt" : "n/a"),
-    });
-  }
-
-  const paths = document.elements.filter((element) => element.name === "path");
-  const commandCount = (data: string): number => (data.match(/[MmZzLlHhVvCcSsQqTtAa]/g) ?? []).length;
-  let totalCommands = 0;
-  let largest = 0;
-  for (const element of paths) {
-    const commands = commandCount(element.attributes["d"] ?? "");
-    totalCommands += commands;
-    largest = Math.max(largest, commands);
-    if (commands > policy.forbidden.maxSinglePathCommands) {
-      add(
-        "trace",
-        "<path> at line " + element.line + " has " + commands + " commands; over " + policy.forbidden.maxSinglePathCommands + " it is a flattened trace, not editable artwork",
-      );
-    }
-  }
-  if (totalCommands > 0 && largest / totalCommands > policy.forbidden.maxPathShare && paths.length < 8) {
-    add(
-      "trace",
-      "one path carries " + Math.round((largest / totalCommands) * 100) + "% of all path commands across " + paths.length + " path(s); split it into named objects",
-    );
-  }
-  if (paths.length === 0 && document.elements.length < 4) {
-    add("structure", "the document draws nothing: no shapes and no text");
-  }
-
-  if (canvasWidth > 0 && canvasHeight > 0) {
-    const declaredWidth = Number(root.attributes["width"] ?? "");
-    if (Number.isFinite(declaredWidth) && declaredWidth > 0) {
-      const drift = Math.abs(declaredWidth - canvasWidth) / canvasWidth;
-      if (drift > 0.01) add("canvas", "width=" + declaredWidth + " disagrees with viewBox width=" + canvasWidth, "warning");
-    }
-    for (const element of document.elements) {
-      if (!["rect", "circle", "ellipse", "text"].includes(element.name)) continue;
-      const x = Number(element.attributes["x"] ?? element.attributes["cx"] ?? "0");
-      const y = Number(element.attributes["y"] ?? element.attributes["cy"] ?? "0");
-      if (Number.isFinite(x) && (x < -canvasWidth * 0.02 || x > canvasWidth * 1.02)) {
-        add("canvas", "<" + element.name + "> at line " + element.line + " sits outside the canvas horizontally", "warning");
-      }
-      if (Number.isFinite(y) && (y < -canvasHeight * 0.02 || y > canvasHeight * 1.02)) {
-        add("canvas", "<" + element.name + "> at line " + element.line + " sits outside the canvas vertically", "warning");
-      }
-    }
-  }
-
+  const root = resolveSvgRoot(document, add);
+  if (!root) return findings;
+  const inspection: Inspection = { document, policy, reference: options.reference, add };
+  checkForbidden(inspection);
+  const canvas = checkCanvas(root, inspection);
+  checkAccessibility(root, inspection);
+  checkIds(inspection);
+  checkLayers(inspection);
+  checkTextContrasts(inspection);
+  checkOverflow(inspection);
+  checkPaths(inspection);
+  checkLegend(inspection);
+  checkBounds(root, canvas, inspection);
   return findings;
 }
 

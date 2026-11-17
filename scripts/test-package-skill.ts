@@ -588,9 +588,17 @@ try {
     'scientific-figures/scripts/figure-model.ts',
     'scientific-figures/scripts/render-figure.ts',
     'scientific-figures/scripts/check-figure.ts',
+    'scientific-figures/scripts/check-figure-regression.ts',
+    'scientific-figures/scripts/figure-self-test.ts',
+    'scientific-figures/scripts/figure-fixtures.ts',
+    'scientific-figures/scripts/figure-shape.ts',
+    'scientific-figures/scripts/xml-document.ts',
+    'scientific-figures/scripts/xml-entities.ts',
+    'scientific-figures/scripts/color-contrast.ts',
     'scientific-figures/references/figure-scene.schema.json',
     'scientific-figures/references/quality-policy.json',
     'scientific-figures/references/example.scene.json',
+    'scientific-figures/references/pipeline.md',
   ];
   async function assertFigureBundle(bundleRoot: string, label: string): Promise<void> {
     for (const relative of figureDependencies) await stat(path.join(bundleRoot, relative)).catch(() => {

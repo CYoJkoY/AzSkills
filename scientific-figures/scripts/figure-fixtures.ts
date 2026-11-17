@@ -111,3 +111,23 @@ export const fixtures = [
   { name: "workflow", scene: workflowScene },
   { name: "bilingual", scene: bilingualScene },
 ];
+
+export const connectorScene = {
+  canvas: { width: 640, height: 400 },
+  nodes: [
+    { id: "source", kind: "membrane", box: { x: 100, y: 100, width: 160, height: 20 }, rotate: 0 },
+    { id: "target", kind: "shape", box: { x: 400, y: 80, width: 60, height: 60 }, rotate: 0 },
+  ],
+  arrows: [{ id: "connection", from: { node: "source" }, to: { node: "target" } }],
+};
+
+export const rotatedAnchorCases = [
+  { rotate: 0, start: { x: 264, y: 110 } },
+  { rotate: 90, start: { x: 194, y: 110 } },
+  { rotate: -90, start: { x: 194, y: 110 } },
+  { rotate: 180, start: { x: 264, y: 110 } },
+  { rotate: 45, start: { x: 189.9, y: 100.1 } },
+  { rotate: -45, start: { x: 189.9, y: 119.9 } },
+];
+
+export const invalidXmlText = ["TNF\u0000alpha", "TNF\u0001alpha", "TNF\uFFFEalpha", "TNF\uD800alpha", "TNF\uDC00alpha"];

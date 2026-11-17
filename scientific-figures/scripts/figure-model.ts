@@ -9,6 +9,7 @@
 
 import { readFileSync } from "node:fs";
 import { validateSceneSchema } from "./scene-schema.ts";
+import { validateXmlCharacters } from "./xml-entities.ts";
 
 export type Tone =
   | "ink"
@@ -168,6 +169,7 @@ export interface Policy {
     styleProperties: string[];
     maxSinglePathCommands: number;
     maxPathShare: number;
+    traceShareMinCommands: number;
   };
   text: {
     maxOverflowRatio: number;
@@ -251,14 +253,19 @@ function number(value: unknown, path: string, options: { min?: number; max?: num
 function text(value: unknown, path: string, maxLength: number): string {
   if (value === undefined || value === null) return "";
   if (typeof value !== "string") fail(path, "must be a string");
-  if (value.length > maxLength) fail(path, "must be at most " + maxLength + " characters");
+  if (Array.from(value).length > maxLength) fail(path, "must be at most " + maxLength + " characters");
+  try {
+    validateXmlCharacters(value);
+  } catch (error) {
+    fail(path, error instanceof Error ? error.message : "invalid XML text");
+  }
   return value;
 }
 
-function pick<T extends string>(value: unknown, allowed: readonly T[], fallback: T, path: string): T {
-  if (value === undefined || value === null) return fallback;
-  if (typeof value !== "string" || !(allowed as readonly string[]).includes(value)) {
-    fail(path, "must be one of " + allowed.join(", "));
+function pick<T extends string>(value: unknown, options: { allowed: readonly T[]; fallback: T }, path: string): T {
+  if (value === undefined || value === null) return options.fallback;
+  if (typeof value !== "string" || !(options.allowed as readonly string[]).includes(value)) {
+    fail(path, "must be one of " + options.allowed.join(", "));
   }
   return value as T;
 }
@@ -302,15 +309,15 @@ function port(value: unknown, path: string, nodeIds: ReadonlySet<string>): Port 
     node,
     x: optional("x"),
     y: optional("y"),
-    side: pick(value["side"], ["top", "right", "bottom", "left", "auto"] as const, "auto", path + ".side"),
+    side: pick(value["side"], { allowed: ["top", "right", "bottom", "left", "auto"] as const, fallback: "auto" }, path + ".side"),
   };
 }
 
-function list(source: Record<string, unknown>, key: string, max: number, path: string): unknown[] {
+function list(source: Record<string, unknown>, key: string, options: { max: number; path: string }): unknown[] {
   const value = source[key];
   if (value === undefined || value === null) return [];
-  if (!Array.isArray(value)) fail(path + "." + key, "must be an array");
-  if (value.length > max) fail(path + "." + key, "has " + value.length + " entries; limit is " + max);
+  if (!Array.isArray(value)) fail(options.path + "." + key, "must be an array");
+  if (value.length > options.max) fail(options.path + "." + key, "has " + value.length + " entries; limit is " + options.max);
   return value;
 }
 
@@ -335,13 +342,13 @@ export function parseScene(value: unknown, policy: Policy): Scene {
     fail("scene.canvas", "the short side must be at least " + minSidePt + "pt; strokes and 6pt type stop being legible below that");
   }
 
-  const ids = new Set<string>();
+  const ids = new Set(["svg-title", "background", "panels", "objects", "connectors", "labels", "legend"]);
   const claim = (candidate: string, path: string): void => {
     if (ids.has(candidate)) fail(path, "duplicate id: " + candidate);
     ids.add(candidate);
   };
 
-  const panels: Panel[] = list(value, "panels", policy.layout.maxPanels, "scene").map((raw, index) => {
+  const panels: Panel[] = list(value, "panels", { max: policy.layout.maxPanels, path: "scene" }).map((raw, index) => {
     const path = "scene.panels[" + index + "]";
     if (!isRecord(raw)) fail(path, "must be an object");
     const panelId = id(raw["id"], path + ".id");
@@ -353,28 +360,28 @@ export function parseScene(value: unknown, policy: Policy): Scene {
       box: box(raw["box"], path + ".box", policy),
       letter,
       title: text(raw["title"], path + ".title", 120),
-      fill: pick(raw["fill"], TONES, "neutral", path + ".fill"),
+      fill: pick(raw["fill"], { allowed: TONES, fallback: "neutral" }, path + ".fill"),
     };
   });
 
-  const nodes: SceneNode[] = list(value, "nodes", policy.layout.maxNodes, "scene").map((raw, index) => {
+  const nodes: SceneNode[] = list(value, "nodes", { max: policy.layout.maxNodes, path: "scene" }).map((raw, index) => {
     const path = "scene.nodes[" + index + "]";
     if (!isRecord(raw)) fail(path, "must be an object");
     const nodeId = id(raw["id"], path + ".id");
     claim(nodeId, path + ".id");
+    claim("obj-label-" + nodeId, path + ".id");
     return {
       id: nodeId,
-      kind: pick(raw["kind"], NODE_KINDS, "shape", path + ".kind"),
+      kind: pick(raw["kind"], { allowed: NODE_KINDS, fallback: "shape" }, path + ".kind"),
       box: box(raw["box"], path + ".box", policy),
       label: text(raw["label"], path + ".label", 240),
       detail: text(raw["detail"], path + ".detail", 240),
-      tone: pick(raw["tone"], TONES, "neutral", path + ".tone"),
-      shape: pick(raw["shape"], ["rect", "round", "circle", "ellipse", "diamond"] as const, "round", path + ".shape"),
-      stroke: pick(raw["stroke"], ["none", "hairline", "solid", "dashed"] as const, "solid", path + ".stroke"),
+      tone: pick(raw["tone"], { allowed: TONES, fallback: "neutral" }, path + ".tone"),
+      shape: pick(raw["shape"], { allowed: ["rect", "round", "circle", "ellipse", "diamond"] as const, fallback: "round" }, path + ".shape"),
+      stroke: pick(raw["stroke"], { allowed: ["none", "hairline", "solid", "dashed"] as const, fallback: "solid" }, path + ".stroke"),
       labelPlacement: pick(
         raw["labelPlacement"],
-        ["inside", "below", "above", "right", "left"] as const,
-        "inside",
+        { allowed: ["inside", "below", "above", "right", "left"] as const, fallback: "inside" },
         path + ".labelPlacement",
       ),
       rotate: raw["rotate"] === undefined ? 0 : number(raw["rotate"], path + ".rotate", { min: -180, max: 180 }),
@@ -382,29 +389,31 @@ export function parseScene(value: unknown, policy: Policy): Scene {
   });
 
   const nodeIds = new Set(nodes.map((node) => node.id));
-  const arrows: SceneArrow[] = list(value, "arrows", policy.layout.maxArrows, "scene").map((raw, index) => {
+  const arrows: SceneArrow[] = list(value, "arrows", { max: policy.layout.maxArrows, path: "scene" }).map((raw, index) => {
     const path = "scene.arrows[" + index + "]";
     if (!isRecord(raw)) fail(path, "must be an object");
     const arrowId = id(raw["id"], path + ".id");
     claim(arrowId, path + ".id");
-    const kind = pick(raw["kind"], ARROW_KINDS, "flow", path + ".kind");
+    const kind = pick(raw["kind"], { allowed: ARROW_KINDS, fallback: "flow" }, path + ".kind");
     return {
       id: arrowId,
       from: port(raw["from"], path + ".from", nodeIds),
       to: port(raw["to"], path + ".to", nodeIds),
       kind,
-      route: pick(raw["route"], ["straight", "elbow"] as const, "straight", path + ".route"),
+      route: pick(raw["route"], { allowed: ["straight", "elbow"] as const, fallback: "straight" }, path + ".route"),
       label: text(raw["label"], path + ".label", 120),
-      tone: pick(raw["tone"], TONES, "ink", path + ".tone"),
+      tone: pick(raw["tone"], { allowed: TONES, fallback: "ink" }, path + ".tone"),
       dashed: raw["dashed"] === undefined ? kind === "feedback" : boolean(raw["dashed"], false, path + ".dashed"),
     };
   });
 
-  const labels: SceneLabel[] = list(value, "labels", policy.layout.maxLabels, "scene").map((raw, index) => {
+  const labels: SceneLabel[] = list(value, "labels", { max: policy.layout.maxLabels, path: "scene" }).map((raw, index) => {
     const path = "scene.labels[" + index + "]";
     if (!isRecord(raw)) fail(path, "must be an object");
     const labelId = id(raw["id"], path + ".id");
     claim(labelId, path + ".id");
+    claim("label-" + labelId, path + ".id");
+    claim("text-" + labelId, path + ".id");
     const content = text(raw["text"], path + ".text", 240);
     if (!content.trim()) fail(path + ".text", "must not be empty");
     return {
@@ -412,14 +421,14 @@ export function parseScene(value: unknown, policy: Policy): Scene {
       text: content,
       x: number(raw["x"], path + ".x"),
       y: number(raw["y"], path + ".y"),
-      role: pick(raw["role"], LABEL_ROLES, "label", path + ".role"),
-      anchor: pick(raw["anchor"], ["start", "middle", "end"] as const, "start", path + ".anchor"),
-      tone: pick(raw["tone"], TONES, "ink", path + ".tone"),
+      role: pick(raw["role"], { allowed: LABEL_ROLES, fallback: "label" }, path + ".role"),
+      anchor: pick(raw["anchor"], { allowed: ["start", "middle", "end"] as const, fallback: "start" }, path + ".anchor"),
+      tone: pick(raw["tone"], { allowed: TONES, fallback: "ink" }, path + ".tone"),
       maxWidth: raw["maxWidth"] === undefined ? null : number(raw["maxWidth"], path + ".maxWidth", { exclusiveMin: true, min: 0 }),
     };
   });
 
-  const legend: LegendItem[] = list(value, "legend", 24, "scene").map((raw, index) => {
+  const legend: LegendItem[] = list(value, "legend", { max: 24, path: "scene" }).map((raw, index) => {
     const path = "scene.legend[" + index + "]";
     if (!isRecord(raw)) fail(path, "must be an object");
     const itemId = id(raw["id"], path + ".id");
@@ -427,8 +436,8 @@ export function parseScene(value: unknown, policy: Policy): Scene {
     return {
       id: itemId,
       label: text(raw["label"], path + ".label", 120),
-      kind: pick(raw["kind"], ["swatch", "arrow", "line"] as const, "swatch", path + ".kind"),
-      tone: pick(raw["tone"], TONES, "neutral", path + ".tone"),
+      kind: pick(raw["kind"], { allowed: ["swatch", "arrow", "line"] as const, fallback: "swatch" }, path + ".kind"),
+      tone: pick(raw["tone"], { allowed: TONES, fallback: "neutral" }, path + ".tone"),
       dashed: boolean(raw["dashed"], false, path + ".dashed"),
     };
   });
@@ -437,9 +446,9 @@ export function parseScene(value: unknown, policy: Policy): Scene {
     canvas: {
       width,
       height,
-      background: pick(canvasValue["background"], ["canvas", "surface", "none"] as const, "canvas", "scene.canvas.background"),
+      background: pick(canvasValue["background"], { allowed: ["canvas", "surface", "none"] as const, fallback: "canvas" }, "scene.canvas.background"),
     },
-    theme: pick(value["theme"], ["cobalt", "wabi", "mono"] as const, "cobalt", "scene.theme"),
+    theme: pick(value["theme"], { allowed: ["cobalt", "wabi", "mono"] as const, fallback: "cobalt" }, "scene.theme"),
     title: text(value["title"], "scene.title", 200),
     panels,
     nodes,
@@ -566,37 +575,45 @@ export function textWidth(content: string, sizePt: number, policy: Policy): numb
   return units * sizePt;
 }
 
-/** Greedy word wrap that also breaks between CJK glyphs when no space exists. */
-export function wrapText(content: string, sizePt: number, maxWidth: number, policy: Policy): string[] {
-  if (!content.trim()) return [];
-  const lines: string[] = [];
-  const tokens = content.split(/(\s+)/).filter((token) => token.length > 0);
-  let current = "";
-  const push = (): void => {
-    if (current.trim()) lines.push(current.trim());
-    current = "";
-  };
-  for (const token of tokens) {
-    if (/^\s+$/.test(token)) {
-      if (current) current += " ";
-      continue;
-    }
-    const candidate = current + token;
-    if (textWidth(candidate, sizePt, policy) <= maxWidth || !current) {
-      if (textWidth(candidate, sizePt, policy) <= maxWidth) {
-        current = candidate;
-        continue;
-      }
-      // A single token wider than the line: break it by character.
-      for (const char of token) {
-        if (textWidth(current + char, sizePt, policy) > maxWidth && current) push();
-        current += char;
-      }
-      continue;
-    }
-    push();
-    current = token;
+export interface WrapOptions {
+  sizePt: number;
+  maxWidth: number;
+}
+
+interface WrapState {
+  lines: string[];
+  current: string;
+}
+
+function flushLine(state: WrapState): void {
+  if (state.current.trim() !== "") state.lines.push(state.current.trim());
+  state.current = "";
+}
+
+function appendToken(token: string, state: WrapState, context: WrapOptions & { policy: Policy }): void {
+  if (/^\s+$/.test(token)) {
+    if (state.current !== "") state.current += " ";
+    return;
   }
-  push();
-  return lines;
+  const { sizePt, maxWidth, policy } = context;
+  if (state.current !== "" && textWidth(state.current + token, sizePt, policy) <= maxWidth) {
+    state.current += token;
+    return;
+  }
+  flushLine(state);
+  for (const character of token) {
+    if (state.current !== "" && textWidth(state.current + character, sizePt, policy) > maxWidth) flushLine(state);
+    state.current += character;
+  }
+}
+
+/** Greedy word wrap that also breaks between CJK glyphs when no space exists. */
+export function wrapText(content: string, options: WrapOptions, policy: Policy): string[] {
+  if (content.trim() === "") return [];
+  const state: WrapState = { lines: [], current: "" };
+  const context = { ...options, policy };
+  const tokens = content.split(/(\s+)/).filter((token) => token.length > 0);
+  for (const token of tokens) appendToken(token, state, context);
+  flushLine(state);
+  return state.lines;
 }

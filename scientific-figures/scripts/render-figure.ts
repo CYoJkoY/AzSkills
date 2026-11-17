@@ -19,6 +19,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import {
   type Box,
+  type Panel,
   type Policy,
   type Point,
   type ResolvedPalette,
@@ -129,16 +130,26 @@ interface Paint {
   dashed: boolean;
 }
 
-const shapeAttributes = (paint: Paint, rotate: number, centre: Point): string =>
+interface RenderContext {
+  policy: Policy;
+  palette: ResolvedPalette;
+}
+
+interface ArrowContext extends RenderContext {
+  nodes: ReadonlyMap<string, SceneNode>;
+}
+
+/** Paint attributes only; rotation is applied once on the object's outer group. */
+const shapeAttributes = (paint: Paint): string =>
   attribute("fill", paint.fill) +
   (paint.stroke === null
     ? ""
     : attribute("stroke", paint.stroke) +
       attribute("stroke-width", paint.strokeWidth) +
-      (paint.dashed ? attribute("stroke-dasharray", "4 3") : "")) +
-  (rotate === 0
-    ? ""
-    : attribute("transform", "rotate(" + round(rotate) + " " + fmt(centre.x) + " " + fmt(centre.y) + ")"));
+      (paint.dashed ? attribute("stroke-dasharray", "4 3") : ""));
+
+const rotationTransform = (rotate: number, centre: Point): string =>
+  rotate === 0 ? "" : attribute("transform", "rotate(" + round(rotate) + " " + fmt(centre.x) + " " + fmt(centre.y) + ")");
 
 /**
  * Primitive markup for one object kind. Each kind stays a small set of native
@@ -147,13 +158,13 @@ const shapeAttributes = (paint: Paint, rotate: number, centre: Point): string =>
  */
 function nodePrimitives(
   node: SceneNode,
-  policy: Policy,
+  context: RenderContext,
   paint: Paint,
-  palette: ResolvedPalette,
 ): string[] {
+  const { policy, palette } = context;
   const box: Box = node.box;
   const centre: Point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
-  const attrs = shapeAttributes(paint, node.rotate, centre);
+  const attrs = shapeAttributes(paint);
   const ellipse = (radiusX: number, radiusY: number, extra: string): string =>
     '<ellipse cx="' + fmt(centre.x) + '" cy="' + fmt(centre.y) + '" rx="' + fmt(radiusX) + '" ry="' + fmt(radiusY) + '"' + extra + "/>";
   const innerTint = palette.tints["accent-2"] ?? "#EEEEEE";
@@ -272,7 +283,13 @@ function nodePrimitives(
     default:
       break;
   }
-  if (node.shape === "circle" || node.shape === "ellipse") {
+  if (node.shape === "circle") {
+    return [
+      '<circle cx="' + fmt(centre.x) + '" cy="' + fmt(centre.y) + '" r="' +
+        fmt(Math.min(box.width, box.height) / 2) + '"' + attrs + "/>",
+    ];
+  }
+  if (node.shape === "ellipse") {
     return [ellipse(box.width / 2, box.height / 2, attrs)];
   }
   if (node.shape === "diamond") {
@@ -291,15 +308,30 @@ function nodePrimitives(
   ];
 }
 
+const CIRCLE_KINDS: ReadonlySet<SceneNode["kind"]> = new Set(["well", "badge"]);
+
+function drawsCircle(node: SceneNode): boolean {
+  if (CIRCLE_KINDS.has(node.kind)) return true;
+  return node.kind === "shape" && node.shape === "circle";
+}
+
+function nodeBounds(node: SceneNode): Box {
+  const box = node.box;
+  if (!drawsCircle(node)) return box;
+  const side = Math.min(box.width, box.height);
+  return { x: box.x + (box.width - side) / 2, y: box.y + (box.height - side) / 2, width: side, height: side };
+}
+
 /** The text area a node's label occupies; outside labels get a fixed gutter. */
 function labelBox(node: SceneNode, policy: Policy): Box {
   const pad = policy.layout.labelPadPt;
   if (node.labelPlacement === "inside") {
+    const bounds = nodeBounds(node);
     return {
-      x: node.box.x + pad,
-      y: node.box.y + pad,
-      width: Math.max(policy.layout.minNodePt, node.box.width - pad * 2),
-      height: Math.max(policy.layout.minNodePt, node.box.height - pad * 2),
+      x: bounds.x + pad,
+      y: bounds.y + pad,
+      width: Math.max(policy.layout.minNodePt, bounds.width - pad * 2),
+      height: Math.max(policy.layout.minNodePt, bounds.height - pad * 2),
     };
   }
   const height = policy.type.labelPt * policy.type.lineHeight * 2;
@@ -326,57 +358,61 @@ function nodePaint(node: SceneNode, palette: ResolvedPalette, policy: Policy): P
 }
 
 /** Geometry only, so a later object can never paint over an earlier label. */
-function renderNodeGeometry(node: SceneNode, palette: ResolvedPalette, policy: Policy, out: string[]): void {
-  out.push("<g" + attribute("id", node.id) + attribute("data-kind", node.kind) + attribute("data-tone", node.tone) + ">");
-  out.push(...nodePrimitives(node, policy, nodePaint(node, palette, policy), palette));
+function renderNodeGeometry(node: SceneNode, context: RenderContext, out: string[]): void {
+  const centre: Point = { x: node.box.x + node.box.width / 2, y: node.box.y + node.box.height / 2 };
+  out.push("<g" + attribute("id", node.id) + attribute("data-kind", node.kind) + attribute("data-tone", node.tone) + rotationTransform(node.rotate, centre) + ">");
+  out.push(...nodePrimitives({ ...node, rotate: 0 }, context, nodePaint(node, context.palette, context.policy)));
   out.push("</g>");
 }
 
-function renderNodeLabel(node: SceneNode, palette: ResolvedPalette, policy: Policy, out: string[]): void {
-  if (!node.label && !node.detail) return;
+function renderNodeLabel(node: SceneNode, context: RenderContext, out: string[]): void {
+  const { policy, palette } = context;
+  if (node.label === "" && node.detail === "") return;
+  const centre: Point = { x: node.box.x + node.box.width / 2, y: node.box.y + node.box.height / 2 };
+  const followsNode = node.labelPlacement === "inside" ? rotationTransform(node.rotate, centre) : "";
   out.push(
     "<g" + attribute("id", "obj-label-" + node.id) + attribute("data-for", node.id) +
-      attribute("data-kind", "node-label") + ">",
+      attribute("data-kind", "node-label") + attribute("data-placement", node.labelPlacement) + followsNode + ">",
   );
-    const area = labelBox(node, policy);
-    const size = policy.type.labelPt;
-    const anchor = node.labelPlacement === "inside" ? "middle" : "start";
-    const x = anchor === "middle" ? area.x + area.width / 2 : area.x;
-    const lines = wrapText(node.label, size, area.width, policy);
-    const detailLines = node.detail ? wrapText(node.detail, policy.type.notePt, area.width, policy) : [];
-    const total = lines.length + detailLines.length;
-    const firstY =
-      node.labelPlacement === "inside"
-        ? area.y + area.height / 2 - ((total - 1) * size * policy.type.lineHeight) / 2 + size * 0.35
-        : area.y + size * 0.9;
+  const area = labelBox(node, policy);
+  const size = policy.type.labelPt;
+  const anchor = node.labelPlacement === "inside" ? "middle" : "start";
+  const x = anchor === "middle" ? area.x + area.width / 2 : area.x;
+  const lines = wrapText(node.label, { sizePt: size, maxWidth: area.width }, policy);
+  const detailLines = wrapText(node.detail, { sizePt: policy.type.notePt, maxWidth: area.width }, policy);
+  const total = lines.length + detailLines.length;
+  const firstY =
+    node.labelPlacement === "inside"
+      ? area.y + area.height / 2 - ((total - 1) * size * policy.type.lineHeight) / 2 + size * 0.35
+      : area.y + size * 0.9;
+  emitText(out, {
+    lines,
+    x,
+    y: firstY,
+    size,
+    fill: palette.palette["ink"] ?? "#000000",
+    anchor,
+    lineHeight: policy.type.lineHeight,
+    weight: 600,
+    family: policy.type.family,
+    id: null,
+    tabular: false,
+  });
+  if (detailLines.length > 0) {
     emitText(out, {
-      lines,
+      lines: detailLines,
       x,
-      y: firstY,
-      size,
-      fill: palette.palette["ink"] ?? "#000000",
+      y: firstY + lines.length * size * policy.type.lineHeight,
+      size: policy.type.notePt,
+      fill: palette.palette["muted"] ?? "#444444",
       anchor,
       lineHeight: policy.type.lineHeight,
-      weight: 600,
+      weight: 400,
       family: policy.type.family,
       id: null,
       tabular: false,
     });
-    if (detailLines.length > 0) {
-      emitText(out, {
-        lines: detailLines,
-        x,
-        y: firstY + lines.length * size * policy.type.lineHeight,
-        size: policy.type.notePt,
-        fill: palette.palette["muted"] ?? "#444444",
-        anchor,
-        lineHeight: policy.type.lineHeight,
-        weight: 400,
-        family: policy.type.family,
-        id: null,
-        tabular: false,
-      });
-    }
+  }
   out.push("</g>");
 }
 
@@ -388,6 +424,43 @@ interface ArrowGeometry {
   endSide: Side;
 }
 
+interface Anchor {
+  point: Point;
+  side: Side;
+}
+
+const SIDE_OFFSETS: Readonly<Record<Side, Point>> = {
+  top: { x: 0, y: -1 },
+  right: { x: 1, y: 0 },
+  bottom: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+};
+
+function rotatePoint(point: Point, centre: Point, degrees: number): Point {
+  const radians = degrees * Math.PI / 180;
+  const dx = point.x - centre.x;
+  const dy = point.y - centre.y;
+  return {
+    x: centre.x + dx * Math.cos(radians) - dy * Math.sin(radians),
+    y: centre.y + dx * Math.sin(radians) + dy * Math.cos(radians),
+  };
+}
+
+function offsetAnchor(anchor: Anchor, gap: number): Point {
+  const direction = SIDE_OFFSETS[anchor.side];
+  return { x: anchor.point.x + direction.x * gap, y: anchor.point.y + direction.y * gap };
+}
+
+function rotatedAnchor(node: SceneNode, target: Point, options: { side: Side | "auto"; gap: number }): Anchor {
+  const centre = { x: node.box.x + node.box.width / 2, y: node.box.y + node.box.height / 2 };
+  const localTarget = rotatePoint(target, centre, -node.rotate);
+  const anchor = anchorOnBox(nodeBounds(node), localTarget, options.side);
+  const direction = rotatePoint(SIDE_OFFSETS[anchor.side], { x: 0, y: 0 }, node.rotate);
+  const horizontal = Math.abs(direction.x) >= Math.abs(direction.y);
+  const side = horizontal ? direction.x >= 0 ? "right" : "left" : direction.y >= 0 ? "bottom" : "top";
+  return { point: rotatePoint(offsetAnchor(anchor, options.gap), centre, node.rotate), side };
+}
+
 function arrowGeometry(arrow: SceneArrow, nodes: ReadonlyMap<string, SceneNode>, policy: Policy): ArrowGeometry {
   const fromNode = nodes.get(arrow.from.node);
   const toNode = nodes.get(arrow.to.node);
@@ -397,27 +470,17 @@ function arrowGeometry(arrow: SceneArrow, nodes: ReadonlyMap<string, SceneNode>,
   const explicit = (port: { x: number | null; y: number | null }): boolean => port.x !== null && port.y !== null;
   const fromTarget: Point = explicit(arrow.to) ? { x: arrow.to.x ?? 0, y: arrow.to.y ?? 0 } : toCentre;
   const toTarget: Point = explicit(arrow.from) ? { x: arrow.from.x ?? 0, y: arrow.from.y ?? 0 } : fromCentre;
-  const start = explicit(arrow.from)
-    ? { point: { x: arrow.from.x ?? 0, y: arrow.from.y ?? 0 }, side: arrow.from.side === "auto" ? ("right" as Side) : arrow.from.side }
-    : anchorOnBox(fromNode.box, fromTarget, arrow.from.side);
-  const end = explicit(arrow.to)
-    ? { point: { x: arrow.to.x ?? 0, y: arrow.to.y ?? 0 }, side: arrow.to.side === "auto" ? ("left" as Side) : arrow.to.side }
-    : anchorOnBox(toNode.box, toTarget, arrow.to.side);
   const gap = policy.layout.labelPadPt;
-  const pull = (point: Point, side: Side): Point => {
-    switch (side) {
-      case "top":
-        return { x: point.x, y: point.y - gap };
-      case "bottom":
-        return { x: point.x, y: point.y + gap };
-      case "left":
-        return { x: point.x - gap, y: point.y };
-      default:
-        return { x: point.x + gap, y: point.y };
-    }
-  };
-  const startPoint = pull(start.point, start.side);
-  const endPoint = pull(end.point, end.side);
+  const fromSide = arrow.from.side === "auto" ? "right" : arrow.from.side;
+  const toSide = arrow.to.side === "auto" ? "left" : arrow.to.side;
+  const start = explicit(arrow.from)
+    ? { point: offsetAnchor({ point: { x: arrow.from.x ?? 0, y: arrow.from.y ?? 0 }, side: fromSide }, gap), side: fromSide }
+    : rotatedAnchor(fromNode, fromTarget, { side: arrow.from.side, gap });
+  const end = explicit(arrow.to)
+    ? { point: offsetAnchor({ point: { x: arrow.to.x ?? 0, y: arrow.to.y ?? 0 }, side: toSide }, gap), side: toSide }
+    : rotatedAnchor(toNode, toTarget, { side: arrow.to.side, gap });
+  const startPoint = start.point;
+  const endPoint = end.point;
   const points: Point[] = [startPoint];
   if (arrow.route === "elbow") {
     const horizontalFirst = start.side === "left" || start.side === "right";
@@ -433,12 +496,11 @@ function arrowGeometry(arrow: SceneArrow, nodes: ReadonlyMap<string, SceneNode>,
 
 function renderArrow(
   arrow: SceneArrow,
-  nodes: ReadonlyMap<string, SceneNode>,
-  palette: ResolvedPalette,
-  policy: Policy,
+  context: ArrowContext,
   out: string[],
 ): void {
-  const geometry = arrowGeometry(arrow, nodes, policy);
+  const { policy, palette } = context;
+  const geometry = arrowGeometry(arrow, context.nodes, policy);
   const ink = palette.palette[arrow.tone] ?? palette.palette["ink"] ?? "#000000";
   const headLength = policy.layout.arrowHeadLengthPt;
   const headWidth = policy.layout.arrowHeadWidthPt;
@@ -483,7 +545,7 @@ function renderArrow(
     const mid = geometry.points[Math.floor(geometry.points.length / 2)] ?? geometry.start;
     const normal: Point = { x: -Math.sin(angle), y: Math.cos(angle) };
     const offset = policy.type.notePt * 0.9;
-    const lines = wrapText(arrow.label, policy.type.notePt, 72, policy);
+    const lines = wrapText(arrow.label, { sizePt: policy.type.notePt, maxWidth: 72 }, policy);
     emitText(out, {
       lines,
       x: mid.x + normal.x * offset,
@@ -497,6 +559,112 @@ function renderArrow(
       id: null,
       tabular: false,
     });
+  }
+  out.push("</g>");
+}
+
+function renderPanels(panels: readonly Panel[], context: RenderContext, out: string[]): void {
+  if (panels.length === 0) return;
+  const { policy, palette: resolved } = context;
+  const palette = resolved.palette;
+  out.push('<g id="panels">');
+  for (const panel of panels) {
+    const fill = resolved.tints[panel.fill] ?? palette[panel.fill] ?? palette["neutral"] ?? "#EEEEEE";
+    out.push("<g" + attribute("id", panel.id) + attribute("data-kind", "panel") + ">");
+    out.push(
+      '<rect x="' + fmt(panel.box.x) + '" y="' + fmt(panel.box.y) + '" width="' + fmt(panel.box.width) + '" height="' +
+        fmt(panel.box.height) + '" rx="' + fmt(policy.layout.cornerRadiusPt * 2) + '"' + attribute("fill", fill) +
+        attribute("stroke", palette["rule"] ?? "#CCCCCC") + attribute("stroke-width", policy.canvas.strokeMinPt) + "/>",
+    );
+    const top = panel.box.y + policy.type.panelPt * 1.1;
+    let textX = panel.box.x + policy.layout.panelPaddingPt;
+    if (panel.letter !== "") {
+      emitText(out, {
+        lines: [panel.letter],
+        x: textX,
+        y: top,
+        size: policy.type.panelPt,
+        fill: palette["ink"] ?? "#000000",
+        anchor: "start",
+        lineHeight: policy.type.lineHeight,
+        weight: 700,
+        family: policy.type.family,
+        id: null,
+        tabular: false,
+      });
+      textX += policy.type.panelPt;
+    }
+    if (panel.title !== "") {
+      const width = panel.box.width - policy.layout.panelPaddingPt * 2 - (textX - panel.box.x - policy.layout.panelPaddingPt);
+      emitText(out, {
+        lines: wrapText(panel.title, { sizePt: policy.type.panelPt, maxWidth: width }, policy),
+        x: textX,
+        y: top,
+        size: policy.type.panelPt,
+        fill: palette["ink"] ?? "#000000",
+        anchor: "start",
+        lineHeight: policy.type.lineHeight,
+        weight: 700,
+        family: policy.type.family,
+        id: null,
+        tabular: false,
+      });
+    }
+    out.push("</g>");
+  }
+  out.push("</g>");
+}
+
+function renderLegend(scene: Scene, context: RenderContext, out: string[]): void {
+  if (scene.legend.length === 0) return;
+  const { policy, palette: resolved } = context;
+  const palette = resolved.palette;
+  const layout = layoutLegend(scene.legend, scene.canvas, policy);
+  out.push('<g id="legend">');
+  for (const slot of layout.slots) {
+    const { item, x, y, symbolWidth } = slot;
+    const ink = palette[item.tone] ?? "#000000";
+    out.push(
+      "<g" + attribute("id", item.id) + attribute("data-kind", "legend-item") + attribute("data-tone", item.tone) + ">",
+    );
+    if (item.kind === "swatch") {
+      out.push(
+        '<rect x="' + fmt(x) + '" y="' + fmt(y - layout.rowHeight * 0.28) + '" width="' + fmt(layout.rowHeight * 0.56) + '" height="' +
+          fmt(layout.rowHeight * 0.56) + '" rx="2"' + attribute("fill", resolved.tints[item.tone] ?? ink) +
+          attribute("stroke", ink) + attribute("stroke-width", policy.canvas.strokeMinPt) + "/>",
+      );
+    } else if (item.kind === "arrow") {
+      out.push(
+        '<polyline points="' + fmt(x) + "," + fmt(y) + " " + fmt(x + symbolWidth - 4) + "," + fmt(y) + '" fill="none"' +
+          attribute("stroke", ink) + attribute("stroke-width", policy.canvas.strokeDefaultPt) +
+          (item.dashed ? attribute("stroke-dasharray", "5 3") : "") + "/>",
+      );
+      out.push(
+        '<polygon points="' +
+          [fmt(x + symbolWidth) + "," + fmt(y), fmt(x + symbolWidth - 4) + "," + fmt(y - 3), fmt(x + symbolWidth - 4) + "," + fmt(y + 3)].join(" ") +
+          '"' + attribute("fill", ink) + "/>",
+      );
+    } else {
+      out.push(
+        '<line x1="' + fmt(x) + '" y1="' + fmt(y) + '" x2="' + fmt(x + symbolWidth) + '" y2="' + fmt(y) + '"' +
+          attribute("stroke", ink) + attribute("stroke-width", policy.canvas.strokeDefaultPt) +
+          (item.dashed ? attribute("stroke-dasharray", "5 3") : "") + "/>",
+      );
+    }
+    emitText(out, {
+      lines: [item.label],
+      x: x + symbolWidth + policy.layout.labelPadPt,
+      y: y + policy.type.footerPt * 0.35,
+      size: policy.type.footerPt,
+      fill: palette["ink"] ?? "#000000",
+      anchor: "start",
+      lineHeight: policy.type.lineHeight,
+      weight: 400,
+      family: policy.type.family,
+      id: null,
+      tabular: false,
+    });
+    out.push("</g>");
   }
   out.push("</g>");
 }
@@ -533,63 +701,16 @@ export function renderScene(scene: Scene, policy: Policy): string {
     );
     out.push("</g>");
   }
-  if (scene.panels.length > 0) {
-    out.push('<g id="panels">');
-    for (const panel of scene.panels) {
-      const fill = resolved.tints[panel.fill] ?? palette[panel.fill] ?? palette["neutral"] ?? "#EEEEEE";
-      out.push("<g" + attribute("id", panel.id) + attribute("data-kind", "panel") + ">");
-      out.push(
-        '<rect x="' + fmt(panel.box.x) + '" y="' + fmt(panel.box.y) + '" width="' + fmt(panel.box.width) + '" height="' +
-          fmt(panel.box.height) + '" rx="' + fmt(policy.layout.cornerRadiusPt * 2) + '"' + attribute("fill", fill) +
-          attribute("stroke", palette["rule"] ?? "#CCCCCC") + attribute("stroke-width", policy.canvas.strokeMinPt) + "/>",
-      );
-      const top = panel.box.y + policy.type.panelPt * 1.1;
-      let textX = panel.box.x + policy.layout.panelPaddingPt;
-      if (panel.letter) {
-        emitText(out, {
-          lines: [panel.letter],
-          x: textX,
-          y: top,
-          size: policy.type.panelPt,
-          fill: palette["ink"] ?? "#000000",
-          anchor: "start",
-          lineHeight: policy.type.lineHeight,
-          weight: 700,
-          family: policy.type.family,
-          id: null,
-          tabular: false,
-        });
-        textX += policy.type.panelPt;
-      }
-      if (panel.title) {
-        const width = panel.box.width - policy.layout.panelPaddingPt * 2 - (textX - panel.box.x - policy.layout.panelPaddingPt);
-        emitText(out, {
-          lines: wrapText(panel.title, policy.type.panelPt, width, policy),
-          x: textX,
-          y: top,
-          size: policy.type.panelPt,
-          fill: palette["ink"] ?? "#000000",
-          anchor: "start",
-          lineHeight: policy.type.lineHeight,
-          weight: 700,
-          family: policy.type.family,
-          id: null,
-          tabular: false,
-        });
-      }
-      out.push("</g>");
-    }
-    out.push("</g>");
-  }
+  renderPanels(scene.panels, { policy, palette: resolved }, out);
   if (scene.nodes.length > 0) {
     out.push('<g id="objects">');
-    for (const node of scene.nodes) renderNodeGeometry(node, resolved, policy, out);
+    for (const node of scene.nodes) renderNodeGeometry(node, { policy, palette: resolved }, out);
     out.push("</g>");
   }
   const byId = new Map(scene.nodes.map((node) => [node.id, node]));
   if (scene.arrows.length > 0) {
     out.push('<g id="connectors">');
-    for (const arrow of scene.arrows) renderArrow(arrow, byId, resolved, policy, out);
+    for (const arrow of scene.arrows) renderArrow(arrow, { policy, palette: resolved, nodes: byId }, out);
     out.push("</g>");
   }
   if (scene.labels.length > 0 || scene.nodes.some((node) => node.label !== "" || node.detail !== "")) {
@@ -599,11 +720,11 @@ export function renderScene(scene: Scene, policy: Policy): string {
      * next to its own shape could be covered by a later neighbour, which is
      * exactly how a membrane band erases a receptor name.
      */
-    for (const node of scene.nodes) renderNodeLabel(node, resolved, policy, out);
+    for (const node of scene.nodes) renderNodeLabel(node, { policy, palette: resolved }, out);
     for (const item of scene.labels) {
       const size = roleSize(item.role, policy);
       const tone = palette[item.tone] ?? palette["ink"] ?? "#000000";
-      const lines = wrapText(item.text, size, item.maxWidth ?? scene.canvas.width, policy);
+      const lines = wrapText(item.text, { sizePt: size, maxWidth: item.maxWidth ?? scene.canvas.width }, policy);
       out.push(
         "<g" + attribute("id", "label-" + item.id) + attribute("data-role", item.role) + attribute("data-tone", item.tone) + ">",
       );
@@ -624,56 +745,7 @@ export function renderScene(scene: Scene, policy: Policy): string {
     }
     out.push("</g>");
   }
-  if (scene.legend.length > 0) {
-    const layout = layoutLegend(scene.legend, scene.canvas, policy);
-    out.push('<g id="legend">');
-    for (const slot of layout.slots) {
-      const { item, x, y, symbolWidth } = slot;
-      const ink = palette[item.tone] ?? "#000000";
-      out.push(
-        "<g" + attribute("id", item.id) + attribute("data-kind", "legend-item") + attribute("data-tone", item.tone) + ">",
-      );
-      if (item.kind === "swatch") {
-        out.push(
-          '<rect x="' + fmt(x) + '" y="' + fmt(y - layout.rowHeight * 0.28) + '" width="' + fmt(layout.rowHeight * 0.56) + '" height="' +
-            fmt(layout.rowHeight * 0.56) + '" rx="2"' + attribute("fill", resolved.tints[item.tone] ?? ink) +
-            attribute("stroke", ink) + attribute("stroke-width", policy.canvas.strokeMinPt) + "/>",
-        );
-      } else if (item.kind === "arrow") {
-        out.push(
-          '<polyline points="' + fmt(x) + "," + fmt(y) + " " + fmt(x + symbolWidth - 4) + "," + fmt(y) + '" fill="none"' +
-            attribute("stroke", ink) + attribute("stroke-width", policy.canvas.strokeDefaultPt) +
-            (item.dashed ? attribute("stroke-dasharray", "5 3") : "") + "/>",
-        );
-        out.push(
-          '<polygon points="' +
-            [fmt(x + symbolWidth) + "," + fmt(y), fmt(x + symbolWidth - 4) + "," + fmt(y - 3), fmt(x + symbolWidth - 4) + "," + fmt(y + 3)].join(" ") +
-            '"' + attribute("fill", ink) + "/>",
-        );
-      } else {
-        out.push(
-          '<line x1="' + fmt(x) + '" y1="' + fmt(y) + '" x2="' + fmt(x + symbolWidth) + '" y2="' + fmt(y) + '"' +
-            attribute("stroke", ink) + attribute("stroke-width", policy.canvas.strokeDefaultPt) +
-            (item.dashed ? attribute("stroke-dasharray", "5 3") : "") + "/>",
-        );
-      }
-      emitText(out, {
-        lines: [item.label],
-        x: x + symbolWidth + policy.layout.labelPadPt,
-        y: y + policy.type.footerPt * 0.35,
-        size: policy.type.footerPt,
-        fill: palette["ink"] ?? "#000000",
-        anchor: "start",
-        lineHeight: policy.type.lineHeight,
-        weight: 400,
-        family: policy.type.family,
-        id: null,
-        tabular: false,
-      });
-      out.push("</g>");
-    }
-    out.push("</g>");
-  }
+  renderLegend(scene, { policy, palette: resolved }, out);
   out.push("</svg>");
   return out.join("\n") + "\n";
 }
