@@ -228,7 +228,7 @@
     </div>
     <div class="controls">
       <button type="button" class="ck-btn ck-btn--secondary ck-btn--compact" id="theme-toggle" aria-pressed="false">Dark theme</button>
-      <button type="button" class="ck-btn ck-btn--secondary ck-btn--compact" id="motion-toggle" aria-pressed="false">Reduced motion</button>
+      <button type="button" class="ck-btn ck-btn--secondary ck-btn--compact" id="motion-toggle" aria-pressed="false">Reduce motion</button>
     </div>
   </header>
 
@@ -399,6 +399,17 @@
 
   const themeButton = document.getElementById("theme-toggle");
   const motionButton = document.getElementById("motion-toggle");
+  const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const motionLabels = { reduce: "Reduce motion", system: "Use system motion" };
+  function refreshMotionState() {
+    const override = document.body.dataset.motion === "reduce";
+    const reduce = override || motionPreference.matches;
+    motionButton.setAttribute("aria-pressed", String(override));
+    motionButton.textContent = motionLabels[override ? "system" : "reduce"];
+    document.getElementById("motion-state").textContent = "Motion: " + (reduce ? "reduced" : "full");
+  }
+  refreshMotionState();
+  motionPreference.addEventListener("change", refreshMotionState);
   themeButton.addEventListener("click", () => {
     const dark = document.body.dataset.theme !== "dark";
     if (dark) document.body.dataset.theme = "dark";
@@ -412,9 +423,7 @@
     const reduce = document.body.dataset.motion !== "reduce";
     if (reduce) document.body.dataset.motion = "reduce";
     else delete document.body.dataset.motion;
-    motionButton.setAttribute("aria-pressed", String(reduce));
-    motionButton.textContent = reduce ? "Full motion" : "Reduced motion";
-    document.getElementById("motion-state").textContent = "Motion: " + (reduce ? "reduced" : "full");
+    refreshMotionState();
   });
 </script>
 </body>

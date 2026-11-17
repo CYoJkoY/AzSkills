@@ -228,6 +228,7 @@
    ============================================================================ */
 
 .sp-loader--sweep {
+  border: var(--_stroke) solid var(--_ink);
   border-radius: var(--_stroke);
   background: linear-gradient(
       90deg,

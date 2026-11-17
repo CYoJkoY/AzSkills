@@ -9,6 +9,7 @@
 
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { runInNewContext } from "node:vm";
 import { PRESET_TRIGGERS, STYLE_INTENT_PATTERN, isLoaderRequest } from "../references/style-presets/style-triggers.ts";
 
 const read = (path: string): string =>
@@ -288,6 +289,19 @@ for (const token of ["--_track", "--_shine"]) {
   assert.doesNotMatch(loaderDefaults[token], /color-mix\(/, "Loader fallback requires color-mix: " + token);
 }
 
+const sweep = /\.sp-loader--sweep\s*\{([^}]+)\}/.exec(loaders)?.[1] ?? "";
+assert.match(sweep, /border:\s*var\(--_stroke\) solid var\(--_ink\)/, "Sweep needs a persistent foreground boundary in animated and static poses");
+const sweepKeyframes = /@keyframes sp-sweep\s*\{([\s\S]*?)\n\}/.exec(loaders)?.[1] ?? "";
+assert.doesNotMatch(sweepKeyframes, /(?:border|outline|opacity)\s*:/, "Sweep animation must preserve its foreground boundary");
+for (const theme of [{ name: "light", tokens: light }, { name: "dark", tokens: dark }]) {
+  for (const background of ["canvas", "surface", "overlay"]) {
+    const ink = theme.tokens["--ck-text"];
+    const surface = theme.tokens["--ck-" + background];
+    assert.ok(ink !== undefined && surface !== undefined, "Missing sweep contrast tokens");
+    assert.ok(contrast(ink, surface) >= 3, theme.name + " sweep boundary must hold 3:1 on " + background);
+  }
+}
+
 /*
  * A layout property in a keyframe re-runs layout inside whatever table or
  * toolbar hosts the indicator, every frame. Paint-only properties such as
@@ -325,6 +339,10 @@ const loaderPrompts = [
   "Add a loading state to the upload button", "给列表加个加载状态", "Use css-loaders",
   "Add a loading state to the dashboard", "Add a loader to the modal", "给仪表盘加个加载状态",
   "Add a spinner to the JSON viewer", "Add a loader to the YAML editor panel",
+  "Add a spinner to the upload button in this Vite app",
+  "Add a spinner to the upload button in this webpack app",
+  "Add a loading state to the upload button in this Vite app",
+  "给这个 Vite 应用的上传按钮加个加载状态",
 ];
 for (const prompt of loaderPrompts) {
   assert.ok(isLoaderRequest(prompt), "Loader request not routed: " + prompt);
@@ -345,6 +363,9 @@ const codePrompts = [
   "给后端任务列表模型添加加载状态枚举",
   "给数据库任务列表添加加载状态字段",
   "Create a skeleton class for the payment service",
+  "Add a loader to the Vite app",
+  "Upgrade css-loaders to v7 in the Vite config",
+  "Add a spinner to the backend job model",
 ];
 for (const prompt of codePrompts) {
   assert.ok(!isLoaderRequest(prompt), "Code task routed as a loader request: " + prompt);
@@ -379,6 +400,52 @@ for (const id of ["theme-toggle", "motion-toggle", "swatches", "loaders"]) {
 }
 assert.match(gallery, /role="progressbar"/, "Gallery must show determinate progress semantics");
 assert.match(gallery, /aria-busy="true"/, "Gallery must show a busy region");
+
+const galleryScript = /<script>([\s\S]*?)<\/script>/.exec(gallery)?.[1];
+assert.ok(galleryScript !== undefined, "Missing gallery controller");
+for (const preference of [{ matches: false, state: "Motion: full" }, { matches: true, state: "Motion: reduced" }]) {
+  const handlers = new Map<string, () => void>();
+  const attributes = new Map<string, string>();
+  const motionButton = {
+    textContent: "",
+    setAttribute: (name: string, value: string): void => { attributes.set(name, value); },
+    addEventListener: (name: string, handler: () => void): void => { handlers.set(name, handler); },
+  };
+  const mediaHandlers = new Map<string, () => void>();
+  const media = {
+    matches: preference.matches,
+    addEventListener: (name: string, handler: () => void): void => { mediaHandlers.set(name, handler); },
+  };
+  const body: { dataset: Record<string, string> } = { dataset: {} };
+  const status = { textContent: "" };
+  const inert = { append: (): void => {}, querySelectorAll: (): [] => [], addEventListener: (): void => {} };
+  const nodes: Record<string, unknown> = { "motion-toggle": motionButton, "motion-state": status };
+  runInNewContext(galleryScript, {
+    document: { body, getElementById: (id: string): unknown => nodes[id] ?? inert, createElement: (): object => ({}), querySelectorAll: (): [] => [] },
+    getComputedStyle: (): object => ({ getPropertyValue: (): string => "" }),
+    window: { matchMedia: (query: string): typeof media => { assert.equal(query, "(prefers-reduced-motion: reduce)"); return media; } },
+  });
+  const click = handlers.get("click");
+  const change = mediaHandlers.get("change");
+  assert.ok(click !== undefined && change !== undefined, "Motion controls must subscribe to clicks and OS changes");
+  assert.equal(status.textContent, preference.state, "Initial motion state must follow the OS");
+  assert.equal(attributes.get("aria-pressed"), "false", "Initialization does not create a manual override");
+  media.matches = !preference.matches;
+  change();
+  assert.equal(status.textContent, media.matches ? "Motion: reduced" : "Motion: full", "Motion status follows live OS changes");
+  click();
+  assert.equal(body.dataset["motion"], "reduce", "Enabling the toggle creates the reduced-motion override");
+  assert.equal(attributes.get("aria-pressed"), "true");
+  assert.equal(motionButton.textContent, "Use system motion", "The toggle offers system preference rather than promising full motion");
+  media.matches = preference.matches;
+  change();
+  assert.equal(status.textContent, "Motion: reduced", "An active manual override survives OS changes");
+  click();
+  assert.equal(body.dataset["motion"], undefined, "Disabling the toggle removes the override");
+  assert.equal(attributes.get("aria-pressed"), "false");
+  assert.equal(status.textContent, preference.state, "Removing the override still honors the OS");
+  assert.equal(motionButton.textContent, "Reduce motion");
+}
 
 // ASCII contract for executable assets; references may carry CJK triggers.
 for (const [name, text] of Object.entries({ "cobalt-kit.css": css, "loaders.css": loaders, "gallery.html": gallery })) {

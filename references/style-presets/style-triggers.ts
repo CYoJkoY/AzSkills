@@ -67,11 +67,16 @@ export const LOADER_VISUAL_CONTEXT: readonly string[] = [
 export const LOADER_NOUNS: readonly string[] = ["loader", "loaders"];
 
 /** Tool names that make a bare "loader" a build-tool task. */
-export const LOADER_CODE_CONTEXT: readonly string[] = [
-  "webpack", "vite", "esbuild", "rollup", "babel", "bundler", "module loader",
-  "npm", "yarn", "pnpm", "cargo", "file loader", "deserialize", "parser", "ast",
+const LOADER_TOOL_CONTEXT: readonly string[] = [
+  "webpack", "vite", "esbuild", "rollup", "babel", "npm", "yarn", "pnpm", "cargo",
+];
+
+const LOADER_NONVISUAL_CONTEXT: readonly string[] = [
+  "bundler", "module loader", "file loader", "deserialize", "parser", "ast",
   "backend", "database", "schema", "enum", "column", "后端", "数据库", "枚举", "字段",
 ];
+
+export const LOADER_CODE_CONTEXT: readonly string[] = [...LOADER_TOOL_CONTEXT, ...LOADER_NONVISUAL_CONTEXT];
 
 /**
  * Package names that end in `-loader` belong to a build toolchain, not to a UI.
@@ -133,10 +138,12 @@ const loaderStatePattern = new RegExp(alternation(LOADER_STATE_INDICATORS), "i")
 const loaderVisualPattern = new RegExp(alternation(LOADER_VISUAL_CONTEXT), "i");
 const skeletonPattern = new RegExp(alternation(["skeleton"]), "i");
 export const LOADER_CODE_CONTEXT_PATTERN: RegExp = new RegExp(alternation(LOADER_CODE_CONTEXT), "i");
+const loaderNonvisualContextPattern = new RegExp(alternation(LOADER_NONVISUAL_CONTEXT), "i");
 
 /** True when the prompt asks for a loading primitive rather than a build loader. */
 export function isLoaderRequest(prompt: string): boolean {
-  if (LOADER_CODE_CONTEXT_PATTERN.test(prompt)) return false;
+  if (loaderNonvisualContextPattern.test(prompt)) return false;
+  if (LOADER_CODE_CONTEXT_PATTERN.test(prompt) && !loaderVisualPattern.test(prompt)) return false;
   if (LOADER_STRONG_PATTERN.test(prompt)) return true;
   if (!loaderVisualPattern.test(prompt)) return false;
   if (skeletonPattern.test(prompt)) return false;

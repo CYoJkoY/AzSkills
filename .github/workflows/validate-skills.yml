@@ -19,6 +19,7 @@ on:
       - "codex-plugin/**"
       - "godot-3-dev/**"
       - "style-presets/**"
+      - "references/style-presets/**"
       - "integrations/**"
       - "README.md"
       - "assets/**"
