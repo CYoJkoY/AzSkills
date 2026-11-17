@@ -280,6 +280,21 @@ assertClean(
   documentWith('<g id="objects"><g id="node-clear"><rect x="40" y="300" width="120" height="50" fill="#DDE8FB"/></g></g>\n' + legendStrip),
   "An object clear of the legend strip is not reported",
 );
+/*
+ * One transform policy governs both sides: a rotated legend item is left out of
+ * the band instead of being measured where it would have sat unrotated.
+ */
+assertClean(
+  documentWith(
+    [
+      '<g id="objects"><g id="node-under-rotated"><rect x="470" y="340" width="120" height="50" fill="#DDE8FB"/></g></g>',
+      '<g id="legend"><g id="legend-rotated" data-kind="legend-item" data-tone="accent" transform="rotate(30 480 360)">',
+      '<rect x="480" y="356" width="10" height="10" fill="#E8EEF6"/>',
+      "</g></g>",
+    ].join("\n"),
+  ),
+  "A rotated legend item is excluded from the band the same way rotated content is",
+);
 
 // A band thinner than two label pads has no vertical room, so it is not overflow.
 assertClean(
@@ -320,7 +335,20 @@ for (const commands of [policy.forbidden.traceShareMinCommands - 1, policy.forbi
   const svg = documentWith('<g id="curves"><path id="curve-a" d="M 200 50 ' + "L 240 80 ".repeat(commands - 1) + '"/></g>');
   assert.equal(rules(svg).includes("trace"), commands >= policy.forbidden.traceShareMinCommands, "The configured trace floor is inclusive at " + commands + " commands");
 }
+/*
+ * An arc rides an ellipse, so its box follows the curve instead of one radius
+ * around each endpoint. A wide, shallow arc inside the canvas must stay clean;
+ * the previous radius-per-endpoint rule reported it as overflow.
+ */
+assertClean(
+  documentWith('<g id="objects"><path id="shallow-arc" d="M 120 200 A 180 40 0 0 1 480 200" fill="none" stroke="#12212F" stroke-width="1"/></g>'),
+  "A shallow arc inside the canvas is not reported as estimated overflow",
+);
+assert.ok(
+  rules(documentWith('<g id="objects"><path id="outside-arc" d="M 120 200 A 400 300 0 0 1 900 200" fill="none" stroke="#12212F" stroke-width="1"/></g>')).includes("canvas"),
+  "An arc that leaves the canvas is still reported",
+);
 
 console.log(
-  "Figure checker regressions passed: XML, prefixed elements, stylesheet payloads, painted bounds, composited contrast, label placement and vertical bounds, legend strip and threshold, configured path floor, and line-length policy.",
+  "Figure checker regressions passed: XML, prefixed elements, stylesheet payloads, painted bounds, composited contrast, label placement and vertical bounds, legend strip, transform policy and threshold, configured path floor, arc bounds, and line-length policy.",
 );

@@ -57,6 +57,46 @@ export interface Extent {
   bottom: number;
 }
 
+/**
+ * Axis-aligned box of an elliptical arc from its endpoint parameterization.
+ *
+ * The arc lies on an ellipse, so the ellipse's own box bounds it. Computing the
+ * centre from the endpoints (SVG implementation notes F.6.5) and the ellipse's
+ * rotated half-extents gives a box that is still conservative but follows the
+ * curve instead of inflating a whole radius around each endpoint. A radius of
+ * zero collapses to a straight line, which the endpoints already cover.
+ */
+function arcExtent(startX: number, startY: number, endX: number, endY: number, radiusX: number, radiusY: number, rotation: number, largeArc: boolean, sweep: boolean): Extent | null {
+  if (radiusX <= 0 || radiusY <= 0) return null;
+  if (startX === endX && startY === endY) return null;
+  const phi = (rotation * Math.PI) / 180;
+  const cosPhi = Math.cos(phi);
+  const sinPhi = Math.sin(phi);
+  const dx = (startX - endX) / 2;
+  const dy = (startY - endY) / 2;
+  const x1 = cosPhi * dx + sinPhi * dy;
+  const y1 = -sinPhi * dx + cosPhi * dy;
+  const lambda = (x1 * x1) / (radiusX * radiusX) + (y1 * y1) / (radiusY * radiusY);
+  const scale = lambda > 1 ? Math.sqrt(lambda) : 1;
+  const rx = radiusX * scale;
+  const ry = radiusY * scale;
+  const numerator = rx * rx * ry * ry - rx * rx * y1 * y1 - ry * ry * x1 * x1;
+  const denominator = rx * rx * y1 * y1 + ry * ry * x1 * x1;
+  const factor = (largeArc === sweep ? -1 : 1) * Math.sqrt(Math.max(0, numerator) / (denominator === 0 ? 1 : denominator));
+  const cx1 = (factor * rx * y1) / ry;
+  const cy1 = (-factor * ry * x1) / rx;
+  const centreX = cosPhi * cx1 - sinPhi * cy1 + (startX + endX) / 2;
+  const centreY = sinPhi * cx1 + cosPhi * cy1 + (startY + endY) / 2;
+  const halfWidth = Math.sqrt(rx * rx * cosPhi * cosPhi + ry * ry * sinPhi * sinPhi);
+  const halfHeight = Math.sqrt(rx * rx * sinPhi * sinPhi + ry * ry * cosPhi * cosPhi);
+  return {
+    left: centreX - halfWidth,
+    right: centreX + halfWidth,
+    top: centreY - halfHeight,
+    bottom: centreY + halfHeight,
+  };
+}
+
 /** Point list of `<polyline>`/`<polygon>`: coordinates alternate x, y. */
 export function pointList(element: XmlElement): Array<{ x: number; y: number }> {
   const numbers = (element.attributes["points"] ?? "")
@@ -73,9 +113,9 @@ export function pointList(element: XmlElement): Array<{ x: number; y: number }> 
 
 /**
  * Path bounds from the control hull. Cubics stay inside their control points,
- * so a curve never escapes this box; arcs can bulge away from it, so the radius
- * is added around both endpoints. The result is deliberately generous and is
- * reported as an estimate rather than an exact extent.
+ * so a curve never escapes this box; arcs can bulge away from it, so each arc
+ * contributes the box of the ellipse it rides on. The result is deliberately
+ * generous and is reported as an estimate rather than an exact extent.
  */
 export function pathExtent(element: XmlElement): Extent | null {
   const tokens = (element.attributes["d"] ?? "").match(/[MmZzLlHhVvCcSsQqTtAa]|-?\d*\.?\d+(?:[eE][-+]?\d+)?/g);
@@ -87,6 +127,7 @@ export function pathExtent(element: XmlElement): Extent | null {
   let startY = 0;
   let index = 0;
   let command = "";
+  const arcs: Extent[] = [];
   const next = (): number => {
     const value = Number(tokens[index] ?? "0");
     index += 1;
@@ -149,28 +190,47 @@ export function pathExtent(element: XmlElement): Extent | null {
         break;
       }
       case "A": {
+        const fromX = cursorX;
+        const fromY = cursorY;
         const radiusX = Math.abs(next());
         const radiusY = Math.abs(next());
-        next();
-        next();
-        next();
+        const rotation = next();
+        const largeArc = next() !== 0;
+        const sweep = next() !== 0;
         cursorX = originX + next();
         cursorY = originY + next();
-        const bulge = Math.max(radiusX, radiusY);
-        points.push({ x: cursorX - bulge, y: cursorY - bulge });
-        points.push({ x: cursorX + bulge, y: cursorY + bulge });
-        points.push({ x: cursorX - bulge, y: cursorY + bulge });
-        points.push({ x: cursorX + bulge, y: cursorY - bulge });
+        const arc = arcExtent(fromX, fromY, cursorX, cursorY, radiusX, radiusY, rotation, largeArc, sweep);
+        if (arc === null) {
+          points.push({ x: cursorX, y: cursorY });
+        } else {
+          arcs.push(arc);
+        }
         break;
       }
       default:
         index += 1;
     }
   }
-  if (points.length === 0) return null;
+  if (points.length === 0) {
+    /* An arc-only path draws no vertex of its own, so its ellipse box is the extent. */
+    if (arcs.length === 0) return null;
+    return {
+      left: Math.min(...arcs.map((arc) => arc.left)),
+      right: Math.max(...arcs.map((arc) => arc.right)),
+      top: Math.min(...arcs.map((arc) => arc.top)),
+      bottom: Math.max(...arcs.map((arc) => arc.bottom)),
+    };
+  }
   const xs = points.map((point) => point.x);
   const ys = points.map((point) => point.y);
-  return { left: Math.min(...xs), right: Math.max(...xs), top: Math.min(...ys), bottom: Math.max(...ys) };
+  const extent: Extent = { left: Math.min(...xs), right: Math.max(...xs), top: Math.min(...ys), bottom: Math.max(...ys) };
+  for (const arc of arcs) {
+    extent.left = Math.min(extent.left, arc.left);
+    extent.right = Math.max(extent.right, arc.right);
+    extent.top = Math.min(extent.top, arc.top);
+    extent.bottom = Math.max(extent.bottom, arc.bottom);
+  }
+  return extent;
 }
 
 /**

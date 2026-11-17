@@ -606,11 +606,13 @@ function intersects(left: Extent, right: Extent, tolerance: number): boolean {
  * The legend is painted last, so anything else inside its strip is already
  * covered. Measuring the painted legend rather than a second copy of the layout
  * math keeps the gate honest when the legend wraps to a second row.
- */
-/**
+ *
  * Painted content is the leaves of the `objects` and `labels` layers. Shapes are
  * skipped when an ancestor carries a transform, because the checker does not
- * model that matrix and must not invent an overlap from unrotated geometry.
+ * model that matrix and must not invent an overlap from unrotated geometry. The
+ * same rule applies to the legend itself: a rotated legend item is left out of
+ * the band rather than measured at its unrotated place, so one transform policy
+ * governs both sides of the comparison.
  */
 function contentLeaves(document: XmlDocument): XmlElement[] {
   const layers = new Set(["objects", "labels"]);
@@ -631,14 +633,17 @@ function checkLegendOverlap(inspection: Inspection): void {
   const legend = inspection.document.elements.find((element) => element.attributes["id"] === "legend");
   if (legend === undefined) return;
   const painted: Extent[] = [];
-  const collect = (index: number): void => {
+  const collect = (index: number, transformed: boolean): void => {
     const element = inspection.document.elements[index];
     if (element === undefined) return;
-    const bounds = elementBounds(inspection.document, element, inspection.policy);
-    if (bounds !== null) painted.push(bounds);
-    for (const child of element.children) collect(child);
+    const moved = transformed || element.attributes["transform"] !== undefined;
+    if (!moved) {
+      const bounds = elementBounds(inspection.document, element, inspection.policy);
+      if (bounds !== null) painted.push(bounds);
+    }
+    for (const child of element.children) collect(child, moved);
   };
-  collect(inspection.document.elements.indexOf(legend));
+  collect(inspection.document.elements.indexOf(legend), false);
   const band = union(painted);
   if (band === null) return;
   const tolerance = inspection.policy.layout.labelPadPt / 2;
