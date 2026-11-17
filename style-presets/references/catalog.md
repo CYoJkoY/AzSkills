@@ -6,8 +6,11 @@ that owns the tokens.
 
 | Preset id | Triggers | Thesis | Package |
 | :--- | :--- | :--- | :--- |
-| `wabi-press` | `wabi press`, `wabi-press`, `paper and ink`, `default direction`, `侘寂刊本` | Warm paper, soot ink, a single cinnabar seal, serif titles, near-zero shadow | Root `DESIGN.md` and `design-system/wabi-press.css` |
-| `cobalt-kit` | `biorender`, `bio render`, `cobalt kit`, `lab canvas`, `research canvas` | Bright cobalt on a cool white canvas, one violet secondary, 4px rhythm, pill controls, flat depth | `style-presets/assets/cobalt-kit.css` |
+| `wabi-press` | `wabi press`, `wabi-press`, `paper and ink`, `侘寂刊本` | Warm paper, soot ink, a single cinnabar seal, serif titles, near-zero shadow | Root `DESIGN.md` and `design-system/wabi-press.css` |
+| `cobalt-kit` | `biorender`, `bio render`, `bio-render`, `cobalt kit`, `cobalt-kit`, `cobalt preset`, `lab canvas`, `research canvas` | Bright cobalt on a cool white canvas, one violet secondary, 4px rhythm, pill controls, flat depth | `style-presets/assets/cobalt-kit.css` |
+
+Catalog-level phrases route to this list rather than to one preset: `style
+preset`, `style presets`, `style catalog`, `style-catalog`, `preset catalog`.
 
 ## Selection
 
@@ -49,8 +52,9 @@ level, and the notice file records the provenance.
    and provenance level.
 3. Write `style-presets/assets/<id>.css` scoped to `[data-style="<id>"]`.
 4. Add one catalog row with stable triggers.
-5. Add the keyword route to the Codex hook so a plain request resolves without
-   naming the module.
+5. Add the trigger to `codex-plugin/hooks/style-triggers.ts`. The hook and the
+   validator both read that file, so a phrase listed above and a phrase that
+   routes cannot disagree.
 6. Verify both themes at 4.5:1, then render the gallery.
 
 Presets are additive. A new preset never becomes the repository default, and it

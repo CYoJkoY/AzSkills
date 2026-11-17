@@ -271,13 +271,15 @@
           <button type="button" class="ck-chip" aria-pressed="false">HEK 293</button>
           <button type="button" class="ck-chip" aria-pressed="false">Primary</button>
         </div>
-        <div class="ck-selection" aria-selected="true">
-          <span class="ck-selection__mark" aria-hidden="true"></span>
-          <span><strong>Plate 04</strong><br><span class="ck-meta">48 wells - 2 repeats</span></span>
-        </div>
-        <div class="ck-selection" aria-selected="false">
-          <span class="ck-selection__mark" aria-hidden="true"></span>
-          <span><strong>Plate 05</strong><br><span class="ck-meta">24 wells - 1 repeat</span></span>
+        <div role="radiogroup" aria-label="Plate selection" style="display:grid;gap:var(--ck-space-2)">
+          <label class="ck-selection">
+            <input class="ck-selection__input" type="radio" name="plate" value="04" checked>
+            <span><strong>Plate 04</strong><br><span class="ck-meta">48 wells - 2 repeats</span></span>
+          </label>
+          <label class="ck-selection">
+            <input class="ck-selection__input" type="radio" name="plate" value="05">
+            <span><strong>Plate 05</strong><br><span class="ck-meta">24 wells - 1 repeat</span></span>
+          </label>
         </div>
         <div class="ck-panel row-demo" style="padding:0;overflow:clip">
           <div class="ck-row"><span>Mean fluorescence</span><span class="ck-row__value">1,284.06</span></div>
@@ -303,7 +305,7 @@
         Saving
       </button>
       <div class="meter-demo">
-        <div class="sp-loader sp-loader--meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="42" aria-labelledby="meter-label" style="--sp-size:28px;--sp-value:42;--sp-color:var(--ck-accent)">
+        <div class="sp-loader sp-loader--meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="42" aria-labelledby="meter-label" style="--sp-size:28px;--sp-color:var(--ck-accent)">
           <span class="sp-sr-only">Uploading figures, 42 percent</span>
         </div>
         <span class="ck-meta" id="meter-label">Uploading 24 figures - 42%</span>
@@ -374,12 +376,19 @@
     card.innerHTML =
       '<div class="loader-card__stage">' +
       '<div class="sp-loader sp-loader--' + variant + '" role="' + (meter ? "progressbar" : "status") + '"' +
-      (meter ? ' aria-valuemin="0" aria-valuemax="100" aria-valuenow="62" style="--sp-value:62"' : "") +
+      (meter ? ' aria-valuemin="0" aria-valuemax="100" aria-valuenow="62"' : "") +
       '><span class="sp-sr-only">' + label + "</span></div>" +
       "</div>" +
       '<span class="loader-card__name">' + variant + "</span>" +
       '<span class="loader-card__use">' + use + "</span>";
     loaderGrid.append(card);
+  }
+
+  // A meter paints from --sp-value, and the accessible value is aria-valuenow.
+  // Read the ARIA value once so the two can never show different numbers.
+  for (const meter of document.querySelectorAll('[role="progressbar"][aria-valuenow]')) {
+    const value = meter.getAttribute("aria-valuenow");
+    if (value !== null) meter.style.setProperty("--sp-value", value);
   }
 
   const themeButton = document.getElementById("theme-toggle");

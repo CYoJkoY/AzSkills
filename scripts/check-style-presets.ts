@@ -9,6 +9,7 @@
 
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { PRESET_TRIGGERS, isLoaderRequest } from "../references/style-presets/style-triggers.ts";
 
 const read = (path: string): string =>
   readFileSync(new URL(`../${path}`, import.meta.url), "utf8").replace(/\r\n/g, "\n");
@@ -49,7 +50,7 @@ const contrast = (foreground: string, background: string): number => {
 };
 
 const light = block(css, '[data-style="cobalt-kit"] {');
-const dark = block(css, '[data-style="cobalt-kit"][data-theme="dark"] {');
+const dark = block(css, '[data-style="cobalt-kit"][data-theme="dark"],');
 
 const required = [
   "canvas", "surface", "overlay", "text", "text-secondary", "text-muted",
@@ -100,6 +101,8 @@ for (const theme of [
 const primitivesAt = css.indexOf("Primitives - only the surfaces");
 assert.ok(primitivesAt > 0, "Missing primitives section");
 assert.doesNotMatch(css.slice(primitivesAt), /#[0-9a-f]{3,8}\b/i, "Component rule carries a raw hex colour");
+const primitivesBodyFrom = css.indexOf("*/", primitivesAt) + 2;
+assert.ok(primitivesBodyFrom > 2, "Missing primitives section terminator");
 assert.match(css, /\[data-style="cobalt-kit"\] \.ck-btn--primary/, "Missing primary action primitive");
 for (const selector of [".ck-btn--secondary", ".ck-field__input", ".ck-chip", ".ck-panel", ".ck-row", ".ck-selection", ".ck-status--danger"]) {
   assert.ok(css.includes(selector), `Missing primitive: ${selector}`);
@@ -107,6 +110,37 @@ for (const selector of [".ck-btn--secondary", ".ck-field__input", ".ck-chip", ".
 assert.match(css, /:focus-visible/, "Missing focus-visible treatment");
 assert.match(css, /prefers-reduced-motion/, "Missing reduced-motion handling");
 assert.doesNotMatch(css, /(^|\n):root\s*\{/, "Preset must not write :root");
+
+// Every primitive rule is scoped, so the pack cannot leak into a host page.
+const scopedPrimitives = css.slice(primitivesBodyFrom).replace(/\/\*[\s\S]*?\*\//g, "");
+for (const match of scopedPrimitives.matchAll(/(^|\n)([^{}\n][^{}\n]*)\{/g)) {
+  const selectorList = (match[2] ?? "").trim();
+  if (selectorList.startsWith("@")) continue;
+  for (const selector of selectorList.split(",")) {
+    const trimmed = selector.trim();
+    if (!trimmed) continue;
+    assert.ok(
+      trimmed.startsWith('[data-style="cobalt-kit"]') || trimmed.startsWith(':root[data-theme="dark"] [data-style="cobalt-kit"]'),
+      "Unscoped primitive selector: " + trimmed,
+    );
+  }
+}
+
+// Dark theme resolves through the shipped controller as well as the same element.
+assert.match(
+  css,
+  /:root\[data-theme="dark"\] \[data-style="cobalt-kit"\]/,
+  "Dark theme must resolve from a root-level data-theme the controller sets",
+);
+assert.match(
+  css,
+  /@media \(pointer: coarse\)\s*\{[\s\S]*?--ck-control-height:\s*var\(--ck-touch-target\)/,
+  "The documented 44px touch floor must be applied, not only declared",
+);
+
+// Selection state is carried by a native control, not by invalid ARIA on a div.
+assert.doesNotMatch(css, /\.ck-selection\[aria-selected/, "Selection must not key off aria-selected on a generic element");
+assert.match(css, /\.ck-selection__input:checked/, "Selection must key off a native checked control");
 
 // Loader layer: eight variants, shared tokens, accessible label, reduced motion.
 const variants = ["ring", "arc", "dots", "bars", "sweep", "squish", "orbit", "meter"];
@@ -132,7 +166,11 @@ assert.doesNotMatch(
 );
 assert.match(loaders, /\.sp-sr-only\s*\{/, "Missing visually hidden label");
 assert.match(loaders, /box-sizing:\s*border-box/, "Loaders must not grow past --sp-size with their own border");
-for (const derived of ["--_dot: calc(var(--_size)", "--_bar: max(2px, calc(var(--_size)", "--_bead: calc(var(--_size)"]) {
+for (const derived of [
+  "--_dot: calc((var(--_size) - var(--_gap) * 2) / 3)",
+  "--_bar: max(2px, calc(var(--_size)",
+  "--_bead: calc(var(--_size)",
+]) {
   assert.ok(loaders.includes(derived), `Loader geometry must derive from --sp-size: ${derived}`);
 }
 assert.match(loaders, /prefers-reduced-motion:\s*reduce/, "Missing media-query fallback");
@@ -148,6 +186,39 @@ assert.match(
   "The media-query fallback must cancel the animation",
 );
 assert.match(loaders, /@media \(forced-colors: active\)/, "Missing forced-colors handling");
+
+// A loader animation composites; a layout property in a keyframe would re-run
+// layout inside the table or toolbar that hosts the indicator.
+for (const keyframes of loaders.matchAll(/@keyframes\s+[\w-]+\s*\{([\s\S]*?)\n\}/g)) {
+  const body = (keyframes[1] ?? "").replace(/\/\*[\s\S]*?\*\//g, "");
+  assert.doesNotMatch(
+    body,
+    /(^|\s)(inset-block|inset-inline|inset|inline-size|block-size|width|height|margin|padding|top|left|right|bottom)\s*:/,
+    "Loader keyframes must animate transform, opacity, or paint-free properties only",
+  );
+}
+
+// Documented triggers, catalog rows, and routed phrases come from one source.
+const triggers = read("references/style-presets/style-triggers.ts");
+for (const group of PRESET_TRIGGERS) {
+  for (const trigger of group.triggers) {
+    assert.ok(catalog.includes("`" + trigger + "`"), "Catalog omits routed trigger: " + trigger);
+    assert.ok(triggers.includes('"' + trigger + '"'), "Trigger source omits: " + trigger);
+  }
+}
+const loaderPrompts = ["Add a spinner while the report saves", "Give me a CSS loader for the upload card", "这个列表需要骨架屏"];
+for (const prompt of loaderPrompts) {
+  assert.ok(isLoaderRequest(prompt), "Loader request not routed: " + prompt);
+}
+const codePrompts = [
+  "Upgrade css-loader to v7 in the bundler config",
+  "Fix the loading state bug in the auth store",
+  "Rename the spinner module in the settings service",
+  "Refactor the module loader in the bundler",
+];
+for (const prompt of codePrompts) {
+  assert.ok(!isLoaderRequest(prompt), "Code task routed as a loader request: " + prompt);
+}
 
 // Preview wires both layers, both themes, and both controls.
 assert.match(gallery, /<body data-style="cobalt-kit">/, "Gallery must scope the preset");

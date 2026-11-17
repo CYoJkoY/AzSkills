@@ -8,8 +8,9 @@
    Scope: [data-style="cobalt-kit"]. Never apply this pack at :root of a host
    application, and never place two presets on one surface.
 
-   Dark theme: add [data-theme="dark"] to the same element that carries
-   [data-style="cobalt-kit"].
+   Dark theme: either put [data-theme="dark"] on the same element that carries
+   [data-style="cobalt-kit"], or set it on the document root the way
+   design-system/wabi-press-theme.ts does. Both routes resolve here.
    ============================================================================ */
 
 [data-style="cobalt-kit"] {
@@ -69,7 +70,16 @@
   --ck-ease: cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
-[data-style="cobalt-kit"][data-theme="dark"] {
+/* Touch-first surfaces get the 44px floor the geometry table promises. */
+@media (pointer: coarse) {
+  [data-style="cobalt-kit"] {
+    --ck-control-height: var(--ck-touch-target);
+    --ck-control-height-compact: var(--ck-touch-target);
+  }
+}
+
+[data-style="cobalt-kit"][data-theme="dark"],
+:root[data-theme="dark"] [data-style="cobalt-kit"] {
   color-scheme: dark;
 
   --ck-canvas: #0E141C;
@@ -316,7 +326,9 @@
   text-align: end;
 }
 
-/* Selection: accent outline plus a check glyph, never colour alone. */
+/* Selection: a native radio carries the state, so AT hears "checked" and the
+   row emphasis is decoration on top. Without :has() support the radio still
+   shows the selection; only the row tint is lost. */
 [data-style="cobalt-kit"] .ck-selection {
   display: flex;
   gap: var(--ck-space-2);
@@ -326,36 +338,29 @@
   border-radius: var(--ck-radius-panel);
   background: var(--ck-canvas);
   color: var(--ck-text);
+  cursor: pointer;
 }
 
-[data-style="cobalt-kit"] .ck-selection[aria-selected="true"],
-[data-style="cobalt-kit"] .ck-selection.is-selected {
+[data-style="cobalt-kit"] .ck-selection:hover {
+  border-color: var(--ck-border-strong);
+}
+
+[data-style="cobalt-kit"] .ck-selection:has(.ck-selection__input:checked) {
   border: var(--ck-border-active) solid var(--ck-accent-text);
   background: var(--ck-tint-accent);
 }
 
-[data-style="cobalt-kit"] .ck-selection__mark {
+[data-style="cobalt-kit"] .ck-selection__input {
   inline-size: 1rem;
   block-size: 1rem;
-  border: var(--ck-border-width) solid var(--ck-border-strong);
-  border-radius: var(--ck-radius-field);
-  background: var(--ck-canvas);
+  margin: 0.125rem 0 0;
+  accent-color: var(--ck-accent);
   flex: none;
 }
 
-[data-style="cobalt-kit"] .ck-selection[aria-selected="true"] .ck-selection__mark,
-[data-style="cobalt-kit"] .ck-selection.is-selected .ck-selection__mark {
-  border-color: var(--ck-accent-text);
-  background: var(--ck-accent);
-  color: var(--ck-on-accent);
-  font-size: 0.6875rem;
-  line-height: 1rem;
-  text-align: center;
-}
-
-[data-style="cobalt-kit"] .ck-selection[aria-selected="true"] .ck-selection__mark::after,
-[data-style="cobalt-kit"] .ck-selection.is-selected .ck-selection__mark::after {
-  content: "\2713";
+[data-style="cobalt-kit"] .ck-selection__input:focus-visible {
+  outline: var(--ck-border-active) solid var(--ck-focus);
+  outline-offset: 2px;
 }
 
 /* Status text roles. */

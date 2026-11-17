@@ -18,6 +18,7 @@
      --sp-track      inactive track        default 18% of ink
      --sp-shine      sweep highlight       default 32% of ink
      --sp-duration   one full cycle        default 900ms
+     --sp-ease       timing curve          default cubic-bezier(.65,0,.35,1)
      --sp-value      meter percentage      default 0
    ============================================================================ */
 
@@ -106,14 +107,15 @@
 .sp-loader--dots,
 .sp-loader--dots::before,
 .sp-loader--dots::after {
-  --_dot: calc(var(--_size) / 4);
+  /* Three dots plus two gaps fill the box exactly, so --sp-gap is the real
+     spacing control here and the default reproduces the 1/4-size dot. */
+  --_dot: calc((var(--_size) - var(--_gap) * 2) / 3);
 }
 
 /*
- * Three dots fill the box edge to edge: 3/4 --sp-size of ink plus two 1/8
- * gaps. The outer pair anchors to the inline edges, so the row can never
- * outgrow the box, and the middle dot sits on the element's own background so
- * the wave can be staggered without a third pseudo-element.
+ * The outer pair anchors to the inline edges, so the row can never outgrow the
+ * box, and the middle dot sits on the element's own background so the wave can
+ * be staggered without a third pseudo-element.
  */
 .sp-loader--dots {
   background: radial-gradient(circle closest-side, var(--_ink) 98%, transparent 100%)
@@ -176,10 +178,12 @@
 .sp-loader--bars::after {
   content: "";
   position: absolute;
-  inset-block: 30%;
+  inset-block: 0;
   inline-size: var(--_bar);
+  block-size: 100%;
   border-radius: calc(var(--_bar) / 2);
   background: var(--_ink);
+  transform-origin: 50% 50%;
   animation: sp-bar var(--_duration) var(--_ease) infinite;
 }
 
@@ -201,8 +205,10 @@
 }
 
 @keyframes sp-bar {
-  0%, 100% { inset-block: 30%; }
-  50% { inset-block: 0; }
+  /* Scale, not inset-block: a bar growing to 40% of the box is a transform, so
+     the animation never re-runs layout inside a table or toolbar. */
+  0%, 100% { scale: 1 0.4; }
+  50% { scale: 1 1; }
 }
 
 @keyframes sp-bar-center {

@@ -42,10 +42,15 @@ Two maintained presets ship today. Wabi Press is the repository default; Cobalt
 Kit is an opt-in sibling. The catalog is
 [`style-presets/references/catalog.md`](../../style-presets/references/catalog.md).
 
-| Preset id | Trigger keywords | Standing |
-| :--- | :--- | :--- |
-| `wabi-press` | wabi press, paper and ink, default direction | Default for owned surfaces; contract lives in `DESIGN.md` |
-| `cobalt-kit` | biorender, cobalt, lab, bright-blue research canvas | Opt-in only; never becomes the default |
+| Preset id | Standing |
+| :--- | :--- |
+| `wabi-press` | Default for owned surfaces; contract lives in `DESIGN.md` |
+| `cobalt-kit` | Opt-in only; never becomes the default |
+
+Trigger phrases are not restated here. They live in the catalog table and in
+[`references/style-presets/style-triggers.ts`](../style-presets/style-triggers.ts),
+which the hook and the preset check both read, so a documented trigger and a
+routed trigger cannot disagree.
 
 Wabi Press is not restated here. Its tokens, geometry, and gates stay in the root
 [`DESIGN.md`](../../DESIGN.md) and its stylesheet. This module owns only the

@@ -22,6 +22,11 @@ borders doing the grouping work that shadows would otherwise do.
 Scope the pack to `[data-style="cobalt-kit"]`. Do not apply it at `:root` of a
 host application.
 
+Dark theme has two activation routes, so the shipped controller works unchanged:
+put `data-theme="dark"` on the scoped element, or set it on the document root the
+way `design-system/wabi-press-theme.ts` does. `:root[data-theme="dark"]
+[data-style="cobalt-kit"]` resolves the root route.
+
 | Role | Light | Dark | Use |
 | :--- | :--- | :--- | :--- |
 | `--ck-canvas` | `#FFFFFF` | `#0E141C` | Page field |
@@ -57,8 +62,11 @@ Radius    4px fields, 8px panels, 12px cards, 999px pill controls
 Border    1px solid --ck-border; 2px --ck-border-strong for active and focus
 Depth     no shadow on controls; one 0 1px 2px hairline seat on raised cards
 Type      system sans for interface, serif reserved for figure captions if needed
-Controls  32px comfortable, 26px compact, 44px minimum on touch-first surfaces
+Controls  32px comfortable, 26px compact, 44px on pointer:coarse surfaces
 ```
+
+`--ck-touch-target` is the 44px floor. A `@media (pointer: coarse)` block raises
+both control heights to it, so a touch surface never gets a 32px target.
 
 Pill geometry belongs to buttons, chips, and toggles only. Panels and cards keep
 the smaller radius tiers; a pill panel is a different preset.

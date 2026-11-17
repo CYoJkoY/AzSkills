@@ -36,11 +36,12 @@ roughly 300ms. A flash of spinner on every keystroke reads as instability.
 | :--- | :--- | :--- |
 | `--sp-size` | `32px` | Bounding box of the indicator |
 | `--sp-stroke` | `3px` | Ring, arc, track, and meter thickness |
-| `--sp-gap` | `calc(var(--sp-size) / 8)` | Space between dots and bars |
+| `--sp-gap` | `calc(var(--sp-size) / 8)` | Space between dots and between bars |
 | `--sp-color` | `currentColor` | Active ink of the indicator |
 | `--sp-track` | `color-mix(in oklab, currentColor 18%, transparent)` | Inactive track |
 | `--sp-shine` | `color-mix(in oklab, currentColor 32%, transparent)` | Sweep highlight |
 | `--sp-duration` | `900ms` | One full cycle |
+| `--sp-ease` | `cubic-bezier(0.65, 0, 0.35, 1)` | Timing curve for every variant except the linear ring, sweep, and orbit |
 | `--sp-value` | `0` | Determinate percentage, `0`-`100`, meter only |
 
 Set tokens on the loader or on any ancestor. Inheriting from the surface is the
