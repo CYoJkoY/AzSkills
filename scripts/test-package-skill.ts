@@ -581,6 +581,100 @@ try {
   assert.match(JSON.parse(postDeleteUnrelatedError.stdout).hookSpecificOutput.additionalContext, /errors=1, related=0/);
   const godotCheck = spawnSync(process.execPath, [path.join(plugin, 'godot-3-dev/scripts/check-godot-3x.ts'), '--self-test'], { encoding: 'utf8' });
   assert.equal(godotCheck.status, 0, godotCheck.stderr);
+  const figureDependencies = [
+    'references/modules/scientific-figures.md',
+    'references/scientific-figures/figure-triggers.ts',
+    'scientific-figures/scripts/scene-schema.ts',
+    'scientific-figures/scripts/figure-model.ts',
+    'scientific-figures/scripts/render-figure.ts',
+    'scientific-figures/scripts/check-figure.ts',
+    'scientific-figures/references/figure-scene.schema.json',
+    'scientific-figures/references/quality-policy.json',
+    'scientific-figures/references/example.scene.json',
+  ];
+  async function assertFigureBundle(bundleRoot: string, label: string): Promise<void> {
+    for (const relative of figureDependencies) await stat(path.join(bundleRoot, relative)).catch(() => {
+      throw new Error(label + ' bundle is missing ' + relative);
+    });
+  }
+  // The shipped example is the only scene a bundle is guaranteed to contain, so
+  // rendering it proves the packaged imports, schema, and policy resolve together.
+  async function assertFigureExampleRuntime(bundleRoot: string, label: string): Promise<void> {
+    const svg = path.join(temp, label + '-figure.svg');
+    const scene = path.join(bundleRoot, 'scientific-figures/references/example.scene.json');
+    const render = spawnSync(process.execPath, [path.join(bundleRoot, 'scientific-figures/scripts/render-figure.ts'), '--scene', scene, '--out', svg], {
+      cwd: temp, encoding: 'utf8',
+    });
+    assert.equal(render.status, 0, label + ' render failed: ' + render.stderr);
+    const markup = await readFile(svg, 'utf8');
+    for (const token of ['<image', 'data:', 'xlink:href', '<script']) {
+      assert.ok(!markup.includes(token), label + ' rendered forbidden content: ' + token);
+    }
+    assert.match(markup, /<title id="svg-title">/, label + ' lost the accessible title');
+    assert.match(markup, /role="img"/, label + ' lost role=img');
+    const check = spawnSync(process.execPath, [path.join(bundleRoot, 'scientific-figures/scripts/check-figure.ts'), '--svg', svg, '--json'], {
+      cwd: temp, encoding: 'utf8',
+    });
+    assert.equal(check.status, 0, label + ' check failed: ' + check.stdout + check.stderr);
+    const report = JSON.parse(check.stdout) as { errors: number; findings: unknown[] };
+    assert.equal(report.errors, 0, label + ' example report carries errors');
+  }
+  // Scientific-figures ownership is decided by the real UserPromptSubmit hook,
+  // and the same gate must hold for the checkout and the packaged plugin.
+  const figurePrompts = [
+    'Draw the receptor signaling pathway',
+    'Redraw this immunofluorescence panel as editable SVG',
+    'Convert this publication figure to sciprism-svg',
+    '画一个细胞信号通路示意图',
+    '帮我把这张机制图重绘成可编辑的矢量图',
+  ];
+  const figureNonPrompts = [
+    'Explain the cell cycle',
+    'Animate this svg',
+    'Summarize this paper about receptor signaling',
+    'Draw a product logo',
+    'Refactor the figure renderer module',
+    'Restyle this dashboard with BioRender',
+  ];
+  const figureHookContext = (hookRoot: string, promptText: string): string => {
+    const result = spawnSync(process.execPath, [path.join(hookRoot, 'codex-plugin/hooks/session-start.ts'), 'UserPromptSubmit'], {
+      cwd: temp, encoding: 'utf8', input: JSON.stringify({ prompt: promptText }),
+      env: { ...process.env, PLUGIN_ROOT: hookRoot },
+    });
+    assert.equal(result.status, 0, result.stderr);
+    return JSON.parse(result.stdout).hookSpecificOutput.additionalContext;
+  };
+  const figureModuleEntry = (context: string, label: string): string => {
+    const match = context.match(/Scientific Figures \(sciprism-svg\)\. Read (.+?)\. This module owns the figure/);
+    assert.ok(match, 'figure routing is missing its module entry: ' + label);
+    return match[1] ?? '';
+  };
+  async function assertFigureRouting(hookRoot: string): Promise<void> {
+    for (const promptText of figurePrompts) {
+      const context = figureHookContext(hookRoot, promptText);
+      assert.match(context, /scientific-figures\.md/, promptText);
+      assert.match(context, /render-figure\.ts/, promptText);
+      assert.match(context, /check-figure\.ts/, promptText);
+      assert.doesNotMatch(context, /# AzSkills/, promptText);
+      assert.doesNotMatch(context, /names a maintained AzSkills style/, promptText);
+      await stat(figureModuleEntry(context, promptText));
+    }
+    for (const promptText of figureNonPrompts) {
+      assert.doesNotMatch(figureHookContext(hookRoot, promptText), /scientific-figures/, promptText);
+    }
+  }
+  // A BioRender word inside a figure request styles the figure; it must not
+  // outrank the module that owns the scientific content.
+  async function assertFigureStyleBoundary(hookRoot: string): Promise<void> {
+    const mixed = figureHookContext(hookRoot, 'Draw the receptor signaling pathway with BioRender style tokens');
+    assert.match(mixed, /This module owns the figure; style-presets supplies tokens only when requested/);
+    assert.match(mixed, /references[\\/]modules[\\/]style-presets\.md/);
+    assert.match(mixed, /catalog\.md/);
+    await stat(figureModuleEntry(mixed, 'BioRender figure prompt'));
+    const styleOnly = figureHookContext(hookRoot, 'Restyle this dashboard with BioRender');
+    assert.match(styleOnly, /names a maintained AzSkills style/);
+    assert.doesNotMatch(styleOnly, /scientific-figures/);
+  }
   // Execute the declared commands, including their quoting, from an unrelated cwd.
   for (const pluginRoot of [plugin, repository]) {
     const hooksFile = JSON.parse(await readFile(path.join(pluginRoot, '.codex-plugin/plugin.json'), 'utf8')).hooks;
@@ -661,6 +755,8 @@ try {
       assert.equal(plain.status, 0, plain.stderr);
       assert.doesNotMatch(JSON.parse(plain.stdout).hookSpecificOutput.additionalContext, /names a maintained AzSkills style|needs a loading primitive/, promptText);
     }
+    await assertFigureRouting(pluginRoot);
+    await assertFigureStyleBoundary(pluginRoot);
   }
   console.log('Codex plugin package and SessionStart context assertions passed.');
   // A clean checkout has no ignored dist directory, so the marketplace must resolve inside it.
@@ -676,7 +772,7 @@ try {
   });
   const cloneMarketplace = JSON.parse(await readFile(path.join(cleanClone, '.agents/plugins/marketplace.json'), 'utf8'));
   const clonePlugin = path.resolve(cleanClone, cloneMarketplace.plugins[0].source.path);
-  for (const required of ['.codex-plugin/plugin.json', 'SKILL.md', 'skills/azskills/SKILL.md', 'skills/az-clean-code/SKILL.md', 'codex-plugin/hooks/hooks.json', 'codex-plugin/hooks/session-start.ts', 'codex-plugin/hooks/godot3-guard.ts', 'godot-3-dev/scripts/check-godot-3x.ts', 'godot-3-dev/scripts/godot3-lexical.ts', 'godot-3-dev/references/api-3.6.json', 'codex-plugin/taste/hooks/steer.ts']) {
+  for (const required of ['.codex-plugin/plugin.json', 'SKILL.md', 'skills/azskills/SKILL.md', 'skills/az-clean-code/SKILL.md', 'codex-plugin/hooks/hooks.json', 'codex-plugin/hooks/session-start.ts', 'codex-plugin/hooks/godot3-guard.ts', 'godot-3-dev/scripts/check-godot-3x.ts', 'godot-3-dev/scripts/godot3-lexical.ts', 'godot-3-dev/references/api-3.6.json', 'codex-plugin/taste/hooks/steer.ts', ...figureDependencies]) {
     await stat(path.join(clonePlugin, required));
   }
   const cloneHooks = (JSON.parse(await readFile(path.join(clonePlugin, 'codex-plugin/hooks/hooks.json'), 'utf8')) as { hooks: HookFile }).hooks;
@@ -703,6 +799,8 @@ try {
   assert.deepEqual(extractedPlugin, pluginManifest);
   assert.equal(await readFile(path.join(pluginExpanded, 'plugin.json'), 'utf8').catch(error => error.code), 'ENOENT');
   assert.deepEqual(JSON.parse(await readFile(path.join(pluginExpanded, extractedPlugin.hooks), 'utf8')).hooks, pluginHooks);
+  await assertFigureBundle(pluginExpanded, 'extracted plugin');
+  await assertFigureExampleRuntime(pluginExpanded, 'extracted-plugin');
   // Resolve the repository marketplace against the build tree, as a local install does.
   const builtPlugin = path.join(pluginBuild, 'azskills-marketplace/plugins/azskills');
   assert.deepEqual(JSON.parse(await readFile(path.join(builtPlugin, '.codex-plugin/plugin.json'), 'utf8')), pluginManifest);
@@ -757,8 +855,10 @@ try {
   assert.deepEqual(JSON.parse(await readFile(path.join(extracted, 'skills.json'), 'utf8')).aliases, registry.aliases);
   assert.deepEqual(await readFile(path.join(extracted, 'ui-design/references/ux/overview.md')), await readFile(path.join(repository, 'ui-design/references/ux/overview.md')));
   await validatePackagedSkill(extracted);
+  await assertFigureBundle(extracted, 'portable skill');
+  await assertFigureExampleRuntime(extracted, 'portable-skill');
   console.log('Unified archive passed: exactly one manifest, all modules and aliases, extracted supporting bytes and links, deterministic output, and excluded build metadata.');
-  console.log('Skill package tests passed (Markdown, HTML assets, srcset, fenced examples, missing dependencies, deterministic zip, and extracted links).');
+  console.log('Skill package tests passed (Markdown, HTML assets, srcset, fenced examples, missing dependencies, deterministic zip, extracted links, figure routing, and shipped example rendering).');
 } finally {
   if (inTreeOutput) await rm(inTreeOutput, { recursive: true, force: true });
   await rm(temp, { recursive: true, force: true });

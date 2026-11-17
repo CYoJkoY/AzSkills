@@ -20,6 +20,8 @@ on:
       - "godot-3-dev/**"
       - "style-presets/**"
       - "references/style-presets/**"
+      - "scientific-figures/**"
+      - "references/scientific-figures/**"
       - "integrations/**"
       - "README.md"
       - "assets/**"
@@ -64,6 +66,9 @@ jobs:
 
       - name: Validate style presets and loader layer
         run: node scripts/check-style-presets.ts
+
+      - name: Validate scientific figure pipeline
+        run: node scripts/check-scientific-figures.ts
 
       - name: Validate integration registry and guides
         run: node scripts/validate-integrations.ts
