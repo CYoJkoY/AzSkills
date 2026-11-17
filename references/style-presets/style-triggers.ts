@@ -68,11 +68,12 @@ export const LOADER_NOUNS: readonly string[] = ["loader", "loaders"];
 
 /** Tool names that make a bare "loader" a build-tool task. */
 const LOADER_TOOL_CONTEXT: readonly string[] = [
-  "webpack", "vite", "esbuild", "rollup", "babel", "npm", "yarn", "pnpm", "cargo",
+  "webpack", "vite", "esbuild", "rollup", "babel", "bundler", "npm", "yarn", "pnpm", "cargo",
 ];
 
+/** Phrases that name a non-visual loader, so no UI request can be meant. */
 const LOADER_NONVISUAL_CONTEXT: readonly string[] = [
-  "bundler", "module loader", "file loader", "deserialize", "parser", "ast",
+  "module loader", "file loader", "deserialize", "parser", "ast",
   "backend", "database", "schema", "enum", "column", "后端", "数据库", "枚举", "字段",
 ];
 

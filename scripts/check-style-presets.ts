@@ -342,6 +342,7 @@ const loaderPrompts = [
   "Add a spinner to the upload button in this Vite app",
   "Add a spinner to the upload button in this webpack app",
   "Add a loading state to the upload button in this Vite app",
+  "Add a spinner to the upload button in an app built with a bundler",
   "给这个 Vite 应用的上传按钮加个加载状态",
 ];
 for (const prompt of loaderPrompts) {
