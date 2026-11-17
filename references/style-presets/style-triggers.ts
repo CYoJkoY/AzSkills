@@ -170,6 +170,18 @@ export const LOADER_STRONG_PATTERN: RegExp = new RegExp(
 const LOADER_MIXED_PATTERN: RegExp = new RegExp(cjkVerbThen(LOADER_CJK_VERB_NOUNS), "i");
 const LOADER_TOOL_PATTERN: RegExp = new RegExp(alternation(LOADER_TOOL_CONTEXT), "i");
 
+/**
+ * A toolchain name that owns the noun it precedes: "the webpack config", "the
+ * Vite plugin". A surface word inside such a container names code, so it cannot
+ * promote the mixed branch: "add a spinner entry in the webpack config" edits a
+ * file, while "add a spinner to the upload button in this Vite app" renders.
+ */
+const LOADER_TOOL_ARTIFACT_PATTERN: RegExp = new RegExp(
+  "(?:" + alternation(LOADER_TOOL_CONTEXT) + ")[^.\\n]{0,8}?"
+    + "(?:" + alternation(["配置", "插件", "源码", "依赖", "构建脚本", "config", "plugin", "plugins"]) + ")",
+  "i",
+);
+
 /** A bare loader noun only routes outside a build-tool context. */
 export const LOADER_NOUN_PATTERN: RegExp = new RegExp(verbThen(LOADER_NOUNS), "i");
 const loaderStatePattern = new RegExp(alternation(LOADER_STATE_INDICATORS), "i");
@@ -216,11 +228,14 @@ function clauseRoutesLoader(clause: string): boolean {
   // An unambiguous indicator on a named surface outranks an incidental word
   // such as "parser" or "column"; a bare indicator does not, so "Add a spinner
   // to the backend job model" stays a code task.
-  const explicitUi = loaderSurfacePattern.test(clause) && LOADER_STRONG_PATTERN.test(clause);
+  const cjkVerbNoun = LOADER_MIXED_PATTERN.test(clause);
+  const toolArtifact = LOADER_TOOL_ARTIFACT_PATTERN.test(clause);
+  const explicitUi = loaderSurfacePattern.test(clause)
+    && (LOADER_STRONG_PATTERN.test(clause) || (cjkVerbNoun && !toolArtifact));
   if (loaderNonvisualContextPattern.test(clause) && !explicitUi) return false;
   if (LOADER_CODE_CONTEXT_PATTERN.test(clause) && !visual) return false;
   if (LOADER_STRONG_PATTERN.test(clause)) return true;
-  if (LOADER_MIXED_PATTERN.test(clause) && (!LOADER_TOOL_PATTERN.test(clause) || explicitUi)) return true;
+  if (cjkVerbNoun && (!LOADER_TOOL_PATTERN.test(clause) || explicitUi)) return true;
   if (!visual) return false;
   if (skeletonPattern.test(clause)) return false;
   if (loaderStatePattern.test(clause)) return true;

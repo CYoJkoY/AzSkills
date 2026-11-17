@@ -82,11 +82,10 @@ as "draw out" and "make me one", and the subject set accepts a bare pathway
 noun plus pathology and anatomy nouns: tumour, immune, microenvironment,
 synapse, neuron system, vessel, cardiac, metabolic, gene, virus, bacteria, and
 drug. A composed term such as a neural network does not qualify: it names a
-model, not tissue.
-The literals live in the trigger source above, so this paragraph cannot
-disagree with what routes. A subject without a drawing action stays a
-question: asking what a pathway does, or why a pathway figure uses a colour,
-is analysis rather than a figure request.
+model, not tissue. The literals live in the trigger source above, so this
+paragraph cannot disagree with what routes. A subject without a drawing action
+stays a question: asking what a pathway does, or why a pathway figure uses a
+colour, is analysis rather than a figure request.
 
 ## Quality gates
 

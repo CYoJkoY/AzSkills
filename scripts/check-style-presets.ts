@@ -353,6 +353,8 @@ const loaderPrompts = [
   "给列表加个进度加载器",
   "加一个 spinner",
   "放个 spinner 到面板顶部",
+  "给这个 Vite 应用的上传按钮加个 spinner",
+  "在 Vite 应用的按钮上加个 spinner",
 ];
 for (const prompt of loaderPrompts) {
   assert.ok(isLoaderRequest(prompt), "Loader request not routed: " + prompt);
@@ -382,6 +384,8 @@ const codePrompts = [
   "Add a loader to deserialize YAML configuration after the migration",
   "需要把 spinner 从 webpack 配置里删掉",
   "把 webpack 配置里的 spinner 删掉",
+  "在 webpack 配置的按钮组件里加个 spinner 配置项",
+  "给 Vite 插件源码里的 spinner 组件补个单元测试",
 ];
 for (const prompt of codePrompts) {
   assert.ok(!isLoaderRequest(prompt), "Code task routed as a loader request: " + prompt);

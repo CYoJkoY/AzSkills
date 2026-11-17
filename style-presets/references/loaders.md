@@ -45,7 +45,10 @@ module.
 A build-tool loader stays out: `css-loader`, `sass-loader`, `style-loader`,
 `esbuild-loader`, `module loader`, and any request that names a backend table,
 schema, enum, column, or parser. `Add a loader to deserialize YAML` is a data
-task, not a visual one.
+task, not a visual one. The same holds when a toolchain owns the noun: a
+surface word inside "the webpack config", "the Vite plugin", or "the build
+source" names code rather than a screen, so "在 webpack 配置的按钮组件里加个
+spinner 配置项" edits a file while "在 Vite 应用的按钮上加个 spinner" renders.
 
 ## Tokens
 
