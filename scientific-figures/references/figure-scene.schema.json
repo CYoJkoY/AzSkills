@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "azskills/scientific-figures/figure-scene",
+  "title": "Scientific figure scene",
+  "description": "Declarative description of one publication-style mechanism, pathway, or panel figure. The renderer turns it into semantic SVG; the checker verifies the result.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["canvas", "nodes"],
+  "properties": {
+    "canvas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 20000 },
+        "height": { "type": "number", "exclusiveMinimum": 0, "maximum": 20000 },
+        "background": { "enum": ["canvas", "surface", "none"], "default": "canvas" }
+      }
+    },
+    "theme": { "enum": ["cobalt", "wabi", "mono"], "default": "cobalt" },
+    "title": { "type": "string", "maxLength": 200 },
+    "panels": {
+      "type": "array",
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/panel" }
+    },
+    "nodes": {
+      "type": "array",
+      "maxItems": 200,
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "arrows": {
+      "type": "array",
+      "maxItems": 200,
+      "items": { "$ref": "#/$defs/arrow" }
+    },
+    "labels": {
+      "type": "array",
+      "maxItems": 200,
+      "items": { "$ref": "#/$defs/label" }
+    },
+    "legend": {
+      "type": "array",
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/legendItem" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,40}$",
+      "description": "Stable lowercase id. Becomes the SVG group id, so it must survive editing."
+    },
+    "box": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "tone": {
+      "enum": ["ink", "muted", "accent", "accent-2", "success", "warning", "danger", "neutral"],
+      "default": "neutral"
+    },
+    "panel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "box"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "box": { "$ref": "#/$defs/box" },
+        "letter": { "type": "string", "pattern": "^[A-Za-z]$" },
+        "title": { "type": "string", "maxLength": 120 },
+        "fill": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "box"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "kind": {
+          "enum": [
+            "shape", "cell", "nucleus", "vesicle", "membrane",
+            "receptor", "protein", "channel", "antibody", "dna",
+            "well", "badge"
+          ]
+        },
+        "box": { "$ref": "#/$defs/box" },
+        "label": { "type": "string", "maxLength": 240 },
+        "detail": { "type": "string", "maxLength": 240 },
+        "tone": { "$ref": "#/$defs/tone" },
+        "shape": { "enum": ["rect", "round", "circle", "ellipse", "diamond"], "default": "round" },
+        "stroke": { "enum": ["none", "hairline", "solid", "dashed"], "default": "solid" },
+        "labelPlacement": { "enum": ["inside", "below", "above", "right", "left"], "default": "inside" },
+        "rotate": { "type": "number", "minimum": -180, "maximum": 180 }
+      }
+    },
+    "port": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node"],
+      "dependentRequired": { "x": ["y"], "y": ["x"] },
+      "properties": {
+        "node": { "$ref": "#/$defs/id" },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "side": { "enum": ["top", "right", "bottom", "left", "auto"], "default": "auto" }
+      }
+    },
+    "arrow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "from", "to"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "from": { "$ref": "#/$defs/port" },
+        "to": { "$ref": "#/$defs/port" },
+        "kind": {
+          "enum": ["flow", "activation", "inhibition", "transport", "conversion", "feedback"],
+          "default": "flow"
+        },
+        "route": { "enum": ["straight", "elbow"], "default": "straight" },
+        "label": { "type": "string", "maxLength": 120 },
+        "tone": { "$ref": "#/$defs/tone" },
+        "dashed": { "type": "boolean", "default": false }
+      }
+    },
+    "label": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "text", "x", "y"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "text": { "type": "string", "maxLength": 240 },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "role": {
+          "enum": ["title", "subtitle", "panel", "label", "note", "legend"],
+          "default": "label"
+        },
+        "anchor": { "enum": ["start", "middle", "end"], "default": "start" },
+        "tone": { "$ref": "#/$defs/tone" },
+        "maxWidth": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "legendItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "type": "string", "maxLength": 120 },
+        "kind": { "enum": ["swatch", "arrow", "line"], "default": "swatch" },
+        "tone": { "$ref": "#/$defs/tone" },
+        "dashed": { "type": "boolean", "default": false }
+      }
+    }
+  }
+}

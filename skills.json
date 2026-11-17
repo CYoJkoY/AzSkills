@@ -121,6 +121,18 @@
       "status": "alias",
       "canonical": "style-presets",
       "mode": "catalog"
+    },
+    {
+      "id": "sciprism-svg",
+      "status": "alias",
+      "canonical": "scientific-figures",
+      "mode": "redraw"
+    },
+    {
+      "id": "sci-figure",
+      "status": "alias",
+      "canonical": "scientific-figures",
+      "mode": "author"
     }
   ],
   "version": "2.8.0",
@@ -383,6 +395,15 @@
       "modes": ["catalog", "apply", "loaders", "audit"],
       "role": "Named visual presets, keyword triggers, preset token packs, and loading indicators.",
       "composes": ["design-system", "ui-design", "ui-motion", "frontend-slides"]
+    },
+    {
+      "id": "scientific-figures",
+      "path": "references/modules/scientific-figures.md",
+      "status": "module",
+      "family": "visual",
+      "modes": ["redraw", "author", "verify"],
+      "role": "Medical and scientific schematics, faithful redraws, editable SVG, and deterministic figure verification.",
+      "composes": ["style-presets", "frontend-slides", "ui-motion"]
     }
   ]
 }

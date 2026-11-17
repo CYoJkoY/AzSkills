@@ -242,6 +242,13 @@ const MODULES: readonly SkillEntry[] = [
     when: "Use when a request names a style or needs a loader, spinner, or progress indicator.",
     contract: "One preset per artifact. Prefixed tokens. Both themes verified. Reduced-motion pose.",
   },
+  {
+    name: "scientific-figures",
+    group: "VISUAL",
+    purpose: "Draw medical and scientific schematics as validated, editable SVG.",
+    when: "Use for pathway, mechanism, or figure requests, including SciPrism redraws.",
+    contract: "Preserve relationships and ratio. Real text. Named groups. Render inspection.",
+  },
 ];
 
 const DEFAULT_SELECTED = "ui-design";

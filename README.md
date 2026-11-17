@@ -68,6 +68,14 @@ Uninstall backs up and removes managed entries. Rollback restores the immediatel
 
 These contracts are ordinary Markdown files. They retain their domain workflows and output gates.
 
+For a visual starting point, open the [preset catalog](style-presets/references/catalog.md)
+or the [interactive style and loader gallery](style-presets/assets/gallery.html).
+Say "show the style catalog", "use BioRender style", or "add a CSS loader";
+the prompt hook selects the matching workflow. Medical or research drawing
+requests select [Scientific Figures](references/modules/scientific-figures.md),
+also available as `sciprism-svg`. Its [runnable pipeline](scientific-figures/references/pipeline.md)
+turns scene JSON into editable SVG and checks the result.
+
 <!-- SKILL-CATALOG:START -->
 | Family | Module | Modes | Focus |
 | :--- | :--- | :--- | :--- |
@@ -88,6 +96,7 @@ These contracts are ordinary Markdown files. They retain their domain workflows 
 | Architecture | [`az-clean-code`](references/modules/az-clean-code.md) | write, review, refactor | Explicit code, flat control flow, reuse, and business data externalized before coding. |
 | Architecture | [`godot-3-dev`](references/modules/godot-3-dev.md) | script, review, port | Godot 3.x GDScript, virtual-call safety, the 3.6 API surface, and down-porting. |
 | Interface | [`style-presets`](references/modules/style-presets.md) | catalog, apply, loaders, audit | Named visual presets, keyword triggers, preset token packs, and loading indicators. |
+| Visual | [`scientific-figures`](references/modules/scientific-figures.md) | redraw, author, verify | Medical and scientific schematics, faithful redraws, editable SVG, and deterministic figure verification. |
 <!-- SKILL-CATALOG:END -->
 
 ## Legacy names
@@ -110,6 +119,8 @@ These contracts are ordinary Markdown files. They retain their domain workflows 
 | `cobalt-kit` | [`style-presets`](references/modules/style-presets.md) | apply |
 | `css-loaders` | [`style-presets`](references/modules/style-presets.md) | loaders |
 | `style-catalog` | [`style-presets`](references/modules/style-presets.md) | catalog |
+| `sciprism-svg` | [`scientific-figures`](references/modules/scientific-figures.md) | redraw |
+| `sci-figure` | [`scientific-figures`](references/modules/scientific-figures.md) | author |
 <!-- SKILL-ALIASES:END -->
 
 ## MCP
