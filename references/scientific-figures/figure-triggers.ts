@@ -95,7 +95,10 @@ const sentenceHasIntent = (sentence: string): boolean =>
  * A bare `通路` is a pathway in biology, a circuit in electronics, and a
  * channel in sales. Only the biological sense belongs here, so a qualifying
  * non-biological compound is blanked before subject matching. Blanking keeps
- * a real subject elsewhere in the sentence able to route the request.
+ * a real subject elsewhere in the sentence able to route the request, so
+ * "细胞通信通路" still routes on `细胞`. `通信` is blanked because the bare
+ * compound normally means a telecom channel; the biology sense survives only
+ * when the sentence names its own subject.
  */
 const NON_BIOLOGICAL_PATHWAY =
   /(?:电路|线路|油路|气路|水路|营销|渠道|分销|交通|通信|网络|物流|销售|供水|供气|暖通)通路/g;

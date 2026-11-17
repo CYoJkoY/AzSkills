@@ -81,11 +81,15 @@ draw-and-build verbs, the action set accepts first-person result phrasing such
 as "draw out" and "make me one", and the subject set accepts a bare pathway
 noun plus pathology and anatomy nouns: tumour, immune, microenvironment,
 synapse, neuron system, vessel, cardiac, metabolic, gene, virus, bacteria, and
-drug. A composed term such as a neural network does not qualify: it names a
-model, not tissue. The literals live in the trigger source above, so this
-paragraph cannot disagree with what routes. A subject without a drawing action
-stays a question: asking what a pathway does, or why a pathway figure uses a
-colour, is analysis rather than a figure request.
+drug. That pathway noun is a Chinese literal, and in Chinese it also names a
+circuit or a sales channel, so a compound built from an electrical, logistics,
+or distribution qualifier is blanked before the subject test. The literals live
+in the trigger source above, so this paragraph cannot disagree with what routes.
+Two limits are worth stating plainly: a subject without a drawing action stays
+a question, since asking what a pathway does or why a pathway figure uses a
+colour is analysis rather than a figure request; and an English request that
+already names a figure artifact routes through the artifact branch whatever its
+subject, which is pre-existing behaviour rather than this compound rule.
 
 ## Quality gates
 
