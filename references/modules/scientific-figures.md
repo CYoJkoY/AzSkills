@@ -91,6 +91,32 @@ colour is analysis rather than a figure request; and an English request that
 already names a figure artifact routes through the artifact branch whatever its
 subject, which is pre-existing behaviour rather than this compound rule.
 
+A supplied figure is usually pointed at instead of named, so a pointing phrase
+plus a drawing verb routes without any subject: "redraw this figure" and
+"draw this figure". A bare pronoun counts only when the sentence
+also names the target format, which is how "redraw this as editable svg" reaches
+the module while "redraw this chart" and "turn this editable svg into a png"
+stay out. The pointing list is compound on purpose, since a bare Chinese
+character for "figure" also sits inside the words for "icon" and "chart"; those
+two compounds are blanked first, so an app icon or a chart keeps its owning
+module, and the chart compound is only blanked when the character for "shows"
+does not follow it. An analysis question that names the act it asks about, such
+as "why does redrawing this figure take so long", is denied when the
+interrogative and the first drawing verb share one clause, while "why are these
+arrows such a mess, redraw it" keeps its drawing intent because the comma ends
+the question.
+
+A summary that takes the drawing act as its topic is analysis too: "summarize
+the process of redrawing this figure" and its Chinese equivalents name both a
+pointing phrase and a redraw verb, so the pointing branch would otherwise claim
+them. The denial needs an explaining verb first, no clause break before the
+drawing verb, and a noun about the act itself in that same clause, such as
+"process", "steps", "principle", or "how long". The noun may precede the
+drawing verb, as in "the steps of redrawing this figure", or follow it. Any
+drawing verb later in the prompt returns the request to the module, which keeps
+"redraw this figure, then summarize the redraw process" and "summarize the
+steps, then redraw this figure" as drawing requests.
+
 ## Quality gates
 
 - [ ] The source inventory matches the output's panels, objects, labels, units, arrows, and legend.
