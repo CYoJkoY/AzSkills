@@ -49,6 +49,9 @@ task, not a visual one. The same holds when a toolchain owns the noun: a
 surface word inside "the webpack config", "the Vite plugin", or "the build
 source" names code rather than a screen, so "在 webpack 配置的按钮组件里加个
 spinner 配置项" edits a file while "在 Vite 应用的按钮上加个 spinner" renders.
+A toolchain that modifies a screen is the exception, since "配置面板" and
+"配置界面" name UI: "在这个 Vite 配置面板里加个 spinner" renders, while
+"给 Vite 的 spinner 配置文件补个默认值" does not.
 
 ## Tokens
 

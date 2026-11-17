@@ -175,10 +175,16 @@ const LOADER_TOOL_PATTERN: RegExp = new RegExp(alternation(LOADER_TOOL_CONTEXT),
  * Vite plugin". A surface word inside such a container names code, so it cannot
  * promote the mixed branch: "add a spinner entry in the webpack config" edits a
  * file, while "add a spinner to the upload button in this Vite app" renders.
+ *
+ * `配置面板`, `配置页`, and `配置界面` are exceptions: there the toolchain
+ * modifies a screen, so the request renders. The guard is a lookahead rather
+ * than a longer alternative, so `配置项` and `配置的组件` stay code.
  */
 const LOADER_TOOL_ARTIFACT_PATTERN: RegExp = new RegExp(
   "(?:" + alternation(LOADER_TOOL_CONTEXT) + ")[^.\\n]{0,8}?"
-    + "(?:" + alternation(["配置", "插件", "源码", "依赖", "构建脚本", "config", "plugin", "plugins"]) + ")",
+    + "(?:" + alternation(["插件", "源码", "依赖", "构建脚本", "plugin", "plugins"]) + ")"
+    + "|(?:" + alternation(LOADER_TOOL_CONTEXT) + ")[^.\\n]{0,8}?"
+    + "(?:配置(?![面板页界]))",
   "i",
 );
 
