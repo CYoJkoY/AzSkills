@@ -28,6 +28,7 @@ body:
         - taste
         - az-clean-code
         - godot-3-dev
+        - style-presets
         - application-architecture (alias)
         - frontend-architecture (alias)
         - ui-aesthetics (alias)
