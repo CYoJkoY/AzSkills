@@ -140,7 +140,7 @@ and implemented in [`style-presets/assets/loaders.css`](../../style-presets/asse
 | `meter` | Known completion value |
 
 Every loader keeps a status role (`role="status"`, or `role="progressbar"` with a
-value for `meter`) and a visually hidden label, honours `--sp-size`,
+value and an explicit accessible name for `meter`) and a visually hidden label, honours `--sp-size`,
 `--sp-color`, and `--sp-duration`, and drops its animation for a static pose
 under `prefers-reduced-motion: reduce`. A loader never communicates state by
 motion alone.

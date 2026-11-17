@@ -10,7 +10,8 @@ that owns the tokens.
 | `cobalt-kit` | `biorender`, `bio render`, `bio-render`, `cobalt kit`, `cobalt-kit`, `cobalt preset`, `lab canvas`, `research canvas` | Bright cobalt on a cool white canvas, one violet secondary, 4px rhythm, pill controls, flat depth | `style-presets/assets/cobalt-kit.css` |
 
 Catalog-level phrases route to this list rather than to one preset: `style
-preset`, `style presets`, `style catalog`, `style-catalog`, `preset catalog`.
+preset`, `style presets`, `style catalog`, `style-catalog`, `preset catalog`,
+`风格目录`, `样式目录`, `设计风格`, `风格预设`, `样式预设`.
 
 ## Selection
 

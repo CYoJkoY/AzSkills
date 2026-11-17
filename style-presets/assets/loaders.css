@@ -44,8 +44,8 @@
   --_stroke: var(--sp-stroke, 3px);
   --_gap: var(--sp-gap, calc(var(--_size) / 8));
   --_ink: var(--sp-color, currentColor);
-  --_track: var(--sp-track, color-mix(in oklab, var(--_ink) 18%, transparent));
-  --_shine: var(--sp-shine, color-mix(in oklab, var(--_ink) 32%, transparent));
+  --_track: var(--sp-track, rgba(128, 128, 128, 0.25));
+  --_shine: var(--sp-shine, rgba(128, 128, 128, 0.45));
   --_duration: var(--sp-duration, 900ms);
   --_value: var(--sp-value, 0);
   --_ease: var(--sp-ease, cubic-bezier(0.65, 0, 0.35, 1));
@@ -59,6 +59,13 @@
   color: var(--_ink);
   vertical-align: middle;
   contain: layout;
+}
+
+@supports (color: color-mix(in oklab, black, white)) {
+  .sp-loader {
+    --_track: var(--sp-track, color-mix(in oklab, var(--_ink) 18%, transparent));
+    --_shine: var(--sp-shine, color-mix(in oklab, var(--_ink) 32%, transparent));
+  }
 }
 
 /* ============================================================================
@@ -307,8 +314,8 @@
   );
   mask: radial-gradient(
     farthest-side,
-    transparent calc(100% - var(--_stroke) * 2),
-    #000 calc(100% - var(--_stroke) * 2)
+    transparent calc(100% - var(--_stroke)),
+    #000 calc(100% - var(--_stroke))
   );
   transition: none;
 }

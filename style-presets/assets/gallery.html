@@ -354,18 +354,24 @@
     ["meter", "Known completion value"]
   ];
 
-  const style = getComputedStyle(document.body);
   const swatches = document.getElementById("swatches");
   for (const [token, label] of tokens) {
-    const value = style.getPropertyValue(token).trim().toUpperCase();
     const card = document.createElement("div");
     card.className = "swatch";
     card.innerHTML =
       '<div class="swatch__chip" style="background:var(' + token + ')"></div>' +
       '<div class="swatch__body"><span class="swatch__name">' + label +
-      '</span><span class="swatch__value">' + value + "</span></div>";
+      '</span><span class="swatch__value" data-token="' + token + '"></span></div>';
     swatches.append(card);
   }
+
+  function refreshSwatches() {
+    const style = getComputedStyle(document.body);
+    for (const value of swatches.querySelectorAll("[data-token]")) {
+      value.textContent = style.getPropertyValue(value.dataset.token).trim().toUpperCase();
+    }
+  }
+  refreshSwatches();
 
   const loaderGrid = document.getElementById("loaders");
   for (const [variant, use] of variants) {
@@ -376,7 +382,7 @@
     card.innerHTML =
       '<div class="loader-card__stage">' +
       '<div class="sp-loader sp-loader--' + variant + '" role="' + (meter ? "progressbar" : "status") + '"' +
-      (meter ? ' aria-valuemin="0" aria-valuemax="100" aria-valuenow="62"' : "") +
+      (meter ? ' aria-label="Loading meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="62"' : "") +
       '><span class="sp-sr-only">' + label + "</span></div>" +
       "</div>" +
       '<span class="loader-card__name">' + variant + "</span>" +
@@ -397,6 +403,7 @@
     const dark = document.body.dataset.theme !== "dark";
     if (dark) document.body.dataset.theme = "dark";
     else delete document.body.dataset.theme;
+    refreshSwatches();
     themeButton.setAttribute("aria-pressed", String(dark));
     themeButton.textContent = dark ? "Light theme" : "Dark theme";
     document.getElementById("theme-state").textContent = "Theme: " + (dark ? "dark" : "light");

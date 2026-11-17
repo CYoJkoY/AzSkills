@@ -126,26 +126,36 @@ const closingBrace = (source: string, open: number): number => {
   let depth = 0;
   for (let index = open; index < source.length; index += 1) {
     if (source[index] === "{") depth += 1;
-    else if (source[index] === "}") {
-      depth -= 1;
-      if (depth === 0) return index;
-    }
+    if (source[index] !== "}") continue;
+    depth -= 1;
+    if (depth === 0) return index;
   }
   throw new Error("Unbalanced braces at offset " + open);
 };
 
-function parseRules(source: string, from = 0, to = source.length, chain: readonly string[] = []): CssRule[] {
+interface CssScope {
+  from: number;
+  to: number;
+  chain: readonly string[];
+}
+
+function nestedRules(source: string, head: string, scope: CssScope): CssRule[] {
+  if (head.startsWith("@")) return parseRules(source, scope);
+  if (head === "") return [];
+  return [{ chain: scope.chain.slice(0, -1), prelude: head }];
+}
+
+function parseRules(source: string, scope: CssScope = { from: 0, to: source.length, chain: [] }): CssRule[] {
   const rules: CssRule[] = [];
   let prelude = "";
-  let index = from;
-  while (index < to) {
+  let index = scope.from;
+  while (index < scope.to) {
     const char = source[index];
     if (char === "{") {
       const head = prelude.trim();
       prelude = "";
       const end = closingBrace(source, index);
-      if (head.startsWith("@")) rules.push(...parseRules(source, index + 1, end, [...chain, head]));
-      else if (head) rules.push({ chain, prelude: head });
+      rules.push(...nestedRules(source, head, { from: index + 1, to: end, chain: [...scope.chain, head] }));
       index = end + 1;
       continue;
     }
@@ -272,6 +282,11 @@ assert.match(
   "The media-query fallback must cancel the animation",
 );
 assert.match(loaders, /@media \(forced-colors: active\)/, "Missing forced-colors handling");
+const loaderDefaults = block(loaders, ".sp-loader {");
+for (const token of ["--_track", "--_shine"]) {
+  assert.ok(loaderDefaults[token], "Missing loader fallback: " + token);
+  assert.doesNotMatch(loaderDefaults[token], /color-mix\(/, "Loader fallback requires color-mix: " + token);
+}
 
 /*
  * A layout property in a keyframe re-runs layout inside whatever table or
@@ -305,7 +320,10 @@ for (const group of PRESET_TRIGGERS) {
     assert.ok(triggers.includes('"' + trigger + '"'), "Trigger source omits: " + trigger);
   }
 }
-const loaderPrompts = ["Add a spinner while the report saves", "Give me a CSS loader for the upload card", "这个列表需要骨架屏"];
+const loaderPrompts = [
+  "Add a spinner while the report saves", "Give me a CSS loader for the upload card", "这个列表需要骨架屏",
+  "Add a loading state to the upload button", "给列表加个加载状态", "Use css-loaders",
+];
 for (const prompt of loaderPrompts) {
   assert.ok(isLoaderRequest(prompt), "Loader request not routed: " + prompt);
 }
@@ -314,6 +332,14 @@ const codePrompts = [
   "Fix the loading state bug in the auth store",
   "Rename the spinner module in the settings service",
   "Refactor the module loader in the bundler",
+  "Add a loading state enum to the backend job model",
+  "Use a loading state in the backend job model",
+  "Add a loading state property to the job interface",
+  "给后端任务模型添加加载状态枚举",
+  "Add a loader to deserialize YAML configuration",
+  "Add a loading state column to the jobs table",
+  "Add a skeleton class to the parser AST",
+  "Upgrade css-loaders to v7 in the bundler config",
 ];
 for (const prompt of codePrompts) {
   assert.ok(!isLoaderRequest(prompt), "Code task routed as a loader request: " + prompt);
@@ -334,6 +360,9 @@ for (const prompt of [
   "Switch the lifestyle preset to dark",
 ]) {
   assert.ok(!STYLE_INTENT_PATTERN.test(prompt), "Substring routed as a preset request: " + prompt);
+}
+for (const prompt of ["查看风格目录", "列出设计风格", "选择一个样式预设"]) {
+  assert.ok(STYLE_INTENT_PATTERN.test(prompt), "Chinese catalog request not routed: " + prompt);
 }
 
 // Preview wires both layers, both themes, and both controls.

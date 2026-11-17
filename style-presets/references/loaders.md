@@ -38,8 +38,8 @@ roughly 300ms. A flash of spinner on every keystroke reads as instability.
 | `--sp-stroke` | `3px` | Ring, arc, track, and meter thickness |
 | `--sp-gap` | `calc(var(--sp-size) / 8)` | Space between dots and between bars |
 | `--sp-color` | `currentColor` | Active ink of the indicator |
-| `--sp-track` | `color-mix(in oklab, currentColor 18%, transparent)` | Inactive track |
-| `--sp-shine` | `color-mix(in oklab, currentColor 32%, transparent)` | Sweep highlight |
+| `--sp-track` | 18% ink; `rgba(128, 128, 128, 0.25)` fallback | Inactive track |
+| `--sp-shine` | 32% ink; `rgba(128, 128, 128, 0.45)` fallback | Sweep highlight |
 | `--sp-duration` | `900ms` | One full cycle |
 | `--sp-ease` | `cubic-bezier(0.65, 0, 0.35, 1)` | Timing curve for every variant except the linear ring, sweep, and orbit |
 | `--sp-value` | `0` | Determinate percentage, `0`-`100`, meter only |
@@ -72,7 +72,7 @@ whole indicator.
   Saving
 </button>
 
-<div class="sp-loader sp-loader--meter" role="progressbar"
+<div class="sp-loader sp-loader--meter" role="progressbar" aria-label="Uploading"
      aria-valuemin="0" aria-valuemax="100" aria-valuenow="42"
      style="--sp-value: 42">
   <span class="sp-sr-only">Uploading, 42 percent</span>
@@ -82,7 +82,7 @@ whole indicator.
 Rules that hold for every variant:
 
 1. `role="status"` for indeterminate work, `role="progressbar"` with
-   `aria-valuenow` for `meter`.
+   `aria-valuenow` and `aria-label` or `aria-labelledby` for `meter`.
 2. A text label inside `.sp-sr-only`, or a visible label beside the indicator.
    "Loading" alone is weak; name the object when it is known.
 3. The indicator is decorative to a screen reader beyond the label; do not put
