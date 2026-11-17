@@ -323,6 +323,8 @@ for (const group of PRESET_TRIGGERS) {
 const loaderPrompts = [
   "Add a spinner while the report saves", "Give me a CSS loader for the upload card", "这个列表需要骨架屏",
   "Add a loading state to the upload button", "给列表加个加载状态", "Use css-loaders",
+  "Add a loading state to the dashboard", "Add a loader to the modal", "给仪表盘加个加载状态",
+  "Add a spinner to the JSON viewer", "Add a loader to the YAML editor panel",
 ];
 for (const prompt of loaderPrompts) {
   assert.ok(isLoaderRequest(prompt), "Loader request not routed: " + prompt);
@@ -340,6 +342,9 @@ const codePrompts = [
   "Add a loading state column to the jobs table",
   "Add a skeleton class to the parser AST",
   "Upgrade css-loaders to v7 in the bundler config",
+  "给后端任务列表模型添加加载状态枚举",
+  "给数据库任务列表添加加载状态字段",
+  "Create a skeleton class for the payment service",
 ];
 for (const prompt of codePrompts) {
   assert.ok(!isLoaderRequest(prompt), "Code task routed as a loader request: " + prompt);
