@@ -358,6 +358,8 @@ const loaderPrompts = [
   "在这个 Vite 配置面板里加个 spinner",
   "在 webpack 配置面板上加个 spinner",
   "给构建配置页面加个 spinner",
+  "给 Vite 配置弹窗加个 spinner",
+  "给 webpack 配置窗口加个 spinner",
 ];
 for (const prompt of loaderPrompts) {
   assert.ok(isLoaderRequest(prompt), "Loader request not routed: " + prompt);

@@ -60,7 +60,8 @@ export const LOADER_STATE_INDICATORS: readonly string[] = ["loading state", "加
 export const LOADER_SURFACE_CONTEXT: readonly string[] = [
   "ui", "user interface", "screen", "component", "page", "panel", "dashboard", "modal", "editor", "viewer", "button",
   "dialog", "card", "form", "table", "list", "toolbar", "frontend", "front-end",
-  "页面", "仪表盘", "编辑器", "查看器", "按钮", "列表", "面板", "弹窗", "界面", "组件", "卡片", "表格", "表单", "前端",
+  "页面", "仪表盘", "编辑器", "查看器", "按钮", "列表", "面板", "弹窗", "界面", "窗口",
+  "对话框", "视图", "组件", "卡片", "表格", "表单", "前端",
 ];
 
 export const LOADER_VISUAL_CONTEXT: readonly string[] = [
@@ -176,15 +177,20 @@ const LOADER_TOOL_PATTERN: RegExp = new RegExp(alternation(LOADER_TOOL_CONTEXT),
  * promote the mixed branch: "add a spinner entry in the webpack config" edits a
  * file, while "add a spinner to the upload button in this Vite app" renders.
  *
- * `配置面板`, `配置页`, and `配置界面` are exceptions: there the toolchain
- * modifies a screen, so the request renders. The guard is a lookahead rather
- * than a longer alternative, so `配置项` and `配置的组件` stay code.
+ * A toolchain that modifies a screen is the exception, since the screen suffix
+ * turns the compound into UI: "配置面板", "配置页", "配置界面", "配置弹窗".
+ * The lookahead states that suffix list once, so `配置项`, `配置文件`, and
+ * `配置的组件` stay code without needing an alternative for each of them.
  */
+const LOADER_SCREEN_SUFFIX: readonly string[] = [
+  "面板", "页面", "界面", "窗口", "弹窗", "对话框", "视图", "页",
+];
+
 const LOADER_TOOL_ARTIFACT_PATTERN: RegExp = new RegExp(
   "(?:" + alternation(LOADER_TOOL_CONTEXT) + ")[^.\\n]{0,8}?"
     + "(?:" + alternation(["插件", "源码", "依赖", "构建脚本", "plugin", "plugins"]) + ")"
     + "|(?:" + alternation(LOADER_TOOL_CONTEXT) + ")[^.\\n]{0,8}?"
-    + "(?:配置(?![面板页界]))",
+    + "(?:配置(?!" + alternation(LOADER_SCREEN_SUFFIX) + "))",
   "i",
 );
 
