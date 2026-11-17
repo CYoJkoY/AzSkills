@@ -114,6 +114,9 @@ drawing verb, and a noun about the act itself later in that same clause, such as
 "process", "steps", "principle", or "how long". Any figure artifact or second
 drawing verb after that noun returns the request to the module, which keeps
 "redraw this figure, then summarize the redraw process" as a drawing request.
+The same holds across a clause break: a sentence that summarizes the steps
+first and then asks to redraw reaches the module, so the denial never swallows
+a later drawing clause.
 
 ## Quality gates
 

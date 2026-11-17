@@ -194,12 +194,6 @@ const FIGURE_PROCESS_NOUNS = [
 ] as const;
 const processNoun = phrasePattern(FIGURE_PROCESS_NOUNS);
 
-/** The rest of the clause, which is how far a topic noun can sit from its verb. */
-const clauseTail = (text: string): string => {
-  const breakIndex = text.search(CLAUSE_BREAK);
-  return breakIndex === -1 ? text : text.slice(0, breakIndex);
-};
-
 const narratesDrawing = (prompt: string): boolean => {
   const explaining = informational.exec(prompt);
   if (explaining === null) return false;
@@ -207,12 +201,15 @@ const narratesDrawing = (prompt: string): boolean => {
   if (drawing === null || drawing.index < explaining.index) return false;
   const between = prompt.slice(explaining.index + explaining[0].length, drawing.index);
   if (CLAUSE_BREAK.test(between)) return false;
-  const tail = clauseTail(prompt.slice(drawing.index + drawing[0].length));
+  const afterDrawing = prompt.slice(drawing.index + drawing[0].length);
+  const breakIndex = afterDrawing.search(CLAUSE_BREAK);
+  const tail = breakIndex === -1 ? afterDrawing : afterDrawing.slice(0, breakIndex);
   const noun = processNoun.exec(tail);
   if (noun === null) return false;
-  const rest = tail.slice(noun.index + noun[0].length);
-  if (artifact.test(rest)) return false;
-  return !action.test(rest) && !editAction.test(rest);
+  const afterNoun = tail.slice(noun.index + noun[0].length);
+  if (artifact.test(afterNoun) || action.test(afterNoun) || editAction.test(afterNoun)) return false;
+  const remainder = breakIndex === -1 ? "" : afterDrawing.slice(breakIndex + 1);
+  return !action.test(remainder) && !editAction.test(remainder);
 };
 
 export function isScientificFigureRequest(prompt: string): boolean {

@@ -333,6 +333,8 @@ async function checkTriggers(): Promise<number> {
     "重画这张图，然后解释一下箭头含义",
     "为什么这张图的箭头这么乱，重画一遍",
     "重画这张图，然后总结一下重画过程",
+    "总结一下重画的步骤，然后重画这张图",
+    "解释一下重绘流程，再重画这张图",
   ]) {
     assert.ok(isScientificFigureRequest(prompt), "figure request is not routed: " + prompt);
     prompts += 1;
