@@ -345,6 +345,9 @@ const loaderPrompts = [
   "Add a spinner to the upload button in an app built with a bundler",
   "Add a spinner to the upload button while the parser runs",
   "Add a spinner to the dashboard while the parser runs",
+  "Add a spinner while the database query runs",
+  "Add a spinner while the database query runs and keep the layout still",
+  "数据库查询的时候显示加载动画",
   "给这个 Vite 应用的上传按钮加个加载状态",
 ];
 for (const prompt of loaderPrompts) {
@@ -371,6 +374,8 @@ const codePrompts = [
   "Add a spinner to the backend job model",
   "Add a loading animation for the parser",
   "Add a loader to the parser AST",
+  "Add a spinner to the backend job model once the import finishes",
+  "Add a loader to deserialize YAML configuration after the migration",
 ];
 for (const prompt of codePrompts) {
   assert.ok(!isLoaderRequest(prompt), "Code task routed as a loader request: " + prompt);

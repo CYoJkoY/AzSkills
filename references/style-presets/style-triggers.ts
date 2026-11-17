@@ -147,19 +147,60 @@ const skeletonPattern = new RegExp(alternation(["skeleton"]), "i");
 export const LOADER_CODE_CONTEXT_PATTERN: RegExp = new RegExp(alternation(LOADER_CODE_CONTEXT), "i");
 const loaderNonvisualContextPattern = new RegExp(alternation(LOADER_NONVISUAL_CONTEXT), "i");
 
-/** True when the prompt asks for a loading primitive rather than a build loader. */
-export function isLoaderRequest(prompt: string): boolean {
-  const visual = loaderVisualPattern.test(prompt);
+/**
+ * Temporal subordinators and punctuation end the span in which a non-visual
+ * noun can veto a loader request. "Add a spinner while the database query runs"
+ * names the wait, not the target, so the spinner still routes; "Add a spinner
+ * to the backend job model" names the target and stays a code task.
+ *
+ * `as` is deliberately absent: it also introduces role phrases, so
+ * "use css-loaders as a build plugin" must not split into a loader request.
+ * A bare CJK `时` is absent for the same reason: it is part of `实时` and
+ * `即时`, so only the longer `的时候` / `的同时` / `期间` forms split.
+ */
+const LOADER_CLAUSE_BOUNDARY: RegExp = new RegExp(
+  [
+    alternation([
+      "while", "whilst", "whenever", "when", "during", "after", "before", "until", "once",
+      "\u7684\u65F6\u5019", "\u7684\u540C\u65F6", "\u540C\u65F6", "\u671F\u95F4",
+      "\u4E4B\u540E", "\u4E4B\u524D",
+    ]),
+    "[,;:!?\\uFF0C\\u3002\\uFF1B\\uFF1A\\u3001\\u2014]",
+  ].join("|"),
+  "i",
+);
+
+/** Split a prompt at subordinate-clause boundaries, keeping empty parts out. */
+function splitPromptClauses(prompt: string): readonly string[] {
+  return prompt
+    .split(LOADER_CLAUSE_BOUNDARY)
+    .map((clause) => clause.trim())
+    .filter((clause) => clause.length > 0);
+}
+
+/** True when this single clause asks for a loading primitive. */
+function clauseRoutesLoader(clause: string): boolean {
+  const visual = loaderVisualPattern.test(clause);
   // An unambiguous indicator on a named surface outranks an incidental word
   // such as "parser" or "column"; a bare indicator does not, so "Add a spinner
   // to the backend job model" stays a code task.
-  const explicitUi = loaderSurfacePattern.test(prompt) && LOADER_STRONG_PATTERN.test(prompt);
-  if (loaderNonvisualContextPattern.test(prompt) && !explicitUi) return false;
-  if (LOADER_CODE_CONTEXT_PATTERN.test(prompt) && !visual) return false;
-  if (LOADER_STRONG_PATTERN.test(prompt)) return true;
+  const explicitUi = loaderSurfacePattern.test(clause) && LOADER_STRONG_PATTERN.test(clause);
+  if (loaderNonvisualContextPattern.test(clause) && !explicitUi) return false;
+  if (LOADER_CODE_CONTEXT_PATTERN.test(clause) && !visual) return false;
+  if (LOADER_STRONG_PATTERN.test(clause)) return true;
   if (!visual) return false;
-  if (skeletonPattern.test(prompt)) return false;
-  if (loaderStatePattern.test(prompt)) return true;
-  return LOADER_NOUN_PATTERN.test(prompt)
-    && !LOADER_PACKAGE_PATTERN.test(prompt);
+  if (skeletonPattern.test(clause)) return false;
+  if (loaderStatePattern.test(clause)) return true;
+  return LOADER_NOUN_PATTERN.test(clause)
+    && !LOADER_PACKAGE_PATTERN.test(clause);
+}
+
+/** True when the prompt asks for a loading primitive rather than a build loader. */
+export function isLoaderRequest(prompt: string): boolean {
+  if (clauseRoutesLoader(prompt)) return true;
+  // Only a prompt that carries a temporal split earns a per-clause second look,
+  // so a straight request keeps the whole-prompt verdict.
+  const clauses = splitPromptClauses(prompt);
+  if (clauses.length < 2) return false;
+  return clauses.some(clauseRoutesLoader);
 }
