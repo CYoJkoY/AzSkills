@@ -343,6 +343,8 @@ const loaderPrompts = [
   "Add a spinner to the upload button in this webpack app",
   "Add a loading state to the upload button in this Vite app",
   "Add a spinner to the upload button in an app built with a bundler",
+  "Add a spinner to the upload button while the parser runs",
+  "Add a spinner to the dashboard while the parser runs",
   "给这个 Vite 应用的上传按钮加个加载状态",
 ];
 for (const prompt of loaderPrompts) {
@@ -367,6 +369,8 @@ const codePrompts = [
   "Add a loader to the Vite app",
   "Upgrade css-loaders to v7 in the Vite config",
   "Add a spinner to the backend job model",
+  "Add a loading animation for the parser",
+  "Add a loader to the parser AST",
 ];
 for (const prompt of codePrompts) {
   assert.ok(!isLoaderRequest(prompt), "Code task routed as a loader request: " + prompt);

@@ -56,11 +56,16 @@ export const LOADER_INDICATORS: readonly string[] = [
 
 export const LOADER_STATE_INDICATORS: readonly string[] = ["loading state", "加载状态"];
 
-export const LOADER_VISUAL_CONTEXT: readonly string[] = [
+/** Concrete UI surfaces a loading primitive can sit on. */
+export const LOADER_SURFACE_CONTEXT: readonly string[] = [
   "ui", "user interface", "screen", "component", "page", "panel", "dashboard", "modal", "editor", "viewer", "button",
   "dialog", "card", "form", "table", "list", "toolbar", "frontend", "front-end",
-  "visual", "spinner", "indicator", "animation", "placeholder",
   "页面", "仪表盘", "编辑器", "查看器", "按钮", "列表", "面板", "弹窗", "界面", "组件", "卡片", "表格", "表单", "前端",
+];
+
+export const LOADER_VISUAL_CONTEXT: readonly string[] = [
+  ...LOADER_SURFACE_CONTEXT,
+  "visual", "spinner", "indicator", "animation", "placeholder",
 ];
 
 /** Bare "loader" needs a UI context, so a bundler loader stays out. */
@@ -137,16 +142,22 @@ export const LOADER_STRONG_PATTERN: RegExp = new RegExp(
 export const LOADER_NOUN_PATTERN: RegExp = new RegExp(verbThen(LOADER_NOUNS), "i");
 const loaderStatePattern = new RegExp(alternation(LOADER_STATE_INDICATORS), "i");
 const loaderVisualPattern = new RegExp(alternation(LOADER_VISUAL_CONTEXT), "i");
+const loaderSurfacePattern = new RegExp(alternation(LOADER_SURFACE_CONTEXT), "i");
 const skeletonPattern = new RegExp(alternation(["skeleton"]), "i");
 export const LOADER_CODE_CONTEXT_PATTERN: RegExp = new RegExp(alternation(LOADER_CODE_CONTEXT), "i");
 const loaderNonvisualContextPattern = new RegExp(alternation(LOADER_NONVISUAL_CONTEXT), "i");
 
 /** True when the prompt asks for a loading primitive rather than a build loader. */
 export function isLoaderRequest(prompt: string): boolean {
-  if (loaderNonvisualContextPattern.test(prompt)) return false;
-  if (LOADER_CODE_CONTEXT_PATTERN.test(prompt) && !loaderVisualPattern.test(prompt)) return false;
+  const visual = loaderVisualPattern.test(prompt);
+  // An unambiguous indicator on a named surface outranks an incidental word
+  // such as "parser" or "column"; a bare indicator does not, so "Add a spinner
+  // to the backend job model" stays a code task.
+  const explicitUi = loaderSurfacePattern.test(prompt) && LOADER_STRONG_PATTERN.test(prompt);
+  if (loaderNonvisualContextPattern.test(prompt) && !explicitUi) return false;
+  if (LOADER_CODE_CONTEXT_PATTERN.test(prompt) && !visual) return false;
   if (LOADER_STRONG_PATTERN.test(prompt)) return true;
-  if (!loaderVisualPattern.test(prompt)) return false;
+  if (!visual) return false;
   if (skeletonPattern.test(prompt)) return false;
   if (loaderStatePattern.test(prompt)) return true;
   return LOADER_NOUN_PATTERN.test(prompt)
