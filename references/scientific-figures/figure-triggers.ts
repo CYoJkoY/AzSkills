@@ -180,11 +180,42 @@ const analysisLeads = (prompt: string): boolean => {
   return !CLAUSE_BREAK.test(between);
 };
 
+/**
+ * A summary can take the drawing act as its topic instead of asking for it:
+ * "summarize the process of redrawing this figure" names both a pointing
+ * phrase and a redraw verb, so the pointing branch would claim it. It stays
+ * analysis only when an explaining verb leads the clause and the drawing verb
+ * is followed by a noun about the act itself. "Redraw this figure, then
+ * explain the arrows" keeps its drawing intent because the explaining verb
+ * comes after the drawing verb.
+ */
+const FIGURE_PROCESS_NOUNS = [
+  "过程", "步骤", "原理", "耗时", "多久", "多长", "时间", "历史", "思路", "代价", "开销",
+] as const;
+const processNoun = phrasePattern(FIGURE_PROCESS_NOUNS);
+const PROCESS_NOUN_WINDOW = 8;
+
+const narratesDrawing = (prompt: string): boolean => {
+  const explaining = informational.exec(prompt);
+  if (explaining === null) return false;
+  const drawing = action.exec(prompt) ?? editAction.exec(prompt);
+  if (drawing === null || drawing.index < explaining.index) return false;
+  const between = prompt.slice(explaining.index + explaining[0].length, drawing.index);
+  if (CLAUSE_BREAK.test(between)) return false;
+  const drawingEnd = drawing.index + drawing[0].length;
+  const noun = processNoun.exec(prompt.slice(drawingEnd, drawingEnd + PROCESS_NOUN_WINDOW));
+  if (noun === null) return false;
+  const rest = prompt.slice(drawingEnd + noun.index + noun[0].length);
+  if (artifact.test(rest)) return false;
+  return !action.test(rest) && !editAction.test(rest);
+};
+
 export function isScientificFigureRequest(prompt: string): boolean {
   if (drawingRefusal.test(prompt)) return false;
   const scope = withoutNonBiologicalPathway(prompt).replace(NON_FIGURE_COMPOUNDS, " ");
   if (isInformationalOnly(scope)) return false;
   if (analysisLeads(scope)) return false;
+  if (narratesDrawing(scope)) return false;
   if (namedFigure.test(scope)) return true;
   if (conversionPhrase.test(scope) && conversionAction.test(scope) && (conversionReference.test(scope) || subject.test(scope))) {
     return true;

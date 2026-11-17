@@ -106,6 +106,15 @@ interrogative and the first drawing verb share one clause, while "why are these
 arrows such a mess, redraw it" keeps its drawing intent because the comma ends
 the question.
 
+A summary that takes the drawing act as its topic is analysis too: "summarize
+the process of redrawing this figure" and its Chinese equivalents name both a
+pointing phrase and a redraw verb, so the pointing branch would otherwise claim
+them. The denial needs an explaining verb first, no clause break before the
+drawing verb, and a noun about the act itself right after it, such as "process",
+"steps", "principle", or "how long". Any later figure artifact or second
+drawing verb returns the request to the module, which keeps "redraw this
+figure, then summarize the redraw process" as a drawing request.
+
 ## Quality gates
 
 - [ ] The source inventory matches the output's panels, objects, labels, units, arrows, and legend.
