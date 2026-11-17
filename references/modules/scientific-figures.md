@@ -91,6 +91,21 @@ colour is analysis rather than a figure request; and an English request that
 already names a figure artifact routes through the artifact branch whatever its
 subject, which is pre-existing behaviour rather than this compound rule.
 
+A supplied figure is usually pointed at instead of named, so a pointing phrase
+plus a redraw verb routes without any subject: "redraw this figure" and
+"redraw it as an editable svg". A bare pronoun counts only when the sentence
+also names the target format, which is how "redraw this as editable svg" reaches
+the module while "redraw this chart" and "turn this editable svg into a png"
+stay out. The pointing list is compound on purpose, since a bare Chinese
+character for "figure" also sits inside the words for "icon" and "chart"; those
+two compounds are blanked first, so an app icon or a chart keeps its owning
+module, and the chart compound is only blanked when the character for "shows"
+does not follow it. An analysis question that names the act it asks about, such
+as "why does redrawing this figure take so long", is denied when the
+interrogative and the first drawing verb share one clause, while "why are these
+arrows such a mess, redraw it" keeps its drawing intent because the comma ends
+the question.
+
 ## Quality gates
 
 - [ ] The source inventory matches the output's panels, objects, labels, units, arrows, and legend.

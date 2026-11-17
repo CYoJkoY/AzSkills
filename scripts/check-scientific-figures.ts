@@ -321,6 +321,17 @@ async function checkTriggers(): Promise<number> {
     "帮我做个免疫细胞示意图",
     "画一幅神经突触示意图",
     "做一个细胞实验的流程图",
+    "重画这张病理图",
+    "把这张图重画成可编辑 SVG",
+    "照着这张图重新画一个",
+    "把这篇论文的 Figure 2 重画成矢量图",
+    "turn this figure into editable svg",
+    "Redraw this as editable SVG",
+    "把它重绘成矢量图",
+    "把这张图表示的关系重画一下",
+    "Recreate this illustration",
+    "重画这张图，然后解释一下箭头含义",
+    "为什么这张图的箭头这么乱，重画一遍",
   ]) {
     assert.ok(isScientificFigureRequest(prompt), "figure request is not routed: " + prompt);
     prompts += 1;
@@ -347,6 +358,15 @@ async function checkTriggers(): Promise<number> {
     "画出销售渠道通路的示意图",
     "画一个神经网络结构图",
     "画一张系统架构图",
+    "重画一下这个按钮的图标",
+    "把这张图表重新画一下",
+    "不要重画这张图",
+    "turn this editable svg into a png",
+    "redraw this chart",
+    "recreate this chart",
+    "分析一下为什么重画这张图这么慢",
+    "why does redrawing this figure take so long",
+    "为什么重画这张图这么慢",
   ]) {
     assert.ok(!isScientificFigureRequest(prompt), "unrelated request routed as a figure: " + prompt);
     prompts += 1;
