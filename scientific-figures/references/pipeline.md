@@ -60,7 +60,8 @@ No BioRender icon, illustration library, or upstream asset ships here.
 
 The checker detects malformed XML, raster/external content, duplicate ids,
 missing editable structure, tiny type, supported explicit-color contrast
-failures on the composited background, approximate label overflow, line-length
+failures on the composited background, exact shape overflow, approximate label
+and path overflow, line-length
 limits, content hidden under the legend strip, and flattened traces. It reads
 `<style>` bodies as well as attributes, so a stylesheet cannot smuggle an
 import, a data payload, or a filter past the raster gate. It is a bounded
