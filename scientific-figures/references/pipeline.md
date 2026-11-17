@@ -63,12 +63,12 @@ illustration library, or upstream asset ships here.
 The checker detects malformed XML, raster/external content, duplicate ids,
 missing editable structure, tiny type, supported explicit-color contrast
 failures on the composited background, exact shape overflow, approximate label
-and path overflow, line-length
- limits, content hidden under the legend strip, and flattened traces. Path and
- label boxes are estimates: a curve is bounded by its control hull, an arc by
- the swept slice of its ellipse, and text by its average glyph advance. One transform
-policy governs both sides of the legend gate, so a subtree with a `transform`
-is excluded from the strip comparison instead of being measured unrotated. It reads
+and path overflow, line-length limits, content hidden under the legend strip,
+and flattened traces. Path and label boxes are estimates: a curve is bounded by
+its control hull, an arc by the swept slice of its ellipse, and text by its
+average glyph advance. One transform policy governs both sides of the legend
+gate, so a subtree with a `transform` is excluded from the strip comparison
+instead of being measured unrotated. It reads
 `<style>` bodies as well as attributes, so a stylesheet cannot smuggle an
 import, a data payload, or a filter past the raster gate. It is a bounded
 static check. Browser CSS inheritance, complex SVG transforms, text the

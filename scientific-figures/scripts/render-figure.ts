@@ -399,7 +399,16 @@ function renderNodeLabel(node: SceneNode, context: RenderContext, out: string[])
     { sizePt: size, maxWidth: area.width, maxChars: roleMaxChars("label", policy) },
     policy,
   );
-  const detailLines = wrapText(node.detail, { sizePt: policy.type.notePt, maxWidth: area.width }, policy);
+  /*
+   * The detail line lives in the node-label group, so the checker measures it
+   * under the label role. Without the label cap here the renderer can emit a
+   * line its own gate reports as a warning.
+   */
+  const detailLines = wrapText(
+    node.detail,
+    { sizePt: policy.type.notePt, maxWidth: area.width, maxChars: roleMaxChars("label", policy) },
+    policy,
+  );
   const total = lines.length + detailLines.length;
   const firstY =
     node.labelPlacement === "inside"

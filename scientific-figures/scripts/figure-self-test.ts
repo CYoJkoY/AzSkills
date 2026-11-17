@@ -355,6 +355,37 @@ export function runSelfTest(render: Renderer): void {
     ["IL6J", "AK2S", "TAT3"],
     "a character cap splits an unbroken token exactly at the limit",
   );
+  /*
+   * Detail text is emitted inside the node-label group, so the checker measures
+   * it under the label role. A wide box must not let the renderer ship a detail
+   * line that its own gate reports as a warning.
+   */
+  const detailScene = parseScene(
+    {
+      canvas: { width: 640, height: 360 },
+      theme: "cobalt",
+      title: "Detail probe",
+      nodes: [
+        {
+          id: "detail-node",
+          kind: "protein",
+          box: { x: 40, y: 120, width: 400, height: 100 },
+          label: "Node",
+          detail: "A detail sentence that is clearly longer than forty characters",
+          tone: "accent",
+        },
+      ],
+      arrows: [],
+      labels: [],
+    },
+    policy,
+  );
+  const detailWarnings = inspectFigure(render(detailScene, policy), policy).filter((finding) => finding.severity === "warning");
+  assert.equal(
+    detailWarnings.length,
+    0,
+    "a long node detail tripped the label line cap: " + detailWarnings.map((finding) => finding.message).join(" | "),
+  );
 
   // Renderer-generated wrapper and derived ids are reserved before input ids.
   const reservedScene = (nodes: unknown[], labels: unknown[] = []): unknown => ({
