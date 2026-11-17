@@ -110,13 +110,12 @@ A summary that takes the drawing act as its topic is analysis too: "summarize
 the process of redrawing this figure" and its Chinese equivalents name both a
 pointing phrase and a redraw verb, so the pointing branch would otherwise claim
 them. The denial needs an explaining verb first, no clause break before the
-drawing verb, and a noun about the act itself later in that same clause, such as
-"process", "steps", "principle", or "how long". Any figure artifact or second
-drawing verb after that noun returns the request to the module, which keeps
-"redraw this figure, then summarize the redraw process" as a drawing request.
-The same holds across a clause break: a sentence that summarizes the steps
-first and then asks to redraw reaches the module, so the denial never swallows
-a later drawing clause.
+drawing verb, and a noun about the act itself in that same clause, such as
+"process", "steps", "principle", or "how long". The noun may precede the
+drawing verb, as in "the steps of redrawing this figure", or follow it. Any
+drawing verb later in the prompt returns the request to the module, which keeps
+"redraw this figure, then summarize the redraw process" and "summarize the
+steps, then redraw this figure" as drawing requests.
 
 ## Quality gates
 

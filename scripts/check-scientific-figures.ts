@@ -375,6 +375,8 @@ async function checkTriggers(): Promise<number> {
     "说明一下重画这张图的原理",
     "解释一下重画这张图花了多久",
     "总结一下重画这张图用的全部过程和中间步骤",
+    "summarize the process to redraw this figure",
+    "summarize the steps of redrawing this figure",
   ]) {
     assert.ok(!isScientificFigureRequest(prompt), "unrelated request routed as a figure: " + prompt);
     prompts += 1;

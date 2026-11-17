@@ -190,6 +190,7 @@ const analysisLeads = (prompt: string): boolean => {
  * comes after the drawing verb.
  */
 const FIGURE_PROCESS_NOUNS = [
+  "process", "step", "steps", "principle", "principles", "how long", "duration",
   "过程", "步骤", "原理", "耗时", "多久", "多长", "时间", "历史", "思路", "代价", "开销",
 ] as const;
 const processNoun = phrasePattern(FIGURE_PROCESS_NOUNS);
@@ -204,10 +205,7 @@ const narratesDrawing = (prompt: string): boolean => {
   const afterDrawing = prompt.slice(drawing.index + drawing[0].length);
   const breakIndex = afterDrawing.search(CLAUSE_BREAK);
   const tail = breakIndex === -1 ? afterDrawing : afterDrawing.slice(0, breakIndex);
-  const noun = processNoun.exec(tail);
-  if (noun === null) return false;
-  const afterNoun = tail.slice(noun.index + noun[0].length);
-  if (artifact.test(afterNoun) || action.test(afterNoun) || editAction.test(afterNoun)) return false;
+  if (!processNoun.test(between + " " + tail)) return false;
   const remainder = breakIndex === -1 ? "" : afterDrawing.slice(breakIndex + 1);
   return !action.test(remainder) && !editAction.test(remainder);
 };
