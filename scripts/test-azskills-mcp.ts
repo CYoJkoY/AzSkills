@@ -88,7 +88,7 @@ assert.deepEqual(response(2).result?.tools?.map((t) => t.name), ["azskills"]);
 const resourceUris = response(3).result?.resources?.map((r) => r.uri) ?? [];
 assert.equal(resourceUris.length, pluginRegistry.plugins.length + 1);
 assert.equal(resourceUris[0], "azskills://catalog");
-assert.ok(resourceUris.includes("azskills://plugins/ui-design"));
+assert.ok(resourceUris.includes("azskills://plugins/design"));
 assert.equal(text(4), await readFile(path.join(root, "catalog/plugins.json"), "utf8"));
 assert.match(text(5), /name: azskills/);
 assert.equal(text(5), await readFile(path.join(root, "SKILL.md"), "utf8"));

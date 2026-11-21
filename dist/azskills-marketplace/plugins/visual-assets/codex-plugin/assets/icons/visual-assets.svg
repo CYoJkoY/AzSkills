@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Visual Assets</title>
+  <rect width="64" height="64" rx="8" fill="#7A3E9D"/>
+  <rect x="16" y="18" width="32" height="28" rx="4" fill="none" stroke="#FAF9F5" stroke-width="3.2"/>
+  <circle cx="25" cy="27" r="3" fill="#FAF9F5"/>
+  <path d="M18 42l9-11 6 7 5-5 8 9" fill="none" stroke="#FAF9F5" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

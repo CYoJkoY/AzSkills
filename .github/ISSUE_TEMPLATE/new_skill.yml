@@ -126,23 +126,14 @@ body:
         Which existing Skills could this new Skill compose with?
       multiple: true
       options:
-        - architecture
-        - design-system
-        - ui-design
-        - ui-design
-        - logo-generator
-        - photo-abstract-editorial
-        - frontend-slides
-        - remotion-production
-        - document-writing
-        - localization
+        - engineering
+        - design
+        - visual-assets
+        - visual-production
+        - writing
         - resume-evidence-workflow
-        - tool-integration
-        - taste
-        - az-clean-code
+        - operations
         - godot-3-dev
-        - style-presets
-        - scientific-figures
         - None / Standalone
     validations:
       required: false

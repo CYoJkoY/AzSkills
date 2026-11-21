@@ -7,9 +7,15 @@
   },
   "plugins": [
     {
-      "id": "architecture",
+      "id": "engineering",
       "kind": "module",
-      "module": "architecture",
+      "modules": [
+        "architecture",
+        "az-clean-code"
+      ],
+      "description": "Choose runtime and frontend architecture or improve code quality, style consistency, refactoring, and reusable implementation patterns.",
+      "icon": "codex-plugin/assets/icons/engineering.svg",
+      "brandColor": "#1F4E79",
       "category": "Productivity",
       "capabilities": [
         "Read",
@@ -17,29 +23,24 @@
       ],
       "extra": [
         "architecture/references",
-        "codex-plugin/assets/icon.svg"
+        "az-clean-code/references",
+        "az-clean-code/scripts",
+        "az-clean-code/constraints.json",
+        "codex-plugin/assets/icons/engineering.svg"
       ],
       "hooks": null
     },
     {
-      "id": "design-system",
+      "id": "design",
       "kind": "module",
-      "module": "design-system",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
+      "modules": [
+        "design-system",
+        "ui-design",
+        "style-presets"
       ],
-      "extra": [
-        "design-system/references",
-        "codex-plugin/assets/icon.svg"
-      ],
-      "hooks": null
-    },
-    {
-      "id": "ui-design",
-      "kind": "module",
-      "module": "ui-design",
+      "description": "Design and refine interfaces, establish design systems, apply visual presets, and build accessible, responsive UI motion.",
+      "icon": "codex-plugin/assets/icons/design.svg",
+      "brandColor": "#A6382A",
       "category": "Productivity",
       "capabilities": [
         "Read",
@@ -48,14 +49,24 @@
       "extra": [
         "ui-design/references",
         "ui-motion/references",
-        "codex-plugin/assets/icon.svg"
+        "style-presets/references",
+        "style-presets/assets",
+        "design-system/references",
+        "codex-plugin/assets/icons/design.svg"
       ],
       "hooks": null
     },
     {
-      "id": "logo-generator",
+      "id": "visual-assets",
       "kind": "module",
-      "module": "logo-generator",
+      "modules": [
+        "logo-generator",
+        "photo-abstract-editorial",
+        "scientific-figures"
+      ],
+      "description": "Create logos, editorial image treatments, and accurate scientific or medical figures with editable deliverables.",
+      "icon": "codex-plugin/assets/icons/visual-assets.svg",
+      "brandColor": "#7A3E9D",
       "category": "Productivity",
       "capabilities": [
         "Read",
@@ -63,28 +74,22 @@
       ],
       "extra": [
         "logo-generator/references",
-        "codex-plugin/assets/icon.svg"
+        "scientific-figures/references",
+        "scientific-figures/scripts",
+        "codex-plugin/assets/icons/visual-assets.svg"
       ],
       "hooks": null
     },
     {
-      "id": "photo-abstract-editorial",
+      "id": "visual-production",
       "kind": "module",
-      "module": "photo-abstract-editorial",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
+      "modules": [
+        "frontend-slides",
+        "remotion-production"
       ],
-      "extra": [
-        "codex-plugin/assets/icon.svg"
-      ],
-      "hooks": null
-    },
-    {
-      "id": "frontend-slides",
-      "kind": "module",
-      "module": "frontend-slides",
+      "description": "Produce responsive HTML reports and presentations, data-driven video, and deterministic Remotion renders.",
+      "icon": "codex-plugin/assets/icons/visual-production.svg",
+      "brandColor": "#C2410C",
       "category": "Productivity",
       "capabilities": [
         "Read",
@@ -100,29 +105,21 @@
         "frontend-slides/animation-patterns.md",
         "frontend-slides/viewport-base.css",
         "frontend-slides/LICENSE",
-        "codex-plugin/assets/icon.svg"
-      ],
-      "hooks": null
-    },
-    {
-      "id": "remotion-production",
-      "kind": "module",
-      "module": "remotion-production",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
-      ],
-      "extra": [
         "remotion-production/references",
-        "codex-plugin/assets/icon.svg"
+        "codex-plugin/assets/icons/visual-production.svg"
       ],
       "hooks": null
     },
     {
-      "id": "document-writing",
+      "id": "writing",
       "kind": "module",
-      "module": "document-writing",
+      "modules": [
+        "document-writing",
+        "localization"
+      ],
+      "description": "Write and audit GitHub documentation, Steam Workshop pages, and game localization tables.",
+      "icon": "codex-plugin/assets/icons/writing.svg",
+      "brandColor": "#6B4F2A",
       "category": "Productivity",
       "capabilities": [
         "Read",
@@ -132,28 +129,19 @@
         "readme-craft/references",
         "readme-craft/LICENSE",
         "steam-mod-page/references",
-        "codex-plugin/assets/icon.svg"
-      ],
-      "hooks": null
-    },
-    {
-      "id": "localization",
-      "kind": "module",
-      "module": "localization",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
-      ],
-      "extra": [
-        "codex-plugin/assets/icon.svg"
+        "codex-plugin/assets/icons/writing.svg"
       ],
       "hooks": null
     },
     {
       "id": "resume-evidence-workflow",
       "kind": "module",
-      "module": "resume-evidence-workflow",
+      "modules": [
+        "resume-evidence-workflow"
+      ],
+      "description": "Build an evidence-backed career profile, tailor resumes to job requirements, and deliver an editable resume.",
+      "icon": "codex-plugin/assets/icons/career.svg",
+      "brandColor": "#4A5568",
       "category": "Productivity",
       "capabilities": [
         "Read",
@@ -163,28 +151,20 @@
         "resume-evidence-workflow/references",
         "resume-evidence-workflow/assets",
         "resume-evidence-workflow/LICENSE",
-        "codex-plugin/assets/icon.svg"
+        "codex-plugin/assets/icons/career.svg"
       ],
       "hooks": null
     },
     {
-      "id": "tool-integration",
+      "id": "operations",
       "kind": "module",
-      "module": "tool-integration",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
+      "modules": [
+        "tool-integration",
+        "taste"
       ],
-      "extra": [
-        "codex-plugin/assets/icon.svg"
-      ],
-      "hooks": null
-    },
-    {
-      "id": "taste",
-      "kind": "module",
-      "module": "taste",
+      "description": "Connect and configure AI client integrations, and apply GPT with Taste steering and collaboration guidance.",
+      "icon": "codex-plugin/assets/icons/operations.svg",
+      "brandColor": "#2B6E6E",
       "category": "Productivity",
       "capabilities": [
         "Read",
@@ -195,31 +175,19 @@
         "codex-plugin/taste/hooks/local-tools.ts",
         "scripts/runtime.ts",
         "scripts/types.ts",
-        "codex-plugin/assets/icon.svg"
+        "codex-plugin/assets/icons/operations.svg"
       ],
       "hooks": "codex-plugin/hooks/taste-hooks.json"
     },
     {
-      "id": "az-clean-code",
-      "kind": "module",
-      "module": "az-clean-code",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
-      ],
-      "extra": [
-        "az-clean-code/references",
-        "az-clean-code/scripts",
-        "az-clean-code/constraints.json",
-        "codex-plugin/assets/icon.svg"
-      ],
-      "hooks": null
-    },
-    {
       "id": "godot-3-dev",
       "kind": "module",
-      "module": "godot-3-dev",
+      "modules": [
+        "godot-3-dev"
+      ],
+      "description": "Develop, review, and down-port Godot 3.x GDScript against the verified 3.6 API surface.",
+      "icon": "codex-plugin/assets/icons/godot.svg",
+      "brandColor": "#2F6B4F",
       "category": "Productivity",
       "capabilities": [
         "Read",
@@ -233,41 +201,9 @@
         "godot-3-dev/scripts/check-godot-3x.ts",
         "scripts/runtime.ts",
         "scripts/types.ts",
-        "codex-plugin/assets/icon.svg"
+        "codex-plugin/assets/icons/godot.svg"
       ],
       "hooks": "codex-plugin/hooks/godot-hooks.json"
-    },
-    {
-      "id": "style-presets",
-      "kind": "module",
-      "module": "style-presets",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
-      ],
-      "extra": [
-        "style-presets/references",
-        "style-presets/assets",
-        "codex-plugin/assets/icon.svg"
-      ],
-      "hooks": null
-    },
-    {
-      "id": "scientific-figures",
-      "kind": "module",
-      "module": "scientific-figures",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
-      ],
-      "extra": [
-        "scientific-figures/references",
-        "scientific-figures/scripts",
-        "codex-plugin/assets/icon.svg"
-      ],
-      "hooks": null
     },
     {
       "id": "no-think-tags",
@@ -279,7 +215,8 @@
         "Write"
       ],
       "extra": [],
-      "hooks": "hooks/hooks.json"
+      "hooks": "hooks/hooks.json",
+      "brandColor": "#BE185D"
     },
     {
       "id": "empty-reply",
@@ -291,7 +228,8 @@
         "Write"
       ],
       "extra": [],
-      "hooks": "hooks/hooks.json"
+      "hooks": "hooks/hooks.json",
+      "brandColor": "#0E7490"
     }
   ]
 }

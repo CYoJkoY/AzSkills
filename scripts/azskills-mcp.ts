@@ -12,7 +12,7 @@ import readline from "node:readline";
 import { fileURLToPath } from "node:url";
 import { collectClosure, filesUnder, toPosix } from "./link-bundle.ts";
 import { errorMessage, isRecord, readJson } from "./runtime.ts";
-import type { PluginCatalog, SkillCatalog } from "./types.ts";
+import type { PluginCatalog, PluginCatalogEntry, SkillCatalog, SkillModule } from "./types.ts";
 
 interface ResourceData {
   uri: string;
@@ -34,6 +34,7 @@ const plugins = await readJson<PluginCatalog>(path.join(root, "catalog/plugins.j
 const pluginIndex = new Map(plugins.plugins.map((entry) => [entry.id, entry]));
 const moduleIndex = new Map(catalog.modules.map((module) => [module.id, module]));
 const aliasIndex = new Map(catalog.aliases.map((alias) => [alias.id, alias]));
+const moduleOwners = new Map(plugins.plugins.flatMap((entry) => (entry.modules ?? []).map((module) => [module, entry.id] as const)));
 
 const closures = new Map<string, Promise<Map<string, string>>>();
 
@@ -44,9 +45,9 @@ async function closureFor(id: string): Promise<Map<string, string>> {
   if (cached !== undefined) return cached;
   const pending = (async (): Promise<Map<string, string>> => {
     if (entry.kind === "module") {
-      const module = entry.module === undefined ? undefined : moduleIndex.get(entry.module);
-      if (module === undefined) throw new Error(id + ": no matching canonical module");
-      return collectClosure(root, [module.path, ...entry.extra]);
+      const modules = (entry.modules ?? []).map((module) => moduleIndex.get(module));
+      if (modules.length === 0 || modules.some((module) => module === undefined)) throw new Error(id + ": no matching canonical modules");
+      return collectClosure(root, [...modules.map((module) => module!.path), ...entry.extra, ...(entry.icon ? [entry.icon] : [])]);
     }
     if (entry.source === undefined) throw new Error(id + ": standalone plugin requires a source directory");
     const seeds = (await filesUnder(path.join(root, entry.source))).map((file) => toPosix(path.relative(root, file)));
@@ -56,15 +57,34 @@ async function closureFor(id: string): Promise<Map<string, string>> {
   return pending;
 }
 
-async function pluginSkillFile(id: string): Promise<{ file: string; mode: string | undefined }> {
+async function pluginSkillFile(id: string, moduleId?: string): Promise<{ file: string; mode: string | undefined }> {
   const entry = pluginIndex.get(id);
   if (entry === undefined) throw new Error("Unknown plugin: " + id);
   if (entry.kind === "module") {
-    const module = entry.module === undefined ? undefined : moduleIndex.get(entry.module);
-    if (module === undefined) throw new Error(id + ": no matching canonical module");
-    return { file: path.join(root, module.path), mode: undefined };
+    const modules = (entry.modules ?? []).map((module) => moduleIndex.get(module));
+    if (modules.length === 0 || modules.some((module) => module === undefined)) throw new Error(id + ": no matching canonical modules");
+    // A request that names one of the member modules reads that contract, not
+    // whichever member happens to be listed first.
+    const chosen = modules.find((module) => module!.id === moduleId) ?? modules[0]!;
+    return { file: path.join(root, chosen.path), mode: undefined };
   }
   return { file: path.join(root, entry.source ?? "", "skills", id, "SKILL.md"), mode: undefined };
+}
+
+function pluginIndexText(entry: PluginCatalogEntry): string {
+  const modules = (entry.modules ?? [])
+    .map((module) => moduleIndex.get(module))
+    .filter((module): module is SkillModule => module !== undefined);
+  return [
+    "# " + entry.id,
+    "",
+    entry.description ?? "",
+    "",
+    "This plugin groups several workflows. Pick one contract, then load only the references it names:",
+    "",
+    ...modules.map((module) => "- " + module.id + " (modes: " + module.modes.join(", ") + ") -> " + module.path),
+    "",
+  ].join("\n");
 }
 
 const catalogUri = "azskills://catalog";
@@ -78,7 +98,7 @@ const resources = [
     uri: pluginUri(entry.id),
     name: entry.id,
     title: entry.id,
-    description: entry.capabilities.join("; "),
+    description: entry.description ?? entry.capabilities.join("; "),
     mimeType: "text/markdown",
   })),
 ];
@@ -124,7 +144,8 @@ async function fileData(uri: string, file: string): Promise<ResourceData> {
 
 function resolveId(id: unknown): string {
   const alias = typeof id === "string" ? aliasIndex.get(id) : undefined;
-  return alias?.canonical ?? (typeof id === "string" ? id : "");
+  const moduleId = alias?.canonical ?? (typeof id === "string" ? id : "");
+  return moduleOwners.get(moduleId) ?? moduleId;
 }
 
 function resolveMode(alias: { mode: string; legacyModes?: Record<string, string> } | undefined, requested: string | undefined): string | undefined {
@@ -141,10 +162,11 @@ async function call(input: Record<string, unknown>): Promise<unknown> {
   if (action === "plugin" || action === "module") {
     const rawId = typeof input.id === "string" ? input.id : "";
     const alias = aliasIndex.get(rawId);
-    const id = alias?.canonical ?? rawId;
+    const moduleId = alias?.canonical ?? rawId;
+    const id = moduleOwners.get(moduleId) ?? moduleId;
     const entry = pluginIndex.get(id);
     if (entry === undefined) throw new Error("Unknown plugin: " + String(input.id));
-    const module = entry.kind === "module" && entry.module !== undefined ? moduleIndex.get(entry.module) : undefined;
+    const module = entry.kind === "module" ? moduleIndex.get(moduleId) : undefined;
     const requestedMode = input.mode;
     if (requestedMode !== undefined && typeof requestedMode !== "string") throw new Error("Unknown mode for " + id);
     const mode = resolveMode(alias, typeof requestedMode === "string" ? requestedMode : undefined);
@@ -152,7 +174,8 @@ async function call(input: Record<string, unknown>): Promise<unknown> {
       if (module === undefined) throw new Error("Unknown mode for " + id);
       if (!module.modes.includes(mode)) throw new Error("Unknown mode for " + id);
     }
-    const selected = await pluginSkillFile(id);
+    if (entry.kind === "module" && module === undefined) return textResult(pluginIndexText(entry));
+    const selected = await pluginSkillFile(id, module?.id);
     const body = await readFile(selected.file, "utf8");
     return textResult((mode !== undefined ? "Selected mode: " + mode + "\n\n" : "") + body);
   }

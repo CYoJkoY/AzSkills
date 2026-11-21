@@ -66,7 +66,13 @@ function displayName(id: string): string {
     .join(" ");
 }
 
-function pointer(contractPath: string, title: string, description: string): string {
+interface ContractPointer {
+  readonly id: string;
+  readonly path: string;
+  readonly description: string;
+}
+
+function pointer(contracts: readonly ContractPointer[], title: string, description: string): string {
   return [
     "---",
     "name: " + title,
@@ -75,9 +81,13 @@ function pointer(contractPath: string, title: string, description: string): stri
     "",
     "# " + displayName(title),
     "",
-    "This plugin ships one AzSkills workflow. Read the canonical contract before acting:",
+    "This plugin groups related workflows under one installation. Open the matching",
+    "contract before acting; do not answer from this index alone.",
     "",
-    "- [Contract](" + contractPath + ")",
+    ...contracts.flatMap((contract) => [
+      "- [" + displayName(contract.id) + "](" + contract.path + ")",
+      "  " + contract.description,
+    ]),
     "",
     "Load only the supporting references the task needs. The plugin is self-contained;",
     "do not look for a shared AzSkills entry or for other plugins in the catalog.",
@@ -107,9 +117,9 @@ export function pluginManifest(
       developerName: "AzSkills",
       category: entry.category,
       capabilities: entry.capabilities,
-      brandColor: "#A6382A",
-      composerIcon: "./codex-plugin/assets/icon.svg",
-      logo: "./codex-plugin/assets/icon.svg",
+      brandColor: entry.brandColor ?? "#A6382A",
+      composerIcon: "./" + (entry.icon ?? "codex-plugin/assets/icon.svg"),
+      logo: "./" + (entry.icon ?? "codex-plugin/assets/icon.svg"),
     },
   };
 }
@@ -121,11 +131,12 @@ async function buildModule(
   destination: string,
   view: "plugin" | "skill",
 ): Promise<PluginBuild> {
-  const module = registry.modules.find((candidate) => candidate.id === entry.module);
-  if (module === undefined) throw new Error(entry.id + ": no matching canonical module");
-  const contract = await readContract(repoRoot, module);
-  const contractPath = view === "plugin" ? "../../" + module.path : module.path;
-  const paths = [module.path, ...entry.extra];
+  const modules = (entry.modules ?? []).map((id) => registry.modules.find((candidate) => candidate.id === id));
+  if (modules.length === 0 || modules.some((module) => module === undefined)) throw new Error(entry.id + ": no matching canonical modules");
+  const contracts = await Promise.all(modules.map(async (module) => ({ module: module!, contract: await readContract(repoRoot, module!) })));
+  const description = entry.description ?? contracts.map(({ contract }) => contract.description).join(" ");
+  if (!asciiOnly(description) || description.length > 320) throw new Error(entry.id + ": plugin description must be ASCII and at most 320 characters");
+  const paths = [...modules.map((module) => module!.path), ...entry.extra, ...(entry.icon ? [entry.icon] : [])];
 
   const bundle = await collectClosure(repoRoot, paths);
   await materialize(bundle, destination);
@@ -133,9 +144,15 @@ async function buildModule(
     ? path.join(destination, "skills", entry.id, "SKILL.md")
     : path.join(destination, "SKILL.md");
   await mkdir(path.dirname(skillEntry), { recursive: true });
-  await writeFile(skillEntry, pointer(contractPath, entry.id, contract.description), "utf8");
+  const contractPointers = contracts.map(({ module, contract }) => ({
+    id: module.id,
+    path: view === "plugin" ? "../../" + module.path : module.path,
+    description: contract.description,
+  }));
+  await writeFile(skillEntry, pointer(contractPointers, entry.id, description), "utf8");
   if (view === "plugin") {
-    const manifest = pluginManifest(entry, registry.version, contract.description, module.modes);
+    const modes = contracts.flatMap(({ module }) => module.modes.map((mode) => module.id + "/" + mode));
+    const manifest = pluginManifest(entry, registry.version, description, modes);
     await mkdir(path.join(destination, ".codex-plugin"), { recursive: true });
     await writeFile(path.join(destination, ".codex-plugin/plugin.json"), JSON.stringify(manifest, null, 2) + "\n", "utf8");
   }
@@ -311,13 +328,13 @@ if (isMain) {
         const result = await writeZip(plugin.directory, path.join(zipRoot, plugin.id + ".zip"));
         files += result.files;
       }
+      if (destination.startsWith(path.resolve(repositoryRoot) + path.sep)) {
+        await publishRepositoryMarketplace(repositoryRoot, destination);
+      }
       console.log("Packaged " + built.plugins.length + " independent plugins into " + destination);
       console.log("Plugin archives: " + zipRoot + " (" + files + " files across " + built.plugins.length + " archives)");
     } finally {
       await rm(staging, { recursive: true, force: true });
-      if (destination.startsWith(path.resolve(repositoryRoot) + path.sep)) {
-        await publishRepositoryMarketplace(repositoryRoot, destination);
-      }
     }
   } catch (error) {
     console.error("AzSkills packaging failed: " + errorMessage(error));

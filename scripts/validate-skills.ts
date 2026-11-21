@@ -54,10 +54,13 @@ interface ResolvedTarget {
 interface TemplateSpec {
   file: string;
   dropdown: string;
+  /** "all" requires every plugin id; "module" requires workflow plugins only. */
+  scope: "all" | "module";
 }
 
 const root = process.cwd();
 const registryPath = path.join(root, "skills.json");
+const pluginsPath = path.join(root, "catalog", "plugins.json");
 const readmePath = path.join(root, "README.md");
 const errors: string[] = [];
 const checkedFiles = new Set<string>();
@@ -216,6 +219,30 @@ function isCatalog(value: unknown): value is Catalog {
   return isRecord(value) && Array.isArray(value.modules) && Array.isArray(value.aliases);
 }
 
+interface PluginOptionSpec {
+  all: string[];
+  modules: string[];
+}
+
+async function loadPluginOptions(): Promise<PluginOptionSpec> {
+  const parsed: unknown = JSON.parse(await readFile(pluginsPath, "utf8"));
+  if (!isRecord(parsed) || !Array.isArray(parsed.plugins)) {
+    fail("catalog/plugins.json: plugins must be an array");
+    return { all: [], modules: [] };
+  }
+  const all: string[] = [];
+  const modules: string[] = [];
+  for (const plugin of parsed.plugins) {
+    if (!isRecord(plugin) || typeof plugin.id !== "string") {
+      fail("catalog/plugins.json: plugin without a string id");
+      continue;
+    }
+    all.push(plugin.id);
+    if (plugin.kind === "module") modules.push(plugin.id);
+  }
+  return { all, modules };
+}
+
 async function main(): Promise<void> {
   try {
     const parsed: unknown = JSON.parse(await readFile(registryPath, "utf8"));
@@ -307,7 +334,7 @@ async function main(): Promise<void> {
   for (const [entryPath, entry] of allPathEntries) {
     if (!files.some((file) => relative(file) === entryPath)) fail(entry.id + ": registered file is missing: " + entryPath);
   }
-  interface PluginShape { id: string; kind: string; module?: string }
+  interface PluginShape { id: string; kind: string; modules?: string[] }
   let pluginRegistry: { plugins: PluginShape[] } | null = null;
   try {
     const parsedPlugins: unknown = JSON.parse(await readFile(path.join(root, "catalog/plugins.json"), "utf8"));
@@ -332,7 +359,7 @@ async function main(): Promise<void> {
   }
   if (!foundPaths.has("SKILL.md")) fail("Root SKILL.md is required");
   if (pluginRegistry !== null) {
-    const modulePlugins = new Set(pluginRegistry.plugins.filter((plugin) => plugin.kind === "module" && typeof plugin.module === "string").map((plugin) => plugin.module));
+    const modulePlugins = new Set(pluginRegistry.plugins.filter((plugin) => plugin.kind === "module").flatMap((plugin) => plugin.modules ?? []));
     for (const module of catalog.modules) {
       if (!modulePlugins.has(module.id)) fail("catalog/plugins.json: missing module plugin for " + module.id);
     }
@@ -539,10 +566,11 @@ async function main(): Promise<void> {
   }
 
   const templateSpecs: TemplateSpec[] = [
-    { file: "bug_report.yml", dropdown: "skill" },
-    { file: "new_skill.yml", dropdown: "composition" },
-    { file: "skill_improvement.yml", dropdown: "skill" },
+    { file: "bug_report.yml", dropdown: "skill", scope: "all" },
+    { file: "new_skill.yml", dropdown: "composition", scope: "module" },
+    { file: "skill_improvement.yml", dropdown: "skill", scope: "all" },
   ];
+  const pluginOptions = await loadPluginOptions();
   for (const spec of templateSpecs) {
     const relativeTemplate = ".github/ISSUE_TEMPLATE/" + spec.file;
     let text = "";
@@ -556,17 +584,23 @@ async function main(): Promise<void> {
       .split(/\n(?=  - type: )/)
       .find((item) => new RegExp("^    id: " + spec.dropdown + "$", "m").test(item));
     const optionsText = block?.split(/\n\s+options:\s*\n/)[1]?.split(/\n\s+validations:/)[0] ?? "";
-    const entries = new Set<string>(
-      optionsText
-        .split("\n")
-        .map((line) => /^\s{8}- (.+)$/.exec(line)?.[1])
-        .filter((value): value is string => value !== undefined),
-    );
+    const listed = optionsText
+      .split("\n")
+      .map((line) => /^\s{8}- (.+)$/.exec(line)?.[1])
+      .filter((value): value is string => value !== undefined);
+    const entries = new Set<string>(listed);
     if (!block) fail(relativeTemplate + ": missing dropdown " + spec.dropdown);
-    for (const skill of catalog.modules) {
-      if (!entries.has(skill.id)) {
-        fail(relativeTemplate + ": missing canonical Skill option " + skill.id);
+    if (listed.length !== entries.size) {
+      fail(relativeTemplate + ": duplicate dropdown option in " + spec.dropdown);
+    }
+    const required = spec.scope === "all" ? pluginOptions.all : pluginOptions.modules;
+    for (const pluginId of required) {
+      if (!entries.has(pluginId)) {
+        fail(relativeTemplate + ": missing plugin option " + pluginId);
       }
+    }
+    if (spec.scope === "module" && !entries.has("None / Standalone")) {
+      fail(relativeTemplate + ": missing option None / Standalone");
     }
   }
 

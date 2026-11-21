@@ -1,0 +1,26 @@
+{
+  "name": "design",
+  "version": "5.0.0",
+  "description": "Design and refine interfaces, establish design systems, apply visual presets, and build accessible, responsive UI motion.",
+  "license": "MIT",
+  "keywords": [
+    "design",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Design",
+    "shortDescription": "Design and refine interfaces, establish design systems, apply visual presets, and build accessible, responsive UI motion.",
+    "longDescription": "Design and refine interfaces, establish design systems, apply visual presets, and build accessible, responsive UI motion. Modes: design-system/ingest, design-system/author, design-system/migrate, design-system/audit, ui-design/build, ui-design/refine, ui-design/review, ui-design/system, ui-design/motion, ui-design/motion-review, ui-design/motion-audit, ui-design/motion-pattern, ui-design/svg, style-presets/catalog, style-presets/apply, style-presets/loaders, style-presets/audit.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icons/design.svg",
+    "logo": "./codex-plugin/assets/icons/design.svg"
+  }
+}

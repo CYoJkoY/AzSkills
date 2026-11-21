@@ -12,22 +12,16 @@ body:
     attributes:
       label: Target Skill
       options:
-        - architecture
-        - design-system
-        - ui-design
-        - document-writing
-        - logo-generator
-        - photo-abstract-editorial
-        - frontend-slides
-        - remotion-production
-        - localization
+        - engineering
+        - design
+        - visual-assets
+        - visual-production
+        - writing
         - resume-evidence-workflow
-        - tool-integration
-        - taste
-        - az-clean-code
+        - operations
         - godot-3-dev
-        - style-presets
-        - scientific-figures
+        - no-think-tags
+        - empty-reply
         - application-architecture (alias)
         - frontend-architecture (alias)
         - ui-aesthetics (alias)

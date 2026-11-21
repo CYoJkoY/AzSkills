@@ -1,7 +1,7 @@
 # Tool integrations
 
 AzSkills connects to AI tools through native skills, Codex plugins, MCP servers, and manual import.
-AzSkills is a catalog of 18 independent plugins. Skill folders install the workflow plugins individually, the Codex marketplace installs any plugin including the hook plugins, and the MCP server exposes the catalog to clients without a skill folder.
+AzSkills is a catalog of 10 independent plugins. Skill folders install the workflow plugins individually, the Codex marketplace installs any plugin including the hook plugins, and the MCP server exposes the catalog to clients without a skill folder.
 Manual import is used only where the vendor workflow is UI-based or not publicly documented for local files.
 
 | Tool | Mechanism | Default target |
@@ -45,8 +45,8 @@ Start the interactive setup and maintenance wizard:
 Or select a client, scope, and plugins explicitly:
 
     node scripts/install-skills.ts --list
-    node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --plugin architecture,ui-design --dry-run
-    node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --plugin architecture,ui-design --yes
+    node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --plugin engineering,design --dry-run
+    node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --plugin engineering,design --yes
     node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --all-plugins --yes
     node scripts/package-plugin.ts --output /path/to/fresh/exports
     node scripts/install-skills.ts --rollback --target /path/to/project/.agents/skills --yes
