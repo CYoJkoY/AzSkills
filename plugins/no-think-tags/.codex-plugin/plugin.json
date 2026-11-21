@@ -1,0 +1,20 @@
+{
+  "name": "no-think-tags",
+  "version": "3.0.0",
+  "description": "Stop a final reply that leaks a raw reasoning tag block, and ask for one clean re-send.",
+  "license": "MIT",
+  "keywords": ["reasoning", "think-tags", "output-hygiene", "azskills"],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "interface": {
+    "displayName": "No Think Tags",
+    "shortDescription": "Keeps reasoning tags out of final replies.",
+    "longDescription": "A Stop hook that detects a reply opening with a raw <think>, <thinking>, or <thought> block and requests one bounded, clean re-send. Closing tags inside Markdown code are ignored, and the hook never re-fires inside the same correction turn.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "brandColor": "#A6382A",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/icon.svg"
+  }
+}

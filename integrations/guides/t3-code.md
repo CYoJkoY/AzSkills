@@ -18,7 +18,7 @@ For an interactive setup, run the guided wizard from the AzSkills checkout:
 
     node scripts/install-skills.ts
 
-The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.
+The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope.
 
 Run the dependency-free server from the AzSkills checkout:
 
@@ -39,13 +39,13 @@ Use the client MCP settings to add the entry, then refresh its tool list.
 
 ## Use
 
-After the client connects, call the azskills tool with action entry. Use action route for module selection, action module with id and optional mode to read one contract, or action file with a bundle-relative path to load support files. Discovery lists one tool and one public resource.
+After the client connects, call the azskills tool with action catalog to list plugins, action plugin with id to read one plugin entry, or action module and action file to read a contract and its support files. Resources: azskills://catalog and azskills://plugins/<id>[/<path>].
 
 ## Verify
 
 Configure the MCP server in a supported underlying agent and call azskills with action entry.
 
-Confirm the single azskills entry can read references/routing.md and one selected module.
+Confirm each imported entry reads its own contract and that catalog/plugins.json lists every plugin you installed.
 
 ## Remove
 

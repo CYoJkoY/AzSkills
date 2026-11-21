@@ -7,12 +7,12 @@ const root = new URL('../', import.meta.url);
 const registry = await readJson<SkillCatalog>(fileURLToPath(new URL('skills.json', root)));
 const content = [
   '# AzSkills routing', '',
-  'Choose by the requested output. These are internal modules, not installable skills.', '',
-  '| Module | Outcome / trigger | Modes |', '| :--- | :--- | :--- |',
+  'Choose by the requested output. Each row is an independent plugin in the catalog, and the linked contract is the workflow that plugin ships.', '',
+  '| Plugin | Outcome / trigger | Modes |', '| :--- | :--- | :--- |',
   ...registry.modules.map(m => '| [' + m.id + '](modules/' + m.id + '.md) | ' + m.role + ' | ' + m.modes.join(', ') + ' |'),
   '', '## Legacy names', '',
-  'Resolve these names inside AzSkills. Do not install additional entrypoints.', '',
-  '| Name | Module | Mode |', '| :--- | :--- | :--- |',
+  'These names stay valid in prompts and issues. Resolve each one to the plugin that owns the canonical module.', '',
+  '| Name | Plugin | Mode |', '| :--- | :--- | :--- |',
   ...registry.aliases.map(a => '| ' + a.id + ' | [' + a.canonical + '](modules/' + a.canonical + '.md) | ' + a.mode + ' |'), '',
 ].join('\n');
 const output = new URL('references/routing.md', root);

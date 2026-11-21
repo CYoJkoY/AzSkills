@@ -36,10 +36,10 @@ Turn a user's target AI client and desired scope into the shortest verified AzSk
 2. Resolve the client name against integrations/tools.json. Match aliases case-insensitively only when unambiguous. If the client is not registered, say so and offer the closest documented mechanism without claiming compatibility.
 3. Ask only for a missing value that changes the destination: project path versus user-wide install. Default to project scope when the current project is evident; otherwise show both choices briefly.
 4. Read the selected guide from the [client guide directory](../../integrations/guides) and check the current repository root. Do not assume the user already has an AzSkills checkout; if absent, give the repository clone command and continue from that path.
-5. For native-skills or shared-skills, preview with --dry-run before installation. The installer copies one complete azskills directory, replaces only manifest-owned legacy entries, refuses unmanaged conflicts, and stores rollback snapshots beside the client skills root. Legacy --skills selections all map to the complete bundle.
-6. For archive imports, run node scripts/package-skill.ts --output <directory> to create azskills.zip. Keep the complete archive layout: one public SKILL.md and supporting internal modules. Treat client import as a separate action.
-7. For mcp, use the registered server command and documented client configuration location. The server lists one azskills tool and one public resource. Tool actions entry, route, module, and file load content on demand. Edit client settings only when setup is explicitly requested.
-8. For manual, follow the guide to import the complete azskills.zip or its extracted azskills folder. Do not describe manual import as automatic installation.
+5. For native-skills or shared-skills, preview with --dry-run before installation. The installer copies each selected plugin into its own directory (its complete link closure), replaces only manifest-owned entries, refuses unmanaged conflicts, and stores rollback snapshots beside the client skills root. A bare run installs every module plugin; --plugin <id,...> installs a subset; the two standalone hook plugins are Codex-plugin only and are reported, not copied.
+6. For archive imports, run node scripts/package-plugin.ts --output <directory> to build the marketplace bundle (dist/azskills-marketplace) and one self-contained zip per plugin under dist/zips/<id>.zip. Keep each plugin archive self-contained. Treat client import as a separate action.
+7. For mcp, use the registered server command and documented client configuration location. The server exposes a catalog tool and catalog resources (azskills://catalog and azskills://plugins/<id>[/<path>]). Tool actions catalog, entry, route, plugin, and file load content on demand. Edit client settings only when setup is explicitly requested.
+8. For manual, follow the guide to import the per-plugin zip or a plugin folder from the marketplace bundle. Do not describe manual import as automatic installation.
 9. Verify in stages: local files/manifest, client discovery, then a minimal skill read or invocation. CLI output must clearly label client-side actions as pending until the actual client confirms them; do not treat copied files as proof of client loading.
 10. For troubleshooting, follow the failing stage from path resolution to file presence, client discovery, and invocation. Fix the earliest failed stage and repeat its verification.
 11. For removal, use --uninstall to preview and remove manifest-owned skill directories; backups remain available and --rollback restores the preceding operation. MCP setups remove only the AzSkills entry from client settings; manual setups detach the imported files. Preserve unrelated configuration and unmanaged files.
@@ -62,6 +62,6 @@ For guidance, return the selected client and mechanism, a short ordered setup se
 - [Integration overview](../../integrations/README.md) - overview and installer entry point.
 - [Integration registry](../../integrations/tools.json) - source of truth for client IDs, mechanisms, and targets.
 - [Client guides](../../integrations/guides) - per-client setup details; load only the selected client guide.
-- [Installer CLI](../../scripts/install-skills.ts) - guided native/shared installer, updater, verifier, and rollback manager.
-- [Packaging CLI](../../scripts/package-skill.ts) - deterministic single-entry bundle export.
-- [MCP server](../../scripts/azskills-mcp.ts) - local MCP server interface.
+- [Installer CLI](../../scripts/install-skills.ts) - guided native/shared per-plugin installer, updater, verifier, and rollback manager.
+- [Packaging CLI](../../scripts/package-plugin.ts) - deterministic per-plugin marketplace and zip export.
+- [MCP server](../../scripts/azskills-mcp.ts) - local MCP server interface over the plugin catalog.

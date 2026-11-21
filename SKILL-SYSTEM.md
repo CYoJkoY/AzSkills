@@ -1,8 +1,8 @@
 # AzSkills module system
 
-Version: 2.0.0
+Version: 3.0.0
 
-AzSkills exposes one root SKILL.md. Its routing table selects internal module contracts under references/modules/. Modes and references load on demand. Legacy aliases exist only in skills.json and never create additional installable entries.
+AzSkills is a catalog of independent plugins. Each module contract under references/modules/ is shipped as its own plugin by catalog/plugins.json, and the root SKILL.md is the catalog index. Modes and references load on demand inside the owning plugin. Legacy aliases exist only in skills.json and never create additional installable entries.
 
 ## Shared rules
 
@@ -122,7 +122,7 @@ request
 
 ## Families
 
-| Family | Internal modules | Purpose |
+| Family | Plugins | Purpose |
 | :--- | :--- | :--- |
 | architecture | `architecture` | Runtime, frontend, storage, and process boundaries. |
 | interface | `design-system`, `ui-design`, `ui-motion`, `style-presets` | Design contracts, interface execution, motion, and named style presets. |

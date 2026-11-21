@@ -8,7 +8,7 @@
       "target": "Codex plugin marketplace",
       "userTarget": "Codex plugin marketplace",
       "source": "https://developers.openai.com/plugins/build/plugins",
-      "verify": "Confirm the installed plugin version, list eight handlers across five events, review and trust their commands including the Godot 3.x PreToolUse/PostToolUse guard, then confirm a new session receives AzSkills routing context.",
+      "verify": "Confirm the marketplace lists 20 plugins, install the ones the project needs, check that each reports version 3.0.0 or later, review and trust hooks for taste, godot-3-dev, no-think-tags, and empty-reply, then confirm a new session selects an installed plugin by description without naming it.",
       "automation": "manual-import",
       "detection": "manual",
       "configTarget": null,
