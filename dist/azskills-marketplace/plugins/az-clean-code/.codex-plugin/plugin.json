@@ -1,0 +1,28 @@
+{
+  "name": "az-clean-code",
+  "version": "3.0.0",
+  "description": "Apply explicit, flat, reusable, data-driven constraints when writing, reviewing, or refactoring application code.",
+  "license": "MIT",
+  "keywords": [
+    "az",
+    "clean",
+    "code",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Az Clean Code",
+    "shortDescription": "Apply explicit, flat, reusable, data-driven constraints when writing, reviewing, or refactoring application code.",
+    "longDescription": "Apply explicit, flat, reusable, data-driven constraints when writing, reviewing, or refactoring application code. Modes: write, review, refactor.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icon.svg",
+    "logo": "./codex-plugin/assets/icon.svg"
+  }
+}

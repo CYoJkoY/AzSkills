@@ -1,0 +1,26 @@
+{
+  "name": "architecture",
+  "version": "3.0.0",
+  "description": "Choose and review the smallest maintainable runtime, frontend stack, persistence model, and process boundary before implementation. Use for new applications, browser extensions, desktop shells, web apps, migrations, and stack decisions.",
+  "license": "MIT",
+  "keywords": [
+    "architecture",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Architecture",
+    "shortDescription": "Choose and review the smallest maintainable runtime, frontend stack, persistence model, and process boundary before implementation. Use for new applications, browser extensions, desktop shells, web apps, migrations, and stack decisions.",
+    "longDescription": "Choose and review the smallest maintainable runtime, frontend stack, persistence model, and process boundary before implementation. Use for new applications, browser extensions, desktop shells, web apps, migrations, and stack decisions. Modes: runtime, frontend, migration, review.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icon.svg",
+    "logo": "./codex-plugin/assets/icon.svg"
+  }
+}

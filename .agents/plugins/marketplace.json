@@ -1,14 +1,243 @@
 {
   "name": "azskills-local",
   "interface": {
-    "displayName": "AzSkills"
+    "displayName": "AzSkills",
+    "shortDescription": "Independent Codex plugins maintained by the AzSkills catalog."
   },
   "plugins": [
     {
-      "name": "azskills",
+      "name": "architecture",
       "source": {
         "source": "local",
-        "path": "./"
+        "path": "./dist/azskills-marketplace/plugins/architecture"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "design-system",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/design-system"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "ui-design",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/ui-design"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "ui-motion",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/ui-motion"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "logo-generator",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/logo-generator"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "photo-abstract-editorial",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/photo-abstract-editorial"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "frontend-slides",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/frontend-slides"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "remotion-production",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/remotion-production"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "readme-craft",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/readme-craft"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "steam-mod-page",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/steam-mod-page"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "localization",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/localization"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "resume-evidence-workflow",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/resume-evidence-workflow"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "tool-integration",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/tool-integration"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "taste",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/taste"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "az-clean-code",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/az-clean-code"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "godot-3-dev",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/godot-3-dev"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "style-presets",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/style-presets"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "scientific-figures",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/scientific-figures"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "no-think-tags",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/no-think-tags"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "empty-reply",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/empty-reply"
       },
       "policy": {
         "installation": "AVAILABLE",

@@ -1,0 +1,28 @@
+{
+  "name": "steam-mod-page",
+  "version": "3.0.0",
+  "description": "Write and audit Steam Workshop Mod descriptions as clean BBCode with verified facts, player-first or developer-first structure, independent Chinese and English deliverables, and a final syntax lint.",
+  "license": "MIT",
+  "keywords": [
+    "steam",
+    "mod",
+    "page",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Steam Mod Page",
+    "shortDescription": "Write and audit Steam Workshop Mod descriptions as clean BBCode with verified facts, player-first or developer-first structure, independent Chinese and English deliverables, and a final syntax lint.",
+    "longDescription": "Write and audit Steam Workshop Mod descriptions as clean BBCode with verified facts, player-first or developer-first structure, independent Chinese and English deliverables, and a final syntax lint. Modes: player, developer, audit.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icon.svg",
+    "logo": "./codex-plugin/assets/icon.svg"
+  }
+}

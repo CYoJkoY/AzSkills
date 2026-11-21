@@ -1,0 +1,27 @@
+{
+  "name": "readme-craft",
+  "version": "3.0.0",
+  "description": "Design, rewrite, and audit GitHub README homepages with evidence-first information architecture, theme-safe SVG headings, stable anchors, verified links, dynamic repository facts, and rendered QA. Use for repository landing pages.",
+  "license": "MIT",
+  "keywords": [
+    "readme",
+    "craft",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Readme Craft",
+    "shortDescription": "Design, rewrite, and audit GitHub README homepages with evidence-first information architecture, theme-safe SVG headings, stable anchors, verified links, dynamic repository facts, and rendered QA. Use for repository landing pages.",
+    "longDescription": "Design, rewrite, and audit GitHub README homepages with evidence-first information architecture, theme-safe SVG headings, stable anchors, verified links, dynamic repository facts, and rendered QA. Use for repository landing pages. Modes: build, rewrite, audit.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icon.svg",
+    "logo": "./codex-plugin/assets/icon.svg"
+  }
+}

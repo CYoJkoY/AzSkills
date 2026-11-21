@@ -1,0 +1,27 @@
+{
+  "name": "ui-motion",
+  "version": "3.0.0",
+  "description": "Construct, review, audit, and adapt UI motion using the smallest correct mechanism, host tokens, full interruption and accessibility behavior, and rendered verification. Also owns SVG animation and expressive interaction patterns.",
+  "license": "MIT",
+  "keywords": [
+    "ui",
+    "motion",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Ui Motion",
+    "shortDescription": "Construct, review, audit, and adapt UI motion using the smallest correct mechanism, host tokens, full interruption and accessibility behavior, and rendered verification. Also owns SVG animation and expressive interaction patterns.",
+    "longDescription": "Construct, review, audit, and adapt UI motion using the smallest correct mechanism, host tokens, full interruption and accessibility behavior, and rendered verification. Also owns SVG animation and expressive interaction patterns. Modes: build, review, audit, pattern, svg.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icon.svg",
+    "logo": "./codex-plugin/assets/icon.svg"
+  }
+}

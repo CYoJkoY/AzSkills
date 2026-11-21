@@ -1,0 +1,27 @@
+{
+  "name": "tool-integration",
+  "version": "3.0.0",
+  "description": "Connect AzSkills to a supported AI client and produce verified install, MCP, or manual setup steps without inventing client capabilities.",
+  "license": "MIT",
+  "keywords": [
+    "tool",
+    "integration",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Tool Integration",
+    "shortDescription": "Connect AzSkills to a supported AI client and produce verified install, MCP, or manual setup steps without inventing client capabilities.",
+    "longDescription": "Connect AzSkills to a supported AI client and produce verified install, MCP, or manual setup steps without inventing client capabilities. Modes: install, configure, troubleshoot, remove.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icon.svg",
+    "logo": "./codex-plugin/assets/icon.svg"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "style-presets",
+  "version": "3.0.0",
+  "description": "Resolve a named visual style, a style keyword, or a loading indicator to one maintained AzSkills preset, then apply it through owned tokens. Use for style-name requests, BioRender-derived direction, loader and progress states, and preset audits.",
+  "license": "MIT",
+  "keywords": [
+    "style",
+    "presets",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Style Presets",
+    "shortDescription": "Resolve a named visual style, a style keyword, or a loading indicator to one maintained AzSkills preset, then apply it through owned tokens. Use for style-name requests, BioRender-derived direction, loader and progress states, and preset audits.",
+    "longDescription": "Resolve a named visual style, a style keyword, or a loading indicator to one maintained AzSkills preset, then apply it through owned tokens. Use for style-name requests, BioRender-derived direction, loader and progress states, and preset audits. Modes: catalog, apply, loaders, audit.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icon.svg",
+    "logo": "./codex-plugin/assets/icon.svg"
+  }
+}

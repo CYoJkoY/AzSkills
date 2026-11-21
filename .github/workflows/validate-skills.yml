@@ -17,6 +17,7 @@ on:
       - "package-lock.json"
       - "tsconfig.json"
       - "catalog/**"
+      - "dist/azskills-marketplace/**"
       - "plugins/**"
       - "docs/**"
       - "codex-plugin/**"
@@ -66,6 +67,9 @@ jobs:
 
       - name: Validate plugin catalog
         run: node scripts/validate-catalog.ts
+
+      - name: Validate published marketplace
+        run: node scripts/check-marketplace.ts
 
       - name: Test editable resume copy behavior
         run: node resume-evidence-workflow/tests/copy-description.test.ts

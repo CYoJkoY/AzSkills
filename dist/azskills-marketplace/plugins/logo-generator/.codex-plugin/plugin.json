@@ -1,0 +1,27 @@
+{
+  "name": "logo-generator",
+  "version": "3.0.0",
+  "description": "Develop logos, product marks, wordmarks, character marks, and identity systems from a product brief. Use for concept exploration, vector construction, small-size validation, colorways, and identity rules.",
+  "license": "MIT",
+  "keywords": [
+    "logo",
+    "generator",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Logo Generator",
+    "shortDescription": "Develop logos, product marks, wordmarks, character marks, and identity systems from a product brief. Use for concept exploration, vector construction, small-size validation, colorways, and identity rules.",
+    "longDescription": "Develop logos, product marks, wordmarks, character marks, and identity systems from a product brief. Use for concept exploration, vector construction, small-size validation, colorways, and identity rules. Modes: mark, character, system.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icon.svg",
+    "logo": "./codex-plugin/assets/icon.svg"
+  }
+}
