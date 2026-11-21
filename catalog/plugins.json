@@ -190,13 +190,7 @@
       "extra": [
         "codex-plugin/assets/icon.svg"
       ],
-      "hooks": null,
-      "modes": [
-        "write",
-        "review",
-        "refactor",
-        "style"
-      ]
+      "hooks": null
     },
     {
       "id": "godot-3-dev",

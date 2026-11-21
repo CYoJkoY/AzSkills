@@ -33,7 +33,7 @@ function isPluginEntry(value: unknown): value is PluginCatalogEntry {
     Array.isArray(value.extra) &&
     value.extra.every((item) => typeof item === "string") &&
     (value.hooks === null || typeof value.hooks === "string") &&
-      (value.module === undefined || (typeof value.module === "string" && kebab(value.module))) &&
+    (value.module === undefined || (typeof value.module === "string" && kebab(value.module))) &&
     (value.source === undefined || typeof value.source === "string")
   );
 }
@@ -111,7 +111,6 @@ async function main(): Promise<void> {
   }
 
   const modules = registry.modules.map((module) => module.id).sort();
-  const published = [...moduleEntries.keys()].sort();
   for (const id of modules) {
     if (!moduleOwners.has(id)) fail("catalog: module " + id + " is not owned by any plugin");
   }
