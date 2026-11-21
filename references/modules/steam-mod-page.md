@@ -195,4 +195,4 @@ Unverified items:
 
 ## References
 
-- `../../steam-mod-page/references/steam-guide.md` - detailed page patterns, BBCode nesting, language tone, image discipline, and extended lint.
+- [steam-guide.md](../../steam-mod-page/references/steam-guide.md) - detailed page patterns, BBCode nesting, language tone, image discipline, and extended lint.

@@ -55,6 +55,14 @@ try {
       assert.ok(text.includes("../../references/modules/" + plugin.id + ".md"));
       assert.equal(await exists(path.join(pluginRoot, "references/modules", plugin.id + ".md")), true);
       if (plugin.id === "ui-design") assert.equal(await exists(path.join(pluginRoot, "SKILL-SYSTEM.md")), true);
+      if (plugin.id === "ui-design") {
+        assert.equal(await exists(path.join(pluginRoot, "ui-motion/references/review.md")), true);
+        assert.equal(await exists(path.join(pluginRoot, "ui-motion/references/svg-animation.md")), true);
+      }
+      if (plugin.id === "document-writing") {
+        assert.equal(await exists(path.join(pluginRoot, "references/modules/readme-craft.md")), true);
+        assert.equal(await exists(path.join(pluginRoot, "references/modules/steam-mod-page.md")), true);
+      }
     } else {
       assert.equal(await exists(path.join(pluginRoot, "hooks/stop-hook.ts")), true);
       assert.equal(await exists(path.join(pluginRoot, "lib/hook-runtime.ts")), true);

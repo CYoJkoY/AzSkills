@@ -1,4 +1,4 @@
-# Plugin catalog migration (3.0.0)
+# Plugin catalog migration (4.0.0)
 
 Issue: #85. This document supersedes the single-entry packaging described in
 [single entry migration](single-entry-migration.md).
@@ -10,9 +10,33 @@ a single sentence and relied on an internal routing table. A shared dispatcher
 only activates when a prompt names it or matches that broad description, so many
 capabilities were never selected automatically.
 
-3.0.0 turns the repository into a plugin catalog. Each capability is an
-independent Codex plugin with its own manifest, skill entry, trigger
-description, and reference closure, and each one is matched on its own.
+3.0.0 turned the repository into a plugin catalog. 4.0.0 flattens overlapping
+workflows into fewer canonical owners while preserving routing aliases. Each
+capability is an independent Codex plugin with its own manifest, skill entry,
+trigger description, and reference closure, and each one is matched on its own.
+
+## Flattened ownership
+
+The canonical marketplace now has 16 workflow plugins and two independent hook
+plugins. Motion is a branch of `ui-design`; code style is a mode of
+`az-clean-code`; and README plus Steam Workshop writing are branches of
+`document-writing`. The former `ui-motion`, `readme-craft`, and
+`steam-mod-page` IDs remain only as routing aliases in `skills.json`; they are
+not separate Codex marketplace entries.
+
+The release is intentionally versioned 4.0.0 because marketplace plugin IDs
+changed. Remove stale marketplace entries and reinstall the replacements:
+
+```sh
+codex plugin marketplace remove azskills-local
+codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
+codex plugin install ui-design@azskills-local
+codex plugin install document-writing@azskills-local
+```
+
+To roll back, remove the marketplace and add the previous marketplace source.
+Aliases continue to work for the installer and MCP routing, but they do not
+recreate removed installable plugin IDs.
 
 ## Catalog registry
 

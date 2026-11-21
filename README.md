@@ -111,6 +111,8 @@ turns scene JSON into editable SVG and checks the result.
 | `ui-aesthetics` | [`ui-design`](references/modules/ui-design.md) | refine |
 | `ui-ux-design-intelligence` | [`ui-design`](references/modules/ui-design.md) | review |
 | `ui-motion-review` | [`ui-design`](references/modules/ui-design.md) | motion-review |
+| `ui-motion-audit` | [`ui-design`](references/modules/ui-design.md) | motion-audit |
+| `rare-ui-motion` | [`ui-design`](references/modules/ui-design.md) | motion-pattern |
 | `svg-animation` | [`ui-design`](references/modules/ui-design.md) | svg |
 | `ip-as-logo` | [`logo-generator`](references/modules/logo-generator.md) | character |
 | `l13n` | [`localization`](references/modules/localization.md) | translate |

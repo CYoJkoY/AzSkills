@@ -82,6 +82,10 @@ async function main(): Promise<void> {
     if (plugin.kind === "module") {
       if (plugin.module === undefined) fail(plugin.id + ": module plugins must declare a canonical module");
       if (plugin.module !== undefined) {
+        if (!registry.modules.some((module) => module.id === plugin.module)) {
+          fail(plugin.id + ": module must reference a registered canonical module: " + plugin.module);
+        }
+        if (plugin.id !== plugin.module) fail(plugin.id + ": module plugin id must match its canonical module");
         if (moduleOwners.has(plugin.module)) {
           fail("catalog: module " + plugin.module + " is claimed by both " + moduleOwners.get(plugin.module) + " and " + plugin.id);
         }
@@ -89,6 +93,9 @@ async function main(): Promise<void> {
       }
       if (plugin.source !== undefined) fail(plugin.id + ": module plugins are built from the module contract, not from a source directory");
       if (moduleEntries.has(plugin.id)) fail(plugin.id + ": duplicate module plugin");
+      for (const extra of plugin.extra) {
+        if (path.isAbsolute(extra) || extra.split(/[\\/]/).includes("..")) fail(plugin.id + ": extra path must stay inside the repository: " + extra);
+      }
       moduleEntries.set(plugin.id, plugin);
       continue;
     }

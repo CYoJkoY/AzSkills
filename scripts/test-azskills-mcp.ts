@@ -46,6 +46,14 @@ const requests: [string, Record<string, unknown>][] = [
   ["tools/call", { name: "azskills" }],
   ["tools/call", { name: "azskills", arguments: [] }],
   ["tools/call", { name: "azskills", arguments: { action: "module", id: "az-clean-code", mode: "write" } }],
+  ["tools/call", { name: "azskills", arguments: { action: "plugin", id: "ui-motion", mode: "review" } }],
+  ["tools/call", { name: "azskills", arguments: { action: "plugin", id: "ui-motion-audit" } }],
+  ["tools/call", { name: "azskills", arguments: { action: "plugin", id: "rare-ui-motion" } }],
+  ["tools/call", { name: "azskills", arguments: { action: "plugin", id: "readme-craft", mode: "audit" } }],
+  ["tools/call", { name: "azskills", arguments: { action: "plugin", id: "steam-mod-page", mode: "developer" } }],
+  ["resources/read", { uri: "azskills://plugins/ui-motion/references/modules/ui-design.md" }],
+  ["resources/read", { uri: "azskills://plugins/readme-craft" }],
+  ["tools/call", { name: "azskills", arguments: { action: "plugin", id: "ui-motion", mode: "unknown" } }],
 ];
 const result = spawnSync(process.execPath, ["scripts/azskills-mcp.ts"], {
   cwd: root,
@@ -99,4 +107,12 @@ assert.equal(text(17), await readFile(path.join(root, "az-clean-code/SKILL.md"),
 assert.equal(text(18), await readFile(path.join(root, "SKILL.md"), "utf8"));
 assert.equal(response(19).result?.isError, true);
 assert.match(text(20), /Selected mode: write/);
+assert.match(text(21), /Selected mode: motion-review/);
+assert.match(text(22), /Selected mode: motion-audit/);
+assert.match(text(23), /Selected mode: motion-pattern/);
+assert.match(text(24), /Selected mode: readme-audit/);
+assert.match(text(25), /Selected mode: steam-developer/);
+assert.match(resourceText(26), /name: ui-design/);
+assert.match(resourceText(27), /name: document-writing/);
+assert.equal(response(28).result?.isError, true);
 console.log("MCP tests passed: catalog and per-plugin resources, plugin and module contracts, closure-validated files, alias and mode handling, and traversal rejection.");

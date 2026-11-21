@@ -91,7 +91,6 @@ jobs:
 
           for skill in \
             "ui-design" \
-            "ui-motion" \
             "frontend-slides" \
             "logo-generator"
           do

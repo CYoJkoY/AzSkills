@@ -16,6 +16,7 @@
         "Write"
       ],
       "extra": [
+        "architecture/references",
         "codex-plugin/assets/icon.svg"
       ],
       "hooks": null
@@ -30,6 +31,7 @@
         "Write"
       ],
       "extra": [
+        "design-system/references",
         "codex-plugin/assets/icon.svg"
       ],
       "hooks": null
@@ -44,6 +46,8 @@
         "Write"
       ],
       "extra": [
+        "ui-design/references",
+        "ui-motion/references",
         "codex-plugin/assets/icon.svg"
       ],
       "hooks": null
@@ -58,6 +62,7 @@
         "Write"
       ],
       "extra": [
+        "logo-generator/references",
         "codex-plugin/assets/icon.svg"
       ],
       "hooks": null
@@ -86,6 +91,15 @@
         "Write"
       ],
       "extra": [
+        "frontend-slides/references",
+        "frontend-slides/scripts",
+        "frontend-slides/assets",
+        "frontend-slides/DESIGN_SYSTEM.md",
+        "frontend-slides/STYLE_PRESETS.md",
+        "frontend-slides/html-template.md",
+        "frontend-slides/animation-patterns.md",
+        "frontend-slides/viewport-base.css",
+        "frontend-slides/LICENSE",
         "codex-plugin/assets/icon.svg"
       ],
       "hooks": null
@@ -100,6 +114,7 @@
         "Write"
       ],
       "extra": [
+        "remotion-production/references",
         "codex-plugin/assets/icon.svg"
       ],
       "hooks": null
@@ -114,6 +129,9 @@
         "Write"
       ],
       "extra": [
+        "readme-craft/references",
+        "readme-craft/LICENSE",
+        "steam-mod-page/references",
         "codex-plugin/assets/icon.svg"
       ],
       "hooks": null
@@ -142,6 +160,9 @@
         "Write"
       ],
       "extra": [
+        "resume-evidence-workflow/references",
+        "resume-evidence-workflow/assets",
+        "resume-evidence-workflow/LICENSE",
         "codex-plugin/assets/icon.svg"
       ],
       "hooks": null
@@ -188,6 +209,9 @@
         "Write"
       ],
       "extra": [
+        "az-clean-code/references",
+        "az-clean-code/scripts",
+        "az-clean-code/constraints.json",
         "codex-plugin/assets/icon.svg"
       ],
       "hooks": null
@@ -202,6 +226,7 @@
         "Write"
       ],
       "extra": [
+        "godot-3-dev/references",
         "codex-plugin/hooks/godot-hooks.json",
         "codex-plugin/hooks/godot3-guard.ts",
         "godot-3-dev/scripts/godot3-lexical.ts",
@@ -222,6 +247,8 @@
         "Write"
       ],
       "extra": [
+        "style-presets/references",
+        "style-presets/assets",
         "codex-plugin/assets/icon.svg"
       ],
       "hooks": null
@@ -236,6 +263,8 @@
         "Write"
       ],
       "extra": [
+        "scientific-figures/references",
+        "scientific-figures/scripts",
         "codex-plugin/assets/icon.svg"
       ],
       "hooks": null

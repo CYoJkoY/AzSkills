@@ -157,5 +157,5 @@ redraw the whole mark to fix one optical issue.
 
 ## References
 
-- `../../logo-generator/references/logo-guide.md` - detailed concept, exploration, system-board, showcase, and revision workflows.
-- `../../logo-generator/references/character-marks.md` - character and IP simplification budget.
+- [logo-guide.md](../../logo-generator/references/logo-guide.md) - detailed concept, exploration, system-board, showcase, and revision workflows.
+- [character-marks.md](../../logo-generator/references/character-marks.md) - character and IP simplification budget.

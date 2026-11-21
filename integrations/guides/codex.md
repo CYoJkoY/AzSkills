@@ -30,7 +30,7 @@ AzSkills is a catalog, not one plugin. The marketplace lists 18 independent plug
 
 Install the plugins the project needs. Each plugin is matched on its own description, so a capability no longer depends on one shared dispatcher entry. Hooks ship only with `taste` (steering) and `godot-3-dev` (Godot 3.x write guard), plus the two hook plugins; review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces.
 
-When upgrading from an earlier release, refresh the marketplace source and reinstall the selected plugins. Confirm each installed plugin reports 3.0.0 or later; changing the checkout alone does not replace a cached installation. Hook trust is keyed to the handler hash, so an upgrade that changes a hook manifest or a bundled script marks those hooks for review again. Open the hook list (or `/hooks` in the CLI) to review and trust the handlers, then start a new session.
+When upgrading from an earlier release, remove the old marketplace, add the Git source again, and reinstall the selected plugins. Confirm each installed plugin reports 4.0.0 or later; changing the checkout alone does not replace a cached installation. Hook trust is keyed to the handler hash, so an upgrade that changes a hook manifest or a bundled script marks those hooks for review again. Open the hook list (or `/hooks` in the CLI) to review and trust the handlers, then start a new session.
 
 ## Use
 
@@ -38,7 +38,7 @@ Start a new Codex session and make a request covered by an installed plugin with
 
 ## Verify
 
-Confirm the marketplace lists 20 plugins, install the ones the project needs, check that each reports version 3.0.0 or later, review and trust hooks for taste, godot-3-dev, no-think-tags, and empty-reply, then confirm a new session selects an installed plugin by description without naming it.
+Confirm the marketplace lists 18 plugins, install the ones the project needs, check that each reports version 4.0.0 or later, review and trust hooks for taste, godot-3-dev, no-think-tags, and empty-reply, then confirm a new session selects an installed plugin by description without naming it.
 
 
 ## Remove
