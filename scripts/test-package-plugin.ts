@@ -16,10 +16,40 @@ const exists = async (file: string): Promise<boolean> =>
     throw error;
   });
 
+const fileBytes = async (file: string): Promise<Uint8Array> => readFile(file);
+const listFiles = async (directory: string): Promise<string[]> => {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files: string[] = [];
+  for (const entry of entries) {
+    const file = path.join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...(await listFiles(file)));
+    else if (entry.isFile()) files.push(file);
+    else throw new Error("Unexpected marketplace entry: " + file);
+  }
+  return files.sort();
+};
+
 try {
   const catalog = await readJson<PluginCatalog>(path.join(root, "catalog/plugins.json"));
   const registry = await readJson<SkillCatalog>(path.join(root, "skills.json"));
   const built = await packageMarketplace(root, path.join(temp, "marketplace"));
+
+  const committedMarketplace = path.join(root, "dist/azskills-marketplace");
+  const builtFiles = await listFiles(built.marketplace);
+  const committedFiles = await listFiles(committedMarketplace);
+  assert.deepEqual(
+    builtFiles.map((file) => path.relative(built.marketplace, file)),
+    committedFiles.map((file) => path.relative(committedMarketplace, file)),
+    "Committed marketplace file list must match a fresh build",
+  );
+  for (const file of builtFiles) {
+    const relative = path.relative(built.marketplace, file);
+    assert.deepEqual(
+      await fileBytes(file),
+      await fileBytes(path.join(committedMarketplace, relative)),
+      "Committed marketplace file must match a fresh build: " + relative,
+    );
+  }
 
   assert.equal(built.plugins.length, catalog.plugins.length);
   assert.equal(built.plugins.length, 18);

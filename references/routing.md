@@ -32,6 +32,8 @@ These names stay valid in prompts and issues. Resolve each one to the plugin tha
 | ui-aesthetics | [ui-design](modules/ui-design.md) | refine |
 | ui-ux-design-intelligence | [ui-design](modules/ui-design.md) | review |
 | ui-motion-review | [ui-design](modules/ui-design.md) | motion-review |
+| ui-motion-audit | [ui-design](modules/ui-design.md) | motion-audit |
+| rare-ui-motion | [ui-design](modules/ui-design.md) | motion-pattern |
 | svg-animation | [ui-design](modules/ui-design.md) | svg |
 | ip-as-logo | [logo-generator](modules/logo-generator.md) | character |
 | l13n | [localization](modules/localization.md) | translate |

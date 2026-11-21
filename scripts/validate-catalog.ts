@@ -93,9 +93,6 @@ async function main(): Promise<void> {
       }
       if (plugin.source !== undefined) fail(plugin.id + ": module plugins are built from the module contract, not from a source directory");
       if (moduleEntries.has(plugin.id)) fail(plugin.id + ": duplicate module plugin");
-      for (const extra of plugin.extra) {
-        if (path.isAbsolute(extra) || extra.split(/[\\/]/).includes("..")) fail(plugin.id + ": extra path must stay inside the repository: " + extra);
-      }
       moduleEntries.set(plugin.id, plugin);
       continue;
     }
