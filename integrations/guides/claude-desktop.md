@@ -18,7 +18,7 @@ For an interactive setup, run the guided wizard from the AzSkills checkout:
 
     node scripts/install-skills.ts
 
-The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.
+The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope.
 
 Run the dependency-free server from the AzSkills checkout:
 
@@ -39,13 +39,13 @@ Open the Claude Desktop configuration for MCP servers, paste the entry, and rest
 
 ## Use
 
-After the client connects, call the azskills tool with action entry. Use action route for module selection, action module with id and optional mode to read one contract, or action file with a bundle-relative path to load support files. Discovery lists one tool and one public resource.
+After the client connects, call the azskills tool with action catalog to list plugins, action plugin with id to read one plugin entry, or action module and action file to read a contract and its support files. Resources: azskills://catalog and azskills://plugins/<id>[/<path>].
 
 ## Verify
 
 Add the stdio server in Claude Desktop MCP settings and list AzSkills resources.
 
-Confirm the single azskills entry can read references/routing.md and one selected module.
+Confirm each imported entry reads its own contract and that catalog/plugins.json lists every plugin you installed.
 
 ## Remove
 

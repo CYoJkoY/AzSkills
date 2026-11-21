@@ -256,3 +256,17 @@ The Remotion production workflow is an original AzSkills synthesis informed by t
 The review covered current public guidance around composition, frame-driven timing, calculateMetadata(), media, rendering APIs, Three.js, GSAP, Lottie, and Rive integrations. AzSkills does not vendor the Remotion documentation, the upstream Remotion repository, example assets, or the upstream Remotion Skill.
 
 The resulting contract deliberately adds AzSkills-specific behavior: explicit engine responsibility boundaries, deterministic timing rules, progressive-disclosure references, AI production workflow, cross-Skill routing, rendering QA, asset provenance, and performance gates.
+
+## Answer hygiene hook plugins
+
+The standalone plugins `plugins/no-think-tags` and `plugins/empty-reply` were
+written for AzSkills after studying the OpenCode plugins `packages/think-tags`
+and `packages/empty-reply` in https://github.com/magpie-community/plugins
+(MIT License, Copyright (c) the magpie-community contributors).
+
+This repository does not vendor upstream source. Both plugins are independent
+Codex Stop-hook implementations: their detection rules, correction budgets,
+tests, and manifests were written against the Codex hook contract, and they add
+behavior the upstream packages do not define, such as honouring
+`stop_hook_active`, counting corrections per session and turn, and treating
+reasoning-only or invisible-only output as empty.

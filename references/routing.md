@@ -1,8 +1,8 @@
 # AzSkills routing
 
-Choose by the requested output. These are internal modules, not installable skills.
+Choose by the requested output. Each row is an independent plugin in the catalog, and the linked contract is the workflow that plugin ships.
 
-| Module | Outcome / trigger | Modes |
+| Plugin | Outcome / trigger | Modes |
 | :--- | :--- | :--- |
 | [architecture](modules/architecture.md) | Runtime, frontend stack, persistence, and process boundaries. | runtime, frontend, migration, review |
 | [design-system](modules/design-system.md) | DESIGN.md ingestion, normalization, provenance, and verification. | ingest, author, migrate, audit |
@@ -25,9 +25,9 @@ Choose by the requested output. These are internal modules, not installable skil
 
 ## Legacy names
 
-Resolve these names inside AzSkills. Do not install additional entrypoints.
+These names stay valid in prompts and issues. Resolve each one to the plugin that owns the canonical module.
 
-| Name | Module | Mode |
+| Name | Plugin | Mode |
 | :--- | :--- | :--- |
 | application-architecture | [architecture](modules/architecture.md) | runtime |
 | frontend-architecture | [architecture](modules/architecture.md) | frontend |

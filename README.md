@@ -3,40 +3,43 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/azskills-hero-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/azskills-hero.svg">
-  <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: one entry with specialized internal modules" width="100%">
+  <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: a catalog of independent Codex plugins" width="100%">
 </picture>
 
-Version **2.8.0**. One entry in your client, specialized capabilities inside.
+Version **3.0.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
 
-AzSkills installs as a single `azskills` folder with one root `SKILL.md`. Describe the result you want; the entry routes to the relevant internal module and loads only the necessary references. Internal module names are workflow choices, not additional skills to install. The `az-clean-code` package is also available as a standalone Skill.
+Every capability ships as its own plugin with its own manifest, skill entry, trigger description, and reference closure. A single dispatcher entry only fires when a prompt names it or matches one broad description; independent plugins are matched directly, so capabilities stop being invisible to automatic routing. `catalog/plugins.json` is the distribution registry and `skills.json` stays the canonical module and alias source.
+
+| Kind | Plugins | Count |
+| :--- | :--- | :--- |
+| Workflow | architecture, design-system, ui-design, ui-motion, logo-generator, photo-abstract-editorial, frontend-slides, remotion-production, readme-craft, steam-mod-page, localization, resume-evidence-workflow, tool-integration, taste, az-clean-code, godot-3-dev, style-presets, scientific-figures | 18 |
+| Hook | no-think-tags, empty-reply | 2 |
 
 ## Install
 
-Requires Node.js 22.18 or later (23.6+ on Node 23, which enabled type stripping mid-release), because the scripts run as native TypeScript. From this checkout:
+Requires Node.js 22.18 or later (23.6+ on Node 23, which enabled type stripping mid-release), because the scripts run as native TypeScript.
+
+Install selected workflow plugins as skill folders:
 
 ```sh
-node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --dry-run
-node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --yes
+node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --plugin architecture,ui-design --dry-run
+node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --plugin architecture,ui-design --yes
 ```
 
-The resulting entry is `/path/to/project/.agents/skills/azskills/SKILL.md`. Use `--mode user` for the client user directory, `--target <skills-root>` to override the destination, or `--list` to see supported clients. Running without arguments opens a client-selection prompt. The default scope is user. Every selection installs the same complete bundle.
+Each selected plugin becomes `/path/to/project/.agents/skills/<id>/SKILL.md` with its own reference closure. Use `--all-plugins` for every workflow plugin, `--mode user` for the client user directory, `--target <skills-root>` to override the destination, or `--list` to see supported clients. Running without arguments opens a client-selection prompt. Bare installs select all workflow plugins.
 
-For Codex's automatic routing hooks, add the repository as a Git marketplace, or build a local marketplace:
-
-```sh
-codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
-```
+For the full catalog including hooks, use the Codex plugin marketplace:
 
 ```sh
 node scripts/package-plugin.ts --output /path/to/fresh/exports
 codex plugin marketplace add /path/to/fresh/exports/azskills-marketplace
 ```
 
-The repository root is the plugin root. Its `.agents/plugins/marketplace.json` points to `./`, so a Git clone already contains `.codex-plugin/plugin.json`, `codex-plugin/hooks`, the canonical `SKILL.md`, and the `skills/` entries Codex discovers. The default build mirrors that layout under `dist/azskills-marketplace/plugins/azskills`; with a custom `--output` directory, import the generated marketplace instead.
+```sh
+codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
+```
 
-Install AzSkills from the marketplace in Codex and review/trust its `SessionStart`, `UserPromptSubmit`, `SubagentStart`, `PreToolUse`, and `PostToolUse` hooks when prompted. The package uses the supported `.codex-plugin/plugin.json` manifest with a direct `hooks` path because current Codex CLI hook discovery does not reliably read hooks from Agent Plugins root manifests. After trust, AzSkills routing and GPT with Taste behavior are supplied automatically. SessionStart restores routing context and loads the Taste Main recipe; UserPromptSubmit applies both routing reminders and routes matching code tasks to Az Clean Code; the Godot 3.x guard checks the canonical Codex `apply_patch` command (`Write`/`Edit` are matcher aliases, and synthetic `MultiEdit` events are still understood) against the real project and `project.godot` when it can reconstruct the proposed content, denies checker errors, falls back to high-confidence lexical blocking for partial or ambiguous patches or an unavailable checker, denies shell commands that appear to write Godot files, reruns the checker after shell commands that show write evidence rather than after every read, and blocks further progress after write when static errors remain; SubagentStart and completed local-agent waits apply Taste steering. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The plugin bundles its AzSkills icon for the composer and plugin details. The regular installer above installs a skill folder without these hooks. See the [Codex upgrade and verification guide](integrations/guides/codex.md) to replace a cached installation and verify eight handlers across five events.
-
-For archive import, run `node scripts/package-skill.ts --output /path/to/exports` and import `azskills.zip`. The ZIP has the AzSkills root entry and the standalone `az-clean-code/SKILL.md`, plus supporting files. To export only Az Clean Code, run `node scripts/package-skill.ts --skill az-clean-code --output /path/to/exports`. Install the complete archive, not the manifest alone. Use a fresh export directory; pre-existing older archives are not removed automatically.
+The build writes `azskills-marketplace/.agents/plugins/marketplace.json` plus one self-contained directory per plugin under `plugins/<id>/`, and deterministic archives under `zips/<id>.zip`. Install the plugins you need from the marketplace; each plugin carries a narrow description and is matched on its own. Only `taste` (steering) and `godot-3-dev` (Godot 3.x write guard) ship hooks among workflow plugins, plus the two hook plugins; review and trust those hooks when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The hook plugins use Stop hooks: `no-think-tags` blocks a final reply that opens with a raw reasoning-tag block, and `empty-reply` asks for a real answer when a finished turn has no visible text. See the [Codex upgrade and verification guide](integrations/guides/codex.md).
 
 See [client integration guides](integrations/README.md) for Codex plugin setup, skill folders, manual import, and MCP configuration. Client discovery depends on the client scan scope and may require a restart. The installer verifies local contents separately from actual client discovery and invocation.
 
@@ -44,15 +47,15 @@ See [client integration guides](integrations/README.md) for Codex plugin setup, 
 
 Ask naturally, for example:
 
-- "Use AzSkills to review the architecture of this application."
-- "Use AzSkills to refine the interface and check its states."
-- "Use AzSkills to turn these findings into an HTML report."
+- "Review the architecture of this application." matches the `architecture` plugin.
+- "Refine the interface and check its states." matches the `ui-design` plugin.
+- "Turn these findings into an HTML report." matches the `frontend-slides` plugin.
 
-You may specify `architecture/frontend` or a legacy name such as `frontend-architecture`. Both route within AzSkills. Read [routing](references/routing.md) for outcomes and modes; the [entry contract](SKILL.md) defines the loading sequence.
+You may name a mode such as `architecture/frontend` or a legacy name such as `frontend-architecture`; both resolve to the plugin that owns the module. Read [routing](references/routing.md) for outcomes and modes; the [catalog index](SKILL.md) lists every plugin.
 
 ## Upgrade and rollback
 
-The installer migrates entries recorded in an older `.azskills-manifest.json` to one `azskills` directory. It preserves unrelated paths and refuses an unmanaged conflicting `azskills` directory. An old manual installation without a manifest needs manual reconciliation after reviewing its files. Legacy `--skills <module>` and `--all-skills` options map to the complete bundle.
+The installer records installed plugin ids in a schema 4 `.azskills-manifest.json` and migrates older manifests (schemas 1 to 3, including the former single `azskills` directory). It preserves unrelated paths and refuses an unmanaged conflicting plugin directory. An old manual installation without a manifest needs manual reconciliation after reviewing its files. `--skills` remains a legacy alias for `--plugin`.
 
 Backups live outside the scan root, in a sibling `.<skills-root-name>-azskills-backups` directory. Existing in-root AzSkills backups move there during migration so their old manifests cannot be rediscovered. Rollback restores the previous entries, previous manifest bytes, and previous in-root backup location, so it intentionally restores the previous discovery behavior too.
 
@@ -62,11 +65,11 @@ node scripts/install-skills.ts --rollback --target /path/to/skills --yes
 node scripts/install-skills.ts --uninstall --target /path/to/skills --yes
 ```
 
-Uninstall backs up and removes managed entries. Rollback restores the immediately preceding operation; an unchanged install preserves the existing rollback point. Backups are retained for recovery and are not automatically purged. A missing or modified rollback snapshot requires manual recovery; legacy rollback records use the previous installer.
+Uninstall backs up and removes managed plugin directories. Rollback restores the immediately preceding operation; an unchanged install preserves the existing rollback point. Backups are retained for recovery and are not automatically purged. A missing or modified rollback snapshot requires manual recovery.
 
-## Internal modules
+## Workflow contracts
 
-These contracts are ordinary Markdown files. They retain their domain workflows and output gates.
+These contracts are ordinary Markdown files. Each one is the workflow that its plugin ships, and it retains the domain workflow and output gates.
 
 For a visual starting point, open the [preset catalog](style-presets/references/catalog.md)
 or the [interactive style and loader gallery](style-presets/assets/gallery.html).
@@ -125,31 +128,35 @@ turns scene JSON into editable SVG and checks the result.
 
 ## MCP
 
-Register `node scripts/azskills-mcp.ts` as a stdio server named `azskills`. It lists one tool and one public resource. Call `azskills` with `action: entry` to start, `route` for the routing table, `module` plus `id` (optionally `mode`) for one contract, or `file` plus a bundle-relative `path` for supporting content. Paths are matched against packaged files; arbitrary filesystem access is unavailable. Binary files return embedded resources. Supporting resource URIs use `azskills://skills/azskills/<encoded/path>`.
+Register `node scripts/azskills-mcp.ts` as a stdio server named `azskills`. Call `azskills` with `action: catalog` to list plugins, `entry` for this catalog index, `plugin` plus `id` for one plugin contract, `route` for the routing table, `module` plus `id` (optionally `mode`) for one contract, or `file` plus a path for supporting content. Paths are matched against packaged files; arbitrary filesystem access is unavailable. Resources are `azskills://catalog` and `azskills://plugins/<id>[/<path>]`.
 
 ## Contributing and verification
 
-See [module system](SKILL-SYSTEM.md), [design contract](DESIGN.md), [design intelligence](design-intelligence.md), [migration and version plan](docs/single-entry-migration.md), and [third-party notices](THIRD_PARTY_NOTICES.md). License: [MIT](LICENSE).
+See [module system](SKILL-SYSTEM.md), [design contract](DESIGN.md), [design intelligence](design-intelligence.md), [catalog migration](docs/plugin-catalog-migration.md), and [third-party notices](THIRD_PARTY_NOTICES.md). License: [MIT](LICENSE).
 
 After `npm ci`, `npm run check` runs the type check, validators, and tests. The individual commands are:
 
 ```sh
 node scripts/generate-routing.ts --check
 node scripts/validate-skills.ts
+node scripts/validate-catalog.ts
 node scripts/validate-integrations.ts
-node scripts/test-package-skill.ts
+node scripts/test-link-bundle.ts
+node scripts/test-package-plugin.ts
+node scripts/test-think-tags-hook.ts
+node scripts/test-empty-reply-hook.ts
 node scripts/test-install-skills.ts
 node scripts/test-azskills-mcp.ts
 node design-system/tui/preview.ts --check
 ```
 
-The terminal preview is an internal module catalog for contributors; it is not the client skill panel.
+The terminal preview is a contributor view of the contract catalog; it is not the client plugin panel.
 
-Report bugs or propose module improvements through the repository issue templates. Keep one public entry, version changed contracts, and verify portable links and migration behavior before submitting changes.
+Report bugs or propose plugin improvements through the repository issue templates. Keep each plugin self-contained, version changed contracts, and verify portable links and migration behavior before submitting changes.
 
 ## Support
 
-Support maintenance of the internal modules, references, and tooling.
+Support maintenance of the plugins, references, and tooling.
 
 [Support AzSkills](https://cyojkoy.github.io/Payment/)
 

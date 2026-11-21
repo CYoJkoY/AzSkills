@@ -4,7 +4,7 @@
 
 | Field | Value |
 | :--- | :--- |
-| Connection | Native skill folder |
+| Connection | Native skill folders |
 | Project target | skills |
 | User target | ~/.openclaw/skills |
 | Automation | managed-copy |
@@ -18,21 +18,25 @@ For an interactive setup, run the guided wizard from the AzSkills checkout:
 
     node scripts/install-skills.ts
 
-The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope. It installs one complete azskills entry and previews changes before confirmation.
+The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope.
 
-From the AzSkills checkout, install into a project skill directory:
+Install a subset of the catalog into a project skill directory:
 
-    node scripts/install-skills.ts --tool openclaw --mode project --project /path/to/project
+    node scripts/install-skills.ts --tool openclaw --mode project --project /path/to/project --plugin architecture,ui-design
+
+Install every workflow plugin instead:
+
+    node scripts/install-skills.ts --tool openclaw --mode project --project /path/to/project --all-plugins
 
 Install for the current user instead:
 
-    node scripts/install-skills.ts --tool openclaw --mode user
+    node scripts/install-skills.ts --tool openclaw --mode user --plugin architecture
 
-Use --target to place the skill folder somewhere other than the default target. Use --dry-run to inspect without writing, --all-skills as a legacy shorthand for the complete AzSkills bundle, --rollback to restore the previous run, and --uninstall to remove only manifest-managed skill directories. Non-interactive writes require --yes after reviewing the preview.
+Each selected plugin becomes its own `<skills-root>/<id>/SKILL.md` with its own reference closure, so clients discover them independently. Use --target to choose another skills root, --dry-run to inspect without writing, --rollback to restore the previous run, and --uninstall to remove only manifest-managed plugin directories. Non-interactive writes require --yes after reviewing the preview. The hook plugins no-think-tags and empty-reply are skipped here; install them through the Codex plugin marketplace.
 
 ## Use
 
-Start a session and ask AzSkills for the desired outcome, for example: Use AzSkills to review this architecture. Import the complete azskills.zip or install the azskills folder. Internal modules and legacy names route within this single entry.
+Start a session and make a request covered by an installed plugin, for example: review this architecture. Each installed plugin is its own entry; module aliases such as frontend-architecture remain prompt and issue vocabulary for the owning plugin.
 
 ## Verify
 

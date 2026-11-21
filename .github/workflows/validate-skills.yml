@@ -16,6 +16,9 @@ on:
       - "package.json"
       - "package-lock.json"
       - "tsconfig.json"
+      - "catalog/**"
+      - "plugins/**"
+      - "docs/**"
       - "codex-plugin/**"
       - "godot-3-dev/**"
       - "style-presets/**"
@@ -61,6 +64,9 @@ jobs:
           node scripts/validate-skills.ts
           node scripts/generate-routing.ts --check
 
+      - name: Validate plugin catalog
+        run: node scripts/validate-catalog.ts
+
       - name: Test editable resume copy behavior
         run: node resume-evidence-workflow/tests/copy-description.test.ts
 
@@ -76,19 +82,30 @@ jobs:
       - name: Test installer lifecycle
         run: node scripts/test-install-skills.ts
 
-      - name: Test portable Skill bundles
-        run: node scripts/test-package-skill.ts
-
-      - name: Export all portable Skill bundles
+      - name: Test self-contained plugin bundles
         run: |
-          node scripts/package-skill.ts --output "$RUNNER_TEMP/azskills-export"
-          for archive in "$RUNNER_TEMP"/azskills-export/*.zip; do
+          node scripts/test-link-bundle.ts
+          node scripts/test-package-plugin.ts
+
+      - name: Test standalone hook plugins
+        run: |
+          node scripts/test-think-tags-hook.ts
+          node scripts/test-empty-reply-hook.ts
+
+      - name: Export all plugin archives
+        run: |
+          node scripts/package-plugin.ts --output "$RUNNER_TEMP/azskills-export"
+          for archive in "$RUNNER_TEMP"/azskills-export/zips/*.zip; do
             unzip -tq "$archive"
           done
-          test "$(find "$RUNNER_TEMP/azskills-export" -maxdepth 1 -name '*.zip' | wc -l)" -eq 1
+          test "$(find "$RUNNER_TEMP/azskills-export/zips" -maxdepth 1 -name '*.zip' | wc -l)" -eq 20
+          test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/.agents/plugins/marketplace.json"
+          test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/ui-design/.codex-plugin/plugin.json"
+          test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/empty-reply/hooks/stop-hook.ts"
           mkdir -p "$RUNNER_TEMP/azskills-extracted"
-          unzip -q "$RUNNER_TEMP/azskills-export/azskills.zip" -d "$RUNNER_TEMP/azskills-extracted"
-          test -f "$RUNNER_TEMP/azskills-extracted/SKILL.md"
+          unzip -q "$RUNNER_TEMP/azskills-export/zips/ui-design.zip" -d "$RUNNER_TEMP/azskills-extracted"
+          test -f "$RUNNER_TEMP/azskills-extracted/skills/ui-design/SKILL.md"
+          test -f "$RUNNER_TEMP/azskills-extracted/references/modules/ui-design.md"
           test -f "$RUNNER_TEMP/azskills-extracted/ui-design/references/ux/overview.md"
 
       - name: Test MCP bundle resources

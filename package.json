@@ -1,17 +1,17 @@
 {
   "name": "azskills",
-  "version": "2.8.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
-  "description": "AzSkills workflows and GPT with Taste behavior for Codex.",
+  "description": "AzSkills: a catalog of independent Codex plugins for design, engineering, and answer hygiene workflows.",
   "license": "MIT",
   "engines": {
     "node": "^22.18.0 || >=23.6.0"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "validate": "node scripts/validate-skills.ts && node scripts/generate-routing.ts --check && node scripts/validate-integrations.ts && node scripts/check-design-contract.ts && node scripts/check-editorial.ts && node scripts/check-style-presets.ts && node scripts/check-scientific-figures.ts",
-    "test": "node resume-evidence-workflow/tests/copy-description.test.ts && node scripts/test-install-skills.ts && node scripts/test-package-skill.ts && node scripts/test-azskills-mcp.ts && node godot-3-dev/scripts/check-godot-3x.ts --self-test && node design-system/tui/preview.ts --check",
+    "validate": "node scripts/validate-skills.ts && node scripts/validate-catalog.ts && node scripts/generate-routing.ts --check && node scripts/validate-integrations.ts && node scripts/check-design-contract.ts && node scripts/check-editorial.ts && node scripts/check-style-presets.ts && node scripts/check-scientific-figures.ts",
+    "test": "node resume-evidence-workflow/tests/copy-description.test.ts && node scripts/test-link-bundle.ts && node scripts/test-package-plugin.ts && node scripts/test-think-tags-hook.ts && node scripts/test-empty-reply-hook.ts && node scripts/test-install-skills.ts && node scripts/test-azskills-mcp.ts && node godot-3-dev/scripts/check-godot-3x.ts --self-test && node design-system/tui/preview.ts --check",
     "check": "npm run typecheck && npm run validate && npm run test"
   },
   "devDependencies": {

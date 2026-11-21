@@ -1,101 +1,287 @@
-import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
-import { tmpdir } from 'node:os';
-import { writeSkillZip } from './package-skill.ts';
-import { errorCode, readJson } from './runtime.ts';
-import type { SkillCatalog } from './types.ts';
+/*
+ * Builds every catalog plugin as a self-contained Codex plugin directory.
+ *
+ * Module plugins are derived from references/modules/<id>.md plus the local
+ * reference closure, keeping repository-relative paths so no contract text is
+ * rewritten. Standalone plugins under plugins/<id>/ are copied as authored.
+ */
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+import { cp, mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+import { tmpdir } from "node:os";
+import { collectClosure, filesUnder, materialize, validateBundle } from "./link-bundle.ts";
+import { writeZip } from "./zip-bundle.ts";
+import { errorCode, errorMessage, isRecord, readJson } from "./runtime.ts";
+import type { PluginCatalog, PluginCatalogEntry, SkillCatalog, SkillModule } from "./types.ts";
 
-const excludedTopLevel = new Set(['.git', 'dist', 'node_modules']);
-const requiredPluginFiles = [
-  '.codex-plugin/plugin.json',
-  'SKILL.md',
-  'skills/azskills/SKILL.md',
-  'skills/az-clean-code/SKILL.md',
-  'az-clean-code/SKILL.md',
-  'codex-plugin/hooks/hooks.json',
-  'codex-plugin/hooks/session-start.ts',
-  'codex-plugin/hooks/godot3-guard.ts',
-  'godot-3-dev/scripts/check-godot-3x.ts',
-  'godot-3-dev/scripts/godot3-lexical.ts',
-  'godot-3-dev/references/api-3.6.json',
-  'codex-plugin/taste/hooks/steer.ts',
-];
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-interface PluginPackage {
-  marketplace: string;
-  plugin: string;
+export interface PluginBuild {
+  readonly id: string;
+  readonly kind: "module" | "standalone";
+  readonly directory: string;
+  readonly skillEntry: string;
+  readonly hooks: string | null;
 }
 
-interface PluginManifest {
-  name: string;
-  version: string;
-  hooks: string;
-  interface: Record<string, string>;
+interface ModuleContract {
+  readonly name: string;
+  readonly description: string;
 }
 
-export async function packageCodexPlugin(repositoryRoot: string, outputDirectory: string): Promise<PluginPackage> {
-  const base = path.resolve(repositoryRoot);
-  const output = path.resolve(outputDirectory);
-  const plugin = path.join(output, 'plugins', 'azskills');
+const asciiOnly = (text: string): boolean => !/[^\x00-\x7F]/.test(text);
 
-  await mkdir(plugin, { recursive: true });
-  for (const entry of await readdir(base, { withFileTypes: true })) {
-    if (excludedTopLevel.has(entry.name) || entry.name.startsWith('.tmp_')) continue;
-    await cp(path.join(base, entry.name), path.join(plugin, entry.name), { recursive: true, errorOnExist: true, force: false });
+function parseFrontmatter(text: string): Record<string, string> {
+  const normalized = text.replace(/^\uFEFF/, "").replace(/\r\n/g, "\n");
+  if (!normalized.startsWith("---\n")) return {};
+  const end = normalized.indexOf("\n---", 4);
+  if (end === -1) return {};
+  const data: Record<string, string> = {};
+  for (const line of normalized.slice(4, end).split("\n")) {
+    const match = /^([A-Za-z][A-Za-z0-9_-]*):\s*(.*)$/.exec(line);
+    if (!match) continue;
+    const key = match[1];
+    if (key === undefined) continue;
+    data[key] = (match[2] ?? "").trim().replace(/^["']|["']$/g, "");
   }
-  for (const required of requiredPluginFiles) {
-    const present = await stat(path.join(plugin, required)).then(() => true).catch(() => false);
-    if (!present) throw new Error('Plugin package is missing ' + required);
-  }
+  return data;
+}
 
-  const manifest = await readJson<PluginManifest>(path.join(plugin, '.codex-plugin/plugin.json'));
-  const registry = await readJson<SkillCatalog>(path.join(plugin, 'skills.json'));
-  if (manifest.name !== 'azskills' || manifest.version !== registry.version) throw new Error('Plugin and AzSkills versions must match');
+async function readContract(repoRoot: string, module: SkillModule): Promise<ModuleContract> {
+  const text = await readFile(path.join(repoRoot, module.path), "utf8");
+  const data = parseFrontmatter(text);
+  const name = data.name ?? module.id;
+  const description = data.description ?? module.role;
+  if (name !== module.id) throw new Error(module.id + ": module contract name must match the module id");
+  if (description.length > 320) throw new Error(module.id + ": module description exceeds 320 characters");
+  if (!asciiOnly(description)) throw new Error(module.id + ": module description must be ASCII");
+  return { name, description };
+}
 
-  const marketplace = {
-    name: 'azskills-local',
-    interface: { displayName: 'AzSkills' },
-    plugins: [{
-      name: 'azskills',
-      source: { source: 'local', path: './plugins/azskills' },
-      policy: { installation: 'AVAILABLE', authentication: 'ON_INSTALL' },
-      category: 'Productivity',
-    }],
+function displayName(id: string): string {
+  return id
+    .split("-")
+    .map((part) => (part === "3d" ? "3D" : part.charAt(0).toUpperCase() + part.slice(1)))
+    .join(" ");
+}
+
+function pointer(contractPath: string, title: string, description: string): string {
+  return [
+    "---",
+    "name: " + title,
+    "description: " + description,
+    "---",
+    "",
+    "# " + displayName(title),
+    "",
+    "This plugin ships one AzSkills workflow. Read the canonical contract before acting:",
+    "",
+    "- [Contract](" + contractPath + ")",
+    "",
+    "Load only the supporting references the task needs. The plugin is self-contained;",
+    "do not look for a shared AzSkills entry or for other plugins in the catalog.",
+    "",
+  ].join("\n");
+}
+
+export function pluginManifest(
+  entry: PluginCatalogEntry,
+  version: string,
+  description: string,
+  modes: readonly string[],
+): Record<string, unknown> {
+  const hooks = entry.hooks === null ? {} : { hooks: entry.hooks.startsWith("./") ? entry.hooks : "./" + entry.hooks };
+  return {
+    name: entry.id,
+    version,
+    description,
+    license: "MIT",
+    keywords: [...entry.id.split("-"), "azskills", "workflow"],
+    skills: "./skills/",
+    ...hooks,
+    interface: {
+      displayName: displayName(entry.id),
+      shortDescription: description,
+      longDescription: description + (modes.length > 0 ? " Modes: " + modes.join(", ") + "." : ""),
+      developerName: "AzSkills",
+      category: entry.category,
+      capabilities: entry.capabilities,
+      brandColor: "#A6382A",
+      composerIcon: "./codex-plugin/assets/icon.svg",
+      logo: "./codex-plugin/assets/icon.svg",
+    },
   };
-  const marketplaceManifest = path.join(output, '.agents', 'plugins', 'marketplace.json');
-  await mkdir(path.dirname(marketplaceManifest), { recursive: true });
-  await writeFile(marketplaceManifest, JSON.stringify(marketplace, null, 2) + '\n', 'utf8');
-  return { marketplace: output, plugin };
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const args = process.argv.slice(2);
-  const index = args.indexOf('--output');
-  const outputArgument = index >= 0 ? args[index + 1] : undefined;
-  if (index >= 0 && (!outputArgument || outputArgument.startsWith('--'))) throw new Error('--output requires a directory');
-  const outputRoot = path.resolve(outputArgument ?? path.join(root, 'dist'));
-  await mkdir(outputRoot, { recursive: true });
-  const destination = path.join(outputRoot, 'azskills-marketplace');
-  const archivePath = path.join(outputRoot, 'azskills-plugin.zip');
-  for (const target of [destination, archivePath]) {
-    try {
-      await stat(target);
-      throw new Error('Output already exists; choose a fresh directory: ' + target);
-    } catch (error) {
-      if (errorCode(error) !== 'ENOENT') throw error;
-    }
+async function buildModule(
+  repoRoot: string,
+  entry: PluginCatalogEntry,
+  registry: SkillCatalog,
+  destination: string,
+  view: "plugin" | "skill",
+): Promise<PluginBuild> {
+  const module = registry.modules.find((candidate) => candidate.id === entry.module);
+  if (module === undefined) throw new Error(entry.id + ": no matching canonical module");
+  const contract = await readContract(repoRoot, module);
+  const contractPath = view === "plugin" ? "../../" + module.path : module.path;
+  const bundle = await collectClosure(repoRoot, [module.path, ...entry.extra]);
+  await materialize(bundle, destination);
+  const skillEntry = view === "plugin"
+    ? path.join(destination, "skills", entry.id, "SKILL.md")
+    : path.join(destination, "SKILL.md");
+  await mkdir(path.dirname(skillEntry), { recursive: true });
+  await writeFile(skillEntry, pointer(contractPath, entry.id, contract.description), "utf8");
+  if (view === "plugin") {
+    const manifest = pluginManifest(entry, registry.version, contract.description, module.modes);
+    await mkdir(path.join(destination, ".codex-plugin"), { recursive: true });
+    await writeFile(path.join(destination, ".codex-plugin/plugin.json"), JSON.stringify(manifest, null, 2) + "\n", "utf8");
   }
-  const staging = await mkdtemp(path.join(tmpdir(), 'azskills-plugin-'));
+  await validateBundle(destination);
+  return {
+    id: entry.id,
+    kind: "module",
+    directory: destination,
+    skillEntry,
+    hooks: entry.hooks,
+  };
+}
+
+async function buildStandalone(
+  repoRoot: string,
+  entry: PluginCatalogEntry,
+  registry: SkillCatalog,
+  destination: string,
+  view: "plugin" | "skill",
+): Promise<PluginBuild> {
+  if (view === "skill") throw new Error(entry.id + ": standalone hook plugins install as Codex plugins, not skill entries");
+  if (entry.source === undefined) throw new Error(entry.id + ": standalone plugin requires a source directory");
+  const source = path.join(repoRoot, entry.source);
+  for (const file of await filesUnder(source)) {
+    const target = path.join(destination, path.relative(source, file));
+    await mkdir(path.dirname(target), { recursive: true });
+    await cp(file, target, { force: true });
+  }
+  const manifestPath = path.join(destination, ".codex-plugin/plugin.json");
+  const raw: unknown = JSON.parse(await readFile(manifestPath, "utf8"));
+  if (!isRecord(raw) || raw.name !== entry.id) throw new Error(entry.id + ": plugin manifest name must match the catalog id");
+  await writeFile(manifestPath, JSON.stringify({ ...raw, version: registry.version }, null, 2) + "\n", "utf8");
+  await validateBundle(destination);
+  return {
+    id: entry.id,
+    kind: "standalone",
+    directory: destination,
+    skillEntry: path.join(destination, "skills", entry.id, "SKILL.md"),
+    hooks: entry.hooks,
+  };
+}
+
+export async function buildPlugin(
+  repoRoot: string,
+  id: string,
+  destination: string,
+  view: "plugin" | "skill" = "plugin",
+): Promise<PluginBuild> {
+  const catalog = await readJson<PluginCatalog>(path.join(repoRoot, "catalog/plugins.json"));
+  const registry = await readJson<SkillCatalog>(path.join(repoRoot, "skills.json"));
+  const entry = catalog.plugins.find((plugin) => plugin.id === id);
+  if (entry === undefined) throw new Error("Unknown plugin: " + id);
+  await mkdir(destination, { recursive: true });
+  return entry.kind === "module"
+    ? buildModule(repoRoot, entry, registry, destination, view)
+    : buildStandalone(repoRoot, entry, registry, destination, view);
+}
+
+export interface MarketplaceBuild {
+  readonly marketplace: string;
+  readonly plugins: PluginBuild[];
+}
+
+export async function packageMarketplace(repoRoot: string, outputDirectory: string): Promise<MarketplaceBuild> {
+  const base = path.resolve(repoRoot);
+  const output = path.resolve(outputDirectory);
+  const catalog = await readJson<PluginCatalog>(path.join(base, "catalog/plugins.json"));
+  const pluginsRoot = path.join(output, "plugins");
+  await mkdir(pluginsRoot, { recursive: true });
+  const plugins: PluginBuild[] = [];
+  for (const entry of catalog.plugins) {
+    plugins.push(await buildPlugin(base, entry.id, path.join(pluginsRoot, entry.id)));
+  }
+  const marketplace = {
+    name: catalog.marketplace.name,
+    interface: { displayName: catalog.marketplace.displayName, shortDescription: catalog.marketplace.description },
+    plugins: catalog.plugins.map((entry) => ({
+      name: entry.id,
+      source: { source: "local", path: "./plugins/" + entry.id },
+      policy: { installation: "AVAILABLE", authentication: "ON_INSTALL" },
+      category: entry.category,
+    })),
+  };
+  const manifestPath = path.join(output, ".agents/plugins/marketplace.json");
+  await mkdir(path.dirname(manifestPath), { recursive: true });
+  await writeFile(manifestPath, JSON.stringify(marketplace, null, 2) + "\n", "utf8");
+  return { marketplace: output, plugins };
+}
+
+export async function packagePluginArchive(
+  repoRoot: string,
+  id: string,
+  stagingDirectory: string,
+  archive: string,
+): Promise<{ archive: string; files: number }> {
+  const built = await buildPlugin(repoRoot, id, path.join(stagingDirectory, id), "plugin");
+  return writeZip(built.directory, archive);
+}
+
+const isMain = process.argv[1] !== undefined && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  const args = process.argv.slice(2);
+  const option = (key: string): string => {
+    const index = args.indexOf(key);
+    if (index < 0) return "";
+    const result = args[index + 1];
+    if (!result || result.startsWith("--")) throw new Error(key + " requires a value");
+    return result;
+  };
+  if (args.includes("--help") || args.includes("-h")) {
+    console.log([
+      "Usage: node scripts/package-plugin.ts [--output <directory>]",
+      "",
+      "Builds one self-contained Codex plugin per catalog entry:",
+      "  <output>/azskills-marketplace/.agents/plugins/marketplace.json",
+      "  <output>/azskills-marketplace/plugins/<id>/",
+      "  <output>/zips/<id>.zip (deterministic archives)",
+    ].join("\n"));
+    process.exit(0);
+  }
   try {
-    const { marketplace, plugin } = await packageCodexPlugin(root, path.join(staging, 'marketplace'));
-    await cp(marketplace, destination, { recursive: true });
-    const result = await writeSkillZip(plugin, archivePath);
-    console.log('Packaged AzSkills Codex plugin and local marketplace: ' + destination);
-    console.log('Plugin archive: ' + result.archive + ' (' + result.files + ' files)');
-  } finally {
-    await rm(staging, { recursive: true, force: true });
+    const outputRoot = path.resolve(option("--output") || path.join(repositoryRoot, "dist"));
+    const destination = path.join(outputRoot, "azskills-marketplace");
+    const zipRoot = path.join(outputRoot, "zips");
+    for (const target of [destination, zipRoot]) {
+      const present = await stat(target).then(() => true).catch((error: unknown) => {
+        if (errorCode(error) === "ENOENT") return false;
+        throw error;
+      });
+      if (present) throw new Error("Output already exists; choose a fresh directory: " + target);
+    }
+    const staging = await mkdtemp(path.join(tmpdir(), "azskills-plugins-"));
+    try {
+      const built = await packageMarketplace(repositoryRoot, path.join(staging, "marketplace"));
+      await cp(built.marketplace, destination, { recursive: true });
+      await mkdir(zipRoot, { recursive: true });
+      let files = 0;
+      for (const plugin of built.plugins) {
+        const result = await writeZip(plugin.directory, path.join(zipRoot, plugin.id + ".zip"));
+        files += result.files;
+      }
+      console.log("Packaged " + built.plugins.length + " independent plugins into " + destination);
+      console.log("Plugin archives: " + zipRoot + " (" + files + " files across " + built.plugins.length + " archives)");
+    } finally {
+      await rm(staging, { recursive: true, force: true });
+    }
+  } catch (error) {
+    console.error("AzSkills packaging failed: " + errorMessage(error));
+    process.exitCode = 1;
   }
 }

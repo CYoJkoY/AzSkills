@@ -1,0 +1,296 @@
+{
+  "schemaVersion": 1,
+  "marketplace": {
+    "name": "azskills-local",
+    "displayName": "AzSkills",
+    "description": "Independent Codex plugins maintained by the AzSkills catalog."
+  },
+  "plugins": [
+    {
+      "id": "architecture",
+      "kind": "module",
+      "module": "architecture",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "design-system",
+      "kind": "module",
+      "module": "design-system",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "ui-design",
+      "kind": "module",
+      "module": "ui-design",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "ui-motion",
+      "kind": "module",
+      "module": "ui-motion",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "logo-generator",
+      "kind": "module",
+      "module": "logo-generator",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "photo-abstract-editorial",
+      "kind": "module",
+      "module": "photo-abstract-editorial",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "frontend-slides",
+      "kind": "module",
+      "module": "frontend-slides",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "remotion-production",
+      "kind": "module",
+      "module": "remotion-production",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "readme-craft",
+      "kind": "module",
+      "module": "readme-craft",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "steam-mod-page",
+      "kind": "module",
+      "module": "steam-mod-page",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "localization",
+      "kind": "module",
+      "module": "localization",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "resume-evidence-workflow",
+      "kind": "module",
+      "module": "resume-evidence-workflow",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "tool-integration",
+      "kind": "module",
+      "module": "tool-integration",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "taste",
+      "kind": "module",
+      "module": "taste",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/hooks/taste-hooks.json",
+        "codex-plugin/taste/hooks/local-tools.ts",
+        "scripts/runtime.ts",
+        "scripts/types.ts",
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": "codex-plugin/hooks/taste-hooks.json"
+    },
+    {
+      "id": "az-clean-code",
+      "kind": "module",
+      "module": "az-clean-code",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "godot-3-dev",
+      "kind": "module",
+      "module": "godot-3-dev",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/hooks/godot-hooks.json",
+        "codex-plugin/hooks/godot3-guard.ts",
+        "godot-3-dev/scripts/godot3-lexical.ts",
+        "godot-3-dev/scripts/check-godot-3x.ts",
+        "scripts/runtime.ts",
+        "scripts/types.ts",
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": "codex-plugin/hooks/godot-hooks.json"
+    },
+    {
+      "id": "style-presets",
+      "kind": "module",
+      "module": "style-presets",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "scientific-figures",
+      "kind": "module",
+      "module": "scientific-figures",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "codex-plugin/assets/icon.svg"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "no-think-tags",
+      "kind": "standalone",
+      "source": "plugins/no-think-tags",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [],
+      "hooks": "hooks/hooks.json"
+    },
+    {
+      "id": "empty-reply",
+      "kind": "standalone",
+      "source": "plugins/empty-reply",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [],
+      "hooks": "hooks/hooks.json"
+    }
+  ]
+}

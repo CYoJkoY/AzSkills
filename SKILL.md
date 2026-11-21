@@ -1,45 +1,76 @@
 ---
 name: azskills
-description: Build and review architecture, clean code, Godot 3.x, interfaces, design systems, style presets, loaders, scientific and medical figures, editable SVG, motion, logos, editorial images, slides, video, publishing, resumes, AI setup, and GPT with Taste behavior. Routes one owning module with references on demand.
-version: 2.8.0
+description: AzSkills is a catalog of independent Codex plugins for architecture, design systems, interfaces, motion, logos, editorial images, slides, video, publishing, resumes, AI client setup, code discipline, Godot 3.x, style presets, scientific figures, and answer hygiene. Install the plugins a task needs; each one routes on its own.
+version: 3.0.0
 ---
 
 # AzSkills
 
-The Codex plugin automatically supplies GPT with Taste Main behavior at session start and role-specific steering through hooks.
+AzSkills is a catalog of independent Codex plugins. Every capability below ships
+as its own plugin with its own `.codex-plugin/plugin.json`, skill entry, reference
+closure, and narrow trigger description. Nothing is loaded through a shared
+dispatcher.
 
-AzSkills is one skill with specialized internal modules. Start from the user's
-requested outcome. Module names and old aliases select workflows inside this
-entry; they are not separate skills to install.
+The catalog exists because one broad entry only fires when a prompt names it or
+matches its single description. Independent plugins are matched directly, so a
+capability is no longer invisible to automatic routing.
 
-When loaded by the AzSkills Codex plugin's session hook, proactively route
-matching requests through this entry without waiting for the user to invoke
-AzSkills by name. Use this workflow only for requests within the capabilities
-listed above; unrelated tasks remain outside its scope.
+## Catalog
 
-## Route the task
+`catalog/plugins.json` is the distribution registry; `skills.json` remains the
+canonical module and alias source. A module plugin carries the workflow of the
+linked contract; the contract is not an alternative entry point.
 
-1. Read [routing](references/routing.md) and [shared rules](references/shared-rules.md).
-2. Select the single module that owns the requested artifact, then its mode.
-   An explicitly requested module or legacy alias takes priority over inference.
-3. Read that module's contract. Load only the references needed by the mode.
-   Supporting paths in a module are relative to that module file unless marked
-   as repository-root paths. Never preload the complete module library.
-4. If a second capability is necessary, finish or define the first owner's
-   boundary, then load the next module. Keep one owner per decision.
-5. Follow its workflow, quality gates, and output contract. Report actual
-   verification and unresolved items with the requested artifact.
+| Plugin | Modes | Outcome |
+| :--- | :--- | :--- |
+| [`architecture`](references/modules/architecture.md) | runtime, frontend, migration, review | Runtime, frontend stack, persistence, and process boundaries. |
+| [`design-system`](references/modules/design-system.md) | ingest, author, migrate, audit | DESIGN.md ingestion, normalization, provenance, and verification. |
+| [`ui-design`](references/modules/ui-design.md) | build, refine, review, system | Interface hierarchy, components, states, responsive behavior, and visual QA. |
+| [`ui-motion`](references/modules/ui-motion.md) | build, review, audit, pattern, svg | Motion construction, review, audit, patterns, and SVG animation. |
+| [`logo-generator`](references/modules/logo-generator.md) | mark, character, system | Logos, product marks, character marks, and identity systems. |
+| [`photo-abstract-editorial`](references/modules/photo-abstract-editorial.md) | treatment, audit | Photograph-preserving abstract editorial diptychs. |
+| [`frontend-slides`](references/modules/frontend-slides.md) | new, convert, enhance, report | Responsive HTML reports, fixed-stage presentations, and rendered QA. |
+| [`remotion-production`](references/modules/remotion-production.md) | video, data, 3d, ui-showcase, motion, av | Deterministic programmatic video and render delivery. |
+| [`readme-craft`](references/modules/readme-craft.md) | build, rewrite, audit | GitHub README architecture, visuals, links, and QA. |
+| [`steam-mod-page`](references/modules/steam-mod-page.md) | player, developer, audit | Steam Workshop BBCode pages and bilingual delivery. |
+| [`localization`](references/modules/localization.md) | translate, audit | Game CSV localization with locale completeness and markup safety. |
+| [`resume-evidence-workflow`](references/modules/resume-evidence-workflow.md) | evidence, tailor, review | Career evidence, requirement alignment, and editable resume delivery. |
+| [`tool-integration`](references/modules/tool-integration.md) | install, configure, troubleshoot, remove | Connect AzSkills to AI clients with verified installation and setup workflows. |
+| [`taste`](references/modules/taste.md) | main, subagent, independent | GPT with Taste judgment, collaboration, and execution behavior. |
+| [`az-clean-code`](references/modules/az-clean-code.md) | write, review, refactor | Explicit, flat, reusable code with business data externalized before implementation. |
+| [`godot-3-dev`](references/modules/godot-3-dev.md) | script, review, port | Godot 3.x GDScript, virtual-call safety, 3.6 API surface, and down-porting. |
+| [`style-presets`](references/modules/style-presets.md) | catalog, apply, loaders, audit | Named visual presets, keyword triggers, preset token packs, and loading indicators. |
+| [`scientific-figures`](references/modules/scientific-figures.md) | redraw, author, verify | Medical and scientific schematics, faithful redraws, editable SVG, and deterministic figure verification. |
 
-When the outcome is ambiguous, inspect available project context first and ask
-only for information that changes routing or delivery. User and repository
-instructions take precedence. Installing AzSkills does not grant permission to
-publish, deploy, merge, send messages, or change client settings.
+Two plugins enforce answer hygiene with Stop hooks and ship no workflow contract:
+
+| Plugin | Outcome |
+| :--- | :--- |
+| [`no-think-tags`](plugins/no-think-tags/skills/no-think-tags/SKILL.md) | Blocks a final reply that opens with a raw reasoning-tag block. |
+| [`empty-reply`](plugins/empty-reply/skills/empty-reply/SKILL.md) | Requests a real answer when a finished turn has no visible text. |
+
+## Install
+
+- Marketplace: `node scripts/package-plugin.ts --output <dir>`, then
+  `codex plugin marketplace add <dir>/azskills-marketplace`.
+- Skills roots: `node scripts/install-skills.ts --tool codex --plugin <id,...>`
+  installs module plugins only. `--all-plugins` installs all of them.
+- MCP catalog: `node scripts/azskills-mcp.ts` exposes `azskills://catalog` and
+  per-plugin resources.
+
+Installing a plugin never grants permission to publish, deploy, merge, send
+messages, or change client settings. See the [README](README.md) and
+[client guides](integrations/README.md).
 
 ## Examples
 
-- "Use AzSkills to review this app's architecture" selects architecture/review.
-- "Use AzSkills to refine this interface" selects ui-design/refine.
-- "Use frontend-architecture" resolves to architecture/frontend inside AzSkills.
-- "Use AzSkills to install it in Codex" selects tool-integration/install.
+- "Review this app's architecture" matches the `architecture` plugin.
+- "Refine this interface" matches the `ui-design` plugin.
+- "Use frontend-architecture" is a legacy alias for `architecture`/frontend.
+- "Set this up in Codex" matches the `tool-integration` plugin.
 
-For installation and migration, see [the README](README.md).
+## References
+
+- [Routing table](references/routing.md)
+- [Shared rules](references/shared-rules.md)
+- [Skill system](SKILL-SYSTEM.md)

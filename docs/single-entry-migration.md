@@ -1,5 +1,8 @@
 # Single entry migration (2.0.0)
 
+> Historical: superseded by [plugin catalog migration](plugin-catalog-migration.md)
+> in 3.0.0. The single entry and its routing hook no longer exist.
+
 Issue: #55. Baseline: main at 2dd4fbf.
 
 Baseline checks passed: validate-skills, validate-integrations, test-package-skill, test-install-skills, and test-azskills-mcp (all under scripts/, using node).

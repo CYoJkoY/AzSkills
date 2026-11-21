@@ -25,6 +25,25 @@ export interface SkillCatalog {
   modules: SkillModule[];
 }
 
+export type PluginKind = "module" | "standalone";
+
+export interface PluginCatalogEntry {
+  id: string;
+  kind: PluginKind;
+  module?: string;
+  source?: string;
+  category: string;
+  capabilities: string[];
+  extra: string[];
+  hooks: string | null;
+}
+
+export interface PluginCatalog {
+  schemaVersion: number;
+  marketplace: { name: string; displayName: string; description: string };
+  plugins: PluginCatalogEntry[];
+}
+
 export type IntegrationMechanism =
   | "native-skills"
   | "shared-skills"
@@ -55,10 +74,14 @@ export interface IntegrationRegistry {
 }
 
 export interface SkillManifest {
-  schemaVersion: 1 | 2 | 3;
+  schemaVersion: 1 | 2 | 3 | 4;
   version?: string;
+  /** schemaVersion 1: legacy owned directory names. */
   paths?: string[];
+  /** schemaVersion 2 and 3: legacy owned directory names. */
   skills?: string[];
+  /** schemaVersion 4: installed plugin ids. */
+  plugins?: string[];
   lastRun?: RollbackState | null;
 }
 

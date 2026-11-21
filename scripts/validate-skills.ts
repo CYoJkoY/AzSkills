@@ -296,31 +296,40 @@ async function main(): Promise<void> {
   for (const [entryPath, entry] of allPathEntries) {
     if (!files.some((file) => relative(file) === entryPath)) fail(entry.id + ": registered file is missing: " + entryPath);
   }
-  const allowedSkillPaths = new Set([
-    "SKILL.md",
-    "az-clean-code/SKILL.md",
-    "skills/azskills/SKILL.md",
-    "skills/az-clean-code/SKILL.md",
-  ]);
+  interface PluginShape { id: string; kind: string; module?: string }
+  let pluginRegistry: { plugins: PluginShape[] } | null = null;
+  try {
+    const parsedPlugins: unknown = JSON.parse(await readFile(path.join(root, "catalog/plugins.json"), "utf8"));
+    if (isRecord(parsedPlugins) && Array.isArray(parsedPlugins.plugins)
+      && parsedPlugins.plugins.every((entry): entry is PluginShape => isRecord(entry) && typeof entry.id === "string" && typeof entry.kind === "string")) {
+      pluginRegistry = { plugins: parsedPlugins.plugins };
+    } else {
+      fail("catalog/plugins.json: invalid plugin catalog");
+    }
+  } catch {
+    fail("catalog/plugins.json: missing");
+  }
+
+  const allowedSkillPaths = new Set(["SKILL.md", "az-clean-code/SKILL.md"]);
+  if (pluginRegistry !== null) {
+    for (const plugin of pluginRegistry.plugins) {
+      if (plugin.kind === "standalone") allowedSkillPaths.add("plugins/" + plugin.id + "/skills/" + plugin.id + "/SKILL.md");
+    }
+  }
   for (const found of foundPaths) {
     if (!allowedSkillPaths.has(found)) fail(found + ": unregistered SKILL.md");
   }
   if (!foundPaths.has("SKILL.md")) fail("Root SKILL.md is required");
-  const pluginSkillEntries = [
-    { path: "skills/azskills/SKILL.md", name: "azskills", canonical: "../../SKILL.md" },
-    { path: "skills/az-clean-code/SKILL.md", name: "az-clean-code", canonical: "../../az-clean-code/SKILL.md" },
-  ];
-  for (const entry of pluginSkillEntries) {
-    if (!foundPaths.has(entry.path)) {
-      fail(entry.path + ": plugin skill entry is required");
-      continue;
+  if (pluginRegistry !== null) {
+    const modulePlugins = new Set(pluginRegistry.plugins.filter((plugin) => plugin.kind === "module" && typeof plugin.module === "string").map((plugin) => plugin.module));
+    for (const module of catalog.modules) {
+      if (!modulePlugins.has(module.id)) fail("catalog/plugins.json: missing module plugin for " + module.id);
     }
-    const text = await readFile(path.join(root, entry.path), "utf8");
-    const meta = parseFrontmatter(text, entry.path).data;
-    if (meta.name !== entry.name) fail(entry.path + ": name must be " + entry.name);
-    if (!meta.description) fail(entry.path + ": description is required");
-    if (!asciiOnly(text)) fail(entry.path + ": content must be ASCII");
-    if (!text.includes(entry.canonical)) fail(entry.path + ": must link the canonical contract at " + entry.canonical);
+    for (const plugin of pluginRegistry.plugins) {
+      if (plugin.kind === "standalone" && !foundPaths.has("plugins/" + plugin.id + "/skills/" + plugin.id + "/SKILL.md")) {
+        fail("plugins/" + plugin.id + "/skills/" + plugin.id + "/SKILL.md: standalone skill entry is required");
+      }
+    }
   }
   if (foundPaths.has("az-clean-code/SKILL.md")) {
     const cleanCodePath = path.join(root, "az-clean-code/SKILL.md");
@@ -595,7 +604,7 @@ function finish(): void {
   console.log(
     "Skill validation passed: " +
       catalog.modules.length +
-      " internal modules, " +
+      " module plugins, " +
       catalog.aliases.length +
       " aliases, " +
       Object.keys(catalog.families).length +

@@ -7,6 +7,7 @@ on:
     paths:
       - "**/SKILL.md"
       - "skills.json"
+      - "catalog/plugins.json"
   workflow_dispatch:
 
 permissions:
@@ -28,9 +29,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          count="$(node -e "const r=require('./skills.json'); process.stdout.write(String(r.entry ? 1 : 0))")"
+          count="$(node -e "const r=require('./catalog/plugins.json'); process.stdout.write(String(r.plugins.length))")"
           echo "count=${count}" >> "$GITHUB_OUTPUT"
-          echo "Detected ${count} public skill entry."
+          echo "Detected ${count} catalog plugins."
 
       - name: Write badge endpoint
         shell: bash
@@ -40,7 +41,7 @@ jobs:
           cat > .github/badges/skills.json <<EOF
           {
             "schemaVersion": 1,
-            "label": "Skills",
+            "label": "Plugins",
             "message": "${{ steps.count.outputs.count }}",
             "color": "A6382A"
           }

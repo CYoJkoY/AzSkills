@@ -1,0 +1,20 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^(?:apply_patch|Write|Edit|MultiEdit|Bash)$",
+        "hooks": [
+          {"type": "command", "command": "node \"${PLUGIN_ROOT}/codex-plugin/hooks/godot3-guard.ts\"", "statusMessage": "Checking Godot 3.x edits"}
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^(?:apply_patch|Write|Edit|MultiEdit|Bash)$",
+        "hooks": [
+          {"type": "command", "command": "node \"${PLUGIN_ROOT}/codex-plugin/hooks/godot3-guard.ts\"", "statusMessage": "Verifying Godot 3.x edits"}
+        ]
+      }
+    ]
+  }
+}
