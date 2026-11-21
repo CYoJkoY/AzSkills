@@ -9,7 +9,11 @@ const catalog = await readJson<PluginCatalog>(fileURLToPath(new URL('catalog/plu
 const moduleOwners = new Map(catalog.plugins.flatMap(plugin => (plugin.modules ?? []).map(module => [module, plugin.id] as const)));
 // Plugins are build output, so the source tree links nothing here; the id is
 // enough to install and locate the matching marketplace entry.
-const pluginColumn = (moduleId: string) => '`' + moduleOwners.get(moduleId) + '`';
+const pluginColumn = (moduleId: string): string => {
+  const owner = moduleOwners.get(moduleId);
+  if (owner === undefined) throw new Error('No plugin owns module: ' + moduleId);
+  return '`' + owner + '`';
+};
 const content = [
   '# AzSkills routing', '',
   'Choose the plugin by the requested job, then select the matching workflow contract inside it.', '',
