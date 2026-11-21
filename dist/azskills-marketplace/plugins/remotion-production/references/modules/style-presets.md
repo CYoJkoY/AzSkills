@@ -174,9 +174,9 @@ decisive reason and the alternatives that were rejected.
 
 ## References
 
-- `../../style-presets/references/catalog.md` - preset ids, triggers, thesis, token source, and selection rules.
-- `../../style-presets/references/cobalt-kit.md` - BioRender-derived preset contract, token table, and provenance.
-- `../../style-presets/references/loaders.md` - variant selection, markup, customization, and accessibility rules.
-- `../../style-presets/assets/cobalt-kit.css` - executable Cobalt Kit token and primitive layer.
-- `../../style-presets/assets/loaders.css` - executable loader primitives.
-- `../../style-presets/assets/gallery.html` - interactive preview for presets and loaders.
+- [catalog.md](../../style-presets/references/catalog.md) - preset ids, triggers, thesis, token source, and selection rules.
+- [cobalt-kit.md](../../style-presets/references/cobalt-kit.md) - BioRender-derived preset contract, token table, and provenance.
+- [loaders.md](../../style-presets/references/loaders.md) - variant selection, markup, customization, and accessibility rules.
+- [cobalt-kit.css](../../style-presets/assets/cobalt-kit.css) - executable Cobalt Kit token and primitive layer.
+- [loaders.css](../../style-presets/assets/loaders.css) - executable loader primitives.
+- [gallery.html](../../style-presets/assets/gallery.html) - interactive preview for presets and loaders.

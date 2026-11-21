@@ -220,8 +220,8 @@ Unverified items:
 
 ## References
 
-- `../../resume-evidence-workflow/references/intake-and-dialogue.md` - career discovery, value branches, question limits, voice input, and correction protocol.
-- `../../resume-evidence-workflow/references/evidence-bank.md` - portable bank structure, ownership, project logic, metrics, and key-event cards.
-- `../../resume-evidence-workflow/references/workspace-and-reuse.md` - base resume, layout profile, direction baselines, project material, and reusable wording.
-- `../../resume-evidence-workflow/references/jd-and-delivery.md` - requirement decoding, routing, selection, Grooming, and final artifact checks.
-- `../../resume-evidence-workflow/references/editable-html.md` - editable HTML controls, copy panel, fitting, print preflight, and layout preservation.
+- [intake-and-dialogue.md](../../resume-evidence-workflow/references/intake-and-dialogue.md) - career discovery, value branches, question limits, voice input, and correction protocol.
+- [evidence-bank.md](../../resume-evidence-workflow/references/evidence-bank.md) - portable bank structure, ownership, project logic, metrics, and key-event cards.
+- [workspace-and-reuse.md](../../resume-evidence-workflow/references/workspace-and-reuse.md) - base resume, layout profile, direction baselines, project material, and reusable wording.
+- [jd-and-delivery.md](../../resume-evidence-workflow/references/jd-and-delivery.md) - requirement decoding, routing, selection, Grooming, and final artifact checks.
+- [editable-html.md](../../resume-evidence-workflow/references/editable-html.md) - editable HTML controls, copy panel, fitting, print preflight, and layout preservation.

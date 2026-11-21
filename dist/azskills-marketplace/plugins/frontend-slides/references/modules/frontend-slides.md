@@ -163,10 +163,10 @@ not be preserved.
 
 ## References
 
-- `../../frontend-slides/references/html-report.md` - report-only design, fonts, mobile layout and verification; overrides fixed-stage reference geometry.
+- [html-report.md](../../frontend-slides/references/html-report.md) - report-only design, fonts, mobile layout and verification; overrides fixed-stage reference geometry.
 
-- `../../frontend-slides/references/frontend-slides-guide.md` - detailed mode workflows, layout rules, image pipeline, and editing guidance.
-- `../../frontend-slides/DESIGN_SYSTEM.md` - deck design system and quality gate.
-- `../../frontend-slides/STYLE_PRESETS.md` - default art direction and token reference; resolves a maintained preset through `style-presets` before a one-off direction.
-- `../../frontend-slides/html-template.md` - stage shell and component markup.
-- `../../frontend-slides/animation-patterns.md` - slide and element motion patterns.
+- [frontend-slides-guide.md](../../frontend-slides/references/frontend-slides-guide.md) - detailed mode workflows, layout rules, image pipeline, and editing guidance.
+- [DESIGN_SYSTEM.md](../../frontend-slides/DESIGN_SYSTEM.md) - deck design system and quality gate.
+- [STYLE_PRESETS.md](../../frontend-slides/STYLE_PRESETS.md) - default art direction and token reference; resolves a maintained preset through `style-presets` before a one-off direction.
+- [html-template.md](../../frontend-slides/html-template.md) - stage shell and component markup.
+- [animation-patterns.md](../../frontend-slides/animation-patterns.md) - slide and element motion patterns.

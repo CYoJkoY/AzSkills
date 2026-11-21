@@ -1,6 +1,6 @@
 {
   "name": "az-clean-code",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Apply explicit, flat, reusable, data-driven constraints when writing, reviewing, refactoring, or consistently styling application code.",
   "license": "MIT",
   "keywords": [

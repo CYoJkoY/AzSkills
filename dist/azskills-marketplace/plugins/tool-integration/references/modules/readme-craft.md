@@ -100,9 +100,9 @@ generic banner that could belong to any repository.
 ### 5. Build the heading icon system
 
 For AzSkills-owned READMEs, every major `##` section uses one semantic SVG icon
-from `../../readme-craft/assets/readme/icons`; minor subsections do not need icons. For an external
-repository, follow its existing icon policy. Do not add icons without an owned
-icon set, and do not use emoji as a substitute.
+from a repository-owned icon set; minor subsections do not need icons. For an
+external repository, follow its existing icon policy. Do not add icons without an
+owned icon set, and do not use emoji as a substitute.
 
 - Draw on a 24px grid with one optical stroke weight.
 - Use `currentColor` or theme-safe colors; never bake a single theme background into the icon.
@@ -168,7 +168,7 @@ correction per finding.
 
 ## References
 
-- `../../readme-craft/references/readme-guide.md` - detailed first-screen, SVG grammar, layout, composition, and QA procedure.
-- `../../readme-craft/references/beautify-github-readme.md` - README information architecture and visual patterns.
-- `../../readme-craft/references/icon-selection.md` - icon selection and scoring.
-- `../../readme-craft/references/support-cta-auto-adapt.md` - theme-adaptive support CTA.
+- [readme-guide.md](../../readme-craft/references/readme-guide.md) - detailed first-screen, SVG grammar, layout, composition, and QA procedure.
+- [beautify-github-readme.md](../../readme-craft/references/beautify-github-readme.md) - README information architecture and visual patterns.
+- [icon-selection.md](../../readme-craft/references/icon-selection.md) - icon selection and scoring.
+- [support-cta-auto-adapt.md](../../readme-craft/references/support-cta-auto-adapt.md) - theme-adaptive support CTA.

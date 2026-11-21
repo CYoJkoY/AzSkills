@@ -6,7 +6,7 @@
   <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: a catalog of independent Codex plugins" width="100%">
 </picture>
 
-Version **3.0.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
+Version **4.0.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
 
 Every capability ships as its own plugin with its own manifest, skill entry, trigger description, and reference closure. A single dispatcher entry only fires when a prompt names it or matches one broad description; independent plugins are matched directly, so capabilities stop being invisible to automatic routing. `catalog/plugins.json` is the distribution registry and `skills.json` stays the canonical module and alias source.
 
@@ -111,6 +111,8 @@ turns scene JSON into editable SVG and checks the result.
 | `ui-aesthetics` | [`ui-design`](references/modules/ui-design.md) | refine |
 | `ui-ux-design-intelligence` | [`ui-design`](references/modules/ui-design.md) | review |
 | `ui-motion-review` | [`ui-design`](references/modules/ui-design.md) | motion-review |
+| `ui-motion-audit` | [`ui-design`](references/modules/ui-design.md) | motion-audit |
+| `rare-ui-motion` | [`ui-design`](references/modules/ui-design.md) | motion-pattern |
 | `svg-animation` | [`ui-design`](references/modules/ui-design.md) | svg |
 | `ip-as-logo` | [`logo-generator`](references/modules/logo-generator.md) | character |
 | `l13n` | [`localization`](references/modules/localization.md) | translate |

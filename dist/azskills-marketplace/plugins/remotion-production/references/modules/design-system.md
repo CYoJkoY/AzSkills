@@ -177,8 +177,8 @@ only the decisions that change the artifact.
 
 ## References
 
-- `../../design-system/references/design-system-guide.md` - detailed extraction, section mapping, reconciliation, editorial conformance, and migration procedure.
-- `../../design-system/references/design-md-adapter.md` - source-to-contract adapter.
-- `../../design-system/references/design-md-schema.md` - DESIGN.md schema reference.
-- `../../design-system/references/source-format-matrix.md` - source class matrix.
+- [design-system-guide.md](../../design-system/references/design-system-guide.md) - detailed extraction, section mapping, reconciliation, editorial conformance, and migration procedure.
+- [design-md-adapter.md](../../design-system/references/design-md-adapter.md) - source-to-contract adapter.
+- [design-md-schema.md](../../design-system/references/design-md-schema.md) - DESIGN.md schema reference.
+- [source-format-matrix.md](../../design-system/references/source-format-matrix.md) - source class matrix.
 - [`tui/preview.ts`](../../design-system/tui/preview.ts) - executable terminal preview and conformance gate.

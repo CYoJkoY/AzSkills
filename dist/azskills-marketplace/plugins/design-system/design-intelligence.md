@@ -39,10 +39,10 @@ structures. Prefer asymmetry, editorial splits, timelines, comparison matrices,
 and annotated evidence when the content supports them. Do not assemble a page
 from unrelated section templates.
 
-### Motion is owned by `ui-motion`
+### Motion is owned by `ui-design`
 
 Motion purpose, mechanism, timing, review, audit, patterns, and SVG output
-belong to [`ui-motion`](references/modules/ui-motion.md). Visual composition may reserve a
+belong to the motion branch of [`ui-design`](references/modules/ui-motion.md). Visual composition may reserve a
 motion role; it does not define duration, easing, or a second motion gate.
 
 ### Visual evidence
@@ -83,14 +83,14 @@ owners that inherit this visual layer:
 | :--- | :--- |
 | DESIGN.md source, tokens, semantics, provenance | `design-system` |
 | Interface hierarchy, components, states, responsive behavior | `ui-design` |
-| Motion construction, review, audit, SVG | `ui-motion` |
+| Interface motion construction, review, audit, SVG | `ui-design` (`motion*`, `svg`) |
 | Named style preset, keyword trigger, preset token pack, loader primitive | `style-presets` |
 | Identity, logo, character mark | `logo-generator` |
 | Photograph-derived abstract editorial treatment | `photo-abstract-editorial` |
 | Slide narrative, responsive HTML reports and composition | `frontend-slides` |
 | Programmatic video and frame determinism | `remotion-production` |
-| GitHub README | `readme-craft` |
-| Steam Workshop page | `steam-mod-page` |
+| GitHub README | `document-writing` (`readme*`) |
+| Steam Workshop page | `document-writing` (`steam-*`) |
 
 ## Inheritance
 

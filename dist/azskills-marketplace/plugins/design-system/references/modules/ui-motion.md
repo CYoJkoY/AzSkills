@@ -23,7 +23,7 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visua
 - Owns: whether motion earns a place, which mechanism is smallest, timing, origin, interruption, reduced-motion parity, performance, and motion findings.
 - Inputs: host motion tokens, component frequency, interaction purpose, current mechanism, browser baseline, input model, reduced-motion policy, and rendered evidence.
 - Outputs: implemented motion, review findings, audit inventory and plan, pattern adaptation, or standalone SVG animation.
-- Compose with: `ui-design` for the static interface; `design-system` for motion tokens; load `../../ui-motion/references/animation-standards.md` for exact values.
+- Compose with: `ui-design` for the static interface; `design-system` for motion tokens; load [animation-standards.md](../../ui-motion/references/animation-standards.md) for exact values.
 - Gates: motion has a named purpose and frequency fit; reduced motion preserves meaning; the interaction is interruptible; the rendered result is verified.
 
 ## Modes
@@ -200,13 +200,13 @@ Unverified items:
 
 ## References
 
-- `../../ui-motion/references/animation-standards.md` - exact easing, duration, spring, performance, and accessibility reference.
-- `../../ui-motion/references/animation-recipes.md` - implementation recipes and component patterns.
-- `../../ui-motion/references/animation-vocabulary.md` - motion terms and intent vocabulary.
-- `../../ui-motion/references/review.md` - detailed read-only review sequence and findings contract.
-- `../../ui-motion/references/audit.md` - detailed codebase inventory, opportunity gates, and plan format.
-- `../../ui-motion/references/plan-template.md` - implementation plan template for audit findings.
-- `../../ui-motion/references/rare-interactions.md` - pattern-selection and adaptation contract.
-- `../../ui-motion/references/rare-patterns.md` - pattern catalog.
-- `../../ui-motion/references/svg-animation.md` - SVG-specific construction and optimization guide.
-- `../../ui-motion/references/icon-morphing.md` - semantic SVG icon morphing, geometry, interruption, and QA.
+- [animation-standards.md](../../ui-motion/references/animation-standards.md) - exact easing, duration, spring, performance, and accessibility reference.
+- [animation-recipes.md](../../ui-motion/references/animation-recipes.md) - implementation recipes and component patterns.
+- [animation-vocabulary.md](../../ui-motion/references/animation-vocabulary.md) - motion terms and intent vocabulary.
+- [review.md](../../ui-motion/references/review.md) - detailed read-only review sequence and findings contract.
+- [audit.md](../../ui-motion/references/audit.md) - detailed codebase inventory, opportunity gates, and plan format.
+- [plan-template.md](../../ui-motion/references/plan-template.md) - implementation plan template for audit findings.
+- [rare-interactions.md](../../ui-motion/references/rare-interactions.md) - pattern-selection and adaptation contract.
+- [rare-patterns.md](../../ui-motion/references/rare-patterns.md) - pattern catalog.
+- [svg-animation.md](../../ui-motion/references/svg-animation.md) - SVG-specific construction and optimization guide.
+- [icon-morphing.md](../../ui-motion/references/icon-morphing.md) - semantic SVG icon morphing, geometry, interruption, and QA.

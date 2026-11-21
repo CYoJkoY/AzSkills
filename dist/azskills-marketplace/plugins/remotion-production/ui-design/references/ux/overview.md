@@ -56,9 +56,9 @@ Rank by user impact. Give the smallest correction that addresses the finding.
 
 ## References
 
-- `ux-priority-model.md` - severity and priority model.
-- `ux-regression-checklist.md` - feature-change regression checks.
-- `accessibility-audit.md` - keyboard, focus, visual, and semantic audit.
-- `screenshot-analysis.md` - screenshot and prototype review method.
-- `developer-handoff.md` - implementation-ready handoff.
-- `platform-patterns.md` - desktop, extension, settings, developer-tool, and localization patterns.
+- [ux-priority-model.md](ux-priority-model.md) - severity and priority model.
+- [ux-regression-checklist.md](ux-regression-checklist.md) - feature-change regression checks.
+- [accessibility-audit.md](accessibility-audit.md) - keyboard, focus, visual, and semantic audit.
+- [screenshot-analysis.md](screenshot-analysis.md) - screenshot and prototype review method.
+- [developer-handoff.md](developer-handoff.md) - implementation-ready handoff.
+- [platform-patterns.md](platform-patterns.md) - desktop, extension, settings, developer-tool, and localization patterns.

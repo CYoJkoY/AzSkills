@@ -63,6 +63,18 @@
       "mode": "motion-review"
     },
     {
+      "id": "ui-motion-audit",
+      "status": "alias",
+      "canonical": "ui-design",
+      "mode": "motion-audit"
+    },
+    {
+      "id": "rare-ui-motion",
+      "status": "alias",
+      "canonical": "ui-design",
+      "mode": "motion-pattern"
+    },
+    {
       "id": "svg-animation",
       "status": "alias",
       "canonical": "ui-design",
@@ -173,11 +185,11 @@
       }
     }
   ],
-  "version": "3.0.0",
+  "version": "4.0.0",
   "entry": {
     "id": "azskills",
     "path": "SKILL.md",
-    "version": "3.0.0"
+    "version": "4.0.0"
   },
   "modules": [
     {

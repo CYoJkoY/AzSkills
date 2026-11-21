@@ -174,13 +174,13 @@ synchronization, assets, performance, and delivery.
 
 ## References
 
-- `../../remotion-production/references/production-guide.md` - full production workflow, specialized modes, and extended gates.
-- `../../remotion-production/references/timeline-composition-patterns.md` - scene timing, sequences, transitions, and frame budgeting.
-- `../../remotion-production/references/react-video-architecture.md` - project structure, composition boundaries, props, and metadata.
-- `../../remotion-production/references/animation-engine-selection.md` - engine selection and rejection.
-- `../../remotion-production/references/asset-pipeline.md` - fonts, images, video, audio, SVG, 3D, and provenance.
-- `../../remotion-production/references/render-performance.md` - render speed, memory, concurrency, and frame sampling.
-- `../../remotion-production/references/audio-video-production.md` - narration, music, sound, captions, and synchronization.
-- `../../remotion-production/references/ai-video-workflow.md` - AI-assisted brief to storyboard to implementation.
-- `../../remotion-production/references/production-checklist.md` - final preflight and delivery.
-- `../../remotion-production/references/visual-engine-matrix.md` - engine comparison.
+- [production-guide.md](../../remotion-production/references/production-guide.md) - full production workflow, specialized modes, and extended gates.
+- [timeline-composition-patterns.md](../../remotion-production/references/timeline-composition-patterns.md) - scene timing, sequences, transitions, and frame budgeting.
+- [react-video-architecture.md](../../remotion-production/references/react-video-architecture.md) - project structure, composition boundaries, props, and metadata.
+- [animation-engine-selection.md](../../remotion-production/references/animation-engine-selection.md) - engine selection and rejection.
+- [asset-pipeline.md](../../remotion-production/references/asset-pipeline.md) - fonts, images, video, audio, SVG, 3D, and provenance.
+- [render-performance.md](../../remotion-production/references/render-performance.md) - render speed, memory, concurrency, and frame sampling.
+- [audio-video-production.md](../../remotion-production/references/audio-video-production.md) - narration, music, sound, captions, and synchronization.
+- [ai-video-workflow.md](../../remotion-production/references/ai-video-workflow.md) - AI-assisted brief to storyboard to implementation.
+- [production-checklist.md](../../remotion-production/references/production-checklist.md) - final preflight and delivery.
+- [visual-engine-matrix.md](../../remotion-production/references/visual-engine-matrix.md) - engine comparison.

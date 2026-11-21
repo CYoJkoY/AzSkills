@@ -1,6 +1,6 @@
 {
   "name": "localization",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Translate game CSV rows into 13 fixed locales with consistent terminology, intact BBCode, correct CSV escaping, and a clean importable output. Use for game localization batches and locale audits.",
   "license": "MIT",
   "keywords": [

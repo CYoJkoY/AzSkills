@@ -1,6 +1,6 @@
 {
   "name": "remotion-production",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Build deterministic programmatic video and motion graphics with Remotion as the single time authority, clear visual-engine ownership, audio and captions, frame QA, and reliable delivery. Use for rendered time-based artifacts.",
   "license": "MIT",
   "keywords": [

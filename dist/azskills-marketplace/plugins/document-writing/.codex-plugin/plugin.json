@@ -1,6 +1,6 @@
 {
   "name": "document-writing",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Write, rewrite, and audit publication-ready documents for GitHub repositories and Steam Workshop. Use for README architecture, heading icons, evidence-first structure, stable anchors, Steam BBCode Workshop descriptions, bilingual delivery, and final syntax lint.",
   "license": "MIT",
   "keywords": [

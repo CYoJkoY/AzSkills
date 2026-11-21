@@ -175,5 +175,5 @@ maintenance impact, and give one smallest corrective action per finding.
 
 ## References
 
-- `../../architecture/references/runtime-selection.md` - detailed runtime, desktop, extension, server, and database gates.
-- `../../architecture/references/frontend-selection.md` - detailed language, framework, styling, persistence, and frontend boundary rules.
+- [runtime-selection.md](../../architecture/references/runtime-selection.md) - detailed runtime, desktop, extension, server, and database gates.
+- [frontend-selection.md](../../architecture/references/frontend-selection.md) - detailed language, framework, styling, persistence, and frontend boundary rules.
