@@ -23,9 +23,9 @@ You can also add the repository as a Git marketplace to work from a clone:
 
     codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
 
-AzSkills is a catalog, not one plugin. The marketplace lists 20 independent plugins, each with its own `.codex-plugin/plugin.json`, skill entry, and reference closure:
+AzSkills is a catalog, not one plugin. The marketplace lists 18 independent plugins, each with its own `.codex-plugin/plugin.json`, skill entry, and reference closure:
 
-- Workflow plugins: architecture, design-system, ui-design, ui-motion, logo-generator, photo-abstract-editorial, frontend-slides, remotion-production, readme-craft, steam-mod-page, localization, resume-evidence-workflow, tool-integration, taste, az-clean-code, godot-3-dev, style-presets, scientific-figures.
+- Workflow plugins: architecture, design-system, ui-design, logo-generator, photo-abstract-editorial, frontend-slides, remotion-production, document-writing, localization, resume-evidence-workflow, tool-integration, taste, az-clean-code, godot-3-dev, style-presets, scientific-figures.
 - Hook plugins: no-think-tags and empty-reply, each a Stop-hook backstop for answer hygiene.
 
 Install the plugins the project needs. Each plugin is matched on its own description, so a capability no longer depends on one shared dispatcher entry. Hooks ship only with `taste` (steering) and `godot-3-dev` (Godot 3.x write guard), plus the two hook plugins; review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces.

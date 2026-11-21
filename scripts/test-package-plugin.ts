@@ -22,8 +22,8 @@ try {
   const built = await packageMarketplace(root, path.join(temp, "marketplace"));
 
   assert.equal(built.plugins.length, catalog.plugins.length);
-  assert.equal(built.plugins.length, 20);
-  assert.equal(registry.modules.length, 18);
+  assert.equal(built.plugins.length, 18);
+  assert.equal(registry.modules.length, 16);
 
   const manifest = JSON.parse(await readFile(path.join(built.marketplace, ".agents/plugins/marketplace.json"), "utf8")) as {
     name: string;
@@ -89,7 +89,7 @@ try {
     assert.deepEqual([...signature.subarray(0, 4)], [0x50, 0x4b, 0x03, 0x04]);
   }
   const archives = await readdir(zipRoot);
-  assert.equal(archives.length, 20);
+  assert.equal(archives.length, 18);
 
   const skillView = path.join(temp, "skill-view");
   const skillBuild = await buildPlugin(root, "ui-design", skillView, "skill");
@@ -110,7 +110,7 @@ try {
   assert.deepEqual(committedManifest, committedExpected);
   await assert.rejects(publishRepositoryMarketplace(root, temp), /inside the repository/);
 
-  console.log("Plugin packaging tests passed: 20 self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
+  console.log("Plugin packaging tests passed: 18 self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

@@ -23,7 +23,7 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md) before
 - Owns: locale completeness, terminology consistency, tone, BBCode integrity, CSV escaping, and importable output.
 - Inputs: CSV rows, header, source English and Simplified Chinese, optional glossary, project context, and game genre.
 - Outputs: complete CSV rows with every locale filled, or a locale audit report.
-- Compose with: `readme-craft` or `steam-mod-page` only when a CSV locale table is embedded in that publishing artifact.
+- Compose with: `document-writing` or `document-writing` only when a CSV locale table is embedded in that publishing artifact.
 - Gates: all 13 locales are non-empty, BBCode is balanced and unchanged, CSV parses, and the output contains no commentary.
 
 ## Modes

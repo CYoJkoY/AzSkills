@@ -20,11 +20,11 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visua
 ## Contract
 
 - Use when: a request names a style, a style keyword, or a reference product; asks which styles AzSkills ships; needs a ready-made loading, progress, or busy indicator; or asks to re-tint an existing preset.
-- Do not use when: the task consumes or normalizes a project visual contract (`design-system`), builds or reviews a product interface (`ui-design`), decides whether non-loader motion earns its place (`ui-motion`), or composes a deck narrative (`frontend-slides`).
+- Do not use when: the task consumes or normalizes a project visual contract (`design-system`), builds or reviews a product interface (`ui-design`), decides whether non-loader motion earns its place (`ui-design`), or composes a deck narrative (`frontend-slides`).
 - Owns: preset ids and trigger keywords, preset token packs, component primitives for a preset, loader variants and their customization tokens, and preset provenance levels.
 - Inputs: the requested outcome, any named style or keyword, existing project tokens, target surface, theme, density, and the artifact that will carry the preset.
 - Outputs: a resolved preset with its token pack and the primitives the artifact uses, a scoped customization, or a loader variant with markup, tokens, and fallback.
-- Compose with: `design-system` when a project contract governs the artifact; `ui-design` for hierarchy and states; `ui-motion` for non-loader motion; `frontend-slides` for deck surfaces.
+- Compose with: `design-system` when a project contract governs the artifact; `ui-design` for hierarchy and states; `ui-design` for non-loader motion; `frontend-slides` for deck surfaces.
 - Gates: no brand asset, logo, illustration, or upstream stylesheet is reproduced; text roles hold 4.5:1 in both themes; every loader carries status semantics plus a reduced-motion fallback; a preset never silently replaces an authoritative project identity.
 
 ## Modes
@@ -123,7 +123,7 @@ the announced status text. Report which checks ran.
 ## Loader library
 
 Loader work is a mode, not a second owner: motion purpose, frequency, and
-non-loader animation stay with `ui-motion`. This module supplies eight
+non-loader animation stay with `ui-design`. This module supplies eight
 single-element primitives driven by `--sp-*` tokens, documented in
 [`style-presets/references/loaders.md`](../../style-presets/references/loaders.md)
 and implemented in [`style-presets/assets/loaders.css`](../../style-presets/assets/loaders.css).

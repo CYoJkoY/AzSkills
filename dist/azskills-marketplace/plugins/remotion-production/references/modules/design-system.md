@@ -23,7 +23,7 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visua
 - Owns: source evidence, token normalization, semantic roles, component and state mapping, provenance, and design-contract verification.
 - Inputs: DESIGN.md or source evidence, product context, existing tokens, target stack, themes, locales, accessibility baseline, and rendered surfaces.
 - Outputs: normalized DESIGN.md contract, token map, component/state matrix, implementation notes, or audit findings.
-- Compose with: `ui-design` to implement, `ui-motion` for motion roles, `architecture` for stack boundaries, `frontend-slides` for fixed-stage mapping.
+- Compose with: `ui-design` to implement, `ui-design` for motion roles, `architecture` for stack boundaries, `frontend-slides` for fixed-stage mapping.
 - Gates: no invented tokens; provenance is explicit; semantic roles and states are complete; representative output is rendered in every shipped theme.
 
 ## Modes

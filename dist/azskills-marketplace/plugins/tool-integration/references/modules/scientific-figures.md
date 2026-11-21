@@ -22,7 +22,7 @@ reasoning engine. Shared rules R01-R12 apply; read
 - Owns: scientific figure inventory, semantic scene geometry, preserved relationships and labels, editable vector construction, and figure-specific verification.
 - Inputs: source figure or explicit scientific content, reference dimensions, target display or print size, labels, legend meaning, and known versus uncertain relationships.
 - Outputs: editable SVG, its scene JSON when the renderer is used, a rendered preview, and actual verification findings with unresolved scientific details.
-- Compose with: `style-presets` for an explicitly named figure style; `frontend-slides` for placing an approved figure in a deck; `ui-motion` for animating verified vector groups.
+- Compose with: `style-presets` for an explicitly named figure style; `frontend-slides` for placing an approved figure in a deck; `ui-design` for animating verified vector groups.
 - Gates: no embedded bitmap or flattened trace; preserve source aspect ratio, labels, arrow direction, and scientific meaning; text remains text and objects remain named editable groups; script success never establishes scientific correctness.
 
 ## Modes

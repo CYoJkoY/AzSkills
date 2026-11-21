@@ -1,0 +1,27 @@
+{
+  "name": "document-writing",
+  "version": "3.0.0",
+  "description": "Write, rewrite, and audit publication-ready documents for GitHub repositories and Steam Workshop. Use for README architecture, heading icons, evidence-first structure, stable anchors, Steam BBCode Workshop descriptions, bilingual delivery, and final syntax lint.",
+  "license": "MIT",
+  "keywords": [
+    "document",
+    "writing",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Document Writing",
+    "shortDescription": "Write, rewrite, and audit publication-ready documents for GitHub repositories and Steam Workshop. Use for README architecture, heading icons, evidence-first structure, stable anchors, Steam BBCode Workshop descriptions, bilingual delivery, and final syntax lint.",
+    "longDescription": "Write, rewrite, and audit publication-ready documents for GitHub repositories and Steam Workshop. Use for README architecture, heading icons, evidence-first structure, stable anchors, Steam BBCode Workshop descriptions, bilingual delivery, and final syntax lint. Modes: readme, readme-rewrite, readme-audit, steam-player, steam-developer, steam-audit.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icon.svg",
+    "logo": "./codex-plugin/assets/icon.svg"
+  }
+}

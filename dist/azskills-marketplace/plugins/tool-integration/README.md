@@ -12,7 +12,7 @@ Every capability ships as its own plugin with its own manifest, skill entry, tri
 
 | Kind | Plugins | Count |
 | :--- | :--- | :--- |
-| Workflow | architecture, design-system, ui-design, ui-motion, logo-generator, photo-abstract-editorial, frontend-slides, remotion-production, readme-craft, steam-mod-page, localization, resume-evidence-workflow, tool-integration, taste, az-clean-code, godot-3-dev, style-presets, scientific-figures | 18 |
+| Workflow | architecture, design-system, ui-design, logo-generator, photo-abstract-editorial, frontend-slides, remotion-production, document-writing, localization, resume-evidence-workflow, tool-integration, taste, az-clean-code, godot-3-dev, style-presets, scientific-figures | 16 |
 | Hook | no-think-tags, empty-reply | 2 |
 
 ## Install
@@ -84,19 +84,18 @@ turns scene JSON into editable SVG and checks the result.
 | :--- | :--- | :--- | :--- |
 | Architecture | [`architecture`](references/modules/architecture.md) | runtime, frontend, migration, review | Runtime, frontend stack, persistence, and process boundaries. |
 | Interface | [`design-system`](references/modules/design-system.md) | ingest, author, migrate, audit | DESIGN.md ingestion, normalization, provenance, and verification. |
-| Interface | [`ui-design`](references/modules/ui-design.md) | build, refine, review, system | Interface hierarchy, components, states, responsive behavior, and visual QA. |
-| Interface | [`ui-motion`](references/modules/ui-motion.md) | build, review, audit, pattern, svg | Motion construction, review, audit, patterns, and SVG animation. |
+| Interface | [`ui-design`](references/modules/ui-design.md) | build, refine, review, system, motion, motion-review, motion-audit, motion-pattern, svg | Interface hierarchy, components, states, responsive behavior, visual QA, motion construction, review, audit, patterns, and SVG animation. |
 | Visual | [`logo-generator`](references/modules/logo-generator.md) | mark, character, system | Logos, product marks, character marks, and identity systems. |
 | Visual | [`photo-abstract-editorial`](references/modules/photo-abstract-editorial.md) | treatment, audit | Photograph-preserving abstract editorial diptychs. |
 | Production | [`frontend-slides`](references/modules/frontend-slides.md) | new, convert, enhance, report | Responsive HTML reports, fixed-stage presentations, and rendered QA. |
 | Production | [`remotion-production`](references/modules/remotion-production.md) | video, data, 3d, ui-showcase, motion, av | Deterministic programmatic video and render delivery. |
-| Publishing | [`readme-craft`](references/modules/readme-craft.md) | build, rewrite, audit | GitHub README architecture, visuals, links, and QA. |
-| Publishing | [`steam-mod-page`](references/modules/steam-mod-page.md) | player, developer, audit | Steam Workshop BBCode pages and bilingual delivery. |
+
+| Publishing | [`document-writing`](references/modules/document-writing.md) | readme, readme-rewrite, readme-audit, steam-player, steam-developer, steam-audit | GitHub README architecture, visuals, links, QA, Steam Workshop BBCode pages, and bilingual delivery. |
 | Publishing | [`localization`](references/modules/localization.md) | translate, audit | Game CSV localization with locale completeness and markup safety. |
 | Career | [`resume-evidence-workflow`](references/modules/resume-evidence-workflow.md) | evidence, tailor, review | Career evidence, requirement alignment, and editable resume delivery. |
 | Operations | [`tool-integration`](references/modules/tool-integration.md) | install, configure, troubleshoot, remove | Connect AzSkills to AI clients with verified installation and setup workflows. |
 | Operations | [`taste`](references/modules/taste.md) | main, subagent, independent | Judgment, collaboration, and execution behavior automatically supplied by Codex hooks. |
-| Architecture | [`az-clean-code`](references/modules/az-clean-code.md) | write, review, refactor | Explicit code, flat control flow, reuse, and business data externalized before coding. |
+| Architecture | [`az-clean-code`](references/modules/az-clean-code.md) | write, review, refactor, style | Explicit code, flat control flow, reuse, code style consistency, and business data externalized before coding. |
 | Architecture | [`godot-3-dev`](references/modules/godot-3-dev.md) | script, review, port | Godot 3.x GDScript, virtual-call safety, the 3.6 API surface, and down-porting. |
 | Interface | [`style-presets`](references/modules/style-presets.md) | catalog, apply, loaders, audit | Named visual presets, keyword triggers, preset token packs, and loading indicators. |
 | Visual | [`scientific-figures`](references/modules/scientific-figures.md) | redraw, author, verify | Medical and scientific schematics, faithful redraws, editable SVG, and deterministic figure verification. |
@@ -111,10 +110,8 @@ turns scene JSON into editable SVG and checks the result.
 | `frontend-architecture` | [`architecture`](references/modules/architecture.md) | frontend |
 | `ui-aesthetics` | [`ui-design`](references/modules/ui-design.md) | refine |
 | `ui-ux-design-intelligence` | [`ui-design`](references/modules/ui-design.md) | review |
-| `ui-motion-review` | [`ui-motion`](references/modules/ui-motion.md) | review |
-| `ui-motion-audit` | [`ui-motion`](references/modules/ui-motion.md) | audit |
-| `rare-ui-motion` | [`ui-motion`](references/modules/ui-motion.md) | pattern |
-| `svg-animation` | [`ui-motion`](references/modules/ui-motion.md) | svg |
+| `ui-motion-review` | [`ui-design`](references/modules/ui-design.md) | motion-review |
+| `svg-animation` | [`ui-design`](references/modules/ui-design.md) | svg |
 | `ip-as-logo` | [`logo-generator`](references/modules/logo-generator.md) | character |
 | `l13n` | [`localization`](references/modules/localization.md) | translate |
 | `biorender` | [`style-presets`](references/modules/style-presets.md) | apply |
@@ -123,6 +120,11 @@ turns scene JSON into editable SVG and checks the result.
 | `css-loaders` | [`style-presets`](references/modules/style-presets.md) | loaders |
 | `style-catalog` | [`style-presets`](references/modules/style-presets.md) | catalog |
 | `sciprism-svg` | [`scientific-figures`](references/modules/scientific-figures.md) | redraw |
+| `readme-craft` | [`document-writing`](references/modules/document-writing.md) | readme |
+| `readme-rewrite` | [`document-writing`](references/modules/document-writing.md) | readme-rewrite |
+| `steam-mod-page` | [`document-writing`](references/modules/document-writing.md) | steam-player |
+| `ui-motion` | [`ui-design`](references/modules/ui-design.md) | motion |
+| `ui-motion-build` | [`ui-design`](references/modules/ui-design.md) | motion |
 | `sci-figure` | [`scientific-figures`](references/modules/scientific-figures.md) | author |
 <!-- SKILL-ALIASES:END -->
 

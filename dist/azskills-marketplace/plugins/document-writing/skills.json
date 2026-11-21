@@ -1,0 +1,451 @@
+{
+  "schemaVersion": 2,
+  "system": "SKILL-SYSTEM.md",
+  "families": {
+    "architecture": {
+      "label": "Architecture",
+      "purpose": "Runtime, frontend, persistence, and process boundaries."
+    },
+    "interface": {
+      "label": "Interface",
+      "purpose": "Design contracts, interface execution, and motion."
+    },
+    "visual": {
+      "label": "Visual",
+      "purpose": "Identity and image-led artifacts."
+    },
+    "production": {
+      "label": "Production",
+      "purpose": "Timed or staged visual production."
+    },
+    "publishing": {
+      "label": "Publishing",
+      "purpose": "Repository, storefront, and locale delivery."
+    },
+    "career": {
+      "label": "Career",
+      "purpose": "Career evidence, requirement alignment, and resume delivery."
+    },
+    "operations": {
+      "label": "Operations",
+      "purpose": "Connect and manage AzSkills across supported AI clients."
+    }
+  },
+  "aliases": [
+    {
+      "id": "application-architecture",
+      "status": "alias",
+      "canonical": "architecture",
+      "mode": "runtime"
+    },
+    {
+      "id": "frontend-architecture",
+      "status": "alias",
+      "canonical": "architecture",
+      "mode": "frontend"
+    },
+    {
+      "id": "ui-aesthetics",
+      "status": "alias",
+      "canonical": "ui-design",
+      "mode": "refine"
+    },
+    {
+      "id": "ui-ux-design-intelligence",
+      "status": "alias",
+      "canonical": "ui-design",
+      "mode": "review"
+    },
+    {
+      "id": "ui-motion-review",
+      "status": "alias",
+      "canonical": "ui-design",
+      "mode": "motion-review"
+    },
+    {
+      "id": "svg-animation",
+      "status": "alias",
+      "canonical": "ui-design",
+      "mode": "svg"
+    },
+    {
+      "id": "ip-as-logo",
+      "status": "alias",
+      "canonical": "logo-generator",
+      "mode": "character"
+    },
+    {
+      "id": "l13n",
+      "status": "alias",
+      "canonical": "localization",
+      "mode": "translate"
+    },
+    {
+      "id": "biorender",
+      "status": "alias",
+      "canonical": "style-presets",
+      "mode": "apply"
+    },
+    {
+      "id": "biorender-style",
+      "status": "alias",
+      "canonical": "style-presets",
+      "mode": "apply"
+    },
+    {
+      "id": "cobalt-kit",
+      "status": "alias",
+      "canonical": "style-presets",
+      "mode": "apply"
+    },
+    {
+      "id": "css-loaders",
+      "status": "alias",
+      "canonical": "style-presets",
+      "mode": "loaders"
+    },
+    {
+      "id": "style-catalog",
+      "status": "alias",
+      "canonical": "style-presets",
+      "mode": "catalog"
+    },
+    {
+      "id": "sciprism-svg",
+      "status": "alias",
+      "canonical": "scientific-figures",
+      "mode": "redraw"
+    },
+    {
+      "id": "sci-figure",
+      "status": "alias",
+      "canonical": "scientific-figures",
+      "mode": "author"
+    },
+    {
+      "id": "readme-craft",
+      "status": "alias",
+      "canonical": "document-writing",
+      "mode": "readme",
+      "legacyModes": {
+        "build": "readme",
+        "rewrite": "readme-rewrite",
+        "audit": "readme-audit"
+      }
+    },
+    {
+      "id": "readme-rewrite",
+      "status": "alias",
+      "canonical": "document-writing",
+      "mode": "readme-rewrite"
+    },
+    {
+      "id": "steam-mod-page",
+      "status": "alias",
+      "canonical": "document-writing",
+      "mode": "steam-player",
+      "legacyModes": {
+        "player": "steam-player",
+        "developer": "steam-developer",
+        "audit": "steam-audit"
+      }
+    },
+    {
+      "id": "ui-motion",
+      "status": "alias",
+      "canonical": "ui-design",
+      "mode": "motion",
+      "legacyModes": {
+        "build": "motion",
+        "review": "motion-review",
+        "audit": "motion-audit",
+        "pattern": "motion-pattern",
+        "svg": "svg"
+      }
+    },
+    {
+      "id": "ui-motion-build",
+      "status": "alias",
+      "canonical": "ui-design",
+      "mode": "motion",
+      "legacyModes": {
+        "build": "motion"
+      }
+    }
+  ],
+  "version": "3.0.0",
+  "entry": {
+    "id": "azskills",
+    "path": "SKILL.md",
+    "version": "3.0.0"
+  },
+  "modules": [
+    {
+      "id": "architecture",
+      "path": "references/modules/architecture.md",
+      "status": "module",
+      "family": "architecture",
+      "modes": [
+        "runtime",
+        "frontend",
+        "migration",
+        "review"
+      ],
+      "role": "Runtime, frontend stack, persistence, and process boundaries.",
+      "composes": [
+        "design-system",
+        "ui-design"
+      ]
+    },
+    {
+      "id": "design-system",
+      "path": "references/modules/design-system.md",
+      "status": "module",
+      "family": "interface",
+      "modes": [
+        "ingest",
+        "author",
+        "migrate",
+        "audit"
+      ],
+      "role": "DESIGN.md ingestion, normalization, provenance, and verification.",
+      "composes": [
+        "architecture",
+        "frontend-slides",
+        "ui-design"
+      ]
+    },
+    {
+      "id": "ui-design",
+      "path": "references/modules/ui-design.md",
+      "status": "module",
+      "family": "interface",
+      "modes": [
+        "build",
+        "refine",
+        "review",
+        "system",
+        "motion",
+        "motion-review",
+        "motion-audit",
+        "motion-pattern",
+        "svg"
+      ],
+      "role": "Interface hierarchy, components, states, responsive behavior, visual QA, motion construction, review, audit, patterns, and SVG animation.",
+      "composes": [
+        "architecture",
+        "design-system"
+      ]
+    },
+    {
+      "id": "logo-generator",
+      "path": "references/modules/logo-generator.md",
+      "status": "module",
+      "family": "visual",
+      "modes": [
+        "mark",
+        "character",
+        "system"
+      ],
+      "role": "Logos, product marks, character marks, and identity systems.",
+      "composes": [
+        "design-system",
+        "ui-design"
+      ]
+    },
+    {
+      "id": "photo-abstract-editorial",
+      "path": "references/modules/photo-abstract-editorial.md",
+      "status": "module",
+      "family": "visual",
+      "modes": [
+        "treatment",
+        "audit"
+      ],
+      "role": "Photograph-preserving abstract editorial diptychs.",
+      "composes": [
+        "logo-generator",
+        "ui-design"
+      ]
+    },
+    {
+      "id": "frontend-slides",
+      "path": "references/modules/frontend-slides.md",
+      "status": "module",
+      "family": "production",
+      "modes": [
+        "new",
+        "convert",
+        "enhance",
+        "report"
+      ],
+      "role": "Responsive HTML reports, fixed-stage presentations, and rendered QA.",
+      "composes": [
+        "design-system",
+        "logo-generator",
+        "ui-design"
+      ]
+    },
+    {
+      "id": "remotion-production",
+      "path": "references/modules/remotion-production.md",
+      "status": "module",
+      "family": "production",
+      "modes": [
+        "video",
+        "data",
+        "3d",
+        "ui-showcase",
+        "motion",
+        "av"
+      ],
+      "role": "Deterministic programmatic video and render delivery.",
+      "composes": [
+        "logo-generator",
+        "ui-design"
+      ]
+    },
+    {
+      "id": "document-writing",
+      "path": "references/modules/document-writing.md",
+      "status": "module",
+      "family": "publishing",
+      "modes": [
+        "readme",
+        "readme-rewrite",
+        "readme-audit",
+        "steam-player",
+        "steam-developer",
+        "steam-audit"
+      ],
+      "role": "GitHub README architecture, visuals, links, QA, Steam Workshop BBCode pages, and bilingual delivery.",
+      "composes": [
+        "logo-generator",
+        "ui-design"
+      ]
+    },
+    {
+      "id": "localization",
+      "path": "references/modules/localization.md",
+      "status": "module",
+      "family": "publishing",
+      "modes": [
+        "translate",
+        "audit"
+      ],
+      "role": "Game CSV localization with locale completeness and markup safety.",
+      "composes": [
+        "document-writing"
+      ]
+    },
+    {
+      "id": "resume-evidence-workflow",
+      "path": "references/modules/resume-evidence-workflow.md",
+      "status": "module",
+      "family": "career",
+      "modes": [
+        "evidence",
+        "tailor",
+        "review"
+      ],
+      "role": "Career evidence, requirement alignment, and editable resume delivery.",
+      "composes": [
+        "ui-design"
+      ]
+    },
+    {
+      "id": "tool-integration",
+      "path": "references/modules/tool-integration.md",
+      "status": "module",
+      "family": "operations",
+      "modes": [
+        "install",
+        "configure",
+        "troubleshoot",
+        "remove"
+      ],
+      "role": "Connect AzSkills to AI clients with verified installation and setup workflows.",
+      "composes": []
+    },
+    {
+      "id": "taste",
+      "path": "references/modules/taste.md",
+      "status": "module",
+      "family": "operations",
+      "modes": [
+        "main",
+        "subagent",
+        "independent"
+      ],
+      "role": "GPT with Taste judgment, collaboration, and execution behavior.",
+      "composes": []
+    },
+    {
+      "id": "az-clean-code",
+      "path": "references/modules/az-clean-code.md",
+      "status": "module",
+      "family": "architecture",
+      "modes": [
+        "write",
+        "review",
+        "refactor",
+        "style"
+      ],
+      "role": "Explicit, flat, reusable code with business data externalized, code style consistency, and implementation quality guards.",
+      "composes": [
+        "architecture"
+      ]
+    },
+    {
+      "id": "godot-3-dev",
+      "path": "references/modules/godot-3-dev.md",
+      "status": "module",
+      "family": "architecture",
+      "modes": [
+        "script",
+        "review",
+        "port"
+      ],
+      "role": "Godot 3.x GDScript, virtual-call safety, 3.6 API surface, and down-porting.",
+      "composes": [
+        "az-clean-code",
+        "architecture"
+      ]
+    },
+    {
+      "id": "style-presets",
+      "path": "references/modules/style-presets.md",
+      "status": "module",
+      "family": "interface",
+      "modes": [
+        "catalog",
+        "apply",
+        "loaders",
+        "audit"
+      ],
+      "role": "Named visual presets, keyword triggers, preset token packs, and loading indicators.",
+      "composes": [
+        "design-system",
+        "ui-design",
+        "frontend-slides"
+      ]
+    },
+    {
+      "id": "scientific-figures",
+      "path": "references/modules/scientific-figures.md",
+      "status": "module",
+      "family": "visual",
+      "modes": [
+        "redraw",
+        "author",
+        "verify"
+      ],
+      "role": "Medical and scientific schematics, faithful redraws, editable SVG, and deterministic figure verification.",
+      "composes": [
+        "style-presets",
+        "frontend-slides",
+        "ui-design"
+      ]
+    }
+  ]
+}

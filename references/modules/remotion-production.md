@@ -19,11 +19,11 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visua
 ## Contract
 
 - Use when: the primary deliverable is a rendered video, motion graphic, data story, 3D or UI showcase, or parameterized video.
-- Do not use when: the output is an interactive interface (`ui-design`), a static slide deck (`frontend-slides`), or a standalone SVG (`ui-motion` svg mode).
+- Do not use when: the output is an interactive interface (`ui-design`), a static slide deck (`frontend-slides`), or a standalone SVG (`ui-design` svg mode).
 - Owns: frame authority, scene graph, compositor boundaries, determinism, media synchronization, render QA, and delivery variants.
 - Inputs: brief, aspect ratio, dimensions, FPS, duration, storyboard, assets, data, audio, captions, and delivery targets.
 - Outputs: composition code, rendered video or image sequence, preview evidence, and a delivery manifest.
-- Compose with: `logo-generator` for identity assets; `ui-design` for interface scenes; `ui-motion` for motion details.
+- Compose with: `logo-generator` for identity assets; `ui-design` for interface scenes; `ui-design` for motion details.
 - Gates: every frame is deterministic; one owner controls time; frame, audio, and captions align; the final render and every variant are inspected.
 
 ## Modes

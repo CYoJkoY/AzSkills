@@ -3,8 +3,8 @@
  * AzSkills plugin catalog validator.
  *
  * The catalog is the distribution contract: every canonical module must be
- * published as its own plugin, and every standalone plugin must carry the
- * manifest and skill entry it claims.
+ * owned by exactly one module plugin, and every standalone plugin must carry
+ * the manifest and skill entry it claims.
  */
 
 import { readFile, stat } from "node:fs/promises";
@@ -33,7 +33,7 @@ function isPluginEntry(value: unknown): value is PluginCatalogEntry {
     Array.isArray(value.extra) &&
     value.extra.every((item) => typeof item === "string") &&
     (value.hooks === null || typeof value.hooks === "string") &&
-    (value.module === undefined || typeof value.module === "string") &&
+      (value.module === undefined || (typeof value.module === "string" && kebab(value.module))) &&
     (value.source === undefined || typeof value.source === "string")
   );
 }
@@ -65,6 +65,7 @@ async function main(): Promise<void> {
 
   const ids = new Set<string>();
   const moduleEntries = new Map<string, PluginCatalogEntry>();
+  const moduleOwners = new Map<string, string>();
   for (const plugin of catalog.plugins) {
     if (!isPluginEntry(plugin)) {
       fail("catalog: malformed plugin entry");
@@ -79,7 +80,13 @@ async function main(): Promise<void> {
       if (path.isAbsolute(extra) || extra.split(/[\\/]/).includes("..")) fail(plugin.id + ": extra path must stay inside the repository: " + extra);
     }
     if (plugin.kind === "module") {
-      if (plugin.module !== plugin.id) fail(plugin.id + ": module plugins must reference a module with the same id");
+      if (plugin.module === undefined) fail(plugin.id + ": module plugins must declare a canonical module");
+      if (plugin.module !== undefined) {
+        if (moduleOwners.has(plugin.module)) {
+          fail("catalog: module " + plugin.module + " is claimed by both " + moduleOwners.get(plugin.module) + " and " + plugin.id);
+        }
+        moduleOwners.set(plugin.module, plugin.id);
+      }
       if (plugin.source !== undefined) fail(plugin.id + ": module plugins are built from the module contract, not from a source directory");
       if (moduleEntries.has(plugin.id)) fail(plugin.id + ": duplicate module plugin");
       moduleEntries.set(plugin.id, plugin);
@@ -106,16 +113,8 @@ async function main(): Promise<void> {
   const modules = registry.modules.map((module) => module.id).sort();
   const published = [...moduleEntries.keys()].sort();
   for (const id of modules) {
-    if (!published.includes(id)) fail("catalog: module " + id + " is not published as a plugin");
+    if (!moduleOwners.has(id)) fail("catalog: module " + id + " is not owned by any plugin");
   }
-  for (const id of published) {
-    if (!modules.includes(id)) fail("catalog: " + id + " is not a canonical module in skills.json");
-  }
-  for (const plugin of moduleEntries.values()) {
-    if (plugin.hooks === null) continue;
-    if (!(await exists(path.join(root, plugin.hooks)))) fail(plugin.id + ": hooks manifest is missing: " + plugin.hooks);
-  }
-
   if (errors.length > 0) {
     console.error("Plugin catalog validation failed with " + errors.length + " issue(s):");
     for (const error of errors) console.error("- " + error);

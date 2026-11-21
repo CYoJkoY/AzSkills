@@ -23,7 +23,7 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visua
 - Owns: concept routes, silhouette, vector geometry, optical correction, small-size behavior, colorways, and identity usage rules.
 - Inputs: product name, category, audience, promise, competitors, existing identity, required formats, color constraints, and reproduction sizes.
 - Outputs: SVG mark or identity board, colorways, clear-space and minimum-size rules, and verification evidence.
-- Compose with: `ui-design` for the surface that hosts the mark; `design-system` when the identity must become tokens; `ui-motion` when the mark animates.
+- Compose with: `ui-design` for the surface that hosts the mark; `design-system` when the identity must become tokens; `ui-design` when the mark animates.
 - Gates: the mark is recognizable at small size, works in one color, survives simplification, and has no unlicensed resemblance.
 
 ## Modes

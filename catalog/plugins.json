@@ -49,20 +49,6 @@
       "hooks": null
     },
     {
-      "id": "ui-motion",
-      "kind": "module",
-      "module": "ui-motion",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
-      ],
-      "extra": [
-        "codex-plugin/assets/icon.svg"
-      ],
-      "hooks": null
-    },
-    {
       "id": "logo-generator",
       "kind": "module",
       "module": "logo-generator",
@@ -119,23 +105,9 @@
       "hooks": null
     },
     {
-      "id": "readme-craft",
+      "id": "document-writing",
       "kind": "module",
-      "module": "readme-craft",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
-      ],
-      "extra": [
-        "codex-plugin/assets/icon.svg"
-      ],
-      "hooks": null
-    },
-    {
-      "id": "steam-mod-page",
-      "kind": "module",
-      "module": "steam-mod-page",
+      "module": "document-writing",
       "category": "Productivity",
       "capabilities": [
         "Read",
@@ -218,7 +190,13 @@
       "extra": [
         "codex-plugin/assets/icon.svg"
       ],
-      "hooks": null
+      "hooks": null,
+      "modes": [
+        "write",
+        "review",
+        "refactor",
+        "style"
+      ]
     },
     {
       "id": "godot-3-dev",

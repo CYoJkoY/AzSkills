@@ -1,18 +1,18 @@
 ---
-name: ui-motion
+name: ui-motion-branch
 description: Construct, review, audit, and adapt UI motion using the smallest correct mechanism, host tokens, full interruption and accessibility behavior, and rendered verification. Also owns SVG animation and expressive interaction patterns.
 version: 3.0.0
-status: module
+status: reference
 family: interface
 modes: [build, review, audit, pattern, svg]
 ---
 
-# UI Motion
+# UI Motion Branch Reference
 
-Turn a motion request into an implementation, a review, an audit, a pattern
-choice, or an SVG animation. This module owns motion purpose, mechanism, timing,
-physicality, interruption, accessibility, performance, and verification. It does
-not own general layout, visual hierarchy, or runtime selection.
+This is the detailed motion branch of the canonical `ui-design` plugin. It does
+not declare a second plugin owner. Use it for `motion`, `motion-review`,
+`motion-audit`, `motion-pattern`, and `svg` after loading the canonical UI
+contract.
 
 Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../../design-intelligence.md).
 

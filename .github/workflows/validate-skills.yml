@@ -102,7 +102,9 @@ jobs:
           for archive in "$RUNNER_TEMP"/azskills-export/zips/*.zip; do
             unzip -tq "$archive"
           done
-          test "$(find "$RUNNER_TEMP/azskills-export/zips" -maxdepth 1 -name '*.zip' | wc -l)" -eq 20
+          expected="$(node -p "require('./catalog/plugins.json').plugins.length")"
+          actual="$(find "$RUNNER_TEMP/azskills-export/zips" -maxdepth 1 -name '*.zip' | wc -l)"
+          test "$actual" -eq "$expected"
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/.agents/plugins/marketplace.json"
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/ui-design/.codex-plugin/plugin.json"
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/empty-reply/hooks/stop-hook.ts"

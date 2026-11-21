@@ -1,10 +1,10 @@
 ---
 name: ui-design
-description: Design, build, refine, and review production interfaces with one visual thesis, a token-based system, complete states, responsive behavior, accessibility, and rendered visual QA. Use for web apps, dashboards, tools, settings, forms, and component libraries.
+description: Design, build, refine, review, and animate production interfaces with one visual thesis, a token-based system, complete states, responsive behavior, accessibility, purposeful motion, and rendered visual QA. Use for web apps, dashboards, tools, settings, forms, and component libraries.
 version: 3.0.0
 status: module
 family: interface
-modes: [build, refine, review, system]
+modes: [build, refine, review, system, motion, motion-review, motion-audit, motion-pattern, svg]
 ---
 
 # UI Design
@@ -12,19 +12,19 @@ modes: [build, refine, review, system]
 Turn a product requirement into a coherent interface and a usable
 implementation. This module owns the interface layer: hierarchy, composition,
 components, states, responsive behavior, accessibility, and visual verification.
-It does not choose the runtime or absorb motion-only, identity, or publishing
-work.
+It does not choose the runtime, create identity marks, or publish repository and
+storefront documents.
 
 Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../../design-intelligence.md).
 
 ## Contract
 
 - Use when: a task creates, changes, or reviews a product-facing interface, component system, or design token layer.
-- Do not use when: the task is runtime selection (`architecture`), motion-only construction or audit (`ui-motion`), identity or character marks (`logo-generator`), or document publishing (`readme-craft`, `steam-mod-page`).
+- Do not use when: the task is runtime selection (`architecture`), identity or character marks (`logo-generator`), or document publishing (`document-writing`).
 - Owns: visual hierarchy, composition, component behavior, state coverage, responsive layout, accessibility, and rendered UI quality.
 - Inputs: repository context, existing design system, normalized DESIGN.md when present, target users, primary tasks, locales, input methods, stack, and performance limits.
 - Outputs: implemented interface, refined component, review findings, or design-system contract, with evidence from the rendered result.
-- Compose with: `design-system` before implementation when a DESIGN.md exists; `ui-motion` for motion; `architecture` when the stack is unresolved.
+- Compose with: `design-system` before implementation when a DESIGN.md exists; Motion is handled internally; `architecture` when the stack is unresolved.
 - Gates: every relevant state is visible and distinguishable; keyboard, focus, contrast, and themes hold; the rendered result is inspected at real sizes.
 
 ## Modes
@@ -35,6 +35,11 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visua
 | `refine` | Existing UI needs hierarchy, polish, or coherence | Diagnose, rank, smallest visual change, verify | Focused diff |
 | `review` | Read-only audit of an existing interface | Evidence, hierarchy, states, accessibility, verdict | Ranked findings |
 | `system` | Implement a contract normalized by `design-system` in the target stack | Inventory, map, implement, document, verify | Token and component implementation |
+| `motion` | Add or change interface motion | Purpose, mechanism, geometry, timing, interruption, accessibility, verify | Implemented motion |
+| `motion-review` | Review an existing motion implementation | Context, motion gate, inspect, rank leverage | Read-only findings |
+| `motion-audit` | Audit motion across a codebase | Inventory, frequency map, opportunity gates, plan | Read-only audit plan |
+| `motion-pattern` | Adapt a distinctive interaction pattern | Static state, interaction contract, host-native translation | Pattern implementation |
+| `svg` | Author or optimize animated SVG | Scope, mechanism, geometry, accessibility, performance, verify | Single-file SVG |
 
 ## Workflow
 
@@ -126,7 +131,7 @@ keyboard-only use.
 - Keep domain state outside presentational components.
 - Use semantic HTML before ARIA; use ARIA only to fill a real gap.
 - Prefer CSS custom properties, native nesting, `:has()`, container queries, and logical properties when the baseline supports them.
-- Animate only after the static states are correct; hand motion construction to `ui-motion`.
+- Animate only after the static states are correct; use the motion branch below and preserve the host token system.
 - Keep icon geometry on one grid and one optical weight.
 - Use real content or representative content; never invent metrics or proof.
 
@@ -139,6 +144,14 @@ without color, the composition is not finished.
 
 For reviews, rank findings by user impact and give one smallest corrective action
 per finding. Separate observation, principle, recommendation, and tradeoff.
+
+## Motion branch
+
+For `motion`, `motion-review`, `motion-audit`, `motion-pattern`, and `svg`, load
+the detailed workflow in [UI motion](./ui-motion.md).
+The merged branch retains the motion gates for purpose, frequency, smallest
+mechanism, timing, interruption, reduced motion, input capability, performance,
+and rendered verification. Review and audit modes remain read-only.
 
 ## Quality gates
 
@@ -183,3 +196,4 @@ Unverified items:
 - [Implementation details](../../ui-design/references/implementation-details.md) - detailed layout, typography, color, forms, motion handoff, performance, and review procedure.
 - [Aesthetics](../../ui-design/references/aesthetics.md) - composition-first visual critique and anti-generic quality gate.
 - [UX overview](../../ui-design/references/ux/overview.md) - product-level UX analysis, platform patterns, and review workflow.
+- [Motion workflow](./ui-motion.md) - motion construction, review, audit, pattern, and SVG procedures.

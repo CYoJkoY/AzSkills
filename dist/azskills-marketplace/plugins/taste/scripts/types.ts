@@ -13,6 +13,7 @@ export interface SkillAlias {
   status: string;
   canonical: string;
   mode: string;
+  legacyModes?: Record<string, string>;
 }
 
 export interface SkillCatalog {

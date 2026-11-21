@@ -1,18 +1,18 @@
 ---
-name: steam-mod-page
+name: steam-branch
 description: Write and audit Steam Workshop Mod descriptions as clean BBCode with verified facts, player-first or developer-first structure, independent Chinese and English deliverables, and a final syntax lint.
 version: 3.0.0
-status: module
+status: reference
 family: publishing
 modes: [player, developer, audit]
 ---
 
-# Steam Mod Page
+# Steam Workshop Branch Reference
 
-Turn a Mod repository into a complete Steam Workshop description. This module
-owns the page argument, BBCode surface, bilingual delivery, compatibility facts,
-changelog, images, support, and final syntax lint. It does not invent features or
-produce Markdown.
+This is the detailed Steam Workshop branch of the canonical `document-writing`
+plugin. It does not declare a second plugin owner. Use it for `steam-player`,
+`steam-developer`, and `steam-audit` after loading the canonical document
+contract.
 
 Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../../design-intelligence.md).
 

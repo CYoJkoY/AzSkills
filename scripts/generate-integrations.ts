@@ -2,12 +2,15 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { errorCode, readJson } from './runtime.ts';
-import type { IntegrationMechanism, IntegrationRegistry, IntegrationTool } from './types.ts';
+import type { IntegrationMechanism, IntegrationRegistry, IntegrationTool, PluginCatalog } from './types.ts';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const registryPath = path.join(root, 'integrations/tools.json');
 const registry = await readJson<IntegrationRegistry>(registryPath);
+const catalog = await readJson<PluginCatalog>(path.join(root, 'catalog/plugins.json'));
 const check = process.argv.includes('--check');
+const workflowIds = catalog.plugins.filter((entry) => entry.kind === 'module').map((entry) => entry.id);
+const pluginCount = catalog.plugins.length;
 
 const labels: Record<IntegrationMechanism, string> = {
   'native-skills': 'Native skill folders',
@@ -53,9 +56,9 @@ const guide = (tool: IntegrationTool): string => {
     lines.push('');
     lines.push('    codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git');
     lines.push('');
-    lines.push('AzSkills is a catalog, not one plugin. The marketplace lists 20 independent plugins, each with its own `.codex-plugin/plugin.json`, skill entry, and reference closure:');
+    lines.push('AzSkills is a catalog, not one plugin. The marketplace lists ' + pluginCount + ' independent plugins, each with its own `.codex-plugin/plugin.json`, skill entry, and reference closure:');
     lines.push('');
-    lines.push('- Workflow plugins: architecture, design-system, ui-design, ui-motion, logo-generator, photo-abstract-editorial, frontend-slides, remotion-production, readme-craft, steam-mod-page, localization, resume-evidence-workflow, tool-integration, taste, az-clean-code, godot-3-dev, style-presets, scientific-figures.');
+    lines.push('- Workflow plugins: ' + workflowIds.join(', ') + '.');
     lines.push('- Hook plugins: no-think-tags and empty-reply, each a Stop-hook backstop for answer hygiene.');
     lines.push('');
     lines.push('Install the plugins the project needs. Each plugin is matched on its own description, so a capability no longer depends on one shared dispatcher entry. Hooks ship only with `taste` (steering) and `godot-3-dev` (Godot 3.x write guard), plus the two hook plugins; review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces.');
@@ -149,7 +152,7 @@ const index = () => {
     '# Tool integrations',
     '',
     'AzSkills connects to AI tools through native skills, Codex plugins, MCP servers, and manual import.',
-    'AzSkills is a catalog of 20 independent plugins. Skill folders install the workflow plugins individually, the Codex marketplace installs any plugin including the hook plugins, and the MCP server exposes the catalog to clients without a skill folder.',
+    'AzSkills is a catalog of ' + pluginCount + ' independent plugins. Skill folders install the workflow plugins individually, the Codex marketplace installs any plugin including the hook plugins, and the MCP server exposes the catalog to clients without a skill folder.',
     'Manual import is used only where the vendor workflow is UI-based or not publicly documented for local files.',
     '',
     '| Tool | Mechanism | Default target |',

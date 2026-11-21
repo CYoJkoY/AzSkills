@@ -1,16 +1,16 @@
 ---
 name: az-clean-code
-description: Apply explicit, flat, reusable, data-driven constraints when writing, reviewing, or refactoring application code.
+description: Apply explicit, flat, reusable, data-driven constraints when writing, reviewing, refactoring, or consistently styling application code.
 status: module
 family: architecture
-modes: [write, review, refactor]
+modes: [write, review, refactor, style]
 version: 2.5.2
 ---
 
 ## Contract
 
 - Use when: authoring, reviewing, or refactoring application logic for explicitness, control-flow depth, reuse, or business-data placement.
-- Do not use when: formatting-only tasks, structure-preserving performance work, or unrelated low-level infrastructure.
+- Do not use when: structure-preserving performance work or unrelated low-level infrastructure.
 - Owns: C1-C7 code acceptance and its required self-check.
 - Inputs: requested behavior, repository conventions, existing code and configuration.
 - Outputs: compliant code or review findings, plus a C1-C7 self-check.
@@ -22,10 +22,18 @@ version: 2.5.2
 - `write`: establish business-data schema before coding, then implement and self-check.
 - `review`: report each applicable C1-C7 failure with location and a concrete correction.
 - `refactor`: preserve observable contracts while flattening control flow and externalizing business data.
+- `style`: normalize formatting and repository code style using existing formatter, editor, and linter contracts without changing behavior.
 
 ## Workflow
 
 Load the standalone `az-clean-code/SKILL.md` first. Follow its before-coding C7 gate, C1-C7 constraints, verification, and required self-check.
+
+For `style`, inspect formatter configuration, EditorConfig, lint rules, generated
+file boundaries, and local conventions first. Apply the narrowest formatting
+scope, preserve semantics and public interfaces, and run the repository's
+format or lint check. A formatting-only change records C1-C7 as not applicable
+where no behavior or business data is involved; it still verifies whitespace,
+generated files, and diff scope.
 
 ## Quality gates
 

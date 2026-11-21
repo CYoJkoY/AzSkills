@@ -1,18 +1,18 @@
 ---
-name: readme-craft
+name: readme-branch
 description: Design, rewrite, and audit GitHub README homepages with evidence-first information architecture, theme-safe SVG headings, stable anchors, verified links, dynamic repository facts, and rendered QA. Use for repository landing pages.
 version: 3.0.0
-status: module
+status: reference
 family: publishing
 modes: [build, rewrite, audit]
 ---
 
-# README Craft
+# README Branch Reference
 
-Turn a repository into a readable, verifiable GitHub landing page. This module
-owns information architecture, first-screen identity, heading icons, navigation,
-repository facts, support presentation, and README visual QA. It does not invent
-product claims, screenshots, benchmarks, or destinations.
+This is the detailed README branch of the canonical `document-writing` plugin.
+It does not declare a second plugin owner. Use it for `readme`,
+`readme-rewrite`, and `readme-audit` after loading the canonical document
+contract.
 
 Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visual extensions are in [design-intelligence.md](../../design-intelligence.md).
 
