@@ -1,0 +1,1277 @@
+/* ============================================================================
+   AzSkills design system
+   ----------------------------------------------------------------------------
+   Wabi Press is the default: warm paper, soot ink, cinnabar and moss.
+   :root owns the material palette. --wb-* aliases preserve the tool API.
+   .wabi-* reading primitives work without a root attribute.
+   data-surface="workbench" selects dense tool typography; the legacy
+   data-surface="editorial" remains compatible with the reading default.
+   ============================================================================ */
+
+/* ============================================================================
+   1 · Shared structural tokens
+   ============================================================================ */
+
+:root {
+  /* [Type stacks 排印字体栈] */
+  --font-editorial: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", Georgia, serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", SFMono-Regular, Menlo, monospace;
+
+  /* [Legacy editorial spacing module · the 8px subset of the --wb-space-* ramp] */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-8: 64px;
+  --space-10: 80px;
+
+  /* [Measured prose] */
+  --measure-prose: 65ch;
+  --line-height-prose: 1.75;
+  --line-height-display: 1.28;
+
+  /* [Physical motion curves 物理动效曲线] */
+  --ease-paper: cubic-bezier(0.25, 1, 0.4, 1);       /* page & surface transitions 240–320ms */
+  --ease-ink: cubic-bezier(0.16, 1, 0.3, 1);         /* micro-interactions 120–150ms */
+}
+
+/* Wabi Press material tokens: default for every surface. */
+:root {
+  color-scheme: light;
+
+  /* [Washi tone spectrum 和纸鸟子谱] */
+  --bg-canvas: #F5F3EC;                              /* warm washi base */
+  --bg-surface: #FAF9F5;                             /* cards & carriers */
+  --bg-overlay: #ECE8DC;                             /* overlays, hover, secondary blocks */
+  --border-subtle: rgba(40, 36, 32, 0.10);           /* 1px hairline impression */
+  --border-strong: rgba(40, 36, 32, 0.25);           /* active & focus ink line */
+
+  --text-primary: #1C1A17;                           /* pine-soot ink */
+  --text-secondary: #524C44;                         /* 熟褐灰 body & descriptions */
+  --text-muted: #6E675D;                             /* readable ink, meta & footnotes */
+
+  --accent-cinnabar: #A6382A;                        /* cinnabar seal · primary action */
+  --accent-moss: #3B5848;                            /* patina moss · success / secondary */
+
+  /* Mineral pigments: text and line roles, never full-page decoration. */
+  --accent-indigo: #405F73;
+  --accent-ochre: #795B28;
+  --accent-clay: #855747;
+  --tint-indigo: #E4EBED;
+  --tint-ochre: #EFE7D5;
+  --tint-clay: #EEE2DA;
+  --font-reading: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-technical: "Maple Mono NF CN", var(--font-mono);
+  --reading-body: 1.125rem;
+  --reading-caption: 1rem;
+  --reading-measure: 65ch;
+  --reading-paragraph-gap: 1em;
+  --reading-heading-gap: 2em;
+  --reading-heading-after: 0.75em;
+  --reading-list-gap: 0.5em;
+  --reading-figure-gap: 1.5em;
+  --reading-caption-gap: 0.5em;
+  --reading-section-gap: clamp(2rem, 5vw, 4rem);
+
+  /* [Paper geometry] */
+  --radius-subtle: 2px;                              /* hand-cut paper corner */
+  --shadow-press: 0 1px 2px rgba(40, 36, 32, 0.04);  /* near-zero paper seating */
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* [Inkstone night spectrum 砚石夜墨谱] */
+  --bg-canvas: #131416;                              /* inkstone black, never pure black */
+  --bg-surface: #1B1C20;                             /* lifted charcoal carrier */
+  --bg-overlay: #25272D;                             /* floating panels & active background */
+  --border-subtle: rgba(240, 235, 225, 0.08);        /* mica hairline */
+  --border-strong: rgba(240, 235, 225, 0.18);
+
+  --text-primary: #EDEAE2;                           /* warm rice-paper ink white */
+  --text-secondary: #A39F95;                         /* faded ash */
+  --text-muted: #AAA397;                             /* readable ash, auxiliary text */
+
+  --accent-cinnabar: #E18C7C;                        /* faintly luminous night cinnabar */
+  --accent-moss: #9AB49E;                            /* valley moss */
+  --accent-indigo: #9EBBCB;
+  --accent-ochre: #D5B576;
+  --accent-clay: #CEA38E;
+  --tint-indigo: #253039;
+  --tint-ochre: #342F24;
+  --tint-clay: #352A27;
+}
+
+/* ============================================================================
+   2 · Workbench compatibility roles and tool geometry
+   ============================================================================ */
+
+:root {
+  /* Compatibility roles: one paper/ink palette, tool geometry below. */
+  --wb-canvas: var(--bg-canvas);
+  --wb-surface: var(--bg-surface);
+  --wb-surface-subtle: var(--bg-overlay);
+  --wb-surface-active: var(--bg-overlay);
+  --wb-border: var(--border-subtle);
+  --wb-border-strong: var(--border-strong);
+  --wb-text: var(--text-primary);
+  --wb-text-secondary: var(--text-secondary);
+  --wb-text-muted: var(--text-muted);
+  --wb-accent: var(--accent-cinnabar);
+  --wb-accent-selected: var(--bg-overlay);
+  --wb-on-accent: var(--bg-canvas);
+  --wb-focus: var(--accent-indigo);
+  --wb-success: var(--accent-moss);
+  --wb-warning: var(--accent-ochre);
+  --wb-danger: var(--accent-cinnabar);
+  --wb-accent-hover: color-mix(in srgb, var(--accent-cinnabar) 88%, var(--text-primary));
+  --wb-accent-active: color-mix(in srgb, var(--accent-cinnabar) 78%, var(--text-primary));
+
+  /* Legacy ramp API; components consume semantic state roles. */
+  --wb-accent-50: var(--bg-overlay);
+  --wb-accent-100: var(--border-strong);
+  --wb-accent-200: color-mix(in srgb, var(--accent-cinnabar) 20%, var(--bg-canvas));
+  --wb-accent-300: color-mix(in srgb, var(--accent-cinnabar) 30%, var(--bg-canvas));
+  --wb-accent-400: color-mix(in srgb, var(--accent-cinnabar) 40%, var(--bg-canvas));
+  --wb-accent-500: color-mix(in srgb, var(--accent-cinnabar) 50%, var(--bg-canvas));
+  --wb-accent-600: var(--wb-accent);
+  --wb-accent-700: var(--wb-accent-hover);
+  --wb-accent-800: var(--wb-accent-active);
+  --wb-accent-900: color-mix(in srgb, var(--accent-cinnabar) 90%, var(--bg-canvas));
+
+  /* [Spacing ramp · Tier 1 primitive, suffix = px] */
+  --wb-space-2: 2px;
+  --wb-space-4: 4px;
+  --wb-space-6: 6px;
+  --wb-space-8: 8px;
+  --wb-space-12: 12px;
+  --wb-space-16: 16px;
+  --wb-space-20: 20px;
+  --wb-space-24: 24px;
+  --wb-space-32: 32px;
+  --wb-space-40: 40px;
+  --wb-space-48: 48px;
+  --wb-space-56: 56px;
+  --wb-space-64: 64px;
+  --wb-space-80: 80px;
+
+  /* [Spacing Tier 2 · grouping roles] */
+  --wb-gap-inline: var(--wb-space-8);                /* icon to label, chip to chip */
+  --wb-gap-stack: var(--wb-space-12);                /* fields inside one group */
+  --wb-gap-group: var(--wb-space-24);                /* groups inside one section */
+  --wb-inset-control: var(--wb-space-4) var(--wb-space-12);
+  --wb-inset-panel: var(--wb-space-16);
+
+  /* [Spacing Tier 3 · layout] */
+  --wb-section-gap: var(--wb-space-48);
+
+  /* [Radius tiers · surface role, not taste] */
+  --wb-radius-sm: 2px;
+  --wb-radius-md: 2px;
+  --wb-radius-lg: 2px;
+  --wb-radius-pill: 999px;
+
+  /* [Chrome geometry] */
+  --wb-rail-width: 48px;
+  --wb-sidebar-width: 260px;
+  --wb-row-height: 34px;
+  --wb-control-height: 32px;
+  --wb-content-gap: var(--wb-space-16);
+  --wb-transition: 140ms var(--ease-ink);
+}
+
+[data-density="comfortable"] {
+  --wb-row-height: 34px;
+  --wb-control-height: 32px;
+  --wb-content-gap: 16px;
+}
+
+[data-density="compact"] {
+  --wb-row-height: 26px;
+  --wb-control-height: 26px;
+  --wb-content-gap: 8px;
+}
+
+/* ============================================================================
+   Workbench base
+   ============================================================================ */
+
+html {
+  background: var(--wb-canvas);
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--wb-canvas);
+  color: var(--wb-text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* The hidden attribute must beat component display rules. `.wb-list-item` and
+   `.wb-statusbar` set display, which would otherwise keep filtered or hidden
+   regions visible even though the attribute is present. */
+[hidden] {
+  display: none !important;
+}
+
+a {
+  color: var(--wb-accent);
+  text-underline-offset: 2px;
+}
+
+::selection {
+  background: var(--wb-accent-100);
+  color: var(--wb-text);
+}
+
+:where(button, input, select, textarea, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--wb-focus);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   Workbench shell · regions
+   ============================================================================ */
+
+.wb-shell {
+  display: grid;
+  grid-template-columns: var(--wb-rail-width) minmax(200px, var(--wb-sidebar-width)) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--wb-canvas);
+  color: var(--wb-text);
+}
+
+.wb-activity-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--wb-space-4);
+  padding: var(--wb-space-8) var(--wb-space-4);
+  background: var(--wb-surface-subtle);
+  border-right: 1px solid var(--wb-border);
+}
+
+.wb-activity-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--wb-row-height);
+  padding: 0 var(--wb-space-4);
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--wb-text-secondary);
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--wb-transition), color var(--wb-transition);
+}
+
+.wb-activity-button:hover {
+  background: var(--wb-surface);
+  color: var(--wb-text);
+}
+
+.wb-activity-button[aria-current="page"],
+.wb-activity-button[aria-pressed="true"] {
+  border-left-color: var(--wb-accent);
+  background: var(--wb-surface-active);
+  color: var(--wb-text);
+}
+
+.wb-sidebar {
+  min-width: 0;
+  overflow: auto;
+  border-right: 1px solid var(--wb-border);
+  background: var(--wb-surface);
+}
+
+.wb-sidebar-header,
+.wb-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wb-gap-inline);
+  min-height: 36px;
+  padding: 0 var(--wb-space-12);
+  border-bottom: 1px solid var(--wb-border);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.wb-content {
+  min-width: 0;
+  padding: var(--wb-content-gap);
+}
+
+.wb-content-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wb-gap-inline);
+  margin-bottom: var(--wb-gap-group);
+}
+
+.wb-content h1,
+.wb-content h2,
+.wb-content h3 {
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.wb-content h1 {
+  font-size: 1.5rem;
+  line-height: 1.35;
+}
+
+.wb-content h2 {
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+
+.wb-prose {
+  max-width: var(--measure-prose);
+}
+
+.wb-panel {
+  min-width: 0;
+  border-top: 1px solid var(--wb-border);
+  background: var(--wb-surface);
+}
+
+.wb-statusbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--wb-space-12);
+  min-height: 24px;
+  padding: var(--wb-space-2) var(--wb-space-12);
+  background: var(--wb-surface-subtle);
+  border-top: 1px solid var(--wb-border);
+  color: var(--wb-text-secondary);
+  font-size: 12px;
+}
+
+/* ============================================================================
+   Workbench lists & selection · two tiers, colour plus a non-colour cue
+   ============================================================================ */
+
+.wb-list {
+  margin: 0;
+  padding: var(--wb-space-4);
+  list-style: none;
+}
+
+.wb-list-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--wb-gap-inline);
+  min-height: var(--wb-row-height);
+  padding: 0 var(--wb-space-8);
+  border-radius: var(--wb-radius-sm);
+  color: var(--wb-text-secondary);
+  cursor: pointer;
+  transition: background var(--wb-transition), color var(--wb-transition);
+}
+
+.wb-list-item:hover {
+  background: var(--wb-surface-subtle);
+  color: var(--wb-text);
+}
+
+.wb-list-item[aria-current="true"],
+.wb-list-item[aria-selected="true"] {
+  background: var(--wb-accent-selected);
+  color: var(--wb-text);
+  box-shadow: inset 0 0 0 1px var(--wb-accent-100);
+}
+
+.wb-list-item[aria-current="true"]::before,
+.wb-list-item[aria-selected="true"]::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--wb-space-4);
+  inset-inline-start: 0;
+  width: 2px;
+  border-radius: var(--wb-radius-pill);
+  background: var(--wb-accent);
+}
+
+.wb-list-item[aria-current="true"]::after,
+.wb-list-item[aria-selected="true"]::after {
+  content: "✓";
+  margin-inline-start: auto;
+  color: var(--wb-accent);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.wb-list-item .wb-badge {
+  margin-inline-start: auto;
+}
+
+/* Grouped selection: container outline, child handles, and a count badge. */
+.wb-group {
+  position: relative;
+  padding: var(--wb-space-8);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-md);
+  background: var(--wb-surface);
+}
+
+.wb-group[aria-selected="true"],
+.wb-group[data-selected="true"] {
+  border-color: var(--wb-accent);
+  box-shadow: 0 0 0 1px var(--wb-accent);
+}
+
+.wb-group-child {
+  position: relative;
+  padding: var(--wb-space-4) var(--wb-space-8);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-sm);
+  background: var(--wb-surface-subtle);
+}
+
+.wb-group[aria-selected="true"] .wb-group-child,
+.wb-group[data-selected="true"] .wb-group-child {
+  border-color: var(--wb-accent-200);
+}
+
+.wb-group[aria-selected="true"] .wb-group-child::before,
+.wb-group[data-selected="true"] .wb-group-child::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -3px;
+  inset-inline-start: -3px;
+  width: 6px;
+  height: 6px;
+  background: var(--wb-accent);
+}
+
+.wb-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 var(--wb-space-6);
+  border-radius: var(--wb-radius-pill);
+  background: var(--wb-accent);
+  color: var(--wb-on-accent);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.wb-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 var(--wb-space-6);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-pill);
+  background: var(--wb-surface-subtle);
+  color: var(--wb-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================================
+   Workbench controls
+   ============================================================================ */
+
+.wb-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--wb-space-4);
+}
+
+.wb-input {
+  width: 100%;
+  min-height: var(--wb-control-height);
+  padding: var(--wb-inset-control);
+  border: 1px solid var(--wb-border-strong);
+  border-radius: var(--wb-radius-sm);
+  background: var(--wb-surface);
+  color: var(--wb-text);
+  font: inherit;
+  transition: border-color var(--wb-transition), background var(--wb-transition);
+}
+
+.wb-input::placeholder {
+  color: var(--wb-text-muted);
+}
+
+.wb-input:hover {
+  border-color: var(--wb-text-muted);
+}
+
+.wb-input[aria-invalid="true"] {
+  border-color: var(--wb-danger);
+}
+
+.wb-input:disabled {
+  background: var(--wb-surface-subtle);
+  color: var(--wb-text-muted);
+  cursor: not-allowed;
+}
+
+/* A select sizes to its options; text inputs stay full width. */
+.wb-select {
+  width: auto;
+}
+
+.wb-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--wb-gap-inline);
+  min-height: var(--wb-control-height);
+  padding: var(--wb-inset-control);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-sm);
+  background: var(--wb-surface);
+  color: var(--wb-text);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--wb-transition), border-color var(--wb-transition), color var(--wb-transition);
+}
+
+.wb-button:hover {
+  border-color: var(--wb-border-strong);
+  background: var(--wb-surface-subtle);
+}
+
+.wb-button:active {
+  border-color: var(--wb-border-strong);
+  background: var(--wb-surface-active);
+}
+
+.wb-button--primary {
+  border-color: var(--wb-accent);
+  background: var(--wb-accent);
+  color: var(--wb-on-accent);
+}
+
+.wb-button--primary:hover {
+  border-color: var(--wb-accent-hover);
+  background: var(--wb-accent-hover);
+}
+
+.wb-button--primary:active {
+  border-color: var(--wb-accent-active);
+  background: var(--wb-accent-active);
+}
+
+.wb-button--ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--wb-text-secondary);
+}
+
+.wb-button--ghost:hover {
+  border-color: var(--wb-border);
+  background: var(--wb-surface-subtle);
+  color: var(--wb-text);
+}
+
+.wb-button[disabled],
+.wb-button:disabled {
+  border-color: var(--wb-border);
+  background: var(--wb-surface-subtle);
+  color: var(--wb-text-muted);
+  cursor: not-allowed;
+}
+
+.wb-button[aria-pressed="true"] {
+  border-color: var(--wb-accent);
+  background: var(--wb-accent-selected);
+  color: var(--wb-text);
+}
+
+.wb-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wb-gap-inline);
+  min-height: 36px;
+  padding: 0 var(--wb-space-20);
+  border: 1px solid var(--wb-accent);
+  border-radius: var(--wb-radius-pill);
+  background: var(--wb-accent);
+  color: var(--wb-on-accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wb-kbd {
+  display: inline-block;
+  min-width: 20px;
+  padding: var(--wb-space-2) var(--wb-space-6);
+  border: 1px solid var(--wb-border);
+  border-bottom-width: 2px;
+  border-radius: var(--wb-radius-sm);
+  background: var(--wb-surface);
+  color: var(--wb-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* ============================================================================
+   Workbench states
+   ============================================================================ */
+
+.wb-state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wb-space-6);
+  font-size: 12px;
+}
+
+.wb-state--success { color: var(--wb-success); }
+.wb-state--warning { color: var(--wb-warning); }
+.wb-state--error { color: var(--wb-danger); }
+
+.wb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wb-space-6);
+  min-height: 22px;
+  padding: 0 var(--wb-space-8);
+  border: 1px solid color-mix(in srgb, currentColor 35%, var(--wb-border));
+  border-radius: var(--wb-radius-pill);
+  background: var(--wb-surface);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.wb-chip::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: var(--wb-radius-pill);
+  background: currentColor;
+}
+
+.wb-chip--success { color: var(--wb-success); }
+.wb-chip--warning { color: var(--wb-warning); }
+.wb-chip--error { color: var(--wb-danger); }
+.wb-chip--neutral { color: var(--wb-text-secondary); }
+
+/* ============================================================================
+   Workbench responsiveness
+   ============================================================================ */
+
+@media (max-width: 760px) {
+  .wb-shell {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .wb-sidebar {
+    display: none;
+  }
+
+  .wb-sidebar[data-open="true"] {
+    display: block;
+    position: fixed;
+    z-index: 10;
+    inset: 0 auto 0 44px;
+    width: min(320px, calc(100vw - 44px));
+    box-shadow: 0 0 0 100vmax rgb(0 0 0 / 35%);
+  }
+
+  .wb-content {
+    padding: var(--wb-space-12);
+  }
+}
+
+/* ============================================================================
+   3 · Reading defaults and Wabi Press primitives
+   ----------------------------------------------------------------------------
+   Material: washi paper (和纸) + pine-soot ink (松烟墨).
+   Prohibited: pure #000000, pure #FFFFFF, heavy shadows, spring/bounce motion.
+   Depth comes from 1px hairline borders + background lightness steps only.
+   ============================================================================ */
+
+html:not([data-surface="workbench"]),
+html:not([data-surface="workbench"]) body {
+  background: var(--bg-canvas);
+  color: var(--text-secondary);
+  font-family: var(--font-reading);
+  line-height: var(--line-height-prose);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html:not([data-surface="workbench"]) { font-size: 100%; }
+html:not([data-surface="workbench"]) body { font-size: var(--reading-body); }
+
+html:not([data-surface="workbench"]) h1,
+html:not([data-surface="workbench"]) h2,
+html:not([data-surface="workbench"]) h3,
+html:not([data-surface="workbench"]) h4 {
+  overflow-wrap: anywhere;
+  font-family: var(--font-editorial);
+  font-weight: 500;                                   /* medium only — no bold bloat */
+  line-height: var(--line-height-display);            /* 1.2–1.35 */
+  color: var(--text-primary);
+}
+
+html:not([data-surface="workbench"]) h1 { font-size: 2.5rem; }
+html:not([data-surface="workbench"]) h2 { font-size: 1.75rem; }
+html:not([data-surface="workbench"]) h3 { font-size: 1.25rem; }
+
+html:not([data-surface="workbench"]) p {
+  max-width: var(--reading-measure);
+  overflow-wrap: anywhere;
+}
+
+html:not([data-surface="workbench"]) a {
+  color: var(--accent-cinnabar);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--border-subtle);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 140ms var(--ease-ink), color 140ms var(--ease-ink);
+}
+
+html:not([data-surface="workbench"]) a:hover {
+  text-decoration-color: var(--accent-cinnabar);
+}
+
+html:not([data-surface="workbench"]) a:focus-visible,
+html:not([data-surface="workbench"]) button:focus-visible,
+html:not([data-surface="workbench"]) input:focus-visible,
+html:not([data-surface="workbench"]) select:focus-visible,
+html:not([data-surface="workbench"]) textarea:focus-visible,
+html:not([data-surface="workbench"]) [tabindex]:focus-visible {
+  outline: 2px solid var(--accent-indigo);             /* visible ink focus */
+  outline-offset: 2px;
+  border-radius: var(--radius-subtle);
+}
+
+html:not([data-surface="workbench"]) :is(code, kbd, samp, var, .mono, .meta-index, .kbd) {
+  font-family: var(--font-technical);
+  font-variant-numeric: tabular-nums;                 /* tabular figures for all technical text */
+  letter-spacing: normal;
+}
+
+html:not([data-surface="workbench"]) ::selection {
+  background: var(--bg-overlay);
+  color: var(--text-primary);
+}
+
+/* ============================================================================
+   Chapter hairlines · 章节引线
+   ============================================================================ */
+
+.hairline {
+  height: 1px;
+  border: 0;
+  background: var(--border-subtle);
+}
+
+.hairline-strong {
+  height: 1px;
+  border: 0;
+  background: var(--border-strong);
+}
+
+/* Thin editorial lead-in rule prefixed by a mono marker, e.g. "SEC. 02 ─────" */
+.lead-rule {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-6) 0 var(--space-3);
+}
+
+.lead-rule::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+/* ============================================================================
+   Wabi-Press card · .wabi-card
+   Hairline frame, 2px cut corners, faint paper seating. No heavy shadow.
+   ============================================================================ */
+
+.wabi-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-subtle);
+  box-shadow: var(--shadow-press);
+  padding: var(--space-3);
+}
+
+.wabi-card--hoverable {
+  transition: background 140ms var(--ease-ink), border-color 140ms var(--ease-ink);
+}
+
+.wabi-card--hoverable:hover {
+  background: var(--bg-overlay);
+  border-color: var(--border-strong);
+}
+
+.wabi-card--raised {
+  background: var(--bg-surface);
+  border-color: var(--border-strong);
+}
+
+/* Secondary block sitting directly on the canvas (no card chrome) */
+.wabi-panel {
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-subtle);
+  padding: var(--space-3);
+}
+
+/* ============================================================================
+   Meta header · .wabi-meta-header
+   Monospace batch identifiers, section numbers, and seal badges.
+   ============================================================================ */
+
+.wabi-meta-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--reading-caption);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+}
+
+.wabi-meta-header .meta-index {
+  color: var(--accent-cinnabar);
+}
+
+.wabi-meta-header .meta-rule {
+  flex: 1;
+  height: 1px;
+  align-self: center;
+  background: var(--border-subtle);
+}
+
+/* ============================================================================
+   Seal badges · .seal / .seal-cinnabar / .seal-moss
+   Publication stamp marks in place of generic icon chips.
+   ============================================================================ */
+
+.seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75em;
+  height: 1.75em;
+  padding: 0 0.35em;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-subtle);
+  font-family: var(--font-editorial);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  user-select: none;
+}
+
+.seal-cinnabar {
+  color: var(--accent-cinnabar);
+}
+
+.seal-moss {
+  color: var(--accent-moss);
+}
+
+.seal--solid {
+  background: var(--accent-cinnabar);
+  border-color: var(--accent-cinnabar);
+  color: var(--bg-canvas);
+}
+
+/* ============================================================================
+   Editorial prose · .editorial-prose
+   Body measure, pull quotes, footnotes, index connectors.
+   ============================================================================ */
+
+.editorial-prose {
+  overflow-wrap: anywhere;
+  font-family: var(--font-reading);
+  font-size: var(--reading-body);
+  line-height: var(--line-height-prose);              /* 1.7–1.8 */
+  max-width: var(--reading-measure);
+  color: var(--text-secondary);
+}
+
+.editorial-prose p + p {
+  margin-top: var(--reading-paragraph-gap);
+}
+
+.editorial-prose .prose-lede {
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+/* Reading rhythm: one margin owner per relationship; figures keep captions close. */
+.editorial-prose :where(p, ul, ol, dl, figure, blockquote, pre, table, h2, h3, h4) {
+  margin: 0;
+}
+.editorial-prose > * + * { margin-block-start: var(--reading-paragraph-gap); }
+.editorial-prose > :is(h2, h3, h4) { margin-block-start: var(--reading-heading-gap); }
+.editorial-prose > :is(h2, h3, h4) + * { margin-block-start: var(--reading-heading-after); }
+.editorial-prose > :first-child { margin-block-start: 0; }
+.editorial-prose :is(ul, ol) { padding-inline-start: 1.5em; }
+.editorial-prose li + li { margin-block-start: var(--reading-list-gap); }
+.editorial-prose > figure,
+.editorial-prose > figure + :where(:not(h2, h3, h4)) { margin-block-start: var(--reading-figure-gap); }
+.editorial-prose :is(img, video, svg) { display: block; max-width: 100%; height: auto; }
+.editorial-prose figcaption {
+  margin-block-start: var(--reading-caption-gap);
+  font: 400 var(--reading-caption)/1.6 var(--font-reading);
+  color: var(--text-muted);
+}
+.editorial-prose :is(p, li, a, figcaption) { overflow-wrap: anywhere; }
+.editorial-prose pre { overflow-x: auto; }
+.editorial-prose :is(code, kbd, samp) {
+  font-family: var(--font-technical);
+  letter-spacing: normal;
+}
+.editorial-prose:lang(zh) { --reading-measure: 34em; line-break: strict; }
+.wabi-note {
+  padding: 1em;
+  border-inline-start: 2px solid var(--accent-indigo);
+  background: var(--tint-indigo);
+  color: var(--text-primary);
+}
+.wabi-note--caution { border-color: var(--accent-ochre); background: var(--tint-ochre); }
+.wabi-note--context { border-color: var(--accent-clay); background: var(--tint-clay); }
+
+/* First-letter settlement · 首字沉降 */
+.editorial-prose .drop-cap::first-letter {
+  float: left;
+  font-family: var(--font-editorial);
+  font-weight: 500;
+  font-size: 3.2em;
+  line-height: 0.9;
+  padding-right: 0.12em;
+  color: var(--text-primary);
+}
+
+/* Pull quote bound by a 1px ink rule, never a box */
+.editorial-prose .pull-quote {
+  margin: var(--space-4) 0;
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--border-strong);
+  font-family: var(--font-editorial);
+  font-weight: 500;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.editorial-prose .pull-quote .pull-quote-cite {
+  display: block;
+  margin-top: var(--space-1);
+  font-family: var(--font-reading);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: normal;
+  font-size: var(--reading-caption);
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* Footnotes · 注脚 */
+.footnotes {
+  margin-top: var(--space-4);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--reading-caption);
+  color: var(--text-muted);
+}
+
+.footnotes .footnote-ref {
+  color: var(--accent-cinnabar);
+  margin-right: 0.5em;
+}
+
+.footnote-mark {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75em;
+  letter-spacing: 0.08em;
+  color: var(--accent-cinnabar);
+  vertical-align: super;
+}
+
+/* Index connector column (left rail of a directory flow) */
+.index-rail {
+  border-left: 1px solid var(--border-subtle);
+  padding-left: var(--space-2);
+}
+
+/* ============================================================================
+   Layout & 間 — asymmetric grids and measured container
+   ============================================================================ */
+
+.wabi-container {
+  max-width: 1088px;                                   /* 12 × 8 + generous 間 */
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 3rem);                      /* 1.5× a dense dashboard gutter */
+  padding-block: var(--space-8);
+}
+
+.ma-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-3);
+  align-items: start;
+}
+
+/* 5/7 golden split — index & meta rail + primary reading flow */
+.ma-grid .ma-5 { grid-column: span 5; }
+.ma-grid .ma-7 { grid-column: span 7; }
+
+/* 3/6/3 three-column ledger */
+.ma-grid .ma-3 { grid-column: span 3; }
+.ma-grid .ma-6 { grid-column: span 6; }
+
+/* Section breathing: 48–80px between blocks */
+.ma-section {
+  margin-block: var(--reading-section-gap);
+}
+
+@media (max-width: 720px) {
+  .ma-grid .ma-3,
+  .ma-grid .ma-5,
+  .ma-grid .ma-6,
+  .ma-grid .ma-7 {
+    grid-column: span 12;
+  }
+}
+
+/* ============================================================================
+   Controls · .wabi-button / .wabi-input
+   Ink-absorption feedback: on :active the background darkens one step and the
+   1px ink line deepens — like ink instantly soaking into paper.
+   No transform, no scale, no bounce.
+   ============================================================================ */
+
+.wabi-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-subtle);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 140ms var(--ease-ink), border-color 140ms var(--ease-ink), color 140ms var(--ease-ink);
+}
+
+.wabi-button:hover {
+  background: var(--bg-overlay);
+}
+
+.wabi-button:active {
+  /* ink absorption: one step darker + deepened ink line, zero bounce */
+  background: var(--bg-overlay);
+  border-color: var(--text-secondary);
+  box-shadow: inset 0 1px 0 rgba(40, 36, 32, 0.06);
+}
+
+.wabi-button--primary {
+  background: var(--accent-cinnabar);
+  border-color: var(--accent-cinnabar);
+  color: var(--bg-canvas);
+}
+
+.wabi-button--primary:hover {
+  background: color-mix(in srgb, var(--accent-cinnabar) 88%, var(--text-primary));
+}
+
+.wabi-button--primary:active {
+  background: color-mix(in srgb, var(--accent-cinnabar) 78%, var(--text-primary));
+  border-color: color-mix(in srgb, var(--accent-cinnabar) 70%, var(--text-primary));
+}
+
+.wabi-button--moss {
+  background: var(--accent-moss);
+  border-color: var(--accent-moss);
+  color: var(--bg-canvas);
+}
+
+.wabi-button--moss:hover {
+  background: color-mix(in srgb, var(--accent-moss) 88%, var(--text-primary));
+}
+
+.wabi-button--moss:active {
+  background: color-mix(in srgb, var(--accent-moss) 78%, var(--text-primary));
+}
+
+.wabi-button--ghost {
+  background: transparent;
+  border-color: var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.wabi-button--ghost:hover {
+  background: var(--bg-overlay);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.wabi-button[disabled],
+.wabi-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Keyboard affordance, publication keycap */
+.kbd {
+  display: inline-block;
+  padding: 0.05em 0.45em;
+  border: 1px solid var(--border-subtle);
+  border-bottom-width: 2px;
+  border-radius: var(--radius-subtle);
+  background: var(--bg-surface);
+  font-size: var(--reading-caption);
+  color: var(--text-secondary);
+}
+
+.wabi-input {
+  width: 100%;
+  max-width: 320px;
+  padding: var(--space-1) 0.75em;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-subtle);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  transition: border-color 140ms var(--ease-ink), background 140ms var(--ease-ink);
+}
+
+.wabi-input::placeholder {
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.wabi-input:hover {
+  border-color: var(--border-strong);
+}
+
+.wabi-input:focus {
+  border-color: var(--border-strong);
+  background: var(--bg-surface);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
+}
+
+/* Pointer focus drops the ring where the UA omits :focus-visible. Text
+   inputs match :focus-visible even on pointer focus in Chromium and
+   Firefox, so an editorial input keeps the ink line above. */
+.wabi-input:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Minimal underline variant */
+.wabi-input--underline {
+  padding-inline: 0.25em;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 0;
+}
+
+.wabi-input--underline:hover {
+  border-bottom-color: var(--border-strong);
+  background: transparent;
+}
+
+.wabi-input--underline:focus {
+  box-shadow: none;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.wabi-input--mono {
+  font-family: var(--font-technical);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: normal;
+  font-size: var(--reading-caption);
+}
+
+/* ============================================================================
+   Page & surface transitions · 平缓转场
+   ============================================================================ */
+
+.wabi-fade {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 280ms var(--ease-paper),
+    transform 280ms var(--ease-paper);
+}
+
+.wabi-fade.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Micro states (hover fills, seal stamps) ride the ink curve */
+.wabi-micro {
+  transition:
+    background 140ms var(--ease-ink),
+    color 140ms var(--ease-ink),
+    border-color 140ms var(--ease-ink),
+    box-shadow 140ms var(--ease-ink);
+}
+
+/* ============================================================================
+   4 · Reduced motion · preserve state feedback, remove spatial movement
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .wabi-fade {
+    opacity: 1;
+    transform: none;
+  }
+}

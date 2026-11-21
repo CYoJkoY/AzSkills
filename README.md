@@ -39,7 +39,7 @@ codex plugin marketplace add /path/to/fresh/exports/azskills-marketplace
 codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
 ```
 
-The build writes `azskills-marketplace/.agents/plugins/marketplace.json` plus one self-contained directory per plugin under `plugins/<id>/`, and deterministic archives under `zips/<id>.zip`. Install the plugins you need from the marketplace; each plugin carries a narrow description and is matched on its own. Only `taste` (steering) and `godot-3-dev` (Godot 3.x write guard) ship hooks among workflow plugins, plus the two hook plugins; review and trust those hooks when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The hook plugins use Stop hooks: `no-think-tags` blocks a final reply that opens with a raw reasoning-tag block, and `empty-reply` asks for a real answer when a finished turn has no visible text. See the [Codex upgrade and verification guide](integrations/guides/codex.md).
+The Git repository is a ready-to-use marketplace: it publishes the built catalog at `dist/azskills-marketplace/`, with a root manifest that points to it. The build writes `azskills-marketplace/.agents/plugins/marketplace.json` plus one self-contained directory per plugin under `plugins/<id>/`, and deterministic archives under `zips/<id>.zip`. Install the plugins you need from the marketplace; each plugin carries a narrow description and is matched on its own. Only `taste` (steering) and `godot-3-dev` (Godot 3.x write guard) ship hooks among workflow plugins, plus the two hook plugins; review and trust those hooks when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The hook plugins use Stop hooks: `no-think-tags` blocks a final reply that opens with a raw reasoning-tag block, and `empty-reply` asks for a real answer when a finished turn has no visible text. See the [Codex upgrade and verification guide](integrations/guides/codex.md).
 
 See [client integration guides](integrations/README.md) for Codex plugin setup, skill folders, manual import, and MCP configuration. Client discovery depends on the client scan scope and may require a restart. The installer verifies local contents separately from actual client discovery and invocation.
 
@@ -141,6 +141,7 @@ node scripts/generate-routing.ts --check
 node scripts/validate-skills.ts
 node scripts/validate-catalog.ts
 node scripts/validate-integrations.ts
+node scripts/check-marketplace.ts
 node scripts/test-link-bundle.ts
 node scripts/test-package-plugin.ts
 node scripts/test-think-tags-hook.ts

@@ -1,0 +1,272 @@
+# Third-Party Skill and Asset Provenance
+
+AzSkills includes Skills that were independently rewritten or synthesized after studying public third-party methodologies, plus a small set of reusable visual assets. These notices make provenance explicit without mechanically vendoring unrelated repositories.
+
+## GPT with Taste
+
+The Codex plugin includes GPT with Taste's Main, Sub, and Independent recipes, its three steering prompts, and adapted Codex hook routing from https://github.com/NB-Corp/gpt-with-taste. Copyright (c) NB-Corp. These files are distributed under the upstream MIT License in `codex-plugin/taste/LICENSE`. The hook integration is adapted for AzSkills packaging and automatic Codex lifecycle events; the upstream installer and unrelated client adapters are not included.
+
+## Godot 3.6 API snapshot
+
+`godot-3-dev/references/api-3.6.json` contains extracted class, method,
+property, signal, constant, project-setting, and GDScript built-in function
+names from Godot Engine `3.6-stable`. The source is available at
+https://github.com/godotengine/godot/tree/3.6-stable and
+https://github.com/godotengine/godot/blob/3.6-stable/modules/gdscript/gdscript_functions.cpp.
+Godot Engine is distributed under the MIT License. The snapshot is used as
+reference data only and does not include the Godot engine binary or source.
+
+## Workbench design references
+
+The repository's interface contract (`DESIGN.md` and `design-system/`) was informed by two publicly documented products:
+
+- **VSCodium / VS Code** — layout regions, navigation and search conventions, list density, and the keyboard model. AzSkills adopts the structural model only; no product icons, themes, screenshots, or source code are copied.
+- **BioRender** (https://www.biorender.com, https://app.biorender.com) — spacing discipline, semantic colour layering with explicit interaction states, icon grouping conventions, and per-scenario adaptation between a marketing surface and a dense product UI. AzSkills treats these as structural evidence, then maps them onto its own accent, type stack, radii, and workbench layout.
+
+AzSkills is not affiliated with or endorsed by either project. Values were read from publicly served stylesheets and observed interface behaviour at the time of review. Third-party colour aggregators disagree with the target stylesheet on BioRender's primary blue (`#2571B7` and `#0373DF` both appear); those readings are marked **unconfirmed** in `DESIGN.md` and are not used as tokens. No BioRender artwork, icon library, illustration, template, or copy is included in this repository.
+
+### Cobalt Kit distillation
+
+The opt-in `cobalt-kit` preset in `style-presets/` distills the same BioRender observations into a reusable AzSkills style: bright cobalt primary, one violet secondary, a cool white canvas, a 4px rhythm, pill controls, and flat depth. Every colour, type, geometry, and component value is an AzSkills choice.
+
+No BioRender palette value, logo, icon library, illustration, template, screenshot, or stylesheet is reproduced. The aggregator readings above are recorded as `unresolved` in `style-presets/references/cobalt-kit.md` and are not used. BioRender is a trademark of its owner; the preset is not affiliated with or endorsed by that product.
+
+## SciPrism SVG workflow
+
+The `scientific-figures` module is informed by the semantic, editable SVG
+reconstruction workflow at https://github.com/hejin145/sciprism-svg, inspected
+at commit `5b7fa57d5f8d7c517b52f1b97b449cb0c38a989e` on November 17, 2026.
+That snapshot contains prompt instructions and agent metadata, with no license
+file or license grant found. AzSkills does not vendor that prompt text, its
+branding, contact links, or assets. The module instructions, declarative scene
+schema, vector renderer, checker, and tests here are independently authored.
+The `sciprism-svg` name is a routing alias identifying the source workflow;
+it does not imply affiliation or endorsement.
+
+## Unified `logo-generator`
+
+Informed by:
+
+- https://github.com/op7418/logo-generator-skill
+- https://github.com/SanbaoAI/logo-generator-skill
+- https://github.com/fucha1122/minimalist-bw-logo-skill
+- https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+
+These public workflows overlap around logo ideation, prompt construction, SVG production, minimalist exploration, colorway exploration, brand-system boards, showcase presentation, and design-quality review. AzSkills therefore uses one unified `logo-generator` Skill.
+
+No upstream example asset library or repository-specific implementation is included.
+
+## `ui-design` and shared design intelligence
+
+The frontend design layer is independently synthesized from public methodologies including:
+
+- Anthropic `frontend-design`: https://github.com/anthropics/skills/tree/main/skills/frontend-design
+- NextLevelBuilder `ui-ux-pro-max`: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+- `better-web-ui`: https://github.com/aladicf/better-web-ui
+- `frontend-designer-skill`: https://github.com/kozz36/frontend-designer-skill
+- UI Skills frontend catalog: https://www.ui-skills.com/skills/frontend
+- UI Skills public methodology catalog: https://www.ui-skills.com/skills
+- `ui-aesthetics-skill`: https://github.com/kasonye/ui-aesthetics-skill
+
+The former `ui-aesthetics` entry is now the visual-critique reference inside `ui-design`. It keeps the upstream project's public concepts: explicit aesthetic thesis, composition-before-decoration, anti-generic review, component precision, state/motion discipline, depth/lighting restraint, and rendered-output self-critique. AzSkills rewrites these concepts into its own contract instead of replacing `ui-design`.
+
+The broader synthesis informed:
+
+- context-first visual direction and explicit aesthetic thesis
+- anti-generic / anti-AI-slop design review
+- design-system-first workflow
+- stack-aware implementation instead of hardcoded framework assumptions
+- design-system persistence and master/override thinking
+- typography, semantic color, spacing, density, and component hierarchy
+- modern CSS architecture and component-driven responsiveness
+- accessibility and interaction hardening
+- motion systems, reduced-motion handling, and performance-aware animation
+- internationalization, RTL, and text-expansion resilience
+- edge-case hardening and rendered visual QA
+
+AzSkills does not copy the upstream `ui-aesthetics-skill` repository's platform wrappers, assets, generated examples, scripts, or repository-specific reference corpus.
+
+### Semantic icon morphing integration
+
+The frontend motion layer also incorporates implementation guidance informed by:
+
+- `morphicons`: https://github.com/guillermolg00/morphicons
+- morphicons playground: https://www.morphicons.com
+
+`morphicons` is treated as an implementation reference rather than a vendored dependency. Its public project demonstrates framework-neutral, stroke-based SVG icon morphing with a DOM-free core, spring-driven motion, interruptible transitions, controlled progress, and framework bindings. AzSkills keeps icon semantics with `ui-design` and motion construction with `ui-motion`; the detailed integration guidance is in [`ui-motion/references/icon-morphing.md`](ui-motion/references/icon-morphing.md).
+
+The integration preserves AzSkills-specific priorities: existing icon systems take precedence, morphing is used only when semantic continuity justifies it, reduced-motion preferences remain authoritative, icon state must remain accessible without animation, and no animation library is introduced solely for visual novelty.
+
+The upstream repository declares the MIT License. AzSkills does not copy its source code, icon data, generated outputs, or repository-specific implementation into the project.
+
+AzSkills intentionally does not import or reproduce external searchable databases, generated outputs, repository-specific scripts, private/internal material, or large upstream skill packages. The implementation is maintained as original AzSkills text in [`references/modules/ui-design.md`](references/modules/ui-design.md), [`ui-design/references/aesthetics.md`](ui-design/references/aesthetics.md), and [`design-intelligence.md`](design-intelligence.md).
+
+One caution from current public discussion is preserved in AzSkills' architecture: external tooling may ship much more data than an agent actually reads, and some combined modes can silently ignore options. AzSkills therefore prioritizes a compact contract with explicit trigger conditions and verification requirements over a large passive data bundle. See the public discussion around UI/UX Pro Max issue #484 for an example of this class of integration risk: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/issues/484
+
+## `ui-motion` modes
+
+The motion integration is informed by the public `emilkowalski/skills` repository, specifically the animation/design methodology current at the reviewed snapshot:
+
+- repository: https://github.com/emilkowalski/skills
+- reviewed source commit: `85e8e2363b713506e1d5b6e07a0eb2da66be1bc3`
+- relevant public areas: `emil-design-eng`, `animate`, `review-animations`, `improve-animations`, `find-animation-opportunities`, and `animation-vocabulary`
+
+AzSkills does not vendor the upstream `skills/` tree or copy its repository-specific wrappers, examples, provider integrations, or implementation files. Transferable principles are rewritten into AzSkills-native contracts:
+
+- `ui-motion` owns construction, read-only review, audit and opportunity discovery, pattern selection, and SVG animation;
+- `ui-motion/references/` supplies progressive-disclosure values and terminology;
+- `design-intelligence.md` supplies no motion rules and routes motion work to `ui-motion`;
+- `ui-design` remains the executable authority for the static interface;
+- `ui-design` refine and review modes own visual judgment.
+
+The source methodology's framework-specific and provider-specific assumptions are deliberately not made universal. Motion libraries remain optional and project-selected; existing product motion tokens and architecture take precedence.
+
+The upstream repository is MIT licensed. This provenance record documents methodology use; it does not grant permission to copy unrelated source, assets, examples, or generated material.
+
+## Rare UI-inspired interaction craft
+
+The `ui-motion` pattern mode studies public interaction patterns and the component gallery published by:
+
+- Source repository: https://github.com/swamimalode07/rare-ui
+- Public component gallery: https://rareui.com/components
+- Upstream license: https://github.com/swamimalode07/rare-ui/blob/main/LICENSE
+
+Rare UI's current license identifies itself as MIT + Commons Clause + Attribution. AzSkills credits Rare UI as a design reference and independently describes pattern families, decision rules, and native implementation guidance. This addition does not include Rare UI component source, registry payloads, screenshots, logos, other assets, or copied documentation. It does not purport to authorize redistribution or porting of the components themselves; any proposal to include component material must be reviewed against the upstream license at that time.
+
+## DESIGN.md integration
+
+AzSkills' design-system Skill is informed by public references from:
+
+- Google Labs design.md: https://github.com/google-labs-code/design.md
+- HU-UH awesome-design-md: https://github.com/HU-UH/awesome-design-md
+- VoltAgent awesome-design-md: https://github.com/VoltAgent/awesome-design-md
+
+Google's specification contributes the token + Markdown rationale model, token references, and canonical section ordering. HU-UH contributes an extended analysis-oriented nine-section vocabulary and preview pairing. VoltAgent contributes extended per-brand analysis with token-bearing examples.
+
+AzSkills does not vendor these collections or copy their complete DESIGN.md files/preview assets. The adapter is original AzSkills text and normalizes evidence into Primitive → Semantic → Component → State.
+
+## `readme-craft`
+
+Informed by:
+
+- https://github.com/oil-oil/beautify-github-readme
+- https://github.com/zhangyu1818/appicon-forge
+- https://github.com/Nieobie/game-icon-pack
+- https://github.com/anthropics/skills/tree/main/skills/frontend-design
+- https://github.com/aladicf/better-web-ui
+- https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+- https://www.ui-skills.com/skills
+
+The AzSkills version integrates README-specific methodology with a project-native visual system, semantic icon selection, adaptive support CTAs, GitHub-safe SVG production, realistic render-size testing, explicit source/deployment/download/support link semantics, evidence-first writing, mandatory light/dark theme verification, and preservation of canonical sponsorship/support destinations.
+
+The README workflow treats support/funding as information architecture rather than optional decoration: when a canonical support destination exists, a whole README redesign must preserve and surface it instead of silently dropping it.
+
+`appicon-forge` is used as a generation/customization reference for project-specific icons and compact identity assets. When its generated icons use Iconify, fonts, images, or other third-party inputs, their individual rights must be checked separately.
+
+`game-icon-pack` is a permitted reusable icon source when a matching semantic icon exists. Its repository metadata declares `CC0-1.0`. Readme-craft requires semantic discovery and context matching rather than maintaining a fixed subset of icons.
+
+The AzSkills README also contains locally authored project-specific semantic icons under `assets/readme/icons/`. These are original local assets and do not require attribution to `game-icon-pack`.
+
+The integrated README reference remains [`readme-craft/references/beautify-github-readme.md`](readme-craft/references/beautify-github-readme.md). Upstream example assets and repository-specific implementations are not mechanically vendored.
+
+## `steam-mod-page`
+
+Informed by public Steam documentation and public community formatting references:
+
+- https://steamcommunity.com/comment/ForumTopic/formattinghelp
+- https://partner.steamgames.com/doc/features/workshop/implementation
+- https://partner.steamgames.com/doc/features/workshop
+- https://steamcommunity.com/sharedfiles/filedetails/?id=2807121939
+- https://steamcommunity.com/sharedfiles/filedetails/?id=812684948
+
+These references cover Steam's documented text formatting vocabulary, Workshop description handling, documentation expectations, image embedding, and known surface-specific parsing caveats.
+
+The AzSkills version independently rewrites those practices into a conservative workflow centered on:
+
+- Steam-BBCode-only final output;
+- explicit rejection of Markdown leakage;
+- separate Chinese and English deliverables;
+- documentation-first placement for developer-oriented Mods;
+- factual compatibility and dependency handling;
+- verified link and image destinations;
+- preserved sponsorship/support information when the Mod provides a real support destination;
+- final syntax and content linting.
+
+AzSkills does not copy Steam Community Guide text verbatim.
+
+## `logo-generator` character mode
+
+Informed by:
+
+- https://github.com/s1dashu/ip-as-logo-skill
+
+The AzSkills version retains the useful concepts of extreme simplification, semantic color budgeting, strong silhouette design, small-size recognition, and character-led IP direction while rewriting the workflow for AzSkills' modular conventions.
+
+## `photo-abstract-editorial`
+
+Informed by:
+
+- https://github.com/ZzzLc0405/photo-abstract-editorial
+
+The AzSkills version independently expresses the core workflow of preserving a source photograph while deriving a restrained abstract editorial panel from observed spatial, tonal, and color relationships.
+
+## Loader technique provenance
+
+`style-presets/assets/loaders.css` supplies eight loading primitives as part of the `style-presets` module. The techniques - conic-gradient rings, stroke-dash arcs, staggered dot pulses, bar waves, sweep highlights, squish morphs, orbit dots, and conic progress meters - are common pure-CSS constructions shown across public loader galleries, including css-loaders.com by Temani Afif (https://css-loaders.com).
+
+No stylesheet, example, or snippet from that site is reproduced. The gallery's licence is not documented publicly, so it was treated as technique inspiration only. Every variant here is written against AzSkills `--sp-*` tokens with its own geometry, timing, status semantics, and reduced-motion pose.
+
+## Licensing note
+
+The integrated Skills are original AzSkills text written from observed public methodologies. They are not presented as verbatim copies of upstream repositories.
+
+For third-party assets that are actually copied into AzSkills, the applicable upstream license is recorded above. Tool/project licenses do not automatically grant rights to third-party materials selected or generated through those tools.
+
+## resume-evidence-workflow
+
+Source repository: https://github.com/Elowwwen/resume-evidence-workflow
+
+Reviewed source commit: `e2175dc3217c9d09e2af41a113182ef148d86a5a`
+
+The upstream workflow is MIT licensed with the notice "Copyright (c) 2026 Resume Evidence Workflow contributors". The upstream license text is included at `resume-evidence-workflow/LICENSE`.
+
+AzSkills carries the upstream behavior test forward unchanged, adapts the HTML
+template, and rewrites the rest:
+
+| Upstream path | Treatment in AzSkills |
+| :--- | :--- |
+| `assets/editable-resume-base.html` | Adapted as `resume-evidence-workflow/assets/editable-resume-base.html`. The editing, copy, fitting, and print logic is preserved; the editor chrome uses AzSkills semantic token roles, grouped controls, and explicit focus, pressed, and disabled states. Resume paper styles are unchanged. |
+| `tests/copy-description.test.cjs` | Ported to `resume-evidence-workflow/tests/copy-description.test.ts`; the module syntax and type annotations changed, and the port adds assertions plus guards for the same behaviours the original exercised. |
+| `SKILL.md` and `references/` | Rewritten as one canonical contract with reference modules, modes, gates, and an output contract that match the AzSkills Skill system. |
+| `README.md`, `agents/openai.yaml`, and the support images | Not carried over. The upstream README is a standalone project page, the agent manifest is runtime-specific, and the donation QR images and promotional calls to action are excluded. |
+
+The upstream material supplied the evidence-bank method, the selective career deep dive, the reusable base-resume workspace, the requirement-to-evidence mapping, the visible alignment review, and the editable HTML behavior. AzSkills rewrote these into a mode-based contract, moved long procedures into references, added shared-rule precedence, review-mode boundaries, and explicit gates against invented claims. The editor chrome adaptation follows the repository UI contract; it changes no resume paper style and adds no runtime dependency.
+
+No upstream donation image, promotional text, or external payment destination appears in the integrated Skill.
+
+
+## remotion-production
+
+The Remotion production workflow is an original AzSkills synthesis informed by the public Remotion documentation and project materials:
+
+- https://www.remotion.dev/docs
+- https://github.com/remotion-dev/remotion
+- https://github.com/remotion-dev/skills
+
+The review covered current public guidance around composition, frame-driven timing, calculateMetadata(), media, rendering APIs, Three.js, GSAP, Lottie, and Rive integrations. AzSkills does not vendor the Remotion documentation, the upstream Remotion repository, example assets, or the upstream Remotion Skill.
+
+The resulting contract deliberately adds AzSkills-specific behavior: explicit engine responsibility boundaries, deterministic timing rules, progressive-disclosure references, AI production workflow, cross-Skill routing, rendering QA, asset provenance, and performance gates.
+
+## Answer hygiene hook plugins
+
+The standalone plugins `plugins/no-think-tags` and `plugins/empty-reply` were
+written for AzSkills after studying the OpenCode plugins `packages/think-tags`
+and `packages/empty-reply` in https://github.com/magpie-community/plugins
+(MIT License, Copyright (c) the magpie-community contributors).
+
+This repository does not vendor upstream source. Both plugins are independent
+Codex Stop-hook implementations: their detection rules, correction budgets,
+tests, and manifests were written against the Codex hook contract, and they add
+behavior the upstream packages do not define, such as honouring
+`stop_hook_active`, counting corrections per session and turn, and treating
+reasoning-only or invisible-only output as empty.

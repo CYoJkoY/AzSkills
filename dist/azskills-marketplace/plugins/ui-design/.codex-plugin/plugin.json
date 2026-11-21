@@ -1,0 +1,27 @@
+{
+  "name": "ui-design",
+  "version": "3.0.0",
+  "description": "Design, build, refine, and review production interfaces with one visual thesis, a token-based system, complete states, responsive behavior, accessibility, and rendered visual QA. Use for web apps, dashboards, tools, settings, forms, and component libraries.",
+  "license": "MIT",
+  "keywords": [
+    "ui",
+    "design",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Ui Design",
+    "shortDescription": "Design, build, refine, and review production interfaces with one visual thesis, a token-based system, complete states, responsive behavior, accessibility, and rendered visual QA. Use for web apps, dashboards, tools, settings, forms, and component libraries.",
+    "longDescription": "Design, build, refine, and review production interfaces with one visual thesis, a token-based system, complete states, responsive behavior, accessibility, and rendered visual QA. Use for web apps, dashboards, tools, settings, forms, and component libraries. Modes: build, refine, review, system.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icon.svg",
+    "logo": "./codex-plugin/assets/icon.svg"
+  }
+}

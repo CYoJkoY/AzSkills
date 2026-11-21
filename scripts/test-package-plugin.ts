@@ -3,7 +3,7 @@ import { mkdtemp, readFile, readdir, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildPlugin, packageMarketplace } from "./package-plugin.ts";
+import { buildPlugin, marketplaceManifest, packageMarketplace, publishRepositoryMarketplace } from "./package-plugin.ts";
 import { errorCode, readJson } from "./runtime.ts";
 import { writeZip } from "./zip-bundle.ts";
 import type { PluginCatalog, SkillCatalog } from "./types.ts";
@@ -103,7 +103,14 @@ try {
   await assert.rejects(buildPlugin(root, "no-think-tags", path.join(temp, "standalone-skill"), "skill"), /install as Codex plugins/);
   await assert.rejects(buildPlugin(root, "unknown-plugin", path.join(temp, "unknown")), /Unknown plugin/);
 
-  console.log("Plugin packaging tests passed: 20 self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, and no routing hook.");
+  const repositoryManifest = await publishRepositoryMarketplace(root, path.join(root, "dist/azskills-marketplace"));
+  assert.equal(repositoryManifest, path.join(root, ".agents/plugins/marketplace.json"));
+  const committedManifest = JSON.parse(await readFile(repositoryManifest, "utf8")) as Record<string, unknown>;
+  const committedExpected = marketplaceManifest(catalog, "dist/azskills-marketplace");
+  assert.deepEqual(committedManifest, committedExpected);
+  await assert.rejects(publishRepositoryMarketplace(root, temp), /inside the repository/);
+
+  console.log("Plugin packaging tests passed: 20 self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

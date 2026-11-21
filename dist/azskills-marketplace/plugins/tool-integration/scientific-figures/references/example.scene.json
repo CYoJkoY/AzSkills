@@ -1,0 +1,18 @@
+{
+  "canvas": { "width": 640, "height": 360 },
+  "theme": "cobalt",
+  "title": "Illustrative signaling sequence",
+  "nodes": [
+    { "id": "ligand", "kind": "protein", "box": { "x": 80, "y": 160, "width": 70, "height": 70 }, "label": "Ligand", "labelPlacement": "below", "tone": "accent" },
+    { "id": "receptor", "kind": "receptor", "box": { "x": 280, "y": 150, "width": 60, "height": 90 }, "label": "Receptor", "labelPlacement": "below", "tone": "accent-2" },
+    { "id": "response", "kind": "nucleus", "box": { "x": 470, "y": 155, "width": 100, "height": 80 }, "label": "Response", "tone": "success" }
+  ],
+  "arrows": [
+    { "id": "ligand-binding", "from": { "node": "ligand", "side": "right" }, "to": { "node": "receptor", "side": "left" }, "kind": "flow" },
+    { "id": "signal-response", "from": { "node": "receptor", "side": "right" }, "to": { "node": "response", "side": "left" }, "kind": "activation" }
+  ],
+  "labels": [
+    { "id": "title", "text": "Illustrative signaling sequence", "x": 24, "y": 36, "role": "title" },
+    { "id": "note", "text": "Illustrative topology; replace with supported entities and relationships.", "x": 24, "y": 300, "role": "note", "maxWidth": 560 }
+  ]
+}

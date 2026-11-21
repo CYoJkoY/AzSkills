@@ -1,5 +1,6 @@
 node_modules/
-dist/
+dist/*
+!dist/azskills-marketplace/
 build/
 __pycache__/
 *.py[cod]

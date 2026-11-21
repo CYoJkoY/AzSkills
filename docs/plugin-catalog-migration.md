@@ -42,6 +42,13 @@ Bundles preserve repository-relative depth, so a contract that links
 `../../SKILL-SYSTEM.md` still resolves inside the package. Archives are
 deterministic.
 
+The repository also publishes this built marketplace at
+`dist/azskills-marketplace/` and tracks `.agents/plugins/marketplace.json` at
+the root with plugin paths that point into that directory. This makes the Git
+URL directly consumable by Codex without first cloning and building locally.
+`scripts/check-marketplace.ts` verifies the published catalog against
+`catalog/plugins.json`.
+
 ## Installer
 
 The installer manifest moves to schema 4 and records `plugins: string[]`.

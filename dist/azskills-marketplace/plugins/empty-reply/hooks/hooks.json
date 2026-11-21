@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/stop-hook.ts\"",
+            "statusMessage": "Checking that the reply has visible text"
+          }
+        ]
+      }
+    ]
+  }
+}

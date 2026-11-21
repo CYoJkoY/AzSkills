@@ -6,7 +6,7 @@
  * rewritten. Standalone plugins under plugins/<id>/ are copied as authored.
  */
 
-import { cp, mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { tmpdir } from "node:os";
@@ -197,6 +197,42 @@ export interface MarketplaceBuild {
   readonly plugins: PluginBuild[];
 }
 
+export function marketplaceManifest(catalog: PluginCatalog, pluginPathPrefix: string): Record<string, unknown> {
+  const prefix = pluginPathPrefix.replace(/^\.?\//, "").replace(/\/$/, "");
+  return {
+    name: catalog.marketplace.name,
+    interface: { displayName: catalog.marketplace.displayName, shortDescription: catalog.marketplace.description },
+    plugins: catalog.plugins.map((entry) => ({
+      name: entry.id,
+      source: { source: "local", path: prefix === "" ? "./plugins/" + entry.id : "./" + prefix + "/plugins/" + entry.id },
+      policy: { installation: "AVAILABLE", authentication: "ON_INSTALL" },
+      category: entry.category,
+    })),
+  };
+}
+
+export async function publishRepositoryMarketplace(
+  repoRoot: string,
+  marketplaceDirectory: string,
+): Promise<string> {
+  const base = path.resolve(repoRoot);
+  const marketplace = path.resolve(marketplaceDirectory);
+  const baseReal = await realpath(base);
+  const marketplaceReal = await realpath(marketplace);
+  if (marketplaceReal !== baseReal && !marketplaceReal.startsWith(baseReal + path.sep)) {
+    throw new Error("Repository marketplace must be written inside the repository: " + marketplace);
+  }
+  const catalog = await readJson<PluginCatalog>(path.join(base, "catalog/plugins.json"));
+  const relative = path.relative(base, marketplace).replace(/\\/g, "/");
+  if (relative === "" || relative.startsWith("..")) {
+    throw new Error("Repository marketplace must be a directory below the repository root: " + marketplace);
+  }
+  const manifestPath = path.join(base, ".agents/plugins/marketplace.json");
+  await mkdir(path.dirname(manifestPath), { recursive: true });
+  await writeFile(manifestPath, JSON.stringify(marketplaceManifest(catalog, relative), null, 2) + "\n", "utf8");
+  return manifestPath;
+}
+
 export async function packageMarketplace(repoRoot: string, outputDirectory: string): Promise<MarketplaceBuild> {
   const base = path.resolve(repoRoot);
   const output = path.resolve(outputDirectory);
@@ -207,16 +243,7 @@ export async function packageMarketplace(repoRoot: string, outputDirectory: stri
   for (const entry of catalog.plugins) {
     plugins.push(await buildPlugin(base, entry.id, path.join(pluginsRoot, entry.id)));
   }
-  const marketplace = {
-    name: catalog.marketplace.name,
-    interface: { displayName: catalog.marketplace.displayName, shortDescription: catalog.marketplace.description },
-    plugins: catalog.plugins.map((entry) => ({
-      name: entry.id,
-      source: { source: "local", path: "./plugins/" + entry.id },
-      policy: { installation: "AVAILABLE", authentication: "ON_INSTALL" },
-      category: entry.category,
-    })),
-  };
+  const marketplace = marketplaceManifest(catalog, "");
   const manifestPath = path.join(output, ".agents/plugins/marketplace.json");
   await mkdir(path.dirname(manifestPath), { recursive: true });
   await writeFile(manifestPath, JSON.stringify(marketplace, null, 2) + "\n", "utf8");
@@ -245,12 +272,14 @@ if (isMain) {
   };
   if (args.includes("--help") || args.includes("-h")) {
     console.log([
-      "Usage: node scripts/package-plugin.ts [--output <directory>]",
+      "Usage: node scripts/package-plugin.ts [--output <directory>] [--refresh]",
       "",
       "Builds one self-contained Codex plugin per catalog entry:",
       "  <output>/azskills-marketplace/.agents/plugins/marketplace.json",
       "  <output>/azskills-marketplace/plugins/<id>/",
       "  <output>/zips/<id>.zip (deterministic archives)",
+      "  --refresh removes the target directories first",
+      "  repository-local output also refreshes .agents/plugins/marketplace.json",
     ].join("\n"));
     process.exit(0);
   }
@@ -258,6 +287,11 @@ if (isMain) {
     const outputRoot = path.resolve(option("--output") || path.join(repositoryRoot, "dist"));
     const destination = path.join(outputRoot, "azskills-marketplace");
     const zipRoot = path.join(outputRoot, "zips");
+    if (args.includes("--refresh")) {
+      for (const target of [destination, zipRoot]) {
+        await rm(target, { recursive: true, force: true });
+      }
+    }
     for (const target of [destination, zipRoot]) {
       const present = await stat(target).then(() => true).catch((error: unknown) => {
         if (errorCode(error) === "ENOENT") return false;
@@ -279,6 +313,9 @@ if (isMain) {
       console.log("Plugin archives: " + zipRoot + " (" + files + " files across " + built.plugins.length + " archives)");
     } finally {
       await rm(staging, { recursive: true, force: true });
+      if (destination.startsWith(path.resolve(repositoryRoot) + path.sep)) {
+        await publishRepositoryMarketplace(repositoryRoot, destination);
+      }
     }
   } catch (error) {
     console.error("AzSkills packaging failed: " + errorMessage(error));

@@ -1,0 +1,136 @@
+{
+  "$comment": "Single source for figure geometry, palette, type scale, and the numeric thresholds the checker enforces. Editing a limit here changes both the render defaults and the gate.",
+  "version": "1.0.0",
+  "canvas": {
+    "minRatio": 0.25,
+    "maxRatio": 4,
+    "minSidePt": 240,
+    "strokeMinPt": 0.5,
+    "strokeDefaultPt": 1
+  },
+  "type": {
+    "labelPt": 8,
+    "notePt": 7,
+    "panelPt": 10,
+    "titlePt": 12,
+    "footerPt": 6.5,
+    "minPt": 6,
+    "family": "'Helvetica Neue', Helvetica, Arial, sans-serif",
+    "charWidthRatio": 0.55,
+    "lineHeight": 1.25
+  },
+  "palette": {
+    "canvas": "#FFFFFF",
+    "surface": "#F5F7FA",
+    "ink": "#12212F",
+    "muted": "#4A5B6C",
+    "rule": "#C8D3DF",
+    "neutral": "#E4EBF2",
+    "accent": "#1F5FD0",
+    "accent-2": "#7A3FB8",
+    "success": "#1B7F5A",
+    "warning": "#8A5A00",
+    "danger": "#B3261E"
+  },
+  "tints": {
+    "accent": "#DDE8FB",
+    "accent-2": "#EBDDF8",
+    "success": "#D9F0E6",
+    "warning": "#FBEFD2",
+    "danger": "#FBDCDA",
+    "neutral": "#EDF2F7"
+  },
+  "themes": {
+    "cobalt": {},
+    "wabi": {
+      "canvas": "#FBF7EF",
+      "surface": "#F3ECE0",
+      "ink": "#2A241E",
+      "muted": "#5B5044",
+      "rule": "#CFC3B0",
+      "neutral": "#E8DFCF",
+      "accent": "#9B3B2A",
+      "accent-2": "#4A6146",
+      "success": "#3F6B4A",
+      "warning": "#7A5514",
+      "danger": "#8E2A20"
+    },
+    "mono": {
+      "canvas": "#FFFFFF",
+      "surface": "#F2F2F2",
+      "ink": "#141414",
+      "muted": "#4F4F4F",
+      "rule": "#C4C4C4",
+      "neutral": "#E6E6E6",
+      "accent": "#2B2B2B",
+      "accent-2": "#5A5A5A",
+      "success": "#3D3D3D",
+      "warning": "#565656",
+      "danger": "#1C1C1C"
+    }
+  },
+  "themeTints": {
+    "cobalt": {},
+    "wabi": {
+      "accent": "#F0E0DA",
+      "accent-2": "#E2E8DF",
+      "success": "#E2EBE2",
+      "warning": "#F5EAD8",
+      "danger": "#F3DFDB",
+      "neutral": "#EEE7DA"
+    },
+    "mono": {
+      "accent": "#E4E4E4",
+      "accent-2": "#EAEAEA",
+      "success": "#E4E4E4",
+      "warning": "#E8E8E8",
+      "danger": "#DEDEDE",
+      "neutral": "#EFEFEF"
+    }
+  },
+  "contrast": {
+    "textOnCanvas": 4.5,
+    "textOnTint": 4.5
+  },
+  "layout": {
+    "marginPt": 8,
+    "gutterPt": 10,
+    "panelPaddingPt": 8,
+    "labelPadPt": 4,
+    "arrowHeadLengthPt": 7,
+    "arrowHeadWidthPt": 5,
+    "cornerRadiusPt": 3,
+    "maxNodes": 200,
+    "maxArrows": 200,
+    "maxLabels": 200,
+    "maxPanels": 24,
+    "maxNodesPerPanel": 48,
+    "minNodePt": 6
+  },
+  "forbidden": {
+    "elements": ["image", "foreignObject", "embed", "iframe", "script"],
+    "attributes": ["xlink:href", "href", "src"],
+    "urlSchemes": ["data:", "http:", "https:", "file:"],
+    "pathData": ["<image", "data:image", "base64"],
+    "styleProperties": ["filter", "backdrop-filter"],
+    "maxSinglePathCommands": 240,
+    "traceShareMinCommands": 24,
+    "maxPathShare": 0.5
+  },
+  "text": {
+    "maxOverflowRatio": 1.02,
+    "maxCharsPerLineNote": 64,
+    "maxCharsPerLineLabel": 40
+  },
+  "verification": {
+    "minLabels": 1,
+    "minGroups": 3,
+    "requireViewBox": true,
+    "requireTitle": false,
+    "requireLegendWhenTones": 4,
+    "requireAria": true,
+    "requireRoleImg": true,
+    "uniqueIds": true,
+    "idPattern": "^[a-z][a-z0-9-]{1,40}$"
+  }
+}

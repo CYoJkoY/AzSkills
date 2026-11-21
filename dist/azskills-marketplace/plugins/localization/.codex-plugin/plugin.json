@@ -1,0 +1,26 @@
+{
+  "name": "localization",
+  "version": "3.0.0",
+  "description": "Translate game CSV rows into 13 fixed locales with consistent terminology, intact BBCode, correct CSV escaping, and a clean importable output. Use for game localization batches and locale audits.",
+  "license": "MIT",
+  "keywords": [
+    "localization",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Localization",
+    "shortDescription": "Translate game CSV rows into 13 fixed locales with consistent terminology, intact BBCode, correct CSV escaping, and a clean importable output. Use for game localization batches and locale audits.",
+    "longDescription": "Translate game CSV rows into 13 fixed locales with consistent terminology, intact BBCode, correct CSV escaping, and a clean importable output. Use for game localization batches and locale audits. Modes: translate, audit.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icon.svg",
+    "logo": "./codex-plugin/assets/icon.svg"
+  }
+}

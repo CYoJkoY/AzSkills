@@ -1,0 +1,28 @@
+{
+  "name": "resume-evidence-workflow",
+  "version": "3.0.0",
+  "description": "Build a portable career evidence bank, align a resume to a job description, and deliver an editable application-ready artifact. Use for career deep dives, evidence-backed tailoring, or resume audits.",
+  "license": "MIT",
+  "keywords": [
+    "resume",
+    "evidence",
+    "workflow",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Resume Evidence Workflow",
+    "shortDescription": "Build a portable career evidence bank, align a resume to a job description, and deliver an editable application-ready artifact. Use for career deep dives, evidence-backed tailoring, or resume audits.",
+    "longDescription": "Build a portable career evidence bank, align a resume to a job description, and deliver an editable application-ready artifact. Use for career deep dives, evidence-backed tailoring, or resume audits. Modes: evidence, tailor, review.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icon.svg",
+    "logo": "./codex-plugin/assets/icon.svg"
+  }
+}

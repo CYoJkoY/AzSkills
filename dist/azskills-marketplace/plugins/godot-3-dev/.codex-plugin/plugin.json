@@ -1,0 +1,29 @@
+{
+  "name": "godot-3-dev",
+  "version": "3.0.0",
+  "description": "Write, review, and down-port Godot 3.x (3.6) GDScript and scenes without re-calling engine-dispatched virtuals and without Godot 4.x symbols.",
+  "license": "MIT",
+  "keywords": [
+    "godot",
+    "3",
+    "dev",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "hooks": "./codex-plugin/hooks/godot-hooks.json",
+  "interface": {
+    "displayName": "Godot 3 Dev",
+    "shortDescription": "Write, review, and down-port Godot 3.x (3.6) GDScript and scenes without re-calling engine-dispatched virtuals and without Godot 4.x symbols.",
+    "longDescription": "Write, review, and down-port Godot 3.x (3.6) GDScript and scenes without re-calling engine-dispatched virtuals and without Godot 4.x symbols. Modes: script, review, port.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#A6382A",
+    "composerIcon": "./codex-plugin/assets/icon.svg",
+    "logo": "./codex-plugin/assets/icon.svg"
+  }
+}
