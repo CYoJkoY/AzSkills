@@ -1,6 +1,6 @@
 {
   "name": "style-presets",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Resolve a named visual style, a style keyword, or a loading indicator to one maintained AzSkills preset, then apply it through owned tokens. Use for style-name requests, BioRender-derived direction, loader and progress states, and preset audits.",
   "license": "MIT",
   "keywords": [

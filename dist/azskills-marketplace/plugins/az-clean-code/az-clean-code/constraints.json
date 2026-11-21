@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "limits": { "controlFlowDepth": 2, "functionParameters": 3, "functionBodyLinesReviewAt": 20 },
+  "checks": {
+    "C1": { "mode": "review", "criteria": ["validate important preconditions", "avoid implicit behavior", "avoid boolean operation switches"] },
+    "C2": { "mode": "automated", "rule": "no-tabs-in-supported-source" },
+    "C3": { "mode": "automated-python-review", "rule": "control-flow-depth" },
+    "C4": { "mode": "review", "criteria": ["invalid and boundary paths exit before the main path"] },
+    "C5": { "mode": "review", "criteria": ["search for equivalents", "extract stable duplication at the third meaningful occurrence"] },
+    "C6": { "mode": "automated-python-review", "rules": ["function-parameters", "function-body-lines"] },
+    "C7": { "mode": "before-coding-review", "criteria": ["identify business data", "define its schema and source before implementation"] }
+  },
+  "automatedLanguages": { "tabScan": ["py", "js", "jsx", "mjs", "cjs", "ts", "tsx", "java", "cs", "go", "rs", "php", "rb", "swift", "kt"], "ast": ["py"] }
+}

@@ -8,7 +8,7 @@
       "target": "Codex plugin marketplace",
       "userTarget": "Codex plugin marketplace",
       "source": "https://developers.openai.com/plugins/build/plugins",
-      "verify": "Confirm the marketplace lists 20 plugins, install the ones the project needs, check that each reports version 3.0.0 or later, review and trust hooks for taste, godot-3-dev, no-think-tags, and empty-reply, then confirm a new session selects an installed plugin by description without naming it.",
+      "verify": "Confirm the marketplace lists 18 plugins, install the ones the project needs, check that each reports version 4.0.0 or later, review and trust hooks for taste, godot-3-dev, no-think-tags, and empty-reply, then confirm a new session selects an installed plugin by description without naming it.",
       "automation": "manual-import",
       "detection": "manual",
       "configTarget": null,

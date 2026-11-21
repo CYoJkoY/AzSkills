@@ -1,6 +1,6 @@
 ---
 name: az-clean-code
-description: Apply explicit, flat, reusable, data-driven constraints when writing, reviewing, or refactoring application code.
+description: Apply explicit, flat, reusable, data-driven constraints when writing, reviewing, refactoring, or consistently styling application code.
 ---
 
 # Az Clean Code

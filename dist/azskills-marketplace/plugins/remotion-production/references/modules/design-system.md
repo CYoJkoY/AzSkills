@@ -23,7 +23,7 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visua
 - Owns: source evidence, token normalization, semantic roles, component and state mapping, provenance, and design-contract verification.
 - Inputs: DESIGN.md or source evidence, product context, existing tokens, target stack, themes, locales, accessibility baseline, and rendered surfaces.
 - Outputs: normalized DESIGN.md contract, token map, component/state matrix, implementation notes, or audit findings.
-- Compose with: `ui-design` to implement, `ui-motion` for motion roles, `architecture` for stack boundaries, `frontend-slides` for fixed-stage mapping.
+- Compose with: `ui-design` to implement, `ui-design` for motion roles, `architecture` for stack boundaries, `frontend-slides` for fixed-stage mapping.
 - Gates: no invented tokens; provenance is explicit; semantic roles and states are complete; representative output is rendered in every shipped theme.
 
 ## Modes
@@ -177,8 +177,8 @@ only the decisions that change the artifact.
 
 ## References
 
-- `../../design-system/references/design-system-guide.md` - detailed extraction, section mapping, reconciliation, editorial conformance, and migration procedure.
-- `../../design-system/references/design-md-adapter.md` - source-to-contract adapter.
-- `../../design-system/references/design-md-schema.md` - DESIGN.md schema reference.
-- `../../design-system/references/source-format-matrix.md` - source class matrix.
+- [design-system-guide.md](../../design-system/references/design-system-guide.md) - detailed extraction, section mapping, reconciliation, editorial conformance, and migration procedure.
+- [design-md-adapter.md](../../design-system/references/design-md-adapter.md) - source-to-contract adapter.
+- [design-md-schema.md](../../design-system/references/design-md-schema.md) - DESIGN.md schema reference.
+- [source-format-matrix.md](../../design-system/references/source-format-matrix.md) - source class matrix.
 - [`tui/preview.ts`](../../design-system/tui/preview.ts) - executable terminal preview and conformance gate.

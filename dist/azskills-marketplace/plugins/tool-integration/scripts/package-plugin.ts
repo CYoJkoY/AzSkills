@@ -125,7 +125,9 @@ async function buildModule(
   if (module === undefined) throw new Error(entry.id + ": no matching canonical module");
   const contract = await readContract(repoRoot, module);
   const contractPath = view === "plugin" ? "../../" + module.path : module.path;
-  const bundle = await collectClosure(repoRoot, [module.path, ...entry.extra]);
+  const paths = [module.path, ...entry.extra];
+
+  const bundle = await collectClosure(repoRoot, paths);
   await materialize(bundle, destination);
   const skillEntry = view === "plugin"
     ? path.join(destination, "skills", entry.id, "SKILL.md")

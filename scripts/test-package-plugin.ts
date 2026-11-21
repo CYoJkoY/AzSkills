@@ -16,14 +16,44 @@ const exists = async (file: string): Promise<boolean> =>
     throw error;
   });
 
+const fileBytes = async (file: string): Promise<Uint8Array> => readFile(file);
+const listFiles = async (directory: string): Promise<string[]> => {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files: string[] = [];
+  for (const entry of entries) {
+    const file = path.join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...(await listFiles(file)));
+    else if (entry.isFile()) files.push(file);
+    else throw new Error("Unexpected marketplace entry: " + file);
+  }
+  return files.sort();
+};
+
 try {
   const catalog = await readJson<PluginCatalog>(path.join(root, "catalog/plugins.json"));
   const registry = await readJson<SkillCatalog>(path.join(root, "skills.json"));
   const built = await packageMarketplace(root, path.join(temp, "marketplace"));
 
+  const committedMarketplace = path.join(root, "dist/azskills-marketplace");
+  const builtFiles = await listFiles(built.marketplace);
+  const committedFiles = await listFiles(committedMarketplace);
+  assert.deepEqual(
+    builtFiles.map((file) => path.relative(built.marketplace, file)),
+    committedFiles.map((file) => path.relative(committedMarketplace, file)),
+    "Committed marketplace file list must match a fresh build",
+  );
+  for (const file of builtFiles) {
+    const relative = path.relative(built.marketplace, file);
+    assert.deepEqual(
+      await fileBytes(file),
+      await fileBytes(path.join(committedMarketplace, relative)),
+      "Committed marketplace file must match a fresh build: " + relative,
+    );
+  }
+
   assert.equal(built.plugins.length, catalog.plugins.length);
-  assert.equal(built.plugins.length, 20);
-  assert.equal(registry.modules.length, 18);
+  assert.equal(built.plugins.length, 18);
+  assert.equal(registry.modules.length, 16);
 
   const manifest = JSON.parse(await readFile(path.join(built.marketplace, ".agents/plugins/marketplace.json"), "utf8")) as {
     name: string;
@@ -55,6 +85,14 @@ try {
       assert.ok(text.includes("../../references/modules/" + plugin.id + ".md"));
       assert.equal(await exists(path.join(pluginRoot, "references/modules", plugin.id + ".md")), true);
       if (plugin.id === "ui-design") assert.equal(await exists(path.join(pluginRoot, "SKILL-SYSTEM.md")), true);
+      if (plugin.id === "ui-design") {
+        assert.equal(await exists(path.join(pluginRoot, "ui-motion/references/review.md")), true);
+        assert.equal(await exists(path.join(pluginRoot, "ui-motion/references/svg-animation.md")), true);
+      }
+      if (plugin.id === "document-writing") {
+        assert.equal(await exists(path.join(pluginRoot, "references/modules/readme-craft.md")), true);
+        assert.equal(await exists(path.join(pluginRoot, "references/modules/steam-mod-page.md")), true);
+      }
     } else {
       assert.equal(await exists(path.join(pluginRoot, "hooks/stop-hook.ts")), true);
       assert.equal(await exists(path.join(pluginRoot, "lib/hook-runtime.ts")), true);
@@ -89,7 +127,7 @@ try {
     assert.deepEqual([...signature.subarray(0, 4)], [0x50, 0x4b, 0x03, 0x04]);
   }
   const archives = await readdir(zipRoot);
-  assert.equal(archives.length, 20);
+  assert.equal(archives.length, 18);
 
   const skillView = path.join(temp, "skill-view");
   const skillBuild = await buildPlugin(root, "ui-design", skillView, "skill");
@@ -110,7 +148,7 @@ try {
   assert.deepEqual(committedManifest, committedExpected);
   await assert.rejects(publishRepositoryMarketplace(root, temp), /inside the repository/);
 
-  console.log("Plugin packaging tests passed: 20 self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
+  console.log("Plugin packaging tests passed: 18 self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

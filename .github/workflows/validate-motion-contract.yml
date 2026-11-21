@@ -47,7 +47,7 @@ jobs:
           test -f ui-motion/references/svg-animation.md
           test -f ui-motion/references/icon-morphing.md
 
-          grep -q '^name: ui-motion$' references/modules/ui-motion.md
+          grep -q '^name: ui-motion-branch$' references/modules/ui-motion.md
           grep -q '^## Contract$' references/modules/ui-motion.md
           grep -q '^## Modes$' references/modules/ui-motion.md
           grep -q '^## Workflow$' references/modules/ui-motion.md
@@ -75,9 +75,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -q 'ui-motion' design-intelligence.md
+          grep -q 'ui-design' design-intelligence.md
           grep -q 'Rare UI-inspired interaction craft' THIRD_PARTY_NOTICES.md
-          grep -q 'ui-motion' references/modules/ui-design.md
+          grep -q 'ui-motion.md' references/modules/ui-design.md
           grep -q 'references/review.md' references/modules/ui-motion.md
           grep -q 'references/audit.md' references/modules/ui-motion.md
           grep -q 'references/rare-interactions.md' references/modules/ui-motion.md

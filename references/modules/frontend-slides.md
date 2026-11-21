@@ -20,10 +20,10 @@ Shared rules R01-R12 apply. Read [SKILL-SYSTEM.md](../../SKILL-SYSTEM.md); visua
 
 - Use when: a task needs a page-by-page HTML report, a new HTML deck, a PowerPoint-to-HTML conversion, or a substantial visual rebuild of an existing deck.
 - Do not use when: the output is a video (`remotion-production`), a product interface (`ui-design`), or a document without report-page structure.
-- Owns: narrative structure, report reflow, stage composition, density, typography, color, imagery, deck-level motion placement, and rendered verification. Motion mechanism, timing, interruption, and motion gates belong to `ui-motion`.
+- Owns: narrative structure, report reflow, stage composition, density, typography, color, imagery, deck-level motion placement, and rendered verification. Motion mechanism, timing, interruption, and motion gates belong to `ui-design`.
 - Inputs: source content, audience, occasion, duration, brand or design contract, required assets, and delivery format.
 - Outputs: self-contained HTML deck, converted deck, PDF/PNG export when requested, and rendered verification.
-- Compose with: `design-system` when a DESIGN.md governs the deck; `ui-motion` for slide transitions; `logo-generator` for identity assets.
+- Compose with: `design-system` when a DESIGN.md governs the deck; `ui-design` for slide transitions; `logo-generator` for identity assets.
 - Gates: reports reflow on phones without clipping or unreadably scaled text; presentation slides fit 1920x1080; narrative, text, contrast, and assets are verified in rendered output.
 
 ## Modes
@@ -163,10 +163,10 @@ not be preserved.
 
 ## References
 
-- `../../frontend-slides/references/html-report.md` - report-only design, fonts, mobile layout and verification; overrides fixed-stage reference geometry.
+- [html-report.md](../../frontend-slides/references/html-report.md) - report-only design, fonts, mobile layout and verification; overrides fixed-stage reference geometry.
 
-- `../../frontend-slides/references/frontend-slides-guide.md` - detailed mode workflows, layout rules, image pipeline, and editing guidance.
-- `../../frontend-slides/DESIGN_SYSTEM.md` - deck design system and quality gate.
-- `../../frontend-slides/STYLE_PRESETS.md` - default art direction and token reference; resolves a maintained preset through `style-presets` before a one-off direction.
-- `../../frontend-slides/html-template.md` - stage shell and component markup.
-- `../../frontend-slides/animation-patterns.md` - slide and element motion patterns.
+- [frontend-slides-guide.md](../../frontend-slides/references/frontend-slides-guide.md) - detailed mode workflows, layout rules, image pipeline, and editing guidance.
+- [DESIGN_SYSTEM.md](../../frontend-slides/DESIGN_SYSTEM.md) - deck design system and quality gate.
+- [STYLE_PRESETS.md](../../frontend-slides/STYLE_PRESETS.md) - default art direction and token reference; resolves a maintained preset through `style-presets` before a one-off direction.
+- [html-template.md](../../frontend-slides/html-template.md) - stage shell and component markup.
+- [animation-patterns.md](../../frontend-slides/animation-patterns.md) - slide and element motion patterns.

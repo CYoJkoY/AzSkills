@@ -1,6 +1,6 @@
 {
   "name": "tool-integration",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Connect AzSkills to a supported AI client and produce verified install, MCP, or manual setup steps without inventing client capabilities.",
   "license": "MIT",
   "keywords": [

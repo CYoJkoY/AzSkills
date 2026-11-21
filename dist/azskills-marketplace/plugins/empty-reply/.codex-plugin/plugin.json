@@ -1,6 +1,6 @@
 {
   "name": "empty-reply",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Continue a turn that ended without visible assistant text, with a bounded retry.",
   "license": "MIT",
   "keywords": [

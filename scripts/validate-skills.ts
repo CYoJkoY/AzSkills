@@ -33,6 +33,7 @@ interface CatalogAliasEntry {
   status: string;
   canonical: string;
   mode: string;
+  legacyModes?: Record<string, string>;
   path?: string;
 }
 
@@ -285,6 +286,16 @@ async function main(): Promise<void> {
       fail(alias.id + ": unknown canonical target " + alias.canonical);
     } else if (!canonicalTarget.modes.includes(alias.mode)) {
       fail(alias.id + ": mode " + alias.mode + " is not declared by " + alias.canonical);
+    } else if (alias.legacyModes !== undefined) {
+      if (!isRecord(alias.legacyModes)) {
+        fail(alias.id + ": legacyModes must be an object");
+      } else {
+        for (const [legacyMode, targetMode] of Object.entries(alias.legacyModes)) {
+          if (typeof targetMode !== "string" || !canonicalTarget.modes.includes(targetMode)) {
+            fail(alias.id + ": legacy mode " + legacyMode + " targets an undeclared mode");
+          }
+        }
+      }
     }
     if (alias.path !== undefined) fail(alias.id + ": aliases must be routing metadata only");
   }

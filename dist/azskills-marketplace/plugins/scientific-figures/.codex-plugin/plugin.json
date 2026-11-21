@@ -1,6 +1,6 @@
 {
   "name": "scientific-figures",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Draw or faithfully reconstruct medical and scientific schematics as editable SVG, using a validated scene model, deterministic vector renderer, and quality checker. Use for pathway and mechanism figures or SciPrism SVG requests; ordinary SVG animation stays with ui-motion.",
   "license": "MIT",
   "keywords": [

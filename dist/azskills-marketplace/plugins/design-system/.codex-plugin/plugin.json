@@ -1,6 +1,6 @@
 {
   "name": "design-system",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Consume, author, normalize, migrate, and audit DESIGN.md visual contracts with exact source evidence, semantic mapping, provenance, and executable QA. Use when a project has DESIGN.md, brand evidence must become rules, or an AzSkills surface needs contract validation.",
   "license": "MIT",
   "keywords": [

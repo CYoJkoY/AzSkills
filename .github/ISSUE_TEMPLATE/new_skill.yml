@@ -129,13 +129,12 @@ body:
         - architecture
         - design-system
         - ui-design
-        - ui-motion
+        - ui-design
         - logo-generator
         - photo-abstract-editorial
         - frontend-slides
         - remotion-production
-        - readme-craft
-        - steam-mod-page
+        - document-writing
         - localization
         - resume-evidence-workflow
         - tool-integration

@@ -127,6 +127,11 @@ function resolveId(id: unknown): string {
   return alias?.canonical ?? (typeof id === "string" ? id : "");
 }
 
+function resolveMode(alias: { mode: string; legacyModes?: Record<string, string> } | undefined, requested: string | undefined): string | undefined {
+  if (requested === undefined) return alias?.mode;
+  return alias?.legacyModes?.[requested] ?? requested;
+}
+
 async function call(input: Record<string, unknown>): Promise<unknown> {
   if (Object.keys(input).some((key) => !["action", "id", "mode", "path"].includes(key))) throw new Error("Unknown argument");
   const action = input.action ?? "entry";
@@ -142,7 +147,7 @@ async function call(input: Record<string, unknown>): Promise<unknown> {
     const module = entry.kind === "module" && entry.module !== undefined ? moduleIndex.get(entry.module) : undefined;
     const requestedMode = input.mode;
     if (requestedMode !== undefined && typeof requestedMode !== "string") throw new Error("Unknown mode for " + id);
-    const mode = typeof requestedMode === "string" ? requestedMode : alias?.mode;
+    const mode = resolveMode(alias, typeof requestedMode === "string" ? requestedMode : undefined);
     if (mode !== undefined) {
       if (module === undefined) throw new Error("Unknown mode for " + id);
       if (!module.modes.includes(mode)) throw new Error("Unknown mode for " + id);
@@ -171,12 +176,13 @@ async function readUri(uri: string): Promise<ResourceData> {
   const slash = rest.indexOf("/");
   const id = decodeURIComponent(slash === -1 ? rest : rest.slice(0, slash));
   const relative = slash === -1 ? "" : rest.slice(slash + 1).split("/").map(decodeURIComponent).join("/");
-  if (!pluginIndex.has(id)) throw new Error("Unknown plugin: " + id);
+  const canonicalId = resolveId(id);
+  if (!pluginIndex.has(canonicalId)) throw new Error("Unknown plugin: " + id);
   if (relative === "") {
-    const selected = await pluginSkillFile(id);
+    const selected = await pluginSkillFile(canonicalId);
     return fileData(uri, selected.file);
   }
-  const bundle = await closureFor(id);
+  const bundle = await closureFor(canonicalId);
   const file = bundle.get(relative);
   if (file === undefined) throw new Error("Unknown plugin-relative file path");
   return fileData(uri, file);

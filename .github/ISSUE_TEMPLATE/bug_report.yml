@@ -16,13 +16,11 @@ body:
         - architecture
         - design-system
         - ui-design
-        - ui-motion
+        - document-writing
         - logo-generator
         - photo-abstract-editorial
         - frontend-slides
         - remotion-production
-        - readme-craft
-        - steam-mod-page
         - localization
         - resume-evidence-workflow
         - tool-integration

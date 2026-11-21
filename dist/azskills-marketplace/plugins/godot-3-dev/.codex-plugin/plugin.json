@@ -1,6 +1,6 @@
 {
   "name": "godot-3-dev",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Write, review, and down-port Godot 3.x (3.6) GDScript and scenes without re-calling engine-dispatched virtuals and without Godot 4.x symbols.",
   "license": "MIT",
   "keywords": [

@@ -1,6 +1,6 @@
 ---
 name: ui-design
-description: Design, build, refine, and review production interfaces with one visual thesis, a token-based system, complete states, responsive behavior, accessibility, and rendered visual QA. Use for web apps, dashboards, tools, settings, forms, and component libraries.
+description: Design, build, refine, review, and animate production interfaces with one visual thesis, a token-based system, complete states, responsive behavior, accessibility, purposeful motion, and rendered visual QA. Use for web apps, dashboards, tools, settings, forms, and component libraries.
 ---
 
 # Ui Design

@@ -1,6 +1,6 @@
 # AzSkills module system
 
-Version: 3.0.0
+Version: 4.0.0
 
 AzSkills is a catalog of independent plugins. Each module contract under references/modules/ is shipped as its own plugin by catalog/plugins.json, and the root SKILL.md is the catalog index. Modes and references load on demand inside the owning plugin. Legacy aliases exist only in skills.json and never create additional installable entries.
 
@@ -112,9 +112,9 @@ request
    dependency DAG. A self-reference is invalid.
 - Prefer a mode over a new Skill. Prefer a reference over a new mode. Prefer a
   shared rule over a copied paragraph.
-- A pipeline may name an ordered set of owners, for example `readme-craft` then
-  `ui-design` for a rendered README page. The order is part of the output
-  contract.
+- A pipeline may name an ordered set of owners, for example `document-writing`
+  with its `readme` mode followed by `ui-design` for a rendered README page.
+  The order is part of the output contract.
 - A reference never becomes a hidden second contract. If a reference changes
   scope, gates, or ownership, promote it to a mode or an internal module.
 - An alias may be selected directly. It forwards to one internal module and one
@@ -124,13 +124,13 @@ request
 
 | Family | Plugins | Purpose |
 | :--- | :--- | :--- |
-| architecture | `architecture` | Runtime, frontend, storage, and process boundaries. |
-| interface | `design-system`, `ui-design`, `ui-motion`, `style-presets` | Design contracts, interface execution, motion, and named style presets. |
-| visual | `logo-generator`, `photo-abstract-editorial` | Identity and image-led artifacts. |
+| architecture | `architecture`, `az-clean-code`, `godot-3-dev` | Runtime, frontend, storage, process boundaries, code discipline, and Godot 3.x delivery. |
+| interface | `design-system`, `ui-design`, `style-presets` | Design contracts, interface execution including motion, and named style presets. |
+| visual | `logo-generator`, `photo-abstract-editorial`, `scientific-figures` | Identity, image-led artifacts, and scientific figures. |
 | production | `frontend-slides`, `remotion-production` | Timed or staged visual production. |
-| publishing | `readme-craft`, `steam-mod-page`, `localization` | Repository, storefront, and locale delivery. |
+| publishing | `document-writing`, `localization` | Repository, storefront, and locale delivery. |
 | career | `resume-evidence-workflow` | Career evidence, requirement alignment, and resume delivery. |
-| operations | `tool-integration` | Connect and manage AzSkills across supported AI clients. |
+| operations | `tool-integration`, `taste` | Connect AI clients and apply execution judgment. |
 
 ## Sizes and progressive disclosure
 

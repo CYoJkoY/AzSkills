@@ -145,13 +145,6 @@ const MODULES: readonly SkillEntry[] = [
     contract: "One thesis. Token-only spacing. Every state. Rendered verification.",
   },
   {
-    name: "ui-motion",
-    group: "INTERFACE",
-    purpose: "Design state transitions that preserve meaning and accessibility.",
-    when: "Use when interaction needs motion or an existing motion needs review.",
-    contract: "Named purpose. Smallest mechanism. Interruptible. Reduced-motion parity.",
-  },
-  {
     name: "logo-generator",
     group: "VISUAL",
     purpose: "Develop logos, product marks, character marks, and identity systems.",
@@ -180,18 +173,11 @@ const MODULES: readonly SkillEntry[] = [
     contract: "Frame is time. One visual owner per concern. Reproducible renders.",
   },
   {
-    name: "readme-craft",
+    name: "document-writing",
     group: "PUBLISH",
-    purpose: "Design, rewrite, and audit evidence-first GitHub README pages.",
-    when: "Use when a repository needs a readable and verifiable landing page.",
-    contract: "Information architecture first. Verified links. Theme-safe SVG.",
-  },
-  {
-    name: "steam-mod-page",
-    group: "PUBLISH",
-    purpose: "Write and audit Steam Workshop descriptions as clean BBCode.",
-    when: "Use when a Mod needs a player-first or developer-first Workshop page.",
-    contract: "BBCode only. Bilingual separation. Verified facts. Final lint.",
+    purpose: "Write, rewrite, and audit GitHub README and Steam Workshop documents.",
+    when: "Use when a repository or Mod needs a publication-ready document.",
+    contract: "Branch-specific format. Verified facts. Stable links. Final lint.",
   },
   {
     name: "localization",

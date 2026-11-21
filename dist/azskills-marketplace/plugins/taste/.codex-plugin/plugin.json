@@ -1,6 +1,6 @@
 {
   "name": "taste",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Apply GPT with Taste's judgment, collaboration, and execution behavior through Codex hooks and reusable role prompts.",
   "license": "MIT",
   "keywords": [

@@ -59,25 +59,25 @@
     {
       "id": "ui-motion-review",
       "status": "alias",
-      "canonical": "ui-motion",
-      "mode": "review"
+      "canonical": "ui-design",
+      "mode": "motion-review"
     },
     {
       "id": "ui-motion-audit",
       "status": "alias",
-      "canonical": "ui-motion",
-      "mode": "audit"
+      "canonical": "ui-design",
+      "mode": "motion-audit"
     },
     {
       "id": "rare-ui-motion",
       "status": "alias",
-      "canonical": "ui-motion",
-      "mode": "pattern"
+      "canonical": "ui-design",
+      "mode": "motion-pattern"
     },
     {
       "id": "svg-animation",
       "status": "alias",
-      "canonical": "ui-motion",
+      "canonical": "ui-design",
       "mode": "svg"
     },
     {
@@ -133,13 +133,63 @@
       "status": "alias",
       "canonical": "scientific-figures",
       "mode": "author"
+    },
+    {
+      "id": "readme-craft",
+      "status": "alias",
+      "canonical": "document-writing",
+      "mode": "readme",
+      "legacyModes": {
+        "build": "readme",
+        "rewrite": "readme-rewrite",
+        "audit": "readme-audit"
+      }
+    },
+    {
+      "id": "readme-rewrite",
+      "status": "alias",
+      "canonical": "document-writing",
+      "mode": "readme-rewrite"
+    },
+    {
+      "id": "steam-mod-page",
+      "status": "alias",
+      "canonical": "document-writing",
+      "mode": "steam-player",
+      "legacyModes": {
+        "player": "steam-player",
+        "developer": "steam-developer",
+        "audit": "steam-audit"
+      }
+    },
+    {
+      "id": "ui-motion",
+      "status": "alias",
+      "canonical": "ui-design",
+      "mode": "motion",
+      "legacyModes": {
+        "build": "motion",
+        "review": "motion-review",
+        "audit": "motion-audit",
+        "pattern": "motion-pattern",
+        "svg": "svg"
+      }
+    },
+    {
+      "id": "ui-motion-build",
+      "status": "alias",
+      "canonical": "ui-design",
+      "mode": "motion",
+      "legacyModes": {
+        "build": "motion"
+      }
     }
   ],
-  "version": "3.0.0",
+  "version": "4.0.0",
   "entry": {
     "id": "azskills",
     "path": "SKILL.md",
-    "version": "3.0.0"
+    "version": "4.0.0"
   },
   "modules": [
     {
@@ -174,8 +224,7 @@
       "composes": [
         "architecture",
         "frontend-slides",
-        "ui-design",
-        "ui-motion"
+        "ui-design"
       ]
     },
     {
@@ -187,31 +236,17 @@
         "build",
         "refine",
         "review",
-        "system"
-      ],
-      "role": "Interface hierarchy, components, states, responsive behavior, and visual QA.",
-      "composes": [
-        "architecture",
-        "design-system",
-        "ui-motion"
-      ]
-    },
-    {
-      "id": "ui-motion",
-      "path": "references/modules/ui-motion.md",
-      "status": "module",
-      "family": "interface",
-      "modes": [
-        "build",
-        "review",
-        "audit",
-        "pattern",
+        "system",
+        "motion",
+        "motion-review",
+        "motion-audit",
+        "motion-pattern",
         "svg"
       ],
-      "role": "Motion construction, review, audit, patterns, and SVG animation.",
+      "role": "Interface hierarchy, components, states, responsive behavior, visual QA, motion construction, review, audit, patterns, and SVG animation.",
       "composes": [
-        "design-system",
-        "ui-design"
+        "architecture",
+        "design-system"
       ]
     },
     {
@@ -227,8 +262,7 @@
       "role": "Logos, product marks, character marks, and identity systems.",
       "composes": [
         "design-system",
-        "ui-design",
-        "ui-motion"
+        "ui-design"
       ]
     },
     {
@@ -261,7 +295,7 @@
       "composes": [
         "design-system",
         "logo-generator",
-        "ui-motion"
+        "ui-design"
       ]
     },
     {
@@ -280,39 +314,25 @@
       "role": "Deterministic programmatic video and render delivery.",
       "composes": [
         "logo-generator",
-        "ui-design",
-        "ui-motion"
-      ]
-    },
-    {
-      "id": "readme-craft",
-      "path": "references/modules/readme-craft.md",
-      "status": "module",
-      "family": "publishing",
-      "modes": [
-        "build",
-        "rewrite",
-        "audit"
-      ],
-      "role": "GitHub README architecture, visuals, links, and QA.",
-      "composes": [
-        "logo-generator",
         "ui-design"
       ]
     },
     {
-      "id": "steam-mod-page",
-      "path": "references/modules/steam-mod-page.md",
+      "id": "document-writing",
+      "path": "references/modules/document-writing.md",
       "status": "module",
       "family": "publishing",
       "modes": [
-        "player",
-        "developer",
-        "audit"
+        "readme",
+        "readme-rewrite",
+        "readme-audit",
+        "steam-player",
+        "steam-developer",
+        "steam-audit"
       ],
-      "role": "Steam Workshop BBCode pages and bilingual delivery.",
+      "role": "GitHub README architecture, visuals, links, QA, Steam Workshop BBCode pages, and bilingual delivery.",
       "composes": [
-        "localization",
+        "logo-generator",
         "ui-design"
       ]
     },
@@ -327,8 +347,7 @@
       ],
       "role": "Game CSV localization with locale completeness and markup safety.",
       "composes": [
-        "readme-craft",
-        "steam-mod-page"
+        "document-writing"
       ]
     },
     {
@@ -365,7 +384,11 @@
       "path": "references/modules/taste.md",
       "status": "module",
       "family": "operations",
-      "modes": ["main", "subagent", "independent"],
+      "modes": [
+        "main",
+        "subagent",
+        "independent"
+      ],
       "role": "GPT with Taste judgment, collaboration, and execution behavior.",
       "composes": []
     },
@@ -374,36 +397,67 @@
       "path": "references/modules/az-clean-code.md",
       "status": "module",
       "family": "architecture",
-      "modes": ["write", "review", "refactor"],
-      "role": "Explicit, flat, reusable code with business data externalized before implementation.",
-      "composes": ["architecture"]
+      "modes": [
+        "write",
+        "review",
+        "refactor",
+        "style"
+      ],
+      "role": "Explicit, flat, reusable code with business data externalized, code style consistency, and implementation quality guards.",
+      "composes": [
+        "architecture"
+      ]
     },
     {
       "id": "godot-3-dev",
       "path": "references/modules/godot-3-dev.md",
       "status": "module",
       "family": "architecture",
-      "modes": ["script", "review", "port"],
+      "modes": [
+        "script",
+        "review",
+        "port"
+      ],
       "role": "Godot 3.x GDScript, virtual-call safety, 3.6 API surface, and down-porting.",
-      "composes": ["az-clean-code", "architecture"]
+      "composes": [
+        "az-clean-code",
+        "architecture"
+      ]
     },
     {
       "id": "style-presets",
       "path": "references/modules/style-presets.md",
       "status": "module",
       "family": "interface",
-      "modes": ["catalog", "apply", "loaders", "audit"],
+      "modes": [
+        "catalog",
+        "apply",
+        "loaders",
+        "audit"
+      ],
       "role": "Named visual presets, keyword triggers, preset token packs, and loading indicators.",
-      "composes": ["design-system", "ui-design", "ui-motion", "frontend-slides"]
+      "composes": [
+        "design-system",
+        "ui-design",
+        "frontend-slides"
+      ]
     },
     {
       "id": "scientific-figures",
       "path": "references/modules/scientific-figures.md",
       "status": "module",
       "family": "visual",
-      "modes": ["redraw", "author", "verify"],
+      "modes": [
+        "redraw",
+        "author",
+        "verify"
+      ],
       "role": "Medical and scientific schematics, faithful redraws, editable SVG, and deterministic figure verification.",
-      "composes": ["style-presets", "frontend-slides", "ui-motion"]
+      "composes": [
+        "style-presets",
+        "frontend-slides",
+        "ui-design"
+      ]
     }
   ]
 }

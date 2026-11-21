@@ -5,7 +5,7 @@ description: Use when coding, reviewing, or refactoring app logic; enforce expli
 
 # Az Clean Code
 
-Apply this Skill when creating or changing application behavior, reviewing code for maintainability, or refactoring nested or hard-coded business logic. Do not apply it to formatting-only work, structure-preserving performance optimization, or unrelated low-level infrastructure. A user may explicitly exempt a disposable one-off script from C7; state that scope and reason in the self-check.
+Apply this Skill when creating or changing application behavior, reviewing code for maintainability, refactoring nested or hard-coded business logic, or normalizing repository code style. Do not apply it to structure-preserving performance optimization or unrelated low-level infrastructure. A user may explicitly exempt a disposable one-off script from C7; state that scope and reason in the self-check.
 
 All applicable code must pass C1-C7. These are acceptance constraints, not suggestions. A conflict with an existing public contract must be reported and resolved within the requested scope; do not silently break the contract. See [constraint sources](references/constraint-sources.md), [data schema](references/data-driven-schema.md), and [anti-patterns](references/anti-patterns.md).
 
@@ -23,11 +23,17 @@ The executable policy lives in `constraints.json`. Run `python az-clean-code/scr
 
 ## Workflow
 
-1. Confirm that the request is code authoring, review, or refactoring within this Skill's boundary.
+1. Confirm that the request is code authoring, review, refactoring, or style normalization within this Skill's boundary.
 2. **Before coding**, identify business data and define or locate its schema and source. If no business data is involved, record that in the self-check. Never start with literal business values and promise to externalize them later.
 3. List invalid inputs, boundary cases, and failure paths. Plan guards and ensure the control-flow depth will not exceed two.
 4. Search the repository for existing equivalent behavior, configuration, and dependencies. Count meaningful duplicates; extract at the third occurrence and avoid speculative abstractions.
 5. Implement, then verify the changed paths against C1-C7 and project checks. Attach the following self-check to the code delivery or review. For repository changes, include it in the response; do not add a one-off report file.
+
+For `style` mode, inspect the repository formatter, EditorConfig, lint, and
+generated-file rules before changing files. Run the narrowest available
+formatter or check, preserve semantics, and report the exact scope. C1, C3,
+C4, C5, C6, and C7 are N/A only when the diff is provably formatting-only;
+C2 and generated-file boundaries remain applicable.
 
 ## Required self-check
 
