@@ -201,6 +201,13 @@ const MODULES: readonly SkillEntry[] = [
     contract: "Registry-backed mechanism. Preview writes. Verify discovery. Preserve unrelated data.",
   },
   {
+    name: "delivery-loop",
+    group: "OPS",
+    purpose: "Deliver concurrent issue-to-merge work with leases and worktrees.",
+    when: "Use when several tasks must ship in parallel without local conflicts.",
+    contract: "Touch-scope leases. Per-task worktrees. Computed score. Gated merge.",
+  },
+  {
     name: "taste",
     group: "OPS",
     purpose: "Apply judgment, collaboration, and clear execution behavior.",

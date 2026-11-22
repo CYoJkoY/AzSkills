@@ -130,7 +130,7 @@ request
 | production | `frontend-slides`, `remotion-production` | Timed or staged visual production. |
 | publishing | `document-writing`, `localization` | Repository, storefront, and locale delivery. |
 | career | `resume-evidence-workflow` | Career evidence, requirement alignment, and resume delivery. |
-| operations | `tool-integration`, `taste` | Connect AI clients and apply execution judgment. |
+| operations | `tool-integration`, `delivery-loop`, `taste` | Connect AI clients, run concurrent issue-to-merge delivery, and apply execution judgment. |
 
 ## Sizes and progressive disclosure
 

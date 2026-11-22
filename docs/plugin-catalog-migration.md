@@ -37,6 +37,7 @@ plugin exposes each contract inside it.
 | `writing` | document-writing, localization |
 | `resume-evidence-workflow` | resume-evidence-workflow |
 | `operations` | tool-integration, taste |
+| `delivery-loop` | delivery-loop |
 | `godot-3-dev` | godot-3-dev |
 
 Merge points live inside a contract as modes, not as extra plugins: code style
@@ -72,6 +73,7 @@ uninstall the replaced entry:
 | `document-writing`, `localization` | `writing` |
 | `resume-evidence-workflow` | `resume-evidence-workflow` |
 | `tool-integration`, `taste` | `operations` |
+| none (new in 5.0.0) | `delivery-loop` |
 | `godot-3-dev` | `godot-3-dev` |
 | `no-think-tags`, `empty-reply` | unchanged |
 

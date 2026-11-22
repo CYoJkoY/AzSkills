@@ -180,7 +180,7 @@ try {
   assert.equal(await readFile(path.join(failedUpdate, 'design', 'SKILL.md'), 'utf8'), 'preserve after copy failure');
   assert.equal(await readFile(manifestFile(failedUpdate), 'utf8'), priorManifest, 'Failed mutation must restore prior manifest bytes');
 
-  assert.equal(moduleIds.length, 8);
+  assert.equal(moduleIds.length, 9);
   assert.equal(moduleIds.includes('no-think-tags'), false);
   console.log('Installer tests passed: per-plugin selection, standalone skipping, legacy schemas, backup migration, byte-preserving rollback, idempotency, content verification, conflicts, unsafe manifests, and missing snapshots.');
 } finally { await rm(temp, { recursive: true, force: true }); }

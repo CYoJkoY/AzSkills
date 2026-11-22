@@ -180,6 +180,30 @@
       "hooks": "codex-plugin/hooks/taste-hooks.json"
     },
     {
+      "id": "delivery-loop",
+      "kind": "module",
+      "modules": [
+        "delivery-loop"
+      ],
+      "description": "Run concurrent issue-to-merge delivery with touch-scope leases, per-task worktrees, computed review scoring, and gated auto-merge, without sub-agents.",
+      "icon": "codex-plugin/assets/icons/delivery-loop.svg",
+      "brandColor": "#3D4E8A",
+      "category": "Productivity",
+      "capabilities": [
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "delivery-loop/references",
+        "delivery-loop/scripts",
+        "codex-plugin/hooks/delivery-hooks.json",
+        "codex-plugin/hooks/guard.ts",
+        "codex-plugin/hooks/delivery-guard.ts",
+        "codex-plugin/assets/icons/delivery-loop.svg"
+      ],
+      "hooks": "codex-plugin/hooks/delivery-hooks.json"
+    },
+    {
       "id": "godot-3-dev",
       "kind": "module",
       "modules": [
