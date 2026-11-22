@@ -6,10 +6,10 @@
   },
   "plugins": [
     {
-      "name": "architecture",
+      "name": "engineering",
       "source": {
         "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/architecture"
+        "path": "./dist/azskills-marketplace/plugins/engineering"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -18,10 +18,10 @@
       "category": "Productivity"
     },
     {
-      "name": "design-system",
+      "name": "design",
       "source": {
         "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/design-system"
+        "path": "./dist/azskills-marketplace/plugins/design"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -30,10 +30,10 @@
       "category": "Productivity"
     },
     {
-      "name": "ui-design",
+      "name": "visual-assets",
       "source": {
         "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/ui-design"
+        "path": "./dist/azskills-marketplace/plugins/visual-assets"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -42,10 +42,10 @@
       "category": "Productivity"
     },
     {
-      "name": "logo-generator",
+      "name": "visual-production",
       "source": {
         "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/logo-generator"
+        "path": "./dist/azskills-marketplace/plugins/visual-production"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -54,58 +54,10 @@
       "category": "Productivity"
     },
     {
-      "name": "photo-abstract-editorial",
+      "name": "writing",
       "source": {
         "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/photo-abstract-editorial"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "frontend-slides",
-      "source": {
-        "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/frontend-slides"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "remotion-production",
-      "source": {
-        "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/remotion-production"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "document-writing",
-      "source": {
-        "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/document-writing"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "localization",
-      "source": {
-        "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/localization"
+        "path": "./dist/azskills-marketplace/plugins/writing"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -126,34 +78,10 @@
       "category": "Productivity"
     },
     {
-      "name": "tool-integration",
+      "name": "operations",
       "source": {
         "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/tool-integration"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "taste",
-      "source": {
-        "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/taste"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "az-clean-code",
-      "source": {
-        "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/az-clean-code"
+        "path": "./dist/azskills-marketplace/plugins/operations"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -166,30 +94,6 @@
       "source": {
         "source": "local",
         "path": "./dist/azskills-marketplace/plugins/godot-3-dev"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "style-presets",
-      "source": {
-        "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/style-presets"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "scientific-figures",
-      "source": {
-        "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/scientific-figures"
       },
       "policy": {
         "installation": "AVAILABLE",

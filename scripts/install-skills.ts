@@ -24,7 +24,13 @@ const pluginCatalog = await readJson<PluginCatalog>(path.join(root, 'catalog/plu
 const moduleIds = pluginCatalog.plugins.filter((plugin) => plugin.kind === 'module').map((plugin) => plugin.id);
 const standaloneIds = new Set(pluginCatalog.plugins.filter((plugin) => plugin.kind === 'standalone').map((plugin) => plugin.id));
 const knownIds = new Set(pluginCatalog.plugins.map((plugin) => plugin.id));
-const aliasTargets = new Map(catalog.aliases.map((alias) => [alias.id, alias.canonical]));
+const moduleOwners = new Map(pluginCatalog.plugins.flatMap((plugin) => (plugin.modules ?? []).map((module) => [module, plugin.id] as const)));
+const aliasTargets = new Map(catalog.aliases.map((alias) => [alias.id, moduleOwners.get(alias.canonical) ?? alias.canonical]));
+// A module id or a legacy alias both resolve to the single plugin that installs it.
+const pluginTargets = new Map<string, string>([
+  ...[...moduleOwners.keys()].map((module) => [module, moduleOwners.get(module) as string] as const),
+  ...aliasTargets,
+]);
 const args = process.argv.slice(2);
 const has = (key: string): boolean => args.includes(key);
 const value = (key: string, fallback = ''): string => {
@@ -293,11 +299,11 @@ function selection(): string[] {
   const explicit = everything ? pluginCatalog.plugins.map((plugin) => plugin.id).join(',') : value('--plugin') || value('--skills');
   if (has('--skills') || has('--all-skills')) console.log('Note: --skills and --all-skills are legacy aliases for --plugin and --all-plugins.');
   const requested = explicit ? explicit.split(',').map((id) => id.trim()).filter(Boolean) : moduleIds;
-  const expanded = requested.flatMap((id) => {
+  const expanded = [...new Set(requested.flatMap((id) => {
     if (id === catalog.entry.id) return moduleIds;
-    const canonical = aliasTargets.get(id);
+    const canonical = pluginTargets.get(id);
     return canonical === undefined ? [id] : [canonical];
-  });
+  }))];
   const unknown = expanded.filter((id) => !knownIds.has(id));
   if (unknown.length) throw new Error('Unknown plugin: ' + unknown.join(', '));
   for (const id of expanded.filter((id) => standaloneIds.has(id))) {

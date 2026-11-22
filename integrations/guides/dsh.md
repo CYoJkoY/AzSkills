@@ -30,7 +30,7 @@ This client has no verified filesystem skill folder in the repository registry. 
 
 ## Use
 
-Start a session and make a request covered by an installed plugin, for example: review this architecture. Each installed plugin is its own entry; module aliases such as frontend-architecture remain prompt and issue vocabulary for the owning plugin.
+Start a session and make a request covered by an installed plugin, for example: review this architecture. Each installed plugin is its own entry; member contracts and aliases such as frontend-architecture remain prompt and issue vocabulary for the owning plugin.
 
 ## Verify
 

@@ -1,0 +1,26 @@
+{
+  "name": "engineering",
+  "version": "5.0.0",
+  "description": "Choose runtime and frontend architecture or improve code quality, style consistency, refactoring, and reusable implementation patterns.",
+  "license": "MIT",
+  "keywords": [
+    "engineering",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Engineering",
+    "shortDescription": "Choose runtime and frontend architecture or improve code quality, style consistency, refactoring, and reusable implementation patterns.",
+    "longDescription": "Choose runtime and frontend architecture or improve code quality, style consistency, refactoring, and reusable implementation patterns. Modes: architecture/runtime, architecture/frontend, architecture/migration, architecture/review, az-clean-code/write, az-clean-code/review, az-clean-code/refactor, az-clean-code/style.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#1F4E79",
+    "composerIcon": "./codex-plugin/assets/icons/engineering.svg",
+    "logo": "./codex-plugin/assets/icons/engineering.svg"
+  }
+}

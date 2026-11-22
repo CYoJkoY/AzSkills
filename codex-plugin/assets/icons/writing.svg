@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Writing</title>
+  <rect width="64" height="64" rx="8" fill="#6B4F2A"/>
+  <rect x="20" y="14" width="24" height="36" rx="3" fill="none" stroke="#FAF9F5" stroke-width="3.2"/>
+  <path d="M26 24h12M26 31h12M26 38h8" stroke="#FAF9F5" stroke-width="3.2" stroke-linecap="round"/>
+</svg>

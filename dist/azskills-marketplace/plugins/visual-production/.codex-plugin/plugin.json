@@ -1,0 +1,27 @@
+{
+  "name": "visual-production",
+  "version": "5.0.0",
+  "description": "Produce responsive HTML reports and presentations, data-driven video, and deterministic Remotion renders.",
+  "license": "MIT",
+  "keywords": [
+    "visual",
+    "production",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Visual Production",
+    "shortDescription": "Produce responsive HTML reports and presentations, data-driven video, and deterministic Remotion renders.",
+    "longDescription": "Produce responsive HTML reports and presentations, data-driven video, and deterministic Remotion renders. Modes: frontend-slides/new, frontend-slides/convert, frontend-slides/enhance, frontend-slides/report, remotion-production/video, remotion-production/data, remotion-production/3d, remotion-production/ui-showcase, remotion-production/motion, remotion-production/av.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#C2410C",
+    "composerIcon": "./codex-plugin/assets/icons/visual-production.svg",
+    "logo": "./codex-plugin/assets/icons/visual-production.svg"
+  }
+}

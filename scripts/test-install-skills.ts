@@ -31,6 +31,17 @@ async function skillEntries(directory: string, base = directory): Promise<string
   return output.sort();
 }
 
+// Only top-level directories inside a skills root are registered as skills, so
+// nested support contracts must not be counted as extra entries.
+async function installedPlugins(directory: string): Promise<string[]> {
+  const output: string[] = [];
+  for (const item of await readdir(directory, { withFileTypes: true })) {
+    if (!item.isDirectory()) continue;
+    if (await exists(path.join(directory, item.name, 'SKILL.md'))) output.push(item.name);
+  }
+  return output.sort();
+}
+
 function cli(target: string, options: string[] = [], pass = true): string {
   const result = spawnSync(process.execPath, ['scripts/install-skills.ts', '--target', target, ...options], { cwd: root, encoding: 'utf8', timeout: 120000 });
   if (result.error) throw result.error;
@@ -56,14 +67,14 @@ try {
 
   const legacySelection = path.join(temp, 'legacy-selection');
   assert.match(cli(legacySelection, ['--skills', 'ui-aesthetics', '--yes']), /legacy aliases/);
-  assert.deepEqual(await skillEntries(legacySelection), ['ui-design/SKILL.md'], 'Legacy flags and alias ids resolve to the canonical module');
+  assert.deepEqual(await installedPlugins(legacySelection), ['design'], 'Legacy flags and alias ids resolve to the owning plugin');
 
   cli(target, ['--plugin', 'architecture,ui-design', '--yes']);
-  assert.deepEqual(await skillEntries(target), ['architecture/SKILL.md', 'ui-design/SKILL.md']);
-  const installed = path.join(target, 'ui-design');
+  assert.deepEqual(await installedPlugins(target), ['design', 'engineering']);
+  const installed = path.join(target, 'design');
   const manifest = await readManifest(target);
   assert.equal(manifest.schemaVersion, 4);
-  assert.deepEqual(manifest.plugins, ['architecture', 'ui-design']);
+  assert.deepEqual(manifest.plugins, ['engineering', 'design']);
   assert.match(await readFile(path.join(installed, 'references/modules/ui-design.md'), 'utf8'), /name: ui-design/);
   assert.equal(await exists(path.join(installed, '.codex-plugin/plugin.json')), false, 'Skill view must not ship a plugin manifest');
   assert.match(await readFile(path.join(installed, 'SKILL.md'), 'utf8'), /references\/modules\/ui-design\.md/);
@@ -86,13 +97,13 @@ try {
   assert.equal(await readFile(path.join(installed, 'SKILL.md'), 'utf8'), 'local edit');
 
   cli(target, ['--plugin', 'architecture', '--yes']);
-  assert.deepEqual(await skillEntries(target), ['architecture/SKILL.md'], 'Selection controls the managed set');
+  assert.deepEqual(await installedPlugins(target), ['engineering'], 'Selection controls the managed set');
   await writeFile(path.join(target, 'user-notes.txt'), 'keep');
   cli(target, ['--uninstall', '--yes']);
-  assert.equal(await exists(path.join(target, 'architecture')), false);
+  assert.equal(await exists(path.join(target, 'engineering')), false);
   assert.equal(await readFile(path.join(target, 'user-notes.txt'), 'utf8'), 'keep');
   cli(target, ['--rollback', '--yes']);
-  assert.match(await readFile(path.join(target, 'architecture', 'SKILL.md'), 'utf8'), /references\/modules\/architecture\.md/);
+  assert.match(await readFile(path.join(target, 'engineering', 'SKILL.md'), 'utf8'), /references\/modules\/architecture\.md/);
 
   for (const schemaVersion of [1, 2, 3] as const) {
     const legacy = path.join(temp, 'legacy-' + schemaVersion, 'skills');
@@ -110,11 +121,11 @@ try {
     cli(legacy, ['--dry-run', '--plugin', 'ui-design']);
     assert.equal((await skillEntries(legacy)).length, 5);
     cli(legacy, ['--plugin', 'ui-design', '--yes']);
-    assert.deepEqual(await skillEntries(legacy), ['ui-design/SKILL.md'], 'Migration must also move legacy backups out of the scan root');
+    assert.deepEqual(await installedPlugins(legacy), ['design'], 'Migration must also move legacy backups out of the scan root');
     const data = await readManifest(legacy);
     const lastRun = requireRollback(data);
     assert.equal(path.relative(legacy, lastRun.directory).startsWith('..'), true);
-    assert.deepEqual(data.plugins, ['ui-design']);
+    assert.deepEqual(data.plugins, ['design']);
     cli(legacy, ['--verify']);
     cli(legacy, ['--rollback', '--yes']);
     assert.equal(await readFile(manifestFile(legacy), 'utf8'), oldManifest);
@@ -124,10 +135,10 @@ try {
   }
 
   const conflict = path.join(temp, 'conflict');
-  await mkdir(path.join(conflict, 'ui-design'), { recursive: true });
-  await writeFile(path.join(conflict, 'ui-design', 'SKILL.md'), 'user-owned');
+  await mkdir(path.join(conflict, 'design'), { recursive: true });
+  await writeFile(path.join(conflict, 'design', 'SKILL.md'), 'user-owned');
   cli(conflict, ['--plugin', 'ui-design', '--yes'], false);
-  assert.equal(await readFile(path.join(conflict, 'ui-design', 'SKILL.md'), 'utf8'), 'user-owned');
+  assert.equal(await readFile(path.join(conflict, 'design', 'SKILL.md'), 'utf8'), 'user-owned');
 
   const invalid = path.join(temp, 'invalid');
   await mkdir(invalid);
@@ -137,18 +148,18 @@ try {
 
   const recovery = path.join(temp, 'recovery');
   cli(recovery, ['--plugin', 'ui-design', '--yes']);
-  await writeFile(path.join(recovery, 'ui-design', 'SKILL.md'), 'changed');
+  await writeFile(path.join(recovery, 'design', 'SKILL.md'), 'changed');
   cli(recovery, ['--plugin', 'ui-design', '--yes']);
   const state = requireRollback(await readManifest(recovery));
-  await rm(path.join(state.directory, 'ui-design', 'SKILL.md'));
-  const before = await readFile(path.join(recovery, 'ui-design', 'SKILL.md'), 'utf8');
+  await rm(path.join(state.directory, 'design', 'SKILL.md'));
+  const before = await readFile(path.join(recovery, 'design', 'SKILL.md'), 'utf8');
   cli(recovery, ['--rollback', '--yes'], false);
-  assert.equal(await readFile(path.join(recovery, 'ui-design', 'SKILL.md'), 'utf8'), before, 'Missing snapshot must fail before mutation');
+  assert.equal(await readFile(path.join(recovery, 'design', 'SKILL.md'), 'utf8'), before, 'Missing snapshot must fail before mutation');
   cli(recovery, ['--plugin', 'missing', '--yes'], false);
 
   const failedUpdate = path.join(temp, 'failed-update');
   cli(failedUpdate, ['--plugin', 'ui-design', '--yes']);
-  await writeFile(path.join(failedUpdate, 'ui-design', 'SKILL.md'), 'preserve after copy failure');
+  await writeFile(path.join(failedUpdate, 'design', 'SKILL.md'), 'preserve after copy failure');
   const priorManifest = await readFile(manifestFile(failedUpdate), 'utf8');
   const preload = path.join(temp, 'fail-copy.mts');
   await writeFile(preload, [
@@ -161,15 +172,15 @@ try {
     '}; syncBuiltinESMExports();',
   ].join('\n'));
   const failure = spawnSync(process.execPath, ['--import', pathToFileURL(preload).href, 'scripts/install-skills.ts', '--target', failedUpdate, '--plugin', 'ui-design', '--yes'], {
-    cwd: root, encoding: 'utf8', timeout: 120000, env: { ...process.env, AZSKILLS_FAIL_DESTINATION: path.join(failedUpdate, 'ui-design') },
+    cwd: root, encoding: 'utf8', timeout: 120000, env: { ...process.env, AZSKILLS_FAIL_DESTINATION: path.join(failedUpdate, 'design') },
   });
   if (failure.error) throw failure.error;
   assert.equal(failure.status, 1, failure.stdout + failure.stderr);
   assert.match(failure.stderr, /Injected copy failure/);
-  assert.equal(await readFile(path.join(failedUpdate, 'ui-design', 'SKILL.md'), 'utf8'), 'preserve after copy failure');
+  assert.equal(await readFile(path.join(failedUpdate, 'design', 'SKILL.md'), 'utf8'), 'preserve after copy failure');
   assert.equal(await readFile(manifestFile(failedUpdate), 'utf8'), priorManifest, 'Failed mutation must restore prior manifest bytes');
 
-  assert.equal(moduleIds.length, 16);
+  assert.equal(moduleIds.length, 8);
   assert.equal(moduleIds.includes('no-think-tags'), false);
   console.log('Installer tests passed: per-plugin selection, standalone skipping, legacy schemas, backup migration, byte-preserving rollback, idempotency, content verification, conflicts, unsafe manifests, and missing snapshots.');
 } finally { await rm(temp, { recursive: true, force: true }); }

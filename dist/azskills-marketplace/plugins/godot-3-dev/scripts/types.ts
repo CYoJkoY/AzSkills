@@ -31,7 +31,10 @@ export type PluginKind = "module" | "standalone";
 export interface PluginCatalogEntry {
   id: string;
   kind: PluginKind;
-  module?: string;
+  modules?: string[];
+  description?: string;
+  icon?: string;
+  brandColor?: string;
   source?: string;
   category: string;
   capabilities: string[];

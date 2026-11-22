@@ -1,7 +1,7 @@
 {
   "name": "resume-evidence-workflow",
-  "version": "4.0.0",
-  "description": "Build a portable career evidence bank, align a resume to a job description, and deliver an editable application-ready artifact. Use for career deep dives, evidence-backed tailoring, or resume audits.",
+  "version": "5.0.0",
+  "description": "Build an evidence-backed career profile, tailor resumes to job requirements, and deliver an editable resume.",
   "license": "MIT",
   "keywords": [
     "resume",
@@ -13,16 +13,16 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Resume Evidence Workflow",
-    "shortDescription": "Build a portable career evidence bank, align a resume to a job description, and deliver an editable application-ready artifact. Use for career deep dives, evidence-backed tailoring, or resume audits.",
-    "longDescription": "Build a portable career evidence bank, align a resume to a job description, and deliver an editable application-ready artifact. Use for career deep dives, evidence-backed tailoring, or resume audits. Modes: evidence, tailor, review.",
+    "shortDescription": "Build an evidence-backed career profile, tailor resumes to job requirements, and deliver an editable resume.",
+    "longDescription": "Build an evidence-backed career profile, tailor resumes to job requirements, and deliver an editable resume. Modes: resume-evidence-workflow/evidence, resume-evidence-workflow/tailor, resume-evidence-workflow/review.",
     "developerName": "AzSkills",
     "category": "Productivity",
     "capabilities": [
       "Read",
       "Write"
     ],
-    "brandColor": "#A6382A",
-    "composerIcon": "./codex-plugin/assets/icon.svg",
-    "logo": "./codex-plugin/assets/icon.svg"
+    "brandColor": "#4A5568",
+    "composerIcon": "./codex-plugin/assets/icons/career.svg",
+    "logo": "./codex-plugin/assets/icons/career.svg"
   }
 }

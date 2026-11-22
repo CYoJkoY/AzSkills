@@ -6,14 +6,27 @@
   <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: a catalog of independent Codex plugins" width="100%">
 </picture>
 
-Version **4.0.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
+Version **5.0.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
 
-Every capability ships as its own plugin with its own manifest, skill entry, trigger description, and reference closure. A single dispatcher entry only fires when a prompt names it or matches one broad description; independent plugins are matched directly, so capabilities stop being invisible to automatic routing. `catalog/plugins.json` is the distribution registry and `skills.json` stays the canonical module and alias source.
+Every plugin ships with its own manifest, skill entry, trigger description, reference closure, and icon. A single dispatcher entry only fires when a prompt names it or matches one broad description; independent plugins are matched directly, so capabilities stop being invisible to automatic routing. Plugins are grouped by the job a request asks for, and each group stays small enough to answer one kind of request, so grouping never hides a capability behind an unrelated name. `catalog/plugins.json` is the distribution registry and `skills.json` stays the canonical module and alias source.
 
 | Kind | Plugins | Count |
 | :--- | :--- | :--- |
-| Workflow | architecture, design-system, ui-design, logo-generator, photo-abstract-editorial, frontend-slides, remotion-production, document-writing, localization, resume-evidence-workflow, tool-integration, taste, az-clean-code, godot-3-dev, style-presets, scientific-figures | 16 |
+| Workflow | engineering, design, visual-assets, visual-production, writing, resume-evidence-workflow, operations, godot-3-dev | 8 |
 | Hook | no-think-tags, empty-reply | 2 |
+
+Each workflow plugin bundles the related contracts that a single job needs, and ships one router skill so selecting the plugin exposes every member contract:
+
+| Plugin | Workflows | Focus |
+| :--- | :--- | :--- |
+| `engineering` | architecture, az-clean-code | Runtime, frontend stack, persistence, process boundaries, explicit code, and code style consistency. |
+| `design` | design-system, ui-design, style-presets | Design systems, interface hierarchy, states, responsive behavior, motion, visual QA, and named presets. |
+| `visual-assets` | logo-generator, photo-abstract-editorial, scientific-figures | Logos, editorial image treatments, and verified scientific or medical figures. |
+| `visual-production` | frontend-slides, remotion-production | Responsive HTML reports, fixed-stage presentations, and deterministic video. |
+| `writing` | document-writing, localization | GitHub READMEs, Steam Workshop pages, and game CSV localization. |
+| `resume-evidence-workflow` | resume-evidence-workflow | Career evidence, requirement alignment, and editable resume delivery. |
+| `operations` | tool-integration, taste | AI client installation and setup, plus judgment and collaboration behavior. |
+| `godot-3-dev` | godot-3-dev | Godot 3.x GDScript, virtual-call safety, the 3.6 API surface, and down-porting. |
 
 ## Install
 
@@ -22,11 +35,11 @@ Requires Node.js 22.18 or later (23.6+ on Node 23, which enabled type stripping 
 Install selected workflow plugins as skill folders:
 
 ```sh
-node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --plugin architecture,ui-design --dry-run
-node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --plugin architecture,ui-design --yes
+node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --plugin engineering,design --dry-run
+node scripts/install-skills.ts --tool codex --mode project --project /path/to/project --plugin engineering,design --yes
 ```
 
-Each selected plugin becomes `/path/to/project/.agents/skills/<id>/SKILL.md` with its own reference closure. Use `--all-plugins` for every workflow plugin, `--mode user` for the client user directory, `--target <skills-root>` to override the destination, or `--list` to see supported clients. Running without arguments opens a client-selection prompt. Bare installs select all workflow plugins.
+Each selected plugin becomes `/path/to/project/.agents/skills/<id>/SKILL.md` with its own reference closure. A module id such as `ui-design` installs the workflow plugin that owns it, so old names keep working. Use `--all-plugins` for every workflow plugin, `--mode user` for the client user directory, `--target <skills-root>` to override the destination, or `--list` to see supported clients. Running without arguments opens a client-selection prompt. Bare installs select all workflow plugins.
 
 For the full catalog including hooks, use the Codex plugin marketplace:
 
@@ -39,7 +52,7 @@ codex plugin marketplace add /path/to/fresh/exports/azskills-marketplace
 codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
 ```
 
-The Git repository is a ready-to-use marketplace: it publishes the built catalog at `dist/azskills-marketplace/`, with a root manifest that points to it. The build writes `azskills-marketplace/.agents/plugins/marketplace.json` plus one self-contained directory per plugin under `plugins/<id>/`, and deterministic archives under `zips/<id>.zip`. Install the plugins you need from the marketplace; each plugin carries a narrow description and is matched on its own. Only `taste` (steering) and `godot-3-dev` (Godot 3.x write guard) ship hooks among workflow plugins, plus the two hook plugins; review and trust those hooks when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The hook plugins use Stop hooks: `no-think-tags` blocks a final reply that opens with a raw reasoning-tag block, and `empty-reply` asks for a real answer when a finished turn has no visible text. See the [Codex upgrade and verification guide](integrations/guides/codex.md).
+The Git repository is a ready-to-use marketplace: it publishes the built catalog at `dist/azskills-marketplace/`, with a root manifest that points to it. The build writes `azskills-marketplace/.agents/plugins/marketplace.json` plus one self-contained directory per plugin under `plugins/<id>/`, and deterministic archives under `zips/<id>.zip`. Install the plugins you need from the marketplace; each plugin carries a narrow description and is matched on its own. Only `operations` (steering through `taste`) and `godot-3-dev` (Godot 3.x write guard) ship hooks among workflow plugins, plus the two hook plugins; review and trust those hooks when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The hook plugins use Stop hooks: `no-think-tags` blocks a final reply that opens with a raw reasoning-tag block, and `empty-reply` asks for a real answer when a finished turn has no visible text. See the [Codex upgrade and verification guide](integrations/guides/codex.md).
 
 See [client integration guides](integrations/README.md) for Codex plugin setup, skill folders, manual import, and MCP configuration. Client discovery depends on the client scan scope and may require a restart. The installer verifies local contents separately from actual client discovery and invocation.
 
@@ -47,11 +60,12 @@ See [client integration guides](integrations/README.md) for Codex plugin setup, 
 
 Ask naturally, for example:
 
-- "Review the architecture of this application." matches the `architecture` plugin.
-- "Refine the interface and check its states." matches the `ui-design` plugin.
-- "Turn these findings into an HTML report." matches the `frontend-slides` plugin.
+- "Review the architecture of this application." matches the `engineering` plugin.
+- "Refine the interface and add its motion." matches the `design` plugin.
+- "Turn these findings into an HTML report." matches the `visual-production` plugin.
+- "Write the README for this repository." matches the `writing` plugin.
 
-You may name a mode such as `architecture/frontend` or a legacy name such as `frontend-architecture`; both resolve to the plugin that owns the module. Read [routing](references/routing.md) for outcomes and modes; the [catalog index](SKILL.md) lists every plugin.
+You may name a workflow such as `architecture/frontend` or a legacy name such as `frontend-architecture`; both resolve to the workflow plugin that owns the contract. Read [routing](references/routing.md) for outcomes and modes; the [catalog index](SKILL.md) lists every plugin.
 
 ## Upgrade and rollback
 
@@ -74,7 +88,7 @@ These contracts are ordinary Markdown files. Each one is the workflow that its p
 For a visual starting point, open the [preset catalog](style-presets/references/catalog.md)
 or the [interactive style and loader gallery](style-presets/assets/gallery.html).
 Say "show the style catalog", "use BioRender style", or "add a CSS loader";
-the prompt hook selects the matching workflow. Medical or research drawing
+the request resolves to the owning workflow. Medical or research drawing
 requests select [Scientific Figures](references/modules/scientific-figures.md),
 also available as `sciprism-svg`. Its [runnable pipeline](scientific-figures/references/pipeline.md)
 turns scene JSON into editable SVG and checks the result.
@@ -89,7 +103,6 @@ turns scene JSON into editable SVG and checks the result.
 | Visual | [`photo-abstract-editorial`](references/modules/photo-abstract-editorial.md) | treatment, audit | Photograph-preserving abstract editorial diptychs. |
 | Production | [`frontend-slides`](references/modules/frontend-slides.md) | new, convert, enhance, report | Responsive HTML reports, fixed-stage presentations, and rendered QA. |
 | Production | [`remotion-production`](references/modules/remotion-production.md) | video, data, 3d, ui-showcase, motion, av | Deterministic programmatic video and render delivery. |
-
 | Publishing | [`document-writing`](references/modules/document-writing.md) | readme, readme-rewrite, readme-audit, steam-player, steam-developer, steam-audit | GitHub README architecture, visuals, links, QA, Steam Workshop BBCode pages, and bilingual delivery. |
 | Publishing | [`localization`](references/modules/localization.md) | translate, audit | Game CSV localization with locale completeness and markup safety. |
 | Career | [`resume-evidence-workflow`](references/modules/resume-evidence-workflow.md) | evidence, tailor, review | Career evidence, requirement alignment, and editable resume delivery. |

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Design</title>
+  <rect width="64" height="64" rx="8" fill="#A6382A"/>
+  <circle cx="26" cy="26" r="10" fill="none" stroke="#FAF9F5" stroke-width="3.2"/>
+  <rect x="27" y="27" width="16" height="16" rx="4" fill="#FAF9F5" fill-opacity="0.55" stroke="#FAF9F5" stroke-width="3.2"/>
+</svg>

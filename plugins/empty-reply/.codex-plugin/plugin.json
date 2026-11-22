@@ -1,9 +1,14 @@
 {
   "name": "empty-reply",
-  "version": "3.0.0",
+  "version": "5.0.0",
   "description": "Continue a turn that ended without visible assistant text, with a bounded retry.",
   "license": "MIT",
-  "keywords": ["empty-reply", "output-hygiene", "reliability", "azskills"],
+  "keywords": [
+    "empty-reply",
+    "output-hygiene",
+    "reliability",
+    "azskills"
+  ],
   "skills": "./skills/",
   "hooks": "./hooks/hooks.json",
   "interface": {
@@ -12,8 +17,11 @@
     "longDescription": "A Stop hook that notices a finished turn with no visible assistant text, including replies that contain only reasoning blocks, and requests a bounded continuation. It stops after two attempts or as soon as text is visible.",
     "developerName": "AzSkills",
     "category": "Productivity",
-    "capabilities": ["Read", "Write"],
-    "brandColor": "#A6382A",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#0E7490",
     "composerIcon": "./assets/icon.svg",
     "logo": "./assets/icon.svg"
   }

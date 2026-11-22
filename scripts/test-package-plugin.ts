@@ -52,7 +52,7 @@ try {
   }
 
   assert.equal(built.plugins.length, catalog.plugins.length);
-  assert.equal(built.plugins.length, 18);
+  assert.equal(built.plugins.length, 10);
   assert.equal(registry.modules.length, 16);
 
   const manifest = JSON.parse(await readFile(path.join(built.marketplace, ".agents/plugins/marketplace.json"), "utf8")) as {
@@ -82,14 +82,18 @@ try {
       assert.equal(await exists(skill), true);
       const text = await readFile(skill, "utf8");
       assert.match(text, new RegExp("^---\\nname: " + plugin.id + "\\n", "m"));
-      assert.ok(text.includes("../../references/modules/" + plugin.id + ".md"));
-      assert.equal(await exists(path.join(pluginRoot, "references/modules", plugin.id + ".md")), true);
-      if (plugin.id === "ui-design") assert.equal(await exists(path.join(pluginRoot, "SKILL-SYSTEM.md")), true);
-      if (plugin.id === "ui-design") {
+      const members = entry.modules ?? [];
+      assert.ok(members.length > 0, "Module plugin must own at least one module: " + plugin.id);
+      for (const member of members) {
+        assert.ok(text.includes("../../references/modules/" + member + ".md"), "Router must link module " + member);
+        assert.equal(await exists(path.join(pluginRoot, "references/modules", member + ".md")), true);
+      }
+      if (plugin.id === "design") assert.equal(await exists(path.join(pluginRoot, "SKILL-SYSTEM.md")), true);
+      if (plugin.id === "design") {
         assert.equal(await exists(path.join(pluginRoot, "ui-motion/references/review.md")), true);
         assert.equal(await exists(path.join(pluginRoot, "ui-motion/references/svg-animation.md")), true);
       }
-      if (plugin.id === "document-writing") {
+      if (plugin.id === "writing") {
         assert.equal(await exists(path.join(pluginRoot, "references/modules/readme-craft.md")), true);
         assert.equal(await exists(path.join(pluginRoot, "references/modules/steam-mod-page.md")), true);
       }
@@ -105,14 +109,14 @@ try {
     assert.equal(await exists(path.join(pluginRoot, "codex-plugin/hooks/session-start.ts")), false, "Routing hook must not ship");
     assert.equal(await exists(path.join(pluginRoot, "codex-plugin/hooks/hooks.json")), false, "Monolithic hook manifest must not ship");
     assert.equal(await exists(path.join(pluginRoot, "skills/azskills")), false, "Single azskills entry must not ship");
-    const icon = entry.kind === "module" ? "codex-plugin/assets/icon.svg" : "assets/icon.svg";
+    const icon = entry.kind === "module" ? (entry.icon ?? "codex-plugin/assets/icon.svg") : "assets/icon.svg";
     assert.equal(await exists(path.join(pluginRoot, icon)), true);
   }
 
-  const taste = built.plugins.find((plugin) => plugin.id === "taste");
-  assert.ok(taste);
-  assert.equal(await exists(path.join(taste.directory, "codex-plugin/taste/hooks/steer.ts")), true);
-  assert.equal(await exists(path.join(taste.directory, "scripts/runtime.ts")), true);
+  const operations = built.plugins.find((plugin) => plugin.id === "operations");
+  assert.ok(operations);
+  assert.equal(await exists(path.join(operations.directory, "codex-plugin/taste/hooks/steer.ts")), true);
+  assert.equal(await exists(path.join(operations.directory, "scripts/runtime.ts")), true);
   const godot = built.plugins.find((plugin) => plugin.id === "godot-3-dev");
   assert.ok(godot);
   assert.equal(await exists(path.join(godot.directory, "codex-plugin/hooks/godot3-guard.ts")), true);
@@ -127,10 +131,10 @@ try {
     assert.deepEqual([...signature.subarray(0, 4)], [0x50, 0x4b, 0x03, 0x04]);
   }
   const archives = await readdir(zipRoot);
-  assert.equal(archives.length, 18);
+  assert.equal(archives.length, 10);
 
   const skillView = path.join(temp, "skill-view");
-  const skillBuild = await buildPlugin(root, "ui-design", skillView, "skill");
+  const skillBuild = await buildPlugin(root, "design", skillView, "skill");
   assert.equal(skillBuild.skillEntry, path.join(skillView, "SKILL.md"));
   const skillText = await readFile(path.join(skillView, "SKILL.md"), "utf8");
   assert.ok(skillText.includes("(references/modules/ui-design.md)"));
@@ -148,7 +152,7 @@ try {
   assert.deepEqual(committedManifest, committedExpected);
   await assert.rejects(publishRepositoryMarketplace(root, temp), /inside the repository/);
 
-  console.log("Plugin packaging tests passed: 18 self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
+  console.log("Plugin packaging tests passed: 10 self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

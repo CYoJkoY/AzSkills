@@ -1,6 +1,6 @@
 {
   "name": "azskills",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "private": true,
   "type": "module",
   "description": "AzSkills: a catalog of independent Codex plugins for design, engineering, and answer hygiene workflows.",

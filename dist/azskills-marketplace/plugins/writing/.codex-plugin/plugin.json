@@ -1,0 +1,26 @@
+{
+  "name": "writing",
+  "version": "5.0.0",
+  "description": "Write and audit GitHub documentation, Steam Workshop pages, and game localization tables.",
+  "license": "MIT",
+  "keywords": [
+    "writing",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Writing",
+    "shortDescription": "Write and audit GitHub documentation, Steam Workshop pages, and game localization tables.",
+    "longDescription": "Write and audit GitHub documentation, Steam Workshop pages, and game localization tables. Modes: document-writing/readme, document-writing/readme-rewrite, document-writing/readme-audit, document-writing/steam-player, document-writing/steam-developer, document-writing/steam-audit, localization/translate, localization/audit.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#6B4F2A",
+    "composerIcon": "./codex-plugin/assets/icons/writing.svg",
+    "logo": "./codex-plugin/assets/icons/writing.svg"
+  }
+}

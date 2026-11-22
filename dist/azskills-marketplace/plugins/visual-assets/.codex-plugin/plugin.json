@@ -1,0 +1,27 @@
+{
+  "name": "visual-assets",
+  "version": "5.0.0",
+  "description": "Create logos, editorial image treatments, and accurate scientific or medical figures with editable deliverables.",
+  "license": "MIT",
+  "keywords": [
+    "visual",
+    "assets",
+    "azskills",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Visual Assets",
+    "shortDescription": "Create logos, editorial image treatments, and accurate scientific or medical figures with editable deliverables.",
+    "longDescription": "Create logos, editorial image treatments, and accurate scientific or medical figures with editable deliverables. Modes: logo-generator/mark, logo-generator/character, logo-generator/system, photo-abstract-editorial/treatment, photo-abstract-editorial/audit, scientific-figures/redraw, scientific-figures/author, scientific-figures/verify.",
+    "developerName": "AzSkills",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#7A3E9D",
+    "composerIcon": "./codex-plugin/assets/icons/visual-assets.svg",
+    "logo": "./codex-plugin/assets/icons/visual-assets.svg"
+  }
+}
