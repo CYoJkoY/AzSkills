@@ -380,6 +380,25 @@
       "composes": []
     },
     {
+      "id": "delivery-loop",
+      "path": "references/modules/delivery-loop.md",
+      "status": "module",
+      "family": "operations",
+      "modes": [
+        "init",
+        "plan",
+        "work",
+        "review",
+        "ship",
+        "recover"
+      ],
+      "role": "Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge.",
+      "composes": [
+        "az-clean-code",
+        "taste"
+      ]
+    },
+    {
       "id": "taste",
       "path": "references/modules/taste.md",
       "status": "module",

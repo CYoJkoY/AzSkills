@@ -26,6 +26,7 @@ so grouping never hides a capability behind an unrelated name.
 | `writing` | document-writing, localization | GitHub READMEs, Steam Workshop pages, and game CSV localization. |
 | `resume-evidence-workflow` | resume-evidence-workflow | Career evidence, requirement alignment, and editable resume delivery. |
 | `operations` | tool-integration, taste | AI client installation and setup, plus judgment and collaboration behavior. |
+| `delivery-loop` | delivery-loop | Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge. |
 | `godot-3-dev` | godot-3-dev | Godot 3.x GDScript, virtual-call safety, the 3.6 API surface, and down-porting. |
 | `no-think-tags` | hook only | Blocks a final reply that opens with a raw reasoning-tag block. |
 | `empty-reply` | hook only | Requests a real answer when a finished turn has no visible text. |

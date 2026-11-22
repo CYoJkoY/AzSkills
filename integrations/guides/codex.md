@@ -23,9 +23,9 @@ The repository root publishes the built catalog, so the Git source can be added 
 
     codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
 
-AzSkills is a catalog, not one plugin. The marketplace lists 10 independent plugins, each with its own `.codex-plugin/plugin.json`, skill entry, and reference closure:
+AzSkills is a catalog, not one plugin. The marketplace lists 11 independent plugins, each with its own `.codex-plugin/plugin.json`, skill entry, and reference closure:
 
-- Workflow plugins: engineering, design, visual-assets, visual-production, writing, resume-evidence-workflow, operations, godot-3-dev.
+- Workflow plugins: engineering, design, visual-assets, visual-production, writing, resume-evidence-workflow, operations, delivery-loop, godot-3-dev.
 - Hook plugins: no-think-tags and empty-reply, each a Stop-hook backstop for answer hygiene.
 
 Install the plugins the project needs. Each plugin is matched on its own description, so a capability no longer depends on one shared dispatcher entry. Hooks ship only with `operations` (taste steering) and `godot-3-dev` (Godot 3.x write guard), plus the two hook plugins; review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces.
@@ -38,7 +38,7 @@ Start a new Codex session and make a request covered by an installed plugin with
 
 ## Verify
 
-Confirm the marketplace lists 10 plugins, install the ones the project needs, check that each reports version 5.0.0 or later, review and trust hooks for operations (taste), godot-3-dev, no-think-tags, and empty-reply, then confirm a new session selects an installed plugin by description without naming it.
+Confirm the marketplace lists 11 plugins, install the ones the project needs, check that each reports version 5.0.0 or later, review and trust hooks for operations (taste), delivery-loop, godot-3-dev, no-think-tags, and empty-reply, then confirm a new session selects an installed plugin by description without naming it.
 
 
 ## Remove
