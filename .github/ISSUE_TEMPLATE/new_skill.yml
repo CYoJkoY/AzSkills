@@ -131,8 +131,9 @@ body:
         - visual-assets
         - visual-production
         - writing
-        - operations
         - delivery-loop
+        - serena
+        - rea
         - None / Standalone
     validations:
       required: false

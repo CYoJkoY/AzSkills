@@ -1,0 +1,35 @@
+{
+  "name": "rea",
+  "version": "7.2.0",
+  "description": "Reverse engineer applications, JavaScript bundles, and native binaries with REA.",
+  "author": {
+    "name": "morluto",
+    "url": "https://github.com/morluto"
+  },
+  "homepage": "https://rea.tools/",
+  "repository": "https://github.com/morluto/rea",
+  "license": "MIT",
+  "keywords": [
+    "reverse-engineering",
+    "binary-analysis",
+    "decompiler",
+    "mcp-server"
+  ],
+  "skills": "./skills",
+  "mcpServers": "./.codex-plugin/mcp.json",
+  "interface": {
+    "displayName": "REA",
+    "shortDescription": "Reverse engineer applications and binaries",
+    "longDescription": "Reverse engineer application behavior, JavaScript bundles, and native binaries through REA's CLI and MCP server.",
+    "developerName": "morluto",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://rea.tools/",
+    "composerIcon": "./assets/rea-plugin.png",
+    "logo": "./assets/rea-plugin.png"
+  }
+}

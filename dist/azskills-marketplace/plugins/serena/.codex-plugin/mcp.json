@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "serena": {
+      "command": "serena",
+      "args": [
+        "start-mcp-server",
+        "--project-from-cwd",
+        "--context=codex"
+      ],
+      "startup_timeout_sec": 15
+    }
+  }
+}

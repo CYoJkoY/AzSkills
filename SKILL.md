@@ -1,7 +1,7 @@
 ---
 name: azskills
 description: AzSkills is a catalog of independent Codex plugins for engineering architecture and code style, design systems and UI motion, visual assets, slides and video, documents, resumes, client setup, Godot 3.x, and answer hygiene. Install only the plugins a task needs; each one routes on its own.
-version: 6.0.0
+version: 7.2.0
 ---
 
 # AzSkills
@@ -19,16 +19,28 @@ so grouping never hides a capability behind an unrelated name.
 
 | Plugin | Workflows | Outcome |
 | :--- | :--- | :--- |
-| `engineering` | architecture, az-clean-code, godot-3-dev | Runtime, frontend stack, persistence, process boundaries, explicit code, code style, and Godot 3.x GDScript. |
+| `engineering` | architecture, az-clean-code, godot-3-dev, tool-integration, taste | Runtime, frontend stack, persistence, process boundaries, explicit code, code style, Godot 3.x GDScript, AI client setup, and judgment and collaboration behavior. |
 | `design` | design-system, ui-design, style-presets | Design systems, interface hierarchy, states, responsive behavior, motion, visual QA, and named presets. |
 | `visual-assets` | logo-generator, photo-abstract-editorial, scientific-figures | Logos, editorial image treatments, and verified scientific or medical figures. |
 | `visual-production` | frontend-slides, remotion-production | Responsive HTML reports, fixed-stage presentations, and deterministic video. |
 | `writing` | document-writing, localization, resume-evidence-workflow | GitHub READMEs, Steam Workshop pages, game CSV localization, and evidence-backed resumes. |
-| `operations` | tool-integration, taste | AI client installation and setup, plus judgment and collaboration behavior. |
-| `delivery-loop` | delivery-loop | Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge. |
+| `delivery-loop` | delivery-loop | Unattended issue-to-merge delivery with touch-scope leases, worktree isolation, enforced commit and PR standards, computed review scoring, and gated auto-merge. |
+| `serena` | upstream MCP | Serena's semantic code intelligence for symbol-aware retrieval, editing, refactoring, and project navigation. |
+| `rea` | upstream MCP | REA's reverse-engineering tools for application behavior, JavaScript bundles, and native binaries. |
 
 Every workflow plugin ships one router skill that lists its member contracts, so
 selecting the plugin exposes each contract inside it.
+
+`serena` and `rea` are standalone plugins. Each bundles an upstream MCP server
+manifest, its own repository icon, and one skill entry, and installs from the
+Codex plugin marketplace; a skills root cannot carry their MCP configuration.
+Their MCP servers must be installed and available on PATH before use: Serena
+through `uv tool install -p 3.13 serena-agent`, REA through `npx rea-agents@latest setup`.
+
+`engineering` also ships the GPT with Taste behavior hooks: `SessionStart`,
+`UserPromptSubmit`, and `SubagentStart` load the Main recipe and steer each
+turn, and a completed local-agent wait injects the agent steer. It keeps the
+Godot 3.x write guard on the same manifest.
 
 `delivery-loop` also carries the Stop hook that blocks a final reply opening
 with a leaked reasoning tag, so answer hygiene installs with the workflow that
@@ -63,7 +75,7 @@ messages, or change client settings. See the [README](README.md) and
 - "Review this app's architecture and tighten the code style" matches `engineering`.
 - "Refine this interface and add its motion" matches `design`.
 - "Write the README for this repository" matches `writing`.
-- "Set this up in Codex" matches `operations`.
+- "Set this up in Codex" matches `engineering`.
 - "Use frontend-architecture" is a legacy alias for `engineering/architecture/frontend`.
 
 ## References

@@ -1,6 +1,6 @@
 ---
 name: engineering
-description: Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, refactoring, and reusable patterns.
+description: Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, and reusable patterns; connect AI clients with verified setup; and steer judgment, collaboration, and execution behavior.
 ---
 
 # Engineering
@@ -14,6 +14,10 @@ contract before acting; do not answer from this index alone.
   Apply explicit, flat, reusable, data-driven constraints when writing, reviewing, refactoring, or consistently styling application code.
 - [Godot 3 Dev](../../references/modules/godot-3-dev.md)
   Write, review, and down-port Godot 3.x (3.6) GDScript and scenes without re-calling engine-dispatched virtuals and without Godot 4.x symbols.
+- [Tool Integration](../../references/modules/tool-integration.md)
+  Connect AzSkills to a supported AI client and produce verified install, MCP, or manual setup steps without inventing client capabilities.
+- [Taste](../../references/modules/taste.md)
+  Apply GPT with Taste's judgment, collaboration, and execution behavior through Codex hooks and reusable role prompts.
 
 Load only the supporting references the task needs. The plugin is self-contained;
 do not look for a shared AzSkills entry or for other plugins in the catalog.

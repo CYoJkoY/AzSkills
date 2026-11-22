@@ -2,14 +2,16 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { errorCode, readJson } from './runtime.ts';
-import type { IntegrationMechanism, IntegrationRegistry, IntegrationTool, PluginCatalog } from './types.ts';
+import type { IntegrationMechanism, IntegrationRegistry, IntegrationTool, PluginCatalog, SkillCatalog } from './types.ts';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const registryPath = path.join(root, 'integrations/tools.json');
 const registry = await readJson<IntegrationRegistry>(registryPath);
 const catalog = await readJson<PluginCatalog>(path.join(root, 'catalog/plugins.json'));
+const skills = await readJson<SkillCatalog>(path.join(root, 'skills.json'));
 const check = process.argv.includes('--check');
 const workflowIds = catalog.plugins.filter((entry) => entry.kind === 'module').map((entry) => entry.id);
+const standaloneIds = catalog.plugins.filter((entry) => entry.kind === 'standalone').map((entry) => entry.id);
 const pluginCount = catalog.plugins.length;
 
 const labels: Record<IntegrationMechanism, string> = {
@@ -59,11 +61,14 @@ const guide = (tool: IntegrationTool): string => {
     lines.push('AzSkills is a catalog, not one plugin. The marketplace lists ' + pluginCount + ' independent plugins, each with its own `.codex-plugin/plugin.json`, skill entry, and reference closure:');
     lines.push('');
     lines.push('- Workflow plugins: ' + workflowIds.join(', ') + '.');
+    if (standaloneIds.length > 0) {
+      lines.push('- Standalone plugins: ' + standaloneIds.join(', ') + '. These bundle an upstream MCP server, so they install only through the marketplace.');
+    }
     lines.push('- `delivery-loop` also carries the Stop hook that blocks a reply opening with a leaked reasoning tag.');
     lines.push('');
-  lines.push('Install the plugins the project needs. Each plugin is matched on its own description, so a capability no longer depends on one shared dispatcher entry. Hooks ship with `operations` (taste steering), `delivery-loop` (delivery-state guard and reasoning-tag Stop hook), `engineering` (Godot 3.x write guard), and `design`/`visual-assets`/`visual-production` (a `UserPromptSubmit` pointer to their router skill when an English or Chinese prompt looks visual); review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces.');
+  lines.push('Install the plugins the project needs. Each plugin is matched on its own description, so a capability no longer depends on one shared dispatcher entry. Hooks ship with `engineering` (GPT with Taste steering on session start, request, and subagents, plus the Godot 3.x write guard), `delivery-loop` (delivery-state guard and reasoning-tag Stop hook), and `design`/`visual-assets`/`visual-production` (a `UserPromptSubmit` pointer to their router skill when an English or Chinese prompt looks visual); review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces.');
     lines.push('');
-  lines.push('When upgrading from an earlier release, remove the old marketplace, add the Git source again, and reinstall the selected plugins. Confirm each installed plugin reports 6.0.0 or later; changing the checkout alone does not replace a cached installation. Hook trust is keyed to the handler hash, so an upgrade that changes a hook manifest or a bundled script marks those hooks for review again. Open the hook list (or `/hooks` in the CLI) to review and trust the handlers, then start a new session.');
+  lines.push('When upgrading from an earlier release, remove the old marketplace, add the Git source again, and reinstall the selected plugins. Confirm each installed plugin reports ' + skills.version + ' or later; changing the checkout alone does not replace a cached installation. Hook trust is keyed to the handler hash, so an upgrade that changes a hook manifest or a bundled script marks those hooks for review again. Open the hook list (or `/hooks` in the CLI) to review and trust the handlers, then start a new session.');
   } else if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
     lines.push(...wizard('user scope'));
     lines.push('');
@@ -152,7 +157,7 @@ const index = () => {
     '# Tool integrations',
     '',
     'AzSkills connects to AI tools through native skills, Codex plugins, MCP servers, and manual import.',
-    'AzSkills is a catalog of ' + pluginCount + ' independent plugins. Skill folders install the workflow plugins individually, the Codex marketplace installs the same plugins with their hooks, and the MCP server exposes the catalog to clients without a skill folder.',
+    'AzSkills is a catalog of ' + pluginCount + ' independent plugins. Skill folders install the workflow plugins individually, the Codex marketplace installs every plugin with its hooks and bundled MCP servers, and the MCP server exposes the catalog to clients without a skill folder.',
     'Manual import is used only where the vendor workflow is UI-based or not publicly documented for local files.',
     '',
     '| Tool | Mechanism | Default target |',

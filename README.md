@@ -6,25 +6,27 @@
   <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: a catalog of independent Codex plugins" width="100%">
 </picture>
 
-Version **6.0.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
+Version **7.2.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
 
 Every plugin ships with its own manifest, skill entry, trigger description, reference closure, and icon. A single dispatcher entry only fires when a prompt names it or matches one broad description; independent plugins are matched directly, so capabilities stop being invisible to automatic routing. Plugins are grouped by the job a request asks for, and each group stays small enough to answer one kind of request, so grouping never hides a capability behind an unrelated name. `catalog/plugins.json` is the distribution registry and `skills.json` stays the canonical module and alias source.
 
 | Kind | Plugins | Count |
 | :--- | :--- | :--- |
-| Workflow | engineering, design, visual-assets, visual-production, writing, operations, delivery-loop | 7 |
+| Workflow | engineering, design, visual-assets, visual-production, writing, delivery-loop | 6 |
+| Standalone | serena, rea | 2 |
 
 Each workflow plugin bundles the related contracts that a single job needs, and ships one router skill so selecting the plugin exposes every member contract:
 
 | Plugin | Workflows | Focus |
 | :--- | :--- | :--- |
-| `engineering` | architecture, az-clean-code, godot-3-dev | Runtime, frontend stack, persistence, process boundaries, explicit code, code style consistency, and Godot 3.x GDScript. |
+| `engineering` | architecture, az-clean-code, godot-3-dev, tool-integration, taste | Runtime, frontend stack, persistence, process boundaries, explicit code, code style consistency, Godot 3.x GDScript, AI client setup, and judgment and collaboration behavior. |
 | `design` | design-system, ui-design, style-presets | Design systems, interface hierarchy, states, responsive behavior, motion, visual QA, and named presets. |
 | `visual-assets` | logo-generator, photo-abstract-editorial, scientific-figures | Logos, editorial image treatments, and verified scientific or medical figures. |
 | `visual-production` | frontend-slides, remotion-production | Responsive HTML reports, fixed-stage presentations, and deterministic video. |
 | `writing` | document-writing, localization, resume-evidence-workflow | GitHub READMEs, Steam Workshop pages, game CSV localization, and evidence-backed resumes. |
-| `operations` | tool-integration, taste | AI client installation and setup, plus judgment and collaboration behavior. |
-| `delivery-loop` | delivery-loop | Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge. |
+| `delivery-loop` | delivery-loop | Unattended issue-to-merge delivery with touch-scope leases, worktree isolation, enforced commit and PR standards, computed review scoring, and gated auto-merge. |
+
+The standalone plugins wrap an upstream MCP server and its own repository icon: `serena` adds Serena's semantic code intelligence, and `rea` adds REA's reverse-engineering tools. They ship no skill-folder view, so install them from the marketplace.
 
 ## Install
 
@@ -50,7 +52,7 @@ codex plugin marketplace add /path/to/fresh/exports/azskills-marketplace
 codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
 ```
 
-The Git repository is a ready-to-use marketplace: it publishes the built catalog at `dist/azskills-marketplace/`, with a root manifest that points to it. The build writes `azskills-marketplace/.agents/plugins/marketplace.json` plus one self-contained directory per plugin under `plugins/<id>/`, and deterministic archives under `zips/<id>.zip`. Install the plugins you need from the marketplace; each plugin carries a narrow description and is matched on its own. These plugins ship hooks: `operations` (steering through `taste`), `delivery-loop` (delivery-state guard plus the reasoning-tag Stop hook), `engineering` (Godot 3.x write guard), and `design`, `visual-assets`, and `visual-production` (a `UserPromptSubmit` pointer to their router skill when an English or Chinese prompt looks visual). Review and trust the hooks when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The `delivery-loop` Stop hook blocks a final reply that opens with a raw reasoning-tag block, closed or left open. See the [Codex upgrade and verification guide](integrations/guides/codex.md).
+The Git repository is a ready-to-use marketplace: it publishes the built catalog at `dist/azskills-marketplace/`, with a root manifest that points to it. The build writes `azskills-marketplace/.agents/plugins/marketplace.json` plus one self-contained directory per plugin under `plugins/<id>/`, and deterministic archives under `zips/<id>.zip`. Install the plugins you need from the marketplace; each plugin carries a narrow description and is matched on its own. These plugins ship hooks: `engineering` (GPT with Taste steering on session start, request, and subagents, plus the Godot 3.x write guard), `delivery-loop` (delivery-state guard plus the reasoning-tag Stop hook), and `design`, `visual-assets`, and `visual-production` (a `UserPromptSubmit` pointer to their router skill when an English or Chinese prompt looks visual). Review and trust the hooks when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The `delivery-loop` Stop hook blocks a final reply that opens with a raw reasoning-tag block, closed or left open. See the [Codex upgrade and verification guide](integrations/guides/codex.md).
 
 See [client integration guides](integrations/README.md) for Codex plugin setup, skill folders, manual import, and MCP configuration. Client discovery depends on the client scan scope and may require a restart. The installer verifies local contents separately from actual client discovery and invocation.
 
@@ -105,7 +107,7 @@ turns scene JSON into editable SVG and checks the result.
 | Publishing | [`localization`](references/modules/localization.md) | translate, audit | Game CSV localization with locale completeness and markup safety. |
 | Career | [`resume-evidence-workflow`](references/modules/resume-evidence-workflow.md) | evidence, tailor, review | Career evidence, requirement alignment, and editable resume delivery. |
 | Operations | [`tool-integration`](references/modules/tool-integration.md) | install, configure, troubleshoot, remove | Connect AzSkills to AI clients with verified installation and setup workflows. |
-| Operations | [`delivery-loop`](references/modules/delivery-loop.md) | init, plan, work, review, ship, recover | Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge. |
+| Operations | [`delivery-loop`](references/modules/delivery-loop.md) | init, plan, work, review, ship, recover | Unattended issue-to-merge delivery with touch-scope leases, worktree isolation, enforced commit and PR standards, computed review scoring, and gated auto-merge. |
 | Operations | [`taste`](references/modules/taste.md) | main, subagent, independent | Judgment, collaboration, and execution behavior automatically supplied by Codex hooks. |
 | Architecture | [`az-clean-code`](references/modules/az-clean-code.md) | write, review, refactor, style | Explicit code, flat control flow, reuse, code style consistency, and business data externalized before coding. |
 | Architecture | [`godot-3-dev`](references/modules/godot-3-dev.md) | script, review, port | Godot 3.x GDScript, virtual-call safety, the 3.6 API surface, and down-porting. |

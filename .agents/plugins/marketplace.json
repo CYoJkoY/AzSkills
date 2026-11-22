@@ -66,18 +66,6 @@
       "category": "Productivity"
     },
     {
-      "name": "operations",
-      "source": {
-        "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/operations"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
       "name": "delivery-loop",
       "source": {
         "source": "local",
@@ -88,6 +76,30 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Productivity"
+    },
+    {
+      "name": "serena",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/serena"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "rea",
+      "source": {
+        "source": "local",
+        "path": "./dist/azskills-marketplace/plugins/rea"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
     }
   ]
 }
