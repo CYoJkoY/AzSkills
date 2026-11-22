@@ -4,10 +4,10 @@ import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { leadingUnclosedTag, stripAllThinking, stripLeadingThinking } from "../plugins/no-think-tags/lib/think-tags.ts";
+import { leadingUnclosedTag, stripAllThinking, stripLeadingThinking } from "../no-think-tags/lib/think-tags.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const hook = path.join(root, "plugins/no-think-tags/hooks/stop-hook.ts");
+const hook = path.join(root, "no-think-tags/hooks/stop-hook.ts");
 const state = await mkdtemp(path.join(tmpdir(), "azskills-think-tags-"));
 
 interface StopPayload {
@@ -128,6 +128,20 @@ try {
     stripLeadingThinking(otag("think") + "\n\n\nreasoning\n\n" + ctag("think") + "\n\nAnswer."),
     { stripped: true, text: "Answer." },
   );
+  // Carriage returns and deeper blank runs are the same shape: the opener sits
+  // on line one, no closer interrupts it early, and the blank lines are spacing.
+  assert.deepEqual(
+    stripLeadingThinking(otag("think") + "\r\n\r\n\r\nreasoning\r\n\r\n" + ctag("think") + "\r\n\r\nAnswer."),
+    { stripped: true, text: "Answer." },
+  );
+  assert.deepEqual(
+    stripLeadingThinking(otag("think") + "\n \n\t\n\n   \nreasoning\n   \n" + ctag("think") + "\n\nAnswer."),
+    { stripped: true, text: "Answer." },
+  );
+  // The same shape with no closer at all is the leak behind the report: blank
+  // lines must never read as a terminator, and the reply must be blocked.
+  assert.equal(leadingUnclosedTag(otag("think") + "\r\n\r\n\r\nReasoning only."), otag("think"));
+  assert.equal(blocks(run({ last_assistant_message: otag("think") + "\r\n\r\n\r\nReasoning only." })), true);
   assert.equal(leadingUnclosedTag(otag("THINK") + "\n\n\nnever closes"), otag("THINK"));
   assert.equal(blocks(run({ last_assistant_message: answer(otag("THINK"), ctag("Think")) })), true);
 

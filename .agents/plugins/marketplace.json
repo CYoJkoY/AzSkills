@@ -100,18 +100,6 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Productivity"
-    },
-    {
-      "name": "no-think-tags",
-      "source": {
-        "source": "local",
-        "path": "./dist/azskills-marketplace/plugins/no-think-tags"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
     }
   ]
 }

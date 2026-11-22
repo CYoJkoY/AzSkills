@@ -22,11 +22,13 @@ capabilities, but split closely related work into many tiny entries, so a task
 that spans one job (for example architecture plus code style, or design systems
 plus interface motion) needed several installs and several description matches.
 
-5.0.0 groups modules into eight task-level workflow plugins plus the two hook
-plugins. Each group answers one kind of request, so it stays small enough that
-grouping never hides a capability behind an unrelated name. Every workflow
-plugin ships one router skill that lists its member contracts, so selecting the
-plugin exposes each contract inside it.
+5.0.0 groups modules into eight task-level workflow plugins. Each group answers
+one kind of request, so it stays small enough that grouping never hides a
+capability behind an unrelated name. Every workflow plugin ships one router
+skill that lists its member contracts, so selecting the plugin exposes each
+contract inside it. Answer hygiene is not a separate entry: `delivery-loop`
+ships the reasoning-tag Stop hook, so the long-running workflow that suffers
+most from a leaked block also guards it.
 
 | Plugin | Workflows |
 | :--- | :--- |
@@ -74,13 +76,13 @@ uninstall the replaced entry:
 | `tool-integration`, `taste` | `operations` |
 | none (new in 5.0.0) | `delivery-loop` |
 | `godot-3-dev` | `engineering` |
-| `no-think-tags` | unchanged |
+| `no-think-tags` | folded into `delivery-loop` |
 
 `empty-reply` is retired in this release. Its Stop hook fired after any turn
 without visible text, which is normal inside goal mode, so the injected
-"continue" message interrupted goal runs instead of helping them. The
-`no-think-tags` hook covers the remaining case: a reply that is only a leaked
-reasoning block.
+"continue" message interrupted goal runs instead of helping them. Answer
+hygiene now belongs to `delivery-loop`, whose Stop hook covers the remaining
+case: a reply that opens with a leaked reasoning block, closed or left open.
 
 Removed module IDs such as `ui-motion`, `readme-craft`, and `steam-mod-page`
 remain only as routing aliases in `skills.json`. They resolve for the installer
@@ -100,8 +102,8 @@ recreate removed installable plugin IDs.
 
 Every plugin in `catalog/plugins.json` is one installable marketplace entry.
 Workflow plugins list their member modules and share one reference closure; the
-two standalone plugins live under `plugins/<id>/` and ship hook code rather than
-a workflow contract.
+hook code ships inside the workflow plugin that owns it, so `delivery-loop`
+carries its Stop hook as ordinary plugin files rather than as a second entry.
 
 ## Package layout
 
@@ -140,8 +142,9 @@ node scripts/install-skills.ts --rollback --target /path/to/skills --yes
 node scripts/install-skills.ts --uninstall --target /path/to/skills --yes
 ```
 
-Skills roots receive one directory per selected workflow plugin. The hook
-plugins install only through the Codex plugin marketplace, because their
+Skills roots receive one directory per selected workflow plugin. A skills root
+carries no hooks, so install `delivery-loop` through the Codex plugin
+marketplace when its guard and reasoning-tag Stop hook are wanted, because that
 behavior depends on hook trust, not skill discovery. `--skills` stays a legacy
 alias for `--plugin`. Selecting a member module id such as `ui-design` installs
 its owning plugin (`design`) exactly once.
@@ -150,9 +153,9 @@ its owning plugin (`design`) exactly once.
 
 The routing and session hooks are removed. Three manifests remain for workflow
 plugins: `operations` (GPT with Taste steering), `delivery-loop` (delivery-state
-guard), and `engineering` (Godot 3.x write guard). The standalone
-`no-think-tags` plugin carries its own Stop hook and can be reviewed and
-trusted independently.
+guard plus the reasoning-tag Stop hook), and `engineering` (Godot 3.x write
+guard). The Stop hook ships as `delivery-loop/no-think-tags/`, so one install
+and one trust review cover the guard and the output check together.
 
 ## MCP
 
@@ -170,8 +173,9 @@ npm run test
 
 The suite proves plugin parity with the module registry, self-contained bundles,
 deterministic archives, per-plugin installation with rollback, hook behavior for
-both standalone plugins, and MCP catalog access. Client discovery and invocation
-still require a connected client and are reported separately.
+the delivery-loop guard and its reasoning-tag Stop hook, and MCP catalog access.
+Client discovery and invocation still require a connected client and are
+reported separately.
 
 ## Rollback
 

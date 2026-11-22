@@ -1,6 +1,6 @@
 ---
 name: delivery-loop
-description: Run concurrent issue-to-merge delivery with touch-scope leases, per-task worktrees, computed review scoring, and gated auto-merge, without sub-agents.
+description: Run concurrent issue-to-merge delivery with touch-scope leases, per-task worktrees, computed review scoring, gated auto-merge, and a reasoning-tag output guard, without sub-agents.
 ---
 
 # Delivery Loop

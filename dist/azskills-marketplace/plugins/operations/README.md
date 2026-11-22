@@ -13,7 +13,6 @@ Every plugin ships with its own manifest, skill entry, trigger description, refe
 | Kind | Plugins | Count |
 | :--- | :--- | :--- |
 | Workflow | engineering, design, visual-assets, visual-production, writing, resume-evidence-workflow, operations, delivery-loop | 8 |
-| Hook | no-think-tags | 1 |
 
 Each workflow plugin bundles the related contracts that a single job needs, and ships one router skill so selecting the plugin exposes every member contract:
 
@@ -52,7 +51,7 @@ codex plugin marketplace add /path/to/fresh/exports/azskills-marketplace
 codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
 ```
 
-The Git repository is a ready-to-use marketplace: it publishes the built catalog at `dist/azskills-marketplace/`, with a root manifest that points to it. The build writes `azskills-marketplace/.agents/plugins/marketplace.json` plus one self-contained directory per plugin under `plugins/<id>/`, and deterministic archives under `zips/<id>.zip`. Install the plugins you need from the marketplace; each plugin carries a narrow description and is matched on its own. Only `operations` (steering through `taste`), `delivery-loop` (delivery-state guard), and `engineering` (Godot 3.x write guard) ship hooks among workflow plugins, plus the `no-think-tags` hook plugin; review and trust those hooks when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The hook plugin uses a Stop hook: `no-think-tags` blocks a final reply that opens with a raw reasoning-tag block, closed or left open. See the [Codex upgrade and verification guide](integrations/guides/codex.md).
+The Git repository is a ready-to-use marketplace: it publishes the built catalog at `dist/azskills-marketplace/`, with a root manifest that points to it. The build writes `azskills-marketplace/.agents/plugins/marketplace.json` plus one self-contained directory per plugin under `plugins/<id>/`, and deterministic archives under `zips/<id>.zip`. Install the plugins you need from the marketplace; each plugin carries a narrow description and is matched on its own. Only `operations` (steering through `taste`), `delivery-loop` (delivery-state guard plus the reasoning-tag Stop hook), and `engineering` (Godot 3.x write guard) ship hooks; review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The `delivery-loop` Stop hook blocks a final reply that opens with a raw reasoning-tag block, closed or left open. See the [Codex upgrade and verification guide](integrations/guides/codex.md).
 
 See [client integration guides](integrations/README.md) for Codex plugin setup, skill folders, manual import, and MCP configuration. Client discovery depends on the client scan scope and may require a restart. The installer verifies local contents separately from actual client discovery and invocation.
 
@@ -98,7 +97,7 @@ turns scene JSON into editable SVG and checks the result.
 | :--- | :--- | :--- | :--- |
 | Architecture | [`architecture`](references/modules/architecture.md) | runtime, frontend, migration, review | Runtime, frontend stack, persistence, and process boundaries. |
 | Interface | [`design-system`](references/modules/design-system.md) | ingest, author, migrate, audit | DESIGN.md ingestion, normalization, provenance, and verification. |
-| Interface | [`ui-design`](references/modules/ui-design.md) | build, refine, review, system, motion, motion-review, motion-audit, motion-pattern, svg | Interface hierarchy, components, states, responsive behavior, visual QA, motion construction, review, audit, patterns, and SVG animation. |
+| Interface | [`ui-design`](references/modules/ui-design.md) | build, refine, review, system, motion, motion-review, motion-audit, motion-pattern, svg | Interface hierarchy, components, states, responsive behavior, visual QA, motion construction, review, audit, patterns, and SVG animation. |
 | Visual | [`logo-generator`](references/modules/logo-generator.md) | mark, character, system | Logos, product marks, character marks, and identity systems. |
 | Visual | [`photo-abstract-editorial`](references/modules/photo-abstract-editorial.md) | treatment, audit | Photograph-preserving abstract editorial diptychs. |
 | Production | [`frontend-slides`](references/modules/frontend-slides.md) | new, convert, enhance, report | Responsive HTML reports, fixed-stage presentations, and rendered QA. |

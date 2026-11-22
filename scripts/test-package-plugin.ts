@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, readdir, rm, stat } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -52,7 +52,7 @@ try {
   }
 
   assert.equal(built.plugins.length, catalog.plugins.length);
-  assert.equal(built.plugins.length, 9);
+  assert.equal(built.plugins.length, 8);
   assert.equal(registry.modules.length, 17);
 
   const manifest = JSON.parse(await readFile(path.join(built.marketplace, ".agents/plugins/marketplace.json"), "utf8")) as {
@@ -133,7 +133,7 @@ try {
     assert.deepEqual([...signature.subarray(0, 4)], [0x50, 0x4b, 0x03, 0x04]);
   }
   const archives = await readdir(zipRoot);
-  assert.equal(archives.length, 9);
+  assert.equal(archives.length, 8);
 
   const skillView = path.join(temp, "skill-view");
   const skillBuild = await buildPlugin(root, "design", skillView, "skill");
@@ -144,7 +144,29 @@ try {
   assert.equal(await exists(path.join(skillView, "references/modules/ui-design.md")), true);
   assert.equal(await exists(path.join(skillView, "SKILL-SYSTEM.md")), true);
 
-  await assert.rejects(buildPlugin(root, "no-think-tags", path.join(temp, "standalone-skill"), "skill"), /install as Codex plugins/);
+  // No plugin uses the standalone kind today, but the kind stays supported, so
+  // a throwaway fixture repository keeps both branches covered.
+  const fixtureRoot = path.join(temp, "fixture-repo");
+  const fixturePlugin = path.join(fixtureRoot, "plugins/hook-fixture");
+  await mkdir(path.join(fixturePlugin, ".codex-plugin"), { recursive: true });
+  await mkdir(path.join(fixtureRoot, "catalog"), { recursive: true });
+  await writeFile(
+    path.join(fixtureRoot, "catalog/plugins.json"),
+    JSON.stringify({
+      schemaVersion: catalog.schemaVersion,
+      marketplace: catalog.marketplace,
+      plugins: [{ id: "hook-fixture", kind: "standalone", source: "plugins/hook-fixture", description: "Hook fixture." }],
+    }),
+  );
+  await writeFile(path.join(fixtureRoot, "skills.json"), JSON.stringify({ version: registry.version }));
+  await writeFile(path.join(fixturePlugin, ".codex-plugin/plugin.json"), JSON.stringify({ name: "hook-fixture", version: "0.0.0" }));
+  const standalone = await buildPlugin(fixtureRoot, "hook-fixture", path.join(temp, "standalone-plugin"));
+  assert.equal(standalone.kind, "standalone");
+  assert.equal(
+    JSON.parse(await readFile(path.join(temp, "standalone-plugin/.codex-plugin/plugin.json"), "utf8")).version,
+    registry.version,
+  );
+  await assert.rejects(buildPlugin(fixtureRoot, "hook-fixture", path.join(temp, "standalone-skill"), "skill"), /install as Codex plugins/);
   await assert.rejects(buildPlugin(root, "unknown-plugin", path.join(temp, "unknown")), /Unknown plugin/);
 
   const repositoryManifest = await publishRepositoryMarketplace(root, path.join(root, "dist/azskills-marketplace"));
@@ -154,7 +176,7 @@ try {
   assert.deepEqual(committedManifest, committedExpected);
   await assert.rejects(publishRepositoryMarketplace(root, temp), /inside the repository/);
 
-  console.log("Plugin packaging tests passed: 9 self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
+  console.log("Plugin packaging tests passed: 8 self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

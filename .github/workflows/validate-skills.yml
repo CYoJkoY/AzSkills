@@ -91,7 +91,7 @@ jobs:
           node scripts/test-link-bundle.ts
           node scripts/test-package-plugin.ts
 
-      - name: Test standalone hook plugins
+      - name: Test the delivery-loop reasoning-tag hook
         run: |
           node scripts/test-think-tags-hook.ts
 
@@ -106,7 +106,7 @@ jobs:
           test "$actual" -eq "$expected"
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/.agents/plugins/marketplace.json"
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/design/.codex-plugin/plugin.json"
-          test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/no-think-tags/hooks/stop-hook.ts"
+          test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/delivery-loop/no-think-tags/hooks/stop-hook.ts"
           mkdir -p "$RUNNER_TEMP/azskills-extracted"
           unzip -q "$RUNNER_TEMP/azskills-export/zips/design.zip" -d "$RUNNER_TEMP/azskills-extracted"
           test -f "$RUNNER_TEMP/azskills-extracted/skills/design/SKILL.md"

@@ -41,7 +41,7 @@ const requests: [string, Record<string, unknown>][] = [
   ["resources/read", { uri: "azskills://plugins/ui-design/references/modules/ui-design.md" }],
   ["resources/read", { uri: "azskills://plugins/ui-design/../../skills.json" }],
   ["resources/read", { uri: "azskills://catalog" }],
-  ["resources/read", { uri: "azskills://plugins/no-think-tags" }],
+  ["resources/read", { uri: "azskills://plugins/delivery-loop" }],
   ["tools/call", { name: "azskills", arguments: { action: "file", id: "az-clean-code", path: "az-clean-code/SKILL.md" } }],
   ["tools/call", { name: "azskills" }],
   ["tools/call", { name: "azskills", arguments: [] }],
@@ -102,7 +102,7 @@ for (const i of [10, 11, 12]) assert.equal(response(i).result?.isError, true);
 assert.match(resourceText(13), /name: ui-design/);
 assert.equal(response(14).error?.code, -32602);
 assert.match(resourceText(15), /"plugins"/);
-assert.match(resourceText(16), /name: no-think-tags/);
+assert.match(resourceText(16), /name: delivery-loop/);
 assert.equal(text(17), await readFile(path.join(root, "az-clean-code/SKILL.md"), "utf8"));
 assert.equal(text(18), await readFile(path.join(root, "SKILL.md"), "utf8"));
 assert.equal(response(19).result?.isError, true);

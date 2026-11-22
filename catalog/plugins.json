@@ -193,7 +193,7 @@
       "modules": [
         "delivery-loop"
       ],
-      "description": "Run concurrent issue-to-merge delivery with touch-scope leases, per-task worktrees, computed review scoring, and gated auto-merge, without sub-agents.",
+      "description": "Run concurrent issue-to-merge delivery with touch-scope leases, per-task worktrees, computed review scoring, gated auto-merge, and a reasoning-tag output guard, without sub-agents.",
       "icon": "codex-plugin/assets/icons/delivery-loop.svg",
       "brandColor": "#3D4E8A",
       "category": "Productivity",
@@ -204,25 +204,14 @@
       "extra": [
         "delivery-loop/references",
         "delivery-loop/scripts",
+        "no-think-tags/hooks",
+        "no-think-tags/lib",
         "codex-plugin/hooks/delivery-hooks.json",
         "codex-plugin/hooks/guard.ts",
         "codex-plugin/hooks/delivery-guard.ts",
         "codex-plugin/assets/icons/delivery-loop.svg"
       ],
       "hooks": "codex-plugin/hooks/delivery-hooks.json"
-    },
-    {
-      "id": "no-think-tags",
-      "kind": "standalone",
-      "source": "plugins/no-think-tags",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
-      ],
-      "extra": [],
-      "hooks": "hooks/hooks.json",
-      "brandColor": "#BE185D"
     }
   ]
 }

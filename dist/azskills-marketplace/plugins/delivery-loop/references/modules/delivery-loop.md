@@ -13,18 +13,20 @@ Turn a repository's issue-to-merge work into a repeatable loop: one agent owns
 judgement and execution, concurrency comes from independent tasks, and the review
 score and the merge are mechanical. This module owns the task ledger, touch-scope
 leases, worktree isolation, computed review scoring, the merge gates, and the guard
-that blocks manual merges and sub-agent spawns. It does not own the project's own
-build commands, its architecture choices, or the content of the code being shipped.
+that blocks manual merges and sub-agent spawns. It also owns final-reply output
+hygiene, because a clean reply is cheaper context and a long run survives on cheap
+context. It does not own the project's own build commands, its architecture
+choices, or the content of the code being shipped.
 
 ## Contract
 
 - Use when: a repository needs issue-to-merge delivery that stays correct under several concurrent tasks, and review scoring plus merging must be automated instead of hand-driven.
 - Do not use when: a one-off edit needs no branch, review record, or merge gate; make the edit directly.
-- Owns: the task ledger, touch-scope leases, worktree isolation, computed review scoring, and the nine merge gates.
+- Owns: the task ledger, touch-scope leases, worktree isolation, computed review scoring, the nine merge gates, and final-reply output hygiene.
 - Inputs: repository root, base branch, task titles with touch scopes, a structured review record, and the project's own verification command.
 - Outputs: admission waves, isolated task worktrees, an English review report with a computed score, and a merged pull request with its issue closed.
 - Compose with: `az-clean-code` when the delivered code must also meet explicit-code rules; `taste` when judgment and collaboration guidance should stay active during the work.
-- Gates: never spawn a sub-agent, never commit or push on the base branch, never merge without a PASS review at the exact head SHA, never let the model choose its own score, and never ask the user for permission to push a task branch or to delete it after a successful merge.
+- Gates: never spawn a sub-agent, never commit or push on the base branch, never merge without a PASS review at the exact head SHA, never let the model choose its own score, never ship a final reply that opens with a raw reasoning block, and never ask the user for permission to push a task branch or to delete it after a successful merge.
 
 ## Modes
 
@@ -133,6 +135,24 @@ merge, closes the linked issue, and fast-forwards the base branch. Merge is neve
 delegated to a manual `gh pr merge`; the guard denies that command so the gates
 cannot be skipped.
 
+## Output hygiene
+
+A final reply must not open with a raw reasoning block. A leaked block spends
+tokens twice, once on screen and once in the correction, and the wasted text stays
+in the context every later turn must carry. On a long loop that cost compounds,
+so the loop ships its own `Stop` hook instead of leaving the behaviour to
+convention.
+
+- The hook ends a block at the first reasoning-family closing tag outside Markdown
+  code, whichever member of the family opened it, and treats a block that never
+  closes as a leak because everything after the opener reads as reasoning.
+- It asks for exactly one clean re-send per turn and never claims the emitted text
+  was removed, because streamed text cannot be recalled.
+- It dedupes on its own per-turn record, so a `Stop` flag set by another hook does
+  not silence it, and it fails open on malformed input.
+- Clean output is also a review requirement: a shipped reply must be text the user
+  can read without wading through reasoning.
+
 ## Quality gates
 
 - Confirm the ledger is git-ignored and the guard is active before claiming work.
@@ -144,6 +164,8 @@ cannot be skipped.
 - Confirm the task branch was pushed without asking, and that the merge was
   followed by a local branch delete and a fast-forwarded base, again without
   asking. Cleanup is part of the loop, not a question for the user.
+- Confirm the final reply carries no raw reasoning block, and that any correction
+  was asked once rather than looped.
 
 ## Output contract
 
@@ -157,5 +179,6 @@ SHA is a failed delivery, not a shortcut.
 - [Concurrency model](../../delivery-loop/references/concurrency.md) - task DAG, leases, worktree isolation, and serialized merge.
 - [Review scoring](../../delivery-loop/references/review.md) - review input shape, formula, caps, and anti-lenience rules.
 - [Automation surface](../../delivery-loop/references/automation.md) - command surface, issue and pull request automation, and the guard.
+- [Output hygiene](../../delivery-loop/references/output-hygiene.md) - reasoning-tag detection, the one bounded correction, and why clean replies extend a run.
 - [Local ledger](../../delivery-loop/references/ledger.md) - ledger layout, state schema, and atomic locked writes.
 - [Migration guide](../../delivery-loop/references/migration.md) - moving rules out of AGENTS.md into this plugin.

@@ -62,8 +62,10 @@ try {
   assert.equal(await exists(target), false, 'Preview must not write target');
   cli(target, ['--plugin', 'ui-design'], false);
   assert.equal(await exists(target), false, 'Missing confirmation must not write');
-  assert.match(cli(target, ['--plugin', 'no-think-tags', '--yes']), /standalone hook plugin/);
-  assert.equal(await exists(target), false, 'Standalone-only selection must not create a skills root');
+  // The standalone no-think-tags plugin folded into delivery-loop, so that id is
+  // no longer selectable: it must fail as unknown rather than write a skills root.
+  assert.match(cli(target, ['--plugin', 'no-think-tags', '--yes'], false), /Unknown plugin: no-think-tags/);
+  assert.equal(await exists(target), false, 'Unknown-only selection must not create a skills root');
 
   const legacySelection = path.join(temp, 'legacy-selection');
   assert.match(cli(legacySelection, ['--skills', 'ui-aesthetics', '--yes']), /legacy aliases/);
@@ -182,5 +184,5 @@ try {
 
   assert.equal(moduleIds.length, 8);
   assert.equal(moduleIds.includes('no-think-tags'), false);
-  console.log('Installer tests passed: per-plugin selection, standalone skipping, legacy schemas, backup migration, byte-preserving rollback, idempotency, content verification, conflicts, unsafe manifests, and missing snapshots.');
+  console.log('Installer tests passed: per-plugin selection, unknown plugin rejection, legacy schemas, backup migration, byte-preserving rollback, idempotency, content verification, conflicts, unsafe manifests, and missing snapshots.');
 } finally { await rm(temp, { recursive: true, force: true }); }

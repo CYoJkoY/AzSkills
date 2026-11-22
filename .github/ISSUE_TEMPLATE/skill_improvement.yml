@@ -20,7 +20,6 @@ body:
         - resume-evidence-workflow
         - operations
         - delivery-loop
-        - no-think-tags
         - application-architecture (alias)
         - frontend-architecture (alias)
         - ui-aesthetics (alias)

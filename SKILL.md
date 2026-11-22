@@ -27,10 +27,13 @@ so grouping never hides a capability behind an unrelated name.
 | `resume-evidence-workflow` | resume-evidence-workflow | Career evidence, requirement alignment, and editable resume delivery. |
 | `operations` | tool-integration, taste | AI client installation and setup, plus judgment and collaboration behavior. |
 | `delivery-loop` | delivery-loop | Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge. |
-| `no-think-tags` | hook only | Blocks a final reply that opens with a raw reasoning-tag block. |
 
 Every workflow plugin ships one router skill that lists its member contracts, so
 selecting the plugin exposes each contract inside it.
+
+`delivery-loop` also carries the Stop hook that blocks a final reply opening
+with a leaked reasoning tag, so answer hygiene installs with the workflow that
+runs the longest turns.
 
 `catalog/plugins.json` is the distribution registry; `skills.json` stays the
 canonical module and alias source. A module plugin ships the workflow of the

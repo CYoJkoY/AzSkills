@@ -257,10 +257,11 @@ The review covered current public guidance around composition, frame-driven timi
 
 The resulting contract deliberately adds AzSkills-specific behavior: explicit engine responsibility boundaries, deterministic timing rules, progressive-disclosure references, AI production workflow, cross-Skill routing, rendering QA, asset provenance, and performance gates.
 
-## Answer hygiene hook plugins
+## Answer hygiene hook
 
-The standalone plugin `plugins/no-think-tags` was written for AzSkills after
-studying the OpenCode plugin `packages/think-tags` in
+The reasoning-tag Stop hook at `no-think-tags/`, shipped inside the
+`delivery-loop` plugin, was written for AzSkills after studying the OpenCode
+plugin `packages/think-tags` in
 https://github.com/magpie-community/plugins (MIT License, Copyright (c) the
 magpie-community contributors).
 
