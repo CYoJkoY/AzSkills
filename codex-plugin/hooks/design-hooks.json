@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {"type": "command", "command": "node \"${PLUGIN_ROOT}/codex-plugin/hooks/visual-intent.ts\" design", "statusMessage": "Checking whether the request needs the design workflow"}
+        ]
+      }
+    ]
+  }
+}

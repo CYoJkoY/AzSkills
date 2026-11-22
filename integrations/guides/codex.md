@@ -23,14 +23,14 @@ The repository root publishes the built catalog, so the Git source can be added 
 
     codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
 
-AzSkills is a catalog, not one plugin. The marketplace lists 8 independent plugins, each with its own `.codex-plugin/plugin.json`, skill entry, and reference closure:
+AzSkills is a catalog, not one plugin. The marketplace lists 7 independent plugins, each with its own `.codex-plugin/plugin.json`, skill entry, and reference closure:
 
-- Workflow plugins: engineering, design, visual-assets, visual-production, writing, resume-evidence-workflow, operations, delivery-loop.
+- Workflow plugins: engineering, design, visual-assets, visual-production, writing, operations, delivery-loop.
 - `delivery-loop` also carries the Stop hook that blocks a reply opening with a leaked reasoning tag.
 
-Install the plugins the project needs. Each plugin is matched on its own description, so a capability no longer depends on one shared dispatcher entry. Hooks ship only with `operations` (taste steering), `delivery-loop` (delivery-state guard and reasoning-tag Stop hook), and `engineering` (Godot 3.x write guard); review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces.
+Install the plugins the project needs. Each plugin is matched on its own description, so a capability no longer depends on one shared dispatcher entry. Hooks ship with `operations` (taste steering), `delivery-loop` (delivery-state guard and reasoning-tag Stop hook), `engineering` (Godot 3.x write guard), and `design`/`visual-assets`/`visual-production` (a `UserPromptSubmit` pointer to their router skill when an English or Chinese prompt looks visual); review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces.
 
-When upgrading from an earlier release, remove the old marketplace, add the Git source again, and reinstall the selected plugins. Confirm each installed plugin reports 5.0.0 or later; changing the checkout alone does not replace a cached installation. Hook trust is keyed to the handler hash, so an upgrade that changes a hook manifest or a bundled script marks those hooks for review again. Open the hook list (or `/hooks` in the CLI) to review and trust the handlers, then start a new session.
+When upgrading from an earlier release, remove the old marketplace, add the Git source again, and reinstall the selected plugins. Confirm each installed plugin reports 6.0.0 or later; changing the checkout alone does not replace a cached installation. Hook trust is keyed to the handler hash, so an upgrade that changes a hook manifest or a bundled script marks those hooks for review again. Open the hook list (or `/hooks` in the CLI) to review and trust the handlers, then start a new session.
 
 ## Use
 

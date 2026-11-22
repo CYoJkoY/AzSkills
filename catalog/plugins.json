@@ -60,9 +60,11 @@
         "style-presets/references",
         "style-presets/assets",
         "design-system/references",
+        "codex-plugin/hooks/design-hooks.json",
+        "codex-plugin/hooks/visual-intent.ts",
         "codex-plugin/assets/icons/design.svg"
       ],
-      "hooks": null
+      "hooks": "codex-plugin/hooks/design-hooks.json"
     },
     {
       "id": "visual-assets",
@@ -84,9 +86,11 @@
         "logo-generator/references",
         "scientific-figures/references",
         "scientific-figures/scripts",
+        "codex-plugin/hooks/visual-assets-hooks.json",
+        "codex-plugin/hooks/visual-intent.ts",
         "codex-plugin/assets/icons/visual-assets.svg"
       ],
-      "hooks": null
+      "hooks": "codex-plugin/hooks/visual-assets-hooks.json"
     },
     {
       "id": "visual-production",
@@ -114,18 +118,21 @@
         "frontend-slides/viewport-base.css",
         "frontend-slides/LICENSE",
         "remotion-production/references",
+        "codex-plugin/hooks/visual-production-hooks.json",
+        "codex-plugin/hooks/visual-intent.ts",
         "codex-plugin/assets/icons/visual-production.svg"
       ],
-      "hooks": null
+      "hooks": "codex-plugin/hooks/visual-production-hooks.json"
     },
     {
       "id": "writing",
       "kind": "module",
       "modules": [
         "document-writing",
-        "localization"
+        "localization",
+        "resume-evidence-workflow"
       ],
-      "description": "Write and audit GitHub documentation, Steam Workshop pages, and game localization tables.",
+      "description": "Write and audit GitHub documentation, Steam Workshop pages, game localization tables, and evidence-backed resumes.",
       "icon": "codex-plugin/assets/icons/writing.svg",
       "brandColor": "#6B4F2A",
       "category": "Productivity",
@@ -137,29 +144,10 @@
         "readme-craft/references",
         "readme-craft/LICENSE",
         "steam-mod-page/references",
-        "codex-plugin/assets/icons/writing.svg"
-      ],
-      "hooks": null
-    },
-    {
-      "id": "resume-evidence-workflow",
-      "kind": "module",
-      "modules": [
-        "resume-evidence-workflow"
-      ],
-      "description": "Build an evidence-backed career profile, tailor resumes to job requirements, and deliver an editable resume.",
-      "icon": "codex-plugin/assets/icons/career.svg",
-      "brandColor": "#4A5568",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
-      ],
-      "extra": [
         "resume-evidence-workflow/references",
         "resume-evidence-workflow/assets",
         "resume-evidence-workflow/LICENSE",
-        "codex-plugin/assets/icons/career.svg"
+        "codex-plugin/assets/icons/writing.svg"
       ],
       "hooks": null
     },

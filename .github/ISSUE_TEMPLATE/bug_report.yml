@@ -18,7 +18,6 @@ body:
         - visual-assets
         - visual-production
         - writing
-        - resume-evidence-workflow
         - operations
         - delivery-loop
         - design-intelligence (root)
@@ -94,3 +93,4 @@ body:
         Links, screenshots, related issues, or suggestions for a fix.
     validations:
       required: false
+

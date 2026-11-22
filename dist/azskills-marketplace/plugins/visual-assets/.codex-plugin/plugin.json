@@ -1,6 +1,6 @@
 {
   "name": "visual-assets",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Create logos, editorial image treatments, and accurate scientific or medical figures with editable deliverables.",
   "license": "MIT",
   "keywords": [
@@ -10,6 +10,7 @@
     "workflow"
   ],
   "skills": "./skills/",
+  "hooks": "./codex-plugin/hooks/visual-assets-hooks.json",
   "interface": {
     "displayName": "Visual Assets",
     "shortDescription": "Create logos, editorial image treatments, and accurate scientific or medical figures with editable deliverables.",

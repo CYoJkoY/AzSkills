@@ -1,6 +1,6 @@
 {
   "name": "visual-production",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Produce responsive HTML reports and presentations, data-driven video, and deterministic Remotion renders.",
   "license": "MIT",
   "keywords": [
@@ -10,6 +10,7 @@
     "workflow"
   ],
   "skills": "./skills/",
+  "hooks": "./codex-plugin/hooks/visual-production-hooks.json",
   "interface": {
     "displayName": "Visual Production",
     "shortDescription": "Produce responsive HTML reports and presentations, data-driven video, and deterministic Remotion renders.",

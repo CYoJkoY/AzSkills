@@ -13,7 +13,7 @@ Choose the plugin by the requested job, then select the matching workflow contra
 | `visual-production` | [remotion-production](modules/remotion-production.md) | Deterministic programmatic video and render delivery. | video, data, 3d, ui-showcase, motion, av |
 | `writing` | [document-writing](modules/document-writing.md) | GitHub README architecture, visuals, links, QA, Steam Workshop BBCode pages, and bilingual delivery. | readme, readme-rewrite, readme-audit, steam-player, steam-developer, steam-audit |
 | `writing` | [localization](modules/localization.md) | Game CSV localization with locale completeness and markup safety. | translate, audit |
-| `resume-evidence-workflow` | [resume-evidence-workflow](modules/resume-evidence-workflow.md) | Career evidence, requirement alignment, and editable resume delivery. | evidence, tailor, review |
+| `writing` | [resume-evidence-workflow](modules/resume-evidence-workflow.md) | Career evidence, requirement alignment, and editable resume delivery. | evidence, tailor, review |
 | `operations` | [tool-integration](modules/tool-integration.md) | Connect AzSkills to AI clients with verified installation and setup workflows. | install, configure, troubleshoot, remove |
 | `delivery-loop` | [delivery-loop](modules/delivery-loop.md) | Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge. | init, plan, work, review, ship, recover |
 | `operations` | [taste](modules/taste.md) | GPT with Taste judgment, collaboration, and execution behavior. | main, subagent, independent |

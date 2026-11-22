@@ -1,6 +1,6 @@
 {
   "name": "delivery-loop",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Run concurrent issue-to-merge delivery with touch-scope leases, per-task worktrees, computed review scoring, gated auto-merge, and a reasoning-tag output guard, without sub-agents.",
   "license": "MIT",
   "keywords": [

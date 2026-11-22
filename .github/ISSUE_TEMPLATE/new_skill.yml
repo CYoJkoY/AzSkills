@@ -131,7 +131,6 @@ body:
         - visual-assets
         - visual-production
         - writing
-        - resume-evidence-workflow
         - operations
         - delivery-loop
         - None / Standalone
@@ -147,3 +146,4 @@ body:
         scenarios where it adds value over ad-hoc prompting.
     validations:
       required: true
+

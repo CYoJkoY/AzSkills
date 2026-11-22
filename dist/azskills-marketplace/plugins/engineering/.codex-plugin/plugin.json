@@ -1,6 +1,6 @@
 {
   "name": "engineering",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, refactoring, and reusable patterns.",
   "license": "MIT",
   "keywords": [

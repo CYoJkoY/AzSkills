@@ -1,7 +1,7 @@
 ---
 name: azskills
 description: AzSkills is a catalog of independent Codex plugins for engineering architecture and code style, design systems and UI motion, visual assets, slides and video, documents, resumes, client setup, Godot 3.x, and answer hygiene. Install only the plugins a task needs; each one routes on its own.
-version: 5.0.0
+version: 6.0.0
 ---
 
 # AzSkills
@@ -23,8 +23,7 @@ so grouping never hides a capability behind an unrelated name.
 | `design` | design-system, ui-design, style-presets | Design systems, interface hierarchy, states, responsive behavior, motion, visual QA, and named presets. |
 | `visual-assets` | logo-generator, photo-abstract-editorial, scientific-figures | Logos, editorial image treatments, and verified scientific or medical figures. |
 | `visual-production` | frontend-slides, remotion-production | Responsive HTML reports, fixed-stage presentations, and deterministic video. |
-| `writing` | document-writing, localization | GitHub READMEs, Steam Workshop pages, and game CSV localization. |
-| `resume-evidence-workflow` | resume-evidence-workflow | Career evidence, requirement alignment, and editable resume delivery. |
+| `writing` | document-writing, localization, resume-evidence-workflow | GitHub READMEs, Steam Workshop pages, game CSV localization, and evidence-backed resumes. |
 | `operations` | tool-integration, taste | AI client installation and setup, plus judgment and collaboration behavior. |
 | `delivery-loop` | delivery-loop | Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge. |
 
@@ -34,6 +33,11 @@ selecting the plugin exposes each contract inside it.
 `delivery-loop` also carries the Stop hook that blocks a final reply opening
 with a leaked reasoning tag, so answer hygiene installs with the workflow that
 runs the longest turns.
+
+`design`, `visual-assets`, and `visual-production` ship a `UserPromptSubmit`
+hook that matches a visual request, in English or Chinese, against their own
+keywords and injects a pointer to the plugin's router skill. The hook guarantees the pointer is
+visible; it does not guarantee the model follows it.
 
 `catalog/plugins.json` is the distribution registry; `skills.json` stays the
 canonical module and alias source. A module plugin ships the workflow of the

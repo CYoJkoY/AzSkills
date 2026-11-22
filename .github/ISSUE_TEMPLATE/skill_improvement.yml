@@ -17,7 +17,6 @@ body:
         - visual-assets
         - visual-production
         - writing
-        - resume-evidence-workflow
         - operations
         - delivery-loop
         - application-architecture (alias)
@@ -100,3 +99,4 @@ body:
         - "Yes - contract semantics change"
     validations:
       required: true
+

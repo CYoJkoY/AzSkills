@@ -66,18 +66,6 @@
       "category": "Productivity"
     },
     {
-      "name": "resume-evidence-workflow",
-      "source": {
-        "source": "local",
-        "path": "./plugins/resume-evidence-workflow"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
       "name": "operations",
       "source": {
         "source": "local",

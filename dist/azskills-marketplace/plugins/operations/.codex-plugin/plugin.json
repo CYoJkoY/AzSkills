@@ -1,6 +1,6 @@
 {
   "name": "operations",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Connect and configure AI client integrations, and apply GPT with Taste steering and collaboration guidance.",
   "license": "MIT",
   "keywords": [

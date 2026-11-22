@@ -52,7 +52,7 @@ try {
   }
 
   assert.equal(built.plugins.length, catalog.plugins.length);
-  assert.equal(built.plugins.length, 8);
+  assert.equal(built.plugins.length, 7);
   assert.equal(registry.modules.length, 17);
 
   const manifest = JSON.parse(await readFile(path.join(built.marketplace, ".agents/plugins/marketplace.json"), "utf8")) as {
@@ -105,6 +105,25 @@ try {
     if (entry.hooks !== null) {
       assert.equal(await exists(path.join(pluginRoot, entry.hooks)), true);
       assert.equal(pluginManifest.hooks, "./" + entry.hooks);
+      const hooksJson = JSON.parse(await readFile(path.join(pluginRoot, entry.hooks), "utf8")) as {
+        hooks?: Record<string, Array<{ hooks?: Array<{ command?: string }> }>>;
+      };
+      const commands: string[] = [];
+      for (const groups of Object.values(hooksJson.hooks ?? {})) {
+        for (const group of groups) {
+          for (const hook of group.hooks ?? []) {
+            if (hook.command) commands.push(hook.command);
+          }
+        }
+      }
+      assert.ok(commands.length > 0, "Hook manifest must declare a command: " + entry.hooks);
+      for (const command of commands) {
+        const target = /\$\{PLUGIN_ROOT\}\/([^"]+)/.exec(command);
+        assert.ok(target, "Hook command must resolve through PLUGIN_ROOT: " + command);
+        const targetPath = target[1];
+        assert.ok(targetPath, "Hook command must name a target: " + command);
+        assert.equal(await exists(path.join(pluginRoot, targetPath)), true, "Hook target must ship with its plugin: " + targetPath);
+      }
     }
     assert.equal(await exists(path.join(pluginRoot, "codex-plugin/hooks/session-start.ts")), false, "Routing hook must not ship");
     assert.equal(await exists(path.join(pluginRoot, "codex-plugin/hooks/hooks.json")), false, "Monolithic hook manifest must not ship");
@@ -133,7 +152,7 @@ try {
     assert.deepEqual([...signature.subarray(0, 4)], [0x50, 0x4b, 0x03, 0x04]);
   }
   const archives = await readdir(zipRoot);
-  assert.equal(archives.length, 8);
+  assert.equal(archives.length, catalog.plugins.length);
 
   const skillView = path.join(temp, "skill-view");
   const skillBuild = await buildPlugin(root, "design", skillView, "skill");
@@ -176,7 +195,7 @@ try {
   assert.deepEqual(committedManifest, committedExpected);
   await assert.rejects(publishRepositoryMarketplace(root, temp), /inside the repository/);
 
-  console.log("Plugin packaging tests passed: 8 self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
+  console.log("Plugin packaging tests passed: " + built.plugins.length + " self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

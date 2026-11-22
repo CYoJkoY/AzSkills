@@ -6,13 +6,13 @@
   <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: a catalog of independent Codex plugins" width="100%">
 </picture>
 
-Version **5.0.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
+Version **6.0.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
 
 Every plugin ships with its own manifest, skill entry, trigger description, reference closure, and icon. A single dispatcher entry only fires when a prompt names it or matches one broad description; independent plugins are matched directly, so capabilities stop being invisible to automatic routing. Plugins are grouped by the job a request asks for, and each group stays small enough to answer one kind of request, so grouping never hides a capability behind an unrelated name. `catalog/plugins.json` is the distribution registry and `skills.json` stays the canonical module and alias source.
 
 | Kind | Plugins | Count |
 | :--- | :--- | :--- |
-| Workflow | engineering, design, visual-assets, visual-production, writing, resume-evidence-workflow, operations, delivery-loop | 8 |
+| Workflow | engineering, design, visual-assets, visual-production, writing, operations, delivery-loop | 7 |
 
 Each workflow plugin bundles the related contracts that a single job needs, and ships one router skill so selecting the plugin exposes every member contract:
 
@@ -22,8 +22,7 @@ Each workflow plugin bundles the related contracts that a single job needs, and 
 | `design` | design-system, ui-design, style-presets | Design systems, interface hierarchy, states, responsive behavior, motion, visual QA, and named presets. |
 | `visual-assets` | logo-generator, photo-abstract-editorial, scientific-figures | Logos, editorial image treatments, and verified scientific or medical figures. |
 | `visual-production` | frontend-slides, remotion-production | Responsive HTML reports, fixed-stage presentations, and deterministic video. |
-| `writing` | document-writing, localization | GitHub READMEs, Steam Workshop pages, and game CSV localization. |
-| `resume-evidence-workflow` | resume-evidence-workflow | Career evidence, requirement alignment, and editable resume delivery. |
+| `writing` | document-writing, localization, resume-evidence-workflow | GitHub READMEs, Steam Workshop pages, game CSV localization, and evidence-backed resumes. |
 | `operations` | tool-integration, taste | AI client installation and setup, plus judgment and collaboration behavior. |
 | `delivery-loop` | delivery-loop | Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge. |
 
@@ -51,7 +50,7 @@ codex plugin marketplace add /path/to/fresh/exports/azskills-marketplace
 codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
 ```
 
-The Git repository is a ready-to-use marketplace: it publishes the built catalog at `dist/azskills-marketplace/`, with a root manifest that points to it. The build writes `azskills-marketplace/.agents/plugins/marketplace.json` plus one self-contained directory per plugin under `plugins/<id>/`, and deterministic archives under `zips/<id>.zip`. Install the plugins you need from the marketplace; each plugin carries a narrow description and is matched on its own. Only `operations` (steering through `taste`), `delivery-loop` (delivery-state guard plus the reasoning-tag Stop hook), and `engineering` (Godot 3.x write guard) ship hooks; review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The `delivery-loop` Stop hook blocks a final reply that opens with a raw reasoning-tag block, closed or left open. See the [Codex upgrade and verification guide](integrations/guides/codex.md).
+The Git repository is a ready-to-use marketplace: it publishes the built catalog at `dist/azskills-marketplace/`, with a root manifest that points to it. The build writes `azskills-marketplace/.agents/plugins/marketplace.json` plus one self-contained directory per plugin under `plugins/<id>/`, and deterministic archives under `zips/<id>.zip`. Install the plugins you need from the marketplace; each plugin carries a narrow description and is matched on its own. These plugins ship hooks: `operations` (steering through `taste`), `delivery-loop` (delivery-state guard plus the reasoning-tag Stop hook), `engineering` (Godot 3.x write guard), and `design`, `visual-assets`, and `visual-production` (a `UserPromptSubmit` pointer to their router skill when an English or Chinese prompt looks visual). Review and trust the hooks when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The `delivery-loop` Stop hook blocks a final reply that opens with a raw reasoning-tag block, closed or left open. See the [Codex upgrade and verification guide](integrations/guides/codex.md).
 
 See [client integration guides](integrations/README.md) for Codex plugin setup, skill folders, manual import, and MCP configuration. Client discovery depends on the client scan scope and may require a restart. The installer verifies local contents separately from actual client discovery and invocation.
 

@@ -15,6 +15,42 @@ workflows into fewer canonical modules and made each module an independent
 plugin with its own manifest, skill entry, trigger description, and reference
 closure. 5.0.0 keeps that independence per task instead of per module.
 
+## 6.0.0: writing absorbs resume evidence
+
+`resume-evidence-workflow` was a single-module plugin whose job is writing and
+auditing a document against evidence, the same job `writing` already owns. It
+now ships inside `writing` as a third member workflow, so one install covers
+docs, storefront pages, localization, and resumes. The module keeps its
+`career` family and its contract, references, editable HTML asset, and LICENSE;
+only the plugin boundary moved.
+
+This is a breaking change to installable IDs: `resume-evidence-workflow` is no
+longer a marketplace entry. Install `writing` in its place. The module id and
+its modes still route to the owning plugin through the installer and MCP.
+
+Two related proposals were reviewed and decided in the same pass:
+
+- `operations` is not folded into `engineering`. It is the opposite of a code
+  style module: `tool-integration` is the client install and configuration
+  foundation, and `taste` is a global behavior hook injected at SessionStart,
+  UserPromptSubmit, SubagentStart, and PostToolUse. Code taste and style already
+  live in `engineering` as the `style` mode of `az-clean-code`. Burying the only
+  global behavior hook inside a code plugin would make it install with a
+  workflow it does not belong to.
+- `design`, `visual-assets`, and `visual-production` previously declared no
+  hooks, so their skills only fired when a prompt matched the plugin
+  description. Each now ships a `UserPromptSubmit` hook
+  (`codex-plugin/hooks/visual-intent.ts` plus a per-plugin manifest) that matches
+  the prompt against that plugin's keywords and injects `additionalContext`
+  pointing at its router skill. Keywords stay specific (interface, design
+  system, motion; logo, icon, scientific figure; slide, deck, video, HTML
+  report) so an unrelated prompt stays untouched. The keyword sets cover
+  English and Chinese, because the requests that miss description matching are
+  often written in Chinese. The hook is a prompt-time pointer, not a
+  dispatcher: it guarantees the router is surfaced, not that the model obeys
+  it. Because hooks only run from a plugin install, these three now need the
+  marketplace rather than a bare skill folder to get the pointer.
+
 ## 5.0.0: task-level plugins
 
 4.0.0 made every module its own installable plugin. That fixed hidden

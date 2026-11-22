@@ -1,6 +1,6 @@
 {
   "name": "design",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Design and refine interfaces, establish design systems, apply visual presets, and build accessible, responsive UI motion.",
   "license": "MIT",
   "keywords": [
@@ -9,6 +9,7 @@
     "workflow"
   ],
   "skills": "./skills/",
+  "hooks": "./codex-plugin/hooks/design-hooks.json",
   "interface": {
     "displayName": "Design",
     "shortDescription": "Design and refine interfaces, establish design systems, apply visual presets, and build accessible, responsive UI motion.",

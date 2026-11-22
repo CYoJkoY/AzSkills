@@ -1,7 +1,7 @@
 {
   "name": "writing",
-  "version": "5.0.0",
-  "description": "Write and audit GitHub documentation, Steam Workshop pages, and game localization tables.",
+  "version": "6.0.0",
+  "description": "Write and audit GitHub documentation, Steam Workshop pages, game localization tables, and evidence-backed resumes.",
   "license": "MIT",
   "keywords": [
     "writing",
@@ -11,8 +11,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Writing",
-    "shortDescription": "Write and audit GitHub documentation, Steam Workshop pages, and game localization tables.",
-    "longDescription": "Write and audit GitHub documentation, Steam Workshop pages, and game localization tables. Modes: document-writing/readme, document-writing/readme-rewrite, document-writing/readme-audit, document-writing/steam-player, document-writing/steam-developer, document-writing/steam-audit, localization/translate, localization/audit.",
+    "shortDescription": "Write and audit GitHub documentation, Steam Workshop pages, game localization tables, and evidence-backed resumes.",
+    "longDescription": "Write and audit GitHub documentation, Steam Workshop pages, game localization tables, and evidence-backed resumes. Modes: document-writing/readme, document-writing/readme-rewrite, document-writing/readme-audit, document-writing/steam-player, document-writing/steam-developer, document-writing/steam-audit, localization/translate, localization/audit, resume-evidence-workflow/evidence, resume-evidence-workflow/tailor, resume-evidence-workflow/review.",
     "developerName": "AzSkills",
     "category": "Productivity",
     "capabilities": [
