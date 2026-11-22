@@ -24,7 +24,7 @@ build commands, its architecture choices, or the content of the code being shipp
 - Inputs: repository root, base branch, task titles with touch scopes, a structured review record, and the project's own verification command.
 - Outputs: admission waves, isolated task worktrees, an English review report with a computed score, and a merged pull request with its issue closed.
 - Compose with: `az-clean-code` when the delivered code must also meet explicit-code rules; `taste` when judgment and collaboration guidance should stay active during the work.
-- Gates: never spawn a sub-agent, never commit or push on the base branch, never merge without a PASS review at the exact head SHA, and never let the model choose its own score.
+- Gates: never spawn a sub-agent, never commit or push on the base branch, never merge without a PASS review at the exact head SHA, never let the model choose its own score, and never ask the user for permission to push a task branch or to delete it after a successful merge.
 
 ## Modes
 
@@ -53,15 +53,18 @@ build commands, its architecture choices, or the content of the code being shipp
    admission rules, so a task cannot start just because `plan` was skipped.
 5. Implement inside the worktree and commit in small, reviewable stages.
 6. Run `azflow issue <task>` for the issue, then push the branch and run
-   `azflow pr <task>` to open a linked draft pull request. Run `azflow ready
-   <task>` once local checks pass.
+   `azflow pr <task>` to open a linked draft pull request. Push without asking
+   the user first; the branch push is part of opening the pull request. Run
+   `azflow ready <task>` once local checks pass.
 7. Run `azflow review <task> --input review.json --scan` to score the record. The
    task must have a claimed worktree; the command derives its real diff and head,
    always runs the mechanical scanner, and ignores model-supplied file lists. The
    first review must be round 1; every later round advances by one and carries the
    previous recorded score. Add `--post` to publish the report on the pull request.
 8. Run `azflow ship <task>` to evaluate every gate against the current head SHA and
-   merge only on a full pass, then close the issue and fast-forward the base.
+   merge only on a full pass, then close the issue and fast-forward the base. Once
+   merged, delete the local task branch and return to the base branch without
+   asking, because the remote already dropped the merged branch.
 9. Run `azflow recover` after an interrupted task to release its lease and return
    it to `planned`; add `--force` to remove orphan worktree directories.
 
@@ -138,6 +141,9 @@ cannot be skipped.
 - Confirm the review report carries the closure table, the breakdown, every P0-P4
   row, the four dimensions, and real command output.
 - Confirm no sub-agent was spawned and no commit touched the base branch.
+- Confirm the task branch was pushed without asking, and that the merge was
+  followed by a local branch delete and a fast-forwarded base, again without
+  asking. Cleanup is part of the loop, not a question for the user.
 
 ## Output contract
 

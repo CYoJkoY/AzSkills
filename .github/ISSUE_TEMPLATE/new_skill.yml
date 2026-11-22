@@ -134,7 +134,6 @@ body:
         - resume-evidence-workflow
         - operations
         - delivery-loop
-        - godot-3-dev
         - None / Standalone
     validations:
       required: false

@@ -52,7 +52,7 @@ try {
   }
 
   assert.equal(built.plugins.length, catalog.plugins.length);
-  assert.equal(built.plugins.length, 11);
+  assert.equal(built.plugins.length, 9);
   assert.equal(registry.modules.length, 17);
 
   const manifest = JSON.parse(await readFile(path.join(built.marketplace, ".agents/plugins/marketplace.json"), "utf8")) as {
@@ -117,10 +117,12 @@ try {
   assert.ok(operations);
   assert.equal(await exists(path.join(operations.directory, "codex-plugin/taste/hooks/steer.ts")), true);
   assert.equal(await exists(path.join(operations.directory, "scripts/runtime.ts")), true);
-  const godot = built.plugins.find((plugin) => plugin.id === "godot-3-dev");
-  assert.ok(godot);
-  assert.equal(await exists(path.join(godot.directory, "codex-plugin/hooks/godot3-guard.ts")), true);
-  assert.equal(await exists(path.join(godot.directory, "godot-3-dev/scripts/check-godot-3x.ts")), true);
+  const engineering = built.plugins.find((plugin) => plugin.id === "engineering");
+  assert.ok(engineering);
+  assert.equal(await exists(path.join(engineering.directory, "codex-plugin/hooks/engineering-hooks.json")), true);
+  assert.equal(await exists(path.join(engineering.directory, "codex-plugin/hooks/godot3-guard.ts")), true);
+  assert.equal(await exists(path.join(engineering.directory, "godot-3-dev/scripts/check-godot-3x.ts")), true);
+  assert.equal(await exists(path.join(engineering.directory, "godot-3-dev/references/api-3.6.json")), true);
 
   const zipRoot = path.join(temp, "zips");
   for (const plugin of built.plugins) {
@@ -131,7 +133,7 @@ try {
     assert.deepEqual([...signature.subarray(0, 4)], [0x50, 0x4b, 0x03, 0x04]);
   }
   const archives = await readdir(zipRoot);
-  assert.equal(archives.length, 11);
+  assert.equal(archives.length, 9);
 
   const skillView = path.join(temp, "skill-view");
   const skillBuild = await buildPlugin(root, "design", skillView, "skill");
@@ -152,7 +154,7 @@ try {
   assert.deepEqual(committedManifest, committedExpected);
   await assert.rejects(publishRepositoryMarketplace(root, temp), /inside the repository/);
 
-  console.log("Plugin packaging tests passed: 11 self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
+  console.log("Plugin packaging tests passed: 9 self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

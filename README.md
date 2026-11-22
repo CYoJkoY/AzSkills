@@ -12,14 +12,14 @@ Every plugin ships with its own manifest, skill entry, trigger description, refe
 
 | Kind | Plugins | Count |
 | :--- | :--- | :--- |
-| Workflow | engineering, design, visual-assets, visual-production, writing, resume-evidence-workflow, operations, delivery-loop, godot-3-dev | 9 |
-| Hook | no-think-tags, empty-reply | 2 |
+| Workflow | engineering, design, visual-assets, visual-production, writing, resume-evidence-workflow, operations, delivery-loop | 8 |
+| Hook | no-think-tags | 1 |
 
 Each workflow plugin bundles the related contracts that a single job needs, and ships one router skill so selecting the plugin exposes every member contract:
 
 | Plugin | Workflows | Focus |
 | :--- | :--- | :--- |
-| `engineering` | architecture, az-clean-code | Runtime, frontend stack, persistence, process boundaries, explicit code, and code style consistency. |
+| `engineering` | architecture, az-clean-code, godot-3-dev | Runtime, frontend stack, persistence, process boundaries, explicit code, code style consistency, and Godot 3.x GDScript. |
 | `design` | design-system, ui-design, style-presets | Design systems, interface hierarchy, states, responsive behavior, motion, visual QA, and named presets. |
 | `visual-assets` | logo-generator, photo-abstract-editorial, scientific-figures | Logos, editorial image treatments, and verified scientific or medical figures. |
 | `visual-production` | frontend-slides, remotion-production | Responsive HTML reports, fixed-stage presentations, and deterministic video. |
@@ -27,7 +27,6 @@ Each workflow plugin bundles the related contracts that a single job needs, and 
 | `resume-evidence-workflow` | resume-evidence-workflow | Career evidence, requirement alignment, and editable resume delivery. |
 | `operations` | tool-integration, taste | AI client installation and setup, plus judgment and collaboration behavior. |
 | `delivery-loop` | delivery-loop | Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge. |
-| `godot-3-dev` | godot-3-dev | Godot 3.x GDScript, virtual-call safety, the 3.6 API surface, and down-porting. |
 
 ## Install
 
@@ -53,7 +52,7 @@ codex plugin marketplace add /path/to/fresh/exports/azskills-marketplace
 codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
 ```
 
-The Git repository is a ready-to-use marketplace: it publishes the built catalog at `dist/azskills-marketplace/`, with a root manifest that points to it. The build writes `azskills-marketplace/.agents/plugins/marketplace.json` plus one self-contained directory per plugin under `plugins/<id>/`, and deterministic archives under `zips/<id>.zip`. Install the plugins you need from the marketplace; each plugin carries a narrow description and is matched on its own. Only `operations` (steering through `taste`), `delivery-loop` (delivery-state guard), and `godot-3-dev` (Godot 3.x write guard) ship hooks among workflow plugins, plus the two hook plugins; review and trust those hooks when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The hook plugins use Stop hooks: `no-think-tags` blocks a final reply that opens with a raw reasoning-tag block, and `empty-reply` asks for a real answer when a finished turn has no visible text. See the [Codex upgrade and verification guide](integrations/guides/codex.md).
+The Git repository is a ready-to-use marketplace: it publishes the built catalog at `dist/azskills-marketplace/`, with a root manifest that points to it. The build writes `azskills-marketplace/.agents/plugins/marketplace.json` plus one self-contained directory per plugin under `plugins/<id>/`, and deterministic archives under `zips/<id>.zip`. Install the plugins you need from the marketplace; each plugin carries a narrow description and is matched on its own. Only `operations` (steering through `taste`), `delivery-loop` (delivery-state guard), and `engineering` (Godot 3.x write guard) ship hooks among workflow plugins, plus the `no-think-tags` hook plugin; review and trust those hooks when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces. The hook plugin uses a Stop hook: `no-think-tags` blocks a final reply that opens with a raw reasoning-tag block, closed or left open. See the [Codex upgrade and verification guide](integrations/guides/codex.md).
 
 See [client integration guides](integrations/README.md) for Codex plugin setup, skill folders, manual import, and MCP configuration. Client discovery depends on the client scan scope and may require a restart. The installer verifies local contents separately from actual client discovery and invocation.
 
@@ -164,7 +163,6 @@ node scripts/check-marketplace.ts
 node scripts/test-link-bundle.ts
 node scripts/test-package-plugin.ts
 node scripts/test-think-tags-hook.ts
-node scripts/test-empty-reply-hook.ts
 node scripts/test-install-skills.ts
 node scripts/test-azskills-mcp.ts
 node design-system/tui/preview.ts --check

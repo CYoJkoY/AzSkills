@@ -102,34 +102,10 @@
       "category": "Productivity"
     },
     {
-      "name": "godot-3-dev",
-      "source": {
-        "source": "local",
-        "path": "./plugins/godot-3-dev"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
       "name": "no-think-tags",
       "source": {
         "source": "local",
         "path": "./plugins/no-think-tags"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "empty-reply",
-      "source": {
-        "source": "local",
-        "path": "./plugins/empty-reply"
       },
       "policy": {
         "installation": "AVAILABLE",

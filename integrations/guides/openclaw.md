@@ -32,7 +32,7 @@ Install for the current user instead:
 
     node scripts/install-skills.ts --tool openclaw --mode user --plugin engineering
 
-Each selected plugin becomes its own `<skills-root>/<id>/SKILL.md` with its own reference closure, so clients discover them independently. Use --target to choose another skills root, --dry-run to inspect without writing, --rollback to restore the previous run, and --uninstall to remove only manifest-managed plugin directories. Non-interactive writes require --yes after reviewing the preview. The hook plugins no-think-tags and empty-reply are skipped here; install them through the Codex plugin marketplace.
+Each selected plugin becomes its own `<skills-root>/<id>/SKILL.md` with its own reference closure, so clients discover them independently. Use --target to choose another skills root, --dry-run to inspect without writing, --rollback to restore the previous run, and --uninstall to remove only manifest-managed plugin directories. Non-interactive writes require --yes after reviewing the preview. The hook plugin no-think-tags is skipped here; install it through the Codex plugin marketplace.
 
 ## Use
 

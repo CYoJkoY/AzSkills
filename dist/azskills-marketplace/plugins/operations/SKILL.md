@@ -19,7 +19,7 @@ so grouping never hides a capability behind an unrelated name.
 
 | Plugin | Workflows | Outcome |
 | :--- | :--- | :--- |
-| `engineering` | architecture, az-clean-code | Runtime, frontend stack, persistence, process boundaries, explicit code, and code style consistency. |
+| `engineering` | architecture, az-clean-code, godot-3-dev | Runtime, frontend stack, persistence, process boundaries, explicit code, code style, and Godot 3.x GDScript. |
 | `design` | design-system, ui-design, style-presets | Design systems, interface hierarchy, states, responsive behavior, motion, visual QA, and named presets. |
 | `visual-assets` | logo-generator, photo-abstract-editorial, scientific-figures | Logos, editorial image treatments, and verified scientific or medical figures. |
 | `visual-production` | frontend-slides, remotion-production | Responsive HTML reports, fixed-stage presentations, and deterministic video. |
@@ -27,9 +27,7 @@ so grouping never hides a capability behind an unrelated name.
 | `resume-evidence-workflow` | resume-evidence-workflow | Career evidence, requirement alignment, and editable resume delivery. |
 | `operations` | tool-integration, taste | AI client installation and setup, plus judgment and collaboration behavior. |
 | `delivery-loop` | delivery-loop | Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge. |
-| `godot-3-dev` | godot-3-dev | Godot 3.x GDScript, virtual-call safety, the 3.6 API surface, and down-porting. |
 | `no-think-tags` | hook only | Blocks a final reply that opens with a raw reasoning-tag block. |
-| `empty-reply` | hook only | Requests a real answer when a finished turn has no visible text. |
 
 Every workflow plugin ships one router skill that lists its member contracts, so
 selecting the plugin exposes each contract inside it.

@@ -1,7 +1,7 @@
 # Tool integrations
 
 AzSkills connects to AI tools through native skills, Codex plugins, MCP servers, and manual import.
-AzSkills is a catalog of 11 independent plugins. Skill folders install the workflow plugins individually, the Codex marketplace installs any plugin including the hook plugins, and the MCP server exposes the catalog to clients without a skill folder.
+AzSkills is a catalog of 9 independent plugins. Skill folders install the workflow plugins individually, the Codex marketplace installs any plugin including the hook plugins, and the MCP server exposes the catalog to clients without a skill folder.
 Manual import is used only where the vendor workflow is UI-based or not publicly documented for local files.
 
 | Tool | Mechanism | Default target |

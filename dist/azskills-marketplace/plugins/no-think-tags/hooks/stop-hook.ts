@@ -6,14 +6,21 @@
  */
 
 import process from "node:process";
-import { stripLeadingThinking } from "../lib/think-tags.ts";
+import { leadingUnclosedTag, stripLeadingThinking } from "../lib/think-tags.ts";
 import { readCorrections, readStopInput, writeCorrections } from "../lib/hook-runtime.ts";
 
 const MAX_CORRECTIONS = 1;
 
-const REASON = [
+const CLOSED_REASON = [
   "Your final reply opened with a raw reasoning block (a <think>, <thinking>, or <thought> block).",
   "The user sees those tags as literal text, and the emitted text cannot be recalled.",
+  "Send the answer again as plain assistant text: no thinking-tag blocks, no preamble about this instruction,",
+  "and only the content the user asked for.",
+].join(" ");
+
+const UNCLOSED_REASON = [
+  "Your final reply opened with a raw reasoning block that never closed (a <think>, <thinking>, or <thought>",
+  "tag with no matching closing tag). Everything after the tag reads as leaked reasoning, not as the answer.",
   "Send the answer again as plain assistant text: no thinking-tag blocks, no preamble about this instruction,",
   "and only the content the user asked for.",
 ].join(" ");
@@ -34,14 +41,27 @@ async function main(): Promise<void> {
   }
   const input = readStopInput(parsed);
   if (input === null) return;
-  if (input.stopHookActive) return;
   if (input.message === null) return;
   const result = stripLeadingThinking(input.message);
-  if (!result.stripped) return;
+  const unclosed = result.stripped ? null : leadingUnclosedTag(input.message);
+  if (!result.stripped && unclosed === null) return;
+  const reason = result.stripped ? CLOSED_REASON : UNCLOSED_REASON;
+  const emit = (): void => {
+    process.stdout.write(JSON.stringify({ decision: "block", reason }) + "\n");
+  };
+
+  // stop_hook_active is shared by every Stop hook in the turn: it says some hook
+  // already continued this turn, not that this hook already fired. Honour it only
+  // when this hook has no per-turn id to dedupe on, or cannot record one.
+  if (input.turnId === "") {
+    if (!input.stopHookActive) emit();
+    return;
+  }
   const state = await readCorrections(input);
   if (state.count >= MAX_CORRECTIONS) return;
-  await writeCorrections(input, { count: state.count + 1 });
-  process.stdout.write(JSON.stringify({ decision: "block", reason: REASON }) + "\n");
+  const stored = await writeCorrections(input, { count: state.count + 1 });
+  if (!stored && input.stopHookActive) return;
+  emit();
 }
 
 await main();

@@ -21,9 +21,7 @@ body:
         - resume-evidence-workflow
         - operations
         - delivery-loop
-        - godot-3-dev
         - no-think-tags
-        - empty-reply
         - design-intelligence (root)
         - Compatibility alias path
         - Shared system file (SKILL-SYSTEM.md or skills.json)

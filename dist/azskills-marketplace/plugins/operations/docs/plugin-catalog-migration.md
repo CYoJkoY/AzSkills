@@ -30,7 +30,7 @@ plugin exposes each contract inside it.
 
 | Plugin | Workflows |
 | :--- | :--- |
-| `engineering` | architecture, az-clean-code |
+| `engineering` | architecture, az-clean-code, godot-3-dev |
 | `design` | design-system, ui-design, style-presets |
 | `visual-assets` | logo-generator, photo-abstract-editorial, scientific-figures |
 | `visual-production` | frontend-slides, remotion-production |
@@ -38,7 +38,6 @@ plugin exposes each contract inside it.
 | `resume-evidence-workflow` | resume-evidence-workflow |
 | `operations` | tool-integration, taste |
 | `delivery-loop` | delivery-loop |
-| `godot-3-dev` | godot-3-dev |
 
 Merge points live inside a contract as modes, not as extra plugins: code style
 is a mode of `az-clean-code`, motion is a branch of `ui-design`, and README plus
@@ -74,8 +73,14 @@ uninstall the replaced entry:
 | `resume-evidence-workflow` | `resume-evidence-workflow` |
 | `tool-integration`, `taste` | `operations` |
 | none (new in 5.0.0) | `delivery-loop` |
-| `godot-3-dev` | `godot-3-dev` |
-| `no-think-tags`, `empty-reply` | unchanged |
+| `godot-3-dev` | `engineering` |
+| `no-think-tags` | unchanged |
+
+`empty-reply` is retired in this release. Its Stop hook fired after any turn
+without visible text, which is normal inside goal mode, so the injected
+"continue" message interrupted goal runs instead of helping them. The
+`no-think-tags` hook covers the remaining case: a reply that is only a leaked
+reasoning block.
 
 Removed module IDs such as `ui-motion`, `readme-craft`, and `steam-mod-page`
 remain only as routing aliases in `skills.json`. They resolve for the installer
@@ -143,11 +148,11 @@ its owning plugin (`design`) exactly once.
 
 ## Hooks
 
-The routing and session hooks are removed. Only two manifests remain for
-workflow plugins: `operations` (GPT with Taste steering) and `godot-3-dev`
-(Godot 3.x write guard). The standalone `no-think-tags` and `empty-reply`
-plugins carry their own Stop hooks and can be reviewed and trusted
-independently.
+The routing and session hooks are removed. Three manifests remain for workflow
+plugins: `operations` (GPT with Taste steering), `delivery-loop` (delivery-state
+guard), and `engineering` (Godot 3.x write guard). The standalone
+`no-think-tags` plugin carries its own Stop hook and can be reviewed and
+trusted independently.
 
 ## MCP
 

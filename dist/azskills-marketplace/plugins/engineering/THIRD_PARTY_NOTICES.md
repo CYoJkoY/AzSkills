@@ -259,14 +259,14 @@ The resulting contract deliberately adds AzSkills-specific behavior: explicit en
 
 ## Answer hygiene hook plugins
 
-The standalone plugins `plugins/no-think-tags` and `plugins/empty-reply` were
-written for AzSkills after studying the OpenCode plugins `packages/think-tags`
-and `packages/empty-reply` in https://github.com/magpie-community/plugins
-(MIT License, Copyright (c) the magpie-community contributors).
+The standalone plugin `plugins/no-think-tags` was written for AzSkills after
+studying the OpenCode plugin `packages/think-tags` in
+https://github.com/magpie-community/plugins (MIT License, Copyright (c) the
+magpie-community contributors).
 
-This repository does not vendor upstream source. Both plugins are independent
-Codex Stop-hook implementations: their detection rules, correction budgets,
-tests, and manifests were written against the Codex hook contract, and they add
-behavior the upstream packages do not define, such as honouring
-`stop_hook_active`, counting corrections per session and turn, and treating
-reasoning-only or invisible-only output as empty.
+This repository does not vendor upstream source. The plugin is an independent
+Codex Stop-hook implementation: its detection rules, correction budget, tests,
+and manifest were written against the Codex hook contract, and it adds behavior
+the upstream package does not define, such as honouring `stop_hook_active`,
+counting corrections per session and turn, and treating a reasoning block that
+never closes as a leak.

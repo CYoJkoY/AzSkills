@@ -61,13 +61,16 @@ export async function readCorrections(input: StopInput): Promise<CorrectionState
   }
 }
 
-export async function writeCorrections(input: StopInput, state: CorrectionState): Promise<void> {
+/** Records the correction count. Returns false when the state cannot be stored. */
+export async function writeCorrections(input: StopInput, state: CorrectionState): Promise<boolean> {
   const file = statePath(input);
-  if (file === null) return;
+  if (file === null) return false;
   try {
     await mkdir(path.dirname(file), { recursive: true });
     await writeFile(file, JSON.stringify({ count: state.count }) + "\n", "utf8");
+    return true;
   } catch {
     // A read-only state directory must never block the turn.
+    return false;
   }
 }

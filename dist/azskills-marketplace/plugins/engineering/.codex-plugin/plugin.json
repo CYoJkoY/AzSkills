@@ -1,7 +1,7 @@
 {
   "name": "engineering",
   "version": "5.0.0",
-  "description": "Choose runtime and frontend architecture or improve code quality, style consistency, refactoring, and reusable implementation patterns.",
+  "description": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, refactoring, and reusable patterns.",
   "license": "MIT",
   "keywords": [
     "engineering",
@@ -9,10 +9,11 @@
     "workflow"
   ],
   "skills": "./skills/",
+  "hooks": "./codex-plugin/hooks/engineering-hooks.json",
   "interface": {
     "displayName": "Engineering",
-    "shortDescription": "Choose runtime and frontend architecture or improve code quality, style consistency, refactoring, and reusable implementation patterns.",
-    "longDescription": "Choose runtime and frontend architecture or improve code quality, style consistency, refactoring, and reusable implementation patterns. Modes: architecture/runtime, architecture/frontend, architecture/migration, architecture/review, az-clean-code/write, az-clean-code/review, az-clean-code/refactor, az-clean-code/style.",
+    "shortDescription": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, refactoring, and reusable patterns.",
+    "longDescription": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, refactoring, and reusable patterns. Modes: architecture/runtime, architecture/frontend, architecture/migration, architecture/review, az-clean-code/write, az-clean-code/review, az-clean-code/refactor, az-clean-code/style, godot-3-dev/script, godot-3-dev/review, godot-3-dev/port.",
     "developerName": "AzSkills",
     "category": "Productivity",
     "capabilities": [

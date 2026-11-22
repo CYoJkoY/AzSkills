@@ -11,9 +11,10 @@
       "kind": "module",
       "modules": [
         "architecture",
-        "az-clean-code"
+        "az-clean-code",
+        "godot-3-dev"
       ],
-      "description": "Choose runtime and frontend architecture or improve code quality, style consistency, refactoring, and reusable implementation patterns.",
+      "description": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, refactoring, and reusable patterns.",
       "icon": "codex-plugin/assets/icons/engineering.svg",
       "brandColor": "#1F4E79",
       "category": "Productivity",
@@ -26,9 +27,16 @@
         "az-clean-code/references",
         "az-clean-code/scripts",
         "az-clean-code/constraints.json",
+        "godot-3-dev/references",
+        "godot-3-dev/scripts/godot3-lexical.ts",
+        "godot-3-dev/scripts/check-godot-3x.ts",
+        "codex-plugin/hooks/engineering-hooks.json",
+        "codex-plugin/hooks/godot3-guard.ts",
+        "scripts/runtime.ts",
+        "scripts/types.ts",
         "codex-plugin/assets/icons/engineering.svg"
       ],
-      "hooks": null
+      "hooks": "codex-plugin/hooks/engineering-hooks.json"
     },
     {
       "id": "design",
@@ -204,32 +212,6 @@
       "hooks": "codex-plugin/hooks/delivery-hooks.json"
     },
     {
-      "id": "godot-3-dev",
-      "kind": "module",
-      "modules": [
-        "godot-3-dev"
-      ],
-      "description": "Develop, review, and down-port Godot 3.x GDScript against the verified 3.6 API surface.",
-      "icon": "codex-plugin/assets/icons/godot.svg",
-      "brandColor": "#2F6B4F",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
-      ],
-      "extra": [
-        "godot-3-dev/references",
-        "codex-plugin/hooks/godot-hooks.json",
-        "codex-plugin/hooks/godot3-guard.ts",
-        "godot-3-dev/scripts/godot3-lexical.ts",
-        "godot-3-dev/scripts/check-godot-3x.ts",
-        "scripts/runtime.ts",
-        "scripts/types.ts",
-        "codex-plugin/assets/icons/godot.svg"
-      ],
-      "hooks": "codex-plugin/hooks/godot-hooks.json"
-    },
-    {
       "id": "no-think-tags",
       "kind": "standalone",
       "source": "plugins/no-think-tags",
@@ -241,19 +223,6 @@
       "extra": [],
       "hooks": "hooks/hooks.json",
       "brandColor": "#BE185D"
-    },
-    {
-      "id": "empty-reply",
-      "kind": "standalone",
-      "source": "plugins/empty-reply",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
-      ],
-      "extra": [],
-      "hooks": "hooks/hooks.json",
-      "brandColor": "#0E7490"
     }
   ]
 }

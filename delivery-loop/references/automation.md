@@ -83,6 +83,29 @@ or `rebase`. After merging, `ship` records the task as merged, closes the linked
 issue, then fetches and fast-forwards the base branch, so the next task starts
 from the merged head.
 
+## Push and cleanup
+
+The loop owns the branch lifecycle end to end, so it never asks the user whether
+to push or whether to tidy up. Ask only when an action is irreversible and not
+part of the loop.
+
+- Push the task branch without asking. `azflow pr` already refuses a branch the
+  remote has not seen, so pushing is part of opening the pull request, not a
+  separate decision to confirm.
+- After `azflow ship` merges, delete the local task branch and return to the base
+  branch without asking. Most repositories enable delete-on-merge for the remote
+  branch, so the local branch is stale the moment the merge lands. Check out the
+  base branch, delete the task branch, then fetch and fast-forward.
+- Run the cleanup from outside the task worktree. Git refuses to delete a branch
+  that is still checked out in a worktree, so remove the worktree first
+  (`recover --force`) or run the cleanup from the main checkout.
+- The guard still applies. The cleanup runs on the base branch, but it is a
+  checkout, a branch delete, a fetch, and a fast-forward, never a commit or push
+  on base, and those stay denied.
+- Recovery is a different path: `azflow recover` never deletes a branch, because
+  an interrupted task may still be resumed. Only a successful merge authorizes
+  deleting the task branch, and only after `ship` recorded the merge.
+
 ## Guard
 
 The PreToolUse hook activates only where `.azflow/state.json` exists, so installing

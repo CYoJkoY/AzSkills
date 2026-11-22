@@ -20,9 +20,7 @@ body:
         - resume-evidence-workflow
         - operations
         - delivery-loop
-        - godot-3-dev
         - no-think-tags
-        - empty-reply
         - application-architecture (alias)
         - frontend-architecture (alias)
         - ui-aesthetics (alias)

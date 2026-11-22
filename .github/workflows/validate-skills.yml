@@ -94,7 +94,6 @@ jobs:
       - name: Test standalone hook plugins
         run: |
           node scripts/test-think-tags-hook.ts
-          node scripts/test-empty-reply-hook.ts
 
       - name: Export all plugin archives
         run: |
@@ -107,7 +106,7 @@ jobs:
           test "$actual" -eq "$expected"
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/.agents/plugins/marketplace.json"
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/design/.codex-plugin/plugin.json"
-          test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/empty-reply/hooks/stop-hook.ts"
+          test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/no-think-tags/hooks/stop-hook.ts"
           mkdir -p "$RUNNER_TEMP/azskills-extracted"
           unzip -q "$RUNNER_TEMP/azskills-export/zips/design.zip" -d "$RUNNER_TEMP/azskills-extracted"
           test -f "$RUNNER_TEMP/azskills-extracted/skills/design/SKILL.md"
