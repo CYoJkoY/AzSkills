@@ -1,7 +1,7 @@
 ---
 name: delivery-loop
 description: Run a repository delivery loop that plans concurrent tasks as a dependency DAG with touch-scope leases, isolates each task in its own git worktree, scores reviews mechanically, and merges automatically on green evidence without sub-agents.
-version: 1.1.0
+version: 1.2.0
 status: module
 family: operations
 modes: [init, plan, work, review, ship, recover]
@@ -26,7 +26,7 @@ choices, or the content of the code being shipped.
 - Inputs: repository root, base branch, task titles with touch scopes, a structured review record, and the project's own verification command.
 - Outputs: admission waves, isolated task worktrees, an English review report with a computed score, and a merged pull request with its issue closed.
 - Compose with: `az-clean-code` when the delivered code must also meet explicit-code rules; `taste` when judgment and collaboration guidance should stay active during the work.
-- Gates: never spawn a sub-agent, never commit or push on the base branch, never merge without a PASS review at the exact head SHA, never let the model choose its own score, never ship a final reply that opens with a raw reasoning block, and never ask the user for permission to push a task branch or to delete it after a successful merge.
+- Gates: never spawn a sub-agent, never commit or push on the base branch, never merge without a PASS review at the exact head SHA, never let the model choose its own score, and never ship a final reply that opens with a raw reasoning block. Installing the plugin delegates issue creation, branch push, pull request creation, review posting, merge, and cleanup, so the loop runs that path without asking for per-action approval.
 
 ## Modes
 
@@ -42,33 +42,81 @@ choices, or the content of the code being shipped.
 ## Workflow
 
 1. Run `azflow init` in the repository. It writes `.azflow/state.json` plus a
-   nested `.gitignore` containing `*`, so the ledger stays local, and detects the
-   base branch from `origin/HEAD`.
+   nested `.gitignore` containing `*`, so the ledger stays local, detects the base
+   branch from `origin/HEAD`, and records the static check commands that every
+   commit must pass (`--check "<cmd>"`, or the repository's own `typecheck` and
+   `lint` scripts). A ledger with no recorded check refuses commits until checks
+   are added.
 2. Record tasks with `azflow add "<title>" --touch <glob> [--touch <glob>]
    [--dep T-0001]`. Each task owns its touch scopes and its dependencies.
 3. Run `azflow plan` to pack planned tasks into waves. A task waits when a
    dependency is unmerged, when the wave is already at `maxParallel`, or when its
    touch scopes overlap a live lease. Admission is demand-driven, never a fixed
    roster.
-4. Run `azflow claim <task>` to create the branch and worktree under
+4. Run `azflow issue <task>` so the branch commits have an issue to cite. The
+   issue is created from the task body, without asking the user first.
+5. Run `azflow claim <task>` to create the branch and worktree under
    `.azflow/worktrees/`, then issue a time-bounded lease. Claim re-checks the same
    admission rules, so a task cannot start just because `plan` was skipped.
-5. Implement inside the worktree and commit in small, reviewable stages.
-6. Run `azflow issue <task>` for the issue, then push the branch and run
-   `azflow pr <task>` to open a linked draft pull request. Push without asking
-   the user first; the branch push is part of opening the pull request. Run
-   `azflow ready <task>` once local checks pass.
-7. Run `azflow review <task> --input review.json --scan` to score the record. The
+6. Implement inside the worktree and commit in small, reviewable stages.
+7. Commit each stage with `azflow commit <task> --type <type> --scope <scope>
+   --subject "<subject>"`. The command refuses an empty index, refuses a ledger
+   that records no static check, runs the recorded checks, and enforces the commit
+   standard below, so a red tree never gets a message or a commit; `--skip-check`
+   is the visible escape.
+8. Run the project's own checks on the final head, push the branch, then run
+   `azflow review <task> --input review.json --scan` to score the record. The
    task must have a claimed worktree; the command derives its real diff and head,
    always runs the mechanical scanner, and ignores model-supplied file lists. The
    first review must be round 1; every later round advances by one and carries the
-   previous recorded score. Add `--post` to publish the report on the pull request.
-8. Run `azflow ship <task>` to evaluate every gate against the current head SHA and
-   merge only on a full pass, then close the issue and fast-forward the base. Once
-   merged, delete the local task branch and return to the base branch without
-   asking, because the remote already dropped the merged branch.
-9. Run `azflow recover` after an interrupted task to release its lease and return
+   previous recorded score.
+9. Run `azflow pr <task>` to open a linked draft pull request with a derived title
+   and body, then `azflow ready <task>` to take it out of draft. Push without asking
+   the user first; the branch push is part of opening the pull request. `pr` refuses
+   until a passing review round with a green verification exists, because opening
+   the pull request is the point where the stage becomes visible; it posts the
+   recorded report as the first comment. `--allow-unverified` opens it earlier on
+   purpose.
+10. Run `azflow ship <task>` to refresh the pull request body from the recorded
+   review, evaluate every gate against the current head SHA, and merge only on a
+   full pass, then close the issue and fast-forward the base. Once merged, delete
+   the local task branch and return to the base branch without asking, because the
+   remote already dropped the merged branch.
+11. Run `azflow recover` after an interrupted task to release its lease and return
    it to `planned`; add `--force` to remove orphan worktree directories.
+
+A repair round after `ready` re-runs the checks. The pull request stays open and
+`ship` refuses while the reviewed head differs from the pull request head, so an
+unreviewed fix never merges.
+
+## Commit and pull request standard
+
+The message format is enforced by code, not by convention, because a convention
+cannot stop a malformed commit once it exists.
+
+- ASCII only for commit messages and pull request metadata: printable
+  `0x20`-`0x7E` plus real LF, with no CJK, full-width punctuation, emoji,
+  zero-width characters, or literal `\n` escapes.
+- Commit header `<type>(<scope>)[!]: <imperative subject>`, a type from `feat`,
+  `fix`, `refactor`, `perf`, `test`, `build`, `ci`, `docs`, `chore`, a lowercase
+  verb subject, no trailing period, no `#<id>`, 50 characters as the target and 72
+  as the hard ceiling.
+- `!` and a `BREAKING CHANGE:` footer are required together: either half alone is
+  rejected.
+- Exactly one `Refs: #<issue-id>` footer, so staged commits stay traceable without
+  closing the issue early.
+- One reviewable stage per commit, no mixed types, and no vague subjects such as
+  `update files`, `misc fixes`, or `wip`.
+- No stage is named or recorded while the recorded static checks fail or while the
+  ledger records none; the commit command prints the failing command and its exit
+  code, or the missing-check notice, instead of a message.
+- Pull request title `<type>(<scope>)[!]: <summary> (#<id>)` under 72 characters;
+  the body carries exactly five H2 sections in fixed order: `Linked Issue`,
+  `Change summary`, `Verification & Dependencies`, `Review conclusion`,
+  `Permission Notice`.
+- `Blocking issues:` and `Active iteration: Round <N> of <maxRounds>` appear only
+  while the verdict is FAIL, and the budget follows the scoring policy rather than
+  a separate number. An override body must keep the same five-section structure.
 
 ## Concurrency model
 
@@ -100,7 +148,7 @@ never types a score into the report.
   rely on their weight: one P3 lands at 4.80 and one P4 at 4.90, so a second P3 or
   P4 clears the bar only if the rest of the round is otherwise clean.
 - A pass requires zero P0/P1/P2, a score at or above 4.90, and a round within the
-  repair budget of six.
+  repair budget of five.
 - An unreviewed diff file, a missing or failed verification command, an incomplete
   probe set, a dimension marked failing, or an unevidenced finding each caps the
   report and adds a blocking finding.
@@ -128,7 +176,9 @@ never types a score into the report.
 6. The base branch is unchanged from the configured base.
 7. No blocking label (`do-not-merge`, `blocked`, `wip`, `needs-decision`).
 8. The pull request is not a draft.
-9. Autonomy is `full`. Set autonomy to `manual` to require a human ship.
+9. Autonomy is `full`. The grant to merge came with installing the plugin, so the
+   loop merges on green evidence and does not ask again. Set autonomy to `manual`
+   to keep a human ship as an explicit override.
 
 On a pass the loop merges with `mergeStrategy` (squash by default), records the
 merge, closes the linked issue, and fast-forwards the base branch. Merge is never

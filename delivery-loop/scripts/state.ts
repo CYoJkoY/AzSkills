@@ -58,6 +58,8 @@ export interface FlowConfig {
   leaseTtlMinutes: number;
   mergeStrategy: "squash" | "merge" | "rebase";
   allowFrameworks: string[];
+  /** Static checks `azflow commit` runs before it records a stage. */
+  checks: string[];
 }
 
 export interface FlowState {
@@ -78,6 +80,7 @@ export const DEFAULT_CONFIG: FlowConfig = {
   leaseTtlMinutes: 90,
   mergeStrategy: "squash",
   allowFrameworks: [],
+  checks: [],
 };
 
 export const flowRoot = (project: string): string => path.join(project, ".azflow");
@@ -104,6 +107,8 @@ export async function readState(project: string): Promise<FlowState | null> {
   if (!isFlowState(parsed)) {
     throw new Error("Invalid ledger at " + statePath(project));
   }
+  // A ledger written before checks existed keeps working with no checks.
+  if (!Array.isArray(parsed.config.checks)) parsed.config.checks = [];
   return parsed;
 }
 
@@ -140,7 +145,8 @@ function isConfig(value: Record<string, unknown>): boolean {
     (value.mergeStrategy === "squash" ||
       value.mergeStrategy === "merge" ||
       value.mergeStrategy === "rebase") &&
-    isStringArray(value.allowFrameworks)
+    isStringArray(value.allowFrameworks) &&
+    (value.checks === undefined || isStringArray(value.checks))
   );
 }
 

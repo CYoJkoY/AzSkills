@@ -11,27 +11,46 @@ import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import {
+  branchCommits,
+  commitWithMessage,
   currentBranch,
   defaultBranch,
   diffAddedLines,
   diffFiles,
   ghAvailable,
   git,
+  hasStagedChanges,
   issueClose,
   issueCreate,
   issueNumberFromUrl,
   prChecks,
   prComment,
   prCreate,
+  prEdit,
   prMerge,
   prReady,
   prView,
   remoteBranchExists,
+  runShell,
   revParse,
+  stagedPaths,
   worktreeAddNew,
   worktreeRemove,
 } from "./externals.ts";
+import type { BranchCommit } from "./externals.ts";
+import {
+  DEFAULT_PERMISSION_NOTICE,
+  buildCommitMessage,
+  buildPullRequestBody,
+  buildPullRequestTitle,
+  parseCommitHeader,
+  validateCommitMessage,
+  validatePullRequestBody,
+  validatePullRequestTitle,
+} from "./message.ts";
+import type { PullRequestCommit, PullRequestDimension } from "./message.ts";
 import { mergeFindings, scanDiff } from "./scan.ts";
+import { asciiIssues } from "./message.ts";
 import type { Finding, ReviewInput, ScoreResult } from "./score.ts";
 import { DEFAULT_POLICY, renderReport, scoreReview } from "./score.ts";
 import {
@@ -40,6 +59,7 @@ import {
   findTaskByPr,
   flowRoot,
   issueLease,
+  isRecord,
   leaseAlive,
   makeTask,
   newTaskId,
@@ -51,6 +71,7 @@ import {
   statePath,
   touch,
   touchConflict,
+  matchesAny,
   withLock,
   worktreesRoot,
   writeState,
@@ -124,6 +145,26 @@ async function ensureIgnored(project: string): Promise<void> {
   await writeFile(path.join(directory, ".gitignore"), "*\n", "utf8");
 }
 
+/**
+ * Static checks the ledger should run before every commit. Explicit `--check`
+ * flags win; otherwise a repository that names its own scripts gets them for
+ * free, so a commit cannot land on a red tree by neglect.
+ */
+async function detectChecks(project: string): Promise<string[]> {
+  const text = await readFile(path.join(project, "package.json"), "utf8").catch(() => null);
+  if (text === null) return [];
+  let scripts: Record<string, unknown> = {};
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    if (isRecord(parsed) && isRecord(parsed.scripts)) scripts = parsed.scripts;
+  } catch {
+    return [];
+  }
+  return ["typecheck", "lint"]
+    .filter((name) => typeof scripts[name] === "string")
+    .map((name) => "npm run " + name);
+}
+
 async function init(args: Args): Promise<void> {
   const project = projectRoot(args);
   assertGitRepo(project);
@@ -135,6 +176,7 @@ async function init(args: Args): Promise<void> {
   }
   await ensureIgnored(project);
   const base = lastValue(args, "base") ?? defaultBranch(project);
+  const requested = allValues(args, "check");
   const state: FlowState = {
     schemaVersion: 1,
     config: {
@@ -142,6 +184,7 @@ async function init(args: Args): Promise<void> {
       base,
       maxParallel: Number(lastValue(args, "max-parallel") ?? DEFAULT_CONFIG.maxParallel),
       autonomy: lastValue(args, "autonomy") === "manual" ? "manual" : "full",
+      checks: requested.length > 0 ? requested : await detectChecks(project),
     },
     sequence: 0,
     tasks: [],
@@ -198,24 +241,216 @@ function issueBody(task: Task): string {
   ].join("\n");
 }
 
-/** Deterministic default pull request body, linked to the issue when one exists. */
-function pullRequestBody(task: Task): string {
-  const lines = [
-    task.issue === null ? "" : "Closes #" + String(task.issue),
-    "",
-    "## Summary",
-    "",
+/**
+ * The review record holds the facts the pull request body cites: the command
+ * that ran, its exit code, the probe results, and the dimension verdicts. The
+ * body is rebuilt from that file rather than from prose the model remembers.
+ */
+interface ReviewFacts {
+  readonly staticChecks: string;
+  readonly staticRecorded: boolean;
+  readonly staticGreen: boolean;
+  readonly sawReview: boolean;
+  readonly runtimeChecks: string;
+  readonly unverified: string;
+  readonly dimensions: PullRequestDimension[];
+  readonly verdict: "PASS" | "FAIL";
+  readonly round: number;
+}
+
+/** Review dimensions carry their own ids; map them onto the four audit rows. */
+const DIMENSION_ALIASES: Record<string, string> = {
+  correctness: "correctness",
+  performance: "performance",
+  discipline: "compatibility",
+  compatibility: "compatibility",
+  readability: "readability",
+};
+
+const firstLine = (text: string): string | null => {
+  const line = text
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .find((item) => item !== "");
+  return line ?? null;
+};
+
+const isAscii = (text: string): boolean => asciiIssues(text).length === 0;
+
+async function reviewFacts(project: string, task: Task): Promise<ReviewFacts> {
+  const record = task.review;
+  const pending: ReviewFacts = {
+    staticChecks:
+      "Not recorded yet; `azflow review` writes the command and its exit code, and `azflow ship` refreshes this body before merging.",
+    staticRecorded: false,
+    staticGreen: false,
+    sawReview: false,
+    runtimeChecks: "Not recorded yet.",
+    unverified: "Review not recorded yet.",
+    dimensions: [],
+    verdict: "FAIL",
+    round: 1,
+  };
+  if (record === null) return pending;
+
+  const file = path.join(reviewsRoot(project), task.id + "-r" + String(record.round) + ".json");
+  const text = await readFile(file, "utf8").catch(() => null);
+  if (text === null) return { ...pending, verdict: record.verdict, round: record.round };
+  let input: Record<string, unknown> = {};
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    const candidate = isRecord(parsed) ? parsed.input : null;
+    if (isRecord(candidate)) input = candidate;
+  } catch {
+    input = {};
+  }
+
+  const verification = isRecord(input.verification) ? input.verification : null;
+  const command = typeof verification?.command === "string" ? verification.command.trim() : "";
+  const exitCode = typeof verification?.exitCode === "number" ? verification.exitCode : null;
+  const staticChecks =
+    command === ""
+      ? "No verification command was recorded; a review without one cannot pass."
+      : "`" + command + "` (exit " + String(exitCode ?? "unknown") + ")";
+
+  const probes = Array.isArray(input.probes) ? input.probes.filter(isRecord) : [];
+  const passed = probes.filter((probe) => probe.status === "passed").length;
+  const notApplicable = probes.filter((probe) => probe.status === "na").length;
+  const runtimeChecks =
+    probes.length === 0
+      ? "N/A - no runtime probe was recorded."
+      : String(passed) + " of " + String(probes.length) + " recorded probes passed, " +
+        String(notApplicable) + " not applicable.";
+
+  const rawDimensions = Array.isArray(input.dimensions) ? input.dimensions.filter(isRecord) : [];
+  const mapped = new Map<string, PullRequestDimension>();
+  for (const entry of rawDimensions) {
+    const id = typeof entry.id === "string" ? entry.id : "";
+    const target = DIMENSION_ALIASES[id];
+    if (target === undefined || mapped.has(target)) continue;
+    const status = entry.status === "pass" ? "PASS" : entry.status === "fail" ? "FAIL" : "N/A";
+    const note =
+      typeof entry.note === "string" && entry.note.trim() !== ""
+        ? entry.note.trim()
+        : "recorded without a note";
+    mapped.set(target, { id: target, status, note });
+  }
+
+  const green = command !== "" && exitCode === 0;
+  return {
+    staticChecks,
+    // A passing command with exit 0 is the only evidence strong enough to open
+    // the pull request; a red run may still be reviewed, then fixed and recorded.
+    staticRecorded: green,
+    staticGreen: green,
+    sawReview: true,
+    runtimeChecks,
+    unverified: "None - every assertion above was recorded locally.",
+    dimensions: [...mapped.values()],
+    verdict: record.verdict,
+    round: record.round,
+  };
+}
+
+function guardText(text: string, fallback: string): string {
+  return isAscii(text) ? text : fallback;
+}
+
+function summaryCommits(commits: readonly BranchCommit[]): PullRequestCommit[] {
+  return commits.map((commit) => {
+    const header = guardText(commit.header, "(non-ASCII header omitted)");
+    const note = firstLine(commit.body);
+    return {
+      sha: commit.sha,
+      header,
+      note:
+        note === null
+          ? "Changes stay inside the task's declared touch scopes."
+          : guardText(note, "See the commit message for the detailed note."),
+    };
+  });
+}
+
+function guaranteesFor(commits: readonly BranchCommit[]): string {
+  const breaking = commits
+    .map((commit) => parseCommitHeader(commit.header))
+    .filter((header): header is NonNullable<typeof header> => header !== null && header.breaking);
+  const first = breaking[0];
+  if (first === undefined) {
+    return "No commit header carries a breaking marker; public APIs, configuration keys, and defaults stay as they were.";
+  }
+  return "Breaking change declared in `" + guardText(first.subject, "(non-ASCII subject omitted)") +
+    "`; the BREAKING CHANGE footer carries the migration path.";
+}
+
+function dependenciesFor(commits: readonly BranchCommit[]): string {
+  const build = commits.some((commit) => parseCommitHeader(commit.header)?.type === "build");
+  return build
+    ? "A build or dependency commit is on this branch; its diff carries the version pins."
+    : "No build or dependency commit on this branch; the lockfile is unchanged by this task.";
+}
+
+/** The deterministic pull request title and body for a task at its current head. */
+async function pullRequestContent(
+  project: string,
+  state: FlowState,
+  task: Task,
+  commits: readonly BranchCommit[],
+): Promise<{
+  title: string;
+  body: string;
+  verdict: "PASS" | "FAIL";
+  staticRecorded: boolean;
+  staticGreen: boolean;
+  sawReview: boolean;
+}> {
+  const facts = await reviewFacts(project, task);
+  const issueSummary = guardText(
     task.notes.trim() === "" ? task.title : task.notes.trim(),
-    "",
-    "## Touch scopes",
-    "",
-    ...task.touch.map((scope) => "- `" + scope + "`"),
-    "",
-    "## Verification",
-    "",
-    "Recorded by `azflow review` in the review report on this pull request.",
-  ];
-  return lines.join("\n").replace(/^\n+/, "");
+    "See the linked issue for the objective and the technical driver.",
+  ).replace(/\s+/g, " ");
+  const body = buildPullRequestBody({
+    issueId: task.issue,
+    base: state.config.base,
+    issueSummary: /[.!?]$/.test(issueSummary) ? issueSummary : issueSummary + ".",
+    commits: summaryCommits(commits),
+    guarantees: guaranteesFor(commits),
+    staticChecks: facts.staticChecks,
+    runtimeChecks: facts.runtimeChecks,
+    unverified: facts.unverified,
+    dependencies: dependenciesFor(commits),
+    dimensions: facts.dimensions,
+    verdict: facts.verdict,
+    blocking: facts.verdict === "PASS" ? [] : ["The latest review record does not pass yet; re-run `azflow review`."],
+    round: facts.round,
+    maxRounds: DEFAULT_POLICY.maxRounds,
+    stackedOn: null,
+    permission: DEFAULT_PERMISSION_NOTICE,
+  });
+
+  // The title follows the branch's own commits: `azflow commit` already forces a
+  // conventional header, so the earliest one names what this branch delivers.
+  const derived = commits
+    .map((commit) => parseCommitHeader(commit.header))
+    .find((header) => header !== null) ?? null;
+  const title =
+    derived === null || task.issue === null
+      ? task.title
+      : buildPullRequestTitle({
+          type: derived.type,
+          scope: derived.scope,
+          subject: derived.subject,
+          issueId: task.issue,
+          breaking: derived.breaking,
+        });
+  return {
+    title,
+    body,
+    verdict: facts.verdict,
+    staticRecorded: facts.staticRecorded,
+    staticGreen: facts.staticGreen,
+    sawReview: facts.sawReview,
+  };
 }
 
 function bodyFromArgs(args: Args, project: string, fallback: string): Promise<string> {
@@ -223,6 +458,90 @@ function bodyFromArgs(args: Args, project: string, fallback: string): Promise<st
   if (file !== undefined) return readFile(path.resolve(project, file), "utf8");
   const inline = lastValue(args, "body");
   return Promise.resolve(inline ?? fallback);
+}
+
+
+
+async function commit(args: Args): Promise<void> {
+  const project = projectRoot(args);
+  const id = args.positionals[0];
+  if (id === undefined) throw new Error("commit requires a task id");
+  const type = lastValue(args, "type");
+  const scope = lastValue(args, "scope");
+  const subject = lastValue(args, "subject");
+  const body = lastValue(args, "body");
+  const breaking = lastValue(args, "breaking");
+  if (type === undefined || scope === undefined || subject === undefined) {
+    throw new Error("commit requires --type <type> --scope <scope> --subject \"<imperative subject>\"");
+  }
+  const state = await requireState(project);
+  const task = findTask(state, id);
+  if (task.worktree === null || task.branch === null) {
+    throw new Error(id + " has no claimed worktree; run 'azflow claim " + id + "' first");
+  }
+  if (currentBranch(task.worktree) !== task.branch) {
+    throw new Error("worktree HEAD is not on " + task.branch);
+  }
+  if (!hasStagedChanges(task.worktree)) {
+    throw new Error("staging area is empty; stage the change first, then commit it as one reviewable stage");
+  }
+  const staged = stagedPaths(task.worktree);
+  const outside = staged.filter((file) => !matchesAny(file, task.touch));
+  if (outside.length > 0) {
+    process.stderr.write(
+      "staged path(s) outside the declared touch scopes: " + outside.join(", ") +
+        "\nupdate the task's touch scopes only through a new task boundary, or unstage the path\n",
+    );
+    process.exitCode = 2;
+    return;
+  }
+  // The standard refuses to name a stage that has not passed the local static
+  // checks, so the checks run here rather than after the commit exists.
+  const checks = args.flags.has("skip-check") ? [] : state.config.checks;
+  if (checks.length === 0 && !args.flags.has("skip-check")) {
+    process.stderr.write(
+      "no static checks are configured; initialize with --check \"<cmd>\" or explicitly pass --skip-check\n",
+    );
+    process.exitCode = 2;
+    return;
+  }
+  const ran: { command: string; status: number }[] = [];
+  for (const command of checks) {
+    const result = runShell(command, task.worktree);
+    ran.push({ command, status: result.status });
+    if (result.status !== 0) {
+      const tail = [result.stdout, result.stderr]
+        .filter((part) => part.trim() !== "")
+        .join("\n")
+        .trim()
+        .split(/\r?\n/)
+        .slice(-20)
+        .join("\n");
+      process.stderr.write(
+        "static check failed: " + command + " (exit " + String(result.status) + ")\n" +
+          (tail === "" ? "" : tail + "\n") +
+          "no commit message is produced from a red tree; fix the check, or pass --skip-check to record why it is skipped\n",
+      );
+      process.exitCode = 2;
+      return;
+    }
+  }
+  const message = buildCommitMessage({
+    type,
+    scope,
+    subject,
+    body: body ?? null,
+    breaking: breaking ?? null,
+    issueId: task.issue,
+  });
+  const check = validateCommitMessage(message, { issueId: task.issue });
+  if (check.violations.length > 0) {
+    process.stderr.write(check.violations.join("\n") + "\n");
+    process.exitCode = 2;
+    return;
+  }
+  commitWithMessage(task.worktree, message);
+  printJson({ task: id, branch: task.branch, header: message.split("\n")[0], checks: ran });
 }
 
 async function issue(args: Args): Promise<void> {
@@ -255,10 +574,48 @@ async function openPullRequest(args: Args): Promise<void> {
   if (!remoteBranchExists(project, state.config.remote, task.branch)) {
     throw new Error("push " + task.branch + " to " + state.config.remote + " before opening a pull request");
   }
-  const body = await bodyFromArgs(args, project, pullRequestBody(task));
+  if (task.issue === null) {
+    throw new Error(id + " has no issue; run 'azflow issue " + id + "' before opening the pull request");
+  }
+  const worktree = task.worktree ?? project;
+  const commits = branchCommits(worktree, state.config.base, task.branch);
+  if (commits.length === 0) {
+    throw new Error(id + " has no commits ahead of " + state.config.base + "; commit the stage first");
+  }
+  const generated = await pullRequestContent(project, state, task, commits);
+  const title = lastValue(args, "title") ?? generated.title;
+  const titleCheck = validatePullRequestTitle(title, { issueId: task.issue });
+  if (titleCheck.violations.length > 0) {
+    process.stderr.write(titleCheck.violations.join("\n") + "\n");
+    process.exitCode = 2;
+    return;
+  }
+  const body = await bodyFromArgs(args, project, generated.body);
+  // An override may reword the body, but the five-section skeleton is fixed, so
+  // a hand-written body is checked with the same rule as a generated one.
+  const bodyCheck = validatePullRequestBody(body, { issueId: task.issue });
+  if (bodyCheck.violations.length > 0) {
+    process.stderr.write(bodyCheck.violations.join("\n") + "\n");
+    process.exitCode = 2;
+    return;
+  }
   const draft = !args.flags.has("ready");
+  const blocked = generated.verdict !== "PASS" || !generated.staticRecorded;
+  if (blocked && !args.flags.has("allow-unverified")) {
+    process.stderr.write(
+      !generated.staticGreen && generated.sawReview
+        ? "the recorded verification did not exit 0; fix it, re-run the checks, and record a review round with the green run\n"
+        : generated.sawReview
+          ? "the recorded review does not pass yet; finish the repair rounds before opening the pull request\n"
+          : "review is not recorded yet; commit the last stage, run the project checks, then 'azflow review " +
+            id +
+            " --input <review.json> --scan' before opening the pull request\n",
+    );
+    process.exitCode = 1;
+    return;
+  }
   const url = prCreate(project, {
-    title: task.title,
+    title,
     body,
     base: state.config.base,
     head: task.branch,
@@ -271,6 +628,20 @@ async function openPullRequest(args: Args): Promise<void> {
     stored.pr = number;
     touch(stored);
   });
+  const reportPath = path.join(
+    reviewsRoot(project),
+    id + "-r" + String(task.review?.round ?? 0) + ".md",
+  );
+  const report = await readFile(reportPath, "utf8").catch(() => null);
+  if (report !== null) {
+    // The pull request already exists at this point, so a comment failure must
+    // not make the command look like the pull request was never opened.
+    try {
+      prComment(project, number, report);
+    } catch {
+      print("warning: pull request #" + String(number) + " opened, but the review report comment failed");
+    }
+  }
   printJson({ task: id, pr: number, draft, url });
 }
 
@@ -589,6 +960,16 @@ async function ship(args: Args): Promise<void> {
     process.exitCode = 2;
     return;
   }
+  // Refresh the body from the review record and the real commit list, so the
+  // merged pull request carries the audit trail the gates just accepted.
+  try {
+    const head = task.branch ?? pr.headRefOid;
+    const commits = branchCommits(project, state.config.base, head);
+    const content = await pullRequestContent(project, state, task, commits);
+    prEdit(project, prNumber, { body: content.body });
+  } catch {
+    // Metadata only: a body refresh must never block a verified merge.
+  }
   if (!args.flags.has("json")) {
     print("Merging PR #" + String(prNumber) + " with " + state.config.mergeStrategy);
   }
@@ -697,10 +1078,11 @@ function help(): void {
       "azflow - single-agent delivery loop",
       "",
       "Usage:",
-      "  azflow init [--base main] [--max-parallel 3] [--autonomy full|manual] [--project PATH]",
+      "  azflow init [--base main] [--max-parallel 3] [--autonomy full|manual] [--check \"<cmd>\"] [--project PATH]",
       "  azflow add \"<title>\" --touch <glob> [--touch <glob>] [--dep T-0001] [--issue N]",
       "  azflow issue <task> [--body <text>|--body-file <path>] [--label <name>]",
-      "  azflow pr <task> [--ready] [--body <text>|--body-file <path>]",
+      "  azflow commit <task> --type <type> --scope <scope> --subject \"<imperative>\" [--body <text>] [--breaking <text>] [--skip-check]",
+      "  azflow pr <task> [--title <title>] [--ready] [--body <text>|--body-file <path>] [--allow-unverified]",
       "  azflow ready <task>",
       "  azflow plan [--json]",
       "  azflow claim <task> [--agent <name>]",
@@ -721,6 +1103,7 @@ async function main(): Promise<void> {
     case "init": await init(args); break;
     case "add": await add(args); break;
     case "issue": await issue(args); break;
+    case "commit": await commit(args); break;
     case "pr": await openPullRequest(args); break;
     case "ready": await ready(args); break;
     case "plan": await plan(args); break;

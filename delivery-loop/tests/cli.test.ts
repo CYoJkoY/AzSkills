@@ -56,6 +56,7 @@ if (group === "issue" && action === "create") reply("https://github.com/acme/dem
 if (group === "issue" && (action === "close" || action === "comment")) reply("");
 if (group === "pr" && action === "create") reply("https://github.com/acme/demo/pull/" + process.env.AZFLOW_SHIM_PR);
 if (group === "pr" && action === "comment") reply("");
+if (group === "pr" && action === "edit") reply("");
 if (group === "pr" && action === "ready") reply("");
 if (group === "pr" && action === "checks") reply("[]");
 if (group === "pr" && action === "merge") {
@@ -156,8 +157,35 @@ async function main(): Promise<void> {
     "export const total = (values: readonly number[]): number =>\n  values.reduce((sum, value) => sum + value, 0);\n",
     "utf8",
   );
+  // A commit is refused while the index is empty, and a message the standard
+  // forbids is refused before git records anything.
+  const emptyStage = cli(["commit", "T-0001", "--type", "feat", "--scope", "cart", "--subject", "add total helper"]);
+  assert.equal(emptyStage.status, 1, "an empty staging area must not produce a commit");
+  assert.match(emptyStage.stderr, /staging area is empty/);
+
   git(claimed.worktree, ["add", "."]);
-  git(claimed.worktree, ["commit", "-m", "feat(cart): add total helper"]);
+
+  // A stage is refused when the ledger records no static check at all, so an
+  // unconfigured repository cannot commit on the strength of an empty check list.
+  const unchecked = cli(["commit", "T-0001", "--type", "feat", "--scope", "cart", "--subject", "add total helper"]);
+  assert.equal(unchecked.status, 2, "a commit without configured checks must be refused");
+  assert.match(unchecked.stderr, /no static checks are configured/);
+  const configured = JSON.parse(await readFile(stateFile(project), "utf8")) as {
+    config: { checks: string[] };
+  };
+  configured.config.checks = ['node -e "process.exit(0)"'];
+  await writeFile(stateFile(project), JSON.stringify(configured, null, 2) + "\n", "utf8");
+
+  const vague = cli(["commit", "T-0001", "--type", "feat", "--scope", "cart", "--subject", "update files"]);
+  assert.equal(vague.status, 2, "a vague subject must be refused");
+  assert.match(vague.stderr, /too vague/);
+
+  const committed = JSON.parse(
+    must(["commit", "T-0001", "--type", "feat", "--scope", "cart", "--subject", "add total helper"]).stdout,
+  ) as { header: string; branch: string };
+  assert.equal(committed.header, "feat(cart): add total helper");
+  assert.equal(git(claimed.worktree, ["log", "-1", "--format=%s"]), "feat(cart): add total helper");
+  assert.match(git(claimed.worktree, ["log", "-1", "--format=%b"]), /Refs: #7/, "the commit cites the issue");
 
   // A pull request cannot reference a branch the remote has never seen.
   const early = cli(["pr", "T-0001"]);
@@ -167,15 +195,11 @@ async function main(): Promise<void> {
   git(claimed.worktree, ["push", "-u", "origin", claimed.branch]);
   const headSha = git(claimed.worktree, ["rev-parse", "HEAD"]);
 
-  const opened = JSON.parse(must(["pr", "T-0001"]).stdout) as { pr: number; draft: boolean };
-  assert.equal(opened.pr, 9);
-  assert.equal(opened.draft, true, "a pull request opens as a draft");
-  const draftLog = await readFile(env.AZFLOW_SHIM_LOG ?? "", "utf8");
-  assert.ok(draftLog.includes("pr create --title"), "the pull request is created by gh");
-  assert.ok(draftLog.includes("--draft"), "the pull request opens as a draft");
-  must(["ready", "T-0001"]);
-
-  // A review that names a different commit must be rejected, not scored.
+  // Opening the pull request is when the stage stops being private, so the
+  // project checks and the review must already be on record by then.
+  const unreviewed = cli(["pr", "T-0001"]);
+  assert.equal(unreviewed.status, 1, "pr before any record must fail");
+  assert.match(unreviewed.stderr, /review is not recorded yet/);
   const reviewInput = {
     headSha: "",
     round: 1,
@@ -222,6 +246,34 @@ async function main(): Promise<void> {
   assert.match(skippedFirstRound.stderr, /must be round 1/);
 
   must(["review", "T-0001", "--input", inputPath, "--scan"]);
+  // Opening the pull request is when the stage stops being private, so the
+  // project checks must already be on record by then.
+  const opened = JSON.parse(must(["pr", "T-0001"]).stdout) as { pr: number; draft: boolean };
+  assert.equal(opened.pr, 9);
+  assert.equal(opened.draft, true, "a pull request opens as a draft");
+  const draftLog = await readFile(env.AZFLOW_SHIM_LOG ?? "", "utf8");
+  assert.ok(draftLog.includes("pr create --title"), "the pull request is created by gh");
+  assert.ok(draftLog.includes("--draft"), "the pull request opens as a draft");
+  assert.match(
+    draftLog,
+    /pr create --title feat\(cart\): add total helper \(#7\)/,
+    "the title follows the conventional commit header and names the issue",
+  );
+  assert.ok(draftLog.includes("--body ## Linked Issue"), "the body opens with the fixed first section");
+  assert.ok(draftLog.includes("pr comment 9"), "the recorded review report is posted as the first comment");
+  for (const section of [
+    "## Change summary",
+    "## Verification & Dependencies",
+    "## Review conclusion",
+    "## Permission Notice",
+  ]) {
+    assert.ok(draftLog.includes(section), "the body carries " + section);
+  }
+  assert.ok(!draftLog.includes("exclusive human privilege"), "the notice no longer defers the merge");
+  assert.ok(draftLog.includes("Closes #7:"), "the body closes the linked issue");
+  assert.ok(/\(exit 0\)/.test(draftLog), "the body records the verification outcome");
+  must(["ready", "T-0001"]);
+
   const state = JSON.parse(await readFile(stateFile(project), "utf8")) as {
     tasks: { id: string; status: string; issue: number | null; pr: number | null; review: { verdict: string; headSha: string; score: number } | null }[];
   };
@@ -231,6 +283,7 @@ async function main(): Promise<void> {
   assert.equal(task.pr, 9);
   assert.equal(task.review?.verdict, "PASS");
   assert.equal(task.review?.headSha, headSha);
+
 
   const replayedRound = cli(["review", "T-0001", "--input", inputPath]);
   assert.equal(replayedRound.status, 1, "a review round may not be replayed");
@@ -265,6 +318,7 @@ async function main(): Promise<void> {
   const log = await readFile(env.AZFLOW_SHIM_LOG ?? "", "utf8");
   assert.match(log, /pr merge 9 --squash --delete-branch/);
   assert.match(log, /issue close 7/);
+  assert.match(log, /pr edit 9 --body ## Linked Issue/, "ship refreshes the body before merging");
 
   const merged = JSON.parse(await readFile(stateFile(project), "utf8")) as {
     tasks: { status: string; review: { verdict: string } | null }[];
@@ -273,6 +327,88 @@ async function main(): Promise<void> {
   assert.equal(git(remote, ["rev-parse", "refs/heads/main"]), headSha, "base carries the merged commit");
   assert.equal(git(project, ["rev-parse", "main"]), headSha, "local base fast-forwarded");
   assert.equal(git(project, ["rev-parse", "--abbrev-ref", "HEAD"]), "main");
+
+  // A recorded verification that exited non-zero blocks the pull request. The
+  // escape opens it on purpose, and the blocking issues stay in the body.
+  const second = JSON.parse(must(["claim", "T-0002"]).stdout) as { worktree: string; branch: string };
+  await mkdir(path.join(second.worktree, "src", "badge"), { recursive: true });
+  await writeFile(
+    path.join(second.worktree, "src", "badge", "count.ts"),
+    "export const count = (items: readonly unknown[]): number => items.length;\n",
+    "utf8",
+  );
+  must(["issue", "T-0002"], { AZFLOW_SHIM_ISSUE: "8" });
+  git(second.worktree, ["add", "."]);
+  must(["commit", "T-0002", "--type", "feat", "--scope", "badge", "--subject", "add count helper"]);
+  git(second.worktree, ["push", "-u", "origin", second.branch]);
+  const secondHead = git(second.worktree, ["rev-parse", "HEAD"]);
+  const redInput = {
+    ...reviewInput,
+    headSha: secondHead,
+    reviewedFiles: ["src/badge/count.ts"],
+    verification: { command: "node --test", exitCode: 1, output: "fail 1" },
+  };
+  const redPath = path.join(work, "review-red.json");
+  await writeFile(redPath, JSON.stringify(redInput, null, 2), "utf8");
+  const redReview = cli(["review", "T-0002", "--input", redPath, "--scan"]);
+  assert.equal(redReview.status, 2, "a red verification scores FAIL");
+  const redPull = cli(["pr", "T-0002"], { AZFLOW_SHIM_PR: "10" });
+  assert.equal(redPull.status, 1, "a red verification must not open the pull request");
+  assert.match(redPull.stderr, /did not exit 0/);
+  const forced = JSON.parse(must(["pr", "T-0002", "--allow-unverified"], { AZFLOW_SHIM_PR: "10" }).stdout) as {
+    pr: number;
+  };
+  assert.equal(forced.pr, 10);
+  const forcedLog = await readFile(env.AZFLOW_SHIM_LOG ?? "", "utf8");
+  assert.match(forcedLog, /pr create --title feat\(badge\): add count helper \(#8\)/);
+
+  // A stage is only named when the configured static checks are green. The
+  // ledger records the failing command, so no message is produced from it.
+  must(["add", "Add note reader", "--touch", "src/notes/**"]);
+  const third = JSON.parse(must(["claim", "T-0003"]).stdout) as { worktree: string; branch: string };
+  await mkdir(path.join(third.worktree, "src", "notes"), { recursive: true });
+  await writeFile(path.join(third.worktree, "src", "notes", "read.ts"), "export const read = 1;\n", "utf8");
+  must(["issue", "T-0003"], { AZFLOW_SHIM_ISSUE: "11" });
+  git(third.worktree, ["add", "."]);
+  const headBefore = git(third.worktree, ["rev-parse", "HEAD"]);
+  const ledger = JSON.parse(await readFile(stateFile(project), "utf8")) as {
+    config: { checks: string[] };
+  };
+  ledger.config.checks = ['node -e "process.exit(3)"'];
+  await writeFile(stateFile(project), JSON.stringify(ledger, null, 2) + "\n", "utf8");
+  const redCheck = cli(["commit", "T-0003", "--type", "feat", "--scope", "notes", "--subject", "add note reader"]);
+  assert.equal(redCheck.status, 2, "a failing static check must not record a stage");
+  assert.match(redCheck.stderr, /static check failed: node -e/);
+  assert.equal(git(third.worktree, ["rev-parse", "HEAD"]), headBefore, "the red stage left no commit");
+  ledger.config.checks = ['node -e "process.exit(0)"'];
+  await writeFile(stateFile(project), JSON.stringify(ledger, null, 2) + "\n", "utf8");
+  const green = must(["commit", "T-0003", "--type", "feat", "--scope", "notes", "--subject", "add note reader"]);
+  assert.match(green.stdout, /"command": "node -e /, "the recorded stage cites the check it ran");
+  assert.notEqual(git(third.worktree, ["rev-parse", "HEAD"]), headBefore, "the green stage recorded a commit");
+  const headAfterGreen = git(third.worktree, ["rev-parse", "HEAD"]);
+
+  // A stage must stay inside the task's declared touch scopes, so a commit can
+  // never smuggle a file the lease did not cover into the branch.
+  await writeFile(path.join(third.worktree, "src", "cart", "total.ts"), "export const total = 0;\n", "utf8");
+  git(third.worktree, ["add", "src/cart/total.ts"]);
+  const outOfScope = cli([
+    "commit",
+    "T-0003",
+    "--type",
+    "feat",
+    "--scope",
+    "cart",
+    "--subject",
+    "add cart total helper",
+  ]);
+  assert.equal(outOfScope.status, 2, "a commit outside the task's touch scopes is refused");
+  assert.match(outOfScope.stderr, /outside the declared touch scopes/);
+  assert.match(
+    git(third.worktree, ["diff", "--cached", "--name-only"]),
+    /src\/cart\/total\.ts/,
+    "the refused stage stays staged",
+  );
+  assert.equal(git(third.worktree, ["rev-parse", "HEAD"]), headAfterGreen, "the refused stage made no commit");
 
   await rm(work, { recursive: true, force: true });
   console.log("cli.test.ts: all assertions passed");

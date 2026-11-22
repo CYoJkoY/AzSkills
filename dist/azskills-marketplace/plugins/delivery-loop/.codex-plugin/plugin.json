@@ -1,7 +1,7 @@
 {
   "name": "delivery-loop",
-  "version": "6.0.0",
-  "description": "Run concurrent issue-to-merge delivery with touch-scope leases, per-task worktrees, computed review scoring, gated auto-merge, and a reasoning-tag output guard, without sub-agents.",
+  "version": "7.2.0",
+  "description": "Run concurrent issue-to-merge delivery unattended: install-time delegation, touch-scope leases, per-task worktrees, enforced commit and pull request standards, computed review scoring, gated auto-merge, and a reasoning-tag output guard, without sub-agents.",
   "license": "MIT",
   "keywords": [
     "delivery",
@@ -13,8 +13,8 @@
   "hooks": "./codex-plugin/hooks/delivery-hooks.json",
   "interface": {
     "displayName": "Delivery Loop",
-    "shortDescription": "Run concurrent issue-to-merge delivery with touch-scope leases, per-task worktrees, computed review scoring, gated auto-merge, and a reasoning-tag output guard, without sub-agents.",
-    "longDescription": "Run concurrent issue-to-merge delivery with touch-scope leases, per-task worktrees, computed review scoring, gated auto-merge, and a reasoning-tag output guard, without sub-agents. Modes: delivery-loop/init, delivery-loop/plan, delivery-loop/work, delivery-loop/review, delivery-loop/ship, delivery-loop/recover.",
+    "shortDescription": "Run concurrent issue-to-merge delivery unattended: install-time delegation, touch-scope leases, per-task worktrees, enforced commit and pull request standards, computed review scoring, gated auto-merge, and a reasoning-tag output guard, without sub-agents.",
+    "longDescription": "Run concurrent issue-to-merge delivery unattended: install-time delegation, touch-scope leases, per-task worktrees, enforced commit and pull request standards, computed review scoring, gated auto-merge, and a reasoning-tag output guard, without sub-agents. Modes: delivery-loop/init, delivery-loop/plan, delivery-loop/work, delivery-loop/review, delivery-loop/ship, delivery-loop/recover.",
     "developerName": "AzSkills",
     "category": "Productivity",
     "capabilities": [

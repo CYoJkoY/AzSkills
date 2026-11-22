@@ -73,7 +73,7 @@ A round passes only when all three hold:
 
 1. `P0 + P1 + P2 == 0`.
 2. `score >= threshold` (default 4.90).
-3. `round <= maxRounds` (default 6).
+3. `round <= maxRounds` (default 5).
 
 ## Anti-lenience rules
 

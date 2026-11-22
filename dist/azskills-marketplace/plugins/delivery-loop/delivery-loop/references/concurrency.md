@@ -39,7 +39,8 @@ for the task's paths.
 
 - A lease that has not expired blocks any overlapping claim.
 - A lease that has expired is ignored by the planner and reclaimed by `recover`.
-- The lease is advisory to a human and authoritative to `azflow claim`.
+- The lease is informational in `azflow plan` and authoritative in `azflow
+  claim`, so admission never waits on anyone to approve a wave.
 - `azflow claim` enforces the same admission rules the planner reports: a task
   with an unmerged dependency or past the `maxParallel` cap cannot start, even if
   `plan` was never run.
