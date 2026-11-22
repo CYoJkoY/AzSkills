@@ -50,6 +50,28 @@ export function git(args: readonly string[], options: RunOptions = {}): CommandR
 }
 
 /**
+ * Runs a project-defined verification command through the platform shell.
+ * The command comes from the agent or the operator, never from repository data.
+ */
+export function runShell(command: string, cwd: string): CommandResult {
+  const result = spawnSync(command, {
+    cwd,
+    shell: true,
+    encoding: "utf8",
+    maxBuffer: 32 * 1024 * 1024,
+    windowsHide: true,
+  });
+  if (result.error) {
+    return { status: -1, stdout: "", stderr: String(result.error.message ?? result.error) };
+  }
+  return {
+    status: result.status ?? -1,
+    stdout: result.stdout ?? "",
+    stderr: result.stderr ?? "",
+  };
+}
+
+/**
  * The `gh` binary. `AZFLOW_GH` overrides it, either with a different executable
  * or with an interpreter and a script path, so a harness without `gh` on PATH
  * (or a test double) can be used without changing the flow.
@@ -159,6 +181,49 @@ export function diffAddedLines(cwd: string, base: string): DiffFile[] {
   return parseAddedLines(output);
 }
 
+/** True when the index holds changes, so a commit would record something. */
+export function hasStagedChanges(cwd: string): boolean {
+  return git(["diff", "--cached", "--quiet"], { cwd }).status === 1;
+}
+
+/** Staged paths, including new files, moves, and copies. */
+export function stagedPaths(cwd: string): string[] {
+  const output = ok(git(["diff", "--cached", "--name-only", "--diff-filter=ACMR"], { cwd }));
+  return output === "" ? [] : output.split(/\r?\n/).filter(Boolean);
+}
+
+/** Commit the staged tree with a message read from stdin, so LF survives. */
+export function commitWithMessage(cwd: string, message: string): string {
+  return ok(git(["commit", "-F", "-"], { cwd, input: message }));
+}
+
+export interface BranchCommit {
+  readonly sha: string;
+  readonly header: string;
+  readonly body: string;
+}
+
+/**
+ * Commits on the task branch that the base does not carry, oldest first.
+ * The separators are control characters so a message body cannot split a record.
+ */
+export function branchCommits(cwd: string, base: string, head = "HEAD"): BranchCommit[] {
+  const result = git(["log", "--reverse", "--format=%h%x1f%s%x1f%b%x1e", base + ".." + head], { cwd });
+  if (result.status !== 0) return [];
+  return result.stdout
+    .split("\x1e")
+    .map((record) => record.replace(/^\n+/, "").trim())
+    .filter((record) => record !== "")
+    .map((record) => {
+      const parts = record.split("\x1f");
+      return {
+        sha: (parts[0] ?? "").trim(),
+        header: (parts[1] ?? "").trim(),
+        body: (parts[2] ?? "").trim(),
+      };
+    });
+}
+
 export interface PrView {
   readonly number: number;
   readonly url: string;
@@ -243,6 +308,19 @@ export function prCreate(
   const args = ["pr", "create", "--title", input.title, "--body", input.body, "--base", input.base, "--head", input.head];
   if (input.draft) args.push("--draft");
   return ok(gh(args, { cwd }));
+}
+
+/** Rewrite an open pull request's title or body without opening a new one. */
+export function prEdit(
+  cwd: string,
+  pr: number,
+  input: { title?: string; body?: string },
+): void {
+  const args = ["pr", "edit", String(pr)];
+  if (input.title !== undefined) args.push("--title", input.title);
+  if (input.body !== undefined) args.push("--body", input.body);
+  if (args.length === 2) return;
+  ok(gh(args, { cwd }));
 }
 
 export function prComment(cwd: string, pr: number, body: string): void {

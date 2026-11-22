@@ -1,7 +1,7 @@
 {
   "name": "engineering",
-  "version": "6.0.0",
-  "description": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, refactoring, and reusable patterns.",
+  "version": "7.2.0",
+  "description": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, and reusable patterns; connect AI clients with verified setup; and steer judgment, collaboration, and execution behavior.",
   "license": "MIT",
   "keywords": [
     "engineering",
@@ -12,8 +12,8 @@
   "hooks": "./codex-plugin/hooks/engineering-hooks.json",
   "interface": {
     "displayName": "Engineering",
-    "shortDescription": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, refactoring, and reusable patterns.",
-    "longDescription": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, refactoring, and reusable patterns. Modes: architecture/runtime, architecture/frontend, architecture/migration, architecture/review, az-clean-code/write, az-clean-code/review, az-clean-code/refactor, az-clean-code/style, godot-3-dev/script, godot-3-dev/review, godot-3-dev/port.",
+    "shortDescription": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, and reusable patterns; connect AI clients with verified setup; and steer judgment, collaboration, and execution behavior.",
+    "longDescription": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, and reusable patterns; connect AI clients with verified setup; and steer judgment, collaboration, and execution behavior. Modes: architecture/runtime, architecture/frontend, architecture/migration, architecture/review, az-clean-code/write, az-clean-code/review, az-clean-code/refactor, az-clean-code/style, godot-3-dev/script, godot-3-dev/review, godot-3-dev/port, tool-integration/install, tool-integration/configure, tool-integration/troubleshoot, tool-integration/remove, taste/main, taste/subagent, taste/independent.",
     "developerName": "AzSkills",
     "category": "Productivity",
     "capabilities": [

@@ -18,8 +18,9 @@ body:
         - visual-assets
         - visual-production
         - writing
-        - operations
         - delivery-loop
+        - serena
+        - rea
         - design-intelligence (root)
         - Compatibility alias path
         - Shared system file (SKILL-SYSTEM.md or skills.json)

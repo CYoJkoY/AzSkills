@@ -90,7 +90,7 @@ export interface ScorePolicy {
 
 export const DEFAULT_POLICY: ScorePolicy = {
   threshold: 4.9,
-  maxRounds: 6,
+  maxRounds: 5,
   requiredProbes: PROBES,
 };
 

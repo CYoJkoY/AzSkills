@@ -12,9 +12,11 @@
       "modules": [
         "architecture",
         "az-clean-code",
-        "godot-3-dev"
+        "godot-3-dev",
+        "tool-integration",
+        "taste"
       ],
-      "description": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, refactoring, and reusable patterns.",
+      "description": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, and reusable patterns; connect AI clients with verified setup; and steer judgment, collaboration, and execution behavior.",
       "icon": "codex-plugin/assets/icons/engineering.svg",
       "brandColor": "#1F4E79",
       "category": "Productivity",
@@ -30,6 +32,7 @@
         "godot-3-dev/references",
         "godot-3-dev/scripts/godot3-lexical.ts",
         "godot-3-dev/scripts/check-godot-3x.ts",
+        "codex-plugin/taste/hooks/local-tools.ts",
         "codex-plugin/hooks/engineering-hooks.json",
         "codex-plugin/hooks/godot3-guard.ts",
         "scripts/runtime.ts",
@@ -152,36 +155,12 @@
       "hooks": null
     },
     {
-      "id": "operations",
-      "kind": "module",
-      "modules": [
-        "tool-integration",
-        "taste"
-      ],
-      "description": "Connect and configure AI client integrations, and apply GPT with Taste steering and collaboration guidance.",
-      "icon": "codex-plugin/assets/icons/operations.svg",
-      "brandColor": "#2B6E6E",
-      "category": "Productivity",
-      "capabilities": [
-        "Read",
-        "Write"
-      ],
-      "extra": [
-        "codex-plugin/hooks/taste-hooks.json",
-        "codex-plugin/taste/hooks/local-tools.ts",
-        "scripts/runtime.ts",
-        "scripts/types.ts",
-        "codex-plugin/assets/icons/operations.svg"
-      ],
-      "hooks": "codex-plugin/hooks/taste-hooks.json"
-    },
-    {
       "id": "delivery-loop",
       "kind": "module",
       "modules": [
         "delivery-loop"
       ],
-      "description": "Run concurrent issue-to-merge delivery with touch-scope leases, per-task worktrees, computed review scoring, gated auto-merge, and a reasoning-tag output guard, without sub-agents.",
+      "description": "Run concurrent issue-to-merge delivery unattended: install-time delegation, touch-scope leases, per-task worktrees, enforced commit and pull request standards, computed review scoring, gated auto-merge, and a reasoning-tag output guard, without sub-agents.",
       "icon": "codex-plugin/assets/icons/delivery-loop.svg",
       "brandColor": "#3D4E8A",
       "category": "Productivity",
@@ -200,6 +179,41 @@
         "codex-plugin/assets/icons/delivery-loop.svg"
       ],
       "hooks": "codex-plugin/hooks/delivery-hooks.json"
+    },
+    {
+      "id": "serena",
+      "kind": "standalone",
+      "source": "plugins/serena",
+      "description": "Use Serena's semantic code intelligence and MCP tools for symbol-aware retrieval, editing, refactoring, and project navigation.",
+      "category": "Developer Tools",
+      "capabilities": [
+        "Interactive",
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "plugins/serena/assets/serena-icon.png",
+        "plugins/serena/LICENSES/GPL-3.0-or-later.txt",
+        "plugins/serena/LICENSES/MIT.txt"
+      ],
+      "hooks": null
+    },
+    {
+      "id": "rea",
+      "kind": "standalone",
+      "source": "plugins/rea",
+      "description": "Reverse engineer applications, JavaScript bundles, and native binaries through REA's CLI and MCP server.",
+      "category": "Developer Tools",
+      "capabilities": [
+        "Interactive",
+        "Read",
+        "Write"
+      ],
+      "extra": [
+        "plugins/rea/assets/rea-plugin.png",
+        "plugins/rea/LICENSE"
+      ],
+      "hooks": null
     }
   ]
 }

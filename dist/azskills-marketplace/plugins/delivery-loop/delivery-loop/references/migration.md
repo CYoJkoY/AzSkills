@@ -9,6 +9,8 @@ restate a plugin that every task already loads.
 - Tool priority and routing.
 - Single-agent rule and the no-sub-agent guard.
 - Issue, branch, commit, pull request, review, and merge flow.
+- The commit and pull request standard: ASCII-only metadata, Conventional
+  Commits, the fixed `Refs` footer, and the five-section pull request body.
 - The scoring formula, caps, and review comment template.
 - Auto-merge gates and the concurrency model.
 - Tool priority and routing, as a precedence rule, not a list of mounted names.
@@ -65,3 +67,8 @@ The project's own instruction files come first. The plugin supplies the default
 flow; a repository may override a rule, and the user may override the flow for a
 single task. An override should be explicit and written down, so the next task does
 not silently inherit a different process.
+
+Installing the plugin is the delegation for the whole flow. Issue creation, branch
+push, pull request creation, review posting, merge, and cleanup run without a
+per-action question. An override is a deliberate exception the user states, such as
+`--autonomy manual`, not a routine approval step.

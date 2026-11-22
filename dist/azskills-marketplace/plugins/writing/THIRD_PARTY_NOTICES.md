@@ -271,3 +271,22 @@ and manifest were written against the Codex hook contract, and it adds behavior
 the upstream package does not define, such as honouring `stop_hook_active`,
 counting corrections per session and turn, and treating a reasoning block that
 never closes as a leak.
+
+## Serena
+
+The `serena` plugin at `plugins/serena/` wraps the upstream MCP server from
+https://github.com/oraios/serena and packages its application icon
+(`src/serena/resources/dashboard/serena-icon-1024-mac.png`). The Serena
+application is licensed
+GPL-3.0-or-later; SolidLSP components are MIT. Both upstream license texts are
+included at `plugins/serena/LICENSES/`. AzSkills packages the icon and an
+install and usage contract only; it does not redistribute Serena source code or
+the `serena-agent` package.
+
+## REA
+
+The `rea` plugin at `plugins/rea/` wraps the upstream CLI and MCP server from
+https://github.com/morluto/rea and packages its icon (`assets/rea-plugin.png`).
+REA is MIT licensed; the upstream text is included at `plugins/rea/LICENSE`.
+AzSkills packages the icon and a skill contract only; it does not redistribute
+the `rea-agents` package, which is resolved from npm at install time.

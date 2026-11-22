@@ -14,9 +14,9 @@ Choose the plugin by the requested job, then select the matching workflow contra
 | `writing` | [document-writing](modules/document-writing.md) | GitHub README architecture, visuals, links, QA, Steam Workshop BBCode pages, and bilingual delivery. | readme, readme-rewrite, readme-audit, steam-player, steam-developer, steam-audit |
 | `writing` | [localization](modules/localization.md) | Game CSV localization with locale completeness and markup safety. | translate, audit |
 | `writing` | [resume-evidence-workflow](modules/resume-evidence-workflow.md) | Career evidence, requirement alignment, and editable resume delivery. | evidence, tailor, review |
-| `operations` | [tool-integration](modules/tool-integration.md) | Connect AzSkills to AI clients with verified installation and setup workflows. | install, configure, troubleshoot, remove |
+| `engineering` | [tool-integration](modules/tool-integration.md) | Connect AzSkills to AI clients with verified installation and setup workflows. | install, configure, troubleshoot, remove |
 | `delivery-loop` | [delivery-loop](modules/delivery-loop.md) | Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge. | init, plan, work, review, ship, recover |
-| `operations` | [taste](modules/taste.md) | GPT with Taste judgment, collaboration, and execution behavior. | main, subagent, independent |
+| `engineering` | [taste](modules/taste.md) | GPT with Taste judgment, collaboration, and execution behavior. | main, subagent, independent |
 | `engineering` | [az-clean-code](modules/az-clean-code.md) | Explicit, flat, reusable code with business data externalized, code style consistency, and implementation quality guards. | write, review, refactor, style |
 | `engineering` | [godot-3-dev](modules/godot-3-dev.md) | Godot 3.x GDScript, virtual-call safety, 3.6 API surface, and down-porting. | script, review, port |
 | `design` | [style-presets](modules/style-presets.md) | Named visual presets, keyword triggers, preset token packs, and loading indicators. | catalog, apply, loaders, audit |

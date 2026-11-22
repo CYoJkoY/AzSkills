@@ -30,13 +30,13 @@ its modes still route to the owning plugin through the installer and MCP.
 
 Two related proposals were reviewed and decided in the same pass:
 
-- `operations` is not folded into `engineering`. It is the opposite of a code
-  style module: `tool-integration` is the client install and configuration
-  foundation, and `taste` is a global behavior hook injected at SessionStart,
-  UserPromptSubmit, SubagentStart, and PostToolUse. Code taste and style already
-  live in `engineering` as the `style` mode of `az-clean-code`. Burying the only
-  global behavior hook inside a code plugin would make it install with a
-  workflow it does not belong to.
+- `operations` was not folded into `engineering` in this release. It is the
+  opposite of a code style module: `tool-integration` is the client install and
+  configuration foundation, and `taste` is a global behavior hook injected at
+  SessionStart, UserPromptSubmit, SubagentStart, and PostToolUse. Code taste and
+  style already live in `engineering` as the `style` mode of `az-clean-code`.
+  This decision was reversed in 7.0.0 at the maintainer's request; see the
+  7.0.0 section below.
 - `design`, `visual-assets`, and `visual-production` previously declared no
   hooks, so their skills only fired when a prompt matched the plugin
   description. Each now ships a `UserPromptSubmit` hook
@@ -51,7 +51,95 @@ Two related proposals were reviewed and decided in the same pass:
   it. Because hooks only run from a plugin install, these three now need the
   marketplace rather than a bare skill folder to get the pointer.
 
-## 5.0.0: task-level plugins
+## 7.0.0: engineering absorbs operations
+
+`operations` was a two-module plugin: `tool-integration` (verified client
+install and configuration) and `taste` (GPT with Taste behavior). It now ships
+inside `engineering` as two more member workflows, so one install covers the
+code work, the client setup that connects it, and the judgment that runs it.
+
+Merging the hook manifests is the substantive change. `engineering` previously
+declared only the Godot 3.x write guard. Its manifest now also carries the
+`taste` steer on `SessionStart`, `UserPromptSubmit`, and `SubagentStart`, and
+the agent-result steer on `PostToolUse` after a completed supported local-agent
+wait. The Godot guard and the taste steer share one manifest, one trust review,
+and one install; every `command` target resolves through `PLUGIN_ROOT` and is
+packaged with the plugin, which the packaging test now asserts.
+
+This is a breaking change to installable IDs: `operations` is no longer a
+marketplace entry, and `codex-plugin/hooks/taste-hooks.json` plus the
+`operations` icon are removed. Install `engineering` in place of `operations`.
+The `tool-integration` and `taste` module ids and their modes still resolve to
+the owning plugin through the installer and MCP. The `operations` family label
+in `skills.json` stays as the domain grouping for `tool-integration`, `taste`,
+and `delivery-loop`; only the plugin boundary moved. The release is versioned
+7.0.0 because an installable plugin id was retired.
+
+## 7.1.0: third-party MCP plugins
+
+Two upstream tools are now installable catalog entries: `serena`
+(https://github.com/oraios/serena) and `rea` (https://github.com/morluto/rea).
+Both use the `standalone` kind, which copies `plugins/<id>/` as authored and
+only rewrites the manifest version. A source directory keeps their own icon and
+MCP manifest intact, which the module kind cannot do: module plugins are
+assembled from canonical module contracts and require a generated SVG icon.
+
+Each plugin ships an upstream icon, an MCP server entry, one skill that states
+when and how to use the tool, and a third-party notice. `plugins/serena/`
+carries the upstream GPL-3.0-or-later and MIT license texts because the Serena
+application is GPL-3.0-or-later; `plugins/rea/LICENSE` carries its MIT license.
+The MCP entries are `serena start-mcp-server --project-from-cwd --context=codex`
+and `npx -y rea-agents@6.10.1 mcp`; users still install the upstream runtime
+(`uv tool install -p 3.13 serena-agent` or `npx rea-agents@latest setup`) and
+keep it on PATH.
+
+This is additive, so the version moves to 7.1.0. Both plugins install only from
+the marketplace: `install-skills.ts` writes skill folders without an MCP
+configuration, and `buildPlugin` rejects a skill view for standalone entries.
+The packaging test previously asserted the `delivery-loop` hook layout for every
+standalone plugin; it now asserts the generic standalone contract instead - a
+skill entry, a resolvable `mcpServers` file when the manifest declares one, and
+an existing `interface.composerIcon`.
+
+## 7.2.0: delivery loop owns the commit and pull request standard
+
+Installing `delivery-loop` now reads as a standing delegation: issue creation,
+branch push, pull request creation, review posting, merge, and branch cleanup run
+without a per-action approval question. The guard did not disappear, because it
+never asked for permission in the first place; it denies bypasses (a direct
+`gh pr merge`, a commit or push on base, a sub-agent spawn), and the documentation
+now says so explicitly instead of framing those denials as a request for consent.
+
+The two message standards were prose in `AGENTS.md` and are now enforced code.
+`delivery-loop/scripts/message.ts` validates and builds commit messages and pull
+request titles and bodies; `azflow commit` is a new command that refuses an empty
+index, refuses a ledger that records no static check, runs the ledger's static
+checks before writing anything, constructs the message from the staged diff,
+rejects a violation, and commits through stdin so bodies keep LF endings. `azflow
+init` records those checks from `--check` or detects the `typecheck` and `lint`
+scripts, and `--skip-check` is the only way to commit a red tree, so the bypass is
+explicit rather than silent. `azflow pr` derives its title from the branch's
+earliest commit, validates an override body against the same rules, posts the
+recorded review report as the first comment, and `azflow ship` refreshes the body
+from the recorded review before merging.
+
+Rules carried over unchanged: ASCII-only text with printable `0x20`-`0x7E` plus
+LF, the Conventional Commits type whitelist, a 50-character header target with a
+72 hard ceiling, a lowercase verb subject with no trailing period and no `#<id>`,
+the `!` and `BREAKING CHANGE:` pair, one `Refs: #<id>` footer, one reviewable
+stage per commit, and no vague subjects. Pull request bodies carry exactly five
+H2 sections in fixed order, and a failing body states `Round <N> of 5`, which is
+now the repair budget in the scoring policy as well, so the body and the review
+loop cannot disagree. The `Permission Notice` text changed because the old
+template said the merge was an exclusive human privilege and awaited manual merge;
+under the new policy the loop merges once the gates pass, so the notice states the
+install-time grant and the completed automated review instead.
+
+Messages stay English even in Chinese conversations, which is why the validators
+reject non-ASCII rather than transcribing a translated subject. The release is
+minor rather than major: the command surface only grows, the ledger schema and the
+nine merge gates are untouched, and `autonomy: "manual"` remains the user's
+override for a human ship.
 
 4.0.0 made every module its own installable plugin. That fixed hidden
 capabilities, but split closely related work into many tiny entries, so a task
@@ -96,6 +184,46 @@ codex plugin install design@azskills-local
 The installer and MCP still accept a module id such as `ui-design`, and resolve
 it to the owning plugin, so scripts that name an old module keep working.
 
+## 5.0.0: task-level plugins
+4.0.0 made every module its own installable plugin. That fixed hidden
+capabilities, but split closely related work into many tiny entries, so a task
+that spans one job (for example architecture plus code style, or design systems
+plus interface motion) needed several installs and several description matches.
+
+5.0.0 groups modules into eight task-level workflow plugins. Each group answers
+one kind of request, so it stays small enough that grouping never hides a
+capability again:
+
+| Plugin | Workflows |
+| :--- | :--- |
+| `engineering` | architecture, az-clean-code, godot-3-dev |
+| `design` | design-system, ui-design, style-presets |
+| `visual-assets` | logo-generator, photo-abstract-editorial, scientific-figures |
+| `visual-production` | frontend-slides, remotion-production |
+| `writing` | document-writing, localization |
+| `resume-evidence-workflow` | resume-evidence-workflow |
+| `operations` | tool-integration, taste |
+| `delivery-loop` | delivery-loop |
+
+Merge points live inside a contract as modes, not as extra plugins: code style
+is a mode of `az-clean-code`, motion is a branch of `ui-design`, and README plus
+Steam Workshop writing are modes of `document-writing`. Each plugin also carries
+its own icon and brand color; `scripts/check-marketplace.ts` rejects a
+marketplace whose plugins ship duplicate icons or miss `interface.composerIcon`.
+
+The release is versioned 5.0.0 because plugin IDs changed again. Remove the old
+marketplace, add the Git source again, and install the grouped plugins:
+
+```sh
+codex plugin marketplace remove azskills-local
+codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
+codex plugin install engineering@azskills-local
+codex plugin install design@azskills-local
+```
+
+The installer and MCP still accept a module id such as `ui-design`, and resolve
+it to the owning plugin, so scripts that name an old module keep working.
+
 ## Upgrading from 4.0.0
 
 4.0.0 installable IDs map to 5.0.0 owners as follows. Install the owner, then
@@ -108,8 +236,8 @@ uninstall the replaced entry:
 | `logo-generator`, `photo-abstract-editorial`, `scientific-figures` | `visual-assets` |
 | `frontend-slides`, `remotion-production` | `visual-production` |
 | `document-writing`, `localization` | `writing` |
-| `resume-evidence-workflow` | `resume-evidence-workflow` |
-| `tool-integration`, `taste` | `operations` |
+| `resume-evidence-workflow` | `writing` |
+| `tool-integration`, `taste` | `engineering` |
 | none (new in 5.0.0) | `delivery-loop` |
 | `godot-3-dev` | `engineering` |
 | `no-think-tags` | folded into `delivery-loop` |
@@ -187,11 +315,14 @@ its owning plugin (`design`) exactly once.
 
 ## Hooks
 
-The routing and session hooks are removed. Three manifests remain for workflow
-plugins: `operations` (GPT with Taste steering), `delivery-loop` (delivery-state
-guard plus the reasoning-tag Stop hook), and `engineering` (Godot 3.x write
-guard). The Stop hook ships as `delivery-loop/no-think-tags/`, so one install
-and one trust review cover the guard and the output check together.
+The shared routing and session hooks are gone; each plugin ships its own
+manifest. `engineering` carries the Godot 3.x write guard and the GPT with Taste
+steering (SessionStart, UserPromptSubmit, SubagentStart, and the agent-result
+PostToolUse steer). `delivery-loop` carries the delivery-state guard plus the
+reasoning-tag Stop hook, which ships as `delivery-loop/no-think-tags/` so one
+install and one trust review cover the guard and the output check together.
+`design`, `visual-assets`, and `visual-production` carry the `UserPromptSubmit`
+visual-intent pointer to their router skill.
 
 ## MCP
 

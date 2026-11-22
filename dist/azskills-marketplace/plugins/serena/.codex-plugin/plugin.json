@@ -1,0 +1,34 @@
+{
+  "name": "serena",
+  "version": "7.2.0",
+  "description": "Semantic code intelligence and symbol-aware editing through Serena's MCP server.",
+  "author": {
+    "name": "Oraios AI",
+    "url": "https://github.com/oraios"
+  },
+  "homepage": "https://oraios.github.io/serena",
+  "repository": "https://github.com/oraios/serena",
+  "license": "GPL-3.0-or-later",
+  "keywords": [
+    "semantic-code",
+    "mcp-server",
+    "code-intelligence"
+  ],
+  "skills": "./skills",
+  "mcpServers": "./.codex-plugin/mcp.json",
+  "interface": {
+    "displayName": "Serena",
+    "shortDescription": "Semantic code intelligence for agents",
+    "longDescription": "Use symbol-aware code retrieval, editing, refactoring, and project navigation through Serena's MCP server.",
+    "developerName": "Oraios AI",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://oraios.github.io/serena",
+    "composerIcon": "./assets/serena-icon.png",
+    "logo": "./assets/serena-icon.png"
+  }
+}
