@@ -5,9 +5,12 @@
  * One agent owns judgment and execution. This tool owns the shared record:
  * which tasks exist, which touch scopes are leased, which worktree each task
  * uses, how a review scored, and whether an auto-merge may proceed. It never
- * spawns a sub-agent; concurrency comes from independent task branches.
+ * spawns a sub-agent; it opens a short-lived review window so the independent
+ * reviewers can, and concurrency comes from independent task branches.
  */
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { mkdir, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import {
@@ -67,6 +70,7 @@ import {
   planWaves,
   readState,
   requireState,
+  reviewWindowPath,
   reviewsRoot,
   slugify,
   statePath,
@@ -77,7 +81,7 @@ import {
   worktreesRoot,
   writeState,
 } from "./state.ts";
-import type { FlowState, ReviewRecord, Task } from "./state.ts";
+import type { FlowState, ReviewRecord, ReviewWindow, Task } from "./state.ts";
 import {
   DEFAULT_MAX_ITERATIONS,
   DEFAULT_MAX_NO_PROGRESS,
@@ -842,6 +846,128 @@ function readReviewInput(raw: unknown): ReviewInput {
   return raw as ReviewInput;
 }
 
+const REVIEWER_ID = /^[A-Za-z0-9._:-]{1,64}$/;
+
+/** A P2 that blocks the round; injected when self-review is selected. */
+function selfReviewFinding(id: string): Finding {
+  return {
+    severity: "P2",
+    file: "review",
+    line: 1,
+    dimension: "correctness",
+    summary: "Self-review is not accepted as a gate",
+    evidence: "review engine 'self' was selected for " + id + "; self-review over-scores and hides defects",
+    fix: "Run an EGM review: 'azflow review-open " + id + "', spawn Goldfish reviewers in fresh contexts, then score with engine 'egm'",
+  };
+}
+
+/** A P2 that blocks the round; injected when no valid EGM review is attested. */
+function unattestedFinding(id: string, windowOpen: boolean): Finding {
+  return {
+    severity: "P2",
+    file: "review",
+    line: 1,
+    dimension: "correctness",
+    summary: "Independent (EGM) review not attested",
+    evidence: windowOpen
+      ? "no reviewer reported status 'completed' in a fresh context with files read"
+      : "no open review window for " + id + " at this head",
+    fix: "Open a window with 'azflow review-open " + id + "', spawn Goldfish reviewers in fresh contexts, and attest each in the review input",
+  };
+}
+
+/** Reads the current review window, or null when none is open or it is malformed. */
+async function readReviewWindow(project: string): Promise<ReviewWindow | null> {
+  const text = await readFile(reviewWindowPath(project), "utf8").catch(() => null);
+  if (text === null) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return null;
+  }
+  if (!isRecord(parsed)) return null;
+  if (
+    typeof parsed.taskId !== "string" ||
+    typeof parsed.headSha !== "string" ||
+    typeof parsed.reviewer !== "string" ||
+    (parsed.engine !== "egm" && parsed.engine !== "self") ||
+    typeof parsed.openedAt !== "string" ||
+    typeof parsed.expiresAt !== "string" ||
+    typeof parsed.maxAgents !== "number"
+  ) {
+    return null;
+  }
+  return parsed as unknown as ReviewWindow;
+}
+
+/**
+ * Best-effort check for the installed EGM plugin. A missing plugin only warns,
+ * because the cache location differs per host and must never block a review.
+ */
+function egmPluginPresent(): boolean {
+  const home = process.env.CODEX_HOME ?? path.join(homedir(), ".codex");
+  return existsSync(path.join(home, "plugins", "cache", "egm"));
+}
+
+/**
+ * Opens a short-lived review window for a task's current head. The delivery
+ * guard permits sub-agent spawns only while a window is open, so an EGM review
+ * can run in fresh contexts without leaving a permanent escape hatch behind.
+ */
+async function reviewOpen(args: Args): Promise<void> {
+  const project = projectRoot(args);
+  const id = args.positionals[0];
+  if (id === undefined) throw new Error("review-open requires a task id");
+  const reviewer = lastValue(args, "reviewer") ?? "egm-goldfish";
+  if (!REVIEWER_ID.test(reviewer)) {
+    throw new Error("reviewer id must be 1-64 ASCII letters, digits, or . _ : -");
+  }
+  const ttl = Number(lastValue(args, "ttl") ?? 20);
+  if (!Number.isFinite(ttl) || ttl <= 0 || ttl > 120) {
+    throw new Error("--ttl must be between 1 and 120 minutes");
+  }
+  const maxAgents = Number(lastValue(args, "max-agents") ?? 3);
+  if (!Number.isInteger(maxAgents) || maxAgents < 1 || maxAgents > 8) {
+    throw new Error("--max-agents must be between 1 and 8");
+  }
+  const state = await requireState(project);
+  const task = findTask(state, id);
+  if (task.worktree === null) {
+    throw new Error("review-open requires a claimed worktree; run 'azflow claim " + id + "' first");
+  }
+  const headSha = revParse(task.worktree, "HEAD");
+  const at = new Date();
+  const window: ReviewWindow = {
+    taskId: id,
+    headSha,
+    reviewer,
+    engine: "egm",
+    openedAt: at.toISOString(),
+    expiresAt: new Date(at.getTime() + ttl * 60_000).toISOString(),
+    maxAgents,
+  };
+  await mkdir(flowRoot(project), { recursive: true });
+  const target = reviewWindowPath(project);
+  const temp = target + "." + process.pid + ".tmp";
+  await writeFile(temp, JSON.stringify(window, null, 2) + "\n", "utf8");
+  await rename(temp, target);
+  if (args.flags.has("json")) {
+    printJson({
+      window,
+      instruction:
+        "Spawn EGM Goldfish reviewers in fresh contexts (fork_context: false or fork_turns: none), " +
+        "have them read agents/<persona>.md first, then attest each as engine 'egm' in the review input.",
+    });
+    return;
+  }
+  print("Review window open for " + id + " at head " + headSha + " until " + window.expiresAt + ".");
+  print("Spawn EGM Goldfish reviewers in fresh contexts (fork_context: false), then attest them with engine 'egm'.");
+  if (!egmPluginPresent()) {
+    print("Note: the egm plugin was not found under CODEX_HOME; install it before spawning reviewers.");
+  }
+}
+
 async function review(args: Args): Promise<void> {
   const project = projectRoot(args);
   const id = args.positionals[0];
@@ -945,6 +1071,35 @@ async function review(args: Args): Promise<void> {
         "; score each stage in order so no commit enters the branch unreviewed",
     );
   }
+  // Independent review is enforced here, not inside the scorer, so the
+  // deterministic scorer stays free of policy. A self-review, or an EGM run that
+  // no fresh-context reviewer attests, injects an explicit P2 that caps the round
+  // at 4.50 and blocks the merge. A self-score cannot quietly pass itself.
+  const engine = (lastValue(args, "engine") ?? state.config.reviewEngine) as string;
+  if (engine !== "egm" && engine !== "self") {
+    throw new Error("--engine must be 'egm' or 'self'");
+  }
+  const attestation = Array.isArray(input.reviewers) ? input.reviewers : [];
+  const attested = attestation.some(
+    (entry) =>
+      isRecord(entry) &&
+      entry.status === "completed" &&
+      entry.freshContext === true &&
+      Array.isArray(entry.filesRead) &&
+      entry.filesRead.length > 0,
+  );
+  const window = await readReviewWindow(project);
+  const windowOpen =
+    window !== null &&
+    window.taskId === id &&
+    window.engine === "egm" &&
+    window.headSha === headSha &&
+    Date.parse(window.expiresAt) > Date.now();
+  if (engine === "self") {
+    findings.push(selfReviewFinding(id));
+  } else if (!windowOpen || !attested) {
+    findings.push(unattestedFinding(id, windowOpen));
+  }
   const scoredInput: ReviewInput = {
     ...input,
     diffFiles: diff,
@@ -963,6 +1118,7 @@ async function review(args: Args): Promise<void> {
     verdict: result.verdict,
     reviewer,
     at,
+    engine: engine === "self" ? "self" : "egm",
   };
   const meta = {
     taskId: task.id,
@@ -975,6 +1131,7 @@ async function review(args: Args): Promise<void> {
     resolved: scoredInput.previous === null || scoredInput.previous === undefined ? [] : scoredInput.previous.resolved,
     dimensions: scoredInput.dimensions,
     reviewer,
+    engine: engine === "self" ? ("self" as const) : ("egm" as const),
   };
   const report = renderReport(result, meta);
   await writeFile(
@@ -1009,6 +1166,9 @@ async function review(args: Args): Promise<void> {
     if (stored.status !== "merged") stored.status = "review";
     touch(stored);
   });
+  // The window authorised exactly this head; once scored, a later round must
+  // open its own window at the new head instead of reusing this one.
+  await rm(reviewWindowPath(project), { force: true }).catch(() => undefined);
   if (args.flags.has("post") && task.pr !== null) prComment(project, task.pr, report);
   if (args.flags.has("json")) {
     printJson({ result, record, report });
@@ -1299,6 +1459,15 @@ async function doctor(args: Args): Promise<void> {
       pass: branch !== state.config.base,
       detail: branch === state.config.base ? "on base branch " + branch : branch,
     });
+    const engine = state.config.reviewEngine;
+    checks.push({
+      gate: "review-engine",
+      pass: engine === "egm",
+      detail:
+        engine === "egm"
+          ? "egm" + (egmPluginPresent() ? " plugin detected" : " plugin not detected; install egm before review")
+          : "self review is not accepted; set reviewEngine to egm",
+    });
   }
   const failed = checks.filter((check) => !check.pass);
   if (args.flags.has("json")) printJson({ checks, failed: failed.map((check) => check.gate) });
@@ -1494,7 +1663,8 @@ function help(): void {
       "  azflow plan [--json]",
       "  azflow claim <task> [--agent <name>]",
       "  azflow status [--json]",
-      "  azflow review <task> --input <review.json> --reviewer <fresh id> [--scan] [--post] [--pr N] [--json]",
+      "  azflow review-open <task> [--reviewer <id>] [--ttl 20] [--max-agents 3] [--json]",
+      "  azflow review <task> --input <review.json> --reviewer <fresh id> [--engine egm|self] [--scan] [--post] [--pr N] [--json]",
       "  azflow ship <task>|--pr <n> [--dry-run] [--verify-issue] [--json]",
       "  azflow recover [--force]",
       "  azflow goal start|status|next|note|next-step|pause|resume|extend|complete|abandon",
@@ -1519,6 +1689,7 @@ async function main(): Promise<void> {
     case "claim": await claim(args); break;
     case "status": await status(args); break;
     case "review": await review(args); break;
+    case "review-open": await reviewOpen(args); break;
     case "ship": await ship(args); break;
     case "recover": await recover(args); break;
     case "goal": await goalCommand(args); break;

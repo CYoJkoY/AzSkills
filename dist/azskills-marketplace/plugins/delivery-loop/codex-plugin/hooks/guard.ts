@@ -104,11 +104,44 @@ export function denyReasonForBash(
 }
 
 /** Decide whether a tool invocation is a disallowed sub-agent spawn. */
-export function denyReasonForTool(toolName: string): string | null {
-  if (isSubagentTool(toolName)) {
-    return "Spawning a sub-agent is blocked: the delivery loop runs single-agent to avoid mid-task overhead and quality loss. Set AZFLOW_ALLOW_SUBAGENTS=1 to override.";
-  }
-  return null;
+export function denyReasonForTool(
+  toolName: string,
+  reviewWindow: ReviewWindowCheck | null = null,
+  now: number = Date.now(),
+  headSha: string | null = null,
+): string | null {
+  if (!isSubagentTool(toolName)) return null;
+  if (reviewWindow !== null && reviewWindowOpen(reviewWindow, now, headSha)) return null;
+  return (
+    "Spawning a sub-agent is blocked: the delivery loop runs single-agent to avoid mid-task overhead and quality loss. " +
+    "To run an independent EGM review, open a review window with 'azflow review-open <task>' and spawn the reviewers inside it. " +
+    "Set AZFLOW_ALLOW_SUBAGENTS=1 to override."
+  );
+}
+
+/** The subset of a review window the guard reads; kept free of filesystem access. */
+export interface ReviewWindowCheck {
+  readonly engine: string;
+  readonly expiresAt: string;
+  /** Head SHA the window was opened for; a moved head closes the window. */
+  readonly headSha?: string;
+}
+
+/**
+ * A review window is open only while it targets EGM, has not expired, and — when
+ * both sides are known — still points at the current head. A window bound to a
+ * stale head cannot authorise a spawn after new work landed.
+ */
+export function reviewWindowOpen(
+  window: ReviewWindowCheck,
+  now: number,
+  headSha: string | null = null,
+): boolean {
+  if (window.engine !== "egm") return false;
+  const expires = Date.parse(window.expiresAt);
+  if (!Number.isFinite(expires) || expires <= now) return false;
+  if (window.headSha !== undefined && headSha !== null && window.headSha !== headSha) return false;
+  return true;
 }
 
 /** Extract the command string from a Bash tool input. */

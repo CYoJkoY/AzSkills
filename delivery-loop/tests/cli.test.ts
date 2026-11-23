@@ -256,6 +256,16 @@ async function main(): Promise<void> {
     ],
     verification: { command: "node --test", exitCode: 0, output: "pass 1" },
     previous: null,
+    engine: "egm",
+    reviewers: [
+      {
+        id: "egm-goldfish",
+        persona: "codebase-details",
+        status: "completed",
+        freshContext: true,
+        filesRead: ["src/cart/total.ts"],
+      },
+    ],
   };
   const inputPath = path.join(work, "review.json");
   await writeFile(inputPath, JSON.stringify(reviewInput, null, 2), "utf8");
@@ -285,6 +295,17 @@ async function main(): Promise<void> {
   const skippedFirstRound = cli(["review", "T-0001", "--input", firstRoundPath, "--reviewer", "reviewer-1"]);
   assert.equal(skippedFirstRound.status, 1, "the first review must be round 1");
   assert.match(skippedFirstRound.stderr, /must be round 1/);
+
+  // Independent review runs behind a short-lived window. Opening it records the
+  // current head, and the window is what lets the EGM reviewers spawn.
+  const reviewOpenBad = cli(["review-open", "T-9999"]);
+  assert.equal(reviewOpenBad.status, 1, "review-open on an unknown task must fail");
+  const openedWindow = JSON.parse(
+    must(["review-open", "T-0001", "--reviewer", "egm-goldfish", "--json"]).stdout,
+  ) as { window: { taskId: string; headSha: string; engine: string } };
+  assert.equal(openedWindow.window.taskId, "T-0001");
+  assert.equal(openedWindow.window.headSha, headSha);
+  assert.equal(openedWindow.window.engine, "egm");
 
   must(["review", "T-0001", "--input", inputPath, "--scan", "--reviewer", "reviewer-1"]);
   // Opening the pull request is when the stage stops being private, so the
@@ -426,12 +447,20 @@ async function main(): Promise<void> {
     ...reviewInput,
     headSha: secondHead,
     reviewedFiles: ["src/badge/count.ts"],
+    // No review window is open and no reviewer is attested, so this round must
+    // fail on the independent-review gate as well as the red verification.
+    reviewers: [],
     verification: { command: "node --test", exitCode: 1, output: "fail 1" },
   };
   const redPath = path.join(work, "review-red.json");
   await writeFile(redPath, JSON.stringify(redInput, null, 2), "utf8");
   const redReview = cli(["review", "T-0002", "--input", redPath, "--scan", "--reviewer", "reviewer-1"]);
   assert.equal(redReview.status, 2, "a red verification scores FAIL");
+  assert.match(
+    redReview.stdout,
+    /Independent \(EGM\) review not attested/,
+    "a review without an open window and valid attestation cannot pass",
+  );
   const redPull = cli(["pr", "T-0002"], { AZFLOW_SHIM_PR: "10" });
   assert.equal(redPull.status, 1, "a red verification must not open the pull request");
   assert.match(redPull.stderr, /did not exit 0/);
@@ -511,6 +540,7 @@ async function main(): Promise<void> {
     JSON.stringify({ ...reviewInput, headSha: fourthHead, reviewedFiles: ["src/writer/write.ts"] }, null, 2),
     "utf8",
   );
+  must(["review-open", "T-0004", "--reviewer", "egm-goldfish"]);
   must(["review", "T-0004", "--input", cleanPath, "--scan", "--reviewer", "reviewer-2"]);
   must(["pr", "T-0004"], { AZFLOW_SHIM_PR: "11" });
   must(["ready", "T-0004"]);

@@ -68,6 +68,18 @@ export interface PreviousRound {
   readonly resolved: Finding[];
 }
 
+/**
+ * One independent reviewer's attestation for an EGM review. A reviewer only
+ * counts when it ran to completion in a fresh context and actually read files.
+ */
+export interface EgmReviewer {
+  readonly id: string;
+  readonly persona: string;
+  readonly status: "completed" | "not run";
+  readonly freshContext: boolean;
+  readonly filesRead: readonly string[];
+}
+
 export interface ReviewInput {
   readonly headSha: string;
   readonly round: number;
@@ -80,6 +92,10 @@ export interface ReviewInput {
   readonly verification: VerificationResult | null;
   readonly noVerificationReason?: string;
   readonly previous?: PreviousRound | null;
+  /** Which review engine produced this input. */
+  readonly engine?: "egm" | "self";
+  /** Attestation of each fresh-context EGM reviewer that produced findings. */
+  readonly reviewers?: readonly EgmReviewer[];
 }
 
 export interface ScorePolicy {
@@ -161,6 +177,37 @@ export function assertReviewInput(value: unknown): asserts value is ReviewInput 
   }
   if (record.previous !== null && record.previous !== undefined) {
     assertPreviousRound(record.previous);
+  }
+  if (record.engine !== undefined && record.engine !== "egm" && record.engine !== "self") {
+    throw new ReviewInputError("engine must be 'egm' or 'self' when present");
+  }
+  if (record.reviewers !== undefined) {
+    if (!Array.isArray(record.reviewers)) {
+      throw new ReviewInputError("reviewers must be an array when present");
+    }
+    for (const reviewer of record.reviewers) assertEgmReviewer(reviewer);
+  }
+}
+
+export function assertEgmReviewer(value: unknown): asserts value is EgmReviewer {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new ReviewInputError("Reviewer attestation must be an object");
+  }
+  const record = value as Record<string, unknown>;
+  if (typeof record.id !== "string" || record.id === "") {
+    throw new ReviewInputError("Reviewer id is required");
+  }
+  if (typeof record.persona !== "string") {
+    throw new ReviewInputError("Reviewer persona must be a string");
+  }
+  if (record.status !== "completed" && record.status !== "not run") {
+    throw new ReviewInputError("Reviewer status must be 'completed' or 'not run'");
+  }
+  if (typeof record.freshContext !== "boolean") {
+    throw new ReviewInputError("Reviewer freshContext must be a boolean");
+  }
+  if (!Array.isArray(record.filesRead) || !record.filesRead.every((item) => typeof item === "string")) {
+    throw new ReviewInputError("Reviewer filesRead must be a string array");
   }
 }
 
@@ -557,6 +604,8 @@ export interface ReportMeta {
   readonly carryOver?: readonly Finding[];
   readonly resolved?: readonly Finding[];
   readonly dimensions?: readonly DimensionResult[];
+  /** Which review engine produced the report: EGM or self-review. */
+  readonly engine?: "egm" | "self";
 }
 
 const DIMENSION_LABELS: Record<Dimension, string> = {
@@ -595,6 +644,14 @@ export function renderReport(result: ScoreResult, meta: ReportMeta): string {
   lines.push("- Reviewed at: `" + meta.reviewedAt + "`");
   if (meta.reviewer !== undefined && meta.reviewer !== "") {
     lines.push("- Reviewer: `" + meta.reviewer + "` (independent, fresh context)");
+  }
+  if (meta.engine !== undefined) {
+    lines.push(
+      "- Review engine: `" + meta.engine + "`" +
+        (meta.engine === "egm"
+          ? " (Elephant-Goldfish reviewers, fresh contexts)"
+          : " (self-review, not accepted for merge)"),
+    );
   }
   lines.push("");
 

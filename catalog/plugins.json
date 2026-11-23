@@ -160,7 +160,7 @@
       "modules": [
         "delivery-loop"
       ],
-      "description": "Run unattended issue-to-merge delivery or continue a long-horizon repository objective without Codex Goal mode. Uses isolated worktrees, touch-scope leases, computed reviews, gated auto-merge, durable checkpoints, and bounded dead-loop recovery without sub-agents.",
+      "description": "Run unattended issue-to-merge delivery or continue a long-horizon repository objective without Codex Goal mode. Uses isolated worktrees, touch-scope leases, independent Elephant-Goldfish review, computed scoring, gated auto-merge, durable checkpoints, and bounded dead-loop recovery.",
       "icon": "codex-plugin/assets/icons/delivery-loop.svg",
       "brandColor": "#3D4E8A",
       "category": "Productivity",
@@ -200,9 +200,11 @@
       "extra": [
         "plugins/serena/assets/serena-icon.png",
         "plugins/serena/LICENSES/GPL-3.0-or-later.txt",
-        "plugins/serena/LICENSES/MIT.txt"
+        "plugins/serena/LICENSES/MIT.txt",
+        "plugins/serena/codex-plugin/hooks/serena-hooks.json",
+        "plugins/serena/codex-plugin/hooks/serena-intent.ts"
       ],
-      "hooks": null
+      "hooks": "codex-plugin/hooks/serena-hooks.json"
     },
     {
       "id": "rea",
@@ -217,9 +219,11 @@
       ],
       "extra": [
         "plugins/rea/assets/rea-plugin.png",
-        "plugins/rea/LICENSE"
+        "plugins/rea/LICENSE",
+        "plugins/rea/codex-plugin/hooks/rea-hooks.json",
+        "plugins/rea/codex-plugin/hooks/rea-intent.ts"
       ],
-      "hooks": null
+      "hooks": "codex-plugin/hooks/rea-hooks.json"
     }
   ]
 }

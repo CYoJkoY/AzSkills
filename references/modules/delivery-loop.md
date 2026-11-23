@@ -1,7 +1,7 @@
 ---
 name: delivery-loop
-description: Run a repository delivery loop that plans concurrent tasks as a dependency DAG with touch-scope leases, isolates each task in its own git worktree, scores reviews mechanically, merges automatically on green evidence without sub-agents, and breaks out of dead loops.
-version: 1.4.0
+description: Run a repository delivery loop that plans concurrent tasks as a dependency DAG with touch-scope leases, isolates each task in its own git worktree, scores reviews mechanically through independent Elephant-Goldfish reviewers, merges automatically on green evidence, and breaks out of dead loops.
+version: 1.5.0
 status: module
 family: operations
 modes: [init, plan, work, review, ship, recover, goal]
@@ -13,14 +13,13 @@ Turn a repository's issue-to-merge work into a repeatable loop: one agent owns
 judgement and execution, concurrency comes from independent tasks, and the review
 score and the merge are mechanical. This module owns the task ledger, touch-scope
 leases, worktree isolation, computed review scoring, the merge gates, and the guard
-that blocks manual merges and sub-agent spawns. It also owns final-reply output
-hygiene, because a clean reply is cheaper context and a long run survives on cheap
-context, and the dead-loop guard, because a run that repeats one step never reaches
-a review at all. It does not own the project's own build commands, its architecture
-choices, or the content of the code being shipped.
+that blocks manual merges and sub-agent spawns outside an open review window. It
+also owns final-reply output hygiene, because a clean reply is cheaper context and
+a long run survives on cheap context, and the dead-loop guard, because a run that
+repeats one step never reaches a review at all. It does not own the project's own
+build commands, its architecture choices, or the content of the code being shipped.
 
-It also owns the long-horizon goal run: a durable objective in `.azflow/goal.json`
-that the `Stop` hook drives across turns, so the loop keeps moving without Goal mode.
+It also owns the long-horizon goal run: a durable objective in `.azflow/goal.json`.
 
 ## Contract
 
@@ -30,7 +29,7 @@ that the `Stop` hook drives across turns, so the loop keeps moving without Goal 
 - Inputs: repository root, base branch, task titles with touch scopes, a structured review record, and the project's own verification command.
 - Outputs: admission waves, isolated task worktrees, an English review report with a computed score, and a merged pull request with its issue closed.
 - Compose with: `az-clean-code` when the delivered code must also meet explicit-code rules; `taste` when judgment and collaboration guidance should stay active during the work.
-- Gates: never spawn a sub-agent, never commit or push on the base branch, never merge without every branch commit scored and a PASS review above 4.80 at the exact head SHA, never accept a self-review, never let the model choose its own score, never ship a final reply that opens with a raw reasoning block or carries no visible text, and never let a repeated step run on. Installing the plugin delegates issue creation, branch push, pull request creation, review posting, merge, and cleanup, so the loop runs that path without asking for per-action approval.
+- Gates: never spawn a sub-agent outside an open review window, never commit or push on the base branch, never merge without every branch commit scored and a PASS review above 4.80 at the exact head SHA, never accept a self-review or an unattested review, never let the model choose its own score, never ship a final reply that opens with a raw reasoning block or carries no visible text, and never let a repeated step run on. Installing the plugin delegates issue creation, branch push, pull request creation, review posting, merge, and cleanup, so the loop runs that path without asking for per-action approval.
 
 ## Modes
 
@@ -39,7 +38,7 @@ that the `Stop` hook drives across turns, so the loop keeps moving without Goal 
 | `init` | A repository has no ledger yet | Detect the git root and base branch, write the local ledger, ignore it in git | Ledger path and detected base |
 | `plan` | Several tasks must be ordered safely | Pack planned tasks into dependency waves that respect leases and touch-scope disjointness | Waves, blocked list, and scope overlaps |
 | `work` | One admitted task is ready to implement | Claim the task, create its branch and worktree, implement as a single agent, commit in reviewable stages | Worktree path, branch, and commits |
-| `review` | A diff is ready for scoring | Score the structured review record, inject scanner findings, write the report | Report with computed score and verdict |
+| `review` | A diff is ready for scoring | Open a review window, run the independent reviewers, score the attested record, inject scanner findings, write the report | Report with computed score and verdict |
 | `ship` | A review passed | Re-check every gate at the current head SHA, merge with the configured strategy, close the issue and verify it is CLOSED | Merge outcome and synced base |
 | `recover` | A lease expired or a task stalled | Release expired leases, return the task to the plan, list orphan worktrees | Reclaimed tasks and orphan list |
 | `goal` | One objective must keep moving across many turns without Goal mode | Start a durable goal with done-when criteria, let the Stop hook drive continuation while progress is real, and stall or pause instead of looping | Goal compass, per-pass progress, and a stall or budget pause |
@@ -88,14 +87,16 @@ the full command set.
    standard below, so a red tree never gets a message or a commit; `--skip-check`
    is the visible escape. It also refuses a new stage while the current head has no
    stage record, so each commit is scored before the next one lands.
-8. Run the project's own checks on the final head, push the branch, then run
-   `azflow review <task> --reviewer <fresh id> --input review.json --scan` to score
-   the record. The task must have a claimed worktree; the command derives its real
-   diff and head, always runs the mechanical scanner, and ignores model-supplied
-   file lists. The first review must be round 1; every later round advances by one
-   and carries the previous recorded score. The reviewer must differ from the
-   implementer, so a self-review is rejected and the score comes from a fresh
-   read-only context.
+8. Run the project's own checks on the final head and push the branch. Run
+   `azflow review-open <task>` so the guard permits reviewers to spawn, launch the
+   Elephant-Goldfish reviewers in fresh contexts against the diff, and attest them
+   in `review.json`. Score with `azflow review <task> --reviewer <fresh id>
+   --input review.json --scan`. The task must have a claimed worktree; the command
+   derives its real diff and head, always runs the mechanical scanner, and ignores
+   model-supplied file lists. The first review must be round 1; every later round
+   advances by one and carries the previous recorded score. The reviewer must
+   differ from the implementer, and a round needs a live window and an attested
+   fresh-context reviewer, so a self-review or an unattested round is rejected.
 9. Run `azflow pr <task>` to open a linked draft pull request with a derived title
    and body, then `azflow ready <task>` to take it out of draft. Push without asking
    the user first; the branch push is part of opening the pull request. `pr` refuses
@@ -172,12 +173,21 @@ never types a score into the report.
 - Base score is 5.00. Deductions are P0 2.50, P1 1.50, P2 0.50, P3 0.20, P4 0.10.
 - Hard caps: any P0 caps at 2.00, any P1 at 3.50, and any P2 at 4.50. P3 and P4 rely on their weight: one P3 lands on 4.80 and one P4 at 4.90, so only a single P4 clears the strict bar; 4.80 is a repair, not a merge.
 - A pass requires zero P0/P1/P2, a score strictly above 4.80, and a round within the repair budget of five.
-- Every commit is scored as its own stage before the next stage lands; the pull request merges only when every branch commit has a record and the head stage is PASS above 4.80, scored by a `--reviewer` distinct from the implementer in a fresh context; a self-review is rejected.
+- Every commit is scored as its own stage before the next stage lands; the pull request merges only when every branch commit has a record and the head stage is PASS above 4.80, scored by a `--reviewer` distinct from the implementer in a fresh context; a self-review, or an EGM round with no attested fresh-context reviewer, is rejected.
 - An unreviewed diff file, a missing or failed verification command, an incomplete probe set, a dimension marked failing, or an unevidenced finding each caps the report and adds a blocking finding.
 - The score may rise only as fast as the findings recorded as resolved justify, so a weak round cannot jump to a pass.
 - Review records are grounded in a claimed worktree and the current head. The real diff is scanned on every review, and rounds cannot be replayed, skipped, or omit the previous recorded score.
 - A mechanical scanner injects secrets, conflict markers, `any`, empty catches, framework imports, tab indentation, debug logs, loose equality, and TODO markers before scoring, so the model cannot hide them.
-- The posted report follows a fixed template: head SHA, verdict, score, the previous-round closure table, the deduction breakdown, every P0-P4 row, and the four dimension summaries.
+- The posted report follows a fixed template: head SHA, verdict, score, the review engine, the previous-round closure table, the deduction breakdown, every P0-P4 row, and the four dimension summaries.
+
+## Review independence (EGM)
+
+Self-review over-scores and hides the defects it introduced, so the loop never scores
+itself. `azflow review-open <task>` writes a short-lived `.azflow/review-window.json`
+bound to the task, head SHA, and expiry; only inside that window does the guard allow
+sub-agent spawns, so Elephant-Goldfish reviewers read the diff in fresh contexts and
+attest `engine: "egm"`. A self review, or an EGM round with no attested reviewer,
+injects a P2 that caps and blocks the round; scoring deletes the window after.
 
 ## Auto-merge gates
 
@@ -186,7 +196,7 @@ never types a score into the report.
 1. A recorded review exists and its verdict is PASS (`review-pass`).
 2. The body links the task issue with `Closes #<issue>` (`issue-linked`).
 3. Every branch commit has a stage record and the head stage is PASS above 4.80 (`stage-reviews`).
-4. The review names a reviewer distinct from the implementer (`reviewer-independent`).
+4. The review is EGM-attested and names a reviewer distinct from the implementer (`reviewer-independent`).
 5. The review score is strictly above 4.80; an exact 4.80 fails (`review-score`).
 6. The reviewed head SHA equals the pull request head SHA (`review-head`).
 7. Required CI checks are green with no failing or pending check (`ci-green`).
@@ -238,7 +248,8 @@ failure of the same weight as a broken gate.
 - Verify the shipped head SHA equals the reviewed head SHA, not an earlier commit.
 - Confirm the review report carries the closure table, the breakdown, every P0-P4
   row, the four dimensions, and real command output.
-- Confirm no sub-agent was spawned and no commit touched the base branch.
+- Confirm sub-agents spawned only inside an open review window, that the EGM
+  review is attested, and that no commit touched the base branch.
 - Confirm the task branch was pushed without asking, and that the merge was
   followed by a local branch delete and a fast-forwarded base, again without
   asking. Cleanup is part of the loop, not a question for the user.
@@ -258,6 +269,7 @@ SHA is a failed delivery, not a shortcut.
 
 - [Concurrency model](../../delivery-loop/references/concurrency.md) - task DAG, leases, worktree isolation, and serialized merge.
 - [Review scoring](../../delivery-loop/references/review.md) - review input shape, formula, caps, and anti-lenience rules.
+- [EGM review](../../delivery-loop/references/egm-review.md) - the review window, fresh-context Goldfish reviewers, and the attestation format.
 - [Automation surface](../../delivery-loop/references/automation.md) - command surface, issue and pull request automation, and the guard.
 - [Goal run](../../delivery-loop/references/goal-run.md) - durable objective, stop-hook continuation, progress from real state, and stall and budget safety.
 - [Output hygiene](../../delivery-loop/references/output-hygiene.md) - reasoning-tag detection, the one bounded correction, and why clean replies extend a run.

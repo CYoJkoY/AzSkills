@@ -34,6 +34,8 @@ export interface ReviewRecord {
   readonly at: string;
   /** Identity of the fresh-context reviewer that produced this record. */
   readonly reviewer?: string;
+  /** Which review engine produced this record: EGM or the legacy self-review. */
+  readonly engine?: "egm" | "self";
 }
 
 /**
@@ -77,6 +79,8 @@ export interface FlowConfig {
   maxParallel: number;
   autonomy: "full" | "manual";
   reviewThreshold: number;
+  /** The review engine the loop uses: EGM fresh-context review or legacy self-review. */
+  reviewEngine: "egm" | "self";
   leaseTtlMinutes: number;
   mergeStrategy: "squash" | "merge" | "rebase";
   allowFrameworks: string[];
@@ -89,6 +93,17 @@ export interface FlowState {
   config: FlowConfig;
   sequence: number;
   tasks: Task[];
+}
+
+/** A short-lived permission that lets EGM reviewers spawn while it is open. */
+export interface ReviewWindow {
+  readonly taskId: string;
+  readonly headSha: string;
+  readonly reviewer: string;
+  readonly engine: "egm" | "self";
+  readonly openedAt: string;
+  readonly expiresAt: string;
+  readonly maxAgents: number;
 }
 
 export const STATE_SCHEMA_VERSION = 1;
@@ -106,6 +121,7 @@ export const DEFAULT_CONFIG: FlowConfig = {
   maxParallel: 3,
   autonomy: "full",
   reviewThreshold: 4.8,
+  reviewEngine: "egm",
   leaseTtlMinutes: 90,
   mergeStrategy: "squash",
   allowFrameworks: [],
@@ -119,6 +135,8 @@ export const worktreesRoot = (project: string): string =>
   path.join(flowRoot(project), "worktrees");
 export const reviewsRoot = (project: string): string =>
   path.join(flowRoot(project), "reviews");
+export const reviewWindowPath = (project: string): string =>
+  path.join(flowRoot(project), "review-window.json");
 
 const nowIso = (): string => new Date().toISOString();
 
@@ -142,6 +160,10 @@ export async function readState(project: string): Promise<FlowState | null> {
   // quietly demand a perfect score under the strict comparison.
   if (parsed.config.reviewThreshold === LEGACY_REVIEW_THRESHOLD) {
     parsed.config.reviewThreshold = DEFAULT_CONFIG.reviewThreshold;
+  }
+  // Ledgers written before the review engine existed default to EGM review.
+  if (parsed.config.reviewEngine === undefined) {
+    parsed.config.reviewEngine = DEFAULT_CONFIG.reviewEngine;
   }
   // Older ledgers predate per-commit scoring and implementer identity. Fill
   // the missing fields instead of rejecting a ledger that is otherwise valid.
@@ -188,6 +210,7 @@ function isConfig(value: Record<string, unknown>): boolean {
       value.mergeStrategy === "merge" ||
       value.mergeStrategy === "rebase") &&
     isStringArray(value.allowFrameworks) &&
+    (value.reviewEngine === undefined || value.reviewEngine === "egm" || value.reviewEngine === "self") &&
     (value.checks === undefined || isStringArray(value.checks))
   );
 }
@@ -228,7 +251,8 @@ function isReview(value: unknown): value is ReviewRecord {
     typeof value.score === "number" &&
     (value.verdict === "PASS" || value.verdict === "FAIL") &&
     typeof value.at === "string" &&
-    (value.reviewer === undefined || typeof value.reviewer === "string")
+    (value.reviewer === undefined || typeof value.reviewer === "string") &&
+    (value.engine === undefined || value.engine === "egm" || value.engine === "self")
   );
 }
 function isStageReview(value: unknown): value is StageReview {

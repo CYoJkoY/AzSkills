@@ -16,6 +16,7 @@
   ],
   "skills": "./skills",
   "mcpServers": "./.codex-plugin/mcp.json",
+  "hooks": "./codex-plugin/hooks/serena-hooks.json",
   "interface": {
     "displayName": "Serena",
     "shortDescription": "Semantic code intelligence for agents",

@@ -33,13 +33,27 @@ earlier pass without being reviewed itself.
     { "id": "readability", "status": "pass", "note": "names match the domain" }
   ],
   "verification": { "command": "npm run check", "exitCode": 0, "output": "check passed" },
-  "previous": null
+  "previous": null,
+  "engine": "egm",
+  "reviewers": [
+    {
+      "id": "egm-goldfish",
+      "persona": "codebase-details",
+      "status": "completed",
+      "freshContext": true,
+      "filesRead": ["src/a.ts", "src/b.ts"]
+    }
+  ]
 }
 ```
 
 Each finding needs `severity`, `file`, `line`, `dimension`, `summary`, `evidence`,
 and `fix`. A finding without an observation or a repair still counts against the
 score and also marks the review unreliable.
+
+`engine` and `reviewers` carry the independent-review attestation. See
+[egm-review.md](egm-review.md) for the window, the reviewer protocol, and the
+attestation rules.
 
 ## Formula
 
@@ -91,11 +105,15 @@ round:
 - The reviewer named on the review is not the implementer. The script rejects a
   `--reviewer` equal to the task owner, and `azflow ship` re-checks the recorded
   identity, so independence of identity is enforced by code.
-- The review ran in a fresh context: a new session that saw only the diff, the
+- The review is an EGM review: `engine` is `egm`, an open review window covers
+  this task and head, and at least one reviewer attests `status: "completed"` with
+  `freshContext: true` and a non-empty `filesRead`. A self review, or an EGM round
+  with no valid attestation, injects a P2 that caps the report and blocks the
+  merge, so independence is enforced by code rather than trust.
+- The reviewers ran in fresh contexts: new sessions that saw only the diff, the
   repository files, and the verification output, never the author's reasoning or a
-  prior round's verdict. This is a process rule the script cannot observe, so the
-  orchestrator must open a new context for every round and the report must name
-  that round's reviewer id.
+  prior round's verdict. The attestation is observable because it is recorded per
+  reviewer; a reviewer that did not finish is listed as `not run`, never omitted.
 
 ## Anti-lenience rules
 
@@ -119,8 +137,9 @@ round:
 - Each commit is scored on its own stage. `azflow review` refuses to run when an
   earlier branch commit has no stage record, and `azflow commit` refuses to record
   the next stage until the current head has been scored.
-- A review must name a `--reviewer` that differs from the implementer. The script
-  rejects a self-review, and the reviewer reads the artifact from a fresh context
+- A review must name a `--reviewer` that differs from the implementer and must be
+  an attested EGM round. The script rejects `--engine self`, rejects an unattested
+  or windowless EGM round, and the reviewers read the artifact from fresh contexts
   instead of inheriting the author's reasoning.
 - `azflow pr` refuses any unscored branch commit, and `azflow ship` re-counts the
   branch commits before merging, so a stale or partial review cannot ship.
