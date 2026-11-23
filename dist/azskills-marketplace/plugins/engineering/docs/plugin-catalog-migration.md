@@ -175,10 +175,10 @@ The release is versioned 5.0.0 because plugin IDs changed again. Remove the old
 marketplace, add the Git source again, and install the grouped plugins:
 
 ```sh
-codex plugin marketplace remove azskills-local
+codex plugin marketplace remove azskills
 codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
-codex plugin install engineering@azskills-local
-codex plugin install design@azskills-local
+codex plugin install engineering@azskills
+codex plugin install design@azskills
 ```
 
 The installer and MCP still accept a module id such as `ui-design`, and resolve
@@ -215,10 +215,10 @@ The release is versioned 5.0.0 because plugin IDs changed again. Remove the old
 marketplace, add the Git source again, and install the grouped plugins:
 
 ```sh
-codex plugin marketplace remove azskills-local
+codex plugin marketplace remove azskills
 codex plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
-codex plugin install engineering@azskills-local
-codex plugin install design@azskills-local
+codex plugin install engineering@azskills
+codex plugin install design@azskills
 ```
 
 The installer and MCP still accept a module id such as `ui-design`, and resolve

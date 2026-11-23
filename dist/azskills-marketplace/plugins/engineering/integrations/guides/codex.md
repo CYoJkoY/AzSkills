@@ -44,4 +44,4 @@ Confirm the marketplace lists every catalog plugin, install the ones the project
 
 ## Remove
 
-Uninstall the plugins you no longer need in Codex, then remove the marketplace with `codex plugin marketplace remove azskills-local` when it is no longer used.
+Uninstall the plugins you no longer need in Codex, then remove the marketplace with `codex plugin marketplace remove azskills` when it is no longer used.

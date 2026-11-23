@@ -137,7 +137,7 @@ const guide = (tool: IntegrationTool): string => {
   lines.push('## Remove');
   lines.push('');
   if (tool.mechanism === 'codex-plugin') {
-    lines.push('Uninstall the plugins you no longer need in Codex, then remove the marketplace with `codex plugin marketplace remove azskills-local` when it is no longer used.');
+    lines.push('Uninstall the plugins you no longer need in Codex, then remove the marketplace with `codex plugin marketplace remove azskills` when it is no longer used.');
   } else if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
     lines.push('Use the manifest-based uninstaller so files not owned by AzSkills are preserved:');
     lines.push('');

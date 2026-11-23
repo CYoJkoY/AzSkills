@@ -58,7 +58,7 @@ try {
     name: string;
     plugins: { name: string; source: { path: string } }[];
   };
-  assert.equal(manifest.name, "azskills-local");
+  assert.equal(manifest.name, "azskills");
   assert.deepEqual(manifest.plugins.map((entry) => entry.name), catalog.plugins.map((entry) => entry.id));
   for (const entry of manifest.plugins) {
     assert.equal(entry.source.path, "./plugins/" + entry.name);
