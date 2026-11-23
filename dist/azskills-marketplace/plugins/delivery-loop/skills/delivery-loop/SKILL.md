@@ -1,6 +1,6 @@
 ---
 name: delivery-loop
-description: Run concurrent issue-to-merge delivery unattended: install-time delegation, touch-scope leases, per-task worktrees, enforced commit and pull request standards, computed review scoring, gated auto-merge, dead-loop recovery, and prompt-aware output guards, without sub-agents.
+description: Run unattended issue-to-merge delivery or continue a long-horizon repository objective without Codex Goal mode. Uses isolated worktrees, touch-scope leases, computed reviews, gated auto-merge, durable checkpoints, and bounded dead-loop recovery without sub-agents.
 ---
 
 # Delivery Loop

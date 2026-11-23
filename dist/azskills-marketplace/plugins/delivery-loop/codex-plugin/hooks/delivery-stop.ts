@@ -33,6 +33,7 @@ import {
   type DeliveryState,
 } from "./session-state.ts";
 import { readTurnSnapshot } from "./transcript.ts";
+import { advanceGoal, findGoalProject } from "../../delivery-loop/scripts/goal.ts";
 
 interface StopInput {
   readonly sessionId: string;
@@ -175,8 +176,22 @@ async function main(): Promise<void> {
     return { next: appendReply(pruned, input.message, input.turnId, now), result: null };
   });
 
-  if (outcome === null || !outcome.stored || outcome.result === null) return;
-  block(outcome.result);
+  if (outcome !== null && outcome.stored && outcome.result !== null) {
+    block(outcome.result);
+    return;
+  }
+
+  // A goal run is what gives the loop Goal-mode stamina without Goal mode: the
+  // objective, done-when criteria, next step, and budget live on disk, so the
+  // turn keeps going and a compacted context is re-grounded from the goal file.
+  // A clean stop that would otherwise end the turn is held only while the goal
+  // is active and still making measurable progress; it stalls or pauses itself
+  // rather than running without bound, and a missing or erroring goal file lets
+  // the turn end as usual.
+  const project = await findGoalProject(process.cwd()).catch(() => null);
+  if (project === null) return;
+  const advance = await advanceGoal(project, Date.now()).catch(() => null);
+  if (advance !== null && advance.reason !== null) block(advance.reason);
 }
 
 main().catch(() => undefined);

@@ -185,11 +185,11 @@
       }
     }
   ],
-  "version": "7.3.0",
+  "version": "7.4.0",
   "entry": {
     "id": "azskills",
     "path": "SKILL.md",
-    "version": "7.3.0"
+    "version": "7.4.0"
   },
   "modules": [
     {
@@ -390,7 +390,8 @@
         "work",
         "review",
         "ship",
-        "recover"
+        "recover",
+        "goal"
       ],
       "role": "Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge.",
       "composes": [

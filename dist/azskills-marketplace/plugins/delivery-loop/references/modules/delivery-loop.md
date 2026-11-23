@@ -1,10 +1,10 @@
 ---
 name: delivery-loop
 description: Run a repository delivery loop that plans concurrent tasks as a dependency DAG with touch-scope leases, isolates each task in its own git worktree, scores reviews mechanically, merges automatically on green evidence without sub-agents, and breaks out of dead loops.
-version: 1.3.0
+version: 1.4.0
 status: module
 family: operations
-modes: [init, plan, work, review, ship, recover]
+modes: [init, plan, work, review, ship, recover, goal]
 ---
 
 # Delivery Loop
@@ -19,11 +19,14 @@ context, and the dead-loop guard, because a run that repeats one step never reac
 a review at all. It does not own the project's own build commands, its architecture
 choices, or the content of the code being shipped.
 
+It also owns the long-horizon goal run: a durable objective in `.azflow/goal.json`
+that the `Stop` hook drives across turns, so the loop keeps moving without Goal mode.
+
 ## Contract
 
 - Use when: a repository needs issue-to-merge delivery that stays correct under several concurrent tasks, and review scoring plus merging must be automated instead of hand-driven.
 - Do not use when: a one-off edit needs no branch, review record, or merge gate; make the edit directly.
-- Owns: the task ledger, touch-scope leases, worktree isolation, computed review scoring, the merge gates, dead-loop interruption and restart, and final-reply output hygiene.
+- Owns: the task ledger, touch-scope leases, worktree isolation, computed review scoring, the merge gates, dead-loop interruption and restart, final-reply output hygiene, and the long-horizon goal run.
 - Inputs: repository root, base branch, task titles with touch scopes, a structured review record, and the project's own verification command.
 - Outputs: admission waves, isolated task worktrees, an English review report with a computed score, and a merged pull request with its issue closed.
 - Compose with: `az-clean-code` when the delivered code must also meet explicit-code rules; `taste` when judgment and collaboration guidance should stay active during the work.
@@ -39,6 +42,25 @@ choices, or the content of the code being shipped.
 | `review` | A diff is ready for scoring | Score the structured review record, inject scanner findings, write the report | Report with computed score and verdict |
 | `ship` | A review passed | Re-check every gate at the current head SHA, merge with the configured strategy, close the issue and verify it is CLOSED | Merge outcome and synced base |
 | `recover` | A lease expired or a task stalled | Release expired leases, return the task to the plan, list orphan worktrees | Reclaimed tasks and orphan list |
+| `goal` | One objective must keep moving across many turns without Goal mode | Start a durable goal with done-when criteria, let the Stop hook drive continuation while progress is real, and stall or pause instead of looping | Goal compass, per-pass progress, and a stall or budget pause |
+
+## Goal run
+
+Codex's Goal mode keeps a task alive on its own; this module gives the loop the
+same stamina without it. A local, git-ignored `.azflow/goal.json` holds the
+objective, its done-when criteria, the next step, the progress ledger, and the pass
+budget. On a clean stop the `Stop` hook refuses to end the turn while the goal is
+active and work remains, re-injecting the compass from disk so a compacted context
+is re-grounded rather than trusted to memory; a `SessionStart` hook injects the
+same compass when a session opens. Progress is read from the repository and the
+ledger, never from the model's word: an unchanged HEAD, tree, ledger, and worktree
+set across a pass is no progress, so the run stalls after too many idle passes and
+pauses when the budget is spent instead of spinning. `azflow goal` owns start,
+status, note, next-step, complete, pause, resume, extend, and abandon, and any
+non-active status lets the turn end. A goal needs no ledger, and with one the next
+step is read from that ledger. See
+[goal-run.md](../../delivery-loop/references/goal-run.md) for the state file and
+the full command set.
 
 ## Workflow
 
@@ -148,29 +170,14 @@ findings, probe results, dimension results, and real verification output, and it
 never types a score into the report.
 
 - Base score is 5.00. Deductions are P0 2.50, P1 1.50, P2 0.50, P3 0.20, P4 0.10.
-- Hard caps: any P0 caps at 2.00, any P1 at 3.50, and any P2 at 4.50. P3 and P4
-  rely on their weight: one P3 lands on 4.80 and one P4 at 4.90, so only a single
-  P4 clears the strict bar; 4.80 is a repair, not a merge.
-- A pass requires zero P0/P1/P2, a score strictly above 4.80, and a round within
-  the repair budget of five.
-- Every commit is scored as its own stage before the next stage lands; the pull
-  request merges only when every branch commit has a record and the head stage is
-  PASS above 4.80, scored by a `--reviewer` distinct from the implementer in a
-  fresh context; a self-review is rejected.
-- An unreviewed diff file, a missing or failed verification command, an incomplete
-  probe set, a dimension marked failing, or an unevidenced finding each caps the
-  report and adds a blocking finding.
-- The score may rise only as fast as the findings recorded as resolved justify, so
-  a weak round cannot jump to a pass.
-- Review records are grounded in a claimed worktree and the current head. The real
-  diff is scanned on every review, and rounds cannot be replayed, skipped, or omit
-  the previous recorded score.
-- A mechanical scanner injects secrets, conflict markers, `any`, empty catches,
-  framework imports, tab indentation, debug logs, loose equality, and TODO markers
-  before scoring, so the model cannot hide them.
-- The posted report follows a fixed template: head SHA, verdict, score, the
-  previous-round closure table, the deduction breakdown, every P0-P4 row, and the
-  four dimension summaries.
+- Hard caps: any P0 caps at 2.00, any P1 at 3.50, and any P2 at 4.50. P3 and P4 rely on their weight: one P3 lands on 4.80 and one P4 at 4.90, so only a single P4 clears the strict bar; 4.80 is a repair, not a merge.
+- A pass requires zero P0/P1/P2, a score strictly above 4.80, and a round within the repair budget of five.
+- Every commit is scored as its own stage before the next stage lands; the pull request merges only when every branch commit has a record and the head stage is PASS above 4.80, scored by a `--reviewer` distinct from the implementer in a fresh context; a self-review is rejected.
+- An unreviewed diff file, a missing or failed verification command, an incomplete probe set, a dimension marked failing, or an unevidenced finding each caps the report and adds a blocking finding.
+- The score may rise only as fast as the findings recorded as resolved justify, so a weak round cannot jump to a pass.
+- Review records are grounded in a claimed worktree and the current head. The real diff is scanned on every review, and rounds cannot be replayed, skipped, or omit the previous recorded score.
+- A mechanical scanner injects secrets, conflict markers, `any`, empty catches, framework imports, tab indentation, debug logs, loose equality, and TODO markers before scoring, so the model cannot hide them.
+- The posted report follows a fixed template: head SHA, verdict, score, the previous-round closure table, the deduction breakdown, every P0-P4 row, and the four dimension summaries.
 
 ## Auto-merge gates
 
@@ -204,20 +211,12 @@ in the context every later turn must carry. On a long loop that cost compounds,
 so the loop ships its own `Stop` hook instead of leaving the behaviour to
 convention.
 
-- The hook ends a block at the first reasoning-family closing tag outside Markdown
-  code, whichever member of the family opened it, and treats a block that never
-  closes as a leak because everything after the opener reads as reasoning.
-- A reply whose reasoning blocks leave no visible characters is treated as blank
-  and corrected the same way, because a turn that shows the user nothing has not
-  delivered anything.
-- It asks for exactly one clean re-send per turn and never claims the emitted text
-  was removed, because streamed text cannot be recalled.
-- It dedupes on its own per-turn record, so a `Stop` flag set by another hook does
-  not silence it, and it fails open on malformed input.
-- The correction repeats the user prompt verbatim, because a long run may have
-  compacted the prompt out of context by the time the correction arrives.
-- Clean output is also a review requirement: a shipped reply must be text the user
-  can read without wading through reasoning.
+- The hook ends a block at the first reasoning-family closing tag outside Markdown code, whichever member of the family opened it, and treats a block that never closes as a leak because everything after the opener reads as reasoning.
+- A reply whose reasoning blocks leave no visible characters is treated as blank and corrected the same way, because a turn that shows the user nothing has not delivered anything.
+- It asks for exactly one clean re-send per turn and never claims the emitted text was removed, because streamed text cannot be recalled.
+- It dedupes on its own per-turn record, so a `Stop` flag set by another hook does not silence it, and it fails open on malformed input.
+- The correction repeats the user prompt verbatim, because a long run may have compacted the prompt out of context by the time the correction arrives.
+- Clean output is also a review requirement: a shipped reply must be text the user can read without wading through reasoning.
 
 ## Loop guard
 
@@ -225,25 +224,12 @@ An unattended run can repeat one step forever. The failure is quiet: no merge, n
 error, and no review record. The loop therefore treats a repeating step as a
 failure of the same weight as a broken gate.
 
-  - A step repeats when the same tool call, or the same short cycle of calls, runs
-    at the end of the turn: four times for one call, three times for a cycle of two
-    to four calls. The same final reply three times in a row also counts, and so
-    does a second blank reply in one turn: the first blank is corrected, the second
-    proves the correction did not land.
-- The `PreToolUse` guard denies the fourth identical shell call before it runs, so
-  a loop is interrupted mid-turn instead of burning the rest of the window.
-- The `Stop` guard catches everything the tool guard cannot see, including
-  repeated replies and repeated reads, and restarts the turn.
-- A restart voids the looped attempt and re-sends the original prompt in the same
-  conversation, with a notice that a dead loop just happened. It never opens a new
-  session and never asks the user to repeat the request.
-- Restarts are budgeted: at most two per turn, so a model that keeps looping is
-  stopped by the budget rather than by an endless guard. After a breaker
-  interruption the counter resets, so a deliberate re-run of the same command
-  after a fix is still allowed.
-- The `UserPromptSubmit` hook records the prompt in per-session state the moment
-  it arrives. That copy, not the transcript, is what a correction quotes, so the
-  prompt survives compaction and a flooded window.
+- A step repeats when the same tool call, or the same short cycle of calls, runs at the end of the turn: four times for one call, three times for a cycle of two to four calls. The same final reply three times in a row also counts, and so does a second blank reply in one turn: the first blank is corrected, the second proves the correction did not land.
+- The `PreToolUse` guard denies the fourth identical shell call before it runs, so a loop is interrupted mid-turn instead of burning the rest of the window.
+- The `Stop` guard catches everything the tool guard cannot see, including repeated replies and repeated reads, and restarts the turn.
+- A restart voids the looped attempt and re-sends the original prompt in the same conversation, with a notice that a dead loop just happened. It never opens a new session and never asks the user to repeat the request.
+- Restarts are budgeted: at most two per turn, so a model that keeps looping is stopped by the budget rather than by an endless guard. After a breaker interruption the counter resets, so a deliberate re-run of the same command after a fix is still allowed.
+- The `UserPromptSubmit` hook records the prompt in per-session state the moment it arrives. That copy, not the transcript, is what a correction quotes, so the prompt survives compaction and a flooded window.
 
 ## Quality gates
 
@@ -273,6 +259,7 @@ SHA is a failed delivery, not a shortcut.
 - [Concurrency model](../../delivery-loop/references/concurrency.md) - task DAG, leases, worktree isolation, and serialized merge.
 - [Review scoring](../../delivery-loop/references/review.md) - review input shape, formula, caps, and anti-lenience rules.
 - [Automation surface](../../delivery-loop/references/automation.md) - command surface, issue and pull request automation, and the guard.
+- [Goal run](../../delivery-loop/references/goal-run.md) - durable objective, stop-hook continuation, progress from real state, and stall and budget safety.
 - [Output hygiene](../../delivery-loop/references/output-hygiene.md) - reasoning-tag detection, the one bounded correction, and why clean replies extend a run.
 - [Loop guard](../../delivery-loop/references/loop-guard.md) - dead-loop detection, the in-turn breaker, the restart budget, and prompt replay.
 - [Local ledger](../../delivery-loop/references/ledger.md) - ledger layout, state schema, and atomic locked writes.

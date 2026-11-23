@@ -15,7 +15,7 @@ Choose the plugin by the requested job, then select the matching workflow contra
 | `writing` | [localization](modules/localization.md) | Game CSV localization with locale completeness and markup safety. | translate, audit |
 | `writing` | [resume-evidence-workflow](modules/resume-evidence-workflow.md) | Career evidence, requirement alignment, and editable resume delivery. | evidence, tailor, review |
 | `engineering` | [tool-integration](modules/tool-integration.md) | Connect AzSkills to AI clients with verified installation and setup workflows. | install, configure, troubleshoot, remove |
-| `delivery-loop` | [delivery-loop](modules/delivery-loop.md) | Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge. | init, plan, work, review, ship, recover |
+| `delivery-loop` | [delivery-loop](modules/delivery-loop.md) | Concurrent issue-to-merge delivery with touch-scope leases, worktree isolation, computed review scoring, and gated auto-merge. | init, plan, work, review, ship, recover, goal |
 | `engineering` | [taste](modules/taste.md) | GPT with Taste judgment, collaboration, and execution behavior. | main, subagent, independent |
 | `engineering` | [az-clean-code](modules/az-clean-code.md) | Explicit, flat, reusable code with business data externalized, code style consistency, and implementation quality guards. | write, review, refactor, style |
 | `engineering` | [godot-3-dev](modules/godot-3-dev.md) | Godot 3.x GDScript, virtual-call safety, 3.6 API surface, and down-porting. | script, review, port |

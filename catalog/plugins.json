@@ -160,7 +160,7 @@
       "modules": [
         "delivery-loop"
       ],
-      "description": "Run concurrent issue-to-merge delivery unattended: install-time delegation, touch-scope leases, per-task worktrees, enforced commit and pull request standards, computed review scoring, gated auto-merge, dead-loop recovery, and prompt-aware output guards, without sub-agents.",
+      "description": "Run unattended issue-to-merge delivery or continue a long-horizon repository objective without Codex Goal mode. Uses isolated worktrees, touch-scope leases, computed reviews, gated auto-merge, durable checkpoints, and bounded dead-loop recovery without sub-agents.",
       "icon": "codex-plugin/assets/icons/delivery-loop.svg",
       "brandColor": "#3D4E8A",
       "category": "Productivity",
@@ -176,6 +176,7 @@
         "codex-plugin/hooks/delivery-hooks.json",
         "codex-plugin/hooks/delivery-prompt.ts",
         "codex-plugin/hooks/delivery-stop.ts",
+        "codex-plugin/hooks/delivery-session.ts",
         "codex-plugin/hooks/guard.ts",
         "codex-plugin/hooks/delivery-guard.ts",
         "codex-plugin/hooks/loop-guard.ts",

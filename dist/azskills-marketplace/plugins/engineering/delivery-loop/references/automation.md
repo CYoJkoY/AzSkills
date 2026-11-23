@@ -44,6 +44,7 @@ the precedence and the repository names its own tools.
 | `azflow ship` | Refresh the pull request body, verify every merge gate, merge, close the issue, verify it reads `CLOSED`, sync base. `--verify-issue` finishes a merge whose issue stayed open. |
 | `azflow recover` | Release expired leases and list orphan worktrees. |
 | `azflow doctor` | Check node, git, gh auth, ledger, and the current branch. |
+| `azflow goal` | Drive one long-horizon objective across turns without Goal mode. See [goal-run.md](goal-run.md). |
 
 Every command accepts `--project <path>` and most accept `--json` for scripting.
 
@@ -254,3 +255,24 @@ enforcement; the hook is a fast, early stop.
 `autonomy: "full"` is the default and enables auto-merge. `autonomy: "manual"`
 makes `ship` fail its autonomy gate, which turns auto-merge into a human decision
 without changing anything else. Set it in `azflow init --autonomy manual`.
+
+## Long-horizon goal run
+
+One objective can outlast a single turn or a single context window. zflow goal
+drives that run without Codex Goal mode: it keeps the objective, the done-when
+criteria, and the next step in .azflow/goal.json, and the Stop hook blocks a
+clean stop while the goal is active and work remains. The block reason is the
+whole compass re-injected from disk, so a compacted session is re-grounded in the
+goal rather than a faded memory of it, and a SessionStart hook injects the same
+compass when a session opens or resumes.
+
+Progress is measured from real state - the base HEAD and working tree, the
+ledger, and every live worktree - never from the model saying it advanced. A run
+that keeps talking but never changes the repository stalls itself, and a pass
+budget pauses the run before it can spin. These guards run after the loop guard,
+so a dead or repeated reply is corrected first. A goal needs no ledger and a
+ledger needs no goal; when both exist the next step is read from the ledger.
+Nothing activates unless an active .azflow/goal.json resolves from the working
+directory, so the plugin never changes a repository that never started a goal.
+See [goal-run.md](goal-run.md) for the state file, the continuation rules, and
+the full command set.

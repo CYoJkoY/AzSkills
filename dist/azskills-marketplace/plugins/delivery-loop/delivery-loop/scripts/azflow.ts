@@ -78,6 +78,21 @@ import {
   writeState,
 } from "./state.ts";
 import type { FlowState, ReviewRecord, Task } from "./state.ts";
+import {
+  DEFAULT_MAX_ITERATIONS,
+  DEFAULT_MAX_NO_PROGRESS,
+  MAX_PROGRESS_ENTRIES,
+  createGoal,
+  findGoalProject,
+  goalPath,
+  goalCompass,
+  nextStepFor,
+  progressMarker,
+  pushBlocker,
+  readGoal,
+  updateGoal,
+} from "./goal.ts";
+import type { GoalState } from "./goal.ts";
 
 interface Args {
   readonly command: string;
@@ -1293,6 +1308,177 @@ async function doctor(args: Args): Promise<void> {
   if (failed.length > 0) process.exitCode = 2;
 }
 
+function goalUsage(): void {
+  print(
+    [
+      "azflow goal - long-horizon goal run that survives without Goal mode",
+      "",
+      "Usage:",
+      "  azflow goal start \"<objective>\" --done-when \"<criterion>\" [--done-when \"<criterion>\"] [--max-iterations N] [--max-no-progress N] [--next-step \"<text>\"] [--replace]",
+      "  azflow goal status [--json]",
+      "  azflow goal next",
+      "  azflow goal note \"<what changed>\" [--evidence \"<output or sha>\"] [--next-step \"<text>\"]",
+      "  azflow goal next-step \"<text>\"",
+      "  azflow goal pause [--reason \"<why>\"]",
+      "  azflow goal resume",
+      "  azflow goal extend --by <N>",
+      "  azflow goal complete [--summary \"<result>\"]",
+      "  azflow goal abandon [--reason \"<why>\"]",
+      "",
+      "Goal file: .azflow/goal.json (local, git-ignored). The Stop hook keeps the turn",
+      "alive while the goal is active and work remains, re-injecting the compass each pass.",
+    ].join("\n"),
+  );
+}
+
+async function goalCommand(args: Args): Promise<void> {
+  const sub = args.positionals[0] ?? "status";
+  const cwd = projectRoot(args);
+  const project = lastValue(args, "project") === undefined ? await findGoalProject(cwd) ?? cwd : cwd;
+  const rest = args.positionals.slice(1);
+  const text = rest.join(" ").trim();
+  const at = nowIso();
+
+  const positiveInt = (name: string, fallback: number): number => {
+    const raw = lastValue(args, name);
+    if (raw === undefined) return fallback;
+    const value = Number(raw);
+    if (!Number.isInteger(value) || value <= 0) throw new Error("--" + name + " must be a positive integer.");
+    return value;
+  };
+
+  const requireGoal = async (): Promise<GoalState> => {
+    const goal = await readGoal(project);
+    if (goal === null) throw new Error("No goal at " + flowRoot(project) + ". Start one with `azflow goal start`.");
+    return goal;
+  };
+
+  switch (sub) {
+    case "start": {
+      const objective = (lastValue(args, "objective") ?? text).trim();
+      const goal = await createGoal(
+        project,
+        {
+          objective,
+          doneWhen: allValues(args, "done-when"),
+          maxIterations: positiveInt("max-iterations", DEFAULT_MAX_ITERATIONS),
+          maxNoProgress: positiveInt("max-no-progress", DEFAULT_MAX_NO_PROGRESS),
+          nextStep: lastValue(args, "next-step"),
+        },
+        { replace: args.flags.has("replace") },
+      );
+      print("Goal started at " + goalPath(project));
+      print(goalCompass(goal, await readState(project).catch(() => null)));
+      return;
+    }
+    case "status": {
+      const goal = await readGoal(project);
+      const flow = await readState(project).catch(() => null);
+      if (goal === null) {
+        if (args.flags.has("json")) printJson({ goal: null });
+        else print("No goal at " + flowRoot(project) + ". Start one with `azflow goal start \"<objective>\" --done-when \"<criterion>\"`.");
+        return;
+      }
+      if (args.flags.has("json")) {
+        printJson({ goal, nextStep: nextStepFor(goal, flow) });
+        return;
+      }
+      print(goalCompass(goal, flow));
+      return;
+    }
+    case "next": {
+      const goal = await requireGoal();
+      print(nextStepFor(goal, await readState(project).catch(() => null)));
+      return;
+    }
+    case "note": {
+      if (text === "") throw new Error("azflow goal note needs a note describing what changed.");
+      const evidence = (lastValue(args, "evidence") ?? "").trim();
+      const nextStep = lastValue(args, "next-step");
+      const updated = await updateGoal(project, (goal) => {
+        const entry = { at, iteration: goal.iteration, note: text.slice(0, 4000), evidence: evidence.slice(0, 4000) };
+        return {
+          ...goal,
+          progress: [...goal.progress.slice(-(MAX_PROGRESS_ENTRIES - 1)), entry],
+          nextStep: nextStep === undefined ? goal.nextStep : nextStep.trim().slice(0, 4000),
+          updatedAt: at,
+        };
+      });
+      if (updated === null) throw new Error("No goal at " + flowRoot(project) + ".");
+      print("Recorded progress on goal (pass " + updated.iteration + ", status " + updated.status + ").");
+      return;
+    }
+    case "next-step": {
+      const updated = await updateGoal(project, (goal) => ({ ...goal, nextStep: text.slice(0, 4000), updatedAt: at }));
+      if (updated === null) throw new Error("No goal at " + flowRoot(project) + ".");
+      print(text === "" ? "Next step cleared." : "Next step: " + text);
+      return;
+    }
+    case "pause": {
+      const reason = (lastValue(args, "reason") ?? text).trim();
+      const updated = await updateGoal(project, (goal) => {
+        if (goal.status === "complete" || goal.status === "abandoned") throw new Error("Cannot pause a " + goal.status + " goal.");
+        return {
+          ...goal,
+          status: "paused",
+          blockers: reason === "" ? goal.blockers : pushBlocker(goal.blockers, "Paused: " + reason),
+          updatedAt: at,
+        };
+      });
+      if (updated === null) throw new Error("No goal at " + flowRoot(project) + ".");
+      print("Goal paused." + (reason === "" ? "" : " " + reason));
+      return;
+    }
+    case "resume": {
+      const marker = await progressMarker(project);
+      const updated = await updateGoal(project, (goal) => {
+        if (goal.status !== "paused" && goal.status !== "stalled") throw new Error("Only a paused or stalled goal can be resumed.");
+        if (goal.iteration >= goal.maxIterations) throw new Error("Extend the exhausted goal budget before resuming.");
+        return { ...goal, status: "active", noProgress: 0, lastMarker: marker, updatedAt: at };
+      });
+      if (updated === null) throw new Error("No goal at " + flowRoot(project) + ".");
+      print("Goal resumed (pass " + updated.iteration + " of " + updated.maxIterations + ").");
+      return;
+    }
+    case "extend": {
+      const rawBy = lastValue(args, "by");
+      if (rawBy === undefined) throw new Error("azflow goal extend needs --by <N>.");
+      const by = Number(rawBy);
+      if (!Number.isInteger(by) || by <= 0) throw new Error("--by must be a positive integer.");
+      const updated = await updateGoal(project, (goal) => ({ ...goal, maxIterations: goal.maxIterations + by, updatedAt: at }));
+      if (updated === null) throw new Error("No goal at " + flowRoot(project) + ".");
+      print("Iteration budget extended by " + by + " to " + updated.maxIterations + ".");
+      return;
+    }
+    case "complete": {
+      const summary = (lastValue(args, "summary") ?? text).trim();
+      const updated = await updateGoal(project, (goal) => ({
+        ...goal,
+        status: "complete",
+        summary: summary === "" ? goal.summary : summary.slice(0, 4000),
+        updatedAt: at,
+      }));
+      if (updated === null) throw new Error("No goal at " + flowRoot(project) + ".");
+      print("Goal complete." + (summary === "" ? "" : " " + summary));
+      return;
+    }
+    case "abandon": {
+      const reason = (lastValue(args, "reason") ?? text).trim();
+      const updated = await updateGoal(project, (goal) => ({
+        ...goal,
+        status: "abandoned",
+        summary: reason === "" ? goal.summary : reason.slice(0, 4000),
+        updatedAt: at,
+      }));
+      if (updated === null) throw new Error("No goal at " + flowRoot(project) + ".");
+      print("Goal abandoned." + (reason === "" ? "" : " " + reason));
+      return;
+    }
+    default:
+      goalUsage();
+  }
+}
+
 function help(): void {
   print(
     [
@@ -1311,9 +1497,11 @@ function help(): void {
       "  azflow review <task> --input <review.json> --reviewer <fresh id> [--scan] [--post] [--pr N] [--json]",
       "  azflow ship <task>|--pr <n> [--dry-run] [--verify-issue] [--json]",
       "  azflow recover [--force]",
+      "  azflow goal start|status|next|note|next-step|pause|resume|extend|complete|abandon",
       "  azflow doctor [--json]",
       "",
       "Ledger: .azflow/state.json (local, git-ignored). GitHub Issue/PR stays the shared record.",
+      "Goal: .azflow/goal.json (local, git-ignored). Drives a long run; see `azflow goal`.",
     ].join("\n"),
   );
 }
@@ -1333,6 +1521,7 @@ async function main(): Promise<void> {
     case "review": await review(args); break;
     case "ship": await ship(args); break;
     case "recover": await recover(args); break;
+    case "goal": await goalCommand(args); break;
     case "doctor": await doctor(args); break;
     case "help":
     case "--help":
