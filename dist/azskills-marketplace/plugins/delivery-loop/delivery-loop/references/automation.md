@@ -34,14 +34,14 @@ the precedence and the repository names its own tools.
 | `azflow init` | Detect the base branch, record the static check commands, write the local ledger, ignore it in git. |
 | `azflow add` | Record a task, its touch scopes, dependencies, and issue id. |
 | `azflow issue` | Create the issue from a deterministic body, or `--body`/`--body-file`. |
-| `azflow commit` | Run the recorded static checks, validate a Conventional Commit message against the staged stage, then commit it. |
-| `azflow pr` | Open the pull request as a draft with a derived title and a five-section body, linked to the issue, once the branch is pushed. |
+| `azflow commit` | Run the recorded static checks, validate a Conventional Commit message against the staged stage, then commit it. Refuses to add a stage until the current head has a stage record. |
+| `azflow pr` | Open the pull request as a draft with a derived title and a five-section body, linked to the issue, once the branch is pushed. Refuses any unscored branch commit. |
 | `azflow ready` | Mark the pull request ready for review after local checks pass. |
 | `azflow plan` | Print admission waves, blocked tasks, and scope overlaps. |
 | `azflow claim` | Create the branch and worktree, then issue a lease. |
 | `azflow status` | Show tasks, leases, reviews, and scores. |
-| `azflow review` | Require a claimed worktree, scan its real diff, enforce sequential rounds, score the record, and write the report. |
-| `azflow ship` | Refresh the pull request body, verify every merge gate, merge, close the issue, sync base. |
+| `azflow review` | Require a claimed worktree and a fresh `--reviewer` that is not the implementer, scan the real diff, enforce sequential rounds, score the stage, and write the report. |
+| `azflow ship` | Refresh the pull request body, verify every merge gate, merge, close the issue, verify it reads `CLOSED`, sync base. `--verify-issue` finishes a merge whose issue stayed open. |
 | `azflow recover` | Release expired leases and list orphan worktrees. |
 | `azflow doctor` | Check node, git, gh auth, ledger, and the current branch. |
 
@@ -64,21 +64,24 @@ The agent runs this path without asking for permission at any step:
    commit. The command refuses an empty index, refuses a ledger that records no
    static check, runs the recorded checks on the worktree, refuses a message that
    breaks the standard below, and commits through stdin so the body keeps LF
-   endings.
+   endings. It also refuses to record a new stage while the current head has no
+   stage record, so every commit is scored before the next one lands.
 3. Runs the project's own verification before anything leaves the worktree, so the
    recorded result is green rather than hopeful. Commit the last stage first: a
    review scores the head that exists at review time, so a stage committed after it
    makes its own green run stale.
-4. Pushes the branch and runs `azflow review <task> --input <review.json> --scan`.
-   The review derives the changed files and head from the claimed worktree, runs the
-   scanner unconditionally, and requires round 1 followed by one-step rounds that
-   carry the prior score.
+4. Pushes the branch and runs `azflow review <task> --input <review.json>
+   --reviewer <fresh id> --scan`. The review derives the changed files and head from
+   the claimed worktree, runs the scanner unconditionally, requires round 1 followed
+   by one-step rounds that carry the prior score, and rejects a reviewer that equals
+   the implementer. Read the artifact in a fresh context: the reviewer names the
+   identity that scored this stage, and that identity must differ from the author.
 5. Runs `azflow pr <task>`. The pull request opens as a draft, linked with
    `Closes #<issue>`, with a title and body derived from the branch commits and the
    recorded review, and the report is published as the first comment. `azflow pr`
    refuses a branch the remote has not seen, refuses a branch with no commit ahead
-   of base, and refuses to open until a passing review round with a green
-   verification is on record.
+   of base, refuses any branch commit without a stage record, and refuses to open
+   until a passing review round with a green verification is on record.
 
 Opening the pull request means "this stage is ready to be read", so the checks run
 first and the review is on record before it exists. The draft flag is not a reason
@@ -86,11 +89,14 @@ to skip them; it only keeps merge off until `ready`. `--allow-unverified` is the
 escape for a pull request wanted earlier, and the draft then carries the review's
 own gaps as blocking issues.
 6. Runs `azflow ready <task>` to take the pull request out of draft.
-7. Repairs if needed: run the checks, commit the fix, run the next review with
-   `--input <review.json> --scan --post`, then `azflow ready <task>`. `ship` still
+7. Repairs if needed until the head scores strictly above 4.80: run the checks,
+   commit the fix, then run the next review with a new round and a new
+   `--reviewer <fresh id>` plus `--input <review.json> --scan --post`, then
+   `azflow ready <task>`. Each repair is scored on its own stage, and `ship` still
    compares the reviewed head with the pull request head, so a fix without a new
    round does not merge.
-8. Runs `azflow ship <task>` once the review passes.
+8. Runs `azflow ship <task>` once the head passes. After the merge it closes the
+   linked issue, re-reads it, and exits 1 if it is not `CLOSED`.
 
 The pull request is opened by `gh` from the worktree, never from the base branch.
 
@@ -158,8 +164,14 @@ required structure.
 `azflow ship` refuses unless all of these hold at the same head SHA:
 
 - Review verdict is PASS.
-- Review score meets the threshold.
-- Reviewed head equals the pull request head.
+- The pull request body carries `Closes #<issue>` for the task issue (`issue-linked`).
+- Every branch commit has a stage record, and the head stage is PASS with a score
+  strictly above 4.80 (`stage-reviews`).
+- The review names a reviewer that differs from the implementer
+  (`reviewer-independent`).
+- Review score is strictly above the threshold; an exact 4.80 fails
+  (`review-score`).
+- Reviewed head equals the pull request head (`review-head`).
 - CI is green, with no failing or pending check.
 - `mergeable` is `MERGEABLE` and the state is not dirty.
 - The base branch equals the configured base.
@@ -167,13 +179,20 @@ required structure.
 - The pull request is not a draft.
 - Autonomy is `full`.
 
-`--dry-run` evaluates and prints the gates without merging. A failing gate exits
-with code 2.
+A failing gate exits with code 2, and it does so under `--dry-run` too: a preflight
+reports the same non-zero status, so CI cannot read a clean dry-run exit as a
+mergeable pull request.
 
 The merge uses `mergeStrategy` from the ledger: `squash` by default, or `merge`
-or `rebase`. After merging, `ship` records the task as merged, closes the linked
-issue, then fetches and fast-forwards the base branch, so the next task starts
-from the merged head.
+or `rebase`. The merge cannot be undone, so `ship` closes the linked issue and
+re-reads it with `gh issue view --json state` before it records the delivery. When
+the issue is not `CLOSED` after one retry, the task lands in the distinct status
+`merged-issue-open` and `ship` exits 1. Rerun `azflow ship <task> --verify-issue`
+once the issue can close; that command repairs only that one status, proving the
+issue reads `CLOSED` before it moves the task to `merged`. Any other status has to
+pass the full gate list again, so a merge can never be replayed from that path.
+After a clean merge `ship` fetches and fast-forwards the base branch, so the next
+task starts from the merged head.
 
 ## Push and cleanup
 

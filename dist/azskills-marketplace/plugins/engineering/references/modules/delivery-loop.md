@@ -1,7 +1,7 @@
 ---
 name: delivery-loop
-description: Run a repository delivery loop that plans concurrent tasks as a dependency DAG with touch-scope leases, isolates each task in its own git worktree, scores reviews mechanically, and merges automatically on green evidence without sub-agents.
-version: 1.2.0
+description: Run a repository delivery loop that plans concurrent tasks as a dependency DAG with touch-scope leases, isolates each task in its own git worktree, scores reviews mechanically, merges automatically on green evidence without sub-agents, and breaks out of dead loops.
+version: 1.3.0
 status: module
 family: operations
 modes: [init, plan, work, review, ship, recover]
@@ -15,18 +15,19 @@ score and the merge are mechanical. This module owns the task ledger, touch-scop
 leases, worktree isolation, computed review scoring, the merge gates, and the guard
 that blocks manual merges and sub-agent spawns. It also owns final-reply output
 hygiene, because a clean reply is cheaper context and a long run survives on cheap
-context. It does not own the project's own build commands, its architecture
+context, and the dead-loop guard, because a run that repeats one step never reaches
+a review at all. It does not own the project's own build commands, its architecture
 choices, or the content of the code being shipped.
 
 ## Contract
 
 - Use when: a repository needs issue-to-merge delivery that stays correct under several concurrent tasks, and review scoring plus merging must be automated instead of hand-driven.
 - Do not use when: a one-off edit needs no branch, review record, or merge gate; make the edit directly.
-- Owns: the task ledger, touch-scope leases, worktree isolation, computed review scoring, the nine merge gates, and final-reply output hygiene.
+- Owns: the task ledger, touch-scope leases, worktree isolation, computed review scoring, the merge gates, dead-loop interruption and restart, and final-reply output hygiene.
 - Inputs: repository root, base branch, task titles with touch scopes, a structured review record, and the project's own verification command.
 - Outputs: admission waves, isolated task worktrees, an English review report with a computed score, and a merged pull request with its issue closed.
 - Compose with: `az-clean-code` when the delivered code must also meet explicit-code rules; `taste` when judgment and collaboration guidance should stay active during the work.
-- Gates: never spawn a sub-agent, never commit or push on the base branch, never merge without a PASS review at the exact head SHA, never let the model choose its own score, and never ship a final reply that opens with a raw reasoning block. Installing the plugin delegates issue creation, branch push, pull request creation, review posting, merge, and cleanup, so the loop runs that path without asking for per-action approval.
+- Gates: never spawn a sub-agent, never commit or push on the base branch, never merge without every branch commit scored and a PASS review above 4.80 at the exact head SHA, never accept a self-review, never let the model choose its own score, never ship a final reply that opens with a raw reasoning block or carries no visible text, and never let a repeated step run on. Installing the plugin delegates issue creation, branch push, pull request creation, review posting, merge, and cleanup, so the loop runs that path without asking for per-action approval.
 
 ## Modes
 
@@ -36,7 +37,7 @@ choices, or the content of the code being shipped.
 | `plan` | Several tasks must be ordered safely | Pack planned tasks into dependency waves that respect leases and touch-scope disjointness | Waves, blocked list, and scope overlaps |
 | `work` | One admitted task is ready to implement | Claim the task, create its branch and worktree, implement as a single agent, commit in reviewable stages | Worktree path, branch, and commits |
 | `review` | A diff is ready for scoring | Score the structured review record, inject scanner findings, write the report | Report with computed score and verdict |
-| `ship` | A review passed | Re-check every gate at the current head SHA, merge with the configured strategy, close the issue | Merge outcome and synced base |
+| `ship` | A review passed | Re-check every gate at the current head SHA, merge with the configured strategy, close the issue and verify it is CLOSED | Merge outcome and synced base |
 | `recover` | A lease expired or a task stalled | Release expired leases, return the task to the plan, list orphan worktrees | Reclaimed tasks and orphan list |
 
 ## Workflow
@@ -63,25 +64,28 @@ choices, or the content of the code being shipped.
    --subject "<subject>"`. The command refuses an empty index, refuses a ledger
    that records no static check, runs the recorded checks, and enforces the commit
    standard below, so a red tree never gets a message or a commit; `--skip-check`
-   is the visible escape.
+   is the visible escape. It also refuses a new stage while the current head has no
+   stage record, so each commit is scored before the next one lands.
 8. Run the project's own checks on the final head, push the branch, then run
-   `azflow review <task> --input review.json --scan` to score the record. The
-   task must have a claimed worktree; the command derives its real diff and head,
-   always runs the mechanical scanner, and ignores model-supplied file lists. The
-   first review must be round 1; every later round advances by one and carries the
-   previous recorded score.
+   `azflow review <task> --reviewer <fresh id> --input review.json --scan` to score
+   the record. The task must have a claimed worktree; the command derives its real
+   diff and head, always runs the mechanical scanner, and ignores model-supplied
+   file lists. The first review must be round 1; every later round advances by one
+   and carries the previous recorded score. The reviewer must differ from the
+   implementer, so a self-review is rejected and the score comes from a fresh
+   read-only context.
 9. Run `azflow pr <task>` to open a linked draft pull request with a derived title
    and body, then `azflow ready <task>` to take it out of draft. Push without asking
    the user first; the branch push is part of opening the pull request. `pr` refuses
-   until a passing review round with a green verification exists, because opening
-   the pull request is the point where the stage becomes visible; it posts the
-   recorded report as the first comment. `--allow-unverified` opens it earlier on
-   purpose.
+   any unscored branch commit and refuses until a passing review round with a green
+   verification exists, because opening the pull request is the point where the
+   stage becomes visible; it posts the recorded report as the first comment.
+   `--allow-unverified` opens it earlier on purpose.
 10. Run `azflow ship <task>` to refresh the pull request body from the recorded
-   review, evaluate every gate against the current head SHA, and merge only on a
-   full pass, then close the issue and fast-forward the base. Once merged, delete
-   the local task branch and return to the base branch without asking, because the
-   remote already dropped the merged branch.
+   review, evaluate every gate at the current head SHA, and merge only on a full
+   pass. It closes the issue and exits 1 if it is not CLOSED, leaving status
+   `merged-issue-open`; `ship <task> --verify-issue` finishes that repair. Then
+   delete the local branch and return to base without asking.
 11. Run `azflow recover` after an interrupted task to release its lease and return
    it to `planned`; add `--force` to remove orphan worktree directories.
 
@@ -145,10 +149,14 @@ never types a score into the report.
 
 - Base score is 5.00. Deductions are P0 2.50, P1 1.50, P2 0.50, P3 0.20, P4 0.10.
 - Hard caps: any P0 caps at 2.00, any P1 at 3.50, and any P2 at 4.50. P3 and P4
-  rely on their weight: one P3 lands at 4.80 and one P4 at 4.90, so a second P3 or
-  P4 clears the bar only if the rest of the round is otherwise clean.
-- A pass requires zero P0/P1/P2, a score at or above 4.90, and a round within the
-  repair budget of five.
+  rely on their weight: one P3 lands on 4.80 and one P4 at 4.90, so only a single
+  P4 clears the strict bar; 4.80 is a repair, not a merge.
+- A pass requires zero P0/P1/P2, a score strictly above 4.80, and a round within
+  the repair budget of five.
+- Every commit is scored as its own stage before the next stage lands; the pull
+  request merges only when every branch commit has a record and the head stage is
+  PASS above 4.80, scored by a `--reviewer` distinct from the implementer in a
+  fresh context; a self-review is rejected.
 - An unreviewed diff file, a missing or failed verification command, an incomplete
   probe set, a dimension marked failing, or an unevidenced finding each caps the
   report and adds a blocking finding.
@@ -168,22 +176,25 @@ never types a score into the report.
 
 `azflow ship` merges only when every gate passes at the same head SHA:
 
-1. A recorded review exists and its verdict is PASS.
-2. The review score meets the threshold (default 4.90).
-3. The reviewed head SHA equals the pull request head SHA.
-4. Required CI checks are green with no failing or pending check.
-5. The pull request is mergeable and not dirty.
-6. The base branch is unchanged from the configured base.
-7. No blocking label (`do-not-merge`, `blocked`, `wip`, `needs-decision`).
-8. The pull request is not a draft.
-9. Autonomy is `full`. The grant to merge came with installing the plugin, so the
-   loop merges on green evidence and does not ask again. Set autonomy to `manual`
-   to keep a human ship as an explicit override.
+1. A recorded review exists and its verdict is PASS (`review-pass`).
+2. The body links the task issue with `Closes #<issue>` (`issue-linked`).
+3. Every branch commit has a stage record and the head stage is PASS above 4.80 (`stage-reviews`).
+4. The review names a reviewer distinct from the implementer (`reviewer-independent`).
+5. The review score is strictly above 4.80; an exact 4.80 fails (`review-score`).
+6. The reviewed head SHA equals the pull request head SHA (`review-head`).
+7. Required CI checks are green with no failing or pending check (`ci-green`).
+8. The pull request is mergeable and not dirty (`mergeable`).
+9. The base branch is unchanged from the configured base (`base-unchanged`).
+10. No blocking label (`do-not-merge`, `blocked`, `wip`, `needs-decision`).
+11. The pull request is open and not a draft (`not-draft`, `pr-open`).
+12. Autonomy is `full` (`autonomy`); the loop merges on green evidence and does
+   not ask again. Set autonomy to `manual` for an explicit human ship.
 
 On a pass the loop merges with `mergeStrategy` (squash by default), records the
-merge, closes the linked issue, and fast-forwards the base branch. Merge is never
-delegated to a manual `gh pr merge`; the guard denies that command so the gates
-cannot be skipped.
+merge, closes the linked issue, verifies `gh issue view --json state` reads
+`CLOSED` (retrying once and exiting 1 otherwise), and fast-forwards the base. Merge
+is never delegated to a manual `gh pr merge`; the guard denies it so gates cannot
+be skipped.
 
 ## Output hygiene
 
@@ -196,12 +207,43 @@ convention.
 - The hook ends a block at the first reasoning-family closing tag outside Markdown
   code, whichever member of the family opened it, and treats a block that never
   closes as a leak because everything after the opener reads as reasoning.
+- A reply whose reasoning blocks leave no visible characters is treated as blank
+  and corrected the same way, because a turn that shows the user nothing has not
+  delivered anything.
 - It asks for exactly one clean re-send per turn and never claims the emitted text
   was removed, because streamed text cannot be recalled.
 - It dedupes on its own per-turn record, so a `Stop` flag set by another hook does
   not silence it, and it fails open on malformed input.
+- The correction repeats the user prompt verbatim, because a long run may have
+  compacted the prompt out of context by the time the correction arrives.
 - Clean output is also a review requirement: a shipped reply must be text the user
   can read without wading through reasoning.
+
+## Loop guard
+
+An unattended run can repeat one step forever. The failure is quiet: no merge, no
+error, and no review record. The loop therefore treats a repeating step as a
+failure of the same weight as a broken gate.
+
+  - A step repeats when the same tool call, or the same short cycle of calls, runs
+    at the end of the turn: four times for one call, three times for a cycle of two
+    to four calls. The same final reply three times in a row also counts, and so
+    does a second blank reply in one turn: the first blank is corrected, the second
+    proves the correction did not land.
+- The `PreToolUse` guard denies the fourth identical shell call before it runs, so
+  a loop is interrupted mid-turn instead of burning the rest of the window.
+- The `Stop` guard catches everything the tool guard cannot see, including
+  repeated replies and repeated reads, and restarts the turn.
+- A restart voids the looped attempt and re-sends the original prompt in the same
+  conversation, with a notice that a dead loop just happened. It never opens a new
+  session and never asks the user to repeat the request.
+- Restarts are budgeted: at most two per turn, so a model that keeps looping is
+  stopped by the budget rather than by an endless guard. After a breaker
+  interruption the counter resets, so a deliberate re-run of the same command
+  after a fix is still allowed.
+- The `UserPromptSubmit` hook records the prompt in per-session state the moment
+  it arrives. That copy, not the transcript, is what a correction quotes, so the
+  prompt survives compaction and a flooded window.
 
 ## Quality gates
 
@@ -214,8 +256,10 @@ convention.
 - Confirm the task branch was pushed without asking, and that the merge was
   followed by a local branch delete and a fast-forwarded base, again without
   asking. Cleanup is part of the loop, not a question for the user.
-- Confirm the final reply carries no raw reasoning block, and that any correction
-  was asked once rather than looped.
+- Confirm the final reply carries no raw reasoning block and no blank body, and
+  that any correction was asked once rather than looped.
+- Confirm a repeating step was interrupted rather than retried, and that the
+  re-sent prompt in the restart notice is the user's own prompt.
 
 ## Output contract
 
@@ -230,5 +274,6 @@ SHA is a failed delivery, not a shortcut.
 - [Review scoring](../../delivery-loop/references/review.md) - review input shape, formula, caps, and anti-lenience rules.
 - [Automation surface](../../delivery-loop/references/automation.md) - command surface, issue and pull request automation, and the guard.
 - [Output hygiene](../../delivery-loop/references/output-hygiene.md) - reasoning-tag detection, the one bounded correction, and why clean replies extend a run.
+- [Loop guard](../../delivery-loop/references/loop-guard.md) - dead-loop detection, the in-turn breaker, the restart budget, and prompt replay.
 - [Local ledger](../../delivery-loop/references/ledger.md) - ledger layout, state schema, and atomic locked writes.
 - [Migration guide](../../delivery-loop/references/migration.md) - moving rules out of AGENTS.md into this plugin.

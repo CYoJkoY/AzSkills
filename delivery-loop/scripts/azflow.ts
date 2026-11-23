@@ -23,6 +23,7 @@ import {
   issueClose,
   issueCreate,
   issueNumberFromUrl,
+  issueViewState,
   prChecks,
   prComment,
   prCreate,
@@ -237,7 +238,7 @@ function issueBody(task: Task): string {
     "",
     "- Every changed file stays inside the declared touch scopes.",
     "- The project verification command exits 0 and its output is recorded in the review.",
-    "- The review scores at or above the configured threshold at the pull request head.",
+    "- Every branch commit carries a scored stage record and the pull request head scores strictly above the configured threshold.",
   ].join("\n");
 }
 
@@ -462,6 +463,51 @@ function bodyFromArgs(args: Args, project: string, fallback: string): Promise<st
 
 
 
+/** The implementer of a task: the identity recorded when it was claimed. */
+function implementerOf(task: Task): string | null {
+  return task.owner ?? task.lease?.owner ?? null;
+}
+
+/**
+ * Commits on the branch with no stage record. A stage that was never scored
+ * is a stage nobody checked, so it blocks the pull request and the merge.
+ * Shas are normalised to full ids, because a record written from a worktree
+ * has to match the same commit listed from the project root.
+ */
+function unscoredCommits(cwd: string, base: string, head: string, task: Task): string[] {
+  return branchCommits(cwd, base, head)
+    .map((commit) => revParse(cwd, commit.sha))
+    .filter((sha) => task.stageReviews[sha] === undefined);
+}
+
+/**
+ * Close the task's issue and prove it closed. A merge that leaves its issue
+ * open is a delivery that never finished, so a slow close is retried once.
+ */
+function closeIssue(project: string, issue: number, comment: string): boolean {
+  // A merge only auto-closes the issue when the body carried "Closes #N", so
+  // close it explicitly and prove the state. An already-closed issue is a
+  // success, and a transient gh failure is retried once before giving up.
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      if (issueViewState(project, issue) === "CLOSED") return true;
+    } catch {
+      // Ignore a read failure and attempt the close below.
+    }
+    try {
+      issueClose(project, issue, attempt === 0 ? comment : "");
+    } catch {
+      // The close may still have landed; verify it before retrying.
+    }
+    try {
+      if (issueViewState(project, issue) === "CLOSED") return true;
+    } catch {
+      // Fall through to the retry; the merge already happened.
+    }
+  }
+  return false;
+}
+
 async function commit(args: Args): Promise<void> {
   const project = projectRoot(args);
   const id = args.positionals[0];
@@ -521,6 +567,19 @@ async function commit(args: Args): Promise<void> {
         "static check failed: " + command + " (exit " + String(result.status) + ")\n" +
           (tail === "" ? "" : tail + "\n") +
           "no commit message is produced from a red tree; fix the check, or pass --skip-check to record why it is skipped\n",
+      );
+      process.exitCode = 2;
+      return;
+    }
+  }
+  // The loop scores every commit it records. Refusing the next stage while
+  // the current head is unscored keeps the branch from growing past review.
+  if (branchCommits(task.worktree, state.config.base, "HEAD").length > 0) {
+    const headSha = revParse(task.worktree, "HEAD");
+    if (task.stageReviews[headSha] === undefined) {
+      process.stderr.write(
+        "head " + headSha + " has no review record; run 'azflow review " + id +
+          " --input <review.json> --reviewer <fresh id>' on this stage before recording the next one\n",
       );
       process.exitCode = 2;
       return;
@@ -612,6 +671,18 @@ async function openPullRequest(args: Args): Promise<void> {
             " --input <review.json> --scan' before opening the pull request\n",
     );
     process.exitCode = 1;
+    return;
+  }
+  // A pull request exposes the whole branch, so every commit it carries must
+  // already have a scored record, not only the head.
+  const unscored = unscoredCommits(worktree, state.config.base, task.branch, task);
+  if (unscored.length > 0) {
+    process.stderr.write(
+      "branch commits without a review record: " + unscored.join(", ") +
+        "\nscore each stage with 'azflow review " + id +
+        " --input <review.json> --reviewer <fresh id>' before opening the pull request\n",
+    );
+    process.exitCode = 2;
     return;
   }
   const url = prCreate(project, {
@@ -710,6 +781,9 @@ async function claim(args: Args): Promise<void> {
       task.worktree = directory;
     }
     task.status = "active";
+    // Record who implements this task, so a review can prove the reviewer
+    // is a different context and not the author of the artifact.
+    task.owner = owner;
     issueLease(task, owner, state.config.leaseTtlMinutes);
     touch(task);
     return { id: task.id, branch, worktree: directory, lease: task.lease, owner };
@@ -730,7 +804,7 @@ async function status(args: Args): Promise<void> {
     pr: task.pr,
     branch: task.branch,
     leased: leaseAlive(task.lease, now),
-    owner: task.lease?.owner ?? null,
+    owner: implementerOf(task),
     score: task.review?.score ?? null,
     verdict: task.review?.verdict ?? null,
   }));
@@ -772,6 +846,23 @@ async function review(args: Args): Promise<void> {
   // let a review hide defects and claim coverage it never performed.
   if (task.worktree === null) {
     throw new Error("review requires a claimed worktree; run 'azflow claim " + id + "' first");
+  }
+  // A review only counts when a fresh context produces it. The reviewer is a
+  // separate identity from the implementer, so a self-review cannot pass, and
+  // the record names who scored it.
+  const reviewer = lastValue(args, "reviewer");
+  if (reviewer === undefined || reviewer.trim() === "") {
+    throw new Error("review requires --reviewer <id> naming the fresh-context reviewer");
+  }
+  if (asciiIssues(reviewer).length > 0 || !/^[A-Za-z0-9._:-]{1,64}$/.test(reviewer)) {
+    throw new Error("reviewer id must be 1-64 ASCII letters, digits, or . _ : -");
+  }
+  const implementer = implementerOf(task);
+  if (implementer !== null && implementer === reviewer) {
+    throw new Error(
+      "reviewer " + reviewer + " is the implementer of " + id +
+        "; this tool only enforces distinct identity, so the review must run in a separate agent with a fresh context",
+    );
   }
   const diff: string[] = diffFiles(task.worktree, base);
   const reviewed: string[] = Array.isArray(input.reviewedFiles) ? input.reviewedFiles : [];
@@ -820,6 +911,25 @@ async function review(args: Args): Promise<void> {
     }
   }
   const headSha = actualHead;
+  const reviewRoot: string = task.worktree;
+  const earlier = branchCommits(reviewRoot, base, headSha)
+    .map((commit) => ({ sha: revParse(reviewRoot, commit.sha), committedAt: commit.committedAt }))
+    .filter((commit) => commit.sha !== headSha);
+  const missingEarlier = earlier.filter((commit) => task.stageReviews[commit.sha] === undefined);
+  // Commits written before the task existed predate per-commit scoring, so an
+  // upgraded branch keeps them as LEGACY stages instead of becoming unshippable.
+  // Every commit written while the task is open still needs its own scored stage.
+  const claimedAt = Date.parse(task.createdAt);
+  const legacy = missingEarlier.filter(
+    (commit) => Number.isFinite(claimedAt) && commit.committedAt * 1000 < claimedAt,
+  );
+  const unscored = missingEarlier.filter((commit) => !legacy.includes(commit));
+  if (unscored.length > 0) {
+    throw new Error(
+      "earlier branch commits are unscored: " + unscored.map((commit) => commit.sha).join(", ") +
+        "; score each stage in order so no commit enters the branch unreviewed",
+    );
+  }
   const scoredInput: ReviewInput = {
     ...input,
     diffFiles: diff,
@@ -836,6 +946,7 @@ async function review(args: Args): Promise<void> {
     round: scoredInput.round,
     score: result.score,
     verdict: result.verdict,
+    reviewer,
     at,
   };
   const meta = {
@@ -848,6 +959,7 @@ async function review(args: Args): Promise<void> {
     carryOver: scoredInput.carryOver,
     resolved: scoredInput.previous === null || scoredInput.previous === undefined ? [] : scoredInput.previous.resolved,
     dimensions: scoredInput.dimensions,
+    reviewer,
   };
   const report = renderReport(result, meta);
   await writeFile(
@@ -860,6 +972,25 @@ async function review(args: Args): Promise<void> {
     const stored = findTask(fresh, task.id);
     if (task.pr !== null) stored.pr = task.pr;
     stored.review = record;
+    for (const commit of legacy) {
+      if (stored.stageReviews[commit.sha] !== undefined) continue;
+      stored.stageReviews[commit.sha] = {
+        headSha: commit.sha,
+        round: 0,
+        score: 0,
+        verdict: "LEGACY",
+        reviewer: "pre-gate",
+        at: record.at,
+      };
+    }
+    stored.stageReviews[record.headSha] = {
+      headSha: record.headSha,
+      round: record.round,
+      score: record.score,
+      verdict: record.verdict,
+      reviewer,
+      at: record.at,
+    };
     if (stored.status !== "merged") stored.status = "review";
     touch(stored);
   });
@@ -880,6 +1011,33 @@ interface GateRow {
 
 const BLOCKING_LABELS = ["do-not-merge", "blocked", "wip", "needs-decision"];
 
+/**
+ * Finishes a delivery whose pull request merged but whose issue did not close.
+ * Only that one status is repaired here; every other state has to pass the full
+ * gate list again, so a merge can never be replayed from this path.
+ */
+async function finishIssueClosure(project: string, task: Task, prNumber: number): Promise<void> {
+  if (task.issue === null) throw new Error(task.id + " has no linked issue to verify");
+  if (task.status !== "merged-issue-open") {
+    throw new Error(
+      task.id + " is " + task.status +
+        "; --verify-issue only finishes a merged pull request whose issue is still open",
+    );
+  }
+  const closed = closeIssue(project, task.issue, "Merged as PR #" + String(prNumber) + ".");
+  if (!closed) {
+    process.stderr.write("issue #" + String(task.issue) + " is still not CLOSED\n");
+    process.exitCode = 1;
+    return;
+  }
+  await withLock(project, async (fresh) => {
+    const stored = findTask(fresh, task.id);
+    stored.status = "merged";
+    touch(stored);
+  });
+  print("Issue #" + String(task.issue) + " is CLOSED and " + task.id + " is merged");
+}
+
 async function ship(args: Args): Promise<void> {
   const project = projectRoot(args);
   const state = await requireState(project);
@@ -893,6 +1051,10 @@ async function ship(args: Args): Promise<void> {
   if (task === null) throw new Error("ship requires a task id or --pr");
   const prNumber = task.pr ?? (explicitPr === undefined ? null : Number(explicitPr));
   if (prNumber === null) throw new Error(task.id + " has no pull request; pass --pr");
+  if (args.flags.has("verify-issue")) {
+    await finishIssueClosure(project, task, prNumber);
+    return;
+  }
   const pr = prView(project, prNumber);
   const checks = prChecks(project, prNumber);
   const gates: GateRow[] = [];
@@ -902,10 +1064,54 @@ async function ship(args: Args): Promise<void> {
     pass: review !== null && review.verdict === "PASS",
     detail: review === null ? "no review record" : review.verdict + " at " + review.score.toFixed(2),
   });
+  const closesIssue =
+    task.issue !== null && new RegExp("Closes #" + String(task.issue) + "(?![0-9])").test(pr.body);
+  gates.push({
+    gate: "issue-linked",
+    pass: closesIssue,
+    detail:
+      task.issue === null
+        ? "no linked issue"
+        : closesIssue
+          ? "Closes #" + String(task.issue) + " in the body"
+          : "body does not say Closes #" + String(task.issue),
+  });
+  const stageHead = pr.headRefOid !== "" ? pr.headRefOid : task.branch ?? "";
+  const stageCommits = stageHead === "" ? [] : branchCommits(project, state.config.base, stageHead)
+    .map((commit) => revParse(project, commit.sha));
+  const stageUnscored = stageCommits.filter((sha) => task.stageReviews[sha] === undefined);
+  const headStage = pr.headRefOid === "" ? null : task.stageReviews[pr.headRefOid] ?? null;
+  gates.push({
+    gate: "stage-reviews",
+    pass:
+      stageCommits.length > 0 && stageUnscored.length === 0 && headStage !== null &&
+      headStage.verdict === "PASS" && headStage.score > state.config.reviewThreshold,
+    detail:
+      stageCommits.length === 0
+        ? "no branch commits resolved"
+        : stageUnscored.length > 0
+          ? "unscored: " + stageUnscored.join(",")
+          : headStage === null
+            ? "head has no stage record"
+            : String(stageCommits.length) + " scored, head " + headStage.verdict + " " + headStage.score.toFixed(2),
+  });
+  const implementer = implementerOf(task);
+  gates.push({
+    gate: "reviewer-independent",
+    pass:
+      review !== null && review.reviewer !== undefined && review.reviewer !== "" &&
+      review.reviewer !== implementer,
+    detail:
+      review === null
+        ? "no review record"
+        : review.reviewer === undefined
+          ? "review names no reviewer"
+          : "reviewer " + review.reviewer + " vs implementer " + String(implementer ?? "unknown"),
+  });
   gates.push({
     gate: "review-score",
-    pass: review !== null && review.score >= state.config.reviewThreshold,
-    detail: review === null ? "no score" : String(review.score.toFixed(2)) + " >= " + state.config.reviewThreshold.toFixed(2),
+    pass: review !== null && review.score > state.config.reviewThreshold,
+    detail: review === null ? "no score" : String(review.score.toFixed(2)) + " > " + state.config.reviewThreshold.toFixed(2),
   });
   gates.push({
     gate: "review-head",
@@ -955,11 +1161,13 @@ async function ship(args: Args): Promise<void> {
     print("Ship gates for " + task.id + " / PR #" + String(prNumber) + " @ " + pr.headRefOid);
     for (const gate of gates) print("  " + (gate.pass ? "PASS" : "FAIL") + " " + gate.gate + ": " + gate.detail);
   }
-  if (args.flags.has("dry-run")) return;
+  // A dry run is still a preflight: failed gates must exit non-zero so CI can
+  // gate on the report instead of reading a clean exit as a clean pull request.
   if (failed.length > 0) {
     process.exitCode = 2;
     return;
   }
+  if (args.flags.has("dry-run")) return;
   // Refresh the body from the review record and the real commit list, so the
   // merged pull request carries the audit trail the gates just accepted.
   try {
@@ -983,16 +1191,29 @@ async function ship(args: Args): Promise<void> {
     }
   }
   prMerge(project, prNumber, state.config.mergeStrategy, true);
+  // The merge cannot be undone, so the issue is closed and proven CLOSED before
+  // the ledger calls the delivery done. A pull request whose issue stays open
+  // keeps the distinct status merged-issue-open, which --verify-issue finishes.
+  const issueClosed = task.issue === null
+    ? true
+    : closeIssue(project, task.issue, "Merged as PR #" + String(prNumber) + ".");
   await withLock(project, async (fresh) => {
     const stored = findTask(fresh, task.id);
-    stored.status = "merged";
+    stored.status = issueClosed ? "merged" : "merged-issue-open";
     stored.pr = prNumber;
     if (stored.worktree !== null) {
       stored.worktree = null;
     }
     touch(stored);
   });
-  if (task.issue !== null) issueClose(project, task.issue, "Merged as PR #" + String(prNumber) + ".");
+  if (!issueClosed) {
+    process.stderr.write(
+      "merged PR #" + String(prNumber) + " but issue #" + String(task.issue) +
+        " is not CLOSED; the task is recorded as merged-issue-open\n" +
+        "run: azflow ship " + task.id + " --verify-issue\n",
+    );
+    process.exitCode = 1;
+  }
   const fetched = git(["fetch", state.config.remote, "--prune"], { cwd: project });
   let synced = false;
   if (fetched.status === 0) {
@@ -1002,7 +1223,7 @@ async function ship(args: Args): Promise<void> {
       synced = pull.status === 0;
     }
   }
-  if (args.flags.has("json")) printJson({ ...outcome, merged: true, synced });
+  if (args.flags.has("json")) printJson({ ...outcome, merged: true, synced, issueClosed });
   else {
     if (synced) {
       print("Merged and synced " + state.config.base);
@@ -1087,8 +1308,8 @@ function help(): void {
       "  azflow plan [--json]",
       "  azflow claim <task> [--agent <name>]",
       "  azflow status [--json]",
-      "  azflow review <task> --input <review.json> [--scan] [--post] [--pr N] [--json]",
-      "  azflow ship <task>|--pr <n> [--dry-run] [--json]",
+      "  azflow review <task> --input <review.json> --reviewer <fresh id> [--scan] [--post] [--pr N] [--json]",
+      "  azflow ship <task>|--pr <n> [--dry-run] [--verify-issue] [--json]",
       "  azflow recover [--force]",
       "  azflow doctor [--json]",
       "",

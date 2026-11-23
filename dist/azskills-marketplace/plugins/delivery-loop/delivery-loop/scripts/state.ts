@@ -15,6 +15,8 @@ export type TaskStatus =
   | "active"
   | "review"
   | "merged"
+  /** The pull request merged, but the linked issue is still open. */
+  | "merged-issue-open"
   | "abandoned";
 
 export interface TaskLease {
@@ -30,6 +32,22 @@ export interface ReviewRecord {
   readonly score: number;
   readonly verdict: "PASS" | "FAIL";
   readonly at: string;
+  /** Identity of the fresh-context reviewer that produced this record. */
+  readonly reviewer?: string;
+}
+
+/**
+ * One scored stage. Every commit on a task branch is scored after it is
+ * made, so a commit without a record is a commit that was never reviewed.
+ */
+export interface StageReview {
+  readonly headSha: string;
+  readonly round: number;
+  readonly score: number;
+  /** LEGACY marks a commit written before per-commit scoring existed. */
+  readonly verdict: "PASS" | "FAIL" | "LEGACY";
+  readonly reviewer: string;
+  readonly at: string;
 }
 
 export interface Task {
@@ -42,8 +60,12 @@ export interface Task {
   branch: string | null;
   worktree: string | null;
   pr: number | null;
+  /** Implementer identity recorded at claim; a reviewer must differ from it. */
+  owner: string | null;
   lease: TaskLease | null;
   review: ReviewRecord | null;
+  /** Per-commit stage reviews, keyed by the commit SHA that was scored. */
+  stageReviews: Record<string, StageReview>;
   notes: string;
   createdAt: string;
   updatedAt: string;
@@ -71,12 +93,19 @@ export interface FlowState {
 
 export const STATE_SCHEMA_VERSION = 1;
 
+/**
+ * The threshold shipped before strict per-commit scoring. A ledger that still
+ * carries it is migrated, because a strict `score > 4.9` over 0.1-quantised
+ * weights silently demands a perfect 5.00 instead of the documented 4.80 bar.
+ */
+export const LEGACY_REVIEW_THRESHOLD = 4.9;
+
 export const DEFAULT_CONFIG: FlowConfig = {
   base: "main",
   remote: "origin",
   maxParallel: 3,
   autonomy: "full",
-  reviewThreshold: 4.9,
+  reviewThreshold: 4.8,
   leaseTtlMinutes: 90,
   mergeStrategy: "squash",
   allowFrameworks: [],
@@ -109,6 +138,19 @@ export async function readState(project: string): Promise<FlowState | null> {
   }
   // A ledger written before checks existed keeps working with no checks.
   if (!Array.isArray(parsed.config.checks)) parsed.config.checks = [];
+  // The pre-gate default threshold is migrated, not preserved: keeping 4.9 would
+  // quietly demand a perfect score under the strict comparison.
+  if (parsed.config.reviewThreshold === LEGACY_REVIEW_THRESHOLD) {
+    parsed.config.reviewThreshold = DEFAULT_CONFIG.reviewThreshold;
+  }
+  // Older ledgers predate per-commit scoring and implementer identity. Fill
+  // the missing fields instead of rejecting a ledger that is otherwise valid.
+  for (const task of parsed.tasks) {
+    if (task.owner === undefined) task.owner = task.lease === null ? null : task.lease.owner;
+    if (task.stageReviews === undefined || task.stageReviews === null) {
+      task.stageReviews = {};
+    }
+  }
   return parsed;
 }
 
@@ -150,7 +192,14 @@ function isConfig(value: Record<string, unknown>): boolean {
   );
 }
 
-const TASK_STATUSES: readonly TaskStatus[] = ["planned", "active", "review", "merged", "abandoned"];
+const TASK_STATUSES: readonly TaskStatus[] = [
+  "planned",
+  "active",
+  "review",
+  "merged",
+  "merged-issue-open",
+  "abandoned",
+];
 
 function isPositiveInt(value: unknown): boolean {
   return typeof value === "number" && Number.isInteger(value) && value > 0;
@@ -178,8 +227,25 @@ function isReview(value: unknown): value is ReviewRecord {
     Number.isInteger(value.round) &&
     typeof value.score === "number" &&
     (value.verdict === "PASS" || value.verdict === "FAIL") &&
+    typeof value.at === "string" &&
+    (value.reviewer === undefined || typeof value.reviewer === "string")
+  );
+}
+function isStageReview(value: unknown): value is StageReview {
+  return (
+    isRecord(value) &&
+    typeof value.headSha === "string" &&
+    typeof value.round === "number" &&
+    Number.isInteger(value.round) &&
+    typeof value.score === "number" &&
+    (value.verdict === "PASS" || value.verdict === "FAIL" || value.verdict === "LEGACY") &&
+    typeof value.reviewer === "string" &&
     typeof value.at === "string"
   );
+}
+function isStageReviewMap(value: unknown): value is Record<string, StageReview> {
+  if (!isRecord(value)) return false;
+  return Object.values(value).every((entry) => isStageReview(entry));
 }
 
 function isTask(value: unknown): value is Task {
@@ -195,8 +261,10 @@ function isTask(value: unknown): value is Task {
     (value.branch === null || typeof value.branch === "string") &&
     (value.worktree === null || typeof value.worktree === "string") &&
     (value.pr === null || typeof value.pr === "number") &&
+    (value.owner === undefined || value.owner === null || typeof value.owner === "string") &&
     (value.lease === null || isLease(value.lease)) &&
     (value.review === null || isReview(value.review)) &&
+    (value.stageReviews === undefined || isStageReviewMap(value.stageReviews)) &&
     typeof value.notes === "string" &&
     typeof value.createdAt === "string" &&
     typeof value.updatedAt === "string"
@@ -278,8 +346,10 @@ export function makeTask(id: string, title: string, touch: string[]): Task {
     branch: null,
     worktree: null,
     pr: null,
+    owner: null,
     lease: null,
     review: null,
+    stageReviews: {},
     notes: "",
     createdAt: at,
     updatedAt: at,

@@ -51,12 +51,33 @@ const log = process.env.AZFLOW_SHIM_LOG;
 fs.appendFileSync(log, args.join(" ") + "\\n");
 const reply = (value) => { process.stdout.write(value + "\\n"); process.exit(0); };
 const [group, action] = args;
+const issueStatePath = (issue) => process.env.AZFLOW_SHIM_ISSUE_STATE + "-" + issue;
+const issueState = (issue) => (fs.existsSync(issueStatePath(issue))
+  ? fs.readFileSync(issueStatePath(issue), "utf8").trim()
+  : "OPEN");
+const prBodyPath = process.env.AZFLOW_SHIM_PR_BODY;
+const readBody = () => (fs.existsSync(prBodyPath) ? fs.readFileSync(prBodyPath, "utf8") : "");
+const rememberBody = () => {
+  const at = args.indexOf("--body");
+  if (at !== -1) fs.writeFileSync(prBodyPath, args[at + 1] || "");
+};
 if (group === "auth" && action === "status") reply("ok");
 if (group === "issue" && action === "create") reply("https://github.com/acme/demo/issues/" + process.env.AZFLOW_SHIM_ISSUE);
-if (group === "issue" && (action === "close" || action === "comment")) reply("");
-if (group === "pr" && action === "create") reply("https://github.com/acme/demo/pull/" + process.env.AZFLOW_SHIM_PR);
+if (group === "issue" && action === "comment") reply("");
+if (group === "issue" && action === "close") {
+  if (process.env.AZFLOW_SHIM_ISSUE_STUCK !== "1") fs.writeFileSync(issueStatePath(args[2]), "CLOSED");
+  reply("");
+}
+if (group === "issue" && action === "view") reply(JSON.stringify({ state: issueState(args[2]) }));
+if (group === "pr" && action === "create") {
+  rememberBody();
+  reply("https://github.com/acme/demo/pull/" + process.env.AZFLOW_SHIM_PR);
+}
 if (group === "pr" && action === "comment") reply("");
-if (group === "pr" && action === "edit") reply("");
+if (group === "pr" && action === "edit") {
+  rememberBody();
+  reply("");
+}
 if (group === "pr" && action === "ready") reply("");
 if (group === "pr" && action === "checks") reply("[]");
 if (group === "pr" && action === "merge") {
@@ -70,7 +91,7 @@ if (group === "pr" && action === "view") {
     number: Number(process.env.AZFLOW_SHIM_PR),
     url: "https://github.com/acme/demo/pull/" + process.env.AZFLOW_SHIM_PR,
     title: "Add checkout helper",
-    body: "",
+    body: readBody(),
     headRefName: process.env.AZFLOW_SHIM_BRANCH,
     baseRefName: "main",
     headRefOid: process.env.AZFLOW_SHIM_HEAD_SHA,
@@ -118,6 +139,8 @@ async function setup(): Promise<{
       AZFLOW_SHIM_REPO: project,
       AZFLOW_SHIM_ISSUE: "7",
       AZFLOW_SHIM_PR: "9",
+      AZFLOW_SHIM_ISSUE_STATE: path.join(work, "issue-state"),
+      AZFLOW_SHIM_PR_BODY: path.join(work, "pr-body.txt"),
       AZFLOW_SHIM_BRANCH: "issue/t-0001-add-checkout-helper",
       AZFLOW_SHIM_HEAD_SHA: "",
     },
@@ -187,6 +210,16 @@ async function main(): Promise<void> {
   assert.equal(git(claimed.worktree, ["log", "-1", "--format=%s"]), "feat(cart): add total helper");
   assert.match(git(claimed.worktree, ["log", "-1", "--format=%b"]), /Refs: #7/, "the commit cites the issue");
 
+  // Every commit is scored before the next one is recorded, so a branch
+  // cannot grow past a stage that no review ever saw.
+  await writeFile(path.join(claimed.worktree, "src", "cart", "empty.ts"), "export const empty: readonly number[] = [];\n", "utf8");
+  git(claimed.worktree, ["add", "src/cart/empty.ts"]);
+  const unscoredHead = cli(["commit", "T-0001", "--type", "feat", "--scope", "cart", "--subject", "add empty list"]);
+  assert.equal(unscoredHead.status, 2, "a stage before the head is scored must be refused");
+  assert.match(unscoredHead.stderr, /has no review record/);
+  git(claimed.worktree, ["restore", "--staged", "src/cart/empty.ts"]);
+  await rm(path.join(claimed.worktree, "src", "cart", "empty.ts"), { force: true });
+
   // A pull request cannot reference a branch the remote has never seen.
   const early = cli(["pr", "T-0001"]);
   assert.equal(early.status, 1, "pr before push must fail");
@@ -234,18 +267,26 @@ async function main(): Promise<void> {
     JSON.stringify({ ...reviewInput, headSha: "0000000000000000000000000000000000000000" }, null, 2),
     "utf8",
   );
-  const stale = cli(["review", "T-0001", "--input", stalePath]);
+  const noReviewer = cli(["review", "T-0001", "--input", inputPath]);
+  assert.equal(noReviewer.status, 1, "a review without a reviewer id must fail");
+  assert.match(noReviewer.stderr, /requires --reviewer/);
+
+  const selfReview = cli(["review", "T-0001", "--input", inputPath, "--reviewer", "primary"]);
+  assert.equal(selfReview.status, 1, "the implementer may not review its own artifact");
+  assert.match(selfReview.stderr, /is the implementer/);
+
+  const stale = cli(["review", "T-0001", "--input", stalePath, "--reviewer", "reviewer-1"]);
   assert.equal(stale.status, 1, "a stale review head must fail");
 
   const withoutWorktree = cli(["review", "T-0002", "--input", inputPath]);
   assert.equal(withoutWorktree.status, 1, "a review without a claimed worktree must fail");
   assert.match(withoutWorktree.stderr, /requires a claimed worktree/);
 
-  const skippedFirstRound = cli(["review", "T-0001", "--input", firstRoundPath]);
+  const skippedFirstRound = cli(["review", "T-0001", "--input", firstRoundPath, "--reviewer", "reviewer-1"]);
   assert.equal(skippedFirstRound.status, 1, "the first review must be round 1");
   assert.match(skippedFirstRound.stderr, /must be round 1/);
 
-  must(["review", "T-0001", "--input", inputPath, "--scan"]);
+  must(["review", "T-0001", "--input", inputPath, "--scan", "--reviewer", "reviewer-1"]);
   // Opening the pull request is when the stage stops being private, so the
   // project checks must already be on record by then.
   const opened = JSON.parse(must(["pr", "T-0001"]).stdout) as { pr: number; draft: boolean };
@@ -285,7 +326,7 @@ async function main(): Promise<void> {
   assert.equal(task.review?.headSha, headSha);
 
 
-  const replayedRound = cli(["review", "T-0001", "--input", inputPath]);
+  const replayedRound = cli(["review", "T-0001", "--input", inputPath, "--reviewer", "reviewer-1"]);
   assert.equal(replayedRound.status, 1, "a review round may not be replayed");
   assert.match(replayedRound.stderr, /must advance by one/);
 
@@ -295,7 +336,7 @@ async function main(): Promise<void> {
     JSON.stringify({ ...reviewInput, round: 2 }, null, 2),
     "utf8",
   );
-  const missingPrevious = cli(["review", "T-0001", "--input", missingPreviousPath]);
+  const missingPrevious = cli(["review", "T-0001", "--input", missingPreviousPath, "--reviewer", "reviewer-1"]);
   assert.equal(missingPrevious.status, 1, "a later review must carry the previous record");
   assert.match(missingPrevious.stderr, /must include a previous record/);
 
@@ -309,15 +350,54 @@ async function main(): Promise<void> {
     ),
     "utf8",
   );
-  const mismatchedPrevious = cli(["review", "T-0001", "--input", mismatchedPreviousPath]);
+  const mismatchedPrevious = cli(["review", "T-0001", "--input", mismatchedPreviousPath, "--reviewer", "reviewer-1"]);
   assert.equal(mismatchedPrevious.status, 1, "a later review must match the recorded score");
   assert.match(mismatchedPrevious.stderr, /does not match recorded round/);
+
+  // Ship refuses to merge on the three audit gaps its gates exist for: a body
+  // that no longer closes the issue, a review signed by the implementer, and a
+  // commit that bypassed azflow. Each leaves the ledger and the remote intact.
+  const bodyPath = env.AZFLOW_SHIM_PR_BODY ?? "";
+  const savedBody = await readFile(bodyPath, "utf8");
+  await writeFile(bodyPath, "## Change summary\n\nBody was edited by hand.\n", "utf8");
+  const unlinked = cli(["ship", "T-0001", "--json", "--dry-run"], { AZFLOW_SHIM_HEAD_SHA: headSha });
+  assert.equal(unlinked.status, 2, "a body without Closes #n must not merge");
+  assert.ok(
+    (JSON.parse(unlinked.stdout) as { failed: string[] }).failed.includes("issue-linked"),
+    "the issue-linked gate reports the broken link",
+  );
+  await writeFile(bodyPath, savedBody, "utf8");
+
+  const withSelfReview = JSON.parse(await readFile(stateFile(project), "utf8")) as {
+    tasks: { id: string; owner: string; review: { reviewer: string } | null }[];
+  };
+  const firstRecord = withSelfReview.tasks.find((item) => item.id === "T-0001");
+  if (firstRecord === undefined || firstRecord.review === null) {
+    throw new Error("T-0001 must exist with a recorded review");
+  }
+  firstRecord.review.reviewer = firstRecord.owner;
+  await writeFile(stateFile(project), JSON.stringify(withSelfReview, null, 2) + "\n", "utf8");
+  const selfReviewed = cli(["ship", "T-0001", "--json", "--dry-run"], { AZFLOW_SHIM_HEAD_SHA: headSha });
+  assert.equal(selfReviewed.status, 2, "a review signed by the implementer must not merge");
+  assert.ok((JSON.parse(selfReviewed.stdout) as { failed: string[] }).failed.includes("reviewer-independent"));
+  firstRecord.review.reviewer = "reviewer-1";
+  await writeFile(stateFile(project), JSON.stringify(withSelfReview, null, 2) + "\n", "utf8");
+
+  await writeFile(path.join(claimed.worktree, "src", "cart", "bypass.ts"), "export const bypass = true;\n", "utf8");
+  git(claimed.worktree, ["add", "src/cart/bypass.ts"]);
+  git(claimed.worktree, ["commit", "-m", "feat(cart): bypass the loop"]);
+  const bypassed = git(claimed.worktree, ["rev-parse", "HEAD"]);
+  const unscoredShip = cli(["ship", "T-0001", "--json", "--dry-run"], { AZFLOW_SHIM_HEAD_SHA: bypassed });
+  assert.equal(unscoredShip.status, 2, "a commit the loop never scored must not merge");
+  assert.ok((JSON.parse(unscoredShip.stdout) as { failed: string[] }).failed.includes("stage-reviews"));
+  git(claimed.worktree, ["reset", "--hard", headSha]);
 
   const shipped = must(["ship", "T-0001"], { AZFLOW_SHIM_HEAD_SHA: headSha });
   assert.match(shipped.stdout, /Merged and synced main/);
   const log = await readFile(env.AZFLOW_SHIM_LOG ?? "", "utf8");
   assert.match(log, /pr merge 9 --squash --delete-branch/);
   assert.match(log, /issue close 7/);
+  assert.match(log, /issue view 7 --json state/, "ship proves the issue closed after merging");
   assert.match(log, /pr edit 9 --body ## Linked Issue/, "ship refreshes the body before merging");
 
   const merged = JSON.parse(await readFile(stateFile(project), "utf8")) as {
@@ -350,7 +430,7 @@ async function main(): Promise<void> {
   };
   const redPath = path.join(work, "review-red.json");
   await writeFile(redPath, JSON.stringify(redInput, null, 2), "utf8");
-  const redReview = cli(["review", "T-0002", "--input", redPath, "--scan"]);
+  const redReview = cli(["review", "T-0002", "--input", redPath, "--scan", "--reviewer", "reviewer-1"]);
   assert.equal(redReview.status, 2, "a red verification scores FAIL");
   const redPull = cli(["pr", "T-0002"], { AZFLOW_SHIM_PR: "10" });
   assert.equal(redPull.status, 1, "a red verification must not open the pull request");
@@ -361,6 +441,7 @@ async function main(): Promise<void> {
   assert.equal(forced.pr, 10);
   const forcedLog = await readFile(env.AZFLOW_SHIM_LOG ?? "", "utf8");
   assert.match(forcedLog, /pr create --title feat\(badge\): add count helper \(#8\)/);
+
 
   // A stage is only named when the configured static checks are green. The
   // ledger records the failing command, so no message is produced from it.
@@ -409,6 +490,57 @@ async function main(): Promise<void> {
     "the refused stage stays staged",
   );
   assert.equal(git(third.worktree, ["rev-parse", "HEAD"]), headAfterGreen, "the refused stage made no commit");
+
+  // A merge that cannot prove its issue closed is reported, not accepted.
+  must(["add", "Add writer helper", "--touch", "src/writer/**"]);
+  const fourth = JSON.parse(must(["claim", "T-0004"]).stdout) as { worktree: string; branch: string };
+  await mkdir(path.join(fourth.worktree, "src", "writer"), { recursive: true });
+  await writeFile(
+    path.join(fourth.worktree, "src", "writer", "write.ts"),
+    "export const write = (value: string): string => value;\n",
+    "utf8",
+  );
+  must(["issue", "T-0004"], { AZFLOW_SHIM_ISSUE: "12" });
+  git(fourth.worktree, ["add", "."]);
+  must(["commit", "T-0004", "--type", "feat", "--scope", "writer", "--subject", "add write helper"]);
+  git(fourth.worktree, ["push", "-u", "origin", fourth.branch]);
+  const fourthHead = git(fourth.worktree, ["rev-parse", "HEAD"]);
+  const cleanPath = path.join(work, "review-clean.json");
+  await writeFile(
+    cleanPath,
+    JSON.stringify({ ...reviewInput, headSha: fourthHead, reviewedFiles: ["src/writer/write.ts"] }, null, 2),
+    "utf8",
+  );
+  must(["review", "T-0004", "--input", cleanPath, "--scan", "--reviewer", "reviewer-2"]);
+  must(["pr", "T-0004"], { AZFLOW_SHIM_PR: "11" });
+  must(["ready", "T-0004"]);
+  const stuck = cli(["ship", "T-0004"], { AZFLOW_SHIM_HEAD_SHA: fourthHead, AZFLOW_SHIM_ISSUE_STUCK: "1" });
+  assert.equal(stuck.status, 1, "a merge whose issue stays open is a failed delivery");
+  assert.match(stuck.stderr, /is not CLOSED/);
+
+  // The delayed-closure path repairs exactly that one status and nothing else.
+  const alreadyMerged = cli(["ship", "T-0001", "--verify-issue"]);
+  assert.equal(alreadyMerged.status, 1, "verify-issue only repairs a merge whose issue stayed open");
+  assert.match(alreadyMerged.stderr, /only finishes a merged pull request whose issue is still open/);
+  const recovered = must(["ship", "T-0004", "--verify-issue"]);
+  assert.match(recovered.stdout, /is CLOSED and T-0004 is merged/);
+  const recoveredState = JSON.parse(await readFile(stateFile(project), "utf8")) as {
+    tasks: { id: string; status: string }[];
+  };
+  assert.equal(recoveredState.tasks.find((item) => item.id === "T-0004")?.status, "merged");
+
+  // The ledger keeps the implementer and one scored stage per commit.
+  const finalState = JSON.parse(await readFile(stateFile(project), "utf8")) as {
+    tasks: {
+      id: string;
+      owner: string | null;
+      stageReviews: Record<string, { reviewer: string; verdict: string; score: number }>;
+    }[];
+  };
+  const firstTask = finalState.tasks.find((item) => item.id === "T-0001");
+  assert.equal(firstTask?.owner, "primary", "claim records the implementer");
+  assert.deepEqual(Object.keys(firstTask?.stageReviews ?? {}), [headSha], "each commit carries one stage record");
+  assert.equal(Object.values(firstTask?.stageReviews ?? {})[0]?.reviewer, "reviewer-1");
 
   await rm(work, { recursive: true, force: true });
   console.log("cli.test.ts: all assertions passed");

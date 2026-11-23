@@ -89,7 +89,9 @@ export interface ScorePolicy {
 }
 
 export const DEFAULT_POLICY: ScorePolicy = {
-  threshold: 4.9,
+  // A round passes only when its score is strictly above this bar, so a
+  // score of exactly 4.80 is still a repair, not a merge.
+  threshold: 4.8,
   maxRounds: 5,
   requiredProbes: PROBES,
 };
@@ -149,6 +151,79 @@ export function assertReviewInput(value: unknown): asserts value is ReviewInput 
   for (const finding of [...record.findings, ...record.carryOver]) {
     assertFinding(finding);
   }
+  for (const probe of record.probes) assertProbeResult(probe);
+  for (const dimension of record.dimensions) assertDimensionResult(dimension);
+  if (record.verification !== null && record.verification !== undefined) {
+    assertVerification(record.verification);
+  }
+  if (record.noVerificationReason !== undefined && typeof record.noVerificationReason !== "string") {
+    throw new ReviewInputError("noVerificationReason must be a string when present");
+  }
+  if (record.previous !== null && record.previous !== undefined) {
+    assertPreviousRound(record.previous);
+  }
+}
+
+export function assertProbeResult(value: unknown): asserts value is ProbeResult {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new ReviewInputError("Probe result must be an object");
+  }
+  const record = value as Record<string, unknown>;
+  if (!isProbeId(record.id)) {
+    throw new ReviewInputError("Probe id must be one of " + PROBES.join(", "));
+  }
+  if (record.status !== "passed" && record.status !== "failed" && record.status !== "na") {
+    throw new ReviewInputError("Probe status must be passed, failed, or na");
+  }
+  if (typeof record.note !== "string") {
+    throw new ReviewInputError("Probe note must be a string");
+  }
+}
+
+export function assertDimensionResult(value: unknown): asserts value is DimensionResult {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new ReviewInputError("Dimension result must be an object");
+  }
+  const record = value as Record<string, unknown>;
+  if (!isDimension(record.id)) {
+    throw new ReviewInputError("Dimension id must be one of " + DIMENSIONS.join(", "));
+  }
+  if (record.status !== "pass" && record.status !== "fail") {
+    throw new ReviewInputError("Dimension status must be pass or fail");
+  }
+  if (typeof record.note !== "string") {
+    throw new ReviewInputError("Dimension note must be a string");
+  }
+}
+
+export function assertVerification(value: unknown): asserts value is VerificationResult {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new ReviewInputError("Verification must be an object");
+  }
+  const record = value as Record<string, unknown>;
+  if (typeof record.command !== "string") {
+    throw new ReviewInputError("Verification command must be a string");
+  }
+  if (typeof record.exitCode !== "number" || !Number.isInteger(record.exitCode)) {
+    throw new ReviewInputError("Verification exitCode must be an integer");
+  }
+  if (typeof record.output !== "string") {
+    throw new ReviewInputError("Verification output must be a string");
+  }
+}
+
+export function assertPreviousRound(value: unknown): asserts value is PreviousRound {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new ReviewInputError("previous must be an object");
+  }
+  const record = value as Record<string, unknown>;
+  if (typeof record.score !== "number" || !Number.isFinite(record.score)) {
+    throw new ReviewInputError("previous.score must be a finite number");
+  }
+  if (!Array.isArray(record.resolved)) {
+    throw new ReviewInputError("previous.resolved must be a Finding array");
+  }
+  for (const finding of record.resolved) assertFinding(finding);
 }
 
 export function assertFinding(value: unknown): asserts value is Finding {
@@ -164,6 +239,12 @@ export function assertFinding(value: unknown): asserts value is Finding {
   }
   if (typeof record.summary !== "string" || record.summary.trim() === "") {
     throw new ReviewInputError("Finding summary is required");
+  }
+  if (typeof record.evidence !== "string") {
+    throw new ReviewInputError("Finding evidence must be a string");
+  }
+  if (typeof record.fix !== "string") {
+    throw new ReviewInputError("Finding fix must be a string");
   }
 }
 
@@ -423,11 +504,13 @@ export function scoreReview(
       "Round " + input.round + " exceeds the repair budget of " + policy.maxRounds + ".",
     );
   }
+  // The bar is strict: a score equal to the threshold is not above it, so a
+  // round that lands exactly on 4.80 still needs another repair.
   const verdict: "PASS" | "FAIL" =
-    blocking === 0 && score >= policy.threshold && !budgetExhausted ? "PASS" : "FAIL";
+    blocking === 0 && score > policy.threshold && !budgetExhausted ? "PASS" : "FAIL";
   if (verdict === "FAIL" && blocking === 0 && !budgetExhausted) {
     reasons.push(
-      "Score " + score.toFixed(2) + " is below the acceptance threshold " + policy.threshold.toFixed(2) + ".",
+      "Score " + score.toFixed(2) + " is not above the acceptance threshold " + policy.threshold.toFixed(2) + ".",
     );
   }
 
@@ -435,7 +518,7 @@ export function scoreReview(
     id: "acceptance",
     status: verdict === "PASS" ? "pass" : "fail",
     detail:
-      "blocking=" + String(blocking) + ", score=" + score.toFixed(2) + ", threshold=" + policy.threshold.toFixed(2),
+      "blocking=" + String(blocking) + ", score=" + score.toFixed(2) + ", required=score>" + policy.threshold.toFixed(2),
   });
 
   return {
@@ -468,6 +551,7 @@ export interface ReportMeta {
   readonly issue: number | null;
   readonly previousHeadSha: string | null;
   readonly reviewedAt: string;
+  readonly reviewer?: string;
   readonly findings: readonly Finding[];
   readonly headSha?: string;
   readonly carryOver?: readonly Finding[];
@@ -503,12 +587,15 @@ export function renderReport(result: ScoreResult, meta: ReportMeta): string {
         : "Previous head SHA (`" + meta.previousHeadSha + "`)"),
   );
   lines.push(
-    "- **Verdict**: `**" + result.verdict + "**` (Acceptance threshold: zero unresolved `P0/P1/P2` issues and final score `>= " +
+    "- **Verdict**: `**" + result.verdict + "**` (Acceptance rule: zero unresolved `P0/P1/P2` issues and final score `> " +
       result.threshold.toFixed(2) + " / 5.00`)",
   );
   lines.push("- **Final Score**: `**" + result.score.toFixed(2) + " / 5.00**`");
   lines.push("- Task: `" + meta.taskId + "`" + (meta.issue === null ? "" : " / Issue #" + String(meta.issue)));
   lines.push("- Reviewed at: `" + meta.reviewedAt + "`");
+  if (meta.reviewer !== undefined && meta.reviewer !== "") {
+    lines.push("- Reviewer: `" + meta.reviewer + "` (independent, fresh context)");
+  }
   lines.push("");
 
   lines.push(
