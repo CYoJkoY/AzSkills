@@ -78,19 +78,18 @@ const threeP4 = scoreReview(baseInput({ findings: [distinctFinding("P4", 1), dis
 assert.equal(threeP4.score, 4.7);
 assert.equal(threeP4.verdict, "FAIL");
 
-const belowFloor = scoreReview(
-  baseInput({ findings: [finding("P4")] }),
-  { ...DEFAULT_POLICY, threshold: 4.9 },
-);
-assert.equal(belowFloor.score, 4.9);
-assert.equal(belowFloor.verdict, "PASS");
+assert.equal(DEFAULT_POLICY.threshold, 4.8, "the acceptance bar defaults to 4.80");
 
-const strictFloor = scoreReview(
+// The bar is strict: a 4.90 round passes, a 4.80 round is still a repair.
+const aboveThreshold = scoreReview(baseInput({ findings: [finding("P4")] }));
+assert.equal(aboveThreshold.score, 4.9);
+assert.equal(aboveThreshold.verdict, "PASS");
+
+const atThreshold = scoreReview(
   baseInput({ findings: [distinctFinding("P4", 1), distinctFinding("P4", 2)] }),
-  { ...DEFAULT_POLICY, threshold: 4.9 },
 );
-assert.equal(strictFloor.score, 4.8);
-assert.equal(strictFloor.verdict, "FAIL");
+assert.equal(atThreshold.score, 4.8);
+assert.equal(atThreshold.verdict, "FAIL", "a score equal to 4.80 must be repaired, not merged");
 
 const noReview = scoreReview(baseInput({ reviewedFiles: [] }));
 assert.equal(noReview.score, 3.5);
@@ -151,6 +150,7 @@ const firstReport = renderReport(clean, {
   previousHeadSha: null,
   headSha: "abc123",
   reviewedAt: "2026-11-22T00:00:00.000Z",
+  reviewer: "reviewer-prime",
   findings: [],
   carryOver: [],
   resolved: [],
@@ -164,6 +164,7 @@ assert.match(firstReport, /#### 4\. Dimension Summary/);
 assert.match(firstReport, /\| P0 \| None \| - \| No P0 findings \| - \|/);
 assert.match(firstReport, /Initial review round; no prior issues\./);
 assert.match(firstReport, /\*\*Final Score\*\*: `\*\*5\.00 \/ 5\.00\*\*`/);
+assert.match(firstReport, /- Reviewer: `reviewer-prime` \(independent, fresh context\)/);
 
 const secondReport = renderReport(
   scoreReview(baseInput({ round: 2, findings: [distinctFinding("P3", 9)] })),

@@ -30,7 +30,10 @@ script.js
 
 merely because the task mentions a frontend.
 
-Plain HTML/CSS/JS is a deliberate choice for appropriately small, static, disposable, or progressively enhanced surfaces—not the universal fallback for an application.
+Semantic HTML and CSS, optionally with TypeScript for behavior, is a deliberate
+choice for appropriately small, static, disposable, or progressively enhanced
+surfaces. A JavaScript file is not the default for that work, and a JavaScript
+codebase is not the fallback for an application.
 
 ## 1. Inspect before choosing
 
@@ -106,31 +109,14 @@ This table is a starting point, not a command. Existing project constraints over
 
 ## 3. JavaScript versus TypeScript
 
-Do not treat TypeScript as mandatory for every script.
-
-### Prefer JavaScript when
-
-```text
-one-off script
-prototype
-bookmarklet
-DevTools snippet
-small userscript
-very small extension
-short-lived DOM experiment
-```
-
-JavaScript optimizes for minimum setup and direct execution.
-
-### Prefer JavaScript + JSDoc when
-
-The project should remain `.js`, but benefits from editor hints, structural documentation, and lightweight type checking.
-
-Use JSDoc for meaningful public shapes instead of creating a pseudo-TypeScript type system through excessive comments.
+TypeScript is the default for checked-in, maintainable frontend source. Reach for
+plain JavaScript only when the code is genuinely disposable. Do not treat
+TypeScript as optional for anything the project keeps, reviews, or reuses.
 
 ### Prefer TypeScript when
 
 ```text
+any maintainable page script, application, or extension
 multiple modules
 long-lived codebase
 multiple runtime contexts
@@ -142,11 +128,57 @@ public library/API
 frequent refactoring
 ```
 
-TypeScript should be the default for a new maintainable application or medium/large extension unless a concrete constraint argues otherwise.
+TypeScript is required for a new maintainable application, page script, or medium/large
+extension. The only frontend JavaScript in scope is the disposable-snippet list under
+"Reject JavaScript outside narrow exceptions"; a missing build step is solved by adding a
+minimal TypeScript build, not by writing JavaScript.
 
-The reason is not fashion. Types act as contracts between modules, browser contexts, storage schemas, messages, and domain logic.
+The reason is not fashion. Types act as contracts between modules, browser
+contexts, storage schemas, messages, and domain logic.
 
 Do not add gratuitous type annotations where inference is already sufficient.
+
+### Prefer HTML + CSS, or pure TypeScript
+
+Page design can be semantic HTML and CSS alone. When behavior is needed, write it
+in TypeScript against the DOM; there is no requirement to add a framework or a
+separate hand-written `.js` file. A page may also be rendered entirely from
+TypeScript, with no hand-written HTML or CSS at all.
+
+TypeScript is compiled by the project build (`tsc` or a bundler). The emitted `.js` is
+generated build output, never authored or edited by hand, so a static page needs the
+smallest build that emits one script rather than a hand-written `.js` file.
+
+```text
+static page / document / report
+    → semantic HTML + CSS, no JavaScript at all
+
+page with behavior
+    → HTML + CSS + TypeScript using DOM and Web APIs
+
+page rendered entirely in TypeScript
+    → TypeScript only, DOM construction or a component framework;
+      no hand-written HTML or CSS required
+```
+
+### Reject JavaScript outside narrow exceptions
+
+Do not use JavaScript for checked-in frontend source. A JavaScript file is
+acceptable only when it is tiny, disposable, and never becomes maintained code:
+
+```text
+one-off local script
+bookmarklet
+DevTools snippet
+trivial userscript
+```
+
+Anything that survives the task, is reviewed, or is reused moves to TypeScript.
+
+### Do not use JSDoc as a TypeScript substitute
+
+JSDoc types are acceptable only while migrating existing `.js` files. Do not start
+new code in JavaScript with JSDoc; write TypeScript instead.
 
 ## 4. Browser extension architecture
 
@@ -415,21 +447,24 @@ Do not use architectural complexity as a substitute for measurement.
 
 ## 13. Migration rules
 
-When an existing small JavaScript project begins to grow, do not rewrite it automatically.
+When an existing small frontend (HTML/CSS, optionally with plain JavaScript) begins to grow, do not rewrite it automatically.
 
 Use this progression:
 
 ```text
-small JS
+small HTML + CSS
+  ↓
+TypeScript for behavior
   ↓
 modules
   ↓
-JSDoc when useful
-  ↓
-TypeScript where contracts become important
+TypeScript contracts across modules
   ↓
 framework only when client-side state/interaction justifies it
 ```
+
+New JavaScript is not a step on this path. A growing project moves to TypeScript,
+not to a larger JavaScript codebase with more JSDoc.
 
 When an existing HTML/CSS/JS application is already stable, preserve it unless there is a concrete maintenance or capability problem.
 

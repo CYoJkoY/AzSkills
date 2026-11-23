@@ -201,6 +201,8 @@ export interface BranchCommit {
   readonly sha: string;
   readonly header: string;
   readonly body: string;
+  /** Committer time in seconds, used to spot commits older than the task. */
+  readonly committedAt: number;
 }
 
 /**
@@ -208,7 +210,7 @@ export interface BranchCommit {
  * The separators are control characters so a message body cannot split a record.
  */
 export function branchCommits(cwd: string, base: string, head = "HEAD"): BranchCommit[] {
-  const result = git(["log", "--reverse", "--format=%h%x1f%s%x1f%b%x1e", base + ".." + head], { cwd });
+  const result = git(["log", "--reverse", "--format=%h%x1f%s%x1f%b%x1f%ct%x1e", base + ".." + head], { cwd });
   if (result.status !== 0) return [];
   return result.stdout
     .split("\x1e")
@@ -216,10 +218,12 @@ export function branchCommits(cwd: string, base: string, head = "HEAD"): BranchC
     .filter((record) => record !== "")
     .map((record) => {
       const parts = record.split("\x1f");
+      const committedAt = Number.parseInt((parts[3] ?? "").trim(), 10);
       return {
         sha: (parts[0] ?? "").trim(),
         header: (parts[1] ?? "").trim(),
         body: (parts[2] ?? "").trim(),
+        committedAt: Number.isFinite(committedAt) ? committedAt : 0,
       };
     });
 }
@@ -360,6 +364,13 @@ export function issueCreate(
 export function issueClose(cwd: string, issue: number, comment: string): void {
   if (comment.trim() !== "") ok(gh(["issue", "comment", String(issue), "--body", comment], { cwd }));
   ok(gh(["issue", "close", String(issue)], { cwd }));
+}
+
+/** Current state of an issue, so a merge can prove the issue is closed. */
+export function issueViewState(cwd: string, issue: number): string {
+  const parsed: unknown = JSON.parse(ok(gh(["issue", "view", String(issue), "--json", "state"], { cwd })));
+  if (!isRecord(parsed)) throw new Error("gh issue view returned an unexpected shape");
+  return String(parsed.state ?? "");
 }
 
 export function issueNumberFromUrl(url: string): number | null {

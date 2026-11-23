@@ -64,9 +64,9 @@ const guide = (tool: IntegrationTool): string => {
     if (standaloneIds.length > 0) {
       lines.push('- Standalone plugins: ' + standaloneIds.join(', ') + '. These bundle an upstream MCP server, so they install only through the marketplace.');
     }
-    lines.push('- `delivery-loop` also carries the Stop hook that blocks a reply opening with a leaked reasoning tag.');
+    lines.push('- `delivery-loop` also carries prompt-aware output guards and a dead-loop restart hook.');
     lines.push('');
-  lines.push('Install the plugins the project needs. Each plugin is matched on its own description, so a capability no longer depends on one shared dispatcher entry. Hooks ship with `engineering` (GPT with Taste steering on session start, request, and subagents, plus the Godot 3.x write guard), `delivery-loop` (delivery-state guard and reasoning-tag Stop hook), and `design`/`visual-assets`/`visual-production` (a `UserPromptSubmit` pointer to their router skill when an English or Chinese prompt looks visual); review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces.');
+  lines.push('Install the plugins the project needs. Each plugin is matched on its own description, so a capability no longer depends on one shared dispatcher entry. Hooks ship with `engineering` (GPT with Taste steering on session start, request, and subagents, plus the Godot 3.x write guard), `delivery-loop` (delivery-state guard, prompt-aware output correction, and dead-loop restart), and `design`/`visual-assets`/`visual-production` (a `UserPromptSubmit` pointer to their router skill when an English or Chinese prompt looks visual); review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces.');
     lines.push('');
   lines.push('When upgrading from an earlier release, remove the old marketplace, add the Git source again, and reinstall the selected plugins. Confirm each installed plugin reports ' + skills.version + ' or later; changing the checkout alone does not replace a cached installation. Hook trust is keyed to the handler hash, so an upgrade that changes a hook manifest or a bundled script marks those hooks for review again. Open the hook list (or `/hooks` in the CLI) to review and trust the handlers, then start a new session.');
   } else if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
@@ -84,7 +84,7 @@ const guide = (tool: IntegrationTool): string => {
     lines.push('');
     lines.push('    node scripts/install-skills.ts --tool ' + tool.id + ' --mode user --plugin engineering');
     lines.push('');
-    lines.push('Each selected plugin becomes its own `<skills-root>/<id>/SKILL.md` with its own reference closure, so clients discover them independently. Use --target to choose another skills root, --dry-run to inspect without writing, --rollback to restore the previous run, and --uninstall to remove only manifest-managed plugin directories. Non-interactive writes require --yes after reviewing the preview. A skills root carries no hooks, so install `delivery-loop` through the Codex plugin marketplace when you want its guard and reasoning-tag Stop hook.');
+    lines.push('Each selected plugin becomes its own `<skills-root>/<id>/SKILL.md` with its own reference closure, so clients discover them independently. Use --target to choose another skills root, --dry-run to inspect without writing, --rollback to restore the previous run, and --uninstall to remove only manifest-managed plugin directories. Non-interactive writes require --yes after reviewing the preview. A skills root carries no hooks, so install `delivery-loop` through the Codex plugin marketplace when you want its delivery guard, prompt-aware correction, and dead-loop restart.');
   } else if (tool.mechanism === 'mcp') {
     lines.push(...wizard('user scope'));
     lines.push('');

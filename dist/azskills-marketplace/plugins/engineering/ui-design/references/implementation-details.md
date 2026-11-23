@@ -139,7 +139,7 @@ Use the project's existing conventions first. When the stack is established:
 - Vue / Nuxt: follow the existing SFC and composable conventions.
 - Svelte / SvelteKit: prefer existing component and transition patterns.
 - Astro: keep static-first behavior and hydrate only interactive islands.
-- Plain HTML/CSS/JS: use semantic HTML, modern CSS, and progressively enhanced behavior.
+- Plain HTML/CSS/JS (existing projects only): preserve the existing stack; write new behavior in TypeScript per architecture/references/frontend-selection.md.
 - Tailwind projects: use the existing token and utility conventions rather than creating a second styling layer.
 - CSS Modules / CSS-in-JS / custom CSS systems: extend the existing system before introducing another one.
 

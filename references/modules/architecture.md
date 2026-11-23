@@ -1,7 +1,7 @@
 ---
 name: architecture
 description: Choose and review the smallest maintainable runtime, frontend stack, persistence model, and process boundary before implementation. Use for new applications, browser extensions, desktop shells, web apps, migrations, and stack decisions.
-version: 3.0.0
+version: 3.1.0
 status: module
 family: architecture
 modes: [runtime, frontend, migration, review]
@@ -88,7 +88,7 @@ requirement fails at the lower level. Record the failed requirement.
 
 | Product shape | Default starting point |
 | :--- | :--- |
-| Static or mostly static site | Semantic HTML, CSS, minimal JavaScript |
+| Static or mostly static site | Semantic HTML and CSS, no JavaScript (behavior, if any, in TypeScript) |
 | Server-driven application | Server rendering plus HTMX or equivalent |
 | Highly interactive web application | TypeScript plus a justified UI framework |
 | Browser extension | WebExtension APIs, explicit context boundaries |
@@ -112,12 +112,19 @@ runtime
           -> maintenance horizon
 ```
 
-- Use plain JavaScript for tiny, disposable, or progressively enhanced surfaces.
-- Use JavaScript with JSDoc for small maintainable modules that need types at the boundary.
-- Use TypeScript for medium or long-lived frontends, shared contracts, and multi-developer work.
+- Default to TypeScript for frontend code the project keeps: pages, applications,
+  extensions, shared contracts, and multi-developer work.
+- Design pages with semantic HTML and CSS; write behavior in TypeScript against the
+  DOM when needed, with no framework required.
+- Reject JavaScript except tiny disposable snippets such as a one-off local script,
+  a bookmarklet, a DevTools snippet, or a trivial userscript. Do not use JSDoc as a
+  substitute for TypeScript in new code; reserve it for migrating existing `.js`.
 - Add a UI framework when client state, routing, or component coordination justifies it.
 - Preserve an existing framework unless a measured problem justifies migration.
 - Prefer native browser APIs before a dependency.
+- Prefer Go for ordinary HTTP services, CLIs, and data processing; choose Rust first
+  for concurrency-sensitive or performance-critical systems; choose Zig first for
+  rapid iteration, fast compilation, and embedded or low-level work.
 
 ### 5. Set storage and process boundaries
 
@@ -146,6 +153,8 @@ deviation as a defect or update the decision explicitly.
 - [ ] Every heavier alternative has a named rejected capability or constraint.
 - [ ] The existing stack is preserved unless a measured problem justifies change.
 - [ ] Language and framework choices match interaction and maintenance horizon.
+- [ ] Frontend source is TypeScript unless it is a tiny disposable snippet, and a
+      backend language matches its concurrency, performance, and iteration limits.
 - [ ] Persistence matches data lifetime, concurrency, and query shape.
 - [ ] Processes, workers, and native bridges have explicit contracts and failure modes.
 - [ ] Browser-extension contexts and permissions remain separated.

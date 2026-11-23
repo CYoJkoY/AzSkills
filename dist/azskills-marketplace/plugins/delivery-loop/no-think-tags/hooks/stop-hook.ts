@@ -6,7 +6,7 @@
  */
 
 import process from "node:process";
-import { leadingUnclosedTag, stripLeadingThinking } from "../lib/think-tags.ts";
+import { classifyReply } from "../lib/reply-guard.ts";
 import { readCorrections, readStopInput, writeCorrections } from "../lib/hook-runtime.ts";
 
 const MAX_CORRECTIONS = 1;
@@ -42,10 +42,9 @@ async function main(): Promise<void> {
   const input = readStopInput(parsed);
   if (input === null) return;
   if (input.message === null) return;
-  const result = stripLeadingThinking(input.message);
-  const unclosed = result.stripped ? null : leadingUnclosedTag(input.message);
-  if (!result.stripped && unclosed === null) return;
-  const reason = result.stripped ? CLOSED_REASON : UNCLOSED_REASON;
+  const verdict = classifyReply(input.message);
+  if (verdict !== "leading-block" && verdict !== "unclosed-block") return;
+  const reason = verdict === "leading-block" ? CLOSED_REASON : UNCLOSED_REASON;
   const emit = (): void => {
     process.stdout.write(JSON.stringify({ decision: "block", reason }) + "\n");
   };

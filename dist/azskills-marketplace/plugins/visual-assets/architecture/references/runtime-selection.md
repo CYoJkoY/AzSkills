@@ -302,24 +302,35 @@ Do not introduce SQLite merely because an application is "serious".
 Only after the runtime is established should the frontend language be selected.
 
 ```text
-small / disposable browser script
-    → JavaScript
+static page / document / report
+    → semantic HTML + CSS, no JavaScript
 
-small maintainable JS project
-    → JavaScript + JSDoc when useful
+page with behavior
+    → HTML + CSS + TypeScript using DOM and Web APIs
+
+page rendered entirely in TypeScript
+    → TypeScript only, no hand-written HTML or CSS required
 
 medium / long-lived application frontend
     → TypeScript
 
 browser extension
-    → TypeScript by default for maintainable projects
+    → TypeScript by default
 ```
 
-TypeScript is an engineering default, not a mandatory language law.
+TypeScript is the default for checked-in, maintainable frontend source. Page design
+may stay in HTML and CSS; behavior may be written in pure TypeScript against the DOM;
+a page may also be rendered entirely in TypeScript. Emitted `.js` from the TypeScript
+build is generated output, not authored source. Do not write new JavaScript for
+frontend code the project keeps.
 
-JavaScript remains appropriate when the code is genuinely small, temporary, or direct DOM scripting is the primary task.
+JavaScript is acceptable only for tiny, disposable snippets that never become
+maintained code: a one-off local script, a bookmarklet, a DevTools snippet, or a
+trivial userscript. Do not use JSDoc as a substitute for TypeScript in new code;
+JSDoc is migration support for existing `.js` files only.
 
-Do not use Rust, Go, or another compiled language for ordinary browser DOM work merely to avoid TypeScript.
+Do not use Rust, Go, or another compiled language for ordinary browser DOM work
+merely to avoid TypeScript.
 
 ## 10. Backend language selection
 
@@ -331,11 +342,23 @@ A practical default:
 HTTP server / local service / CLI / data processing
     → Go is a strong default
 
-native desktop integration / memory-safe low-level capability
-    → Rust when justified
+high-performance, concurrency-sensitive, memory-safety-critical systems
+    → Rust first
+
+rapid iteration, fast compilation, embedded or low-level work
+    → Zig first
 ```
 
-Do not turn a simple frontend into a multi-process Go/Rust system without a concrete boundary.
+Rust and Zig are first choices for their strengths, not automatic replacements for
+every backend. Prefer Rust when the load is concurrency-sensitive or performance
+critical: thread pools, parallel pipelines, native services, and code where memory
+safety without a garbage collector matters. Prefer Zig when iteration speed, fast
+compilation, a small toolchain, or embedded / low-level targets are the constraint.
+Go stays the right default when it already fits the workload; moving a service to
+Rust or Zig needs a measured reason, not a preference.
+
+Do not turn a simple frontend into a multi-process Go/Rust/Zig system without a
+concrete boundary.
 
 ## 11. Process topology matters
 
@@ -455,7 +478,8 @@ Avoid these defaults:
 ```text
 new desktop app → Electron
 new Web UI → React
-new frontend → HTML/CSS/JS files with no architecture
+new frontend → a pile of HTML/CSS/JavaScript files with no architecture
+new maintained frontend → JavaScript instead of TypeScript
 new local tool → local HTTP server
 new local data tool → PostgreSQL server
 new extension → arbitrary UI framework

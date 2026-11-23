@@ -28,7 +28,7 @@ touching the repository's root `.gitignore`.
     "remote": "origin",
     "maxParallel": 3,
     "autonomy": "full",
-    "reviewThreshold": 4.9,
+    "reviewThreshold": 4.8,
     "leaseTtlMinutes": 90,
     "mergeStrategy": "squash",
     "allowFrameworks": []
@@ -51,16 +51,51 @@ A task:
   "branch": null,
   "worktree": null,
   "pr": null,
+  "owner": null,
   "lease": null,
   "review": null,
+  "stageReviews": {},
   "notes": "",
   "createdAt": "2026-11-22T00:00:00.000Z",
   "updatedAt": "2026-11-22T00:00:00.000Z"
 }
 ```
 
-`review` stores the latest `headSha`, `round`, `score`, `verdict`, and time. The
-full per-round record lives in `reviews/`.
+`review` stores the latest `headSha`, `round`, `score`, `verdict`, `reviewer`, and
+time. The full per-round record lives in `reviews/`.
+
+`owner` records the implementer identity, set when the task is claimed. A review
+refuses a `reviewer` that equals `owner`, and `ship` re-checks that the recorded
+reviewer still differs from it.
+
+`stageReviews` is keyed by full commit SHA, one entry per branch commit:
+
+```json
+"stageReviews": {
+  "4f9c0a0e...": {
+    "headSha": "4f9c0a0e...",
+    "round": 1,
+    "score": 4.8,
+    "verdict": "FAIL",
+    "reviewer": "review-fresh-1",
+    "at": "2026-11-22T00:10:00.000Z"
+  }
+}
+```
+
+Each record is the score that stage received. A commit with no record is
+unreviewed, so `azflow review` refuses to move on while an earlier commit is
+missing one, `azflow pr` refuses to open, and `azflow ship` refuses to merge. The
+head stage must be `PASS` with a score strictly above `reviewThreshold`.
+
+An upgraded ledger keeps commits written before the task existed as
+`verdict: "LEGACY"` stages with `round: 0`, so an older branch stays shippable
+without pretending those commits were scored. Every commit written after the task
+was claimed still needs its own scored stage.
+
+A stored `reviewThreshold` of `4.9` is the pre-gate default; `readState` migrates
+it to `4.8`. Preserving it would combine with the strict comparison to demand a
+perfect `5.00` in silence.
 
 ## Writes are atomic and locked
 
@@ -75,10 +110,15 @@ therefore cannot interleave a read-modify-write.
 planned -> active -> review -> merged
    ^         |
    +---------+   (lease expiry via recover)
+
+review -> merged-issue-open -> merged   (issue still open; --verify-issue closes it)
 ```
 
 `abandoned` is terminal and frees its scopes. A task reaches `merged` only through
-`azflow ship`.
+`azflow ship`. `merged-issue-open` is the one repair status: the pull request
+merged but `gh issue view` still read the issue `OPEN`. `azflow ship <task>
+--verify-issue` closes it, proves it reads `CLOSED`, and moves the task to
+`merged`; no other status accepts that flag.
 
 ## Sharing
 

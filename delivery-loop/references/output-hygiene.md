@@ -9,9 +9,9 @@ before the window fills.
 
 ## The rule
 
-A final assistant reply must not open with a raw reasoning block. The `Stop` hook
-The bundled `no-think-tags/hooks/stop-hook.ts` enforces it and asks for exactly one bounded
-re-send.
+A final assistant reply must not open with a raw reasoning block and must carry
+visible text. The `Stop` hook in `codex-plugin/hooks/delivery-stop.ts` enforces
+both and asks for exactly one bounded re-send.
 
 ## What counts as a leak
 
@@ -37,8 +37,15 @@ the tags, or quotes them inside code, is not a leak.
 - The hook emits one `block` decision whose reason asks for a clean re-send: no
   thinking-tag block, no preamble about the instruction, only the requested
   content.
+- A reply whose reasoning blocks leave no visible characters is reported as blank
+  and asked for again in the same way.
+- A second blank reply in the same turn is not corrected again: the loop guard
+  treats it as a dead loop and restarts the turn with the prompt re-sent.
 - The already-emitted text is never described as removed, because text that has
   streamed cannot be recalled. One re-send is the only honest remedy.
+- The reason repeats the user prompt verbatim between fixed markers. After a long
+  run the prompt may no longer be in context, and a correction that only says
+  "send it again" invites an answer to the wrong question.
 - At most one correction is requested per turn, tracked per session and turn in
   the plugin data directory. A second `Stop` for the same turn is allowed.
 - `stop_hook_active` is turn-wide, so it also reads true when another `Stop` hook
@@ -52,6 +59,9 @@ the tags, or quotes them inside code, is not a leak.
 
 - The guard blocks manual merges and base-branch writes; this hook only shapes the
   final text. Neither replaces the other.
+- The same hook checks for a dead loop first, so a wiped or repeated reply is
+  handled as a loop restart rather than as a second correction. See
+  [loop guard](loop-guard.md).
 - A correction costs one extra model turn, so it is spent only when the leak is
   real and only once. Repeated leaks in one turn are the model's problem, not a
   reason to loop.
@@ -70,3 +80,7 @@ the tags, or quotes them inside code, is not a leak.
 - A second `Stop` for the same turn is allowed without output.
 - A turn where another `Stop` hook already continued still gets its own leaked tag
   corrected, because the shared flag alone does not prove this hook ran.
+- A reply made only of reasoning blocks, or only of invisible characters, is
+  corrected once as blank.
+- Every correction reason ends with the prompt block recorded by
+  `UserPromptSubmit`, so the model can restate the request it was answering.

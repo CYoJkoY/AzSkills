@@ -160,7 +160,7 @@
       "modules": [
         "delivery-loop"
       ],
-      "description": "Run concurrent issue-to-merge delivery unattended: install-time delegation, touch-scope leases, per-task worktrees, enforced commit and pull request standards, computed review scoring, gated auto-merge, and a reasoning-tag output guard, without sub-agents.",
+      "description": "Run concurrent issue-to-merge delivery unattended: install-time delegation, touch-scope leases, per-task worktrees, enforced commit and pull request standards, computed review scoring, gated auto-merge, dead-loop recovery, and prompt-aware output guards, without sub-agents.",
       "icon": "codex-plugin/assets/icons/delivery-loop.svg",
       "brandColor": "#3D4E8A",
       "category": "Productivity",
@@ -174,8 +174,13 @@
         "no-think-tags/hooks",
         "no-think-tags/lib",
         "codex-plugin/hooks/delivery-hooks.json",
+        "codex-plugin/hooks/delivery-prompt.ts",
+        "codex-plugin/hooks/delivery-stop.ts",
         "codex-plugin/hooks/guard.ts",
         "codex-plugin/hooks/delivery-guard.ts",
+        "codex-plugin/hooks/loop-guard.ts",
+        "codex-plugin/hooks/session-state.ts",
+        "codex-plugin/hooks/transcript.ts",
         "codex-plugin/assets/icons/delivery-loop.svg"
       ],
       "hooks": "codex-plugin/hooks/delivery-hooks.json"

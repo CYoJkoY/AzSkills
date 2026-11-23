@@ -4,6 +4,10 @@ The score is a computed value. A reviewing model supplies structured evidence an
 the script produces the number, the caps, and the verdict. The model never types a
 score into the report.
 
+Every commit is scored as its own stage. A branch merges only when each stage has a
+record and the head stage passes the strict bar, so a later commit cannot inherit an
+earlier pass without being reviewed itself.
+
 ## Input shape
 
 ```json
@@ -45,8 +49,9 @@ raw       = max(0.00, 5.00 - deduction)
 score     = floor2(min(cap, raw))
 ```
 
-The score is floored, never rounded up. `4.899` becomes `4.89`, which fails a 4.90
-threshold. Rounding is how a weak review becomes a pass.
+The score is floored, never rounded up. `4.899` becomes `4.89`, which fails a 4.80
+bar, and an exact `4.80` also fails because the bar is strict. Rounding is how a
+weak review becomes a pass.
 
 ## Hard caps
 
@@ -63,17 +68,34 @@ threshold. Rounding is how a weak review becomes a pass.
 | An unevidenced finding, empty probe note, or empty dimension note | 4.50 |
 
 P3 and P4 have no dedicated cap; their weight does the work. One P4 costs `0.10`,
-landing at `4.90` and passing only because a single trivial defect is tolerable.
-Two P4 land at `4.80`, one P3 lands at `4.80`, and two P3 land at `4.60`, so a
-stack of small findings fails arithmetic instead of sliding under a permissive cap.
+landing at `4.90`; that is the only single-finding round that clears the strict
+`> 4.80` bar. Two P4 land exactly on `4.80` and one P3 lands on `4.80`; both sit on
+the bar, not above it, so they still need repair. Two P3 land at `4.60`. A stack of
+small findings fails arithmetic instead of sliding under a permissive cap.
 
 ## Acceptance
 
 A round passes only when all three hold:
 
 1. `P0 + P1 + P2 == 0`.
-2. `score >= threshold` (default 4.90).
+2. `score > threshold` (default 4.80). The comparison is strict: an exact `4.80`
+   is a repair, not a pass.
 3. `round <= maxRounds` (default 5).
+
+A pull request merges only when the branch clears the whole loop, not just one
+round:
+
+- Every commit on the branch carries a stage record.
+- The stage at the pull request head is `PASS` and its score is strictly above the
+  threshold.
+- The reviewer named on the review is not the implementer. The script rejects a
+  `--reviewer` equal to the task owner, and `azflow ship` re-checks the recorded
+  identity, so independence of identity is enforced by code.
+- The review ran in a fresh context: a new session that saw only the diff, the
+  repository files, and the verification output, never the author's reasoning or a
+  prior round's verdict. This is a process rule the script cannot observe, so the
+  orchestrator must open a new context for every round and the report must name
+  that round's reviewer id.
 
 ## Anti-lenience rules
 
@@ -94,6 +116,14 @@ A round passes only when all three hold:
   literals, `any`, `@ts-ignore`, empty catch, `debugger`, framework imports, tab
   indentation, `console.log`, loose equality, unreasoned lint disables, and TODO
   markers.
+- Each commit is scored on its own stage. `azflow review` refuses to run when an
+  earlier branch commit has no stage record, and `azflow commit` refuses to record
+  the next stage until the current head has been scored.
+- A review must name a `--reviewer` that differs from the implementer. The script
+  rejects a self-review, and the reviewer reads the artifact from a fresh context
+  instead of inheriting the author's reasoning.
+- `azflow pr` refuses any unscored branch commit, and `azflow ship` re-counts the
+  branch commits before merging, so a stale or partial review cannot ship.
 
 ## Why this is stricter than the original AGENTS.md
 
@@ -103,15 +133,16 @@ clear the bar. This plugin raises each of those:
 
 | Rule | AGENTS.md | Here |
 | :--- | :--- | :--- |
-| Acceptance threshold | 4.80 | 4.90 |
+| Acceptance threshold | 4.80 | Strictly above 4.80 |
 | P3 weight | 0.10 | 0.20 |
 | P4 weight | 0.05 | 0.10 |
-| Two P4 | (no cap) | 4.80 (arithmetic) |
-| One P3 | (no cap) | 4.80 (arithmetic) |
+| Two P4 | (no cap) | 4.80 (below the strict bar) |
+| One P3 | (no cap) | 4.80 (below the strict bar) |
 
-The heavier weights make small findings cost real score: a single P4 lands exactly
-on `4.90`, so a second P4 or a single P3 drops the round below the bar. Nothing
-averages out, and the deduction table shows every point lost.
+The heavier weights make small findings cost real score: a single P4 lands at
+`4.90` and clears the bar, but a second P4 or a single P3 lands exactly on `4.80`,
+which the strict comparison rejects. Nothing averages out, and the deduction table
+shows every point lost.
 
 The score is also floored, never rounded, and the model never types it. A review
 formatted by hand can claim any number; this one cannot.
