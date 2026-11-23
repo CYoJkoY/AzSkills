@@ -7,7 +7,8 @@ restate a plugin that every task already loads.
 ## What moves to the plugin
 
 - Tool priority and routing.
-- Single-agent rule and the no-sub-agent guard.
+- Single-agent rule, the no-sub-agent guard, and the short-lived review window
+  that admits independent Elephant-Goldfish reviewers.
 - Issue, branch, commit, pull request, review, and merge flow.
 - The commit and pull request standard: ASCII-only metadata, Conventional
   Commits, the fixed `Refs` footer, and the five-section pull request body.

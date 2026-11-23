@@ -17,6 +17,7 @@
   ],
   "skills": "./skills",
   "mcpServers": "./.codex-plugin/mcp.json",
+  "hooks": "./codex-plugin/hooks/rea-hooks.json",
   "interface": {
     "displayName": "REA",
     "shortDescription": "Reverse engineer applications and binaries",

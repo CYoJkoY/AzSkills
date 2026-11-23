@@ -24,7 +24,7 @@ so grouping never hides a capability behind an unrelated name.
 | `visual-assets` | logo-generator, photo-abstract-editorial, scientific-figures | Logos, editorial image treatments, and verified scientific or medical figures. |
 | `visual-production` | frontend-slides, remotion-production | Responsive HTML reports, fixed-stage presentations, and deterministic video. |
 | `writing` | document-writing, localization, resume-evidence-workflow | GitHub READMEs, Steam Workshop pages, game CSV localization, and evidence-backed resumes. |
-| `delivery-loop` | delivery-loop | Unattended issue-to-merge delivery with touch-scope leases, worktree isolation, enforced commit and PR standards, computed review scoring, and gated auto-merge. |
+| `delivery-loop` | delivery-loop | Unattended issue-to-merge delivery with touch-scope leases, worktree isolation, enforced commit and PR standards, independent Elephant-Goldfish review, and gated auto-merge. |
 | `serena` | upstream MCP | Serena's semantic code intelligence for symbol-aware retrieval, editing, refactoring, and project navigation. |
 | `rea` | upstream MCP | REA's reverse-engineering tools for application behavior, JavaScript bundles, and native binaries. |
 
@@ -43,8 +43,14 @@ turn, and a completed local-agent wait injects the agent steer. It keeps the
 Godot 3.x write guard on the same manifest.
 
 `delivery-loop` also carries the Stop hook that blocks a final reply opening
-with a leaked reasoning tag, so answer hygiene installs with the workflow that
-runs the longest turns.
+with a leaked reasoning tag, and a PreToolUse guard that permits reviewer
+sub-agents only inside an `azflow review-open` window, so answer hygiene and
+independent review install with the workflow that runs the longest turns.
+
+`serena` and `rea` ship a `UserPromptSubmit` hook that matches a code-intelligence
+or reverse-engineering request, in English or Chinese, and injects a pointer to
+the bundled skill, so the MCP-backed plugin is reached without relying on
+description matching alone.
 
 `design`, `visual-assets`, and `visual-production` ship a `UserPromptSubmit`
 hook that matches a visual request, in English or Chinese, against their own

@@ -11,6 +11,7 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
 import { bashCommand, denyReasonForBash, denyReasonForTool, isShellTool } from "./guard.ts";
+import type { ReviewWindowCheck } from "./guard.ts";
 import { loopBreakerReason, normalizeCall } from "./loop-guard.ts";
 import { fingerprint, pruneState, withState } from "./session-state.ts";
 
@@ -57,6 +58,14 @@ function currentBranch(cwd: string): string | null {
   return trimmed === "" ? null : trimmed;
 }
 
+/** Current commit SHA, or null outside a repo / on failure. */
+function currentHead(cwd: string): string | null {
+  const result = spawnSync("git", ["rev-parse", "HEAD"], { cwd, encoding: "utf8", windowsHide: true });
+  if (result.status !== 0 || typeof result.stdout !== "string") return null;
+  const trimmed = result.stdout.trim();
+  return trimmed === "" ? null : trimmed;
+}
+
 async function readBase(cwd: string): Promise<string | null> {
   try {
     const text = await readFile(path.join(cwd, ".azflow", "state.json"), "utf8");
@@ -66,6 +75,30 @@ async function readBase(cwd: string): Promise<string | null> {
     if (typeof config !== "object" || config === null) return null;
     const base = (config as StateConfig).base;
     return typeof base === "string" && base !== "" ? base : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Reads the short-lived review window, if one is open. The window is the only
+ * way a sub-agent spawn is allowed inside a delivery loop, and it is checked
+ * again by the guard; a malformed or missing file simply means no window.
+ */
+async function readReviewWindow(cwd: string): Promise<ReviewWindowCheck | null> {
+  try {
+    const text = await readFile(path.join(cwd, ".azflow", "review-window.json"), "utf8");
+    const parsed: unknown = JSON.parse(text);
+    if (typeof parsed !== "object" || parsed === null) return null;
+    const record = parsed as Record<string, unknown>;
+    if (
+      typeof record.engine !== "string" ||
+      typeof record.expiresAt !== "string"
+    ) {
+      return null;
+    }
+    const headSha = typeof record.headSha === "string" && record.headSha !== "" ? record.headSha : undefined;
+    return { engine: record.engine, expiresAt: record.expiresAt, headSha };
   } catch {
     return null;
   }
@@ -144,7 +177,12 @@ async function main(): Promise<void> {
   const toolName = typeof event.tool_name === "string" ? event.tool_name : "";
 
   if (!env("AZFLOW_ALLOW_SUBAGENTS")) {
-    const reason = denyReasonForTool(toolName);
+    const reason = denyReasonForTool(
+      toolName,
+      await readReviewWindow(process.cwd()),
+      Date.now(),
+      currentHead(process.cwd()),
+    );
     if (reason !== null) {
       deny(reason);
       return;

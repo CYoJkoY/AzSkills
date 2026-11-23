@@ -40,10 +40,11 @@ the precedence and the repository names its own tools.
 | `azflow plan` | Print admission waves, blocked tasks, and scope overlaps. |
 | `azflow claim` | Create the branch and worktree, then issue a lease. |
 | `azflow status` | Show tasks, leases, reviews, and scores. |
-| `azflow review` | Require a claimed worktree and a fresh `--reviewer` that is not the implementer, scan the real diff, enforce sequential rounds, score the stage, and write the report. |
+| `azflow review-open` | Open a short-lived review window that lets EGM reviewers spawn for one task at one head. See [egm-review.md](egm-review.md). |
+| `azflow review` | Require a claimed worktree, an open review window, and an EGM attestation from a fresh `--reviewer` that is not the implementer; scan the real diff, enforce sequential rounds, score the stage, write the report, and delete the window. |
 | `azflow ship` | Refresh the pull request body, verify every merge gate, merge, close the issue, verify it reads `CLOSED`, sync base. `--verify-issue` finishes a merge whose issue stayed open. |
 | `azflow recover` | Release expired leases and list orphan worktrees. |
-| `azflow doctor` | Check node, git, gh auth, ledger, and the current branch. |
+| `azflow doctor` | Check node, git, gh auth, ledger, current branch, review engine, and whether the `egm` plugin is installed. |
 | `azflow goal` | Drive one long-horizon objective across turns without Goal mode. See [goal-run.md](goal-run.md). |
 
 Every command accepts `--project <path>` and most accept `--json` for scripting.
@@ -71,12 +72,14 @@ The agent runs this path without asking for permission at any step:
    recorded result is green rather than hopeful. Commit the last stage first: a
    review scores the head that exists at review time, so a stage committed after it
    makes its own green run stale.
-4. Pushes the branch and runs `azflow review <task> --input <review.json>
-   --reviewer <fresh id> --scan`. The review derives the changed files and head from
-   the claimed worktree, runs the scanner unconditionally, requires round 1 followed
-   by one-step rounds that carry the prior score, and rejects a reviewer that equals
-   the implementer. Read the artifact in a fresh context: the reviewer names the
-   identity that scored this stage, and that identity must differ from the author.
+4. Pushes the branch, runs `azflow review-open <task>` so the guard permits the
+   reviewers to spawn, and launches the Elephant-Goldfish reviewers in fresh
+   contexts (`fork_context: false`) against the diff. It then runs
+   `azflow review <task> --input <review.json> --reviewer <fresh id> --scan` with
+   `engine: "egm"` and one attestation per reviewer. The review derives the changed
+   files and head from the claimed worktree, runs the scanner unconditionally,
+   requires round 1 followed by one-step rounds that carry the prior score, and
+   rejects a self review or a round with no attested fresh-context reviewer.
 5. Runs `azflow pr <task>`. The pull request opens as a draft, linked with
    `Closes #<issue>`, with a title and body derived from the branch commits and the
    recorded review, and the report is published as the first comment. `azflow pr`
@@ -91,7 +94,8 @@ escape for a pull request wanted earlier, and the draft then carries the review'
 own gaps as blocking issues.
 6. Runs `azflow ready <task>` to take the pull request out of draft.
 7. Repairs if needed until the head scores strictly above 4.80: run the checks,
-   commit the fix, then run the next review with a new round and a new
+   commit the fix, then `azflow review-open <task>` again for the new head, run the
+   reviewers in fresh contexts, and score the next round with a new
    `--reviewer <fresh id>` plus `--input <review.json> --scan --post`, then
    `azflow ready <task>`. Each repair is scored on its own stage, and `ship` still
    compares the reviewed head with the pull request head, so a fix without a new
@@ -168,8 +172,8 @@ required structure.
 - The pull request body carries `Closes #<issue>` for the task issue (`issue-linked`).
 - Every branch commit has a stage record, and the head stage is PASS with a score
   strictly above 4.80 (`stage-reviews`).
-- The review names a reviewer that differs from the implementer
-  (`reviewer-independent`).
+- The review is EGM-attested and names a reviewer that differs from the
+  implementer (`reviewer-independent`).
 - Review score is strictly above the threshold; an exact 4.80 fails
   (`review-score`).
 - Reviewed head equals the pull request head (`review-head`).
@@ -231,7 +235,9 @@ It denies:
 - `gh pr merge`, which would bypass the gates.
 - `git commit` and `git push` while on the base branch.
 - `git push` whose refspec targets the base branch or `origin`.
-- Any sub-agent spawn tool (`Task`, `Agent`, `spawn_agent`, and variants).
+- Any sub-agent spawn tool (`Task`, `Agent`, `spawn_agent`, and variants), except
+  while a review window opened by `azflow review-open` is live for the current
+  head. The window is the only sanctioned path; every other spawn is denied.
 
 Shell detection matches the tool family, not one name: `Bash`, `shell`,
 `exec_command`, `run_command`, `Terminal`, and `PowerShell` all count, and a
@@ -245,6 +251,10 @@ Escape hatches exist for legitimate exceptions:
 | `AZFLOW_ALLOW_BASE_WRITES=1` | Permit base-branch commit and push. |
 | `AZFLOW_ALLOW_MANUAL_MERGE=1` | Permit `gh pr merge`. |
 | `AZFLOW_ALLOW_SUBAGENTS=1` | Permit a sub-agent spawn. |
+
+The review window is the normal path for an EGM review and does not need the
+override. The override stays for a deliberate, non-review spawn; it is not a
+shortcut around the attestation, which `azflow review` still checks.
 
 The guard fails open. A malformed event or a crashed check allows the tool, because
 a guard bug must never block unrelated work. The gates in `ship` are the real

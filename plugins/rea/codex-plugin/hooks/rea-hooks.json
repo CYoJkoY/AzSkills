@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {"type": "command", "command": "node \"${PLUGIN_ROOT}/codex-plugin/hooks/rea-intent.ts\"", "statusMessage": "Checking whether the request needs REA reverse-engineering tools"}
+        ]
+      }
+    ]
+  }
+}
