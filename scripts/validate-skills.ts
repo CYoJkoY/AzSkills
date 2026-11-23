@@ -508,6 +508,12 @@ async function main(): Promise<void> {
   }
   if (readme) {
     await scanLinks(readmePath, readme);
+    const badge = /Version \*\*(\d+\.\d+\.\d+)\*\*/.exec(readme);
+    if (badge === null) {
+      fail("README.md: missing version badge");
+    } else if (badge[1] !== catalog.version) {
+      fail("README.md: version badge " + badge[1] + " does not match " + catalog.version);
+    }
     const catalogBlock = readme.split("<!-- SKILL-CATALOG:START -->")[1]?.split("<!-- SKILL-CATALOG:END -->")[0];
     const aliasesBlock = readme.split("<!-- SKILL-ALIASES:START -->")[1]?.split("<!-- SKILL-ALIASES:END -->")[0];
     if (!catalogBlock) fail("README.md: missing SKILL-CATALOG block");

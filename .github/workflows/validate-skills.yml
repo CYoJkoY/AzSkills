@@ -95,6 +95,12 @@ jobs:
         run: |
           node scripts/test-think-tags-hook.ts
 
+      - name: Test the delivery-loop dead-loop guard
+        run: |
+          node delivery-loop/tests/loop-guard.test.ts
+          node delivery-loop/tests/loop-breaker.test.ts
+          node delivery-loop/tests/delivery-hook.test.ts
+
       - name: Export all plugin archives
         run: |
           node scripts/package-plugin.ts --output "$RUNNER_TEMP/azskills-export"
@@ -107,6 +113,8 @@ jobs:
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/.agents/plugins/marketplace.json"
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/design/.codex-plugin/plugin.json"
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/delivery-loop/no-think-tags/hooks/stop-hook.ts"
+          test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/delivery-loop/codex-plugin/hooks/delivery-stop.ts"
+          test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/delivery-loop/codex-plugin/hooks/loop-guard.ts"
           mkdir -p "$RUNNER_TEMP/azskills-extracted"
           unzip -q "$RUNNER_TEMP/azskills-export/zips/design.zip" -d "$RUNNER_TEMP/azskills-extracted"
           test -f "$RUNNER_TEMP/azskills-extracted/skills/design/SKILL.md"

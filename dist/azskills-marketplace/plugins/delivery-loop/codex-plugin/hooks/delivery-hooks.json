@@ -1,5 +1,16 @@
 {
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/codex-plugin/hooks/delivery-prompt.ts\"",
+            "statusMessage": "Recording the delivery-loop prompt for later corrections"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "^(?:Bash|Shell|LocalShell|exec_command|run_command|run_shell|Terminal|PowerShell|pwsh|Task|Agent|spawn_agent|spawn_subagent|subagent|delegate|dispatch_agent)$",
@@ -17,8 +28,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${PLUGIN_ROOT}/no-think-tags/hooks/stop-hook.ts\"",
-            "statusMessage": "Checking the reply for leaked reasoning tags"
+            "command": "node \"${PLUGIN_ROOT}/codex-plugin/hooks/delivery-stop.ts\"",
+            "statusMessage": "Checking the reply for a dead loop or leaked reasoning"
           }
         ]
       }
