@@ -752,8 +752,51 @@ async function openPullRequest(args: Args): Promise<void> {
   if (id === undefined) throw new Error("pr requires a task id");
   const state = await requireState(project);
   const task = findTask(state, id);
-  if (task.branch === null) throw new Error(id + " has no branch; run 'azflow claim " + id + "' first");
   if (task.pr !== null) throw new Error(id + " already has PR #" + String(task.pr));
+  let created: CreatedPullRequest;
+  try {
+    created = await createPullRequest(project, state, task, args, !args.flags.has("ready"));
+  } catch (error) {
+    const exitCode = (error as { exitCode?: unknown }).exitCode;
+    // Only validation failures carry an exit code; anything else is a genuine
+    // fault and keeps the normal crash path.
+    if (typeof exitCode !== "number") throw error;
+    process.stderr.write((error instanceof Error ? error.message : String(error)) + "\n");
+    process.exitCode = exitCode;
+    return;
+  }
+  printJson({ task: id, pr: created.number, draft: created.draft, url: created.url });
+}
+
+interface CreatedPullRequest {
+  readonly number: number;
+  readonly draft: boolean;
+  readonly url: string;
+}
+
+/**
+ * Refuses a preparation step with a specific exit code. Validation failures use
+ * 1 or 2 like the command line always has, while a crash stays a crash, so the
+ * shared path can serve both `azflow pr` and the automatic open inside `ship`.
+ */
+function prepFailure(message: string, exitCode: number): Error {
+  return Object.assign(new Error(message), { exitCode });
+}
+
+/**
+ * Opens the pull request for a task and records its number. Shared by
+ * `azflow pr` and `azflow ship`, because a verified branch must never stall on
+ * a missing pull request while `gh pr create` is refused inside the project.
+ */
+async function createPullRequest(
+  project: string,
+  state: FlowState,
+  task: Task,
+  args: Args,
+  draft: boolean,
+): Promise<CreatedPullRequest> {
+  const id = task.id;
+  if (task.branch === null) throw new Error(id + " has no branch; run 'azflow claim " + id + "' first");
   if (!remoteBranchExists(project, state.config.remote, task.branch)) {
     throw new Error("push " + task.branch + " to " + state.config.remote + " before opening a pull request");
   }
@@ -770,23 +813,18 @@ async function openPullRequest(args: Args): Promise<void> {
   const title = lastValue(args, "title") ?? generated.title;
   const titleCheck = validatePullRequestTitle(title, { issueId: issue });
   if (titleCheck.violations.length > 0) {
-    process.stderr.write(titleCheck.violations.join("\n") + "\n");
-    process.exitCode = 2;
-    return;
+    throw prepFailure(titleCheck.violations.join("\n"), 2);
   }
   const body = await bodyFromArgs(args, project, generated.body);
   // An override may reword the body, but the five-section skeleton is fixed, so
   // a hand-written body is checked with the same rule as a generated one.
   const bodyCheck = validatePullRequestBody(body, { issueId: issue });
   if (bodyCheck.violations.length > 0) {
-    process.stderr.write(bodyCheck.violations.join("\n") + "\n");
-    process.exitCode = 2;
-    return;
+    throw prepFailure(bodyCheck.violations.join("\n"), 2);
   }
-  const draft = !args.flags.has("ready");
   const blocked = generated.verdict !== "PASS" || !generated.staticRecorded;
   if (blocked && !args.flags.has("allow-unverified")) {
-    process.stderr.write(
+    throw prepFailure(
       !generated.staticGreen && generated.sawReview
         ? "the recorded verification did not exit 0; fix it, re-run the checks, and record a review round with the green run\n"
         : generated.sawReview
@@ -794,21 +832,19 @@ async function openPullRequest(args: Args): Promise<void> {
           : "review is not recorded yet; commit the last stage, run the project checks, then 'azflow review " +
             id +
             " --input <review.json> --scan' before opening the pull request\n",
+      1,
     );
-    process.exitCode = 1;
-    return;
   }
   // A pull request exposes the whole branch, so every commit it carries must
   // already have a scored record, not only the head.
   const unscored = unscoredCommits(worktree, state.config.base, task.branch, task);
   if (unscored.length > 0) {
-    process.stderr.write(
+    throw prepFailure(
       "branch commits without a review record: " + unscored.join(", ") +
         "\nscore each stage with 'azflow review " + id +
         " --input <review.json> --reviewer <fresh id>' before opening the pull request\n",
+      2,
     );
-    process.exitCode = 2;
-    return;
   }
   const url = prCreate(project, {
     title,
@@ -838,7 +874,7 @@ async function openPullRequest(args: Args): Promise<void> {
       print("warning: pull request #" + String(number) + " opened, but the review report comment failed");
     }
   }
-  printJson({ task: id, pr: number, draft, url });
+  return { number, draft, url };
 }
 
 async function ready(args: Args): Promise<void> {
@@ -1319,8 +1355,31 @@ async function ship(args: Args): Promise<void> {
       ? null
       : findTask(state, id);
   if (task === null) throw new Error("ship requires a task id or --pr");
-  const prNumber = task.pr ?? (explicitPr === undefined ? null : Number(explicitPr));
-  if (prNumber === null) throw new Error(task.id + " has no pull request; pass --pr");
+  let prNumber = task.pr ?? (explicitPr === undefined ? null : Number(explicitPr));
+  if (prNumber === null) {
+    // Every gate runs against a real pull request view, and `gh pr create` is
+    // refused inside the project, so ship opens the missing pull request itself
+    // instead of stalling the last step of a verified branch.
+    if (args.flags.has("dry-run")) {
+      throw new Error(
+        task.id + " has no pull request yet; a live ship opens one automatically, " +
+          "but the gates need the real pull request, so re-run without --dry-run",
+      );
+    }
+    let created: CreatedPullRequest;
+    try {
+      created = await createPullRequest(project, state, task, args, false);
+    } catch (error) {
+      const exitCode = (error as { exitCode?: unknown }).exitCode;
+      if (typeof exitCode !== "number") throw error;
+      process.stderr.write((error instanceof Error ? error.message : String(error)) + "\n");
+      process.exitCode = exitCode;
+      return;
+    }
+    prNumber = created.number;
+    // stderr keeps `ship --json` parseable while still announcing the open.
+    process.stderr.write("opened pull request #" + String(created.number) + " for " + task.id + "\n");
+  }
   // An explicit PR still routes through the same gate, so its linked issue is
   // resolved from the ledger (or created/supplied) before the body is checked.
   if (args.flags.has("verify-issue")) {
