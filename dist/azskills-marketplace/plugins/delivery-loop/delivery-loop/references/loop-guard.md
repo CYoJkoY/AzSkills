@@ -10,7 +10,7 @@ failure and restarts the turn instead of waiting for a review that never comes.
 Two shapes, both read from evidence rather than from a hunch:
 
 - **Repeated tool calls.** The tail of the current turn holds one call four times
-  in a row, or a cycle of two to four calls three times in a row. Call identity is
+  in a row, or a cycle of two to four calls four times in a row. Call identity is
   the tool name plus its arguments with whitespace outside quotes collapsed, so
   formatting drift does not hide a repeat while quoted text stays exact.
 - **Repeated replies.** The same final reply arrives three times in a row and the
@@ -21,6 +21,12 @@ Two shapes, both read from evidence rather than from a hunch:
 
 Only a run at the very end of the turn counts. A model that repeats a step and
 then moves on was not stuck, and blocking it would punish ordinary retries.
+
+The restart is scoped to a delivery project: the turn's directory or one above it
+must carry `.azflow/state.json` or `.azflow/goal.json`. Outside a delivery project
+an ordinary task legitimately reads the same file or re-reads the same reply, and
+voiding the turn there would cut a long task short. Leaked reasoning and blank
+replies are still corrected everywhere, because those are always faults.
 
 ## Two hooks, one rule
 
@@ -79,7 +85,7 @@ answer to memory loss after compaction.
 
 - Four identical shell calls in a row are interrupted once, and the interruption
   names the call and repeats the prompt.
-- A cycle of two alternating calls repeated three times is also interrupted.
+- A cycle of two alternating calls repeated four times is also interrupted.
 - A turn whose transcript shows four identical calls is restarted at `Stop`, even
   when the final reply looks clean.
 - The same long final reply three times is restarted, and a short repeated
@@ -87,6 +93,8 @@ answer to memory loss after compaction.
 - A second blank final reply in the same turn is restarted instead of corrected
   again.
 - The third restart in one turn does not happen.
+- A repeated reply in a plain directory outside a delivery project is left alone,
+  while the same reply inside a project with `.azflow/state.json` restarts.
 - Every restart and correction reason carries the prompt recorded at submission,
   and a prompt recorded for a different turn is never quoted as the current one.
 - Malformed input, a foreign event name, and a missing session id produce no

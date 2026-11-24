@@ -81,6 +81,45 @@ async function readBase(cwd: string): Promise<string | null> {
 }
 
 /**
+ * Finds the azflow project that owns `start`. The delivery loop works inside
+ * `.azflow/worktrees/<id>`, one directory below the project, so a guard that
+ * only looked at the current directory would stop protecting the very turns it
+ * exists for. Walking up to the nearest `.azflow/state.json` keeps the guard on
+ * in a worktree and still leaves unrelated repositories untouched.
+ */
+async function findProjectRoot(start: string): Promise<string | null> {
+  let current = path.resolve(start);
+  for (;;) {
+    const hasState = await readFile(path.join(current, ".azflow", "state.json"), "utf8")
+      .then(() => true)
+      .catch(() => false);
+    if (hasState) return current;
+    const parent = path.dirname(current);
+    if (parent === current) return null;
+    current = parent;
+  }
+}
+
+/**
+ * Resolves the branch each `git -C <dir>` / `cd <dir> && git` target is on.
+ * Without this the guard judged a worktree push by the session's branch and
+ * refused the documented step of pushing a task branch from the project root.
+ */
+function branchResolver(project: string, cwd: string, branch: string | null): (dir: string | null) => string | null {
+  const cache = new Map<string, string | null>();
+  return (dir: string | null): string | null => {
+    if (dir === null) return branch;
+    const base = path.isAbsolute(dir) ? dir : path.resolve(project, dir);
+    if (base === path.resolve(cwd)) return branch;
+    const cached = cache.get(base);
+    if (cached !== undefined) return cached;
+    const resolved = currentBranch(base);
+    cache.set(base, resolved);
+    return resolved;
+  };
+}
+
+/**
  * Reads the short-lived review window, if one is open. The window is the only
  * way a sub-agent spawn is allowed inside a delivery loop, and it is checked
  * again by the guard; a malformed or missing file simply means no window.
@@ -169,7 +208,13 @@ async function main(): Promise<void> {
     allow();
     return;
   }
-  const base = await readBase(process.cwd());
+  const cwd = process.cwd();
+  const project = await findProjectRoot(cwd);
+  if (project === null) {
+    allow();
+    return;
+  }
+  const base = await readBase(project);
   if (base === null) {
     allow();
     return;
@@ -179,9 +224,9 @@ async function main(): Promise<void> {
   if (!env("AZFLOW_ALLOW_SUBAGENTS")) {
     const reason = denyReasonForTool(
       toolName,
-      await readReviewWindow(process.cwd()),
+      await readReviewWindow(project),
       Date.now(),
-      currentHead(process.cwd()),
+      currentHead(cwd),
     );
     if (reason !== null) {
       deny(reason);
@@ -191,12 +236,14 @@ async function main(): Promise<void> {
 
   if (isShellTool(toolName)) {
     const command = bashCommand(event.tool_input);
+    const branch = currentBranch(cwd);
     const reason = denyReasonForBash(
       command,
-      { branch: currentBranch(process.cwd()), base },
+      { branch, base, branchFor: branchResolver(project, cwd, branch) },
       {
         allowManualMerge: env("AZFLOW_ALLOW_MANUAL_MERGE"),
         allowBaseWrites: env("AZFLOW_ALLOW_BASE_WRITES"),
+        allowGhCreate: env("AZFLOW_ALLOW_GH_CREATE"),
       },
     );
     if (reason !== null) {

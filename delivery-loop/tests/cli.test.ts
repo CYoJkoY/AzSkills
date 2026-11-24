@@ -172,8 +172,17 @@ async function main(): Promise<void> {
   assert.equal(blocked.status, 1, "a task with an unmerged dependency must not start");
   assert.match(blocked.stderr, /depends on unmerged T-0001/);
 
-  must(["issue", "T-0001", "--label", "enhancement"]);
-  const claimed = JSON.parse(must(["claim", "T-0001"]).stdout) as { worktree: string; branch: string };
+  // A claim is what starts the delivery contract, so it opens the linked issue
+  // itself; a forgotten `azflow issue` step must not leave the work unlinkable.
+  const claimedWithIssue = JSON.parse(must(["claim", "T-0001", "--label", "enhancement"]).stdout) as {
+    worktree: string;
+    branch: string;
+  };
+  const stateAfterClaim = JSON.parse(await readFile(stateFile(project), "utf8")) as {
+    tasks: { id: string; issue: number | null }[];
+  };
+  assert.equal(stateAfterClaim.tasks.find((task) => task.id === "T-0001")?.issue, 7);
+  const claimed = claimedWithIssue;
   await mkdir(path.join(claimed.worktree, "src", "cart"), { recursive: true });
   await writeFile(
     path.join(claimed.worktree, "src", "cart", "total.ts"),
@@ -375,18 +384,20 @@ async function main(): Promise<void> {
   assert.equal(mismatchedPrevious.status, 1, "a later review must match the recorded score");
   assert.match(mismatchedPrevious.stderr, /does not match recorded round/);
 
-  // Ship refuses to merge on the three audit gaps its gates exist for: a body
-  // that no longer closes the issue, a review signed by the implementer, and a
-  // commit that bypassed azflow. Each leaves the ledger and the remote intact.
+  // Ship repairs a missing issue link, but still refuses a self-review or a
+  // commit that bypassed azflow. The dry run predicts the repair without
+  // mutating the remote; the real run writes the repaired body before merging.
   const bodyPath = env.AZFLOW_SHIM_PR_BODY ?? "";
   const savedBody = await readFile(bodyPath, "utf8");
   await writeFile(bodyPath, "## Change summary\n\nBody was edited by hand.\n", "utf8");
   const unlinked = cli(["ship", "T-0001", "--json", "--dry-run"], { AZFLOW_SHIM_HEAD_SHA: headSha });
-  assert.equal(unlinked.status, 2, "a body without Closes #n must not merge");
+  assert.equal(unlinked.status, 0, "dry-run should predict the automatic issue-link repair");
   assert.ok(
-    (JSON.parse(unlinked.stdout) as { failed: string[] }).failed.includes("issue-linked"),
-    "the issue-linked gate reports the broken link",
+    !(JSON.parse(unlinked.stdout) as { failed: string[] }).failed.includes("issue-linked"),
+    "the issue-linked gate should pass when ship can repair the body",
   );
+  assert.match(unlinked.stdout, /will restore it before merging/);
+  assert.equal(await readFile(bodyPath, "utf8"), "## Change summary\n\nBody was edited by hand.\n");
   await writeFile(bodyPath, savedBody, "utf8");
 
   const withSelfReview = JSON.parse(await readFile(stateFile(project), "utf8")) as {
@@ -431,14 +442,16 @@ async function main(): Promise<void> {
 
   // A recorded verification that exited non-zero blocks the pull request. The
   // escape opens it on purpose, and the blocking issues stay in the body.
-  const second = JSON.parse(must(["claim", "T-0002"]).stdout) as { worktree: string; branch: string };
+  const second = JSON.parse(must(["claim", "T-0002", "--issue", "8"], { AZFLOW_SHIM_ISSUE: "8" }).stdout) as {
+    worktree: string;
+    branch: string;
+  };
   await mkdir(path.join(second.worktree, "src", "badge"), { recursive: true });
   await writeFile(
     path.join(second.worktree, "src", "badge", "count.ts"),
     "export const count = (items: readonly unknown[]): number => items.length;\n",
     "utf8",
   );
-  must(["issue", "T-0002"], { AZFLOW_SHIM_ISSUE: "8" });
   git(second.worktree, ["add", "."]);
   must(["commit", "T-0002", "--type", "feat", "--scope", "badge", "--subject", "add count helper"]);
   git(second.worktree, ["push", "-u", "origin", second.branch]);
@@ -475,10 +488,12 @@ async function main(): Promise<void> {
   // A stage is only named when the configured static checks are green. The
   // ledger records the failing command, so no message is produced from it.
   must(["add", "Add note reader", "--touch", "src/notes/**"]);
-  const third = JSON.parse(must(["claim", "T-0003"]).stdout) as { worktree: string; branch: string };
+  const third = JSON.parse(must(["claim", "T-0003", "--issue", "11"], { AZFLOW_SHIM_ISSUE: "11" }).stdout) as {
+    worktree: string;
+    branch: string;
+  };
   await mkdir(path.join(third.worktree, "src", "notes"), { recursive: true });
   await writeFile(path.join(third.worktree, "src", "notes", "read.ts"), "export const read = 1;\n", "utf8");
-  must(["issue", "T-0003"], { AZFLOW_SHIM_ISSUE: "11" });
   git(third.worktree, ["add", "."]);
   const headBefore = git(third.worktree, ["rev-parse", "HEAD"]);
   const ledger = JSON.parse(await readFile(stateFile(project), "utf8")) as {
@@ -522,14 +537,16 @@ async function main(): Promise<void> {
 
   // A merge that cannot prove its issue closed is reported, not accepted.
   must(["add", "Add writer helper", "--touch", "src/writer/**"]);
-  const fourth = JSON.parse(must(["claim", "T-0004"]).stdout) as { worktree: string; branch: string };
+  const fourth = JSON.parse(must(["claim", "T-0004", "--issue", "12"], { AZFLOW_SHIM_ISSUE: "12" }).stdout) as {
+    worktree: string;
+    branch: string;
+  };
   await mkdir(path.join(fourth.worktree, "src", "writer"), { recursive: true });
   await writeFile(
     path.join(fourth.worktree, "src", "writer", "write.ts"),
     "export const write = (value: string): string => value;\n",
     "utf8",
   );
-  must(["issue", "T-0004"], { AZFLOW_SHIM_ISSUE: "12" });
   git(fourth.worktree, ["add", "."]);
   must(["commit", "T-0004", "--type", "feat", "--scope", "writer", "--subject", "add write helper"]);
   git(fourth.worktree, ["push", "-u", "origin", fourth.branch]);

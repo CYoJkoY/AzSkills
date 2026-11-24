@@ -117,7 +117,9 @@ function parseArgs(argv: readonly string[]): Args {
     if (token.startsWith("--")) {
       const name = token.slice(2);
       const next = argv[index + 1];
-      if (next !== undefined && !next.startsWith("--")) {
+      // A `--no-<thing>` switch never takes a value, so `claim --no-issue T-0001`
+      // keeps the task id positional instead of swallowing it.
+      if (next !== undefined && !next.startsWith("--") && !name.startsWith("no-")) {
         const list = options.get(name) ?? [];
         list.push(next);
         options.set(name, list);
@@ -416,6 +418,7 @@ async function pullRequestContent(
   state: FlowState,
   task: Task,
   commits: readonly BranchCommit[],
+  issue: number,
 ): Promise<{
   title: string;
   body: string;
@@ -430,7 +433,7 @@ async function pullRequestContent(
     "See the linked issue for the objective and the technical driver.",
   ).replace(/\s+/g, " ");
   const body = buildPullRequestBody({
-    issueId: task.issue,
+    issueId: issue,
     base: state.config.base,
     issueSummary: /[.!?]$/.test(issueSummary) ? issueSummary : issueSummary + ".",
     commits: summaryCommits(commits),
@@ -454,13 +457,13 @@ async function pullRequestContent(
     .map((commit) => parseCommitHeader(commit.header))
     .find((header) => header !== null) ?? null;
   const title =
-    derived === null || task.issue === null
+    derived === null
       ? task.title
       : buildPullRequestTitle({
           type: derived.type,
           scope: derived.scope,
           subject: derived.subject,
-          issueId: task.issue,
+          issueId: issue,
           breaking: derived.breaking,
         });
   return {
@@ -641,6 +644,108 @@ async function issue(args: Args): Promise<void> {
   printJson({ task: id, issue: number, url });
 }
 
+/**
+ * Gives a task its linked issue, creating one when the ledger has none.
+ *
+ * The issue used to be a separate step the model had to remember, and a
+ * forgotten step produced a branch whose commits carried no `Refs: #<n>` and a
+ * pull request that closed nothing; the failure only surfaced at the final ship
+ * gate, long after the work was done. `claim` and `pr` both call this, so the
+ * number exists before the first commit needs it. `--issue <n>` attaches an
+ * issue that already exists on the tracker, `--no-issue` leaves the task
+ * unlinked on purpose.
+ */
+async function ensureIssue(project: string, id: string, args: Args): Promise<number | null> {
+  const state = await requireState(project);
+  const task = findTask(state, id);
+  if (task.issue !== null) return task.issue;
+  const explicit = lastValue(args, "issue");
+  let number: number;
+  if (explicit !== undefined) {
+    const parsed = Number(explicit);
+    if (!Number.isInteger(parsed) || parsed <= 0) throw new Error("--issue needs a positive issue number");
+    number = parsed;
+  } else if (args.flags.has("no-issue")) {
+    return null;
+  } else {
+    const url = issueCreate(project, { title: task.title, body: issueBody(task), labels: allValues(args, "label") });
+    const created = issueNumberFromUrl(url);
+    if (created === null) throw new Error("could not read the issue number from " + url);
+    number = created;
+    // A note, not a result: stdout stays the machine-readable record callers parse.
+    process.stderr.write("opened issue #" + String(number) + " for " + id + ": " + url + "\n");
+  }
+  await withLock(project, async (fresh) => {
+    const stored = findTask(fresh, id);
+    if (stored.issue === null) stored.issue = number;
+    touch(stored);
+  });
+  return number;
+}
+
+async function syncIssueLink(
+  project: string,
+  state: FlowState,
+  task: Task,
+  prNumber: number,
+  dryRun: boolean,
+): Promise<{ linked: boolean; detail: string }> {
+  if (task.issue === null) return { linked: false, detail: "no linked issue" };
+  const pr = prView(project, prNumber);
+  const marker = "Closes #" + String(task.issue);
+  if (new RegExp(marker + "(?![0-9])").test(pr.body)) {
+    return { linked: true, detail: marker + " in the body" };
+  }
+  const head = task.branch ?? pr.headRefOid;
+  const commits = branchCommits(project, state.config.base, head);
+  const content = await pullRequestContent(project, state, task, commits, task.issue);
+  if (dryRun) {
+    const predicted = new RegExp(marker + "(?![0-9])").test(content.body);
+    return {
+      linked: predicted,
+      detail: predicted
+        ? "body lacks " + marker + "; ship will restore it before merging"
+        : "body lacks " + marker + "; generated body could not restore it",
+    };
+  }
+  try {
+    prEdit(project, prNumber, { body: content.body });
+  } catch (error) {
+    throw new Error(
+      "could not repair the pull request body with " + marker + ": " +
+        (error instanceof Error ? error.message : String(error)),
+    );
+  }
+  return { linked: true, detail: "restored " + marker };
+}
+
+/**
+ * Why a claim must be refused, or null when it may proceed. Shared by the
+ * preflight and the locked write so an issue is never opened for a task that
+ * cannot start.
+ */
+function claimBlocker(state: FlowState, task: Task, now: number): string | null {
+  const pending = task.dependsOn.filter((dependency) => findTask(state, dependency).status !== "merged");
+  if (pending.length > 0) return task.id + " depends on unmerged " + pending.join(", ");
+  const active = state.tasks.filter(
+    (other) => other.id !== task.id && other.status === "active" && leaseAlive(other.lease, now),
+  );
+  if (task.status !== "active" && active.length >= state.config.maxParallel) {
+    return (
+      "parallel limit reached (" + String(state.config.maxParallel) + " leases held by " +
+      active.map((other) => other.id).join(", ") + ")"
+    );
+  }
+  for (const other of state.tasks) {
+    if (other.id === task.id) continue;
+    if (other.status !== "active" || !leaseAlive(other.lease, now)) continue;
+    const overlap = touchConflict(other.touch, task.touch);
+    if (overlap !== null) return task.id + " conflicts with leased task " + other.id + " on " + overlap;
+  }
+  if (task.status === "merged") return task.id + " is already merged";
+  return null;
+}
+
 async function openPullRequest(args: Args): Promise<void> {
   const project = projectRoot(args);
   const id = args.positionals[0];
@@ -652,17 +757,18 @@ async function openPullRequest(args: Args): Promise<void> {
   if (!remoteBranchExists(project, state.config.remote, task.branch)) {
     throw new Error("push " + task.branch + " to " + state.config.remote + " before opening a pull request");
   }
-  if (task.issue === null) {
-    throw new Error(id + " has no issue; run 'azflow issue " + id + "' before opening the pull request");
-  }
+  // A repair run can reach a branch without ever having had an issue; opening
+  // one here keeps the pull request linked instead of failing at the last gate.
+  const issue = await ensureIssue(project, id, args);
+  if (issue === null) throw new Error(id + " has no issue; a pull request must close one unless --issue supplies it");
   const worktree = task.worktree ?? project;
   const commits = branchCommits(worktree, state.config.base, task.branch);
   if (commits.length === 0) {
     throw new Error(id + " has no commits ahead of " + state.config.base + "; commit the stage first");
   }
-  const generated = await pullRequestContent(project, state, task, commits);
+  const generated = await pullRequestContent(project, state, task, commits, issue);
   const title = lastValue(args, "title") ?? generated.title;
-  const titleCheck = validatePullRequestTitle(title, { issueId: task.issue });
+  const titleCheck = validatePullRequestTitle(title, { issueId: issue });
   if (titleCheck.violations.length > 0) {
     process.stderr.write(titleCheck.violations.join("\n") + "\n");
     process.exitCode = 2;
@@ -671,7 +777,7 @@ async function openPullRequest(args: Args): Promise<void> {
   const body = await bodyFromArgs(args, project, generated.body);
   // An override may reword the body, but the five-section skeleton is fixed, so
   // a hand-written body is checked with the same rule as a generated one.
-  const bodyCheck = validatePullRequestBody(body, { issueId: task.issue });
+  const bodyCheck = validatePullRequestBody(body, { issueId: issue });
   if (bodyCheck.violations.length > 0) {
     process.stderr.write(bodyCheck.violations.join("\n") + "\n");
     process.exitCode = 2;
@@ -767,29 +873,18 @@ async function claim(args: Args): Promise<void> {
   const id = args.positionals[0];
   if (id === undefined) throw new Error("claim requires a task id");
   const owner = lastValue(args, "agent") ?? "primary";
+  const preflight = await requireState(project);
+  const blocked = claimBlocker(preflight, findTask(preflight, id), Date.now());
+  if (blocked !== null) throw new Error(blocked);
+  // The linked issue is part of the claim contract, not a separate step to
+  // remember: it is what commits cite and what the pull request closes.
+  const issue = await ensureIssue(project, id, args);
+  if (issue === null) throw new Error(id + " has no issue; claims need one unless --issue supplies it");
   const created = await withLock(project, async (state) => {
     const task = findTask(state, id);
     const now = Date.now();
-    const pending = task.dependsOn.filter((dependency) => findTask(state, dependency).status !== "merged");
-    if (pending.length > 0) {
-      throw new Error(id + " depends on unmerged " + pending.join(", "));
-    }
-    const active = state.tasks.filter(
-      (other) => other.id !== task.id && other.status === "active" && leaseAlive(other.lease, now),
-    );
-    if (task.status !== "active" && active.length >= state.config.maxParallel) {
-      throw new Error(
-        "parallel limit reached (" + String(state.config.maxParallel) + " leases held by " +
-          active.map((other) => other.id).join(", ") + ")",
-      );
-    }
-    for (const other of state.tasks) {
-      if (other.id === task.id) continue;
-      if (other.status !== "active" || !leaseAlive(other.lease, now)) continue;
-      const overlap = touchConflict(other.touch, task.touch);
-      if (overlap !== null) throw new Error(id + " conflicts with leased task " + other.id + " on " + overlap);
-    }
-    if (task.status === "merged") throw new Error(id + " is already merged");
+    const blockedAfter = claimBlocker(state, task, now);
+    if (blockedAfter !== null) throw new Error(blockedAfter);
     const base = state.config.base;
     const branch = task.branch ?? "issue/" + id.toLowerCase() + "-" + slugify(task.title);
     const directory = task.worktree ?? path.join(worktreesRoot(project), id);
@@ -1226,8 +1321,30 @@ async function ship(args: Args): Promise<void> {
   if (task === null) throw new Error("ship requires a task id or --pr");
   const prNumber = task.pr ?? (explicitPr === undefined ? null : Number(explicitPr));
   if (prNumber === null) throw new Error(task.id + " has no pull request; pass --pr");
+  // An explicit PR still routes through the same gate, so its linked issue is
+  // resolved from the ledger (or created/supplied) before the body is checked.
   if (args.flags.has("verify-issue")) {
     await finishIssueClosure(project, task, prNumber);
+    return;
+  }
+  // The issue is what the pull request must close, so an orphaned pull request
+  // gets one before it is judged. Supplying --issue avoids creating a duplicate
+  // when the work belongs to a tracker issue the ledger lost.
+  const linkedIssue = await ensureIssue(project, task.id, args);
+  if (linkedIssue !== null && linkedIssue !== task.issue) {
+    await withLock(project, async (fresh) => {
+      const stored = findTask(fresh, task.id);
+      stored.issue = linkedIssue;
+      touch(stored);
+    });
+    task.issue = linkedIssue;
+  }
+  let issueLink = { linked: task.issue !== null, detail: task.issue === null ? "no linked issue" : "" };
+  try {
+    issueLink = await syncIssueLink(project, state, task, prNumber, args.flags.has("dry-run"));
+  } catch (error) {
+    process.stderr.write((error instanceof Error ? error.message : String(error)) + "\n");
+    process.exitCode = 1;
     return;
   }
   const pr = prView(project, prNumber);
@@ -1240,16 +1357,15 @@ async function ship(args: Args): Promise<void> {
     detail: review === null ? "no review record" : review.verdict + " at " + review.score.toFixed(2),
   });
   const closesIssue =
-    task.issue !== null && new RegExp("Closes #" + String(task.issue) + "(?![0-9])").test(pr.body);
+    task.issue !== null &&
+    (args.flags.has("dry-run") ? issueLink.linked : new RegExp("Closes #" + String(task.issue) + "(?![0-9])").test(pr.body));
   gates.push({
     gate: "issue-linked",
     pass: closesIssue,
     detail:
       task.issue === null
         ? "no linked issue"
-        : closesIssue
-          ? "Closes #" + String(task.issue) + " in the body"
-          : "body does not say Closes #" + String(task.issue),
+        : issueLink.detail,
   });
   const stageHead = pr.headRefOid !== "" ? pr.headRefOid : task.branch ?? "";
   const stageCommits = stageHead === "" ? [] : branchCommits(project, state.config.base, stageHead)
@@ -1348,7 +1464,7 @@ async function ship(args: Args): Promise<void> {
   try {
     const head = task.branch ?? pr.headRefOid;
     const commits = branchCommits(project, state.config.base, head);
-    const content = await pullRequestContent(project, state, task, commits);
+    const content = await pullRequestContent(project, state, task, commits, task.issue as number);
     prEdit(project, prNumber, { body: content.body });
   } catch {
     // Metadata only: a body refresh must never block a verified merge.
@@ -1458,6 +1574,17 @@ async function doctor(args: Args): Promise<void> {
       gate: "base-branch",
       pass: branch !== state.config.base,
       detail: branch === state.config.base ? "on base branch " + branch : branch,
+    });
+    const orphan = state.tasks.find(
+      (task) => task.branch !== null && task.status !== "merged" && task.issue === null,
+    );
+    checks.push({
+      gate: "issue-link",
+      pass: orphan === undefined,
+      detail:
+        orphan === undefined
+          ? state.tasks.filter((task) => task.branch !== null).length + " active branches carry issues"
+          : orphan.id + " has a branch but no issue; run 'azflow claim " + orphan.id + " --issue <n>'",
     });
     const engine = state.config.reviewEngine;
     checks.push({

@@ -19,11 +19,14 @@ assert.deepEqual(findRepeatedPattern(["a", "a", "a", "a"]), {
   signature: "a",
   total: 4,
 });
-assert.deepEqual(findRepeatedPattern(["a", "b", "a", "b", "a", "b"]), {
+// Two or three passes over a two-step unit are ordinary work, not a dead loop.
+assert.equal(findRepeatedPattern(["a", "b", "a", "b", "a", "b"]), null);
+assert.equal(findRepeatedPattern(["a", "b", "a", "b", "a", "b", "a", "b"])?.period, 2);
+assert.deepEqual(findRepeatedPattern(["a", "b", "a", "b", "a", "b", "a", "b"]), {
   period: 2,
-  repeats: 3,
+  repeats: 4,
   signature: "a",
-  total: 6,
+  total: 8,
 });
 assert.equal(findRepeatedPattern(["a", "a", "a"]), null);
 assert.equal(

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -12,6 +12,12 @@ const stopHook = path.join(root, "codex-plugin/hooks/delivery-stop.ts");
 const azflowCli = path.join(root, "delivery-loop/scripts/azflow.ts");
 const state = await mkdtemp(path.join(tmpdir(), "azskills-delivery-hook-"));
 const transcript = path.join(state, "session.jsonl");
+// The dead-loop restart is scoped to a delivery project, so the guarded runs
+// need a directory that carries the azflow ledger; plain directories must not
+// be restarted at all.
+const project = path.join(state, "project");
+await mkdir(path.join(project, ".azflow"), { recursive: true });
+await writeFile(path.join(project, ".azflow", "state.json"), "{}\n", "utf8");
 const prompt = "Repair the delivery loop without losing the user's original request.";
 
 interface EventInput {
@@ -41,7 +47,7 @@ function runIn(cwd: string, hook: string, event: EventInput): string {
 }
 
 function stop(event: Omit<EventInput, "hook_event_name" | "session_id"> & { session_id?: string }): { decision?: string; reason?: string } {
-  const output = run(stopHook, {
+  const output = runIn(project, stopHook, {
     hook_event_name: "Stop",
     session_id: event.session_id ?? "session-a",
     ...event,
@@ -177,6 +183,20 @@ try {
   // No goal file is present in the repository, so a clean stop still ends the turn.
   const noGoal = stop({ turn_id: "turn-g", session_id: "session-g", last_assistant_message: "A clean, finished reply." });
   assert.equal(noGoal.decision, undefined, "without an active goal the turn is allowed to end");
+
+  // Outside a delivery project there is nothing for a restart to repair: three
+  // identical replies are ordinary work, not a dead loop, and voiding the turn
+  // there would cut a long task short.
+  const plainRepeated = "The same paragraph, read three times on purpose. ";
+  for (let round = 0; round < 3; round += 1) {
+    const plain = runIn(root, stopHook, {
+      hook_event_name: "Stop",
+      session_id: "session-plain",
+      turn_id: "turn-plain",
+      last_assistant_message: plainRepeated,
+    });
+    assert.equal(plain, "", "plain directories never restart the turn");
+  }
 
   // An active goal keeps the turn alive: the Stop hook re-injects the compass
   // from disk so a compacted context is re-grounded, which is the stamina the

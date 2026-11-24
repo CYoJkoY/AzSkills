@@ -20,6 +20,28 @@ assert.ok(denyReasonForBash("git push origin main", ctx) !== null);
 assert.ok(denyReasonForBash("git push origin HEAD:main", ctx) !== null);
 assert.ok(denyReasonForBash("git push origin feature/x", ctx) === null);
 
+// A redirect into a worktree must not be judged by the caller's own branch.
+const branches = new Map([
+  ["E:/repo", "main"],
+  ["E:/repo/.azflow/worktrees/T-0001", "issue/t-0001"],
+]);
+const redirected = {
+  branch: "main",
+  base: "main",
+  branchFor: (dir: string | null): string | null => (dir === null ? "main" : branches.get(dir.replace(/\\/g, "/")) ?? null),
+};
+assert.equal(denyReasonForBash("cd E:/repo && git push -u origin issue/t-0001", redirected), null);
+assert.equal(denyReasonForBash("git -C E:/repo/.azflow/worktrees/T-0001 push -u origin issue/t-0001", redirected), null);
+assert.ok(denyReasonForBash("git -C E:/repo/.azflow/worktrees/T-0001 push origin main", redirected) !== null);
+assert.ok(denyReasonForBash('git -C "E:/repo" push origin feature/x', { ...redirected, branchFor: () => "main" }) === null);
+
+// Raw create calls bypass the linked-issue body the ship gates verify.
+assert.ok(denyReasonForBash("gh pr create --title x", ctx) !== null);
+assert.ok(denyReasonForBash("gh issue create --title x", ctx) !== null);
+assert.equal(denyReasonForBash("gh pr create --title x", ctx, { allowGhCreate: true }), null);
+assert.equal(denyReasonForBash("gh pr view 1", ctx), null);
+assert.equal(denyReasonForBash("gh issue comment 1 --body x", ctx), null);
+
 assert.ok(denyReasonForTool("Task") !== null);
 assert.ok(denyReasonForTool("spawn_agent") !== null);
 assert.equal(denyReasonForTool("Bash"), null);

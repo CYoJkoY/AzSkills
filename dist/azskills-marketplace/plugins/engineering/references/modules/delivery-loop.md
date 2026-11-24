@@ -1,7 +1,7 @@
 ---
 name: delivery-loop
 description: Run a repository delivery loop that plans concurrent tasks as a dependency DAG with touch-scope leases, isolates each task in its own git worktree, scores reviews mechanically through independent Elephant-Goldfish reviewers, merges automatically on green evidence, and breaks out of dead loops.
-version: 1.5.0
+version: 1.6.0
 status: module
 family: operations
 modes: [init, plan, work, review, ship, recover, goal]
@@ -75,11 +75,11 @@ the full command set.
    dependency is unmerged, when the wave is already at `maxParallel`, or when its
    touch scopes overlap a live lease. Admission is demand-driven, never a fixed
    roster.
-4. Run `azflow issue <task>` so the branch commits have an issue to cite. The
-   issue is created from the task body, without asking the user first.
-5. Run `azflow claim <task>` to create the branch and worktree under
-   `.azflow/worktrees/`, then issue a time-bounded lease. Claim re-checks the same
-   admission rules, so a task cannot start just because `plan` was skipped.
+4. Run `azflow claim <task>` to create the branch and worktree under
+   `.azflow/worktrees/`, lease it, and open the task's issue when the ledger has
+   none, so the branch always has a number to cite; `--issue <n>` attaches an
+   existing issue and `--no-issue` leaves the task unlinked on purpose. Claim
+   re-checks admission, so a task cannot start just because `plan` was skipped.
 6. Implement inside the worktree and commit in small, reviewable stages.
 7. Commit each stage with `azflow commit <task> --type <type> --scope <scope>
    --subject "<subject>"`. The command refuses an empty index, refuses a ledger
@@ -234,9 +234,9 @@ An unattended run can repeat one step forever. The failure is quiet: no merge, n
 error, and no review record. The loop therefore treats a repeating step as a
 failure of the same weight as a broken gate.
 
-- A step repeats when the same tool call, or the same short cycle of calls, runs at the end of the turn: four times for one call, three times for a cycle of two to four calls. The same final reply three times in a row also counts, and so does a second blank reply in one turn: the first blank is corrected, the second proves the correction did not land.
+- A step repeats when the same tool call, or the same short cycle of calls, runs at the end of the turn: four times for one call, and four repeats of a cycle of two to four calls. The same final reply three times in a row also counts, and so does a second blank reply in one turn: the first blank is corrected, the second proves the correction did not land.
 - The `PreToolUse` guard denies the fourth identical shell call before it runs, so a loop is interrupted mid-turn instead of burning the rest of the window.
-- The `Stop` guard catches everything the tool guard cannot see, including repeated replies and repeated reads, and restarts the turn.
+- The `Stop` guard catches everything the tool guard cannot see, including repeated replies and repeated reads, and restarts the turn. The restart is scoped to a delivery project, meaning a directory above the turn that carries `.azflow/state.json` or `.azflow/goal.json`; anywhere else a repeated reply or read is ordinary work and is left alone, so a long task outside the loop is never cut short.
 - A restart voids the looped attempt and re-sends the original prompt in the same conversation, with a notice that a dead loop just happened. It never opens a new session and never asks the user to repeat the request.
 - Restarts are budgeted: at most two per turn, so a model that keeps looping is stopped by the budget rather than by an endless guard. After a breaker interruption the counter resets, so a deliberate re-run of the same command after a fix is still allowed.
 - The `UserPromptSubmit` hook records the prompt in per-session state the moment it arrives. That copy, not the transcript, is what a correction quotes, so the prompt survives compaction and a flooded window.
