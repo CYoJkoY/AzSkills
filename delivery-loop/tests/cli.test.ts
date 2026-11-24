@@ -576,6 +576,63 @@ async function main(): Promise<void> {
   };
   assert.equal(recoveredState.tasks.find((item) => item.id === "T-0004")?.status, "merged");
 
+  // A verified branch must never stall on a missing pull request: `gh pr create`
+  // is refused inside the project, so ship opens the pull request itself and
+  // then judges the very pull request it just opened.
+  must(["add", "Add token helper", "--touch", "src/token/**"]);
+  const fifth = JSON.parse(must(["claim", "T-0005"], { AZFLOW_SHIM_ISSUE: "13" }).stdout) as {
+    worktree: string;
+    branch: string;
+  };
+  await mkdir(path.join(fifth.worktree, "src", "token"), { recursive: true });
+  await writeFile(
+    path.join(fifth.worktree, "src", "token", "token.ts"),
+    "export const token = (value: string): string => value.trim();\n",
+    "utf8",
+  );
+  git(fifth.worktree, ["add", "."]);
+  must(["commit", "T-0005", "--type", "feat", "--scope", "token", "--subject", "add token helper"]);
+  git(fifth.worktree, ["push", "-u", "origin", fifth.branch]);
+  const fifthHead = git(fifth.worktree, ["rev-parse", "HEAD"]);
+  const fifthReviewPath = path.join(work, "review-fifth.json");
+  await writeFile(
+    fifthReviewPath,
+    JSON.stringify({ ...reviewInput, headSha: fifthHead, reviewedFiles: ["src/token/token.ts"] }, null, 2),
+    "utf8",
+  );
+  must(["review-open", "T-0005", "--reviewer", "egm-goldfish"]);
+  must(["review", "T-0005", "--input", fifthReviewPath, "--scan", "--reviewer", "reviewer-3"]);
+  const beforeShip = JSON.parse(await readFile(stateFile(project), "utf8")) as {
+    tasks: { id: string; pr: number | null; status: string }[];
+  };
+  assert.equal(
+    beforeShip.tasks.find((item) => item.id === "T-0005")?.pr,
+    null,
+    "the task reaches ship without any pull request",
+  );
+
+  // A dry run cannot judge gates without the pull request, so it says so instead
+  // of opening one; only the live run creates it.
+  const fifthDry = cli(["ship", "T-0005", "--json", "--dry-run"], { AZFLOW_SHIM_HEAD_SHA: fifthHead });
+  assert.equal(fifthDry.status, 1, "a dry run must not open a pull request");
+  assert.match(fifthDry.stderr, /a live ship opens one automatically/);
+
+  const shippedFifth = must(["ship", "T-0005"], { AZFLOW_SHIM_HEAD_SHA: fifthHead, AZFLOW_SHIM_PR: "12" });
+  assert.match(shippedFifth.stderr, /opened pull request #12 for T-0005/, "ship announces the open on stderr");
+  assert.match(shippedFifth.stdout, /Merged and synced main/);
+  const fifthLog = await readFile(env.AZFLOW_SHIM_LOG ?? "", "utf8");
+  assert.match(fifthLog, /pr create --title feat\(token\): add token helper \(#13\)/);
+  assert.match(fifthLog, /Closes #13/, "the automatic pull request closes the linked issue");
+  const fifthCreate = fifthLog.split("\n").find((line) => line.includes("pr create --title feat(token)")) ?? "";
+  assert.ok(fifthCreate !== "" && !fifthCreate.includes("--draft"), "the automatic pull request is ready, not a draft");
+  assert.match(fifthLog, /pr merge 12 --squash --delete-branch/);
+  const fifthState = JSON.parse(await readFile(stateFile(project), "utf8")) as {
+    tasks: { id: string; pr: number | null; status: string }[];
+  };
+  const fifthTask = fifthState.tasks.find((item) => item.id === "T-0005");
+  assert.equal(fifthTask?.pr, 12, "ship records the pull request it opened");
+  assert.equal(fifthTask?.status, "merged");
+
   // The ledger keeps the implementer and one scored stage per commit.
   const finalState = JSON.parse(await readFile(stateFile(project), "utf8")) as {
     tasks: {

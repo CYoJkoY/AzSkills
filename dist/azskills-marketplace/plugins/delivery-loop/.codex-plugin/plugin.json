@@ -1,6 +1,6 @@
 {
   "name": "delivery-loop",
-  "version": "7.6.0",
+  "version": "7.6.1",
   "description": "Run unattended issue-to-merge delivery or continue a long-horizon repository objective without Codex Goal mode. Uses isolated worktrees, touch-scope leases, independent Elephant-Goldfish review, computed scoring, gated auto-merge, durable checkpoints, and bounded dead-loop recovery.",
   "license": "MIT",
   "keywords": [

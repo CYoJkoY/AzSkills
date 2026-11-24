@@ -1,7 +1,7 @@
 ---
 name: delivery-loop
 description: Run a repository delivery loop that plans concurrent tasks as a dependency DAG with touch-scope leases, isolates each task in its own git worktree, scores reviews mechanically through independent Elephant-Goldfish reviewers, merges automatically on green evidence, and breaks out of dead loops.
-version: 1.6.0
+version: 1.6.1
 status: module
 family: operations
 modes: [init, plan, work, review, ship, recover, goal]
@@ -106,13 +106,14 @@ the full command set.
    `--allow-unverified` opens it earlier on purpose.
 10. Run `azflow ship <task>` to refresh the pull request body from the recorded
    review, evaluate every gate at the current head SHA, and merge only on a full
-   pass. It closes the issue and exits 1 if it is not CLOSED, leaving status
-   `merged-issue-open`; `ship <task> --verify-issue` finishes that repair. Then
-   delete the local branch and return to base without asking.
+   pass. It opens the pull request itself when the task has none, because `gh pr
+   create` is refused inside the project. It closes the issue and exits 1 if it is
+   not CLOSED, leaving status `merged-issue-open`; `ship <task> --verify-issue`
+   finishes that repair. Then delete the local branch and return to base.
 11. Run `azflow recover` after an interrupted task to release its lease and return
    it to `planned`; add `--force` to remove orphan worktree directories.
 
-A repair round after `ready` re-runs the checks. The pull request stays open and
+A repair round after `ready` re-runs the checks; the pull request stays open and
 `ship` refuses while the reviewed head differs from the pull request head, so an
 unreviewed fix never merges.
 

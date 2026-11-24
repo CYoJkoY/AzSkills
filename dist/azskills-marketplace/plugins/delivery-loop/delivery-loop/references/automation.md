@@ -42,7 +42,7 @@ the precedence and the repository names its own tools.
 | `azflow status` | Show tasks, leases, reviews, and scores. |
 | `azflow review-open` | Open a short-lived review window that lets EGM reviewers spawn for one task at one head. See [egm-review.md](egm-review.md). |
 | `azflow review` | Require a claimed worktree, an open review window, and an EGM attestation from a fresh `--reviewer` that is not the implementer; scan the real diff, enforce sequential rounds, score the stage, write the report, and delete the window. |
-| `azflow ship` | Restore `Closes #<issue>` in the body when it drifted, verify every merge gate, merge, close the issue, verify it reads `CLOSED`, sync base. A dry run predicts the repair without writing it. `--verify-issue` finishes a merge whose issue stayed open. |
+| `azflow ship` | Restore `Closes #<issue>` when it drifted, open the pull request itself when the task has none (ready, never a draft), verify every merge gate, merge, close the issue, verify it reads `CLOSED`, sync base. A dry run predicts the repair without writing it. `--verify-issue` finishes a merge whose issue stayed open. |
 | `azflow recover` | Release expired leases and list orphan worktrees. |
 | `azflow doctor` | Check node, git, gh auth, ledger, current branch, review engine, the `egm` plugin, and that every active branch has a linked issue. |
 | `azflow goal` | Drive one long-horizon objective across turns without Goal mode. See [goal-run.md](goal-run.md). |
@@ -103,10 +103,15 @@ own gaps as blocking issues.
    `azflow ready <task>`. Each repair is scored on its own stage, and `ship` still
    compares the reviewed head with the pull request head, so a fix without a new
    round does not merge.
-8. Runs `azflow ship <task>` once the head passes. After the merge it closes the
-   linked issue, re-reads it, and exits 1 if it is not `CLOSED`.
+8. Runs `azflow ship <task>` once the head passes. Ship opens the pull request
+   itself when the task has none, so a forgotten `azflow pr` cannot stall the last
+   step while `gh pr create` is refused inside the project; the same review,
+   scoring, and body rules apply. After the merge it closes the linked issue,
+   re-reads it, and exits 1 if it is not `CLOSED`.
 
 The pull request is opened by `gh` from the worktree, never from the base branch.
+Only a live `ship` opens a missing one: `--dry-run` reports the gap and exits 1
+because the gates need the real pull request.
 
 ## Commit standard
 
@@ -271,6 +276,25 @@ shortcut around the attestation, which `azflow review` still checks.
 The guard fails open. A malformed event or a crashed check allows the tool, because
 a guard bug must never block unrelated work. The gates in `ship` are the real
 enforcement; the hook is a fast, early stop.
+
+## When a block is not ours
+
+A denial whose reason names no azflow rule did not come from this plugin: the guard
+only acts where `.azflow/state.json` resolves from the working directory, and it
+always names the rule it refused. Read the event's
+`hookSpecificOutput.permissionDecisionReason` before changing anything.
+
+Two external patterns have been observed blocking ordinary work:
+
+- A context-compaction plugin that denies the tool literally named `Bash` and
+  redirects the model to its own `mcp__*` execute tool. The same session is
+  unaffected where the shell tool is called `exec_command`, so the block appears
+  and disappears by surface rather than by command.
+- A prompt-steering plugin with a PreToolUse matcher of `*` and no
+  `permissionDecision` field. It adds context on every call and denies nothing.
+
+Disable the suspect plugin, re-run the identical command, and compare. The merge
+gates live in `azflow` itself, so disabling every hook never weakens them.
 
 ## Autonomy
 
