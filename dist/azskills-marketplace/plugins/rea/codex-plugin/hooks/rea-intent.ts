@@ -5,8 +5,8 @@ import path from "node:path";
 import process from "node:process";
 
 const patterns = [
-  /reverse engineer|reverse-engineer|decompil|disassembl|binary analys|native binary|javascript bundle|js bundle|obfuscat|minif(?:y|ied)|jadx|ida|ghidra|hopper|frida|smali|symbol recovery/i,
-  /逆向|反编译|反汇编|脱壳|二进制分析|原生二进制|JS(?:脚本)?包|混淆|符号恢复|导入表|加固/,
+  /reverse engineer|reverse-engineer|decompil|disassembl|binary analys|native binary|javascript bundle|js bundle|obfuscat|minif(?:y|ied)|jadx|ida|ghidra|hopper|frida|smali|symbol recovery|import table|export table|static analysis/i,
+  /逆向|反编译|反汇编|脱壳|壳.{0,2}脱|(?<!转成)(?<!转换成)二进制(?!转换|表示|运算|编码)|原生二进制|JS(?:脚本)?包|混淆|符号恢复|导入表|导出表|加固|静态分析|静态特征|so文件|\.so\b|请求签名|反推|还原[\s\S]{0,8}(?:算法|逻辑|代码)/,
 ];
 
 /** Chinese prompts are dense; a few characters already carry the intent. */
