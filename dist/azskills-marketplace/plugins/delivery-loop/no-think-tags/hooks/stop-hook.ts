@@ -12,14 +12,14 @@ import { readCorrections, readStopInput, writeCorrections } from "../lib/hook-ru
 const MAX_CORRECTIONS = 1;
 
 const CLOSED_REASON = [
-  "Your final reply opened with a raw reasoning block (a <think>, <thinking>, or <thought> block).",
+  "Your final reply opened with a raw reasoning block (a think-, thought-, or reasoning-style tag).",
   "The user sees those tags as literal text, and the emitted text cannot be recalled.",
   "Send the answer again as plain assistant text: no thinking-tag blocks, no preamble about this instruction,",
   "and only the content the user asked for.",
 ].join(" ");
 
 const UNCLOSED_REASON = [
-  "Your final reply opened with a raw reasoning block that never closed (a <think>, <thinking>, or <thought>",
+  "Your final reply opened with a raw reasoning block that never closed (a think-, thought-, or reasoning-style",
   "tag with no matching closing tag). Everything after the tag reads as leaked reasoning, not as the answer.",
   "Send the answer again as plain assistant text: no thinking-tag blocks, no preamble about this instruction,",
   "and only the content the user asked for.",

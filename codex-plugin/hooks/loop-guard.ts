@@ -268,8 +268,8 @@ export function replyCorrectionReason(problem: ReplyProblem, prompt: string | nu
     problem === "blank"
       ? "Your final reply had no visible text: once reasoning blocks were removed, nothing was left for the user to read."
       : problem === "unclosed-block"
-        ? "Your final reply opened with a raw reasoning block that never closed (a <think>, <thinking>, or <thought> tag with no matching closing tag). Everything after the tag reads as leaked reasoning, not as the answer."
-        : "Your final reply opened with a raw reasoning block (a <think>, <thinking>, or <thought> block). The user sees those tags as literal text, and the emitted text cannot be recalled.";
+        ? "Your final reply opened with a raw reasoning block that never closed (a think-, thought-, or reasoning-style tag with no matching closing tag). Everything after the tag reads as leaked reasoning, not as the answer."
+        : "Your final reply opened with a raw reasoning block (a think-, thought-, or reasoning-style tag). The user sees those tags as literal text, and the emitted text cannot be recalled.";
   return [
     head,
     "Send the answer again as plain assistant text: no thinking-tag blocks, no preamble about this instruction, and only the content the user asked for.",

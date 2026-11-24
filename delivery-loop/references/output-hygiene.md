@@ -16,16 +16,33 @@ both and asks for exactly one bounded re-send.
 ## What counts as a leak
 
 1. The message begins with optional whitespace followed by an opener from the
-   reasoning family: `think`, `thinking`, or `thought`.
+   reasoning family. That family includes the common spellings `think`,
+   `thinking`, `thought`, `thoughts`, `reasoning`, `reflection`, `analysis`,
+   `scratchpad`, `cot`, `chain-of-thought`, `deliberation`, `introspection`, and
+   their plural, prefix, suffix, camel-case, and separator variants.
 2. The block ends at the first reasoning-family closing tag outside Markdown
    code, or the opener never closes at all.
 3. Neither the opener nor the closer sits inside inline code or a fenced block.
 
+Tag names are normalized into words rather than compared literally, which covers
+the spellings models actually emit: `antThinking`, `redacted_thinking`,
+`thought_process`, `scratch_pad`, `chain-of-thoughts`, and namespaced forms such
+as `anthropic:thinking`. Only whole words count, so prose like `thoughtful` or a
+`class="thinking"` attribute on an unrelated element is not a leak. A leading
+orphan closer left by malformed nested tags is also a leak.
+
 Termination is family-wide and loose on purpose. Any closer from the same family
 ends the block, regardless of which member opened it. Case, inner padding, a
-trailing attribute on the opener, and padding around the closing slash all still
-count. A strict literal comparison misses real replies, which is the failure this
-check exists to catch.
+trailing attribute or self-closing opener, and padding around the closing slash
+all still count. A strict literal comparison misses real replies, which is the
+failure this check exists to catch.
+
+Pipe-wrapped special tokens are recognized in both `|` and `｜` forms, including
+`▁` word spacing (`<|begin▁of▁thinking|>`). These tokens usually close without a
+slash, so `<|end_of_thinking|>`, `<|end▁of▁thinking|>`, and their full-width
+counterparts terminate a block. A pipe token is a closer only when it names both
+a reasoning family and an explicit end word, so `<|begin_of_thought|>`,
+`<|channel|>`, and `<|end_of_text|>` never end a block by accident.
 
 A block that never closes still counts: the opening tag is already on screen, and
 every following line is indistinguishable from reasoning. Blank lines between the
@@ -76,6 +93,12 @@ the tags, or quotes them inside code, is not a leak.
   corrected once.
 - A reply that opens with one family member and closes with another, or uses an
   upper-case, padded, or attribute-bearing spelling, is corrected once.
+- A reply built from derived reasoning aliases, a self-closing opener, or
+  malformed nested tags that leaves a leading orphan closer is corrected once.
+- A reply that closes with a slash-less pipe token such as `<|end_of_thinking|>`
+  or `<|end▁of▁thinking|>`, in `|` or `｜` form, is corrected once.
+- A reply that only contains non-closing pipe tokens such as `<|channel|>` or
+  `<|begin_of_thought|>` is not treated as closed by them.
 - A reply whose tags appear only inside a fenced block or inline code is allowed.
 - A second `Stop` for the same turn is allowed without output.
 - A turn where another `Stop` hook already continued still gets its own leaked tag

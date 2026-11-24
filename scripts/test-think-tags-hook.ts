@@ -105,6 +105,13 @@ try {
   const otag = (name: string): string => lt + name + gt;
   const ctag = (name: string): string => lt + "/" + name + gt;
   const answer = (open: string, close: string): string => open + "\nreasoning\n" + close + "\n\nAnswer.";
+  // Pipe-wrapped special tokens close without a slash and appear in real model
+  // output: a leading pair, an unclosed opener, and a leading closer all leak,
+  // while unrelated special tokens stay prose.
+  assert.equal(blocks(run({ last_assistant_message: answer(otag("|begin_of_thinking|"), otag("|end_of_thinking|")) })), true);
+  assert.equal(blocks(run({ last_assistant_message: otag("|begin_of_thinking|") + "\nnever closed" })), true);
+  assert.equal(blocks(run({ last_assistant_message: otag("|end_of_thinking|") + "Answer." })), true);
+  assert.equal(blocks(run({ last_assistant_message: otag("|channel|") + "final" })), false);
   assert.deepEqual(stripLeadingThinking(answer(otag("think"), ctag("thinking"))), { stripped: true, text: "Answer." });
   assert.deepEqual(stripLeadingThinking(answer(otag("thinking"), ctag("think"))), { stripped: true, text: "Answer." });
   assert.deepEqual(stripLeadingThinking(answer(otag("thought"), ctag("think"))), { stripped: true, text: "Answer." });
@@ -145,7 +152,105 @@ try {
   assert.equal(leadingUnclosedTag(otag("THINK") + "\n\n\nnever closes"), otag("THINK"));
   assert.equal(blocks(run({ last_assistant_message: answer(otag("THINK"), ctag("Think")) })), true);
 
-  console.log("No-think-tags hook tests passed: leading blocks, unclosed tags, code-aware closing tags, bounded correction, and fail-safe inputs.");
+  // Reasoning families vary by model. The common aliases are leaks too, while
+  // ordinary words that merely contain a stem ("thoughtful") are not tags.
+  for (const name of [
+    "reasoning",
+    "reflection",
+    "analysis",
+    "scratchpad",
+    "cot",
+    "chain-of-thought",
+    "chain_of_thought",
+    "inner-thoughts",
+    "internal-reasoning",
+    "hidden-reasoning",
+    "internal-monologue",
+    "private-thinking",
+    "deliberation",
+  ]) {
+    assert.deepEqual(stripLeadingThinking(answer(otag(name), ctag(name))), { stripped: true, text: "Answer." });
+    assert.equal(leadingUnclosedTag(otag(name) + "\nAnswer."), otag(name));
+    assert.equal(blocks(run({ last_assistant_message: answer(otag(name), ctag(name)) })), true);
+  }
+  // Model-specific wrappers are part of the same family: prefixes, suffixes,
+  // camel case, separators, and special-token delimiters all normalize to the
+  // same reasoning words. Ordinary prose and unrelated HTML do not.
+  const specialNames = [
+    "thoughts",
+    "antThinking",
+    "redacted_thinking",
+    "thought_process",
+    "scratch_pad",
+    "chain-of-thoughts",
+    "anthropic:thinking",
+    "begin_of_thinking",
+    "|thinking|",
+    "|begin_of_thought|",
+  ];
+  for (const name of specialNames) {
+    assert.deepEqual(stripLeadingThinking(answer(otag(name), ctag(name))), { stripped: true, text: "Answer." });
+    assert.equal(leadingUnclosedTag(otag(name) + "\nAnswer."), otag(name));
+    assert.equal(blocks(run({ last_assistant_message: answer(otag(name), ctag(name)) })), true);
+  }
+  assert.deepEqual(stripLeadingThinking(answer("<|begin▁of▁thinking|>", "<|end▁of▁thinking|>")), { stripped: true, text: "Answer." });
+  assert.deepEqual(stripLeadingThinking("<think/>Answer."), { stripped: false, text: "<think/>Answer." });
+  assert.deepEqual(stripLeadingThinking("<div class=\"thinking\">Answer.</div>"), { stripped: false, text: "<div class=\"thinking\">Answer.</div>" });
+  assert.deepEqual(stripLeadingThinking("</thought></thinking>Answer."), { stripped: true, text: "Answer." });
+  assert.deepEqual(stripLeadingThinking("\u200B<thought>hidden</thought>Answer."), { stripped: true, text: "Answer." });
+
+  // Pipe-wrapped special tokens often close without a slash (`<|end_of_...|>`)
+  // and may use the `|` or `｜` delimiter with `▁` word spacing. Only tokens
+  // that name both a reasoning family and an end word close a block.
+  assert.deepEqual(
+    stripLeadingThinking(otag("|begin_of_thinking|") + "hidden" + otag("|end_of_thinking|") + "Answer."),
+    { stripped: true, text: "Answer." },
+  );
+  assert.deepEqual(
+    stripLeadingThinking(otag("|begin_of_thought|") + "hidden" + otag("|end_of_thought|") + "Answer."),
+    { stripped: true, text: "Answer." },
+  );
+  assert.deepEqual(
+    stripLeadingThinking(otag("｜begin▁of▁reasoning｜") + "hidden" + otag("｜end▁of▁reasoning｜") + "Answer."),
+    { stripped: true, text: "Answer." },
+  );
+  assert.deepEqual(stripLeadingThinking(otag("|end_of_thinking|") + "Answer."), { stripped: true, text: "Answer." });
+  assert.deepEqual(stripLeadingThinking(ctag("|end_of_thinking|") + "Answer."), { stripped: true, text: "Answer." });
+  assert.deepEqual(
+    stripLeadingThinking(otag("|thinking|") + "hidden" + otag("|end_of_thinking|") + "Answer."),
+    { stripped: true, text: "Answer." },
+  );
+  assert.equal(leadingUnclosedTag(otag("|begin_of_thinking|") + "Answer."), otag("|begin_of_thinking|"));
+  // A begin token is not a closer, and unrelated special tokens stay prose.
+  assert.equal(
+    leadingUnclosedTag(otag("|begin_of_thought|") + "hidden" + otag("|begin_of_thought|") + "Answer."),
+    otag("|begin_of_thought|"),
+  );
+  assert.equal(stripLeadingThinking(otag("|channel|") + "final" + otag("|end_of_text|")).stripped, false);
+
+  assert.deepEqual(stripLeadingThinking("Thoughtful answer."), { stripped: false, text: "Thoughtful answer." });
+  // The derived and pipe-token spellings are caught end to end by the hook, not
+  // only by the pure helpers: a closed pipe block still leaks because its tags
+  // are on screen, an unclosed opener and a leading pipe closer are corrected,
+  // and unrelated special tokens stay prose.
+  assert.equal(blocks(run({ last_assistant_message: answer(otag("|begin_of_thinking|"), otag("|end_of_thinking|")) })), true);
+  assert.equal(blocks(run({ last_assistant_message: otag("|begin_of_thinking|") + "hidden" })), true);
+  assert.equal(blocks(run({ last_assistant_message: otag("|end_of_thinking|") + "Answer." })), true);
+  assert.equal(blocks(run({ last_assistant_message: otag("|channel|") + "final" + otag("|end_of_text|") })), false);
+  assert.equal(stripLeadingThinking("<thinkfoo>x</thinkfoo>").stripped, false);
+
+  // Model output also produces malformed nesting, self-closing tags, quoted
+  // attribute values, and stray closers. They remain raw reasoning leaks rather
+  // than becoming visible junk before the answer.
+  assert.deepEqual(stripLeadingThinking("<think><thought></thinking></thought>Answer."), { stripped: true, text: "Answer." });
+  assert.deepEqual(stripLeadingThinking("<think></think></thought>Answer."), { stripped: true, text: "Answer." });
+  assert.equal(leadingUnclosedTag("<think/>Answer."), "<think/>");
+  assert.equal(blocks(run({ last_assistant_message: "<think/>Answer." })), true);
+  assert.deepEqual(stripLeadingThinking('<think data="a>b">hidden</think>Answer.'), { stripped: true, text: "Answer." });
+  assert.deepEqual(stripLeadingThinking("< thought data-x >hidden< / thought >Answer."), { stripped: true, text: "Answer." });
+  assert.equal(stripLeadingThinking("Intro </think>Answer.").stripped, false);
+
+  console.log("No-think-tags hook tests passed: leading blocks, unclosed tags, code-aware closing tags, pipe special tokens, bounded correction, and fail-safe inputs.");
 } finally {
   await rm(state, { recursive: true, force: true });
 }
