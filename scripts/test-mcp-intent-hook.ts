@@ -77,10 +77,38 @@ try {
   injected(run("serena", { prompt: "查找这个符号的引用并进行重构" }), "serena");
   injected(run("serena", { prompt: "Use the language server to jump to definition across files." }), "serena");
   injected(run("serena", { prompt: "查引用" }), "serena");
+  // Natural Chinese phrasing rarely says "调用关系"; it names the call chain,
+  // the caller, the usage site, or the implementer instead.
+  injected(run("serena", { prompt: "帮我查这个函数的调用链" }), "serena");
+  injected(run("serena", { prompt: "谁调用了这个方法" }), "serena");
+  injected(run("serena", { prompt: "这个函数在哪些地方被调用" }), "serena");
+  injected(run("serena", { prompt: "找出这个类的所有使用位置" }), "serena");
+  injected(run("serena", { prompt: "看下这个接口的实现类" }), "serena");
+  injected(run("serena", { prompt: "这个字段被哪些模块读取" }), "serena");
+  injected(run("serena", { prompt: "帮我理清模块之间的依赖" }), "serena");
+  injected(run("serena", { prompt: "找出所有引用这个常量的位置" }), "serena");
+  injected(run("serena", { prompt: "who calls this method" }), "serena");
+  injected(run("serena", { prompt: "trace the call path across files" }), "serena");
 
   assert.equal(run("rea", { prompt: "Fix the failing unit test." }), "");
   assert.equal(run("serena", { prompt: "Update the README." }), "");
   assert.equal(run("serena", { prompt: "反编译这个二进制" }), "");
+  // Precision guards: punctuation marks are not symbols, and a citation style
+  // request is not a code-intelligence request.
+  assert.equal(run("serena", { prompt: "检查这段文字的标点符号" }), "");
+  assert.equal(run("serena", { prompt: "按 GB 规范标注引用文献" }), "");
+
+  injected(run("rea", { prompt: "把它的壳脱掉看看逻辑" }), "rea");
+  injected(run("rea", { prompt: "分析这个so文件的静态特征" }), "rea");
+  injected(run("rea", { prompt: "还原这个app的加密算法" }), "rea");
+  injected(run("rea", { prompt: "分析这个二进制" }), "rea");
+  injected(run("rea", { prompt: "抓一下它的请求签名算法" }), "rea");
+  injected(run("rea", { prompt: "dump the import table of this pe file" }), "rea");
+  injected(run("rea", { prompt: "run static analysis on the apk" }), "rea");
+
+  // A base conversion is arithmetic, not reverse engineering.
+  assert.equal(run("rea", { prompt: "把十六进制转换成二进制" }), "");
+  assert.equal(run("rea", { prompt: "这段十六进制转成二进制" }), "");
 
   assert.equal(run("rea", { hook_event_name: "SessionStart", prompt: "Decompile this binary." }), "");
   assert.equal(run("serena", "{not json"), "");

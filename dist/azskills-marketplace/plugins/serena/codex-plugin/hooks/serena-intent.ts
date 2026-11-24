@@ -5,8 +5,8 @@ import path from "node:path";
 import process from "node:process";
 
 const patterns = [
-  /symbol|find references?|references? to|go to definition|rename (?:a )?symbol|refactor|language server|\blsp\b|semantic search|code navigation|cross-file|call graph|call hierarchy/i,
-  /语义搜索|符号|查找?引用|引用关系|跳转定义|重命名|代码导航|语言服务器|重构|跨文件|调用关系|调用图/,
+  /symbols?|find (?:all )?references?|references? to|go to definition|goto definition|call (?:graph|hierarchy|chain|sites?|path)|callers?|who calls|usages?|usage sites?|implementations?|subtypes?|type hierarchy|impact analysis|dependency graph|rename (?:a )?symbol|refactor|language server|\blsp\b|semantic (?:search|code)|code navigation|cross-file/i,
+  /(?<!标点)符号|语义搜索|引用关系|引用位置|引用分析|引用[\s\S]{0,10}(?:位置|地方|处)|查找?引用|谁引用|跳转定义|转到定义|定义位置|调用链|调用图|调用关系|调用栈|调用者|谁调用|被调用|哪些地方[\s\S]{0,8}(?:调用|使用|引用)|被哪些[\s\S]{0,8}(?:调用|使用|引用|读取)|实现类|接口实现|继承关系|子类|影响范围|影响面|使用位置|使用处|模块依赖|模块[\s\S]{0,8}依赖|依赖关系|依赖链|依赖分析|语言服务器|跨文件|跨模块|重命名|重构/,
 ];
 
 /** Chinese prompts are dense; a few characters already carry the intent. */
