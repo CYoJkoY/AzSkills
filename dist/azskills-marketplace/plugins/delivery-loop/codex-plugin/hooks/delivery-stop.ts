@@ -15,6 +15,8 @@
  */
 
 import process from "node:process";
+import { stat } from "node:fs/promises";
+import path from "node:path";
 import { classifyReply, type ReplyVerdict } from "../../no-think-tags/lib/reply-guard.ts";
 import {
   detectReplyLoop,
@@ -80,6 +82,32 @@ function verdictProblem(verdict: Exclude<ReplyVerdict, "clean">): ReplyProblem {
   return verdict === "unclosed-block" ? "unclosed-block" : "leading-block";
 }
 
+/**
+ * Finds the azflow project that owns `start`: a directory carrying either the
+ * delivery ledger or a goal file, or the worktree below one.
+ *
+ * A dead-loop restart voids the whole turn and re-sends the prompt, which is the
+ * right repair inside a delivery run and a heavy-handed surprise everywhere
+ * else. Ordinary work legitimately reads the same pair of files three times, so
+ * the restart is scoped to the projects this plugin is accountable for. Leaked
+ * reasoning and blank replies are still corrected everywhere, because those are
+ * always faults.
+ */
+async function findScopeProject(start: string): Promise<string | null> {
+  let current = path.resolve(start);
+  for (;;) {
+    for (const name of ["state.json", "goal.json"]) {
+      const found = await stat(path.join(current, ".azflow", name))
+        .then(() => true)
+        .catch(() => false);
+      if (found) return current;
+    }
+    const parent = path.dirname(current);
+    if (parent === current) return null;
+    current = parent;
+  }
+}
+
 /** Records one reply for later repetition checks, keeping the history bounded. */
 function appendReply(state: DeliveryState, message: string | null, turnId: string, now: number): DeliveryState {
   if (message === null) return state;
@@ -110,6 +138,8 @@ async function main(): Promise<void> {
 
   const snapshot = await readTurnSnapshot(input.transcriptPath, input.turnId).catch(() => null);
   const now = Date.now();
+  const scope = await findScopeProject(process.cwd()).catch(() => null);
+  const restartScope = scope !== null;
 
   const outcome = await withState(input.sessionId, (stored) => {
     const pruned = pruneState(stored, now);
@@ -135,11 +165,11 @@ async function main(): Promise<void> {
     const currentBlank = input.message !== null && classifyReply(input.message) === "blank";
     const lastSameTurnReply = pruned.replies.filter((reply) => sameTurn(reply.turnId)).at(-1);
     const blankFinding =
-      currentBlank && lastSameTurnReply?.sample === BLANK_REPLY
+      restartScope && currentBlank && lastSameTurnReply?.sample === BLANK_REPLY
         ? { period: 1, repeats: 2, signature: "<blank reply>", total: 2 }
         : null;
-    const replyLoop = detectReplyLoop(stateReplies);
-    const toolLoop = detectToolLoop(snapshot?.toolCalls ?? []);
+    const replyLoop = restartScope ? detectReplyLoop(stateReplies) : null;
+    const toolLoop = restartScope ? detectToolLoop(snapshot?.toolCalls ?? []) : null;
     const restartsThisTurn = pruned.restarts.filter((restart) => sameTurn(restart.turnId)).length;
     const canRestart = restartsThisTurn < MAX_RESTARTS_PER_TURN;
 

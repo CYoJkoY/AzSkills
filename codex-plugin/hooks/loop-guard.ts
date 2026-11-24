@@ -34,7 +34,7 @@ export interface LoopFinding {
 export interface RepeatOptions {
   /** Longest repeating unit considered. Defaults to 4. */
   readonly maxPeriod?: number;
-  /** Repeats required for a unit longer than one. Defaults to 3. */
+  /** Repeats required for a unit longer than one. Defaults to 4. */
   readonly minRepeats?: number;
   /** Repeats required for a single-item unit, because one call is common. Defaults to 4. */
   readonly minSingleRepeats?: number;
@@ -52,7 +52,14 @@ export interface ReplyLoopOptions {
 }
 
 const DEFAULT_MAX_PERIOD = 4;
-const DEFAULT_MIN_REPEATS = 3;
+/*
+ * A multi-step unit has to complete four times before it counts as a loop. Two
+ * or three passes over "read A, read B" is ordinary work on a task that touches
+ * several files, and calling it a dead loop restarted healthy turns. Four full
+ * passages with no varied step in between is repetition no longer producing
+ * anything new.
+ */
+const DEFAULT_MIN_REPEATS = 4;
 const DEFAULT_MIN_SINGLE_REPEATS = 4;
 const DEFAULT_WINDOW = 24;
 const DEFAULT_REPLY_MIN_LENGTH = 160;

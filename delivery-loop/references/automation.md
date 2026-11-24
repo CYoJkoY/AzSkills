@@ -42,9 +42,9 @@ the precedence and the repository names its own tools.
 | `azflow status` | Show tasks, leases, reviews, and scores. |
 | `azflow review-open` | Open a short-lived review window that lets EGM reviewers spawn for one task at one head. See [egm-review.md](egm-review.md). |
 | `azflow review` | Require a claimed worktree, an open review window, and an EGM attestation from a fresh `--reviewer` that is not the implementer; scan the real diff, enforce sequential rounds, score the stage, write the report, and delete the window. |
-| `azflow ship` | Refresh the pull request body, verify every merge gate, merge, close the issue, verify it reads `CLOSED`, sync base. `--verify-issue` finishes a merge whose issue stayed open. |
+| `azflow ship` | Restore `Closes #<issue>` in the body when it drifted, verify every merge gate, merge, close the issue, verify it reads `CLOSED`, sync base. A dry run predicts the repair without writing it. `--verify-issue` finishes a merge whose issue stayed open. |
 | `azflow recover` | Release expired leases and list orphan worktrees. |
-| `azflow doctor` | Check node, git, gh auth, ledger, current branch, review engine, and whether the `egm` plugin is installed. |
+| `azflow doctor` | Check node, git, gh auth, ledger, current branch, review engine, the `egm` plugin, and that every active branch has a linked issue. |
 | `azflow goal` | Drive one long-horizon objective across turns without Goal mode. See [goal-run.md](goal-run.md). |
 
 Every command accepts `--project <path>` and most accept `--json` for scripting.
@@ -57,11 +57,14 @@ against a local remote.
 
 The agent runs this path without asking for permission at any step:
 
-1. Runs `azflow issue <task>` to create the issue. The body is generated from the
-   task, so no prompt or hand-written template is needed. Pass `--body` or
-   `--body-file` to override it. The issue exists before the first commit because
-   every commit footer cites it.
-2. Claims the task and commits in small stages through `azflow commit <task>
+1. Runs `azflow claim <task>`, which creates the branch and worktree and also
+   opens the task's issue when the ledger has none. The issue body is generated
+   from the task, so no prompt or hand-written template is needed; `--issue <n>`
+   attaches an existing tracker issue and `--no-issue` leaves the task unlinked on
+   purpose. The issue exists before the first commit because every commit footer
+   cites it, and `azflow pr` and `azflow ship` open one too if a repair run
+   reached them with no issue, so a pull request is never left closing nothing.
+2. Commits in small stages through `azflow commit <task>
    --type <type> --scope <scope> --subject "<subject>"`, one reviewable stage per
    commit. The command refuses an empty index, refuses a ledger that records no
    static check, runs the recorded checks on the worktree, refuses a message that
@@ -233,11 +236,20 @@ the user whether to continue".
 It denies:
 
 - `gh pr merge`, which would bypass the gates.
+- `gh pr create` and `gh issue create` inside a delivery project, so the linked
+  issue and pull request are only made by `azflow`. `AZFLOW_ALLOW_GH_CREATE=1` is
+  the visible escape when a hand-made pull request is genuinely wanted.
 - `git commit` and `git push` while on the base branch.
 - `git push` whose refspec targets the base branch or `origin`.
 - Any sub-agent spawn tool (`Task`, `Agent`, `spawn_agent`, and variants), except
   while a review window opened by `azflow review-open` is live for the current
   head. The window is the only sanctioned path; every other spawn is denied.
+
+The branch a call is judged against is the branch it really targets: the guard
+resolves `git -C <dir>` and a leading `cd <dir> && git`, and it caches the branch
+per directory. A push with an explicit `src:dst` refspec is checked on `dst`, so a
+worktree push is allowed even while the session sits on the base branch, and a
+`git -C <worktree> push origin main` is caught instead of slipping past.
 
 Shell detection matches the tool family, not one name: `Bash`, `shell`,
 `exec_command`, `run_command`, `Terminal`, and `PowerShell` all count, and a
