@@ -8,7 +8,7 @@
       "target": "Codex plugin marketplace",
       "userTarget": "Codex plugin marketplace",
       "source": "https://developers.openai.com/plugins/build/plugins",
-      "verify": "Confirm the marketplace lists every catalog plugin, install the ones the project needs, check that each reports the current release version, review and trust hooks for engineering (GPT with Taste steering plus the Godot 3.x write guard), delivery-loop (delivery-state guard and reasoning-tag Stop hook), and design, visual-assets, and visual-production (a visual-intent pointer), then confirm a new session selects an installed plugin by description without naming it.",
+      "verify": "Confirm the marketplace lists every catalog plugin, install the ones the project needs, and refresh the Git snapshot with `codex plugin marketplace upgrade azskills` after a release. Check that each plugin reports the current release version, then review and trust hooks for engineering (GPT with Taste steering plus the Godot 3.x write guard), delivery-loop (delivery-state guard, review window that admits reviewer sub-agents, prompt-aware correction, and reasoning-tag Stop hook), serena and rea (a code-intelligence or reverse-engineering intent pointer), and design, visual-assets, and visual-production (a visual-intent pointer). Confirm a new session selects an installed plugin by description without naming it, and that a delivery-loop review delegates scoring to an independent reviewer instead of scoring itself.",
       "automation": "manual-import",
       "detection": "manual",
       "configTarget": null,
