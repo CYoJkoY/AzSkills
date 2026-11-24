@@ -27,11 +27,11 @@ AzSkills is a catalog, not one plugin. The marketplace lists 8 independent plugi
 
 - Workflow plugins: engineering, design, visual-assets, visual-production, writing, delivery-loop.
 - Standalone plugins: serena, rea. These bundle an upstream MCP server, so they install only through the marketplace.
-- `delivery-loop` also carries prompt-aware output guards and a dead-loop restart hook.
+- `delivery-loop` also carries prompt-aware output guards, a dead-loop restart hook, and a short-lived review window that admits reviewer sub-agents so an independent model scores the work instead of the session scoring itself.
 
-Install the plugins the project needs. Each plugin is matched on its own description, so a capability no longer depends on one shared dispatcher entry. Hooks ship with `engineering` (GPT with Taste steering on session start, request, and subagents, plus the Godot 3.x write guard), `delivery-loop` (delivery-state guard, prompt-aware output correction, and dead-loop restart), and `design`/`visual-assets`/`visual-production` (a `UserPromptSubmit` pointer to their router skill when an English or Chinese prompt looks visual); review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces.
+Install the plugins the project needs. Each plugin is matched on its own description, so a capability no longer depends on one shared dispatcher entry. Hooks ship with `engineering` (GPT with Taste steering on session start, request, and subagents, plus the Godot 3.x write guard), `delivery-loop` (delivery-state guard that admits reviewer sub-agents only inside an open review window, prompt-aware output correction, and dead-loop restart), `serena` and `rea` (a `UserPromptSubmit` pointer to their own skill when a code-intelligence or reverse-engineering prompt matches, including short Chinese prompts), and `design`/`visual-assets`/`visual-production` (a `UserPromptSubmit` pointer to their router skill when an English or Chinese prompt looks visual); review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces.
 
-When upgrading from an earlier release, remove the old marketplace, add the Git source again, and reinstall the selected plugins. Confirm each installed plugin reports 7.4.0 or later; changing the checkout alone does not replace a cached installation. Hook trust is keyed to the handler hash, so an upgrade that changes a hook manifest or a bundled script marks those hooks for review again. Open the hook list (or `/hooks` in the CLI) to review and trust the handlers, then start a new session.
+When upgrading from an earlier release, refresh the Git snapshot with `codex plugin marketplace upgrade azskills`, then confirm each installed plugin reports 7.5.0 or later. If a cached installation keeps an older version, remove the marketplace, add the Git source again, and reinstall the selected plugins; changing the checkout alone does not replace a cached installation. Hook trust is keyed to the handler hash, so an upgrade that changes a hook manifest or a bundled script marks those hooks for review again. Open the hook list (or `/hooks` in the CLI) to review and trust the handlers, then start a new session.
 
 ## Use
 
@@ -39,7 +39,7 @@ Start a new Codex session and make a request covered by an installed plugin with
 
 ## Verify
 
-Confirm the marketplace lists every catalog plugin, install the ones the project needs, check that each reports the current release version, review and trust hooks for engineering (GPT with Taste steering plus the Godot 3.x write guard), delivery-loop (delivery-state guard and reasoning-tag Stop hook), and design, visual-assets, and visual-production (a visual-intent pointer), then confirm a new session selects an installed plugin by description without naming it.
+Confirm the marketplace lists every catalog plugin, install the ones the project needs, and refresh the Git snapshot with `codex plugin marketplace upgrade azskills` after a release. Check that each plugin reports the current release version, then review and trust hooks for engineering (GPT with Taste steering plus the Godot 3.x write guard), delivery-loop (delivery-state guard, review window that admits reviewer sub-agents, prompt-aware correction, and reasoning-tag Stop hook), serena and rea (a code-intelligence or reverse-engineering intent pointer), and design, visual-assets, and visual-production (a visual-intent pointer). Confirm a new session selects an installed plugin by description without naming it, and that a delivery-loop review delegates scoring to an independent reviewer instead of scoring itself.
 
 
 ## Remove
