@@ -646,6 +646,23 @@ async function main(): Promise<void> {
   assert.deepEqual(Object.keys(firstTask?.stageReviews ?? {}), [headSha], "each commit carries one stage record");
   assert.equal(Object.values(firstTask?.stageReviews ?? {})[0]?.reviewer, "reviewer-1");
 
+  // A machine-checkable goal reports its verification, and the CLI stays the
+  // single place where the model writes it down.
+  const goalStarted = must([
+    "goal",
+    "start",
+    "Ship the feature",
+    "--done-when",
+    "file README.md exists",
+    "--allow",
+    "npm test",
+    "--auto-budget",
+  ]);
+  assert.match(goalStarted.stdout, /ACTIVE GOAL: Ship the feature/);
+  const goalVerified = must(["goal", "verify"]);
+  assert.match(goalVerified.stdout, /\[pass\] file README\.md exists/);
+  assert.match(goalVerified.stdout, /Satisfied: yes/);
+
   await rm(work, { recursive: true, force: true });
   console.log("cli.test.ts: all assertions passed");
 }

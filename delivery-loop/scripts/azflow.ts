@@ -97,6 +97,7 @@ import {
   updateGoal,
 } from "./goal.ts";
 import type { GoalState } from "./goal.ts";
+import { describeDoneWhen, verifyDoneWhen } from "./goal-verify.ts";
 
 interface Args {
   readonly command: string;
@@ -1669,7 +1670,7 @@ function goalUsage(): void {
       "azflow goal - long-horizon goal run that survives without Goal mode",
       "",
       "Usage:",
-      "  azflow goal start \"<objective>\" --done-when \"<criterion>\" [--done-when \"<criterion>\"] [--max-iterations N] [--max-no-progress N] [--next-step \"<text>\"] [--replace]",
+      "  azflow goal start \"<objective>\" --done-when \"<criterion>\" [--done-when \"<criterion>\"] [--max-iterations N] [--max-no-progress N] [--next-step \"<text>\"] [--allow \"<pattern>\"] [--auto-budget] [--replace]",
       "  azflow goal status [--json]",
       "  azflow goal next",
       "  azflow goal note \"<what changed>\" [--evidence \"<output or sha>\"] [--next-step \"<text>\"]",
@@ -1716,9 +1717,12 @@ async function goalCommand(args: Args): Promise<void> {
         {
           objective,
           doneWhen: allValues(args, "done-when"),
-          maxIterations: positiveInt("max-iterations", DEFAULT_MAX_ITERATIONS),
+          maxIterations: args.flags.has("auto-budget")
+            ? undefined
+            : positiveInt("max-iterations", DEFAULT_MAX_ITERATIONS),
           maxNoProgress: positiveInt("max-no-progress", DEFAULT_MAX_NO_PROGRESS),
           nextStep: lastValue(args, "next-step"),
+          allowedCommands: allValues(args, "allow"),
         },
         { replace: args.flags.has("replace") },
       );
@@ -1789,10 +1793,22 @@ async function goalCommand(args: Args): Promise<void> {
       const updated = await updateGoal(project, (goal) => {
         if (goal.status !== "paused" && goal.status !== "stalled") throw new Error("Only a paused or stalled goal can be resumed.");
         if (goal.iteration >= goal.maxIterations) throw new Error("Extend the exhausted goal budget before resuming.");
-        return { ...goal, status: "active", noProgress: 0, lastMarker: marker, updatedAt: at };
+        return { ...goal, status: "active", noProgress: 0, retry: null, diagnosed: false, lastMarker: marker, updatedAt: at };
       });
       if (updated === null) throw new Error("No goal at " + flowRoot(project) + ".");
       print("Goal resumed (pass " + updated.iteration + " of " + updated.maxIterations + ").");
+      return;
+    }
+    case "verify": {
+      const goal = await requireGoal();
+      const report = await verifyDoneWhen(project, goal.doneWhen);
+      if (args.flags.has("json")) {
+        printJson(report);
+        return;
+      }
+      print(describeDoneWhen(report));
+      print("Verifiable: " + (report.allVerifiable ? "yes" : "no"));
+      print("Satisfied: " + (report.allPassed ? "yes" : "no"));
       return;
     }
     case "extend": {
@@ -1853,7 +1869,7 @@ function help(): void {
       "  azflow review <task> --input <review.json> --reviewer <fresh id> [--engine egm|self] [--scan] [--post] [--pr N] [--json]",
       "  azflow ship <task>|--pr <n> [--dry-run] [--verify-issue] [--json]",
       "  azflow recover [--force]",
-      "  azflow goal start|status|next|note|next-step|pause|resume|extend|complete|abandon",
+      "  azflow goal start|status|next|note|next-step|pause|resume|extend|verify|complete|abandon",
       "  azflow doctor [--json]",
       "",
       "Ledger: .azflow/state.json (local, git-ignored). GitHub Issue/PR stays the shared record.",

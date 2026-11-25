@@ -1,7 +1,7 @@
 ---
 name: delivery-loop
 description: Run a repository delivery loop that plans concurrent tasks as a dependency DAG with touch-scope leases, isolates each task in its own git worktree, scores reviews mechanically through independent Elephant-Goldfish reviewers, merges automatically on green evidence, and breaks out of dead loops.
-version: 1.6.2
+version: 1.7.0
 status: module
 family: operations
 modes: [init, plan, work, review, ship, recover, goal]
@@ -41,7 +41,7 @@ It also owns the long-horizon goal run: a durable objective in `.azflow/goal.jso
 | `review` | A diff is ready for scoring | Open a review window, run the independent reviewers, score the attested record, inject scanner findings, write the report | Report with computed score and verdict |
 | `ship` | A review passed | Re-check every gate at the current head SHA, merge with the configured strategy, close the issue and verify it is CLOSED | Merge outcome and synced base |
 | `recover` | A lease expired or a task stalled | Release expired leases, return the task to the plan, list orphan worktrees | Reclaimed tasks and orphan list |
-| `goal` | One objective must keep moving across many turns without Goal mode | Start a durable goal with done-when criteria, let the Stop hook drive continuation while progress is real, and stall or pause instead of looping | Goal compass, per-pass progress, and a stall or budget pause |
+| `goal` | One objective must keep moving across many turns without Goal mode | Start a durable goal with done-when criteria, let the Stop hook drive continuation and bounded self-repair while progress is real, and stall, pause, or complete instead of looping | Goal compass, per-pass progress, an automatic completion, and a stall or budget pause |
 
 ## Goal run
 
@@ -53,11 +53,15 @@ active and work remains, re-injecting the compass from disk so a compacted conte
 is re-grounded rather than trusted to memory; a `SessionStart` hook injects the
 same compass when a session opens. Progress is read from the repository and the
 ledger, never from the model's word: an unchanged HEAD, tree, ledger, and worktree
-set across a pass is no progress, so the run stalls after too many idle passes and
-pauses when the budget is spent instead of spinning. `azflow goal` owns start,
-status, note, next-step, complete, pause, resume, extend, and abandon, and any
-non-active status lets the turn end. A goal needs no ledger, and with one the next
-step is read from that ledger. See
+set across a pass is no progress, so an idle run first gets one diagnostic pass and
+then stalls instead of spinning. A long run repairs itself within bounds: it
+retries a transient failure, extends a healthy budget, repairs a review that lands
+just under the bar, and completes a goal whose done-when criteria all verify
+against the repository. The guard auto-approves repeated reads, tests, and the
+goal's own `--allow` patterns, while `git push` and `gh pr merge` still go through
+the deny rules. `azflow goal` owns start, verify, status, note, next-step, complete,
+pause, resume, extend, and abandon, and any non-active status lets the turn end. A
+goal needs no ledger, and with one the next step is read from that ledger. See
 [goal-run.md](../../delivery-loop/references/goal-run.md) for the state file and
 the full command set.
 
