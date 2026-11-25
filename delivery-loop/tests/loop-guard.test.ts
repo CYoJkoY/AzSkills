@@ -7,7 +7,6 @@ import {
   loopRestartReason,
   normalizeCall,
   promptReplay,
-  replyCorrectionReason,
 } from "../../codex-plugin/hooks/loop-guard.ts";
 
 const longReply = "A".repeat(180);
@@ -53,8 +52,6 @@ assert.match(promptReplay(prompt), /BEGIN RESENT PROMPT/);
 assert.match(promptReplay(prompt), /Implement the delivery loop/);
 assert.match(loopRestartReason({ period: 1, repeats: 4, signature: "bash git status", total: 4 }, "tool", prompt), /DEAD LOOP DETECTED/);
 assert.match(loopBreakerReason({ period: 1, repeats: 4, signature: "bash git status", total: 4 }, "tool", prompt), /DEAD LOOP INTERRUPTED/);
-assert.match(replyCorrectionReason("blank", prompt), /no visible text/);
-assert.match(replyCorrectionReason("blank", prompt), /Implement the delivery loop/);
 assert.match(
   loopRestartReason({ period: 1, repeats: 2, signature: "<blank reply>", total: 2 }, "blank", prompt),
   /blank final reply 2 times/,

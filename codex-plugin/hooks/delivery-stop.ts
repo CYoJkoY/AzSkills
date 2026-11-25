@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 /*
- * Stop hook for the delivery loop: dead-loop restart plus reply correction.
+ * Stop hook for the delivery loop: dead-loop restart plus goal continuation.
  *
  * The Stop event is the moment the model believes the turn is finished. That
- * makes it the right place for two guards. A final reply that is unreadable
- * (leaked reasoning or nothing visible) gets one bounded correction. A turn that
- * just repeated itself gets a full restart: the looped attempt is void, the
- * dialog state is reset in place, and the original prompt is re-sent verbatim
- * with a notice that a dead loop just happened.
+ * makes it the right place to catch a turn that just repeated itself: the
+ * looped attempt is void, the dialog state is reset in place, and the original
+ * prompt is re-sent verbatim with a notice that a dead loop just happened.
  *
  * Nothing here opens a new conversation. The block decision hands the prompt
  * back to the same session so the model can continue with a different approach.
@@ -17,20 +15,17 @@
 import process from "node:process";
 import { stat } from "node:fs/promises";
 import path from "node:path";
-import { classifyReply, type ReplyVerdict } from "../../no-think-tags/lib/reply-guard.ts";
+import { classifyReply } from "../../no-think-tags/lib/reply-guard.ts";
 import {
   detectReplyLoop,
   detectToolLoop,
   loopRestartReason,
   normalizeReply,
-  replyCorrectionReason,
-  type ReplyProblem,
 } from "./loop-guard.ts";
 import {
   MAX_SAMPLE_CHARS,
   isRecord,
   pruneState,
-  turnKey,
   withState,
   type DeliveryState,
 } from "./session-state.ts";
@@ -45,7 +40,6 @@ interface StopInput {
   readonly transcriptPath: string | null;
 }
 
-const MAX_CORRECTIONS = 1;
 const MAX_RESTARTS_PER_TURN = 2;
 const BLANK_REPLY = "";
 
@@ -77,11 +71,6 @@ async function readStdin(): Promise<string> {
   return Buffer.concat(chunks).toString("utf8");
 }
 
-function verdictProblem(verdict: Exclude<ReplyVerdict, "clean">): ReplyProblem {
-  if (verdict === "blank") return "blank";
-  return verdict === "unclosed-block" ? "unclosed-block" : "leading-block";
-}
-
 /**
  * Finds the azflow project that owns `start`: a directory carrying either the
  * delivery ledger or a goal file, or the worktree below one.
@@ -90,8 +79,8 @@ function verdictProblem(verdict: Exclude<ReplyVerdict, "clean">): ReplyProblem {
  * right repair inside a delivery run and a heavy-handed surprise everywhere
  * else. Ordinary work legitimately reads the same pair of files three times, so
  * the restart is scoped to the projects this plugin is accountable for. Leaked
- * reasoning and blank replies are still corrected everywhere, because those are
- * always faults.
+ * reasoning is left to the model; a blank final reply is recorded everywhere but
+ * only counts as a dead loop inside that same scope.
  */
 async function findScopeProject(start: string): Promise<string | null> {
   let current = path.resolve(start);
@@ -143,7 +132,6 @@ async function main(): Promise<void> {
 
   const outcome = await withState(input.sessionId, (stored) => {
     const pruned = pruneState(stored, now);
-    const key = turnKey(input.turnId);
 
     // A prompt is quoted only when it belongs to this turn. With a known turn
     // id, another turn's prompt would mislead the model; with no id we cannot
@@ -186,21 +174,6 @@ async function main(): Promise<void> {
       // the attempt but lets the stop-hook-active flag end the loop.
       if (input.turnId === "" && input.stopHookActive) return { next, result: null };
       return { next, result: loopRestartReason(finding, kind, prompt) };
-    }
-
-    const verdict = classifyReply(input.message);
-    if (verdict !== "clean") {
-      const count = pruned.corrections[key] ?? 0;
-      if (count < MAX_CORRECTIONS) {
-        const next = appendReply(
-          { ...pruned, corrections: { ...pruned.corrections, [key]: count + 1 } },
-          input.message,
-          input.turnId,
-          now,
-        );
-        if (input.turnId === "" && input.stopHookActive) return { next, result: null };
-        return { next, result: replyCorrectionReason(verdictProblem(verdict), prompt) };
-      }
     }
 
     return { next: appendReply(pruned, input.message, input.turnId, now), result: null };

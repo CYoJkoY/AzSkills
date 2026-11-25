@@ -46,9 +46,9 @@ place to decide whether it is. On a clean stop the hook calls `advanceGoal`:
    with the compass and the next step, so the model continues in the same session
    with the goal in front of it.
 
-The loop guard still runs first. A reply that repeats itself, or one that is blank
-or opens with leaked reasoning, is corrected or restarted before the goal
-decision, so a goal run cannot paper over a dead or unreadable reply.
+The loop guard still runs first. A reply that repeats itself, or one that is blank,
+is restarted before the goal decision, so a goal run cannot paper over a dead or
+unreadable reply.
 
 ## Progress from real state
 

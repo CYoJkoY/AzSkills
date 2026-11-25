@@ -1,7 +1,7 @@
 ---
 name: azskills
-description: AzSkills is a catalog of independent Codex plugins for engineering architecture and code style, design systems and UI motion, visual assets, slides and video, documents, resumes, client setup, Godot 3.x, and answer hygiene. Install only the plugins a task needs; each one routes on its own.
-version: 7.6.3
+description: AzSkills is a catalog of independent Codex plugins for engineering architecture and code style, design systems and UI motion, visual assets, slides and video, documents, resumes, client setup, and Godot 3.x. Install only the plugins a task needs; each one routes on its own.
+version: 7.6.4
 ---
 
 # AzSkills
@@ -42,10 +42,11 @@ through `uv tool install -p 3.13 serena-agent`, REA through `npx rea-agents@late
 turn, and a completed local-agent wait injects the agent steer. It keeps the
 Godot 3.x write guard on the same manifest.
 
-`delivery-loop` also carries the Stop hook that blocks a final reply opening
-with a leaked reasoning tag, and a PreToolUse guard that permits reviewer
-sub-agents only inside an `azflow review-open` window, so answer hygiene and
-independent review install with the workflow that runs the longest turns.
+`delivery-loop` also carries the delivery guard: a PreToolUse hook that permits
+reviewer sub-agents only inside an `azflow review-open` window, and a Stop hook
+that restarts a turn stuck in a dead loop and continues an active goal, so
+independent review and loop control install with the workflow that runs the
+longest turns.
 
 `serena` and `rea` ship a `UserPromptSubmit` hook that matches a code-intelligence
 or reverse-engineering request, in English or Chinese, and injects a pointer to

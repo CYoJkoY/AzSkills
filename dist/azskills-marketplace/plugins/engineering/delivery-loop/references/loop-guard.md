@@ -16,8 +16,8 @@ Two shapes, both read from evidence rather than from a hunch:
 - **Repeated replies.** The same final reply arrives three times in a row and the
   reply is long enough to be a real answer rather than a short acknowledgement.
 - **Repeated blank replies.** Two final replies in a row carry no visible text once
-  reasoning blocks are removed. The first one is corrected in place; the second is
-  evidence that the correction did not land, so it restarts the turn.
+  reasoning blocks are removed. The first one is recorded; the second shows the
+  turn is not producing an answer, so it restarts the turn.
 
 Only a run at the very end of the turn counts. A model that repeats a step and
 then moves on was not stuck, and blocking it would punish ordinary retries.
@@ -25,8 +25,8 @@ then moves on was not stuck, and blocking it would punish ordinary retries.
 The restart is scoped to a delivery project: the turn's directory or one above it
 must carry `.azflow/state.json` or `.azflow/goal.json`. Outside a delivery project
 an ordinary task legitimately reads the same file or re-reads the same reply, and
-voiding the turn there would cut a long task short. Leaked reasoning and blank
-replies are still corrected everywhere, because those are always faults.
+voiding the turn there would cut a long task short. Blank replies are still counted
+everywhere, because a turn that shows nothing is always a fault.
 
 ## Two hooks, one rule
 

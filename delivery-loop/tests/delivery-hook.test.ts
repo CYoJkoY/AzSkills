@@ -4,13 +4,11 @@ import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { isReasoningLeak } from "../../codex-plugin/hooks/output-hygiene.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const promptHook = path.join(root, "codex-plugin/hooks/delivery-prompt.ts");
 const sessionHook = path.join(root, "codex-plugin/hooks/delivery-session.ts");
 const stopHook = path.join(root, "codex-plugin/hooks/delivery-stop.ts");
-const hygieneHook = path.join(root, "codex-plugin/hooks/delivery-hygiene.ts");
 const azflowCli = path.join(root, "delivery-loop/scripts/azflow.ts");
 const state = await mkdtemp(path.join(tmpdir(), "azskills-delivery-hook-"));
 const transcript = path.join(state, "session.jsonl");
@@ -59,23 +57,15 @@ function stop(event: Omit<EventInput, "hook_event_name" | "session_id"> & { sess
 }
 
 try {
-  // The prompt hook states the output-hygiene rule up front, because a leak in
-  // a progress note is on screen before the Stop hook ever runs.
+  // The prompt hook only records the request for a later restart; it injects no
+  // rule into the turn and therefore prints nothing.
   const promptOut = run(promptHook, {
     hook_event_name: "UserPromptSubmit",
     session_id: "session-a",
     turn_id: "turn-a",
     prompt,
   });
-  assert.match(promptOut, /OUTPUT HYGIENE/, "the prompt hook states the rule");
-  const promptPayload = JSON.parse(promptOut) as {
-    continue?: boolean;
-    hookSpecificOutput?: { hookEventName?: string; additionalContext?: string };
-  };
-  assert.equal(promptPayload.continue, true);
-  assert.equal(promptPayload.hookSpecificOutput?.hookEventName, "UserPromptSubmit");
-  assert.match(promptPayload.hookSpecificOutput?.additionalContext ?? "", /reasoning tag/);
-  assert.doesNotMatch(promptPayload.hookSpecificOutput?.additionalContext ?? "", /<thinking>/);
+  assert.equal(promptOut, "", "the prompt hook records without injecting context");
 
   const repeated = "A long answer that is clearly not making progress. ".repeat(8);
   const first = stop({ turn_id: "turn-a", last_assistant_message: repeated });
@@ -102,18 +92,17 @@ try {
     prompt: "Second turn: explain the blank reply correction.",
   });
 
+  // One blank reply is recorded but allowed; the second proves the turn is stuck
+  // and restarts it with the stored prompt.
   const blank = stop({ turn_id: "turn-b", last_assistant_message: "\u200B\n\t" });
-  assert.equal(blank.decision, "block");
-  assert.match(blank.reason ?? "", /no visible text/);
-  assert.match(blank.reason ?? "", /Second turn: explain the blank reply correction\./);
-  assert.doesNotMatch(blank.reason ?? "", /Repair the delivery loop/, "another turn's prompt is not quoted");
-  assert.match(blank.reason ?? "", /BEGIN RESENT PROMPT[\s\S]*END RESENT PROMPT/, "the prompt block is complete");
-
+  assert.equal(blank.decision, undefined, "a single blank reply is not a loop");
   const blankAgain = stop({ turn_id: "turn-b", last_assistant_message: "" });
-  assert.equal(blankAgain.decision, "block", "a repeated blank reply escalates to a restart");
+  assert.equal(blankAgain.decision, "block", "a repeated blank reply is a dead loop");
   assert.match(blankAgain.reason ?? "", /DEAD LOOP DETECTED/);
   assert.match(blankAgain.reason ?? "", /blank final reply/);
   assert.match(blankAgain.reason ?? "", /Second turn: explain the blank reply correction\./);
+  assert.doesNotMatch(blankAgain.reason ?? "", /Repair the delivery loop/, "another turn's prompt is not quoted");
+  assert.match(blankAgain.reason ?? "", /BEGIN RESENT PROMPT[\s\S]*END RESENT PROMPT/, "the prompt block is complete");
 
   const loopLines = Array.from({ length: 4 }, () => JSON.stringify({
     type: "response_item",
@@ -129,7 +118,7 @@ try {
   assert.equal(tool.decision, "block");
   assert.match(tool.reason ?? "", /DEAD LOOP DETECTED/);
 
-  // With no recorded prompt (the plugin was installed mid-session), the Stop hook
+  // With no recorded prompt (the plugin was installed mid-session), a restart
   // still recovers the request from the transcript instead of quoting nothing.
   const fallbackFile = path.join(state, "fallback.jsonl");
   await writeFile(
@@ -143,7 +132,12 @@ try {
     }) + "\n",
     "utf8",
   );
-  const fallback = stop({ turn_id: "turn-d", session_id: "session-d", transcript_path: fallbackFile, last_assistant_message: "<thinking>plan</thinking>" });
+  const fallbackText = "Fallback reply that only the transcript can explain. ".repeat(4);
+  const fallbackStop = () =>
+    stop({ turn_id: "turn-d", session_id: "session-d", transcript_path: fallbackFile, last_assistant_message: fallbackText });
+  assert.equal(fallbackStop().decision, undefined);
+  assert.equal(fallbackStop().decision, undefined);
+  const fallback = fallbackStop();
   assert.equal(fallback.decision, "block");
   assert.match(fallback.reason ?? "", /Recover the failing build from the transcript\./);
   assert.match(fallback.reason ?? "", /BEGIN RESENT PROMPT[\s\S]*END RESENT PROMPT/);
@@ -193,190 +187,6 @@ try {
   );
   const scopedLoop = stop({ turn_id: "", session_id: "session-f", transcript_path: scopedLoopFile, last_assistant_message: "Working" });
   assert.equal(scopedLoop.decision, "block", "four calls after the newest prompt are still a loop");
-
-  // A wrapped reasoning block and an opener that never closes are leaks; a
-  // plain note, or a tag quoted inside backticks, is not.
-  assert.equal(isReasoningLeak("<thinking>x</thinking>\nRetry."), true);
-  assert.equal(isReasoningLeak("<thinking>never closes"), true);
-  // Models also truncate the opener: the tag name runs straight into the text,
-  // or stops at a space, with no closing bracket. The name is still on screen.
-  assert.equal(isReasoningLeak("<thinkingThere is a value</thinking>\nRetry."), true);
-  assert.equal(isReasoningLeak("<think beyond? note"), true);
-  assert.equal(isReasoningLeak("Plain progress note."), false);
-  assert.equal(isReasoningLeak("`<thinking>` mentioned in code"), false);
-  assert.equal(isReasoningLeak("the model wrote <thinking without a closing bracket"), false);
-  assert.equal(isReasoningLeak("`<thinking` and `</thinking>` in docs"), false);
-
-  const assistantLine = (id: string, turnId: string, text: string): string =>
-    JSON.stringify({
-      type: "response_item",
-      payload: {
-        type: "message",
-        role: "assistant",
-        phase: "commentary",
-        id,
-        content: [{ type: "output_text", text }],
-        internal_chat_message_metadata_passthrough: { turn_id: turnId },
-      },
-    });
-  const eventAgentLine = (id: string, turnId: string, text: string): string =>
-    JSON.stringify({
-      type: "event_msg",
-      payload: {
-        type: "item_completed",
-        turn_id: turnId,
-        item: { type: "AgentMessage", id, phase: "commentary", content: [{ type: "Text", text }] },
-      },
-    });
-  const turnUserLine = (turnId: string, text: string): string =>
-    JSON.stringify({
-      type: "event_msg",
-      payload: {
-        type: "item_completed",
-        turn_id: turnId,
-        item: { type: "UserMessage", content: [{ type: "text", text }] },
-      },
-    });
-  const hygieneEvent = (turnId: string, file: string, session: string): EventInput => ({
-    hook_event_name: "PreToolUse",
-    session_id: session,
-    turn_id: turnId,
-    transcript_path: file,
-    tool_name: "exec_command",
-  });
-
-  // The same message is recorded twice under one id; the pair must count once.
-  const leakText =
-    "<thinking>Shell issue: I passed shell bash with PowerShell commands, and PowerShell commands in bash. Use shell powershell for PS, and bash for rg. Retry correctly.</thinking>\n" +
-    "\u521a\u624d\u547d\u4ee4\u6df7\u7528\u4e86 Bash/PowerShell\uff0c\u6539\u7528\u5bf9\u5e94 shell \u91cd\u67e5\u5de5\u4f5c\u533a\u72b6\u6001\u548c\u6d4b\u8bd5\u5165\u53e3\u3002";
-  const hygieneFile = path.join(state, "hygiene.jsonl");
-  const hygieneLines = [
-    turnUserLine("turn-h1", "Repair the flaky installer."),
-    eventAgentLine("msg-h1", "turn-h1", leakText),
-    assistantLine("msg-h1", "turn-h1", leakText),
-    JSON.stringify({
-      type: "response_item",
-      payload: {
-        type: "function_call",
-        name: "exec_command",
-        arguments: JSON.stringify({ command: "Get-ChildItem" }),
-        internal_chat_message_metadata_passthrough: { turn_id: "turn-h1" },
-      },
-    }),
-  ];
-  await writeFile(hygieneFile, hygieneLines.join("\n") + "\n", "utf8");
-
-  const firstLeak = run(hygieneHook, hygieneEvent("turn-h1", hygieneFile, "session-h1"));
-  assert.match(firstLeak, /OUTPUT HYGIENE/, "a leaked progress note is corrected");
-  const leakPayload = JSON.parse(firstLeak) as {
-    continue?: boolean;
-    hookSpecificOutput?: { hookEventName?: string; additionalContext?: string };
-  };
-  assert.equal(leakPayload.continue, true);
-  assert.equal(leakPayload.hookSpecificOutput?.hookEventName, "PreToolUse");
-  const leakCorrection = leakPayload.hookSpecificOutput?.additionalContext ?? "";
-  assert.match(leakCorrection, /a raw reasoning block/, "the duplicated record counts once");
-  assert.doesNotMatch(leakCorrection, /2 raw reasoning blocks/);
-  assert.doesNotMatch(leakCorrection, /Shell issue/, "the correction never quotes the leaked text");
-
-  assert.equal(
-    run(hygieneHook, hygieneEvent("turn-h1", hygieneFile, "session-h1")),
-    "",
-    "the same leak is corrected only once",
-  );
-
-  await writeFile(
-    hygieneFile,
-    [...hygieneLines, assistantLine("msg-h2", "turn-h1", "<analysis>second</analysis>\nRetrying.")].join("\n") + "\n",
-    "utf8",
-  );
-  assert.match(
-    run(hygieneHook, hygieneEvent("turn-h1", hygieneFile, "session-h1")),
-    /OUTPUT HYGIENE/,
-    "a new leaked message earns a new correction",
-  );
-
-  // A real turn leaked sixteen notes. The signature budget must hold every leak
-  // the transcript still shows, or the oldest ones fall out and the second check
-  // reports them as new again.
-  const wideFile = path.join(state, "hygiene-wide.jsonl");
-  const wideLines = [turnUserLine("turn-hw", "Long turn.")];
-  for (let index = 1; index <= 16; index += 1) {
-    wideLines.push(
-      assistantLine("msg-hw-" + index, "turn-hw", "<thinking>pass " + index + "</thinking>\nNote " + index + "."),
-    );
-  }
-  await writeFile(wideFile, wideLines.join("\n") + "\n", "utf8");
-  assert.match(
-    run(hygieneHook, hygieneEvent("turn-hw", wideFile, "session-hw")),
-    /16 of your recent visible messages/,
-    "every leaked note in a wide turn counts",
-  );
-  assert.equal(
-    run(hygieneHook, hygieneEvent("turn-hw", wideFile, "session-hw")),
-    "",
-    "a wide turn is not re-reported once all its leaks are recorded",
-  );
-
-  const cleanFile = path.join(state, "hygiene-clean.jsonl");
-  await writeFile(
-    cleanFile,
-    [turnUserLine("turn-h2", "Continue."), assistantLine("msg-h3", "turn-h2", "Checking the test entry point.")].join("\n") + "\n",
-    "utf8",
-  );
-  assert.equal(run(hygieneHook, hygieneEvent("turn-h2", cleanFile, "session-h2")), "", "clean notes stay silent");
-
-  assert.equal(
-    run(hygieneHook, {
-      hook_event_name: "PreToolUse",
-      session_id: "session-h2",
-      turn_id: "turn-h2",
-      tool_name: "exec_command",
-    }),
-    "",
-    "no transcript means no correction",
-  );
-
-  // A leak from an earlier turn is not this turn's evidence.
-  const oldLeakFile = path.join(state, "hygiene-old.jsonl");
-  await writeFile(
-    oldLeakFile,
-    [
-      turnUserLine("turn-old", "Earlier request."),
-      assistantLine("msg-old", "turn-old", "<thinking>old</thinking>\nOld note."),
-      turnUserLine("turn-h3", "New request."),
-      assistantLine("msg-new", "turn-h3", "New clean note."),
-    ].join("\n") + "\n",
-    "utf8",
-  );
-  assert.equal(
-    run(hygieneHook, hygieneEvent("turn-h3", oldLeakFile, "session-h3")),
-    "",
-    "an earlier turn's leak does not trigger a correction here",
-  );
-
-  // Three nudges per turn; a model that ignores all three gets no fourth.
-  const budgetFile = path.join(state, "hygiene-budget.jsonl");
-  const budgetLines = [turnUserLine("turn-hb", "Keep going.")];
-  for (let round = 1; round <= 5; round += 1) {
-    budgetLines.push(assistantLine("msg-hb-" + round, "turn-hb", "<thinking>step " + round + "</thinking>\nNote " + round + "."));
-    await writeFile(budgetFile, budgetLines.join("\n") + "\n", "utf8");
-    const nudged = run(hygieneHook, hygieneEvent("turn-hb", budgetFile, "session-hb"));
-    if (round <= 3) {
-      assert.match(nudged, /OUTPUT HYGIENE/, "nudge " + round + " is delivered");
-      if (round === 3) assert.match(nudged, /last reminder/, "the final nudge says it is the last");
-    } else {
-      assert.equal(nudged, "", "nudge " + round + " is over budget");
-    }
-  }
-  // A genuinely new leak does not reopen a spent budget either.
-  budgetLines.push(assistantLine("msg-hb-6", "turn-hb", "<thinking>step 6</thinking>\nNote 6."));
-  await writeFile(budgetFile, budgetLines.join("\n") + "\n", "utf8");
-  assert.equal(
-    run(hygieneHook, hygieneEvent("turn-hb", budgetFile, "session-hb")),
-    "",
-    "the budget stays closed after it is spent",
-  );
 
   // No goal file is present in the repository, so a clean stop still ends the turn.
   const noGoal = stop({ turn_id: "turn-g", session_id: "session-g", last_assistant_message: "A clean, finished reply." });
@@ -452,7 +262,7 @@ try {
     await rm(goalProject, { recursive: true, force: true });
   }
 
-  console.log("delivery-hook.test.ts: prompt replay, loop restart, blank correction, turn scoping, transcript detection, mid-turn hygiene, and goal continuation passed");
+  console.log("delivery-hook.test.ts: prompt replay, dead-loop restart, blank loop restart, turn scoping, transcript detection, and goal continuation passed");
 } finally {
   await rm(state, { recursive: true, force: true });
 }
