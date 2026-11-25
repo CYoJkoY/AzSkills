@@ -19,6 +19,14 @@
  * the closing bracket still count. Tag names are normalized into words, so
  * prefix, suffix, camel-case, separator, and special-token spellings all count
  * while ordinary prose that merely contains a stem does not.
+ *
+ * Models also truncate the opener itself: a reply may start with the tag name
+ * and go straight into the text, as in `<thinkingThere is ...</thinking>` or
+ * `<think beyond? ...`, with no closing bracket at all. Such a bare opener is
+ * still a leak, because the tag name is on screen. It is read up to the
+ * shortest prefix that names a reasoning family, so the wrapped text stays part
+ * of the block, and it is only accepted when the next character cannot extend
+ * an ordinary word.
  */
 
 export const THINKING_BLOCKS: ReadonlyArray<readonly [string, string]> = [
@@ -72,7 +80,7 @@ const TAG_BODY = /(?:[^<>"']|"[^"]*"|'[^']*')*/;
 const TRIVIA_SOURCE = "[\\s\\u00AD\\u200B-\\u200D\\u2060\\uFEFF]*";
 const LEADING_TRIVIA = new RegExp("^" + TRIVIA_SOURCE);
 const OPENER = new RegExp("^<\\s*(?!/)(" + TAG_BODY.source + ")>", "iy");
-const OPENER_ANY = new RegExp("<\\s*(?!/)(" + TAG_BODY.source + ")>", "gi");
+const OPENER_AT = new RegExp("<\\s*(?!/)(" + TAG_BODY.source + ")>", "iy");
 const CLOSER = new RegExp("<\\s*\\/\\s*(" + TAG_BODY.source + ")>", "iy");
 const LEADING_CLOSER = new RegExp(
   "^" + TRIVIA_SOURCE + "<\\s*\\/\\s*(" + TAG_BODY.source + ")>" + TRIVIA_SOURCE,
@@ -184,8 +192,66 @@ function isReasoningTagBody(body: string): boolean {
  */
 function isPipeCloserBody(body: string): boolean {
   if (!isReasoningTagBody(body)) return false;
-  const words = splitWords(tagNameBody(body));
+  const name = tagNameBody(body);
+  // A pipe token that spells a closing slash is a closer even without an end
+  // word: `<|/thinking|>` names the family and the slash is explicit.
+  if (name.startsWith("/")) return true;
+  const words = splitWords(name);
   return words.some((word) => END_WORDS.has(word));
+}
+
+/*
+ * A truncated opener has no `>` to end it. Its name is read one character at a
+ * time and accepted at the longest prefix that names a reasoning family, so
+ * `<thinkingThere is ...` yields the opener `<thinking` (not the shorter
+ * `think`) and keeps the rest as the block body. The character after that name
+ * must not be a lowercase letter or digit, otherwise `<thinkfoo>` stays prose
+ * exactly as before.
+ */
+const BARE_NAME_CHAR = /[A-Za-z0-9_\-\u2581|｜]/;
+const NAME_EXTENDS_WORD = /[a-z0-9]/;
+const MAX_BARE_NAME_CHARS = 48;
+
+function bareOpeningTagAt(text: string, offset: number): OpenerHit | null {
+  if (text.charAt(offset) !== "<") return null;
+  let cursor = offset + 1;
+  while (cursor < text.length && /[ \t]/.test(text.charAt(cursor))) cursor += 1;
+  const nameStart = cursor;
+  const first = text.charAt(nameStart);
+  if (first === "" || first === "/" || first === "!" || first === "?") return null;
+  let end = nameStart;
+  let matchedEnd = -1;
+  let camelBoundary = -1;
+  while (
+    end < text.length &&
+    end - nameStart < MAX_BARE_NAME_CHARS &&
+    BARE_NAME_CHAR.test(text.charAt(end))
+  ) {
+    if (
+      camelBoundary === -1 &&
+      end > nameStart &&
+      /[A-Z]/.test(text.charAt(end)) &&
+      /[a-z]/.test(text.charAt(end - 1)) &&
+      isReasoningTagBody(text.slice(nameStart, end))
+    ) {
+      camelBoundary = end;
+    }
+    end += 1;
+    if (isReasoningTagBody(text.slice(nameStart, end))) matchedEnd = end;
+  }
+  if (camelBoundary !== -1) matchedEnd = camelBoundary;
+  if (matchedEnd === -1 || NAME_EXTENDS_WORD.test(text.charAt(matchedEnd))) return null;
+  return { tag: text.slice(offset, matchedEnd), length: matchedEnd - offset };
+}
+
+/** Reads a full or truncated reasoning opener at an exact position. */
+function openerAt(text: string, index: number): OpenerHit | null {
+  OPENER_AT.lastIndex = index;
+  const match = OPENER_AT.exec(text);
+  if (match !== null && isReasoningTagBody(match[1] ?? "")) {
+    return { tag: match[0], length: match[0].length };
+  }
+  return bareOpeningTagAt(text, index);
 }
 
 export interface StripResult {
@@ -260,8 +326,10 @@ export function findClosingTag(haystack: string): ClosingHit | null {
 export function openingTagAt(body: string): OpenerHit | null {
   OPENER.lastIndex = 0;
   const match = OPENER.exec(body);
-  if (match === null || !isReasoningTagBody(match[1] ?? "")) return null;
-  return { tag: match[0], length: match[0].length };
+  if (match !== null && isReasoningTagBody(match[1] ?? "")) {
+    return { tag: match[0], length: match[0].length };
+  }
+  return bareOpeningTagAt(body, 0);
 }
 
 /** Removes reasoning-family closing tags that begin the text, if any. */
@@ -319,19 +387,69 @@ export function leadingUnclosedTag(input: string): string | null {
   return findClosingTag(body.slice(open.length)) === null ? open.tag : null;
 }
 
-/** Removes reasoning blocks anywhere in the text, for emptiness checks. */
+/**
+ * Finds the next reasoning opener outside Markdown code. The state machine
+ * mirrors the closer scan, so a tag quoted in an inline span or a fenced block
+ * is not mistaken for a real block when the whole tag sits inside the code.
+ */
+function nextOpeningTag(text: string, from: number): { readonly index: number; readonly length: number } | null {
+  let span = false;
+  let fence = false;
+  let midLine = false;
+  for (let index = from; index < text.length; index += 1) {
+    const char = text.charAt(index);
+    if (char === "\n") {
+      span = false;
+      midLine = false;
+      continue;
+    }
+    if (char === BACKTICK) {
+      let run = 1;
+      while (text.charAt(index + run) === BACKTICK) run += 1;
+      if (fence) {
+        if (run >= 3 && !midLine) fence = false;
+      } else if (run >= 3 && !midLine) {
+        fence = true;
+      } else {
+        span = !span;
+      }
+      index += run - 1;
+      midLine = true;
+      continue;
+    }
+    if (fence || span) {
+      midLine = true;
+      continue;
+    }
+    if (char === "<") {
+      const hit = openerAt(text, index);
+      if (hit !== null) return { index, length: hit.length };
+    }
+    midLine = true;
+  }
+  return null;
+}
+
+/**
+ * Removes reasoning blocks anywhere in the text, for emptiness checks.
+ *
+ * Truncated openers are eligible here too, but a bare opener with no closer is
+ * skipped rather than treated as a block: prose that quotes a tag name without
+ * a closing bracket should not be removed. A later complete block is still
+ * stripped, which the older single-match scan could miss.
+ */
 export function stripAllThinking(input: string): string {
   let rest = input;
+  let from = 0;
   for (;;) {
-    OPENER_ANY.lastIndex = 0;
-    let match: RegExpExecArray | null;
-    do {
-      match = OPENER_ANY.exec(rest);
-    } while (match !== null && !isReasoningTagBody(match[1] ?? ""));
-    if (match === null) return rest;
-    const start = match.index;
-    const hit = findClosingTag(rest.slice(start + match[0].length));
-    if (hit === null) return rest;
-    rest = rest.slice(0, start) + rest.slice(start + match[0].length + hit.index + hit.length);
+    const open = nextOpeningTag(rest, from);
+    if (open === null) return rest;
+    const hit = findClosingTag(rest.slice(open.index + open.length));
+    if (hit === null) {
+      from = open.index + open.length;
+      continue;
+    }
+    rest = rest.slice(0, open.index) + rest.slice(open.index + open.length + hit.index + hit.length);
+    from = open.index;
   }
 }

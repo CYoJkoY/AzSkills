@@ -250,6 +250,28 @@ try {
   assert.deepEqual(stripLeadingThinking("< thought data-x >hidden< / thought >Answer."), { stripped: true, text: "Answer." });
   assert.equal(stripLeadingThinking("Intro </think>Answer.").stripped, false);
 
+  // The reported shape: the model truncates the opener, dropping its closing
+  // bracket and running the text straight after the tag name. The tag name is
+  // still on screen, and the closer may come from another family member.
+  assert.deepEqual(stripLeadingThinking("<thinkingThere is a value</thinking>\n\nAnswer."), { stripped: true, text: "Answer." });
+  assert.deepEqual(stripLeadingThinking("<thinkingThere is a value</THOUGHT>"), { stripped: true, text: "" });
+  assert.equal(leadingUnclosedTag("<think beyond? Continue."), "<think");
+  assert.equal(leadingUnclosedTag("< think beyond? Continue."), "< think");
+  assert.equal(blocks(run({ last_assistant_message: "<think beyond? Continue." })), true);
+  assert.equal(blocks(run({ last_assistant_message: "<thinkingThere is a value</thinking>\n\nAnswer." })), true);
+  assert.equal(stripAllThinking("before <thinkingThere is a value</thinking> after"), "before  after");
+  // A quoted bare opener is not a block: no closer follows it, and a complete
+  // pair inside one code span is documentation rather than leaked reasoning.
+  assert.equal(leadingUnclosedTag("Use `<thinking` in docs"), null);
+  assert.equal(stripAllThinking("the tag `<thinking` has no bracket"), "the tag `<thinking` has no bracket");
+  assert.equal(stripAllThinking("`<thinking>hidden</thinking>`"), "`<thinking>hidden</thinking>`");
+  assert.equal(stripAllThinking("`<thinking` and `</thinking>` in docs"), "`<thinking` and `</thinking>` in docs");
+  // A pipe token that spells the closing slash needs no separate end word.
+  assert.deepEqual(
+    stripLeadingThinking(otag("|begin_of_thinking|") + "hidden" + otag("|/thinking|") + "Answer."),
+    { stripped: true, text: "Answer." },
+  );
+
   console.log("No-think-tags hook tests passed: leading blocks, unclosed tags, code-aware closing tags, pipe special tokens, bounded correction, and fail-safe inputs.");
 } finally {
   await rm(state, { recursive: true, force: true });

@@ -198,8 +198,14 @@ try {
   // plain note, or a tag quoted inside backticks, is not.
   assert.equal(isReasoningLeak("<thinking>x</thinking>\nRetry."), true);
   assert.equal(isReasoningLeak("<thinking>never closes"), true);
+  // Models also truncate the opener: the tag name runs straight into the text,
+  // or stops at a space, with no closing bracket. The name is still on screen.
+  assert.equal(isReasoningLeak("<thinkingThere is a value</thinking>\nRetry."), true);
+  assert.equal(isReasoningLeak("<think beyond? note"), true);
   assert.equal(isReasoningLeak("Plain progress note."), false);
   assert.equal(isReasoningLeak("`<thinking>` mentioned in code"), false);
+  assert.equal(isReasoningLeak("the model wrote <thinking without a closing bracket"), false);
+  assert.equal(isReasoningLeak("`<thinking` and `</thinking>` in docs"), false);
 
   const assistantLine = (id: string, turnId: string, text: string): string =>
     JSON.stringify({
