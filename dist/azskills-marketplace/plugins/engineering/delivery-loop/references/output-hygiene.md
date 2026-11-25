@@ -46,6 +46,15 @@ counterparts terminate a block. A pipe token is a closer only when it names both
 a reasoning family and an explicit end word, so `<|begin_of_thought|>`,
 `<|channel|>`, and `<|end_of_text|>` never end a block by accident.
 
+A model may also truncate the opener itself: the tag name runs straight into the
+text, or stops at a space, with no closing bracket at all, as in
+`<thinkingThere is ...</thinking>` or `<think beyond? ...`. The tag name is still
+on screen, so it counts. The name is read up to the longest prefix that spells a
+reasoning family member, which keeps the wrapped text inside the block, and it is
+accepted only when the next character cannot extend an ordinary word, so
+`thoughtful` and `thinkfoo` stay prose. A bracketless name is never a block on its
+own when it sits inside inline code or a fenced block.
+
 A block that never closes still counts: the opening tag is already on screen, and
 every following line is indistinguishable from reasoning. Blank lines between the
 opener and the rest of the text do not exempt it. A message that only documents
@@ -131,6 +140,10 @@ the final reply from repeating the mistake. Two hooks cover that gap.
   upper-case, padded, or attribute-bearing spelling, is corrected once.
 - A reply built from derived reasoning aliases, a self-closing opener, or
   malformed nested tags that leaves a leading orphan closer is corrected once.
+- A reply whose opener lost its closing bracket and runs into the text, then
+  closes with any family member, is corrected once.
+- A reply that opens with a bracketless tag name and never closes is corrected
+  once, unless that name is quoted inside code.
 - A reply that closes with a slash-less pipe token such as `<|end_of_thinking|>`
   or `<|end▁of▁thinking|>`, in `|` or `｜` form, is corrected once.
 - A reply that only contains non-closing pipe tokens such as `<|channel|>` or
