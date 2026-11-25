@@ -28,6 +28,30 @@ an ordinary task legitimately reads the same file or re-reads the same reply, an
 voiding the turn there would cut a long task short. Blank replies are still counted
 everywhere, because a turn that shows nothing is always a fault.
 
+## Auto-approval without weakening the guard
+
+A long run repeats the same investigations: list the tree, search for a symbol,
+read a log, run the tests. Asking the user for each one is what makes an
+"unattended" run unattended in name only. The guard therefore answers `allow` on
+its own for a fixed allowlist of read-only and bounded-write commands, and for the
+patterns a goal records with `azflow goal start ... --allow "<pattern>"`:
+
+- Built-in reads: `rg`, `grep`, `ls`, `cat`, `git status`, `git log`, `git diff`,
+  `git show`, `gh pr view`, and the like.
+- Bounded writes the loop itself needs: `npm test`, `npm run typecheck`, `npx tsc`,
+  `git add`, `git commit`, `azflow`, `Start-Sleep`, and the like.
+- Per-goal patterns: an exact string, or a `/regex/` or `^...$` expression.
+
+The allowlist cannot be used to weaken the guard. The deny rules and the
+dead-loop breaker run first; auto-approval only answers when they would have let
+the call through, so a base-branch `git commit` is still denied. A command
+carrying a destructive flag (`-d`, `--force`, `--amend`, `--prune`, ...) or an
+output redirection is never approved, and neither `git push` nor `gh pr merge`
+is on the list, so those still reach the deny rules and `azflow ship`. Every
+segment of a compound command must qualify, so `rg x && rm -rf build` is not
+approved by its first half. `AZFLOW_NO_AUTO_APPROVE=1` disables auto-approval
+without disabling the guard.
+
 ## Two hooks, one rule
 
 - `codex-plugin/hooks/delivery-guard.ts` (`PreToolUse`) counts consecutive

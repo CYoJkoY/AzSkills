@@ -10,10 +10,11 @@ import { readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
-import { bashCommand, denyReasonForBash, denyReasonForTool, isShellTool } from "./guard.ts";
+import { bashCommand, denyReasonForBash, denyReasonForTool, isShellTool, shellSegments, shellTokens } from "./guard.ts";
 import type { ReviewWindowCheck } from "./guard.ts";
 import { loopBreakerReason, normalizeCall } from "./loop-guard.ts";
 import { fingerprint, pruneState, withState } from "./session-state.ts";
+import { isAllowedCommand, isSafeBuiltinCommand, readGoalAllowlist } from "./goal-allowlist.ts";
 
 interface StateConfig {
   readonly base: string;
@@ -25,6 +26,21 @@ function out(value: unknown): void {
 
 function allow(): void {
   out({ continue: true });
+}
+
+/**
+ * Auto-approves the call so Codex does not ask the user. Only read-only and
+ * bounded commands reach this, because a long run's repeated investigations are
+ * the bulk of its approval prompts.
+ */
+function approve(reason: string): void {
+  out({
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "allow",
+      permissionDecisionReason: reason,
+    },
+  });
 }
 
 function deny(reason: string): void {
@@ -143,6 +159,11 @@ async function readReviewWindow(cwd: string): Promise<ReviewWindowCheck | null> 
   }
 }
 
+/** Reads `.azflow/goal.json`'s command allowlist, or an empty list when absent. */
+async function readGoal(cwd: string): Promise<string[]> {
+  return readGoalAllowlist(cwd).catch(() => []);
+}
+
 const env = (name: string): boolean => process.env[name] === "1" || process.env[name] === "true";
 
 /** Identical consecutive shell calls that trip the in-turn loop breaker. */
@@ -154,6 +175,23 @@ const MAX_IDENTICAL_CALLS = 4;
  * alone.
  */
 const MAX_BREAKERS_PER_TURN = 2;
+
+/**
+ * True when every simple shell segment is a built-in safe command or one of the
+ * goal's own allowed patterns. A compound command is approved only when all of
+ * its parts are, so `rg x > out && rm -rf /` cannot ride in on its first half.
+ * `cd`/`pushd` are navigation and are approved with at most one argument.
+ */
+function commandAutoApproved(command: string, patterns: readonly string[]): boolean {
+  const segments = shellSegments(command).map((segment) => segment.trim()).filter((segment) => segment !== "");
+  if (segments.length === 0) return false;
+  return segments.every((segment) => {
+    const tokens = shellTokens(segment);
+    const head = tokens[0] ?? "";
+    if (head === "cd" || head === "pushd" || head === "Set-Location") return tokens.length <= 2;
+    return isSafeBuiltinCommand(tokens) || isAllowedCommand(tokens, patterns);
+  });
+}
 
 /**
  * Counts consecutive identical shell calls and returns a breaker reason once the
@@ -253,6 +291,12 @@ async function main(): Promise<void> {
     const loop = await breakerReason(event, toolName, command);
     if (loop !== null) {
       deny(loop);
+      return;
+    }
+    // Approval comes after the deny rules and the dead-loop breaker: the
+    // allowlist removes prompts, it never lifts a guard decision.
+    if (!env("AZFLOW_NO_AUTO_APPROVE") && commandAutoApproved(command, await readGoal(project))) {
+      approve("AZFLOW goal run: read-only or bounded command auto-approved.");
       return;
     }
   }

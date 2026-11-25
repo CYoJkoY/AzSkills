@@ -151,9 +151,10 @@ one kind of request, so it stays small enough that grouping never hides a
 capability behind an unrelated name. Every workflow plugin ships one router
 skill that lists its member contracts, so selecting the plugin exposes each
 contract inside it. The former `no-think-tags` answer-hygiene entry folded into
-`delivery-loop`; 7.6.4 removed its reasoning-tag correction hook, and the
-workflow now ships only the delivery guard, dead-loop restart, and goal
-continuation.
+`delivery-loop`; 7.6.4 removed its reasoning-tag correction hook, leaving the
+delivery guard, dead-loop restart, and goal continuation. 7.7.0 adds allowlist
+auto-approval for repeated reads and tests plus bounded self-repair, budget
+extension, and done-when verification for long goal runs.
 
 | Plugin | Workflows |
 | :--- | :--- |
@@ -321,7 +322,9 @@ The shared routing and session hooks are gone; each plugin ships its own
 manifest. `engineering` carries the Godot 3.x write guard and the GPT with Taste
 steering (SessionStart, UserPromptSubmit, SubagentStart, and the agent-result
 PostToolUse steer). `delivery-loop` carries the delivery-state guard, the
-dead-loop restart, and the goal-run continuation. The reasoning-tag Stop hook is
+dead-loop restart, and the goal-run continuation; since 7.7.0 the guard also
+auto-approves repeated reads, tests, and a goal's own `--allow` patterns, and the
+Stop hook repairs a stalled run within bounds. The reasoning-tag Stop hook is
 retired as of 7.6.4; its reply classifier stays under
 `delivery-loop/no-think-tags/` only to detect a blank final reply, which now
 counts toward the dead-loop restart instead of triggering a re-send.

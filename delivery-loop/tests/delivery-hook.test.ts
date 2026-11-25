@@ -9,6 +9,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const promptHook = path.join(root, "codex-plugin/hooks/delivery-prompt.ts");
 const sessionHook = path.join(root, "codex-plugin/hooks/delivery-session.ts");
 const stopHook = path.join(root, "codex-plugin/hooks/delivery-stop.ts");
+const guardHook = path.join(root, "codex-plugin/hooks/delivery-guard.ts");
 const azflowCli = path.join(root, "delivery-loop/scripts/azflow.ts");
 const state = await mkdtemp(path.join(tmpdir(), "azskills-delivery-hook-"));
 const transcript = path.join(state, "session.jsonl");
@@ -29,6 +30,7 @@ interface EventInput {
   readonly last_assistant_message?: unknown;
   readonly transcript_path?: string;
   readonly tool_name?: string;
+  readonly tool_input?: unknown;
 }
 
 function run(hook: string, event: EventInput): string {
@@ -262,7 +264,70 @@ try {
     await rm(goalProject, { recursive: true, force: true });
   }
 
-  console.log("delivery-hook.test.ts: prompt replay, dead-loop restart, blank loop restart, turn scoping, transcript detection, and goal continuation passed");
+  // The guard auto-approves the repeated reads and tests a long run performs, so
+  // those stop asking the user, while a push or a merge still goes through the
+  // deny rules and is never let through by the allowlist.
+  const allowProject = await mkdtemp(path.join(tmpdir(), "azskills-goal-allow-"));
+  try {
+    await mkdir(path.join(allowProject, ".azflow"), { recursive: true });
+    await writeFile(path.join(allowProject, ".azflow", "state.json"), JSON.stringify({ config: { base: "main" } }), "utf8");
+    await writeFile(
+      path.join(allowProject, ".azflow", "goal.json"),
+      JSON.stringify({ allowedCommands: ["npm run custom"] }),
+      "utf8",
+    );
+    const guard = (command: string): { permissionDecision?: string } => {
+      const output = runIn(allowProject, guardHook, {
+        hook_event_name: "PreToolUse",
+        session_id: "allow-session",
+        turn_id: "allow-turn",
+        tool_name: "bash",
+        tool_input: { command },
+      });
+      if (output === "") return {};
+      const parsed = JSON.parse(output) as { hookSpecificOutput?: { permissionDecision?: string } };
+      return parsed.hookSpecificOutput ?? {};
+    };
+    for (const approved of ["git log --oneline -5", "npm run typecheck", "npm run custom"]) {
+      assert.equal(guard(approved).permissionDecision, "allow", approved + " is auto-approved");
+    }
+    for (const refused of [
+      "git push origin main",
+      "git tag -d v1.2.3",
+      "rg foo > out.txt",
+      "find . -delete",
+      "rg --pre \"rm -rf build\" foo",
+    ]) {
+      assert.notEqual(guard(refused).permissionDecision, "allow", refused + " is never auto-approved");
+    }
+    // `git commit` is an allowlisted bounded write, but the deny rule still wins
+    // on the protected base branch, so auto-approval can never bypass the guard.
+    const baseProject = path.join(allowProject, "base-repo");
+    await mkdir(baseProject, { recursive: true });
+    spawnSync("git", ["init", "-b", "main"], { cwd: baseProject, encoding: "utf8", windowsHide: true });
+    spawnSync(
+      "git",
+      ["-c", "user.email=test@example.com", "-c", "user.name=Test", "commit", "--allow-empty", "-m", "init"],
+      { cwd: baseProject, encoding: "utf8", windowsHide: true },
+    );
+    await mkdir(path.join(baseProject, ".azflow"), { recursive: true });
+    await writeFile(path.join(baseProject, ".azflow", "state.json"), JSON.stringify({ config: { base: "main" } }), "utf8");
+    const onBase = runIn(baseProject, guardHook, {
+      hook_event_name: "PreToolUse",
+      session_id: "allow-session",
+      turn_id: "allow-turn",
+      tool_name: "bash",
+      tool_input: { command: "git commit -m test" },
+    });
+    const baseDecision = onBase === ""
+      ? undefined
+      : (JSON.parse(onBase) as { hookSpecificOutput?: { permissionDecision?: string } }).hookSpecificOutput?.permissionDecision;
+    assert.notEqual(baseDecision, "allow", "a base-branch commit is denied before the allowlist");
+  } finally {
+    await rm(allowProject, { recursive: true, force: true });
+  }
+
+  console.log("delivery-hook.test.ts: prompt replay, dead-loop restart, blank loop restart, turn scoping, transcript detection, goal continuation, and allowlist auto-approval passed");
 } finally {
   await rm(state, { recursive: true, force: true });
 }

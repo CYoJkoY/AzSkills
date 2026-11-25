@@ -54,6 +54,9 @@ async function main(): Promise<void> {
     "Do the next step now. Record each real step with `azflow goal note`; only run",
     "`azflow goal complete` when every done-when criterion is verified true in the",
     "current repository and ledger.",
+    "The run also repairs itself within bounds: a transient failure is retried, a",
+    "review just under 4.80 is re-fixed, and a spent budget is extended while work",
+    "is still moving. A machine-checkable done-when set completes the goal on its own.",
     "</azflow-goal-run>",
   ].join("\n");
 

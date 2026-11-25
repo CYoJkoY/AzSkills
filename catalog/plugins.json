@@ -183,6 +183,7 @@
         "codex-plugin/hooks/output-hygiene.ts",
         "codex-plugin/hooks/session-state.ts",
         "codex-plugin/hooks/transcript.ts",
+        "codex-plugin/hooks/goal-allowlist.ts",
         "codex-plugin/assets/icons/delivery-loop.svg"
       ],
       "hooks": "codex-plugin/hooks/delivery-hooks.json"

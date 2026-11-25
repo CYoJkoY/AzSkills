@@ -193,7 +193,10 @@ async function main(): Promise<void> {
   // the turn end as usual.
   const project = await findGoalProject(process.cwd()).catch(() => null);
   if (project === null) return;
-  const advance = await advanceGoal(project, Date.now()).catch(() => null);
+  // The turn's final message is the only reliable description of why it
+  // stopped, so a transient failure can be retried instead of counted as a
+  // stall. A complete goal still blocks once, so the model reports it.
+  const advance = await advanceGoal(project, Date.now(), { reply: input.message }).catch(() => null);
   if (advance !== null && advance.reason !== null) block(advance.reason);
 }
 

@@ -4,9 +4,9 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
-  DEFAULT_MAX_ITERATIONS,
   advanceGoal,
   createGoal,
+  estimateBudget,
   findGoalProject,
   goalCompass,
   nextStepFor,
@@ -50,7 +50,8 @@ try {
   const goal = await createGoal(root, { objective: "Ship the feature", doneWhen: ["Tests pass", "Docs updated"] });
   assert.equal(goal.status, "active");
   assert.equal(goal.iteration, 0);
-  assert.equal(goal.maxIterations, DEFAULT_MAX_ITERATIONS);
+  assert.equal(goal.maxIterations, estimateBudget("Ship the feature", ["Tests pass", "Docs updated"]));
+  assert.ok(goal.maxIterations >= 120, "a small objective still gets room to run");
   assert.deepEqual(goal.doneWhen, ["Tests pass", "Docs updated"]);
   const reread = await readGoal(root);
   assert.ok(reread !== null);
@@ -115,6 +116,9 @@ try {
   const stallRoot = await freshRepo();
   dirs.push(stallRoot);
   await createGoal(stallRoot, { objective: "Stall me", doneWhen: ["done"], maxNoProgress: 1 });
+  const diagnosis = await advanceGoal(stallRoot, Date.now());
+  assert.equal(diagnosis.action, "continue", "the first silent pass earns one diagnostic pass");
+  assert.match(diagnosis.reason ?? "", /AUTO-DIAGNOSIS/);
   const stalled = await advanceGoal(stallRoot, Date.now());
   assert.equal(stalled.action, "stall");
   assert.match(stalled.reason ?? "", /AZFLOW GOAL STALLED/);
