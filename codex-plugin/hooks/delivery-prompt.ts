@@ -8,12 +8,18 @@
  * This hook captures the prompt the moment it arrives and stores a bounded copy
  * in per-session state, so the correction can quote it verbatim later.
  *
- * It emits nothing and fails open: a malformed payload or a read-only state
- * directory never changes what the user sees.
+ * It also states the output-hygiene rule before the turn's first visible text.
+ * A leak in a progress note between tool calls streams immediately, so the Stop
+ * hook can only correct the final reply; the earliest useful intervention is
+ * context delivered with the prompt itself.
+ *
+ * It fails open: a malformed payload or a read-only state directory never
+ * changes what the user sees, and the rule is still delivered.
  */
 
 import process from "node:process";
 import { isGuardEcho } from "./loop-guard.ts";
+import { OUTPUT_HYGIENE_RULE, isHygieneEcho } from "./output-hygiene.ts";
 import { MAX_PROMPT_CHARS, withState } from "./session-state.ts";
 
 interface PromptInput {
@@ -55,6 +61,10 @@ async function main(): Promise<void> {
   // A restart re-sends the guard's own block text as a new prompt. Recording it
   // would replace the real request with a copy of the correction, so skip it.
   if (isGuardEcho(input.prompt)) return;
+  // This hook's own injected rule can come back as a prompt once the plugin is
+  // reinstalled or a session replays its context; recording it would lose the
+  // real request and re-inject the rule on every pass.
+  if (isHygieneEcho(input.prompt)) return;
   await withState(input.sessionId, (state) => ({
     next: {
       ...state,
@@ -66,6 +76,12 @@ async function main(): Promise<void> {
     },
     result: undefined,
   }));
+  process.stdout.write(
+    JSON.stringify({
+      continue: true,
+      hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: OUTPUT_HYGIENE_RULE },
+    }) + "\n",
+  );
 }
 
 main().catch(() => undefined);

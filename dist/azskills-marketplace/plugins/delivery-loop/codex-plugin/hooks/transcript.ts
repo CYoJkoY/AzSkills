@@ -13,6 +13,7 @@
  */
 
 import { open } from "node:fs/promises";
+import { OUTPUT_HYGIENE_PREFIX } from "./output-hygiene.ts";
 import { isRecord, MAX_PROMPT_CHARS } from "./session-state.ts";
 
 export interface ToolCallRecord {
@@ -20,11 +21,21 @@ export interface ToolCallRecord {
   readonly arguments: string;
 }
 
+export interface AssistantMessageRecord {
+  /** Transcript message id when present, otherwise empty. */
+  readonly id: string;
+  readonly text: string;
+  /** `commentary`, `final`, or empty when the transcript omits it. */
+  readonly phase: string;
+}
+
 export interface TurnSnapshot {
   /** Last real user prompt found in the tail, or null. */
   readonly prompt: string | null;
   /** Tool calls in the current turn, oldest first. */
   readonly toolCalls: readonly ToolCallRecord[];
+  /** Assistant messages in the current turn, oldest first, deduplicated by id. */
+  readonly assistantMessages: readonly AssistantMessageRecord[];
 }
 
 export interface TranscriptOptions {
@@ -37,6 +48,8 @@ export interface TranscriptOptions {
 const DEFAULT_MAX_BYTES = 2 * 1024 * 1024;
 const DEFAULT_MAX_LINES = 6000;
 const MAX_ARGUMENT_CHARS = 4000;
+const MAX_ASSISTANT_CHARS = 8000;
+const MAX_ASSISTANT_MESSAGES = 24;
 
 /** Messages Codex injects around the human prompt; they are not the prompt. */
 const SYNTHETIC_PREFIXES = [
@@ -47,6 +60,7 @@ const SYNTHETIC_PREFIXES = [
   "<collaboration",
   "<codex_internal_context",
   "# Codex desktop context",
+  OUTPUT_HYGIENE_PREFIX,
 ];
 
 function textOfContent(content: unknown): string {
@@ -129,6 +143,13 @@ export async function readTurnSnapshot(
 
   const toolCalls: ToolCallRecord[] = [];
   const commandCalls: ToolCallRecord[] = [];
+  /**
+   * Assistant messages are collected with their line index so a tail without
+   * turn ids can still be scoped to the newest prompt once the whole tail has
+   * been read; the prompt boundary is not final until then.
+   */
+  const assistantCandidates: { readonly index: number; readonly record: AssistantMessageRecord }[] = [];
+  const seenMessages = new Set<string>();
   let prompt: string | null = null;
   /**
    * Index of the newest real user message, or -1 when the tail holds none. Once
@@ -143,6 +164,20 @@ export async function readTurnSnapshot(
     // Without a comparable id the prompt boundary decides; never "all lines",
     // because folding earlier turns in turns a healthy turn into a dead loop.
     return turnStart !== -1 && index >= turnStart;
+  };
+
+  /**
+   * The same assistant text is recorded twice, once as an event item and once
+   * as a response_item with the same id. Either shape alone is enough, so the
+   * id deduplicates the pair; the text fallback covers records without an id.
+   */
+  const pushAssistant = (index: number, id: string, text: string, phase: string): void => {
+    const clipped = text.slice(0, MAX_ASSISTANT_CHARS);
+    if (clipped.trim() === "") return;
+    const key = id !== "" ? "id:" + id : "text:" + phase + "\n" + clipped;
+    if (seenMessages.has(key)) return;
+    seenMessages.add(key);
+    assistantCandidates.push({ index, record: { id, text: clipped, phase } });
   };
 
   for (let index = 0; index < lines.length; index += 1) {
@@ -167,18 +202,41 @@ export async function readTurnSnapshot(
         continue;
       }
       if (payload.type === "message") {
-        if (payload.role !== "user") continue;
-        const text = textOfContent(payload.content);
-        if (isSyntheticPrompt(text)) continue;
         const lineTurn = callTurn(payload);
-        if (turnId !== "" && lineTurn !== "" && lineTurn !== turnId) continue;
-        prompt = text.slice(0, MAX_PROMPT_CHARS);
-        turnStart = index;
+        if (payload.role === "user") {
+          const text = textOfContent(payload.content);
+          if (isSyntheticPrompt(text)) continue;
+          if (turnId !== "" && lineTurn !== "" && lineTurn !== turnId) continue;
+          prompt = text.slice(0, MAX_PROMPT_CHARS);
+          turnStart = index;
+        } else if (payload.role === "assistant" && inTurn(index, lineTurn)) {
+          pushAssistant(
+            index,
+            typeof payload.id === "string" ? payload.id : "",
+            textOfContent(payload.content),
+            typeof payload.phase === "string" ? payload.phase : "",
+          );
+        }
       }
       continue;
     }
 
-    if (record.type !== "event_msg" || payload.type !== "item_completed") continue;
+    if (record.type !== "event_msg") continue;
+    // Older harnesses emit a bare agent_message event instead of an item_completed
+    // carrying an AgentMessage item.
+    if (payload.type === "agent_message") {
+      const lineTurn = typeof payload.turn_id === "string" ? payload.turn_id : "";
+      if (!inTurn(index, lineTurn)) continue;
+      const text = typeof payload.message === "string" ? payload.message : textOfContent(payload.content);
+      pushAssistant(
+        index,
+        typeof payload.id === "string" ? payload.id : "",
+        text,
+        typeof payload.phase === "string" ? payload.phase : "",
+      );
+      continue;
+    }
+    if (payload.type !== "item_completed") continue;
     const item = payload.item;
     if (!isRecord(item)) continue;
     const lineTurn = typeof payload.turn_id === "string" ? payload.turn_id : "";
@@ -189,6 +247,16 @@ export async function readTurnSnapshot(
       if (turnId !== "" && lineTurn !== "" && lineTurn !== turnId) continue;
       prompt = text.slice(0, MAX_PROMPT_CHARS);
       turnStart = index;
+      continue;
+    }
+    if (item.type === "AgentMessage") {
+      if (!inTurn(index, lineTurn)) continue;
+      pushAssistant(
+        index,
+        typeof item.id === "string" ? item.id : "",
+        textOfContent(item.content),
+        typeof item.phase === "string" ? item.phase : "",
+      );
       continue;
     }
     if (item.type === "CommandExecution") {
@@ -203,6 +271,10 @@ export async function readTurnSnapshot(
   // Parsed tool calls are the portable form; command items are a fallback for
   // harnesses that record executions without a function_call entry.
   const chosen = toolCalls.length > 0 ? toolCalls : commandCalls;
+  const assistantMessages = assistantCandidates
+    .filter((entry) => turnId !== "" || turnStart === -1 || entry.index >= turnStart)
+    .slice(-MAX_ASSISTANT_MESSAGES)
+    .map((entry) => entry.record);
 
-  return { prompt, toolCalls: chosen };
+  return { prompt, toolCalls: chosen, assistantMessages };
 }

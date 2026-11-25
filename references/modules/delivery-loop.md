@@ -14,7 +14,7 @@ judgement and execution, concurrency comes from independent tasks, and the revie
 score and the merge are mechanical. This module owns the task ledger, touch-scope
 leases, worktree isolation, computed review scoring, the merge gates, and the guard
 that blocks manual merges and sub-agent spawns outside an open review window. It
-also owns final-reply output hygiene, because a clean reply is cheaper context and
+also owns output hygiene, because clean messages are cheaper context and
 a long run survives on cheap context, and the dead-loop guard, because a run that
 repeats one step never reaches a review at all. It does not own the project's own
 build commands, its architecture choices, or the content of the code being shipped.
@@ -25,11 +25,11 @@ It also owns the long-horizon goal run: a durable objective in `.azflow/goal.jso
 
 - Use when: a repository needs issue-to-merge delivery that stays correct under several concurrent tasks, and review scoring plus merging must be automated instead of hand-driven.
 - Do not use when: a one-off edit needs no branch, review record, or merge gate; make the edit directly.
-- Owns: the task ledger, touch-scope leases, worktree isolation, computed review scoring, the merge gates, dead-loop interruption and restart, final-reply output hygiene, and the long-horizon goal run.
+- Owns: the task ledger, touch-scope leases, worktree isolation, computed review scoring, the merge gates, dead-loop interruption and restart, output hygiene for every visible message, and the long-horizon goal run.
 - Inputs: repository root, base branch, task titles with touch scopes, a structured review record, and the project's own verification command.
 - Outputs: admission waves, isolated task worktrees, an English review report with a computed score, and a merged pull request with its issue closed.
 - Compose with: `az-clean-code` when the delivered code must also meet explicit-code rules; `taste` when judgment and collaboration guidance should stay active during the work.
-- Gates: never spawn a sub-agent outside an open review window, never commit or push on the base branch, never merge without every branch commit scored and a PASS review above 4.80 at the exact head SHA, never accept a self-review or an unattested review, never let the model choose its own score, never ship a final reply that opens with a raw reasoning block or carries no visible text, and never let a repeated step run on. Installing the plugin delegates issue creation, branch push, pull request creation, review posting, merge, and cleanup, so the loop runs that path without asking for per-action approval.
+- Gates: never spawn a sub-agent outside an open review window, never commit or push on the base branch, never merge without every branch commit scored and a PASS review above 4.80 at the exact head SHA, never accept a self-review or an unattested review, never let the model choose its own score, never write a message that carries a raw reasoning block, never ship a final reply with no visible text, and never let a repeated step run on. Installing the plugin delegates issue creation, branch push, pull request creation, review posting, merge, and cleanup, so the loop runs that path without asking for per-action approval.
 
 ## Modes
 
@@ -216,13 +216,13 @@ be skipped.
 
 ## Output hygiene
 
-A final reply must not open with a raw reasoning block. A leaked block spends
+No assistant message may carry a raw reasoning block. A leaked block spends
 tokens twice, once on screen and once in the correction, and the wasted text stays
 in the context every later turn must carry. On a long loop that cost compounds,
-so the loop ships its own `Stop` hook instead of leaving the behaviour to
-convention.
+so the loop ships its own hooks instead of leaving the behaviour to convention.
 
-- The hook ends a block at the first reasoning-family closing tag outside Markdown code, whichever member of the family opened it, and treats a block that never closes as a leak because everything after the opener reads as reasoning.
+- The hooks end a block at the first reasoning-family closing tag outside Markdown code, whichever member of the family opened it, and treat a block that never closes as a leak because everything after the opener reads as reasoning.
+- Progress notes between tool calls stream immediately, so `UserPromptSubmit` states the rule before the turn's first message and `PreToolUse` reads the transcript at the next tool call and injects one short correction when a note leaked. The message is identified by its transcript id, corrected once, and the turn gets at most three nudges.
 - A reply whose reasoning blocks leave no visible characters is treated as blank and corrected the same way, because a turn that shows the user nothing has not delivered anything.
 - It asks for exactly one clean re-send per turn and never claims the emitted text was removed, because streamed text cannot be recalled.
 - It dedupes on its own per-turn record, so a `Stop` flag set by another hook does not silence it, and it fails open on malformed input.
