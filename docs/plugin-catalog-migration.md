@@ -150,9 +150,10 @@ plus interface motion) needed several installs and several description matches.
 one kind of request, so it stays small enough that grouping never hides a
 capability behind an unrelated name. Every workflow plugin ships one router
 skill that lists its member contracts, so selecting the plugin exposes each
-contract inside it. Answer hygiene is not a separate entry: `delivery-loop`
-ships the reasoning-tag Stop hook, so the long-running workflow that suffers
-most from a leaked block also guards it.
+contract inside it. The former `no-think-tags` answer-hygiene entry folded into
+`delivery-loop`; 7.6.4 removed its reasoning-tag correction hook, and the
+workflow now ships only the delivery guard, dead-loop restart, and goal
+continuation.
 
 | Plugin | Workflows |
 | :--- | :--- |
@@ -245,8 +246,9 @@ uninstall the replaced entry:
 `empty-reply` is retired in this release. Its Stop hook fired after any turn
 without visible text, which is normal inside goal mode, so the injected
 "continue" message interrupted goal runs instead of helping them. Answer
-hygiene now belongs to `delivery-loop`, whose Stop hook covers the remaining
-case: a reply that opens with a leaked reasoning block, closed or left open.
+hygiene moved to `delivery-loop` at that time; 7.6.4 dropped the reasoning-tag
+correction there too, because a blocked re-send could not recall text that had
+already streamed and the retry cost more than the leak.
 
 Removed module IDs such as `ui-motion`, `readme-craft`, and `steam-mod-page`
 remain only as routing aliases in `skills.json`. They resolve for the installer
@@ -308,7 +310,7 @@ node scripts/install-skills.ts --uninstall --target /path/to/skills --yes
 
 Skills roots receive one directory per selected workflow plugin. A skills root
 carries no hooks, so install `delivery-loop` through the Codex plugin
-marketplace when its guard and reasoning-tag Stop hook are wanted, because that
+marketplace when its guard, dead-loop restart, and goal continuation are wanted, because that
 behavior depends on hook trust, not skill discovery. `--skills` stays a legacy
 alias for `--plugin`. Selecting a member module id such as `ui-design` installs
 its owning plugin (`design`) exactly once.
@@ -318,9 +320,11 @@ its owning plugin (`design`) exactly once.
 The shared routing and session hooks are gone; each plugin ships its own
 manifest. `engineering` carries the Godot 3.x write guard and the GPT with Taste
 steering (SessionStart, UserPromptSubmit, SubagentStart, and the agent-result
-PostToolUse steer). `delivery-loop` carries the delivery-state guard plus the
-reasoning-tag Stop hook, which ships as `delivery-loop/no-think-tags/` so one
-install and one trust review cover the guard and the output check together.
+PostToolUse steer). `delivery-loop` carries the delivery-state guard, the
+dead-loop restart, and the goal-run continuation. The reasoning-tag Stop hook is
+retired as of 7.6.4; its reply classifier stays under
+`delivery-loop/no-think-tags/` only to detect a blank final reply, which now
+counts toward the dead-loop restart instead of triggering a re-send.
 `design`, `visual-assets`, and `visual-production` carry the `UserPromptSubmit`
 visual-intent pointer to their router skill.
 
@@ -340,7 +344,8 @@ npm run test
 
 The suite proves plugin parity with the module registry, self-contained bundles,
 deterministic archives, per-plugin installation with rollback, hook behavior for
-the delivery-loop guard and its reasoning-tag Stop hook, and MCP catalog access.
+the delivery-loop guard, the dead-loop restart, and the goal continuation, and
+MCP catalog access.
 Client discovery and invocation still require a connected client and are
 reported separately.
 

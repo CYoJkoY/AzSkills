@@ -177,7 +177,6 @@
         "codex-plugin/hooks/delivery-prompt.ts",
         "codex-plugin/hooks/delivery-stop.ts",
         "codex-plugin/hooks/delivery-session.ts",
-        "codex-plugin/hooks/delivery-hygiene.ts",
         "codex-plugin/hooks/guard.ts",
         "codex-plugin/hooks/delivery-guard.ts",
         "codex-plugin/hooks/loop-guard.ts",

@@ -1,7 +1,7 @@
 ---
 name: delivery-loop
 description: Run a repository delivery loop that plans concurrent tasks as a dependency DAG with touch-scope leases, isolates each task in its own git worktree, scores reviews mechanically through independent Elephant-Goldfish reviewers, merges automatically on green evidence, and breaks out of dead loops.
-version: 1.6.1
+version: 1.6.2
 status: module
 family: operations
 modes: [init, plan, work, review, ship, recover, goal]
@@ -14,10 +14,10 @@ judgement and execution, concurrency comes from independent tasks, and the revie
 score and the merge are mechanical. This module owns the task ledger, touch-scope
 leases, worktree isolation, computed review scoring, the merge gates, and the guard
 that blocks manual merges and sub-agent spawns outside an open review window. It
-also owns output hygiene, because clean messages are cheaper context and
-a long run survives on cheap context, and the dead-loop guard, because a run that
-repeats one step never reaches a review at all. It does not own the project's own
-build commands, its architecture choices, or the content of the code being shipped.
+also owns the dead-loop guard, because a run that repeats one step never reaches a
+review at all, and the goal run, because a durable objective outlives one turn. It
+does not own the project's own build commands, its architecture choices, or the
+content of the code being shipped.
 
 It also owns the long-horizon goal run: a durable objective in `.azflow/goal.json`.
 
@@ -25,11 +25,11 @@ It also owns the long-horizon goal run: a durable objective in `.azflow/goal.jso
 
 - Use when: a repository needs issue-to-merge delivery that stays correct under several concurrent tasks, and review scoring plus merging must be automated instead of hand-driven.
 - Do not use when: a one-off edit needs no branch, review record, or merge gate; make the edit directly.
-- Owns: the task ledger, touch-scope leases, worktree isolation, computed review scoring, the merge gates, dead-loop interruption and restart, output hygiene for every visible message, and the long-horizon goal run.
+- Owns: the task ledger, touch-scope leases, worktree isolation, computed review scoring, the merge gates, dead-loop interruption and restart, and the long-horizon goal run.
 - Inputs: repository root, base branch, task titles with touch scopes, a structured review record, and the project's own verification command.
 - Outputs: admission waves, isolated task worktrees, an English review report with a computed score, and a merged pull request with its issue closed.
 - Compose with: `az-clean-code` when the delivered code must also meet explicit-code rules; `taste` when judgment and collaboration guidance should stay active during the work.
-- Gates: never spawn a sub-agent outside an open review window, never commit or push on the base branch, never merge without every branch commit scored and a PASS review above 4.80 at the exact head SHA, never accept a self-review or an unattested review, never let the model choose its own score, never write a message that carries a raw reasoning block, never ship a final reply with no visible text, and never let a repeated step run on. Installing the plugin delegates issue creation, branch push, pull request creation, review posting, merge, and cleanup, so the loop runs that path without asking for per-action approval.
+- Gates: never spawn a sub-agent outside an open review window, never commit or push on the base branch, never merge without every branch commit scored and a PASS review above 4.80 at the exact head SHA, never accept a self-review or an unattested review, never let the model choose its own score, and never let a repeated step run on. Installing the plugin delegates issue creation, branch push, pull request creation, review posting, merge, and cleanup, so the loop runs that path without asking for per-action approval.
 
 ## Modes
 
@@ -214,33 +214,18 @@ merge, closes the linked issue, verifies `gh issue view --json state` reads
 is never delegated to a manual `gh pr merge`; the guard denies it so gates cannot
 be skipped.
 
-## Output hygiene
-
-No assistant message may carry a raw reasoning block. A leaked block spends
-tokens twice, once on screen and once in the correction, and the wasted text stays
-in the context every later turn must carry. On a long loop that cost compounds,
-so the loop ships its own hooks instead of leaving the behaviour to convention.
-
-- The hooks end a block at the first reasoning-family closing tag outside Markdown code, whichever member of the family opened it, and treat a block that never closes as a leak because everything after the opener reads as reasoning.
-- Progress notes between tool calls stream immediately, so `UserPromptSubmit` states the rule before the turn's first message and `PreToolUse` reads the transcript at the next tool call and injects one short correction when a note leaked. The message is identified by its transcript id, corrected once, and the turn gets at most three nudges.
-- A reply whose reasoning blocks leave no visible characters is treated as blank and corrected the same way, because a turn that shows the user nothing has not delivered anything.
-- It asks for exactly one clean re-send per turn and never claims the emitted text was removed, because streamed text cannot be recalled.
-- It dedupes on its own per-turn record, so a `Stop` flag set by another hook does not silence it, and it fails open on malformed input.
-- The correction repeats the user prompt verbatim, because a long run may have compacted the prompt out of context by the time the correction arrives.
-- Clean output is also a review requirement: a shipped reply must be text the user can read without wading through reasoning.
-
 ## Loop guard
 
 An unattended run can repeat one step forever. The failure is quiet: no merge, no
 error, and no review record. The loop therefore treats a repeating step as a
 failure of the same weight as a broken gate.
 
-- A step repeats when the same tool call, or the same short cycle of calls, runs at the end of the turn: four times for one call, and four repeats of a cycle of two to four calls. The same final reply three times in a row also counts, and so does a second blank reply in one turn: the first blank is corrected, the second proves the correction did not land.
+- A step repeats when the same tool call, or the same short cycle of calls, runs at the end of the turn: four times for one call, and four repeats of a cycle of two to four calls. The same final reply three times in a row also counts, and so does a second blank reply in one turn: the first blank is recorded, and the second shows the turn is not producing an answer.
 - The `PreToolUse` guard denies the fourth identical shell call before it runs, so a loop is interrupted mid-turn instead of burning the rest of the window.
 - The `Stop` guard catches everything the tool guard cannot see, including repeated replies and repeated reads, and restarts the turn. The restart is scoped to a delivery project, meaning a directory above the turn that carries `.azflow/state.json` or `.azflow/goal.json`; anywhere else a repeated reply or read is ordinary work and is left alone, so a long task outside the loop is never cut short.
 - A restart voids the looped attempt and re-sends the original prompt in the same conversation, with a notice that a dead loop just happened. It never opens a new session and never asks the user to repeat the request.
 - Restarts are budgeted: at most two per turn, so a model that keeps looping is stopped by the budget rather than by an endless guard. After a breaker interruption the counter resets, so a deliberate re-run of the same command after a fix is still allowed.
-- The `UserPromptSubmit` hook records the prompt in per-session state the moment it arrives. That copy, not the transcript, is what a correction quotes, so the prompt survives compaction and a flooded window.
+- The `UserPromptSubmit` hook records the prompt in per-session state the moment it arrives. That copy, not the transcript, is what a restart quotes, so the prompt survives compaction and a flooded window.
 
 ## Quality gates
 
@@ -254,8 +239,8 @@ failure of the same weight as a broken gate.
 - Confirm the task branch was pushed without asking, and that the merge was
   followed by a local branch delete and a fast-forwarded base, again without
   asking. Cleanup is part of the loop, not a question for the user.
-- Confirm the final reply carries no raw reasoning block and no blank body, and
-  that any correction was asked once rather than looped.
+- Confirm the final reply is readable text rather than a leaked reasoning block or
+  a blank body.
 - Confirm a repeating step was interrupted rather than retried, and that the
   re-sent prompt in the restart notice is the user's own prompt.
 
@@ -273,7 +258,6 @@ SHA is a failed delivery, not a shortcut.
 - [EGM review](../../delivery-loop/references/egm-review.md) - the review window, fresh-context Goldfish reviewers, and the attestation format.
 - [Automation surface](../../delivery-loop/references/automation.md) - command surface, issue and pull request automation, and the guard.
 - [Goal run](../../delivery-loop/references/goal-run.md) - durable objective, stop-hook continuation, progress from real state, and stall and budget safety.
-- [Output hygiene](../../delivery-loop/references/output-hygiene.md) - reasoning-tag detection, the one bounded correction, and why clean replies extend a run.
 - [Loop guard](../../delivery-loop/references/loop-guard.md) - dead-loop detection, the in-turn breaker, the restart budget, and prompt replay.
 - [Local ledger](../../delivery-loop/references/ledger.md) - ledger layout, state schema, and atomic locked writes.
 - [Migration guide](../../delivery-loop/references/migration.md) - moving rules out of AGENTS.md into this plugin.

@@ -1,9 +1,9 @@
 {
   "name": "azskills",
-  "version": "7.6.3",
+  "version": "7.6.4",
   "private": true,
   "type": "module",
-  "description": "AzSkills: a catalog of independent Codex plugins for design, engineering, and answer hygiene workflows.",
+  "description": "AzSkills: a catalog of independent Codex plugins for design, engineering, and long-horizon delivery workflows.",
   "license": "MIT",
   "engines": {
     "node": "^22.18.0 || >=23.6.0"
