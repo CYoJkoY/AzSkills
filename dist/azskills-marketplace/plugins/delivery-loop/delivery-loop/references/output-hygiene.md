@@ -9,9 +9,11 @@ before the window fills.
 
 ## The rule
 
-A final assistant reply must not open with a raw reasoning block and must carry
-visible text. The `Stop` hook in `codex-plugin/hooks/delivery-stop.ts` enforces
-both and asks for exactly one bounded re-send.
+No assistant message may carry a raw reasoning block, and a final reply must
+also carry visible text. The `Stop` hook in
+`codex-plugin/hooks/delivery-stop.ts` enforces the final reply and asks for
+exactly one bounded re-send; the hooks described in
+[Mid-turn commentary](#mid-turn-commentary) keep the earlier messages clean.
 
 ## What counts as a leak
 
@@ -74,6 +76,40 @@ the tags, or quotes them inside code, is not a leak.
 
 ## Interaction with the rest of the loop
 
+## Mid-turn commentary
+
+A long turn is not one message. The model writes short progress notes between
+tool calls, and those notes stream the moment they are produced. A reasoning
+block wrapped around one of them is already on the user's screen before the
+`Stop` hook runs, so the end-of-turn correction cannot undo it: it can only stop
+the final reply from repeating the mistake. Two hooks cover that gap.
+
+- `UserPromptSubmit` (`codex-plugin/hooks/delivery-prompt.ts`) delivers the rule
+  as `additionalContext` before the turn's first visible text, so the model
+  knows the constraint while every message is still unwritten. It also skips
+  recording this rule when the text comes back as a prompt, so a replayed
+  context cannot replace the real request.
+- `PreToolUse` (`codex-plugin/hooks/delivery-hygiene.ts`) reads the current
+  turn's assistant messages from the transcript at the next tool call and, when
+  any of them carry a reasoning block, injects one short correction. The turn
+  continues with that correction in context instead of leaking for the rest of
+  the run.
+- The transcript records each message twice, once as an event item and once as a
+  `response_item`, under the same id. The hook dedupes by id, so one leak is one
+  leak and the correction never claims a count the user did not see.
+- Each message is corrected once, tracked by id (or a text fingerprint when the
+  transcript carries no id), and a turn gets at most three nudges. A model that
+  ignores three reminders will ignore a fourth, and every nudge costs a turn of
+  attention.
+- The correction is silent when there is no transcript, no new leak, or no way
+  to store state. Without stored signatures the same reminder would repeat on
+  every later tool call, which is worse than the leak it describes.
+- The correction names no tag and quotes no leaked text. Repeating the tag shape
+  in an instruction invites the model to copy it, and quoting the block would
+  show the reasoning to the user a second time.
+
+## Interaction with the rest of the loop
+
 - The guard blocks manual merges and base-branch writes; this hook only shapes the
   final text. Neither replaces the other.
 - The same hook checks for a dead loop first, so a wiped or repeated reply is
@@ -107,3 +143,9 @@ the tags, or quotes them inside code, is not a leak.
   corrected once as blank.
 - Every correction reason ends with the prompt block recorded by
   `UserPromptSubmit`, so the model can restate the request it was answering.
+- A progress note carrying a reasoning block is corrected at the next tool call,
+  once, and the same note is not corrected again on later calls.
+- A message recorded twice under one id counts as one leak, not two.
+- A leak from an earlier turn does not trigger a correction in the current turn.
+- A turn receives at most three mid-turn nudges, and the third says it is the
+  last.

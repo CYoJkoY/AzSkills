@@ -1,7 +1,7 @@
 ---
 name: azskills
 description: AzSkills is a catalog of independent Codex plugins for engineering architecture and code style, design systems and UI motion, visual assets, slides and video, documents, resumes, client setup, Godot 3.x, and answer hygiene. Install only the plugins a task needs; each one routes on its own.
-version: 7.6.1
+version: 7.6.2
 ---
 
 # AzSkills

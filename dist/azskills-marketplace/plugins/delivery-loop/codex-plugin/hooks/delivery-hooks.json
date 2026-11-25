@@ -24,6 +24,16 @@
     ],
     "PreToolUse": [
       {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/codex-plugin/hooks/delivery-hygiene.ts\"",
+            "statusMessage": "Checking visible messages for leaked reasoning tags"
+          }
+        ]
+      },
+      {
         "matcher": "^(?:Bash|Shell|LocalShell|exec_command|run_command|run_shell|Terminal|PowerShell|pwsh|Task|Agent|spawn_agent|spawn_subagent|subagent|delegate|dispatch_agent)$",
         "hooks": [
           {

@@ -19,6 +19,15 @@ import path from "node:path";
 
 export const MAX_PROMPT_CHARS = 8000;
 export const MAX_SAMPLE_CHARS = 2000;
+/**
+ * Message ids remembered per turn. It must stay at or above the number of
+ * assistant messages the transcript reader returns, otherwise an id drops out
+ * of the record while its message is still in the window and the same leak is
+ * corrected twice.
+ */
+export const MAX_HYGIENE_SIGNATURES = 40;
+/** Mid-turn corrections per turn; a model that ignores three will ignore a fourth. */
+export const MAX_HYGIENE_NUDGES = 3;
 
 export interface PromptRecord {
   readonly text: string;
@@ -43,12 +52,25 @@ export interface ToolRunRecord {
   readonly turnId: string;
 }
 
+/**
+ * Leaked-reasoning bookkeeping for one turn. Progress notes stream before the
+ * next tool call, so a leak is already on screen by the time it can be seen;
+ * the signatures let the hook correct each message once instead of repeating
+ * the same reminder, and the nudge count bounds the total.
+ */
+export interface HygieneRecord {
+  readonly turnId: string;
+  readonly signatures: readonly string[];
+  readonly nudges: number;
+}
+
 export interface DeliveryState {
   readonly prompt: PromptRecord | null;
   readonly replies: readonly ReplyRecord[];
   readonly restarts: readonly RestartRecord[];
   readonly corrections: Readonly<Record<string, number>>;
   readonly toolRun: ToolRunRecord | null;
+  readonly hygiene: HygieneRecord | null;
 }
 
 /** What an updater returns: the state to store (or null) plus a value for the caller. */
@@ -72,7 +94,7 @@ const FILE_MODE = 0o600;
 const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function emptyState(): DeliveryState {
-  return { prompt: null, replies: [], restarts: [], corrections: {}, toolRun: null };
+  return { prompt: null, replies: [], restarts: [], corrections: {}, toolRun: null, hygiene: null };
 }
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
@@ -150,6 +172,25 @@ function readToolRun(value: unknown): ToolRunRecord | null {
   return { fingerprint: print, count: Math.max(0, Math.min(count, 100)), turnId };
 }
 
+function readHygiene(value: unknown): HygieneRecord | null {
+  if (!isRecord(value)) return null;
+  const turnId = typeof value.turnId === "string" ? value.turnId : "";
+  const signatures: string[] = [];
+  if (Array.isArray(value.signatures)) {
+    for (const item of value.signatures) {
+      if (typeof item !== "string" || item === "") continue;
+      signatures.push(item.slice(0, 120));
+    }
+  }
+  const raw = value.nudges;
+  const nudges = typeof raw === "number" && Number.isInteger(raw) ? raw : 0;
+  return {
+    turnId,
+    signatures: signatures.slice(-MAX_HYGIENE_SIGNATURES),
+    nudges: Math.max(0, Math.min(nudges, MAX_HYGIENE_NUDGES)),
+  };
+}
+
 export async function readState(sessionId: string): Promise<DeliveryState> {
   const file = stateFile(sessionId);
   if (file === null) return emptyState();
@@ -168,18 +209,28 @@ export async function readState(sessionId: string): Promise<DeliveryState> {
     restarts: readRestarts(parsed.restarts),
     corrections: readCorrections(parsed.corrections),
     toolRun: readToolRun(parsed.toolRun),
+    hygiene: readHygiene(parsed.hygiene),
   };
 }
 
 /** Prunes counters that have aged out so one file never grows without bound. */
 export function pruneState(state: DeliveryState, now: number): DeliveryState {
   const corrections = Object.entries(state.corrections).slice(-MAX_CORRECTIONS);
+  const hygiene =
+    state.hygiene === null
+      ? null
+      : {
+          turnId: state.hygiene.turnId,
+          signatures: state.hygiene.signatures.slice(-MAX_HYGIENE_SIGNATURES),
+          nudges: Math.max(0, Math.min(state.hygiene.nudges, MAX_HYGIENE_NUDGES)),
+        };
   return {
     prompt: state.prompt,
     replies: state.replies.slice(-MAX_REPLIES),
     restarts: state.restarts.filter((restart) => now - restart.at <= RESTART_WINDOW_MS).slice(-MAX_RESTARTS),
     corrections: Object.fromEntries(corrections),
     toolRun: state.toolRun,
+    hygiene,
   };
 }
 
