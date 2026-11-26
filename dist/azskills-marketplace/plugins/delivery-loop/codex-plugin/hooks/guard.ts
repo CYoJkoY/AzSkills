@@ -24,6 +24,7 @@ export interface GuardOptions {
   readonly allowManualMerge?: boolean;
   readonly allowBaseWrites?: boolean;
   readonly allowGhCreate?: boolean;
+  readonly allowManualPrComment?: boolean;
 }
 
 const SUBAGENT_TOOLS = new Set([
@@ -254,6 +255,14 @@ export function denyReasonForBash(
   // nothing. `azflow claim` opens the issue and `azflow pr` builds the body.
   if (!options.allowGhCreate && /\bgh\s+(?:pr|issue)\s+create\b/.test(normalized)) {
     return "Creating a pull request or issue with 'gh ... create' is blocked inside an azflow project: 'azflow claim' opens the linked issue and 'azflow pr' builds the pull request body the ship gates verify. Set AZFLOW_ALLOW_GH_CREATE=1 to override.";
+  }
+
+  // Review comments are evidence the merge gates read back from the pull
+  // request. Free-form text would bypass the fixed report template and let a
+  // comment look like a review without the recorded round, head, verdict, and
+  // score. `gh issue comment` and `gh pr view` stay available.
+  if (!options.allowManualPrComment && /\bgh\s+pr\s+(?:comment|review)\b/.test(normalized)) {
+    return "Manual 'gh pr comment'/'gh pr review' is blocked inside an azflow project: publish the deterministic report with 'azflow review' or retry with 'azflow review-post <task> --round N'. Set AZFLOW_ALLOW_MANUAL_PR_COMMENT=1 to override.";
   }
 
   if (options.allowBaseWrites) return null;

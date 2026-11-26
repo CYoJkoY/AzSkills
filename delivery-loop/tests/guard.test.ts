@@ -42,6 +42,12 @@ assert.equal(denyReasonForBash("gh pr create --title x", ctx, { allowGhCreate: t
 assert.equal(denyReasonForBash("gh pr view 1", ctx), null);
 assert.equal(denyReasonForBash("gh issue comment 1 --body x", ctx), null);
 
+// Review text on a pull request must come from the deterministic report
+// template, not from a hand-written comment.
+assert.ok(denyReasonForBash("gh pr comment 1 --body x", ctx) !== null);
+assert.ok(denyReasonForBash("gh pr review 1 --approve", ctx) !== null);
+assert.equal(denyReasonForBash("gh pr comment 1 --body x", ctx, { allowManualPrComment: true }), null);
+
 assert.ok(denyReasonForTool("Task") !== null);
 assert.ok(denyReasonForTool("spawn_agent") !== null);
 assert.equal(denyReasonForTool("Bash"), null);

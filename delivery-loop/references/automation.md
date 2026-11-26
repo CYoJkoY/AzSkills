@@ -34,14 +34,16 @@ the precedence and the repository names its own tools.
 | `azflow init` | Detect the base branch, record the static check commands, write the local ledger, ignore it in git. |
 | `azflow add` | Record a task, its touch scopes, dependencies, and issue id. |
 | `azflow issue` | Create the issue from a deterministic body, or `--body`/`--body-file`. |
-| `azflow commit` | Run the recorded static checks, validate a Conventional Commit message against the staged stage, then commit it. Refuses to add a stage until the current head has a stage record. |
-| `azflow pr` | Open the pull request as a draft with a derived title and a five-section body, linked to the issue, once the branch is pushed. Refuses any unscored branch commit. |
+| `azflow commit` | Run the recorded static checks, validate a Conventional Commit message against the staged stage, commit it, then push the task branch automatically. Refuses to add a stage until the current head has a stage record. |
+| `azflow push` | Push the task branch after a commit whose upload failed, or when automatic pushes were turned off. Never moves a commit, so a rejected push only needs a retry. |
+| `azflow pr` | Push the task branch, open the pull request as a draft with a derived title and a five-section body, linked to the issue, and publish the recorded review as the first comment. Refuses any unscored branch commit. |
 | `azflow ready` | Mark the pull request ready for review after local checks pass. |
 | `azflow plan` | Print admission waves, blocked tasks, and scope overlaps. |
 | `azflow claim` | Create the branch and worktree, then issue a lease. |
 | `azflow status` | Show tasks, leases, reviews, and scores. |
 | `azflow review-open` | Open a short-lived review window that lets EGM reviewers spawn for one task at one head. See [egm-review.md](egm-review.md). |
-| `azflow review` | Require a claimed worktree, an open review window, and an EGM attestation from a fresh `--reviewer` that is not the implementer; scan the real diff, enforce sequential rounds, score the stage, write the report, and delete the window. |
+| `azflow review` | Require a claimed worktree, an open review window, and an EGM attestation from a fresh `--reviewer` that is not the implementer; scan the real diff, enforce sequential rounds, score the stage, write the report, publish it to the pull request, and delete the window. `--no-post` suppresses the post. |
+| `azflow review-post` | Re-publish a recorded review round from disk after a post failure. Validates the stored report against the template before posting. See [review-comment.md](review-comment.md). |
 | `azflow ship` | Restore `Closes #<issue>` when it drifted, open the pull request itself when the task has none (ready, never a draft), verify every merge gate, merge, close the issue, verify it reads `CLOSED`, sync base. A dry run predicts the repair without writing it. `--verify-issue` finishes a merge whose issue stayed open. |
 | `azflow recover` | Release expired leases and list orphan worktrees. |
 | `azflow doctor` | Check node, git, gh auth, ledger, current branch, review engine, the `egm` plugin, and that every active branch has a linked issue. |
@@ -71,24 +73,33 @@ The agent runs this path without asking for permission at any step:
    breaks the standard below, and commits through stdin so the body keeps LF
    endings. It also refuses to record a new stage while the current head has no
    stage record, so every commit is scored before the next one lands.
+   A successful commit then pushes the task branch on its own, so the shared
+   record backs up each stage without waiting for a separate instruction to
+   upload. A rejected push keeps the local commit and exits 1 with the retry
+   command; `azflow push <task>` resends the same commit. `--no-push` or
+   `AZFLOW_NO_AUTO_PUSH=1` turns the automatic upload off for an offline run.
 3. Runs the project's own verification before anything leaves the worktree, so the
    recorded result is green rather than hopeful. Commit the last stage first: a
    review scores the head that exists at review time, so a stage committed after it
    makes its own green run stale.
-4. Pushes the branch, runs `azflow review-open <task>` so the guard permits the
-   reviewers to spawn, and launches the Elephant-Goldfish reviewers in fresh
-   contexts (`fork_context: false`) against the diff. It then runs
+4. Runs `azflow review-open <task>` so the guard permits the reviewers to spawn,
+   then launches the Elephant-Goldfish reviewers in fresh contexts
+   (`fork_context: false`) against the diff. It then runs
    `azflow review <task> --input <review.json> --reviewer <fresh id> --scan` with
    `engine: "egm"` and one attestation per reviewer. The review derives the changed
    files and head from the claimed worktree, runs the scanner unconditionally,
    requires round 1 followed by one-step rounds that carry the prior score, and
-   rejects a self review or a round with no attested fresh-context reviewer.
-5. Runs `azflow pr <task>`. The pull request opens as a draft, linked with
-   `Closes #<issue>`, with a title and body derived from the branch commits and the
-   recorded review, and the report is published as the first comment. `azflow pr`
-   refuses a branch the remote has not seen, refuses a branch with no commit ahead
-   of base, refuses any branch commit without a stage record, and refuses to open
-   until a passing review round with a green verification is on record.
+   rejects a self review or a round with no attested fresh-context reviewer. When
+   the task already has a pull request, the round is published as the fixed report
+   comment by default (see [review-comment.md](review-comment.md)); `--no-post`
+   suppresses it.
+5. Runs `azflow pr <task>`. It pushes the task branch, then opens the pull request
+   as a draft, linked with `Closes #<issue>`, with a title and body derived from
+   the branch commits and the recorded review, and publishes the recorded report
+   as the first comment. `azflow pr` refuses a branch with no commit ahead of base,
+   refuses any branch commit without a stage record, and refuses to open until a
+   passing review round with a green verification is on record. A post failure
+   keeps the pull request and exits 1 rather than dropping the review silently.
 
 Opening the pull request means "this stage is ready to be read", so the checks run
 first and the review is on record before it exists. The draft flag is not a reason
@@ -97,12 +108,12 @@ escape for a pull request wanted earlier, and the draft then carries the review'
 own gaps as blocking issues.
 6. Runs `azflow ready <task>` to take the pull request out of draft.
 7. Repairs if needed until the head scores strictly above 4.80: run the checks,
-   commit the fix, then `azflow review-open <task>` again for the new head, run the
-   reviewers in fresh contexts, and score the next round with a new
-   `--reviewer <fresh id>` plus `--input <review.json> --scan --post`, then
-   `azflow ready <task>`. Each repair is scored on its own stage, and `ship` still
-   compares the reviewed head with the pull request head, so a fix without a new
-   round does not merge.
+   commit the fix (which pushes the branch), then `azflow review-open <task>`
+   again for the new head, run the reviewers in fresh contexts, and score the next
+   round with a new `--reviewer <fresh id>` plus `--input <review.json> --scan`,
+   then `azflow ready <task>`. Each repair is scored on its own stage and posts its
+   own report comment, and `ship` still compares the reviewed head with the pull
+   request head, so a fix without a new round does not merge.
 8. Runs `azflow ship <task>` once the head passes. Ship opens the pull request
    itself when the task has none, so a forgotten `azflow pr` cannot stall the last
    step while `gh pr create` is refused inside the project; the same review,
@@ -169,6 +180,10 @@ required structure.
 - `Permission Notice` states that the agent completed development and automated
   review under the install-time grant, and that the merge itself is performed by
   the loop after every gate passes. It does not hand the merge back to the user.
+- The recorded review is published on the pull request as the fixed report
+  comment when the pull request opens and on every later round, so the review is
+  part of the shared record rather than a local file. See
+  [review-comment.md](review-comment.md).
 - `azflow ship` refreshes the body from the recorded review before merging, so the
   merged pull request describes the review that actually passed.
 
@@ -185,6 +200,11 @@ required structure.
 - Review score is strictly above the threshold; an exact 4.80 fails
   (`review-score`).
 - Reviewed head equals the pull request head (`review-head`).
+- The pull request carries the recorded review as the fixed report comment, for
+  the same round, head, task, verdict, and score (`review-comment`). The gate
+  reads the real comment list, not the local report file. A live `ship` re-posts a
+  missing report and re-validates; a dry run reports the gap without posting. See
+  [review-comment.md](review-comment.md).
 - CI is green, with no failing or pending check.
 - `mergeable` is `MERGEABLE` and the state is not dirty.
 - The base branch equals the configured base.
@@ -212,9 +232,15 @@ task starts from the merged head.
 The loop owns the branch lifecycle end to end, so it never asks the user whether
 to push or whether to tidy up.
 
-- Push the task branch without asking. `azflow pr` already refuses a branch the
-  remote has not seen, so pushing is part of opening the pull request, not a
-  separate decision to confirm.
+- The upload is automatic and eager. `azflow commit` pushes the task branch as
+  soon as it records a stage, so every commit is backed up on the remote even when
+  no pull request exists yet, and `azflow pr` pushes again before it opens the
+  pull request. The user never has to ask the loop to upload work, and a branch is
+  never left only local after a commit.
+- A rejected push does not undo the commit. The commit stays recorded locally and
+  the command exits 1 with `azflow push <task>` as the retry, so a network fault
+  costs a retry, not the work. `--no-push` and `AZFLOW_NO_AUTO_PUSH=1` are the
+  visible opt-outs for a deliberately offline run.
 - After `azflow ship` merges, delete the local task branch and return to the base
   branch without asking. Most repositories enable delete-on-merge for the remote
   branch, so the local branch is stale the moment the merge lands. Check out the
@@ -244,6 +270,10 @@ It denies:
 - `gh pr create` and `gh issue create` inside a delivery project, so the linked
   issue and pull request are only made by `azflow`. `AZFLOW_ALLOW_GH_CREATE=1` is
   the visible escape when a hand-made pull request is genuinely wanted.
+- `gh pr comment` and `gh pr review`, so a hand-written comment cannot stand in
+  for the fixed review report. `gh issue comment` and `gh pr view` stay available.
+  `AZFLOW_ALLOW_MANUAL_PR_COMMENT=1` is the visible escape for a separate note; it
+  does not relax the `review-comment` gate.
 - `git commit` and `git push` while on the base branch.
 - `git push` whose refspec targets the base branch or `origin`.
 - Any sub-agent spawn tool (`Task`, `Agent`, `spawn_agent`, and variants), except
@@ -267,6 +297,7 @@ Escape hatches exist for legitimate exceptions:
 | :--- | :--- |
 | `AZFLOW_ALLOW_BASE_WRITES=1` | Permit base-branch commit and push. |
 | `AZFLOW_ALLOW_MANUAL_MERGE=1` | Permit `gh pr merge`. |
+| `AZFLOW_ALLOW_MANUAL_PR_COMMENT=1` | Permit a hand-written `gh pr comment` or `gh pr review`. |
 | `AZFLOW_ALLOW_SUBAGENTS=1` | Permit a sub-agent spawn. |
 
 The review window is the normal path for an EGM review and does not need the
