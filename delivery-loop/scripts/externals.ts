@@ -197,6 +197,20 @@ export function commitWithMessage(cwd: string, message: string): string {
   return ok(git(["commit", "-F", "-"], { cwd, input: message }));
 }
 
+/**
+ * Pushes a branch to the remote, so the shared GitHub record carries the work
+ * without waiting for a separate instruction. `-u` records the tracking ref so
+ * `remoteBranchExists` sees the branch and later pushes need no arguments.
+ * Fails loudly on a rejected push; the caller keeps the local commit and can
+ * retry, so a network fault never discards work.
+ */
+export function gitPush(cwd: string, remote: string, branch: string, setUpstream = true): void {
+  const args = ["push"];
+  if (setUpstream) args.push("-u");
+  args.push(remote, branch);
+  ok(git(args, { cwd }));
+}
+
 export interface BranchCommit {
   readonly sha: string;
   readonly header: string;
@@ -329,6 +343,35 @@ export function prEdit(
 
 export function prComment(cwd: string, pr: number, body: string): void {
   ok(gh(["pr", "comment", String(pr), "--body", body], { cwd }));
+}
+
+export interface PrComment {
+  readonly body: string;
+  readonly author: string;
+  readonly createdAt: string;
+}
+
+/**
+ * Reads a pull request's comments so `ship` can prove the templated review
+ * report is actually present on the PR before merging, rather than trusting a
+ * local file that a failed post never delivered. Missing or malformed comment
+ * fields are tolerated; the caller validates the body it cares about.
+ */
+export function prComments(cwd: string, pr: number): PrComment[] {
+  const parsed: unknown = JSON.parse(ok(gh(["pr", "view", String(pr), "--json", "comments"], { cwd })));
+  if (!isRecord(parsed) || !Array.isArray(parsed.comments)) return [];
+  return parsed.comments
+    .filter(isRecord)
+    .map((entry) => {
+      const author = isRecord(entry.author) && typeof entry.author.login === "string"
+        ? entry.author.login
+        : "";
+      return {
+        body: typeof entry.body === "string" ? entry.body : "",
+        author,
+        createdAt: typeof entry.createdAt === "string" ? entry.createdAt : "",
+      };
+    });
 }
 
 /** Flip a draft pull request to ready for review. */

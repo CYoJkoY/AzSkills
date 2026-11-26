@@ -5,6 +5,7 @@ import {
   DIMENSIONS,
   renderReport,
   scoreReview,
+  validateReviewComment,
   type Finding,
   type ProbeResult,
   type DimensionResult,
@@ -163,8 +164,19 @@ assert.match(firstReport, /#### 3\. Current Round Findings & Exact Line Numbers 
 assert.match(firstReport, /#### 4\. Dimension Summary/);
 assert.match(firstReport, /\| P0 \| None \| - \| No P0 findings \| - \|/);
 assert.match(firstReport, /Initial review round; no prior issues\./);
-assert.match(firstReport, /\*\*Final Score\*\*: `\*\*5\.00 \/ 5\.00\*\*`/);
+assert.match(firstReport, /\*\*Final Score\*\*: `5\.00 \/ 5\.00`/);
 assert.match(firstReport, /- Reviewer: `reviewer-prime` \(independent, fresh context\)/);
+assert.deepEqual(
+  validateReviewComment(firstReport, {
+    round: 1,
+    headSha: "abc123",
+    taskId: "T-0001",
+    verdict: "PASS",
+    score: 5,
+  }),
+  [],
+);
+assert.ok(validateReviewComment("LGTM").length > 0, "free-form text is not a review report");
 
 const secondReport = renderReport(
   scoreReview(baseInput({ round: 2, findings: [distinctFinding("P3", 9)] })),

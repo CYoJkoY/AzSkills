@@ -636,10 +636,10 @@ export function renderReport(result: ScoreResult, meta: ReportMeta): string {
         : "Previous head SHA (`" + meta.previousHeadSha + "`)"),
   );
   lines.push(
-    "- **Verdict**: `**" + result.verdict + "**` (Acceptance rule: zero unresolved `P0/P1/P2` issues and final score `> " +
+    "- **Verdict**: `" + result.verdict + "` (Acceptance rule: zero unresolved `P0/P1/P2` issues and final score `> " +
       result.threshold.toFixed(2) + " / 5.00`)",
   );
-  lines.push("- **Final Score**: `**" + result.score.toFixed(2) + " / 5.00**`");
+  lines.push("- **Final Score**: `" + result.score.toFixed(2) + " / 5.00`");
   lines.push("- Task: `" + meta.taskId + "`" + (meta.issue === null ? "" : " / Issue #" + String(meta.issue)));
   lines.push("- Reviewed at: `" + meta.reviewedAt + "`");
   if (meta.reviewer !== undefined && meta.reviewer !== "") {
@@ -763,4 +763,142 @@ export function renderReport(result: ScoreResult, meta: ReportMeta): string {
 
 function escapeCell(value: string): string {
   return value.replace(/\|/g, "\\|").replace(/\r?\n/g, " ");
+}
+
+/**
+ * A review report parsed back from the text posted to a pull request. Only the
+ * fields the gates compare are read; the body is otherwise opaque.
+ */
+export interface ParsedReviewComment {
+  readonly round: number;
+  readonly headSha: string;
+  readonly verdict: "PASS" | "FAIL";
+  readonly score: number;
+  readonly taskId: string;
+  readonly issue: number | null;
+}
+
+/** Fields a posted comment must agree with, so a hand-written body cannot pass. */
+export interface ReviewCommentExpectation {
+  readonly round?: number;
+  readonly headSha?: string;
+  readonly taskId?: string;
+  readonly verdict?: "PASS" | "FAIL";
+  readonly score?: number;
+}
+
+const REVIEW_TITLE = /^### \u{1F50D} Autonomous Code Review Report \(Round ([1-9]\d*)\)$/u;
+const REVIEW_COMMIT = /^-\s+\*\*Reviewed Commit \(`head SHA`\)\*\*:\s*`([^`]+)`/;
+const REVIEW_VERDICT = /^-\s+\*\*Verdict\*\*:\s*`(PASS|FAIL)`/;
+const REVIEW_SCORE = /^-\s+\*\*Final Score\*\*:\s*`(\d+\.\d{2}) \/ 5\.00`/;
+const REVIEW_TASK = /^- Task:\s*`([^`]+)`(?:\s*\/\s*Issue #(\d+))?/;
+
+const REVIEW_SECTIONS = [
+  "#### 1. Previous Round Issue Resolution",
+  "#### 2. Quantitative Deduction Formula",
+  "#### 3. Current Round Findings & Exact Line Numbers (P0-P4)",
+  "#### 4. Dimension Summary",
+  "#### Evidence Gates",
+];
+
+const FINDINGS_TABLE_HEADER = "| Severity | File & Line | Review Dimension | Issue Description | Recommended Fix |";
+const GATES_TABLE_HEADER = "| Gate | Status | Detail |";
+
+function reviewLines(body: string): string[] {
+  return body.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim().split("\n");
+}
+
+function firstMatch(lines: readonly string[], pattern: RegExp): RegExpExecArray | null {
+  for (const line of lines) {
+    const match = pattern.exec(line);
+    if (match !== null) return match;
+  }
+  return null;
+}
+
+/**
+ * Reads the fixed metadata a templated review report must carry. Returns null
+ * when the body is not a report or a required field is missing, so a caller can
+ * refuse to publish or accept free-form prose.
+ */
+export function parseReviewComment(body: string): ParsedReviewComment | null {
+  const lines = reviewLines(body);
+  const title = REVIEW_TITLE.exec(lines[0] ?? "");
+  if (title === null) return null;
+  const round = Number(title[1]);
+  const commit = firstMatch(lines, REVIEW_COMMIT);
+  const verdictMatch = firstMatch(lines, REVIEW_VERDICT);
+  const scoreMatch = firstMatch(lines, REVIEW_SCORE);
+  const taskMatch = firstMatch(lines, REVIEW_TASK);
+  if (commit === null || verdictMatch === null || scoreMatch === null || taskMatch === null) return null;
+  const headSha = (commit[1] ?? "").trim();
+  const taskId = (taskMatch[1] ?? "").trim();
+  const score = Number(scoreMatch[1]);
+  if (headSha === "" || taskId === "" || !Number.isFinite(score)) return null;
+  return {
+    round,
+    headSha,
+    verdict: verdictMatch[1] === "PASS" ? "PASS" : "FAIL",
+    score,
+    taskId,
+    issue: taskMatch[2] === undefined ? null : Number(taskMatch[2]),
+  };
+}
+
+/**
+ * Checks that a body is the deterministic report template and, when supplied,
+ * that it describes the round/head/task/verdict/score it is expected to. An
+ * empty array means "valid"; any entry is a reason to refuse publication.
+ */
+export function validateReviewComment(
+  body: string,
+  expect: ReviewCommentExpectation = {},
+): string[] {
+  const parsed = parseReviewComment(body);
+  if (parsed === null) {
+    return [
+      "the comment is not a templated Autonomous Code Review Report; publish it with 'azflow review' or 'azflow review-post'",
+    ];
+  }
+  const lines = reviewLines(body);
+  const problems: string[] = [];
+  if (!lines.some((line) => /^-\s+\*\*Baseline\*\*:/.test(line))) {
+    problems.push("missing '- **Baseline**:' metadata line");
+  }
+  if (!lines.some((line) => /^- Reviewed at:/.test(line))) {
+    problems.push("missing '- Reviewed at:' metadata line");
+  }
+  let cursor = -1;
+  for (const header of REVIEW_SECTIONS) {
+    const index = lines.findIndex((line, at) => at > cursor && line.trim().startsWith(header));
+    if (index === -1) {
+      problems.push("missing section header '" + header + "' in the required order");
+    } else {
+      cursor = index;
+    }
+  }
+  if (!lines.some((line) => line.trim() === FINDINGS_TABLE_HEADER)) {
+    problems.push("missing findings table header '" + FINDINGS_TABLE_HEADER + "'");
+  }
+  if (!lines.some((line) => line.trim() === GATES_TABLE_HEADER)) {
+    problems.push("missing evidence gates table header '" + GATES_TABLE_HEADER + "'");
+  }
+  if (expect.round !== undefined && parsed.round !== expect.round) {
+    problems.push("round is " + String(parsed.round) + ", expected " + String(expect.round));
+  }
+  if (expect.headSha !== undefined && parsed.headSha !== expect.headSha) {
+    problems.push("reviewed head is " + parsed.headSha + ", expected " + expect.headSha);
+  }
+  if (expect.taskId !== undefined && parsed.taskId !== expect.taskId) {
+    problems.push("task is " + parsed.taskId + ", expected " + expect.taskId);
+  }
+  if (expect.verdict !== undefined && parsed.verdict !== expect.verdict) {
+    problems.push("verdict is " + parsed.verdict + ", expected " + expect.verdict);
+  }
+  if (expect.score !== undefined && Math.abs(parsed.score - expect.score) > 0.004) {
+    problems.push(
+      "final score is " + parsed.score.toFixed(2) + ", expected " + expect.score.toFixed(2),
+    );
+  }
+  return problems;
 }

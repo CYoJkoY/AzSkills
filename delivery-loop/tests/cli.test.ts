@@ -61,6 +61,24 @@ const rememberBody = () => {
   const at = args.indexOf("--body");
   if (at !== -1) fs.writeFileSync(prBodyPath, args[at + 1] || "");
 };
+const commentsPath = process.env.AZFLOW_SHIM_PR_COMMENTS;
+const readComments = () => {
+  if (!fs.existsSync(commentsPath)) return {};
+  try { return JSON.parse(fs.readFileSync(commentsPath, "utf8")); } catch { return {}; }
+};
+const rememberComment = () => {
+  const at = args.indexOf("--body");
+  const pr = args[2];
+  const comments = readComments();
+  const bucket = Array.isArray(comments[pr]) ? comments[pr] : [];
+  bucket.push({
+    body: at === -1 ? "" : args[at + 1] || "",
+    author: { login: "shim-reviewer" },
+    createdAt: "2026-01-01T00:00:00.000Z",
+  });
+  comments[pr] = bucket;
+  fs.writeFileSync(commentsPath, JSON.stringify(comments));
+};
 if (group === "auth" && action === "status") reply("ok");
 if (group === "issue" && action === "create") reply("https://github.com/acme/demo/issues/" + process.env.AZFLOW_SHIM_ISSUE);
 if (group === "issue" && action === "comment") reply("");
@@ -73,7 +91,10 @@ if (group === "pr" && action === "create") {
   rememberBody();
   reply("https://github.com/acme/demo/pull/" + process.env.AZFLOW_SHIM_PR);
 }
-if (group === "pr" && action === "comment") reply("");
+if (group === "pr" && action === "comment") {
+  rememberComment();
+  reply("");
+}
 if (group === "pr" && action === "edit") {
   rememberBody();
   reply("");
@@ -87,6 +108,7 @@ if (group === "pr" && action === "merge") {
   reply("merged");
 }
 if (group === "pr" && action === "view") {
+  const comments = readComments();
   reply(JSON.stringify({
     number: Number(process.env.AZFLOW_SHIM_PR),
     url: "https://github.com/acme/demo/pull/" + process.env.AZFLOW_SHIM_PR,
@@ -100,6 +122,7 @@ if (group === "pr" && action === "view") {
     mergeStateStatus: "CLEAN",
     isDraft: false,
     labels: [],
+    comments: comments[String(args[2])] || [],
   }));
 }
 process.stderr.write("unexpected gh call: " + args.join(" ") + "\\n");
@@ -141,6 +164,7 @@ async function setup(): Promise<{
       AZFLOW_SHIM_PR: "9",
       AZFLOW_SHIM_ISSUE_STATE: path.join(work, "issue-state"),
       AZFLOW_SHIM_PR_BODY: path.join(work, "pr-body.txt"),
+      AZFLOW_SHIM_PR_COMMENTS: path.join(work, "pr-comments.json"),
       AZFLOW_SHIM_BRANCH: "issue/t-0001-add-checkout-helper",
       AZFLOW_SHIM_HEAD_SHA: "",
     },
@@ -214,10 +238,16 @@ async function main(): Promise<void> {
 
   const committed = JSON.parse(
     must(["commit", "T-0001", "--type", "feat", "--scope", "cart", "--subject", "add total helper"]).stdout,
-  ) as { header: string; branch: string };
+  ) as { header: string; branch: string; pushed: boolean };
   assert.equal(committed.header, "feat(cart): add total helper");
+  assert.equal(committed.pushed, true, "commit uploads the task branch automatically");
   assert.equal(git(claimed.worktree, ["log", "-1", "--format=%s"]), "feat(cart): add total helper");
   assert.match(git(claimed.worktree, ["log", "-1", "--format=%b"]), /Refs: #7/, "the commit cites the issue");
+  assert.equal(
+    git(remote, ["rev-parse", "refs/heads/" + claimed.branch]),
+    git(claimed.worktree, ["rev-parse", "HEAD"]),
+    "the commit is already on the remote",
+  );
 
   // Every commit is scored before the next one is recorded, so a branch
   // cannot grow past a stage that no review ever saw.
@@ -229,12 +259,17 @@ async function main(): Promise<void> {
   git(claimed.worktree, ["restore", "--staged", "src/cart/empty.ts"]);
   await rm(path.join(claimed.worktree, "src", "cart", "empty.ts"), { force: true });
 
-  // A pull request cannot reference a branch the remote has never seen.
+  // A pull request cannot be opened before its reviewed head is recorded. It
+  // still uploads the task branch first, so a retry only needs the review.
   const early = cli(["pr", "T-0001"]);
-  assert.equal(early.status, 1, "pr before push must fail");
-  assert.match(early.stderr, /push issue\/t-0001/);
+  assert.equal(early.status, 1, "pr before review must fail");
+  assert.match(early.stderr, /review is not recorded yet/);
+  assert.equal(
+    git(remote, ["rev-parse", "refs/heads/" + claimed.branch]),
+    git(claimed.worktree, ["rev-parse", "HEAD"]),
+    "pr pushed the branch before refusing the missing review",
+  );
 
-  git(claimed.worktree, ["push", "-u", "origin", claimed.branch]);
   const headSha = git(claimed.worktree, ["rev-parse", "HEAD"]);
 
   // Opening the pull request is when the stage stops being private, so the
@@ -454,7 +489,11 @@ async function main(): Promise<void> {
   );
   git(second.worktree, ["add", "."]);
   must(["commit", "T-0002", "--type", "feat", "--scope", "badge", "--subject", "add count helper"]);
-  git(second.worktree, ["push", "-u", "origin", second.branch]);
+  assert.equal(
+    git(remote, ["rev-parse", "refs/heads/" + second.branch]),
+    git(second.worktree, ["rev-parse", "HEAD"]),
+    "the second task branch was uploaded by commit",
+  );
   const secondHead = git(second.worktree, ["rev-parse", "HEAD"]);
   const redInput = {
     ...reviewInput,
@@ -549,7 +588,6 @@ async function main(): Promise<void> {
   );
   git(fourth.worktree, ["add", "."]);
   must(["commit", "T-0004", "--type", "feat", "--scope", "writer", "--subject", "add write helper"]);
-  git(fourth.worktree, ["push", "-u", "origin", fourth.branch]);
   const fourthHead = git(fourth.worktree, ["rev-parse", "HEAD"]);
   const cleanPath = path.join(work, "review-clean.json");
   await writeFile(
@@ -592,7 +630,6 @@ async function main(): Promise<void> {
   );
   git(fifth.worktree, ["add", "."]);
   must(["commit", "T-0005", "--type", "feat", "--scope", "token", "--subject", "add token helper"]);
-  git(fifth.worktree, ["push", "-u", "origin", fifth.branch]);
   const fifthHead = git(fifth.worktree, ["rev-parse", "HEAD"]);
   const fifthReviewPath = path.join(work, "review-fifth.json");
   await writeFile(
@@ -632,6 +669,121 @@ async function main(): Promise<void> {
   const fifthTask = fifthState.tasks.find((item) => item.id === "T-0005");
   assert.equal(fifthTask?.pr, 12, "ship records the pull request it opened");
   assert.equal(fifthTask?.status, "merged");
+
+  // Uploads and review comments are automatic, not opt-in. This task proves a
+  // commit and PR upload themselves, a review posts its fixed report by default,
+  // free-form text is refused, and ship repairs a dropped comment before merge.
+  must(["add", "Add promo helper", "--touch", "src/promo/**"]);
+  const sixth = JSON.parse(must(["claim", "T-0006", "--issue", "14"], { AZFLOW_SHIM_ISSUE: "14" }).stdout) as {
+    worktree: string;
+    branch: string;
+  };
+  await mkdir(path.join(sixth.worktree, "src", "promo"), { recursive: true });
+  await writeFile(
+    path.join(sixth.worktree, "src", "promo", "promo.ts"),
+    "export const promo = (value: string): string => value.toUpperCase();\n",
+    "utf8",
+  );
+  git(sixth.worktree, ["add", "."]);
+  const sixthCommit = JSON.parse(
+    must(["commit", "T-0006", "--type", "feat", "--scope", "promo", "--subject", "add promo helper"]).stdout,
+  ) as { headSha: string; pushed: boolean };
+  assert.equal(sixthCommit.pushed, true, "the commit uploads its branch");
+  const sixthHead = git(sixth.worktree, ["rev-parse", "HEAD"]);
+  assert.equal(sixthCommit.headSha, sixthHead);
+  assert.equal(
+    git(remote, ["rev-parse", "refs/heads/" + sixth.branch]),
+    sixthHead,
+    "the remote already has the commit",
+  );
+  const explicitPush = JSON.parse(must(["push", "T-0006"]).stdout) as { headSha: string; pushed: boolean };
+  assert.equal(explicitPush.pushed, true, "azflow push is an idempotent retry for a completed upload");
+  assert.equal(explicitPush.headSha, sixthHead);
+
+  const sixthReviewPath = path.join(work, "review-sixth.json");
+  await writeFile(
+    sixthReviewPath,
+    JSON.stringify({ ...reviewInput, headSha: sixthHead, reviewedFiles: ["src/promo/promo.ts"] }, null, 2),
+    "utf8",
+  );
+  must(["review-open", "T-0006", "--reviewer", "egm-goldfish"]);
+  const sixthRound = JSON.parse(
+    must(["review", "T-0006", "--input", sixthReviewPath, "--scan", "--reviewer", "reviewer-6", "--json"]).stdout,
+  ) as { record: { score: number; round: number }; posted: boolean };
+  assert.equal(sixthRound.record.round, 1);
+  assert.equal(sixthRound.posted, false, "a review with no pull request posts nothing");
+  const commentsPath = env.AZFLOW_SHIM_PR_COMMENTS ?? "";
+  const commentsFor = async (pr: number): Promise<{ body: string }[]> => {
+    const stored = JSON.parse(await readFile(commentsPath, "utf8")) as Record<string, { body: string }[]>;
+    return stored[String(pr)] ?? [];
+  };
+  assert.equal((await commentsFor(13)).length, 0, "no comment exists before the pull request");
+
+  const sixthPr = JSON.parse(
+    must(["pr", "T-0006"], { AZFLOW_SHIM_PR: "13" }).stdout,
+  ) as { pr: number; commentPosted: boolean; commentError: string | null };
+  assert.equal(sixthPr.pr, 13);
+  assert.equal(sixthPr.commentPosted, true, "opening the pull request posts the review report");
+  assert.equal(sixthPr.commentError, null);
+  const afterPr = await commentsFor(13);
+  assert.equal(afterPr.length, 1);
+  assert.match(afterPr[0]?.body ?? "", /Autonomous Code Review Report \(Round 1\)/);
+  must(["ready", "T-0006"]);
+
+  // A second round at the same head carries the prior score and posts by
+  // default, because the pull request now exists.
+  const sixthSecondPath = path.join(work, "review-sixth-r2.json");
+  await writeFile(
+    sixthSecondPath,
+    JSON.stringify(
+      {
+        ...reviewInput,
+        headSha: sixthHead,
+        round: 2,
+        reviewedFiles: ["src/promo/promo.ts"],
+        previous: { score: sixthRound.record.score, resolved: [] },
+      },
+      null,
+      2,
+    ),
+    "utf8",
+  );
+  must(["review-open", "T-0006", "--reviewer", "egm-goldfish"]);
+  const sixthSecond = JSON.parse(
+    must(["review", "T-0006", "--input", sixthSecondPath, "--scan", "--reviewer", "reviewer-7", "--json"]).stdout,
+  ) as { posted: boolean; commentError: string | null };
+  assert.equal(sixthSecond.posted, true, "a review on an open pull request posts by default");
+  assert.equal(sixthSecond.commentError, null);
+  const afterSecond = await commentsFor(13);
+  assert.equal(afterSecond.length, 2);
+  assert.match(afterSecond[1]?.body ?? "", /Autonomous Code Review Report \(Round 2\)/);
+
+  // A missed post is repairable from the recorded report, and only the exact
+  // template is accepted.
+  must(["review-post", "T-0006", "--round", "1"]);
+  assert.equal((await commentsFor(13)).length, 3, "review-post republishes the recorded round");
+  const secondReportPath = path.join(project, ".azflow", "reviews", "T-0006-r2.md");
+  const secondReport = await readFile(secondReportPath, "utf8");
+  await writeFile(secondReportPath, "LGTM\n", "utf8");
+  const tampered = cli(["review-post", "T-0006", "--round", "2"]);
+  assert.equal(tampered.status, 2, "a hand-written body cannot pass as the report template");
+  assert.match(tampered.stderr, /does not match the required template/);
+  await writeFile(secondReportPath, secondReport, "utf8");
+
+  // The comment is a merge gate, not a convenience: a dry run reports the gap,
+  // and a live ship re-posts the fixed report before merging.
+  await writeFile(commentsPath, "{}\n", "utf8");
+  const missingComment = cli(["ship", "T-0006", "--json", "--dry-run"], { AZFLOW_SHIM_HEAD_SHA: sixthHead });
+  assert.equal(missingComment.status, 2, "a pull request without its review comment must not merge");
+  assert.ok(
+    (JSON.parse(missingComment.stdout) as { failed: string[] }).failed.includes("review-comment"),
+    "the review-comment gate blocks the merge",
+  );
+  const repairedShip = must(["ship", "T-0006"], { AZFLOW_SHIM_HEAD_SHA: sixthHead });
+  assert.match(repairedShip.stdout, /Merged and synced main/);
+  const repaired = await commentsFor(13);
+  assert.equal(repaired.length, 1, "ship reposted exactly one templated report");
+  assert.match(repaired[0]?.body ?? "", /Autonomous Code Review Report \(Round 2\)/);
 
   // The ledger keeps the implementer and one scored stage per commit.
   const finalState = JSON.parse(await readFile(stateFile(project), "utf8")) as {

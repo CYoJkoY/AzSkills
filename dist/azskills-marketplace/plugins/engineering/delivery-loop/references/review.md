@@ -144,6 +144,33 @@ round:
 - `azflow pr` refuses any unscored branch commit, and `azflow ship` re-counts the
   branch commits before merging, so a stale or partial review cannot ship.
 
+## Posting the report
+
+A scored round is published to the pull request, not left only on disk. A record
+that never reaches the pull request leaves the shared review invisible, so every
+round is posted as one comment in a fixed template and the merge gate reads it
+back.
+
+- `azflow review` posts the report automatically when the task has a pull request;
+  `--no-post` keeps a run offline. When the task has no pull request yet, `azflow
+  pr` posts the current recorded report as the first comment once it opens one.
+- `azflow review-post <task> [--round N] [--pr N]` re-publishes a recorded round
+  from disk. It re-reads the report and the score record, refuses a missing file or
+  a mismatched round, and validates the body again before posting, so it is the
+  idempotent retry after a transient post failure.
+- `validateReviewComment()` rejects any body that is not the exact template for the
+  recorded round, head, task, verdict, and score, so a hand-written or copied
+  comment cannot stand in for the report.
+- `azflow ship` re-reads the real comment list and requires a template-valid
+  comment for the recorded round (`review-comment`). On a live run it repairs a
+  missing comment by re-posting the recorded report and re-validating; on
+  `--dry-run` it reports the gap and exits 2 without posting.
+
+The model never writes a review comment by hand, and the guard denies `gh pr
+comment` and `gh pr review` inside a project. See
+[review-comment.md](review-comment.md) for the template anchors, the publishing
+commands, and the gate.
+
 ## Why this is stricter than the original AGENTS.md
 
 The original rules passed at `4.80`, weighted a P3 at `0.10` and a P4 at `0.05`,

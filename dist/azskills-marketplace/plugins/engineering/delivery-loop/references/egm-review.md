@@ -57,6 +57,13 @@ warns and never blocks.
    drop one because another reviewer missed it.
 6. Run `azflow review <task> --reviewer <fresh id> --input review.json --scan`
    with `engine: "egm"` and one attestation entry per reviewer.
+7. Leave the post to the command. When the task has a pull request, `azflow review`
+   publishes the reported round as the fixed-template pull-request comment by
+   itself; `--no-post` is the only way to stay offline. A post that fails keeps
+   the record and exits 1 with the retry command, and `azflow review-post <task>`
+   re-publishes the recorded round. Never write the comment by hand: the guard
+   denies `gh pr comment` and `gh pr review` inside a project, and the merge gate
+   reads the templated comment back.
 
 If the session has no sub-agent tool, stop and say so. Never simulate a
 fresh-context review, never write the attestation yourself, and never fall back
@@ -109,6 +116,13 @@ deterministic:
 
 The injected finding is a real P2: it is scored, carried into the next round, and
 counted by `ship`. It is not a warning the loop can ignore.
+
+The result reaches the pull request, not just the local file. After scoring, the
+report is published as the fixed-template review comment (see
+[review-comment.md](review-comment.md)), and `azflow ship` requires that comment
+at the recorded round, head, verdict, and score before it merges. A transient post
+failure is retried with `azflow review-post <task>`; a hand-written PR comment is
+refused by the guard, so the only comment is the attested report.
 
 ## Stage coverage
 

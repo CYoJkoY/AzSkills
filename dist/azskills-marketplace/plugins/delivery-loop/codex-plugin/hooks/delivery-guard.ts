@@ -282,6 +282,7 @@ async function main(): Promise<void> {
         allowManualMerge: env("AZFLOW_ALLOW_MANUAL_MERGE"),
         allowBaseWrites: env("AZFLOW_ALLOW_BASE_WRITES"),
         allowGhCreate: env("AZFLOW_ALLOW_GH_CREATE"),
+        allowManualPrComment: env("AZFLOW_ALLOW_MANUAL_PR_COMMENT"),
       },
     );
     if (reason !== null) {

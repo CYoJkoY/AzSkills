@@ -22,6 +22,7 @@ import {
   diffFiles,
   ghAvailable,
   git,
+  gitPush,
   hasStagedChanges,
   issueClose,
   issueCreate,
@@ -29,6 +30,7 @@ import {
   issueViewState,
   prChecks,
   prComment,
+  prComments,
   prCreate,
   prEdit,
   prMerge,
@@ -56,7 +58,8 @@ import type { PullRequestCommit, PullRequestDimension } from "./message.ts";
 import { mergeFindings, scanDiff } from "./scan.ts";
 import { asciiIssues } from "./message.ts";
 import type { Finding, ReviewInput, ScoreResult } from "./score.ts";
-import { DEFAULT_POLICY, renderReport, scoreReview } from "./score.ts";
+import type { ReviewCommentExpectation } from "./score.ts";
+import { DEFAULT_POLICY, renderReport, scoreReview, validateReviewComment } from "./score.ts";
 import {
   DEFAULT_CONFIG,
   findTask,
@@ -623,7 +626,66 @@ async function commit(args: Args): Promise<void> {
     return;
   }
   commitWithMessage(task.worktree, message);
-  printJson({ task: id, branch: task.branch, header: message.split("\n")[0], checks: ran });
+  const headSha = revParse(task.worktree, "HEAD");
+  const autoPush = !args.flags.has("no-push") &&
+    !["1", "true"].includes((process.env.AZFLOW_NO_AUTO_PUSH ?? "").toLowerCase());
+  let pushed = true;
+  let pushError: string | null = null;
+  if (autoPush) {
+    try {
+      gitPush(task.worktree, state.config.remote, task.branch, true);
+    } catch (error) {
+      pushed = false;
+      pushError = error instanceof Error ? error.message : String(error);
+    }
+  }
+  printJson({
+    task: id,
+    branch: task.branch,
+    header: message.split("\n")[0],
+    checks: ran,
+    headSha,
+    pushed,
+    pushError,
+  });
+  if (!pushed) {
+    process.stderr.write(
+      "the commit was recorded, but pushing " + task.branch + " failed; retry: azflow push " + id + "\n",
+    );
+    process.exitCode = 1;
+  }
+}
+
+/**
+ * Pushes the task branch after a commit whose upload failed, or explicitly when
+ * automatic pushes were disabled. It never moves a commit, so a rejected push
+ * only needs to be retried.
+ */
+async function push(args: Args): Promise<void> {
+  const project = projectRoot(args);
+  const id = args.positionals[0];
+  if (id === undefined) throw new Error("push requires a task id");
+  const state = await requireState(project);
+  const task = findTask(state, id);
+  if (task.worktree === null || task.branch === null) {
+    throw new Error(id + " has no claimed worktree; run 'azflow claim " + id + "' first");
+  }
+  if (currentBranch(task.worktree) !== task.branch) {
+    throw new Error("worktree HEAD is not on " + task.branch);
+  }
+  const headSha = revParse(task.worktree, "HEAD");
+  try {
+    gitPush(task.worktree, state.config.remote, task.branch, true);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(
+      "pushing " + task.branch + " to " + state.config.remote + " failed: " + message +
+        "\nthe local commit is kept; retry: azflow push " + id + "\n",
+    );
+    process.exitCode = 1;
+    return;
+  }
+  printJson({ task: id, branch: task.branch, remote: state.config.remote, headSha, pushed: true });
 }
 
 async function issue(args: Args): Promise<void> {
@@ -766,13 +828,23 @@ async function openPullRequest(args: Args): Promise<void> {
     process.exitCode = exitCode;
     return;
   }
-  printJson({ task: id, pr: created.number, draft: created.draft, url: created.url });
+  if (created.commentError !== null) process.exitCode = 1;
+  printJson({
+    task: id,
+    pr: created.number,
+    draft: created.draft,
+    url: created.url,
+    commentPosted: created.commentPosted,
+    commentError: created.commentError,
+  });
 }
 
 interface CreatedPullRequest {
   readonly number: number;
   readonly draft: boolean;
   readonly url: string;
+  readonly commentPosted: boolean;
+  readonly commentError: string | null;
 }
 
 /**
@@ -782,6 +854,30 @@ interface CreatedPullRequest {
  */
 function prepFailure(message: string, exitCode: number): Error {
   return Object.assign(new Error(message), { exitCode });
+}
+
+/**
+ * Publishes a review report only after the deterministic template and recorded
+ * round metadata have passed validation. The returned string is the reason a
+ * post failed; `null` means the comment is on the pull request.
+ */
+async function publishReviewReport(
+  project: string,
+  pr: number,
+  body: string,
+  expect: ReviewCommentExpectation,
+): Promise<string | null> {
+  const problems = validateReviewComment(body, expect);
+  if (problems.length > 0) {
+    return "review report does not match the required template: " + problems.join("; ");
+  }
+  try {
+    prComment(project, pr, body.trimEnd());
+    return null;
+  } catch (error) {
+    return "posting the review comment failed: " +
+      (error instanceof Error ? error.message : String(error));
+  }
 }
 
 /**
@@ -798,14 +894,28 @@ async function createPullRequest(
 ): Promise<CreatedPullRequest> {
   const id = task.id;
   if (task.branch === null) throw new Error(id + " has no branch; run 'azflow claim " + id + "' first");
+  const worktree = task.worktree ?? project;
+  try {
+    gitPush(worktree, state.config.remote, task.branch, true);
+  } catch (error) {
+    throw prepFailure(
+      "could not push " + task.branch + " to " + state.config.remote + ": " +
+        (error instanceof Error ? error.message : String(error)) +
+        "\nthe local commits are kept; retry 'azflow pr " + id + "' or 'git push -u " +
+        state.config.remote + " " + task.branch + "'\n",
+      1,
+    );
+  }
   if (!remoteBranchExists(project, state.config.remote, task.branch)) {
-    throw new Error("push " + task.branch + " to " + state.config.remote + " before opening a pull request");
+    throw prepFailure(
+      "pushed " + task.branch + ", but " + state.config.remote + "/" + task.branch + " is still missing",
+      1,
+    );
   }
   // A repair run can reach a branch without ever having had an issue; opening
   // one here keeps the pull request linked instead of failing at the last gate.
   const issue = await ensureIssue(project, id, args);
   if (issue === null) throw new Error(id + " has no issue; a pull request must close one unless --issue supplies it");
-  const worktree = task.worktree ?? project;
   const commits = branchCommits(worktree, state.config.base, task.branch);
   if (commits.length === 0) {
     throw new Error(id + " has no commits ahead of " + state.config.base + "; commit the stage first");
@@ -866,16 +976,20 @@ async function createPullRequest(
     id + "-r" + String(task.review?.round ?? 0) + ".md",
   );
   const report = await readFile(reportPath, "utf8").catch(() => null);
-  if (report !== null) {
-    // The pull request already exists at this point, so a comment failure must
-    // not make the command look like the pull request was never opened.
-    try {
-      prComment(project, number, report);
-    } catch {
-      print("warning: pull request #" + String(number) + " opened, but the review report comment failed");
-    }
+  const expect = {
+    round: task.review?.round ?? 0,
+    headSha: task.review?.headSha ?? "",
+    taskId: id,
+    verdict: task.review?.verdict,
+    score: task.review?.score,
+  };
+  const commentError = report === null
+    ? "the recorded review report is missing: " + reportPath
+    : await publishReviewReport(project, number, report, expect);
+  if (commentError !== null) {
+    process.stderr.write("warning: pull request #" + String(number) + " opened, but " + commentError + "\n");
   }
-  return { number, draft, url };
+  return { number, draft, url, commentPosted: commentError === null, commentError };
 }
 
 async function ready(args: Args): Promise<void> {
@@ -1301,13 +1415,119 @@ async function review(args: Args): Promise<void> {
   // The window authorised exactly this head; once scored, a later round must
   // open its own window at the new head instead of reusing this one.
   await rm(reviewWindowPath(project), { force: true }).catch(() => undefined);
-  if (args.flags.has("post") && task.pr !== null) prComment(project, task.pr, report);
+  const postPr = task.pr;
+  const shouldPost = postPr !== null && !args.flags.has("no-post");
+  let posted = false;
+  let commentError: string | null = null;
+  if (postPr !== null && shouldPost) {
+    commentError = await publishReviewReport(project, postPr, report, {
+      round: record.round,
+      headSha: record.headSha,
+      taskId: id,
+      verdict: record.verdict,
+      score: record.score,
+    });
+    posted = commentError === null;
+  }
   if (args.flags.has("json")) {
-    printJson({ result, record, report });
+    printJson({ result, record, report, posted, commentError });
   } else {
     print(report);
   }
   if (result.verdict !== "PASS") process.exitCode = 2;
+  else if (commentError !== null) process.exitCode = 1;
+  if (commentError !== null) {
+    process.stderr.write(
+      commentError + "\nretry: azflow review-post " + id + " --round " + String(record.round) + "\n",
+    );
+  }
+}
+
+/**
+ * Re-posts a recorded review report after a temporary post failure. The file
+ * and ledger are checked again, so a hand-written or altered body can never
+ * bypass the fixed template.
+ */
+async function reviewPost(args: Args): Promise<void> {
+  const project = projectRoot(args);
+  const id = args.positionals[0];
+  if (id === undefined) throw new Error("review-post requires a task id");
+  const state = await requireState(project);
+  const task = findTask(state, id);
+  const prValue = lastValue(args, "pr");
+  const pr = prValue === undefined ? task.pr : Number(prValue);
+  const roundValue = lastValue(args, "round");
+  const round = roundValue === undefined
+    ? task.review?.round ?? null
+    : Number(roundValue);
+  if (!Number.isInteger(round) || round === null || round <= 0) {
+    throw new Error("review-post requires --round <n> or a recorded review round");
+  }
+  if (pr === null || !Number.isInteger(pr) || pr <= 0) {
+    throw new Error("review-post requires --pr <n> or a recorded pull request");
+  }
+  const directory = reviewsRoot(project);
+  const reportPath = path.join(directory, id + "-r" + String(round) + ".md");
+  const recordPath = path.join(directory, id + "-r" + String(round) + ".json");
+  let report: string;
+  let record: unknown;
+  try {
+    [report, record] = await Promise.all([readFile(reportPath, "utf8"), readFile(recordPath, "utf8")]);
+  } catch (error) {
+    throw prepFailure(
+      "review report or record for round " + String(round) + " is missing: " +
+        (error instanceof Error ? error.message : String(error)) + "\n",
+      2,
+    );
+  }
+  let parsedRecord: {
+    input?: { headSha?: unknown };
+    result?: { round?: unknown; score?: unknown; verdict?: unknown };
+  };
+  try {
+    parsedRecord = JSON.parse(record as string) as typeof parsedRecord;
+  } catch (error) {
+    throw prepFailure(
+      "review record for round " + String(round) + " is not valid JSON: " +
+        (error instanceof Error ? error.message : String(error)) + "\n",
+      2,
+    );
+  }
+  const headSha = typeof parsedRecord.input?.headSha === "string" ? parsedRecord.input.headSha : "";
+  const recordRound = typeof parsedRecord.result?.round === "number" ? parsedRecord.result.round : null;
+  const score = typeof parsedRecord.result?.score === "number" ? parsedRecord.result.score : null;
+  const verdict = parsedRecord.result?.verdict === "PASS" || parsedRecord.result?.verdict === "FAIL"
+    ? parsedRecord.result.verdict
+    : null;
+  if (headSha === "" || recordRound !== round || score === null || verdict === null) {
+    throw prepFailure(
+      "review record for round " + String(round) + " is incomplete or does not match the requested round\n",
+      2,
+    );
+  }
+  const problems = validateReviewComment(report, {
+    round,
+    headSha,
+    taskId: id,
+    verdict,
+    score,
+  });
+  if (problems.length > 0) {
+    throw prepFailure("review report does not match the required template: " + problems.join("; ") + "\n", 2);
+  }
+  const commentError = await publishReviewReport(project, pr, report, {
+    round,
+    headSha,
+    taskId: id,
+    verdict,
+    score,
+  });
+  if (commentError !== null) {
+    process.stderr.write(commentError + "\nretry: azflow review-post " + id + " --round " + String(round) + "\n");
+    process.exitCode = 1;
+    return;
+  }
+  printJson({ task: id, pr, round, headSha, verdict, score, posted: true });
 }
 
 interface GateRow {
@@ -1469,6 +1689,45 @@ async function ship(args: Args): Promise<void> {
     pass: review !== null && review.headSha === pr.headRefOid,
     detail: review === null ? "no reviewed head" : review.headSha + " vs " + pr.headRefOid,
   });
+  // The review result must also be visible on the pull request itself, as the
+  // fixed report template. A local file is not proof the reviewers' verdict was
+  // ever published, so the gate reads the real comment list and repairs a post
+  // that a transient failure dropped instead of merging silently.
+  if (review === null) {
+    gates.push({ gate: "review-comment", pass: false, detail: "no review record" });
+  } else {
+    const expect: ReviewCommentExpectation = {
+      round: review.round,
+      headSha: review.headSha,
+      taskId: task.id,
+      verdict: review.verdict,
+      score: review.score,
+    };
+    const hasReport = (): boolean =>
+      prComments(project, prNumber).some((comment) => validateReviewComment(comment.body, expect).length === 0);
+    let present = hasReport();
+    let detail = present ? "templated review comment present" : "no templated review comment";
+    if (!present && !args.flags.has("dry-run")) {
+      const reportPath = path.join(reviewsRoot(project), task.id + "-r" + String(review.round) + ".md");
+      const report = await readFile(reportPath, "utf8").catch(() => null);
+      if (report === null) {
+        detail = "review report is missing: " + reportPath;
+        process.stderr.write(detail + "\n");
+      } else {
+        const commentError = await publishReviewReport(project, prNumber, report, expect);
+        if (commentError !== null) {
+          detail = commentError;
+          process.stderr.write("review comment repair failed: " + commentError + "\n");
+        } else {
+          present = hasReport();
+          detail = present ? "templated review comment repaired" : "posted the report, but it is not on the pull request";
+        }
+      }
+    } else if (!present) {
+      detail = "a live ship posts the templated report before merging";
+    }
+    gates.push({ gate: "review-comment", pass: present, detail });
+  }
   gates.push({
     gate: "ci-green",
     pass: checks.ok,
@@ -1859,14 +2118,16 @@ function help(): void {
       "  azflow init [--base main] [--max-parallel 3] [--autonomy full|manual] [--check \"<cmd>\"] [--project PATH]",
       "  azflow add \"<title>\" --touch <glob> [--touch <glob>] [--dep T-0001] [--issue N]",
       "  azflow issue <task> [--body <text>|--body-file <path>] [--label <name>]",
-      "  azflow commit <task> --type <type> --scope <scope> --subject \"<imperative>\" [--body <text>] [--breaking <text>] [--skip-check]",
+      "  azflow commit <task> --type <type> --scope <scope> --subject \"<imperative>\" [--body <text>] [--breaking <text>] [--skip-check] [--no-push]",
+      "  azflow push <task>",
       "  azflow pr <task> [--title <title>] [--ready] [--body <text>|--body-file <path>] [--allow-unverified]",
       "  azflow ready <task>",
       "  azflow plan [--json]",
       "  azflow claim <task> [--agent <name>]",
       "  azflow status [--json]",
       "  azflow review-open <task> [--reviewer <id>] [--ttl 20] [--max-agents 3] [--json]",
-      "  azflow review <task> --input <review.json> --reviewer <fresh id> [--engine egm|self] [--scan] [--post] [--pr N] [--json]",
+      "  azflow review <task> --input <review.json> --reviewer <fresh id> [--engine egm|self] [--scan] [--no-post] [--pr N] [--json]",
+      "  azflow review-post <task> [--round N] [--pr N] [--json]",
       "  azflow ship <task>|--pr <n> [--dry-run] [--verify-issue] [--json]",
       "  azflow recover [--force]",
       "  azflow goal start|status|next|note|next-step|pause|resume|extend|verify|complete|abandon",
@@ -1874,6 +2135,8 @@ function help(): void {
       "",
       "Ledger: .azflow/state.json (local, git-ignored). GitHub Issue/PR stays the shared record.",
       "Goal: .azflow/goal.json (local, git-ignored). Drives a long run; see `azflow goal`.",
+      "Uploads: commit and pr push the task branch automatically; a failed push keeps the commit and",
+      "         can be retried with `azflow push`. Reviews post the templated report to the PR.",
     ].join("\n"),
   );
 }
@@ -1885,12 +2148,14 @@ async function main(): Promise<void> {
     case "add": await add(args); break;
     case "issue": await issue(args); break;
     case "commit": await commit(args); break;
+    case "push": await push(args); break;
     case "pr": await openPullRequest(args); break;
     case "ready": await ready(args); break;
     case "plan": await plan(args); break;
     case "claim": await claim(args); break;
     case "status": await status(args); break;
     case "review": await review(args); break;
+    case "review-post": await reviewPost(args); break;
     case "review-open": await reviewOpen(args); break;
     case "ship": await ship(args); break;
     case "recover": await recover(args); break;
@@ -1905,5 +2170,6 @@ async function main(): Promise<void> {
 
 main().catch((error: unknown) => {
   process.stderr.write((error instanceof Error ? error.message : String(error)) + "\n");
-  process.exitCode = 1;
+  const exitCode = (error as { exitCode?: unknown }).exitCode;
+  process.exitCode = typeof exitCode === "number" ? exitCode : 1;
 });

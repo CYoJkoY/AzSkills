@@ -29,7 +29,7 @@ It also owns the long-horizon goal run: a durable objective in `.azflow/goal.jso
 - Inputs: repository root, base branch, task titles with touch scopes, a structured review record, and the project's own verification command.
 - Outputs: admission waves, isolated task worktrees, an English review report with a computed score, and a merged pull request with its issue closed.
 - Compose with: `az-clean-code` when the delivered code must also meet explicit-code rules; `taste` when judgment and collaboration guidance should stay active during the work.
-- Gates: never spawn a sub-agent outside an open review window, never commit or push on the base branch, never merge without every branch commit scored and a PASS review above 4.80 at the exact head SHA, never accept a self-review or an unattested review, never let the model choose its own score, and never let a repeated step run on. Installing the plugin delegates issue creation, branch push, pull request creation, review posting, merge, and cleanup, so the loop runs that path without asking for per-action approval.
+- Gates: never spawn a sub-agent outside an open review window, never commit or push on the base branch, never merge without every branch commit scored and a PASS review above 4.80 at the exact head SHA, never accept a self-review or an unattested review, never let the model choose its own score, never hand-write a pull request review comment, and never let a repeated step run on. Installing the plugin delegates issue creation, branch push, pull request creation, review posting, merge, and cleanup, so the loop runs that path without asking for per-action approval.
 
 ## Modes
 
@@ -91,7 +91,11 @@ the full command set.
    standard below, so a red tree never gets a message or a commit; `--skip-check`
    is the visible escape. It also refuses a new stage while the current head has no
    stage record, so each commit is scored before the next one lands.
-8. Run the project's own checks on the final head and push the branch. Run
+   A successful commit also pushes the branch to its remote immediately, so the
+   remote backup never waits for a reminder; a push failure keeps the commit and
+   exits 1, and `azflow push <task>` retries idempotently. `--no-push` and
+   `AZFLOW_NO_AUTO_PUSH=1` are the visible escapes.
+8. Run the project's own checks on the final head, then run
    `azflow review-open <task>` so the guard permits reviewers to spawn, launch the
    Elephant-Goldfish reviewers in fresh contexts against the diff, and attest them
    in `review.json`. Score with `azflow review <task> --reviewer <fresh id>
@@ -101,13 +105,17 @@ the full command set.
    advances by one and carries the previous recorded score. The reviewer must
    differ from the implementer, and a round needs a live window and an attested
    fresh-context reviewer, so a self-review or an unattested round is rejected.
+   When the task has a pull request, the scored round is published as the fixed-template
+   review comment automatically; a post failure keeps the record and exits 1 with the
+   retry command. `--no-post` stays offline and `azflow review-post <task>` re-publishes a round.
 9. Run `azflow pr <task>` to open a linked draft pull request with a derived title
    and body, then `azflow ready <task>` to take it out of draft. Push without asking
-   the user first; the branch push is part of opening the pull request. `pr` refuses
-   any unscored branch commit and refuses until a passing review round with a green
-   verification exists, because opening the pull request is the point where the
-   stage becomes visible; it posts the recorded report as the first comment.
-   `--allow-unverified` opens it earlier on purpose.
+   the user first; `pr` pushes first and confirms the remote branch exists before
+   opening. `pr` refuses any unscored branch commit and refuses until a passing
+   review round with a green verification exists, because opening the pull request
+   is the point where the stage becomes visible; it posts the recorded report as
+   the first comment and exits 1 on a post failure without dropping the pull
+   request. `--allow-unverified` opens it earlier on purpose.
 10. Run `azflow ship <task>` to refresh the pull request body from the recorded
    review, evaluate every gate at the current head SHA, and merge only on a full
    pass. It opens the pull request itself when the task has none, because `gh pr
@@ -184,6 +192,7 @@ never types a score into the report.
 - Review records are grounded in a claimed worktree and the current head. The real diff is scanned on every review, and rounds cannot be replayed, skipped, or omit the previous recorded score.
 - A mechanical scanner injects secrets, conflict markers, `any`, empty catches, framework imports, tab indentation, debug logs, loose equality, and TODO markers before scoring, so the model cannot hide them.
 - The posted report follows a fixed template: head SHA, verdict, score, the review engine, the previous-round closure table, the deduction breakdown, every P0-P4 row, and the four dimension summaries.
+- The report is published to the pull request as one comment in that fixed template, not only written to disk. `azflow review` posts it by default and `azflow pr` posts it as the first comment; the model never types a comment by hand, `validateReviewComment()` rejects anything off-template, and the guard denies `gh pr comment` and `gh pr review`.
 
 ## Review independence (EGM)
 
@@ -204,12 +213,13 @@ injects a P2 that caps and blocks the round; scoring deletes the window after.
 4. The review is EGM-attested and names a reviewer distinct from the implementer (`reviewer-independent`).
 5. The review score is strictly above 4.80; an exact 4.80 fails (`review-score`).
 6. The reviewed head SHA equals the pull request head SHA (`review-head`).
-7. Required CI checks are green with no failing or pending check (`ci-green`).
-8. The pull request is mergeable and not dirty (`mergeable`).
-9. The base branch is unchanged from the configured base (`base-unchanged`).
-10. No blocking label (`do-not-merge`, `blocked`, `wip`, `needs-decision`).
-11. The pull request is open and not a draft (`not-draft`, `pr-open`).
-12. Autonomy is `full` (`autonomy`); the loop merges on green evidence and does
+7. The pull request carries the fixed-template review comment for the recorded round, head, verdict, and score; on a live run a missing comment is re-posted and re-validated (`review-comment`).
+8. Required CI checks are green with no failing or pending check (`ci-green`).
+9. The pull request is mergeable and not dirty (`mergeable`).
+10. The base branch is unchanged from the configured base (`base-unchanged`).
+11. No blocking label (`do-not-merge`, `blocked`, `wip`, `needs-decision`).
+12. The pull request is open and not a draft (`not-draft`, `pr-open`).
+13. Autonomy is `full` (`autonomy`); the loop merges on green evidence and does
    not ask again. Set autonomy to `manual` for an explicit human ship.
 
 On a pass the loop merges with `mergeStrategy` (squash by default), records the
@@ -238,6 +248,8 @@ failure of the same weight as a broken gate.
 - Verify the shipped head SHA equals the reviewed head SHA, not an earlier commit.
 - Confirm the review report carries the closure table, the breakdown, every P0-P4
   row, the four dimensions, and real command output.
+- Confirm the report reached the pull request as the fixed-template comment, not
+  only a local file, and that no review comment was written by hand.
 - Confirm sub-agents spawned only inside an open review window, that the EGM
   review is attested, and that no commit touched the base branch.
 - Confirm the task branch was pushed without asking, and that the merge was
@@ -260,6 +272,7 @@ SHA is a failed delivery, not a shortcut.
 - [Concurrency model](../../delivery-loop/references/concurrency.md) - task DAG, leases, worktree isolation, and serialized merge.
 - [Review scoring](../../delivery-loop/references/review.md) - review input shape, formula, caps, and anti-lenience rules.
 - [EGM review](../../delivery-loop/references/egm-review.md) - the review window, fresh-context Goldfish reviewers, and the attestation format.
+- [Review comment](../../delivery-loop/references/review-comment.md) - the fixed-template pull request comment, its publishing commands, and the merge gate.
 - [Automation surface](../../delivery-loop/references/automation.md) - command surface, issue and pull request automation, and the guard.
 - [Goal run](../../delivery-loop/references/goal-run.md) - durable objective, stop-hook continuation, progress from real state, and stall and budget safety.
 - [Loop guard](../../delivery-loop/references/loop-guard.md) - dead-loop detection, the in-turn breaker, the restart budget, and prompt replay.
