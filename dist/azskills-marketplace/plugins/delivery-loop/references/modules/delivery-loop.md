@@ -57,13 +57,13 @@ set across a pass is no progress, so an idle run first gets one diagnostic pass 
 then stalls instead of spinning. A long run repairs itself within bounds: it
 retries a transient failure, extends a healthy budget, repairs a review that lands
 just under the bar, and completes a goal whose done-when criteria all verify
-against the repository. The guard auto-approves repeated reads, tests, and the
-goal's own `--allow` patterns, while `git push` and `gh pr merge` still go through
-the deny rules. `azflow goal` owns start, verify, status, note, next-step, complete,
-pause, resume, extend, and abandon, and any non-active status lets the turn end. A
-goal needs no ledger, and with one the next step is read from that ledger. See
-[goal-run.md](../../delivery-loop/references/goal-run.md) for the state file and
-the full command set.
+against the repository. The guard auto-approves repeated reads, tests, the goal's
+own `--allow` patterns, and a bounded task-branch push; base-branch, force, or tag
+pushes and `gh pr merge` still deny. `azflow goal` owns start, verify, status, note,
+next-step, complete, pause, resume, extend, and abandon; any non-active status ends
+the turn. A goal needs no ledger, and with one the next step is read from that
+ledger. See [goal-run.md](../../delivery-loop/references/goal-run.md) for the state
+file and the full command set.
 
 ## Workflow
 

@@ -21,8 +21,9 @@ export const READ_COMMANDS: readonly string[] = [
 
 /**
  * Bounded writes the delivery loop itself needs. Tests and checks are included
- * because a run cannot verify its own work without running them. Pushing and
- * merging stay out: those must go through the guard and `azflow ship`.
+ * because a run cannot verify its own work without running them. A task-branch
+ * push is approved in the dispatcher, where the guard can resolve the branch
+ * and refspec; a merge stays out because `azflow ship` owns it.
  */
 export const SAFE_WRITE_COMMANDS: readonly string[] = [
   "npm test", "npm run typecheck", "npm run validate", "npm run check",
