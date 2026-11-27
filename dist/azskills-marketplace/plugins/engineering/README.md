@@ -6,7 +6,7 @@
   <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: a catalog of independent Codex plugins" width="100%">
 </picture>
 
-Version **7.7.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
+Version **7.8.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
 
 Every plugin ships with its own manifest, skill entry, trigger description, reference closure, and icon. A single dispatcher entry only fires when a prompt names it or matches one broad description; independent plugins are matched directly, so capabilities stop being invisible to automatic routing. Plugins are grouped by the job a request asks for, and each group stays small enough to answer one kind of request, so grouping never hides a capability behind an unrelated name. `catalog/plugins.json` is the distribution registry and `skills.json` stays the canonical module and alias source.
 
@@ -19,7 +19,7 @@ Each workflow plugin bundles the related contracts that a single job needs, and 
 
 | Plugin | Workflows | Focus |
 | :--- | :--- | :--- |
-| `engineering` | architecture, az-clean-code, godot-3-dev, tool-integration, taste | Runtime, frontend stack, persistence, process boundaries, explicit code, code style consistency, Godot 3.x GDScript, AI client setup, and judgment and collaboration behavior. |
+| `engineering` | architecture, az-clean-code, godot-3-dev, tool-integration, taste | Runtime, frontend stack, persistence, process boundaries, explicit code, code style consistency, Godot 3.x GDScript and mod script layout, AI client setup, and judgment and collaboration behavior. |
 | `design` | design-system, ui-design, style-presets | Design systems, interface hierarchy, states, responsive behavior, motion, visual QA, and named presets. |
 | `visual-assets` | logo-generator, photo-abstract-editorial, scientific-figures | Logos, editorial image treatments, and verified scientific or medical figures. |
 | `visual-production` | frontend-slides, remotion-production | Responsive HTML reports, fixed-stage presentations, and deterministic video. |
@@ -110,7 +110,7 @@ turns scene JSON into editable SVG and checks the result.
 | Operations | [`delivery-loop`](references/modules/delivery-loop.md) | init, plan, work, review, ship, recover, goal | Unattended issue-to-merge delivery with touch-scope leases, worktree isolation, enforced commit and PR standards, independent Elephant-Goldfish review, gated auto-merge, and a long-horizon goal run. |
 | Operations | [`taste`](references/modules/taste.md) | main, subagent, independent | Judgment, collaboration, and execution behavior automatically supplied by Codex hooks. |
 | Architecture | [`az-clean-code`](references/modules/az-clean-code.md) | write, review, refactor, style | Explicit code, flat control flow, reuse, code style consistency, and business data externalized before coding. |
-| Architecture | [`godot-3-dev`](references/modules/godot-3-dev.md) | script, review, port | Godot 3.x GDScript, virtual-call safety, the 3.6 API surface, and down-porting. |
+| Architecture | [`godot-3-dev`](references/modules/godot-3-dev.md) | script, review, port | Godot 3.x GDScript, mod script layout, virtual-call safety, the 3.6 API surface, and down-porting. |
 | Interface | [`style-presets`](references/modules/style-presets.md) | catalog, apply, loaders, audit | Named visual presets, keyword triggers, preset token packs, and loading indicators. |
 | Visual | [`scientific-figures`](references/modules/scientific-figures.md) | redraw, author, verify | Medical and scientific schematics, faithful redraws, editable SVG, and deterministic figure verification. |
 <!-- SKILL-CATALOG:END -->

@@ -8,7 +8,8 @@
  *
  * Usage:
  *   node check-godot-3x.ts --root <project> [--api <api-3.6.json>]
- *     [--overlay <dir>] [--files a.gd,b.tscn] [--json] [--strict] [--self-test]
+ *     [--overlay <dir>] [--files a.gd,b.tscn] [--mod <name>] [--json]
+ *     [--strict] [--self-test]
  *
  * Every Godot file under --root is read so inheritance chains, signals, and
  * `res://` targets resolve project-wide; --files only selects which files may
@@ -97,6 +98,7 @@ interface RunCheckOptions {
   overlay: string | null;
   apiPath: string;
   files: string[];
+  mod: ModLayout | null;
   strict: boolean;
 }
 
@@ -113,6 +115,15 @@ interface MemberCallRule {
   skipWhenProjectMethod?: string;
 }
 
+interface ModLayout {
+  name: string;
+  extensionPrefix: string;
+  methodPrefix: string;
+  signalPrefix: string;
+}
+
+type ModBlock = 'native' | 'extension' | 'method' | 'signal';
+
 interface MaskedMatch {
   index: number;
   groups: RegExpExecArray;
@@ -123,6 +134,7 @@ interface Fixture {
   files: Record<string, string>;
   overlay?: Record<string, string>;
   files_filter?: string[];
+  mod?: string;
   expect: 'pass' | 'fail';
   expectCodes?: string[];
   absentFromReport?: string[];
@@ -1097,6 +1109,142 @@ function collectDeclarations(mask: string): { classes: Set<string>; methods: Set
   return { classes, methods };
 }
 
+const modBlockRank: Record<ModBlock, number> = {
+  native: 0,
+  extension: 1,
+  method: 2,
+  signal: 3,
+};
+
+// `MoreStatsContainer` -> [`more`, `stats`, `container`]; `HD_Mod` -> [`hd`, `mod`].
+function modNameWords(name: string): string[] {
+  return name
+    .replace(/[^A-Za-z0-9]+/g, ' ')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.toLowerCase());
+}
+
+// The default prefixes keep the first word whole and reduce the rest to their
+// initials, so `MoreStatsContainer` becomes `moresc_*` and `msc_*`.
+function deriveModLayout(name: string, extension?: string, method?: string): ModLayout | null {
+  const words = modNameWords(name);
+  const first = words[0];
+  if (first == null) return null;
+  const derivedMethod = words.map((word) => word.charAt(0)).join('');
+  const derivedExtension = first + words.slice(1).map((word) => word.charAt(0)).join('');
+  const methodPrefix = (method ?? derivedMethod).toLowerCase();
+  const extensionPrefix = (extension ?? derivedExtension).toLowerCase();
+  if (!/^[a-z][a-z0-9]*$/.test(methodPrefix)) return null;
+  if (!/^[a-z][a-z0-9]*$/.test(extensionPrefix)) return null;
+  return { name, extensionPrefix, methodPrefix, signalPrefix: methodPrefix + '_on_' };
+}
+
+// The marker is a comment, so the mask must be blank on that line; the same
+// text inside a string is data, not a directive.
+function findModMarker(text: string, mask: string): { offset: number; tokens: string[] } | null {
+  for (const match of text.matchAll(/^[ \t]*#[ \t]*azskills-mod[ \t]*:[ \t]*([^\n]*)$/gm)) {
+    const end = match.index + match[0].length;
+    if (mask.slice(match.index, end).trim() !== '') continue;
+    return {
+      offset: match.index,
+      tokens: (match[1] ?? '').trim().split(/[ \t]+/).filter(Boolean),
+    };
+  }
+  return null;
+}
+
+function classifyModFunction(name: string, layout: ModLayout): ModBlock {
+  // `msc_on_*` also starts with `msc_`, so the signal block is tested first.
+  if (name.startsWith(layout.signalPrefix)) return 'signal';
+  if (name.startsWith(layout.extensionPrefix + '_')) return 'extension';
+  if (name.startsWith(layout.methodPrefix + '_')) return 'method';
+  return 'native';
+}
+
+function checkModLayout(
+  report: Report,
+  file: string,
+  text: string,
+  mask: string,
+  starts: readonly number[],
+  fallback: ModLayout | null,
+): void {
+  const marker = findModMarker(text, mask);
+  const layout = marker
+    ? marker.tokens.length <= 3
+      ? deriveModLayout(marker.tokens[0] ?? '', marker.tokens[1], marker.tokens[2])
+      : null
+    : fallback;
+  if (marker && !layout) {
+    addIssue(
+      report,
+      file,
+      starts,
+      marker.offset,
+      'MOD_MARKER_INVALID',
+      '`# azskills-mod:` needs a mod name and at most an extension and a method prefix',
+      'Write `# azskills-mod: MoreStatsContainer` or `# azskills-mod: MoreStatsContainer moresc msc`.',
+    );
+    return;
+  }
+  if (!layout) return;
+  let highest = 0;
+  let highestBlock: ModBlock = 'native';
+  for (const match of mask.matchAll(/^(?:static[ \t]+)?func[ \t]+([A-Za-z_]\w*)/gm)) {
+    const name = match[1];
+    if (!name) continue;
+    const block = classifyModFunction(name, layout);
+    const rank = modBlockRank[block];
+    if (rank < highest) {
+      addIssue(
+        report,
+        file,
+        starts,
+        match.index,
+        'MOD_FUNCTION_ORDER',
+        block + ' function ' + name + '() appears after ' + highestBlock + ' functions',
+        'Order mod functions as native, then ' +
+          layout.extensionPrefix +
+          '_*, then ' +
+          layout.methodPrefix +
+          '_*, then ' +
+          layout.signalPrefix +
+          '*.',
+      );
+      continue;
+    }
+    if (rank > highest) {
+      highest = rank;
+      highestBlock = block;
+    }
+    if (block === 'native') continue;
+    const prefix =
+      block === 'extension'
+        ? layout.extensionPrefix + '_'
+        : block === 'method'
+          ? layout.methodPrefix + '_'
+          : layout.signalPrefix;
+    const suffix = name.slice(prefix.length);
+    if (!/^[a-z0-9]+(?:_[a-z0-9]+)*$/.test(suffix)) {
+      addIssue(
+        report,
+        file,
+        starts,
+        match.index,
+        'MOD_FUNCTION_NAME',
+        name + '() does not follow ' + prefix + '<lowercase_words>',
+        'Mod functions are lowercase with `_` between words; rename it, for example, to ' +
+          prefix +
+          'handle_event.',
+      );
+    }
+  }
+}
+
 function checkIndentation(
   report: Report,
   file: string,
@@ -1378,6 +1526,7 @@ function checkGdScript(
   starts: readonly number[],
   api: ApiIndex,
   context: CheckContext,
+  mod: ModLayout | null,
 ): void {
   const declared = collectDeclarations(mask);
   const ancestry = context.index.ancestry(file);
@@ -1401,6 +1550,7 @@ function checkGdScript(
   checkCalls(report, file, mask, starts, api, declaredClasses, customMethods);
   checkIndentation(report, file, mask, starts);
   checkDeclarationPlacement(report, file, mask, starts);
+  checkModLayout(report, file, text, mask, starts, mod);
   checkScriptPaths(report, file, text, mask, starts, context.index);
   const baseClasses = [...ancestry.engineBases];
   for (const match of maskedMatches(text, mask, /^[ \t]*extends\b/gm, (slice) =>
@@ -1533,6 +1683,7 @@ async function runCheck({
   overlay,
   apiPath,
   files,
+  mod,
   strict,
 }: RunCheckOptions): Promise<RunCheckResult> {
   const api = await loadIndex(apiPath);
@@ -1584,7 +1735,7 @@ async function runCheck({
     } else if (gdExtensions.has(extension)) {
       const starts = lineStarts(text);
       const mask = maskCommentsAndStrings(text);
-      checkGdScript(report, file, text, mask, starts, api, context);
+      checkGdScript(report, file, text, mask, starts, api, context, mod);
       checkMoveAndSlide(report, file, text, mask, starts);
     } else if (sceneExtensions.has(extension)) {
       checkScene(report, file, text, api, context.projectClasses, context.index);
@@ -1723,6 +1874,17 @@ const fixtures: readonly Fixture[] = [
         'extends Node\n\n# extends "res://Gone.gd" and preload("res://Gone.gd")\nvar note = \'preload("res://Gone.gd")\'\n\nfunc _ready():\n\tprint(note)\n',
     },
     expect: 'pass',
+  },
+  {
+    // A leading comment must not shift the mask, or every later pattern that
+    // slices the original text at a mask index resolves one character early.
+    name: 'comment-shift-keeps-connect-check',
+    files: {
+      'Shifty.gd':
+        '# leading comment\nextends Node\n\nfunc _ready():\n\tconnect("timeout", self, "missing_handler")\n',
+    },
+    expect: 'fail',
+    expectCodes: ['UNKNOWN_SIGNAL_TARGET'],
   },
   {
     name: 'inner-class-duplicate-ok',
@@ -2015,6 +2177,74 @@ const fixtures: readonly Fixture[] = [
     expect: 'fail',
     expectCodes: ['MISSING_LOAD_PATH'],
   },
+  {
+    name: 'mod-layout-clean',
+    files: {
+      'Stats.gd':
+        '# azskills-mod: MoreStatsContainer\nextends Node\n\nsignal stats_changed\n\nfunc _ready():\n\tmoresc_ready()\n\nfunc get_stat(stat_name):\n\treturn moresc_stat_value(stat_name)\n\nfunc on_item_added(item):\n\tmoresc_item_added(item)\n\nfunc moresc_ready():\n\tmsc_prepare_state()\n\tmsc_connect_signals()\n\nfunc moresc_stat_value(stat_name):\n\treturn msc_compute_base(stat_name) + msc_bonus_for(stat_name)\n\nfunc moresc_item_added(item):\n\tmsc_recount(item)\n\nfunc msc_prepare_state():\n\tpass\n\nfunc msc_compute_base(stat_name):\n\treturn 0\n\nfunc msc_bonus_for(stat_name):\n\treturn 0\n\nfunc msc_recount(item):\n\tpass\n\nfunc msc_connect_signals():\n\tconnect("stats_changed", self, "msc_on_stats_changed")\n\nfunc msc_on_stats_changed(stats):\n\tmsc_recount(null)\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'mod-layout-native-base-name',
+    files: {
+      'Stats.gd':
+        '# azskills-mod: MoreStatsContainer\nextends "res://Base.gd"\n\nfunc UpdateHud():\n\tmoresc_ready()\n\nfunc moresc_ready():\n\tpass\n',
+      'Base.gd': 'extends Node\n\nfunc UpdateHud():\n\tpass\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'mod-layout-order',
+    files: {
+      'Stats.gd':
+        '# azskills-mod: MoreStatsContainer\nextends Node\n\nfunc moresc_ready():\n\tpass\n\nfunc _ready():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['MOD_FUNCTION_ORDER'],
+  },
+  {
+    name: 'mod-layout-name',
+    files: {
+      'Stats.gd':
+        '# azskills-mod: MoreStatsContainer\nextends Node\n\nfunc _ready():\n\tmoresc_CalcStat()\n\nfunc moresc_CalcStat():\n\tpass\n\nfunc msc__hidden():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['MOD_FUNCTION_NAME'],
+  },
+  {
+    name: 'mod-layout-marker-invalid',
+    files: {
+      'Stats.gd': '# azskills-mod:\nextends Node\n\nfunc _ready():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['MOD_MARKER_INVALID'],
+  },
+  {
+    name: 'mod-layout-flag',
+    files: {
+      'Stats.gd':
+        'extends Node\n\nfunc _ready():\n\tmoresc_ready()\n\nfunc moresc_ready():\n\tpass\n\nfunc msc_helper():\n\tpass\n',
+    },
+    mod: 'MoreStatsContainer',
+    expect: 'pass',
+  },
+  {
+    name: 'mod-layout-explicit-prefixes',
+    files: {
+      'Quality.gd':
+        '# azskills-mod: QualityOfLife qolx ql\nextends Node\n\nfunc _ready():\n\tqolx_ready()\n\nfunc qolx_ready():\n\tql_apply()\n\nfunc ql_apply():\n\tpass\n\nfunc ql_on_ready():\n\tql_apply()\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'unmarked-layout-skipped',
+    files: {
+      'Hud.gd':
+        'extends Node\n\nfunc moresc_ready():\n\tpass\n\nfunc _ready():\n\tpass\n',
+    },
+    expect: 'pass',
+  },
 ];
 
 async function selfTest(): Promise<void> {
@@ -2043,6 +2273,7 @@ async function selfTest(): Promise<void> {
         overlay,
         apiPath: defaultApi,
         files: fixture.files_filter ?? [],
+        mod: fixture.mod ? deriveModLayout(fixture.mod) : null,
         strict: false,
       });
       const passed = report.errors.length === 0;
@@ -2086,7 +2317,7 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
     console.log(
-      'Usage: node check-godot-3x.ts --root <project> [--api <api-3.6.json>] [--overlay <dir>] [--files a.gd,b.tscn] [--json] [--strict] [--self-test]',
+      'Usage: node check-godot-3x.ts --root <project> [--api <api-3.6.json>] [--overlay <dir>] [--files a.gd,b.tscn] [--mod <name>] [--json] [--strict] [--self-test]',
     );
     return;
   }
@@ -2111,7 +2342,19 @@ async function main(): Promise<void> {
         .map((item) => item.trim())
         .filter(Boolean)
     : [];
-  const { report, targets } = await runCheck({ root, overlay, apiPath, files, strict: args.includes('--strict') });
+  const modValue = valueOf(args, '--mod');
+  const mod = modValue ? deriveModLayout(modValue) : null;
+  if (modValue && !mod) {
+    throw new UsageError('--mod must be a mod name such as MoreStatsContainer: ' + modValue);
+  }
+  const { report, targets } = await runCheck({
+    root,
+    overlay,
+    apiPath,
+    files,
+    mod,
+    strict: args.includes('--strict'),
+  });
   if (args.includes('--json')) {
     process.stdout.write(
       JSON.stringify(

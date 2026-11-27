@@ -18,6 +18,9 @@ node "<skill-root>/godot-3-dev/scripts/check-godot-3x.ts" --root "<project>" --a
   so inheritance and path checks keep the whole project as context.
 - `--json` emits machine-readable errors, warnings, checked files, and limitations.
 - `--strict` promotes warnings to errors for review or release gates.
+- `--mod <name>` applies the mod script layout to every reported script that
+  does not carry an `# azskills-mod:` marker. The name must be a single
+  identifier such as `MoreStatsContainer`; a marker always wins over the flag.
 - `--self-test` runs the embedded clean and regression fixtures.
 
 Exit code `0` means no errors, `1` means findings blocked the check, and `2`
@@ -60,7 +63,17 @@ collections, `super`, `.emit()`, `instantiate()`, `queue_redraw()`, value
 Names that a project could legitimately reuse, such as `get_window()` or
 `is_editor_hint()`, are reported as warnings instead of errors.
 
-The checker ships with 38 fixtures that assert clean 3.x code passes and known
+Mod layout is opt-in. A script that starts with `# azskills-mod: <ModName>`, or
+every reported script when `--mod <ModName>` is set, must keep its functions in
+the four blocks from
+[mod script layout](mod-script-layout.md): native, extension, method, then
+signal. The checker derives `<ext>_`, `<method>_`, and `<method>_on_` from the
+name unless the marker states both prefixes, and reports `MOD_FUNCTION_ORDER`
+when a block appears out of order, `MOD_FUNCTION_NAME` when a prefixed function
+is not lowercase snake_case, and `MOD_MARKER_INVALID` when the marker cannot
+yield prefixes. Marker-free scripts are not checked for layout.
+
+The checker ships with 47 fixtures that assert clean 3.x code passes and known
 regressions fail:
 
 ```text

@@ -237,6 +237,7 @@ export function maskCommentsAndStrings(text: string): string {
     if (state === 'code') {
       if (char === '#') {
         state = 'comment';
+        output += ' ';
         continue;
       }
       if (triple === '"""' || triple === "'''") {

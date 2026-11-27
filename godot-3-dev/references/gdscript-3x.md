@@ -56,6 +56,15 @@ Return-type annotations (`-> void`) and static parameter types exist in 3.x.
 Default arguments and multiple return values via arrays are fine. There are no
 lambda or anonymous functions in 3.x; use a named method or a `FuncRef`.
 
+Function names you write are lowercase with `_` between words; an override
+keeps its base name even when the base name is not, because the base script
+calls it. A mod script that extends a base game script also keeps its functions
+in four blocks: native functions first, then the mod's extension functions,
+then method helpers, then signal handlers. Read
+[mod script layout](mod-script-layout.md) for the block order, the
+`<ext>_*`/`<method>_*`/`<method>_on_*` prefixes, and the marker the checker
+reads.
+
 ## Control flow
 
 ```gdscript

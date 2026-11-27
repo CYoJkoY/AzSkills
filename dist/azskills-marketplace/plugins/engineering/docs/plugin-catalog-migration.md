@@ -186,6 +186,29 @@ codex plugin install design@azskills
 The installer and MCP still accept a module id such as `ui-design`, and resolve
 it to the owning plugin, so scripts that name an old module keep working.
 
+## 7.8.0: mod script layout
+
+`godot-3-dev` now mandates a four-block function layout for mod scripts, the
+scripts that extend a base game script instead of standing alone. In order: the
+native functions copied from the base script in base order, the extension
+functions that the native functions call, the method helpers, and the signal
+handlers wired to `connect()`. No function from a later block sits above an
+earlier block, and every function the mod adds is lowercase snake_case.
+
+Names follow the mod name. `MoreStatsContainer` yields `moresc_*` for extension
+functions (the first word in full, then the first letter of each later word),
+`msc_*` for methods (every word's first letter), and `msc_on_*` for signal
+handlers. Native functions keep their base names and bodies, so a diff against
+the base stays readable.
+
+The layout is opt-in and machine-checked. A script marks itself with
+`# azskills-mod: MoreStatsContainer` before its first function, or the checker
+runs with `--mod <name>` across a project that has no markers; a marker always
+wins over the flag. The bundled checker reports `MOD_FUNCTION_ORDER`,
+`MOD_FUNCTION_NAME`, and `MOD_MARKER_INVALID`, and marker-free scripts keep
+their own conventions. The release is minor: no plugin ID, module id, or mode
+changed, so an upgrade only refreshes the checkout and the installed plugin.
+
 ## 5.0.0: task-level plugins
 4.0.0 made every module its own installable plugin. That fixed hidden
 capabilities, but split closely related work into many tiny entries, so a task

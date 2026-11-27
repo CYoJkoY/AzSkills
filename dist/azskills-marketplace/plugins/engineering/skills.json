@@ -185,11 +185,11 @@
       }
     }
   ],
-  "version": "7.7.0",
+  "version": "7.8.0",
   "entry": {
     "id": "azskills",
     "path": "SKILL.md",
-    "version": "7.7.0"
+    "version": "7.8.0"
   },
   "modules": [
     {
@@ -438,7 +438,7 @@
         "review",
         "port"
       ],
-      "role": "Godot 3.x GDScript, virtual-call safety, 3.6 API surface, and down-porting.",
+      "role": "Godot 3.x GDScript, mod script layout, virtual-call safety, 3.6 API surface, and down-porting.",
       "composes": [
         "az-clean-code",
         "architecture"
