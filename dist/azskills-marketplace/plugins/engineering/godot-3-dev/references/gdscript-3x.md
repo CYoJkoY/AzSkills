@@ -58,12 +58,12 @@ lambda or anonymous functions in 3.x; use a named method or a `FuncRef`.
 
 Function names you write are lowercase with `_` between words; an override
 keeps its base name even when the base name is not, because the base script
-calls it. A mod script that extends a base game script also keeps its functions
-in four blocks: native functions first, then the mod's extension functions,
-then method helpers, then signal handlers. Read
-[mod script layout](mod-script-layout.md) for the block order, the
-`<ext>_*`/`<method>_*`/`<method>_on_*` prefixes, and the marker the checker
-reads.
+calls it. Every script also keeps its functions in four sections under visible
+divider lines: Extensions, Custom, Methods, then Signals. Read
+[script layout](script-layout.md) for the four sections, the exact divider
+format, the `<ext>_*`/`<method>_*`/`<method>_on_*` prefixes, and the markers the
+checker reads: `# azskills-mod: <ModName>` for a mod script, `# azskills-layout`
+for a standalone script.
 
 ## Control flow
 

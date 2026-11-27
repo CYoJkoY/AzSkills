@@ -21,6 +21,9 @@ node "<skill-root>/godot-3-dev/scripts/check-godot-3x.ts" --root "<project>" --a
 - `--mod <name>` applies the mod script layout to every reported script that
   does not carry an `# azskills-mod:` marker. The name must be a single
   identifier such as `MoreStatsContainer`; a marker always wins over the flag.
+- `--layout` applies the standalone script layout to every reported script that
+  carries neither marker. A script marked `# azskills-layout` is gated without
+  the flag, and a mod marker still wins over both.
 - `--self-test` runs the embedded clean and regression fixtures.
 
 Exit code `0` means no errors, `1` means findings blocked the check, and `2`
@@ -65,15 +68,47 @@ Names that a project could legitimately reuse, such as `get_window()` or
 
 Mod layout is opt-in. A script that starts with `# azskills-mod: <ModName>`, or
 every reported script when `--mod <ModName>` is set, must keep its functions in
-the four blocks from
-[mod script layout](mod-script-layout.md): native, extension, method, then
-signal. The checker derives `<ext>_`, `<method>_`, and `<method>_on_` from the
-name unless the marker states both prefixes, and reports `MOD_FUNCTION_ORDER`
-when a block appears out of order, `MOD_FUNCTION_NAME` when a prefixed function
-is not lowercase snake_case, and `MOD_MARKER_INVALID` when the marker cannot
-yield prefixes. Marker-free scripts are not checked for layout.
+the four sections from [script layout](script-layout.md): Extensions, Custom,
+Methods, then Signals, each introduced by its divider line. The divider is
+`#`, 42 U+2550 bars, the label, 42 bars, `#`; a function must sit under the
+divider of the section its name classifies to. The checker derives `<ext>_`,
+`<method>_`, and `<method>_on_` from the name unless the marker states both
+prefixes, and reports:
 
-The checker ships with 47 fixtures that assert clean 3.x code passes and known
+- `MOD_SECTION_MISSING` when a marked script has functions but no canonical
+  divider.
+- `MOD_SECTION_PLACEMENT` when a function sits under the wrong divider or
+  before the first one.
+- `MOD_SECTION_ORDER` when the canonical dividers are out of order or repeated.
+- `MOD_SECTION_FORMAT` when a divider-like comment is not the canonical line,
+  for example 41 bars or a lowercase label.
+- `MOD_SECTION_EXTRA` (warning) when a non-canonical divider follows a
+  canonical section, or when a banner other than `Variables`/`Setters` sits
+  above Extensions.
+- `MOD_FUNCTION_ORDER` when a section's function appears after a later
+  section's function, `MOD_FUNCTION_NAME` when a prefixed function is not
+  lowercase snake_case, and `MOD_MARKER_INVALID` when the marker cannot yield
+  prefixes.
+
+`Variables` and `Setters` dividers may sit above Extensions; they are
+declaration scopes, so a setter body under `Setters` is not placement-checked
+and does not advance the section order. Any other banner above Extensions is
+reported, and a function under it has no section. The layout check reads
+top-level functions and column-0 dividers; an inner class keeps its own indented
+dividers and is not checked. Marker-free scripts are not checked for layout
+unless `--layout` or `--mod` is passed.
+
+A standalone script opts in with `# azskills-layout`, or through `--layout`. It
+has no prefixes, so the checker decides only the two ends: an engine-dispatched
+callback or a function an ancestor script declares is Extensions, and a
+`connect("sig", self, "method")` target or a `_on_<words>` name is Signals. Any
+other function may sit in Custom or Methods, because only the author knows who
+calls it. It reports `SCRIPT_SECTION_MISSING`, `SCRIPT_FUNCTION_UNSECTIONED`,
+`SCRIPT_SECTION_PLACEMENT`, `SCRIPT_SECTION_ORDER`, `SCRIPT_SECTION_FORMAT`, and
+`SCRIPT_SECTION_EXTRA` for the same structural defects the `MOD_SECTION_*` codes
+name. A mod marker suppresses this gate for that file.
+
+The checker ships with 65 fixtures that assert clean 3.x code passes and known
 regressions fail:
 
 ```text
