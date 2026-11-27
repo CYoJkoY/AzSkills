@@ -3,6 +3,7 @@ import {
   bashCommand,
   denyReasonForBash,
   denyReasonForTool,
+  isBoundedPush,
   isShellTool,
   normalizeTool,
   reviewWindowOpen,
@@ -19,6 +20,23 @@ assert.equal(denyReasonForBash("git commit -m 'x'", ctx), null);
 assert.ok(denyReasonForBash("git push origin main", ctx) !== null);
 assert.ok(denyReasonForBash("git push origin HEAD:main", ctx) !== null);
 assert.ok(denyReasonForBash("git push origin feature/x", ctx) === null);
+
+// The sanctioned task-branch push is auto-approved; anything that rewrites,
+// deletes, widens, or targets the base branch still asks the user.
+assert.equal(isBoundedPush("git push -u origin issue/t-0001", ctx), true);
+assert.equal(isBoundedPush("git push", { branch: "issue/t-0001", base: "main" }), true);
+assert.equal(isBoundedPush("git push", { branch: "main", base: "main" }), false);
+assert.equal(isBoundedPush("git push origin main", ctx), false);
+assert.equal(isBoundedPush("git push origin HEAD:main", ctx), false);
+assert.equal(isBoundedPush("git push --force origin issue/t-0001", ctx), false);
+assert.equal(isBoundedPush("git push -f origin issue/t-0001", ctx), false);
+assert.equal(isBoundedPush("git push --force-with-lease origin issue/t-0001", ctx), false);
+assert.equal(isBoundedPush("git push --tags origin", ctx), false);
+assert.equal(isBoundedPush("git push --all origin", ctx), false);
+assert.equal(isBoundedPush("git push --mirror origin", ctx), false);
+assert.equal(isBoundedPush("git push origin --delete issue/t-0001", ctx), false);
+assert.equal(isBoundedPush("git push origin refs/tags/v1.2.3", ctx), false);
+assert.equal(isBoundedPush("git log --oneline", ctx), false);
 
 // A redirect into a worktree must not be judged by the caller's own branch.
 const branches = new Map([

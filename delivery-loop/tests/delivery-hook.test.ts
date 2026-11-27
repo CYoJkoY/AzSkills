@@ -264,9 +264,10 @@ try {
     await rm(goalProject, { recursive: true, force: true });
   }
 
-  // The guard auto-approves the repeated reads and tests a long run performs, so
-  // those stop asking the user, while a push or a merge still goes through the
-  // deny rules and is never let through by the allowlist.
+  // The guard auto-approves the repeated reads, tests, and bounded task-branch
+  // pushes a long run performs, so those stop asking the user, while a base
+  // push, a force push, a tag push, or a merge still goes through the deny
+  // rules and is never let through by the allowlist.
   const allowProject = await mkdtemp(path.join(tmpdir(), "azskills-goal-allow-"));
   try {
     await mkdir(path.join(allowProject, ".azflow"), { recursive: true });
@@ -288,11 +289,21 @@ try {
       const parsed = JSON.parse(output) as { hookSpecificOutput?: { permissionDecision?: string } };
       return parsed.hookSpecificOutput ?? {};
     };
-    for (const approved of ["git log --oneline -5", "npm run typecheck", "npm run custom"]) {
+    for (const approved of [
+      "git log --oneline -5",
+      "npm run typecheck",
+      "npm run custom",
+      "git push -u origin issue/t-0001",
+      "cd task-worktree && git push -u origin issue/t-0001",
+    ]) {
       assert.equal(guard(approved).permissionDecision, "allow", approved + " is auto-approved");
     }
     for (const refused of [
       "git push origin main",
+      "git push --force origin issue/t-0001",
+      "git push --tags origin",
+      "git push --all origin",
+      "git push origin --delete issue/t-0001",
       "git tag -d v1.2.3",
       "rg foo > out.txt",
       "find . -delete",

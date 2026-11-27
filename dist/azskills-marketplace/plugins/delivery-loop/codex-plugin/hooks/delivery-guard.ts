@@ -10,8 +10,16 @@ import { readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
-import { bashCommand, denyReasonForBash, denyReasonForTool, isShellTool, shellSegments, shellTokens } from "./guard.ts";
-import type { ReviewWindowCheck } from "./guard.ts";
+import {
+  bashCommand,
+  denyReasonForBash,
+  denyReasonForTool,
+  isBoundedPush,
+  isShellTool,
+  shellSegments,
+  shellTokens,
+} from "./guard.ts";
+import type { BashContext, ReviewWindowCheck } from "./guard.ts";
 import { loopBreakerReason, normalizeCall } from "./loop-guard.ts";
 import { fingerprint, pruneState, withState } from "./session-state.ts";
 import { isAllowedCommand, isSafeBuiltinCommand, readGoalAllowlist } from "./goal-allowlist.ts";
@@ -177,18 +185,42 @@ const MAX_IDENTICAL_CALLS = 4;
 const MAX_BREAKERS_PER_TURN = 2;
 
 /**
- * True when every simple shell segment is a built-in safe command or one of the
- * goal's own allowed patterns. A compound command is approved only when all of
- * its parts are, so `rg x > out && rm -rf /` cannot ride in on its first half.
- * `cd`/`pushd` are navigation and are approved with at most one argument.
+ * True when a segment invokes `git push`, including `git -C <dir> push`.
  */
-function commandAutoApproved(command: string, patterns: readonly string[]): boolean {
+function isPushInvocation(tokens: readonly string[]): boolean {
+  if (tokens[0] !== "git") return false;
+  let index = 1;
+  while (index < tokens.length) {
+    const token = tokens[index] ?? "";
+    if (token === "-C") {
+      index += 2;
+      continue;
+    }
+    if (token.startsWith("-")) {
+      index += 1;
+      continue;
+    }
+    return token === "push";
+  }
+  return false;
+}
+
+/**
+ * True when every simple shell segment is a built-in safe command, one of the
+ * goal's own allowed patterns, or the loop's bounded task-branch push. A
+ * compound command is approved only when all of its parts are, so
+ * `rg x > out && rm -rf /` cannot ride in on its first half. `cd`/`pushd` are
+ * navigation and are approved with at most one argument.
+ */
+function commandAutoApproved(command: string, patterns: readonly string[], context: BashContext): boolean {
   const segments = shellSegments(command).map((segment) => segment.trim()).filter((segment) => segment !== "");
   if (segments.length === 0) return false;
+  const push = isBoundedPush(command, context);
   return segments.every((segment) => {
     const tokens = shellTokens(segment);
     const head = tokens[0] ?? "";
     if (head === "cd" || head === "pushd" || head === "Set-Location") return tokens.length <= 2;
+    if (isPushInvocation(tokens)) return push;
     return isSafeBuiltinCommand(tokens) || isAllowedCommand(tokens, patterns);
   });
 }
@@ -275,16 +307,13 @@ async function main(): Promise<void> {
   if (isShellTool(toolName)) {
     const command = bashCommand(event.tool_input);
     const branch = currentBranch(cwd);
-    const reason = denyReasonForBash(
-      command,
-      { branch, base, branchFor: branchResolver(project, cwd, branch) },
-      {
-        allowManualMerge: env("AZFLOW_ALLOW_MANUAL_MERGE"),
-        allowBaseWrites: env("AZFLOW_ALLOW_BASE_WRITES"),
-        allowGhCreate: env("AZFLOW_ALLOW_GH_CREATE"),
-        allowManualPrComment: env("AZFLOW_ALLOW_MANUAL_PR_COMMENT"),
-      },
-    );
+    const context: BashContext = { branch, base, branchFor: branchResolver(project, cwd, branch) };
+    const reason = denyReasonForBash(command, context, {
+      allowManualMerge: env("AZFLOW_ALLOW_MANUAL_MERGE"),
+      allowBaseWrites: env("AZFLOW_ALLOW_BASE_WRITES"),
+      allowGhCreate: env("AZFLOW_ALLOW_GH_CREATE"),
+      allowManualPrComment: env("AZFLOW_ALLOW_MANUAL_PR_COMMENT"),
+    });
     if (reason !== null) {
       deny(reason);
       return;
@@ -296,8 +325,8 @@ async function main(): Promise<void> {
     }
     // Approval comes after the deny rules and the dead-loop breaker: the
     // allowlist removes prompts, it never lifts a guard decision.
-    if (!env("AZFLOW_NO_AUTO_APPROVE") && commandAutoApproved(command, await readGoal(project))) {
-      approve("AZFLOW goal run: read-only or bounded command auto-approved.");
+    if (!env("AZFLOW_NO_AUTO_APPROVE") && commandAutoApproved(command, await readGoal(project), context)) {
+      approve("AZFLOW delivery loop: bounded command auto-approved.");
       return;
     }
   }

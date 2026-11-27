@@ -217,6 +217,10 @@ interface PushPlan {
   readonly refspecs: string[];
   /** True when the push deletes remote branches. */
   readonly deleting: boolean;
+  /** True when the push rewrites history. */
+  readonly force: boolean;
+  /** True when the push moves more than the named branch. */
+  readonly broad: boolean;
 }
 
 /** Reads a push's refspecs so the guard can tell an explicit branch from `HEAD`. */
@@ -225,13 +229,57 @@ export function pushPlans(command: string): PushPlan[] {
   for (const call of gitCalls(command)) {
     if (call.command !== "push") continue;
     const values = positionalArgs(call.args);
+    const force = call.args.some(
+      (arg) => arg === "-f" || arg === "--force" || arg === "--force-with-lease" || arg.startsWith("--force-with-lease="),
+    );
+    const broad = call.args.some((arg) =>
+      ["--all", "--mirror", "--tags", "--follow-tags", "--prune"].includes(arg),
+    );
     plans.push({
       dir: call.dir,
       refspecs: values.slice(1),
       deleting: call.args.includes("-d") || call.args.includes("--delete"),
+      force,
+      broad,
     });
   }
   return plans;
+}
+
+/**
+ * Resolves each refspec to the remote branch it moves. `HEAD`, `@`, and an
+ * empty source all mean "the branch I am on", so an explicit-refspec push and
+ * a bare `git push` are judged the same way.
+ */
+function pushTargetRefs(plan: PushPlan, branch: string | null): (string | null)[] {
+  return plan.refspecs.map((refspec) => {
+    const [source = "", dest = ""] = refspec.split(":");
+    const target = (dest === "" ? source : dest).replace(/^\+/, "");
+    return target === "HEAD" || target === "@" || target === "" ? branch : target;
+  });
+}
+
+/**
+ * True when every push in the command is the loop's sanctioned remote
+ * submission: one branch, no force, no delete, no `--all`/`--mirror`/`--tags`,
+ * and no protected base ref. The deny rules run first, so this only decides
+ * whether the approval prompt can be skipped; it never overrides a denial.
+ */
+export function isBoundedPush(command: string, context: BashContext): boolean {
+  const plans = pushPlans(command);
+  if (plans.length === 0) return false;
+  const branchFor = context.branchFor ?? ((dir: string | null): string | null => (dir === null ? context.branch : null));
+  return plans.every((plan) => {
+    if (plan.deleting || plan.force || plan.broad || plan.refspecs.length > 1) return false;
+    const branch = branchFor(plan.dir);
+    const targets = pushTargetRefs(plan, branch);
+    if (targets.some((target) => target === null)) return false;
+    if (targets.some((target) => target !== null && (isBaseRef(target, context.base) || target.startsWith("refs/tags/") || target.startsWith("refs/pull/")))) {
+      return false;
+    }
+    if (plan.refspecs.length > 0) return true;
+    return branch !== null && branch !== context.base;
+  });
 }
 
 /**
@@ -272,12 +320,7 @@ export function denyReasonForBash(
 
   for (const plan of pushPlans(normalized)) {
     const branch = branchFor(plan.dir);
-    const targets = plan.refspecs.map((refspec) => {
-      const [source = "", dest = ""] = refspec.split(":");
-      const target = (dest === "" ? source : dest).replace(/^\+/, "");
-      // `HEAD`, `@`, and an empty source all mean "the branch I am on".
-      return target === "HEAD" || target === "@" || target === "" ? branch : target;
-    });
+    const targets = pushTargetRefs(plan, branch);
     const hitsBase = targets.some((target) => target !== null && isBaseRef(target, context.base));
     if (hitsBase) {
       return "Pushing to the protected base branch '" + context.base + "' is blocked. Commit on a task branch and open a PR. Set AZFLOW_ALLOW_BASE_WRITES=1 to override.";
