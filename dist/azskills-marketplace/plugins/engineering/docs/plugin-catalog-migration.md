@@ -154,7 +154,10 @@ contract inside it. The former `no-think-tags` answer-hygiene entry folded into
 `delivery-loop`; 7.6.4 removed its reasoning-tag correction hook, leaving the
 delivery guard, dead-loop restart, and goal continuation. 7.7.0 adds allowlist
 auto-approval for repeated reads and tests plus bounded self-repair, budget
-extension, and done-when verification for long goal runs.
+extension, and done-when verification for long goal runs. 7.9.0 restores the
+reasoning-tag guard as three cooperating layers - a standing prompt rule, a
+mid-turn transcript nudge, and one bounded Stop-time re-send - because a tag that
+reaches the screen is a real defect, not only extra tokens.
 
 | Plugin | Workflows |
 | :--- | :--- |
@@ -272,7 +275,10 @@ without visible text, which is normal inside goal mode, so the injected
 "continue" message interrupted goal runs instead of helping them. Answer
 hygiene moved to `delivery-loop` at that time; 7.6.4 dropped the reasoning-tag
 correction there too, because a blocked re-send could not recall text that had
-already streamed and the retry cost more than the leak.
+already streamed and the retry cost more than the leak. 7.9.0 brings the guard
+back with that lesson applied: it still cannot recall streamed text, so instead
+of pretending to, it states the rule before the first message, nudges once per
+leak mid-turn, and spends at most one re-send on the final reply.
 
 Removed module IDs such as `ui-motion`, `readme-craft`, and `steam-mod-page`
 remain only as routing aliases in `skills.json`. They resolve for the installer
@@ -349,10 +355,11 @@ dead-loop restart, and the goal-run continuation; since 7.7.0 the guard also
 auto-approves repeated reads, tests, a goal's own `--allow` patterns, and a
 bounded push of the goal's own task branch, while base-branch writes, force or
 tag pushes, and a manual merge still go through the deny rules; the Stop hook
-repairs a stalled run within bounds. The reasoning-tag Stop hook is
-retired as of 7.6.4; its reply classifier stays under
-`delivery-loop/no-think-tags/` only to detect a blank final reply, which now
-counts toward the dead-loop restart instead of triggering a re-send.
+repairs a stalled run within bounds. 7.6.4 retired the reasoning-tag Stop hook;
+7.9.0 restores it as one of three layers under `delivery-loop/no-think-tags/`: a
+`UserPromptSubmit` rule, a `PreToolUse` transcript nudge, and a Stop-time
+correction that also reports a blank final reply, which still counts toward the
+dead-loop restart instead of triggering a re-send.
 `design`, `visual-assets`, and `visual-production` carry the `UserPromptSubmit`
 visual-intent pointer to their router skill.
 

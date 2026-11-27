@@ -245,13 +245,13 @@ function bareOpeningTagAt(text: string, offset: number): OpenerHit | null {
 }
 
 /** Reads a full or truncated reasoning opener at an exact position. */
-function openerAt(text: string, index: number): OpenerHit | null {
+function openerAt(text: string, index: number, allowBare: boolean): OpenerHit | null {
   OPENER_AT.lastIndex = index;
   const match = OPENER_AT.exec(text);
   if (match !== null && isReasoningTagBody(match[1] ?? "")) {
     return { tag: match[0], length: match[0].length };
   }
-  return bareOpeningTagAt(text, index);
+  return allowBare ? bareOpeningTagAt(text, index) : null;
 }
 
 export interface StripResult {
@@ -392,7 +392,11 @@ export function leadingUnclosedTag(input: string): string | null {
  * mirrors the closer scan, so a tag quoted in an inline span or a fenced block
  * is not mistaken for a real block when the whole tag sits inside the code.
  */
-function nextOpeningTag(text: string, from: number): { readonly index: number; readonly length: number } | null {
+function nextOpeningTag(
+  text: string,
+  from: number,
+  allowBare = true,
+): { readonly index: number; readonly length: number } | null {
   let span = false;
   let fence = false;
   let midLine = false;
@@ -422,12 +426,33 @@ function nextOpeningTag(text: string, from: number): { readonly index: number; r
       continue;
     }
     if (char === "<") {
-      const hit = openerAt(text, index);
+      const hit = openerAt(text, index, allowBare);
       if (hit !== null) return { index, length: hit.length };
     }
     midLine = true;
   }
   return null;
+}
+
+/**
+ * Returns a reasoning opener that never closes, wherever it sits outside
+ * Markdown code, or null.
+ *
+ * A reply can leak a block that does not begin the message: a progress note
+ * says a sentence, then opens a reasoning tag and never closes it, so every
+ * following line reads as leaked reasoning. Only a complete `<...>` opener
+ * counts away from the start, because a bare tag name is often prose quoting a
+ * tag rather than a real block.
+ */
+export function unclosedTagAnywhere(input: string): string | null {
+  let from = 0;
+  for (;;) {
+    const open = nextOpeningTag(input, from, false);
+    if (open === null) return null;
+    const hit = findClosingTag(input.slice(open.index + open.length));
+    if (hit === null) return input.slice(open.index, open.index + open.length);
+    from = open.index + open.length + hit.index + hit.length;
+  }
 }
 
 /**

@@ -59,15 +59,25 @@ function stop(event: Omit<EventInput, "hook_event_name" | "session_id"> & { sess
 }
 
 try {
-  // The prompt hook only records the request for a later restart; it injects no
-  // rule into the turn and therefore prints nothing.
+  // The prompt hook records the request for a later restart and, before the
+  // first assistant message, injects the standing reasoning-leak rule once.
   const promptOut = run(promptHook, {
     hook_event_name: "UserPromptSubmit",
     session_id: "session-a",
     turn_id: "turn-a",
     prompt,
   });
-  assert.equal(promptOut, "", "the prompt hook records without injecting context");
+  const promptParsed = JSON.parse(promptOut) as {
+    continue?: boolean;
+    hookSpecificOutput?: { hookEventName?: string; additionalContext?: string };
+  };
+  assert.equal(promptParsed.continue, true, "the prompt hook continues the turn");
+  assert.equal(promptParsed.hookSpecificOutput?.hookEventName, "UserPromptSubmit");
+  assert.match(
+    promptParsed.hookSpecificOutput?.additionalContext ?? "",
+    /^OUTPUT HYGIENE:/,
+    "the standing reasoning-leak rule is injected before the first message",
+  );
 
   const repeated = "A long answer that is clearly not making progress. ".repeat(8);
   const first = stop({ turn_id: "turn-a", last_assistant_message: repeated });
@@ -338,7 +348,7 @@ try {
     await rm(allowProject, { recursive: true, force: true });
   }
 
-  console.log("delivery-hook.test.ts: prompt replay, dead-loop restart, blank loop restart, turn scoping, transcript detection, goal continuation, and allowlist auto-approval passed");
+  console.log("delivery-hook.test.ts: prompt recording, hygiene rule, dead-loop restart, blank loop restart, turn scoping, transcript detection, goal continuation, and allowlist auto-approval passed");
 } finally {
   await rm(state, { recursive: true, force: true });
 }
