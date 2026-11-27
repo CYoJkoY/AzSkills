@@ -1,7 +1,7 @@
 ---
 name: azskills
 description: AzSkills is a catalog of independent Codex plugins for engineering architecture and code style, design systems and UI motion, visual assets, slides and video, documents, resumes, client setup, and Godot 3.x. Install only the plugins a task needs; each one routes on its own.
-version: 7.7.0
+version: 7.8.0
 ---
 
 # AzSkills
@@ -19,7 +19,7 @@ so grouping never hides a capability behind an unrelated name.
 
 | Plugin | Workflows | Outcome |
 | :--- | :--- | :--- |
-| `engineering` | architecture, az-clean-code, godot-3-dev, tool-integration, taste | Runtime, frontend stack, persistence, process boundaries, explicit code, code style, Godot 3.x GDScript, AI client setup, and judgment and collaboration behavior. |
+| `engineering` | architecture, az-clean-code, godot-3-dev, tool-integration, taste | Runtime, frontend stack, persistence, process boundaries, explicit code, code style, Godot 3.x GDScript and mod script layout, AI client setup, and judgment and collaboration behavior. |
 | `design` | design-system, ui-design, style-presets | Design systems, interface hierarchy, states, responsive behavior, motion, visual QA, and named presets. |
 | `visual-assets` | logo-generator, photo-abstract-editorial, scientific-figures | Logos, editorial image treatments, and verified scientific or medical figures. |
 | `visual-production` | frontend-slides, remotion-production | Responsive HTML reports, fixed-stage presentations, and deterministic video. |
