@@ -12,9 +12,12 @@ import path from "node:path";
 import process from "node:process";
 import {
   bashCommand,
+  blankCommitReason,
+  catastrophicDeleteReason,
   denyReasonForBash,
   denyReasonForTool,
   isBoundedPush,
+  isDeleteCommand,
   isShellTool,
   shellSegments,
   shellTokens,
@@ -207,8 +210,8 @@ function isPushInvocation(tokens: readonly string[]): boolean {
 
 /**
  * True when every simple shell segment is a built-in safe command, one of the
- * goal's own allowed patterns, or the loop's bounded task-branch push. A
- * compound command is approved only when all of its parts are, so
+ * goal's own allowed patterns, a delete, or the loop's bounded task-branch
+ * push. A compound command is approved only when all of its parts are, so
  * `rg x > out && rm -rf /` cannot ride in on its first half. `cd`/`pushd` are
  * navigation and are approved with at most one argument.
  */
@@ -220,6 +223,11 @@ function commandAutoApproved(command: string, patterns: readonly string[], conte
     const tokens = shellTokens(segment);
     const head = tokens[0] ?? "";
     if (head === "cd" || head === "pushd" || head === "Set-Location") return tokens.length <= 2;
+    // Deleting is ordinary loop work -- a stale worktree, a scratch build
+    // directory, a merged branch -- so it is approved without a prompt. The
+    // one delete the loop refuses is a whole-volume target, and that check
+    // runs as a deny rule before this function is reached.
+    if (isDeleteCommand(segment)) return true;
     if (isPushInvocation(tokens)) return push;
     return isSafeBuiltinCommand(tokens) || isAllowedCommand(tokens, patterns);
   });
@@ -316,6 +324,19 @@ async function main(): Promise<void> {
     });
     if (reason !== null) {
       deny(reason);
+      return;
+    }
+    // A blank commit records nothing to review and nothing to resume from, and
+    // a whole-volume delete destroys work no task owns. Both are refused before
+    // the approval path, which would otherwise wave them through.
+    const blank = blankCommitReason(command);
+    if (blank !== null) {
+      deny(blank);
+      return;
+    }
+    const catastrophic = catastrophicDeleteReason(command);
+    if (catastrophic !== null) {
+      deny(catastrophic);
       return;
     }
     const loop = await breakerReason(event, toolName, command);

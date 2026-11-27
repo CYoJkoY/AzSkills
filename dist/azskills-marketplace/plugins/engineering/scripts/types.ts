@@ -40,6 +40,7 @@ export interface PluginCatalogEntry {
   capabilities: string[];
   extra: string[];
   hooks: string | null;
+    mcpServers?: string;
 }
 
 export interface PluginCatalog {

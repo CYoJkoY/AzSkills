@@ -6,7 +6,7 @@
   <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: a catalog of independent Codex plugins" width="100%">
 </picture>
 
-Version **7.10.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
+Version **7.11.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
 
 Every plugin ships with its own manifest, skill entry, trigger description, reference closure, and icon. A single dispatcher entry only fires when a prompt names it or matches one broad description; independent plugins are matched directly, so capabilities stop being invisible to automatic routing. Plugins are grouped by the job a request asks for, and each group stays small enough to answer one kind of request, so grouping never hides a capability behind an unrelated name. `catalog/plugins.json` is the distribution registry and `skills.json` stays the canonical module and alias source.
 
@@ -24,7 +24,7 @@ Each workflow plugin bundles the related contracts that a single job needs, and 
 | `visual-assets` | logo-generator, photo-abstract-editorial, scientific-figures | Logos, editorial image treatments, and verified scientific or medical figures. |
 | `visual-production` | frontend-slides, remotion-production | Responsive HTML reports, fixed-stage presentations, and deterministic video. |
 | `writing` | document-writing, localization, resume-evidence-workflow | GitHub READMEs, Steam Workshop pages, game CSV localization, and evidence-backed resumes. |
-| `delivery-loop` | delivery-loop | Unattended issue-to-merge delivery with touch-scope leases, worktree isolation, enforced commit and PR standards, independent Elephant-Goldfish review, gated auto-merge, and a plugin-native long-horizon goal run that works without Goal mode. |
+| `delivery-loop` | delivery-loop | Unattended issue-to-merge delivery with touch-scope leases, worktree isolation, enforced commit and PR standards, independent Elephant-Goldfish review, gated auto-merge, a plugin-native long-horizon goal run that works without Goal mode, and a side-panel snapshot with a configuration form. |
 
 The standalone plugins wrap an upstream MCP server and its own repository icon: `serena` adds Serena's semantic code intelligence, and `rea` adds REA's reverse-engineering tools. They ship no skill-folder view, so install them from the marketplace.
 
