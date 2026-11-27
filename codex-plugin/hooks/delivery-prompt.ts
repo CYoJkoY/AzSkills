@@ -2,19 +2,17 @@
 /*
  * UserPromptSubmit hook for the delivery-loop guards.
  *
- * This is the record-keeping half of the prompt-replay feature. The Stop hook
- * cannot always recover the original prompt from the session
- * transcript, because a compacted or flooded context may no longer contain it.
- * This hook captures the prompt the moment it arrives and stores a bounded copy
- * in per-session state, so a dead-loop restart can re-send it verbatim later.
- *
- * It fails open: a malformed payload or a read-only state directory never
- * changes what the user sees.
+ * Two jobs, both fail-open. First it records the prompt: the Stop hook cannot
+ * always recover the original prompt from the transcript, because a compacted
+ * or flooded context may no longer contain it, so a dead-loop restart needs a
+ * bounded copy taken the moment the prompt arrives. Second it states the
+ * reasoning-leak rule before the first assistant message, which is the only
+ * point where a rule can be set without reacting to text already on screen.
  */
 
 import process from "node:process";
 import { isGuardEcho } from "./loop-guard.ts";
-import { isHygieneEcho } from "./output-hygiene.ts";
+import { isHygieneEcho, OUTPUT_HYGIENE_RULE } from "./output-hygiene.ts";
 import { MAX_PROMPT_CHARS, withState } from "./session-state.ts";
 
 interface PromptInput {
@@ -52,14 +50,27 @@ async function main(): Promise<void> {
     return;
   }
   const input = readInput(parsed);
-  if (input === null || input.prompt.trim() === "" || input.sessionId === "") return;
+  if (input === null) return;
+  const emitting = (): void => {
+    process.stdout.write(
+      JSON.stringify({
+        continue: true,
+        hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: OUTPUT_HYGIENE_RULE },
+      }) + "\n",
+    );
+  };
   // A restart re-sends the guard's own block text as a new prompt. Recording it
   // would replace the real request with a copy of the correction, so skip it.
   if (isGuardEcho(input.prompt)) return;
   // An older installation injected its hygiene rule as context, and a replay can
   // still surface that text as a prompt; recording it would lose the real
-  // request, so it is skipped like the guard's own block text.
+  // request, and re-injecting the rule into it would stack copies of itself.
   if (isHygieneEcho(input.prompt)) return;
+  if (input.sessionId === "") {
+    emitting();
+    return;
+  }
+  if (input.prompt.trim() === "") return;
   await withState(input.sessionId, (state) => ({
     next: {
       ...state,
@@ -71,6 +82,7 @@ async function main(): Promise<void> {
     },
     result: undefined,
   }));
+  emitting();
 }
 
 main().catch(() => undefined);

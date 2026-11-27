@@ -94,6 +94,7 @@ jobs:
       - name: Test the delivery-loop reasoning-tag hook
         run: |
           node scripts/test-think-tags-hook.ts
+          node scripts/test-reasoning-guard.ts
 
       - name: Test the delivery-loop dead-loop guard
         run: |
@@ -113,6 +114,7 @@ jobs:
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/.agents/plugins/marketplace.json"
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/design/.codex-plugin/plugin.json"
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/delivery-loop/no-think-tags/hooks/stop-hook.ts"
+          test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/delivery-loop/no-think-tags/hooks/tool-hook.ts"
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/delivery-loop/codex-plugin/hooks/delivery-stop.ts"
           test -f "$RUNNER_TEMP/azskills-export/azskills-marketplace/plugins/delivery-loop/codex-plugin/hooks/loop-guard.ts"
           mkdir -p "$RUNNER_TEMP/azskills-extracted"

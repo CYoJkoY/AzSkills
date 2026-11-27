@@ -71,7 +71,15 @@ try {
   assert.equal(blocks(run({ last_assistant_message: "Plain answer." })), false);
   assert.equal(blocks(run({ last_assistant_message: "  <thinking>plan</thinking>\nAnswer." })), true);
   assert.equal(blocks(run({ last_assistant_message: "<thought>plan</thought>Done." })), true);
-  assert.equal(blocks(run({ last_assistant_message: "Intro <thinking>x</thinking>" })), false);
+  // A block that opens partway through a message leaks too: the tags are on
+  // screen even though the sentence around them is readable.
+  assert.equal(blocks(run({ last_assistant_message: "Intro <thinking>x</thinking>" })), true);
+  // An opener that never closes, away from the start, leaks the rest of the text.
+  assert.equal(blocks(run({ last_assistant_message: "Intro <thinking>never closes" })), true);
+  // A pair that only appears inside a fenced block is documentation, not a leak.
+  assert.equal(blocks(run({ last_assistant_message: "Example:\n```\n<thinking>x</thinking>\n```\nDone." })), false);
+  // A tag name quoted inside an inline span stays prose.
+  assert.equal(blocks(run({ last_assistant_message: "The `<thinking>` tag is documented here." })), false);
   assert.equal(blocks(run({ last_assistant_message: "<thinking>unclosed" })), true);
   assert.equal(blocks(run({ last_assistant_message: "<think>\n\n\nReasoning only, never closed." })), true);
   assert.equal(blocks(run({ last_assistant_message: "<think>" })), true);

@@ -19,8 +19,6 @@ review at all, and the goal run, because a durable objective outlives one turn. 
 does not own the project's own build commands, its architecture choices, or the
 content of the code being shipped.
 
-It also owns the long-horizon goal run: a durable objective in `.azflow/goal.json`.
-
 ## Contract
 
 - Use when: a repository needs issue-to-merge delivery that stays correct under several concurrent tasks, and review scoring plus merging must be automated instead of hand-driven.
@@ -196,12 +194,9 @@ never types a score into the report.
 
 ## Review independence (EGM)
 
-Self-review over-scores and hides the defects it introduced, so the loop never scores
-itself. `azflow review-open <task>` writes a short-lived `.azflow/review-window.json`
-bound to the task, head SHA, and expiry; only inside that window does the guard allow
-sub-agent spawns, so Elephant-Goldfish reviewers read the diff in fresh contexts and
-attest `engine: "egm"`. A self review, or an EGM round with no attested reviewer,
-injects a P2 that caps and blocks the round; scoring deletes the window after.
+Self-review over-scores and hides the defects it introduced, so the loop never scores itself. `azflow review-open <task>` writes a short-lived `.azflow/review-window.json` bound to the task, head SHA, and expiry.
+Only inside that window does the guard allow sub-agent spawns, so Elephant-Goldfish reviewers read the diff in fresh contexts and attest `engine: "egm"`.
+A self review, or an EGM round with no attested reviewer, injects a P2 that caps and blocks the round; scoring deletes the window after.
 
 ## Auto-merge gates
 
@@ -219,20 +214,16 @@ injects a P2 that caps and blocks the round; scoring deletes the window after.
 10. The base branch is unchanged from the configured base (`base-unchanged`).
 11. No blocking label (`do-not-merge`, `blocked`, `wip`, `needs-decision`).
 12. The pull request is open and not a draft (`not-draft`, `pr-open`).
-13. Autonomy is `full` (`autonomy`); the loop merges on green evidence and does
-   not ask again. Set autonomy to `manual` for an explicit human ship.
+13. Autonomy is `full` (`autonomy`); the loop merges on green evidence and does not ask again. Set autonomy to `manual` for an explicit human ship.
 
-On a pass the loop merges with `mergeStrategy` (squash by default), records the
-merge, closes the linked issue, verifies `gh issue view --json state` reads
-`CLOSED` (retrying once and exiting 1 otherwise), and fast-forwards the base. Merge
-is never delegated to a manual `gh pr merge`; the guard denies it so gates cannot
-be skipped.
+On a pass the loop merges with `mergeStrategy` (squash by default), records the merge, closes the linked issue, and fast-forwards the base.
+It verifies `gh issue view --json state` reads `CLOSED`, retrying once and exiting 1 otherwise.
+Merge is never delegated to a manual `gh pr merge`; the guard denies it so gates cannot be skipped.
 
 ## Loop guard
 
-An unattended run can repeat one step forever. The failure is quiet: no merge, no
-error, and no review record. The loop therefore treats a repeating step as a
-failure of the same weight as a broken gate.
+An unattended run can repeat one step forever. The failure is quiet: no merge, no error, and no review record.
+The loop therefore treats a repeating step as a failure of the same weight as a broken gate.
 
 - A step repeats when the same tool call, or the same short cycle of calls, runs at the end of the turn: four times for one call, and four repeats of a cycle of two to four calls. The same final reply three times in a row also counts, and so does a second blank reply in one turn: the first blank is recorded, and the second shows the turn is not producing an answer.
 - The `PreToolUse` guard denies the fourth identical shell call before it runs, so a loop is interrupted mid-turn instead of burning the rest of the window.
@@ -240,6 +231,14 @@ failure of the same weight as a broken gate.
 - A restart voids the looped attempt and re-sends the original prompt in the same conversation, with a notice that a dead loop just happened. It never opens a new session and never asks the user to repeat the request.
 - Restarts are budgeted: at most two per turn, so a model that keeps looping is stopped by the budget rather than by an endless guard. After a breaker interruption the counter resets, so a deliberate re-run of the same command after a fix is still allowed.
 - The `UserPromptSubmit` hook records the prompt in per-session state the moment it arrives. That copy, not the transcript, is what a restart quotes, so the prompt survives compaction and a flooded window.
+
+## Reasoning-leak guard
+
+A leaked reasoning tag is a visible defect, not only wasted context: it is on screen and cannot be recalled, so three layers guard it and each fails open.
+
+- The `UserPromptSubmit` hook states the rule before the turn's first message, while every message is still unwritten.
+- The `PreToolUse` hook reads the turn's visible messages at the next tool call and injects one short correction per new leak; it never blocks the call and allows two nudges per turn.
+- The `Stop` hook corrects a final reply that leaks a block with one bounded re-send, and reports a blank reply the same way; the mid-turn and Stop budgets stay separate.
 
 ## Quality gates
 
@@ -255,8 +254,8 @@ failure of the same weight as a broken gate.
 - Confirm the task branch was pushed without asking, and that the merge was
   followed by a local branch delete and a fast-forwarded base, again without
   asking. Cleanup is part of the loop, not a question for the user.
-- Confirm the final reply is readable text rather than a leaked reasoning block or
-  a blank body.
+- Confirm the final reply is readable text, that no visible message leaked a
+  reasoning tag, and that the reply body is not blank.
 - Confirm a repeating step was interrupted rather than retried, and that the
   re-sent prompt in the restart notice is the user's own prompt.
 
@@ -276,5 +275,6 @@ SHA is a failed delivery, not a shortcut.
 - [Automation surface](../../delivery-loop/references/automation.md) - command surface, issue and pull request automation, and the guard.
 - [Goal run](../../delivery-loop/references/goal-run.md) - durable objective, stop-hook continuation, progress from real state, and stall and budget safety.
 - [Loop guard](../../delivery-loop/references/loop-guard.md) - dead-loop detection, the in-turn breaker, the restart budget, and prompt replay.
+- [Output hygiene](../../delivery-loop/references/output-hygiene.md) - the three-layer reasoning-leak guard and what counts as a leak.
 - [Local ledger](../../delivery-loop/references/ledger.md) - ledger layout, state schema, and atomic locked writes.
 - [Migration guide](../../delivery-loop/references/migration.md) - moving rules out of AGENTS.md into this plugin.
