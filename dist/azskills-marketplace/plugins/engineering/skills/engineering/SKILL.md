@@ -13,7 +13,7 @@ contract before acting; do not answer from this index alone.
 - [Az Clean Code](../../references/modules/az-clean-code.md)
   Apply explicit, flat, reusable, data-driven constraints when writing, reviewing, refactoring, or consistently styling application code.
 - [Godot 3 Dev](../../references/modules/godot-3-dev.md)
-  Write, review, and down-port Godot 3.x (3.6) GDScript and scenes without re-calling engine-dispatched virtuals, without Godot 4.x symbols, and with the mod layout of native, extension, method, and signal blocks.
+  Write, review, and down-port Godot 3.x (3.6) GDScript and scenes without re-calling engine-dispatched virtuals, without Godot 4.x symbols, and with the Extensions, Custom, Methods, and Signals layout.
 - [Tool Integration](../../references/modules/tool-integration.md)
   Connect AzSkills to a supported AI client and produce verified install, MCP, or manual setup steps without inventing client capabilities.
 - [Taste](../../references/modules/taste.md)

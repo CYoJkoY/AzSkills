@@ -28,6 +28,7 @@ import {
   findTokenIssues,
   findVirtualRecalls,
   maskCommentsAndStrings,
+  virtualRecallNames,
 } from './godot3-lexical.ts';
 import { errorMessage } from '../../scripts/runtime.ts';
 
@@ -99,6 +100,7 @@ interface RunCheckOptions {
   apiPath: string;
   files: string[];
   mod: ModLayout | null;
+  layout: boolean;
   strict: boolean;
 }
 
@@ -122,8 +124,6 @@ interface ModLayout {
   signalPrefix: string;
 }
 
-type ModBlock = 'native' | 'extension' | 'method' | 'signal';
-
 interface MaskedMatch {
   index: number;
   groups: RegExpExecArray;
@@ -135,6 +135,7 @@ interface Fixture {
   overlay?: Record<string, string>;
   files_filter?: string[];
   mod?: string;
+  layout?: boolean;
   expect: 'pass' | 'fail';
   expectCodes?: string[];
   absentFromReport?: string[];
@@ -1109,12 +1110,69 @@ function collectDeclarations(mask: string): { classes: Set<string>; methods: Set
   return { classes, methods };
 }
 
-const modBlockRank: Record<ModBlock, number> = {
-  native: 0,
-  extension: 1,
-  method: 2,
-  signal: 3,
+type ModSection = 'extensions' | 'custom' | 'methods' | 'signals';
+
+const modSectionRank: Record<ModSection, number> = {
+  extensions: 0,
+  custom: 1,
+  methods: 2,
+  signals: 3,
 };
+
+const modSectionLabels: Record<ModSection, string> = {
+  extensions: 'Extensions',
+  custom: 'Custom',
+  methods: 'Methods',
+  signals: 'Signals',
+};
+
+const modSectionByLabel: Record<string, ModSection> = {
+  Extensions: 'extensions',
+  Custom: 'custom',
+  Methods: 'methods',
+  Signals: 'signals',
+};
+
+// A divider is `#`, 42 U+2550 bars, the label, 42 bars, `#`, so both bars carry
+// the same width and the line length changes only with the label.
+const sectionBar = '\u2550'.repeat(42);
+
+function sectionDivider(label: string): string {
+  return '# ' + sectionBar + ' ' + label + ' ' + sectionBar + ' #';
+}
+
+const canonicalDividerPattern = new RegExp(
+  '^([ \\t]*)# ' +
+    sectionBar +
+    ' (Extensions|Custom|Methods|Signals) ' +
+    sectionBar +
+    ' #[ \\t]*\\r?$',
+);
+const dividerLikePattern = new RegExp('^[ \\t]*#[ \\t]*' + '\u2550'.repeat(2));
+// A divider-like line whose label is a section name must be the canonical line;
+// a 41-bar bar, a lowercase label, or an old singular label is a format defect.
+// A topical label such as `Signal wiring` is not in this set.
+const sectionDividerLabels = new Set([
+  'extensions',
+  'custom',
+  'methods',
+  'signals',
+  'extension',
+  'method',
+  'signal',
+  'callback',
+]);
+
+// The only banners allowed above Extensions. Both group declarations, and
+// `Setters` holds the setter bodies a `setget` declaration names, so functions
+// there are declarations-adjacent rather than members of a section.
+const declarationDividerLabels = new Set(['variables', 'setters']);
+
+function dividerLabelText(line: string): string {
+  const parts = line.split(/\u2550+/);
+  if (parts.length < 3) return '';
+  return (parts[1] ?? '').replace(/#/g, '').trim().toLowerCase();
+}
 
 // `MoreStatsContainer` -> [`more`, `stats`, `container`]; `HD_Mod` -> [`hd`, `mod`].
 function modNameWords(name: string): string[] {
@@ -1157,12 +1215,165 @@ function findModMarker(text: string, mask: string): { offset: number; tokens: st
   return null;
 }
 
-function classifyModFunction(name: string, layout: ModLayout): ModBlock {
-  // `msc_on_*` also starts with `msc_`, so the signal block is tested first.
-  if (name.startsWith(layout.signalPrefix)) return 'signal';
-  if (name.startsWith(layout.extensionPrefix + '_')) return 'extension';
-  if (name.startsWith(layout.methodPrefix + '_')) return 'method';
-  return 'native';
+function classifyModFunction(name: string, layout: ModLayout): ModSection {
+  // `msc_on_*` also starts with `msc_`, so the signal section is tested first.
+  if (name.startsWith(layout.signalPrefix)) return 'signals';
+  if (name.startsWith(layout.extensionPrefix + '_')) return 'custom';
+  if (name.startsWith(layout.methodPrefix + '_')) return 'methods';
+  return 'extensions';
+}
+
+interface LayoutCodes {
+  missing: string;
+  placement: string;
+  order: string;
+  format: string;
+  extra: string;
+  unsectioned: string;
+}
+
+const modLayoutCodes: LayoutCodes = {
+  missing: 'MOD_SECTION_MISSING',
+  placement: 'MOD_SECTION_PLACEMENT',
+  order: 'MOD_SECTION_ORDER',
+  format: 'MOD_SECTION_FORMAT',
+  extra: 'MOD_SECTION_EXTRA',
+  unsectioned: 'MOD_SECTION_PLACEMENT',
+};
+
+const scriptLayoutCodes: LayoutCodes = {
+  missing: 'SCRIPT_SECTION_MISSING',
+  placement: 'SCRIPT_SECTION_PLACEMENT',
+  order: 'SCRIPT_SECTION_ORDER',
+  format: 'SCRIPT_SECTION_FORMAT',
+  extra: 'SCRIPT_SECTION_EXTRA',
+  unsectioned: 'SCRIPT_FUNCTION_UNSECTIONED',
+};
+
+interface SectionFunctionHit {
+  name: string;
+  offset: number;
+  // The section whose divider is open above the function, or null before the
+  // first divider. `declarations` marks a function below a Variables, Setters,
+  // or topical divider that sits above Extensions; that scope is not a layer.
+  scope: ModSection | null;
+  declarations: boolean;
+}
+
+interface SectionScan {
+  sawDivider: boolean;
+  functions: SectionFunctionHit[];
+}
+
+// Read the column-0 dividers and the top-level functions of one script. The
+// mod gate and the standalone gate share this pass, so both see one structure
+// and one set of order, format, and stray-divider findings.
+function scanSections(
+  report: Report,
+  file: string,
+  text: string,
+  mask: string,
+  starts: readonly number[],
+  codes: LayoutCodes,
+): SectionScan {
+  const lines = text.split('\n');
+  const lineStarts: number[] = [];
+  let cursor = 0;
+  for (const line of lines) {
+    lineStarts.push(cursor);
+    cursor += line.length + 1;
+  }
+
+  let currentSection: ModSection | null = null;
+  let lastDividerRank = -1;
+  let sawDivider = false;
+  let declarationsScope = false;
+  const functions: SectionFunctionHit[] = [];
+
+  lines.forEach((line, index) => {
+    const start = lineStarts[index] ?? 0;
+    const maskedLine = mask.slice(start, start + line.length);
+    // The mask blanks comments, so a blank masked line is a real comment; the
+    // same bar text inside a string stays code and is not a divider.
+    if (maskedLine.trim() === '') {
+      // Only a column-0 comment is a section boundary. An indented banner sits
+      // inside a class or a function body, where it labels code, not a layer.
+      if (/^[ \t]/.test(line)) return;
+      const canonical = canonicalDividerPattern.exec(line);
+      if (canonical) {
+        const label = canonical[2] ?? '';
+        const section = modSectionByLabel[label];
+        if (!section) return;
+        sawDivider = true;
+        declarationsScope = false;
+        const rank = modSectionRank[section];
+        if (rank <= lastDividerRank) {
+          addIssue(
+            report,
+            file,
+            starts,
+            start,
+            codes.order,
+            'the ' + label + ' divider is out of order or repeated',
+            'Order the dividers as Extensions, Custom, Methods, then Signals.',
+          );
+        } else {
+          lastDividerRank = rank;
+        }
+        currentSection = section;
+        return;
+      }
+      if (dividerLikePattern.test(line)) {
+        const label = dividerLabelText(line);
+        if (sectionDividerLabels.has(label)) {
+          addIssue(
+            report,
+            file,
+            starts,
+            start,
+            codes.format,
+            'divider-like comment is not a canonical section divider',
+            'Use "# ", 42 U+2550 bars, one of Extensions, Custom, Methods, Signals, 42 bars, then " #".',
+          );
+        } else if (!sawDivider && declarationDividerLabels.has(label)) {
+          // Variables or Setters above Extensions. Declarations, not a layer.
+          declarationsScope = true;
+          currentSection = null;
+        } else if (sawDivider) {
+          addWarning(
+            report,
+            file,
+            starts,
+            start,
+            codes.extra,
+            'non-canonical divider appears after a section divider',
+            'Only Extensions, Custom, Methods, and Signals are section dividers; keep a topical divider above Extensions.',
+          );
+        } else {
+          // A topical banner above Extensions is not a declaration scope, so a
+          // function under it has no section. Only Variables and Setters may
+          // sit there.
+          addWarning(
+            report,
+            file,
+            starts,
+            start,
+            codes.extra,
+            'a banner other than Variables or Setters sits above Extensions',
+            'Keep only Variables and Setters above Extensions; move a topical grouping into Custom or Methods.',
+          );
+        }
+        return;
+      }
+      return;
+    }
+    const match = /^(?:static[ \t]+)?func[ \t]+([A-Za-z_]\w*)/.exec(maskedLine);
+    const name = match?.[1];
+    if (!name) return;
+    functions.push({ name, offset: start, scope: currentSection, declarations: declarationsScope });
+  });
+
+  return { sawDivider, functions };
 }
 
 function checkModLayout(
@@ -1192,56 +1403,189 @@ function checkModLayout(
     return;
   }
   if (!layout) return;
-  let highest = 0;
-  let highestBlock: ModBlock = 'native';
-  for (const match of mask.matchAll(/^(?:static[ \t]+)?func[ \t]+([A-Za-z_]\w*)/gm)) {
-    const name = match[1];
-    if (!name) continue;
-    const block = classifyModFunction(name, layout);
-    const rank = modBlockRank[block];
-    if (rank < highest) {
+
+  const scan = scanSections(report, file, text, mask, starts, modLayoutCodes);
+  const functions = scan.functions.map((hit) => ({
+    ...hit,
+    section: classifyModFunction(hit.name, layout),
+  }));
+  if (functions.length === 0) return;
+
+  const firstOffset = functions[0]?.offset ?? 0;
+  if (!scan.sawDivider) {
+    addIssue(
+      report,
+      file,
+      starts,
+      firstOffset,
+      modLayoutCodes.missing,
+      'mod script has functions but no canonical section divider',
+      'Add the Extensions, Custom, Methods, and Signals dividers: "# ", 42 U+2550 bars, the label, 42 bars, " #".',
+    );
+  } else {
+    for (const hit of functions) {
+      if (hit.declarations || hit.scope === hit.section) continue;
+      const where = hit.scope
+        ? modSectionLabels[hit.scope]
+        : hit.declarations
+          ? 'the declarations'
+          : 'a banner above Extensions';
       addIssue(
         report,
         file,
         starts,
-        match.index,
-        'MOD_FUNCTION_ORDER',
-        block + ' function ' + name + '() appears after ' + highestBlock + ' functions',
-        'Order mod functions as native, then ' +
-          layout.extensionPrefix +
-          '_*, then ' +
-          layout.methodPrefix +
-          '_*, then ' +
-          layout.signalPrefix +
-          '*.',
+        hit.offset,
+        modLayoutCodes.placement,
+        hit.name + '() sits under ' + where + ' but belongs to ' + modSectionLabels[hit.section],
+        'Move it under the ' + modSectionLabels[hit.section] + ' divider, or rename it to match its section.',
       );
-      continue;
     }
-    if (rank > highest) {
-      highest = rank;
-      highestBlock = block;
+  }
+
+  let highest = -1;
+  let highestLabel = '';
+  for (const hit of functions) {
+    // A setter body under `Setters` is a declaration, not a layer member, so
+    // it neither breaks nor advances the section order.
+    if (!hit.declarations) {
+      const rank = modSectionRank[hit.section];
+      if (rank < highest) {
+        addIssue(
+          report,
+          file,
+          starts,
+          hit.offset,
+          'MOD_FUNCTION_ORDER',
+          modSectionLabels[hit.section] +
+            ' function ' +
+            hit.name +
+            '() appears after ' +
+            highestLabel +
+            ' functions',
+          'Order mod functions as Extensions, then ' +
+            layout.extensionPrefix +
+            '_*, then ' +
+            layout.methodPrefix +
+            '_*, then ' +
+            layout.signalPrefix +
+            '*.',
+        );
+      } else if (rank > highest) {
+        highest = rank;
+        highestLabel = modSectionLabels[hit.section];
+      }
     }
-    if (block === 'native') continue;
+    if (hit.section === 'extensions') continue;
     const prefix =
-      block === 'extension'
+      hit.section === 'custom'
         ? layout.extensionPrefix + '_'
-        : block === 'method'
+        : hit.section === 'methods'
           ? layout.methodPrefix + '_'
           : layout.signalPrefix;
-    const suffix = name.slice(prefix.length);
+    const suffix = hit.name.slice(prefix.length);
     if (!/^[a-z0-9]+(?:_[a-z0-9]+)*$/.test(suffix)) {
       addIssue(
         report,
         file,
         starts,
-        match.index,
+        hit.offset,
         'MOD_FUNCTION_NAME',
-        name + '() does not follow ' + prefix + '<lowercase_words>',
+        hit.name + '() does not follow ' + prefix + '<lowercase_words>',
         'Mod functions are lowercase with `_` between words; rename it, for example, to ' +
           prefix +
           'handle_event.',
       );
     }
+  }
+}
+
+// `_ready`, `_process`, and the other callbacks the engine dispatches itself.
+const virtualCallbackNames = new Set(virtualRecallNames.map((name) => '_' + name));
+
+interface ScriptLayoutContext {
+  connectTargets: ReadonlySet<string>;
+  baseMethods: ReadonlySet<string>;
+}
+
+function findLayoutMarker(text: string, mask: string): boolean {
+  for (const match of text.matchAll(/^[ \t]*#[ \t]*azskills-layout[ \t]*\r?$/gm)) {
+    const end = match.index + match[0].length;
+    if (mask.slice(match.index, end).trim() === '') return true;
+  }
+  return false;
+}
+
+// A mod script classifies by prefix. A standalone script has no prefix, so only
+// the two ends are decidable: an engine-dispatched or base-script entry is
+// Extensions, and a connect() target is Signals. Everything else may sit in
+// Custom or Methods, because only the author knows who calls it.
+function classifyScriptFunction(name: string, context: ScriptLayoutContext): ModSection | null {
+  if (context.connectTargets.has(name)) return 'signals';
+  if (virtualCallbackNames.has(name)) return 'extensions';
+  if (context.baseMethods.has(name)) return 'extensions';
+  if (/_on_[a-z0-9_]+$/.test(name)) return 'signals';
+  return null;
+}
+
+function checkScriptLayout(
+  report: Report,
+  file: string,
+  text: string,
+  mask: string,
+  starts: readonly number[],
+  enabled: boolean,
+  context: ScriptLayoutContext,
+): void {
+  if (!enabled && !findLayoutMarker(text, mask)) return;
+  // A mod script has the stricter gate, and its marker always wins.
+  if (findModMarker(text, mask)) return;
+  const scan = scanSections(report, file, text, mask, starts, scriptLayoutCodes);
+  if (scan.functions.length === 0) return;
+  if (!scan.sawDivider) {
+    addIssue(
+      report,
+      file,
+      starts,
+      scan.functions[0]?.offset ?? 0,
+      scriptLayoutCodes.missing,
+      'script has functions but no canonical section divider',
+      'Add the Extensions, Custom, Methods, and Signals dividers: "# ", 42 U+2550 bars, the label, 42 bars, " #".',
+    );
+    return;
+  }
+  for (const hit of scan.functions) {
+    // A setter body under `Setters` belongs to the declarations, not a layer.
+    if (hit.declarations) continue;
+    if (hit.scope === null) {
+      addIssue(
+        report,
+        file,
+        starts,
+        hit.offset,
+        scriptLayoutCodes.unsectioned,
+        hit.name + '() sits above the first section divider',
+        'Move it under Extensions, Custom, Methods, or Signals; only declarations and setter bodies stay above Extensions.',
+      );
+      continue;
+    }
+    const section = classifyScriptFunction(hit.name, context);
+    if (!section || section === hit.scope) continue;
+    addIssue(
+      report,
+      file,
+      starts,
+      hit.offset,
+      scriptLayoutCodes.placement,
+      hit.name +
+        '() sits under ' +
+        modSectionLabels[hit.scope] +
+        ' but belongs to ' +
+        modSectionLabels[section] +
+        (section === 'extensions'
+          ? ': the engine or a base script calls it'
+          : ': only a connect() target reaches it'),
+      'Move it under the ' + modSectionLabels[section] + ' divider.',
+    );
   }
 }
 
@@ -1527,12 +1871,26 @@ function checkGdScript(
   api: ApiIndex,
   context: CheckContext,
   mod: ModLayout | null,
+  layout: boolean,
 ): void {
   const declared = collectDeclarations(mask);
   const ancestry = context.index.ancestry(file);
   // Methods and signals resolve through the whole script inheritance chain, so
   // a callback declared by a base script is not a missing target here.
   const customMethods = new Set<string>([...declared.methods, ...ancestry.methods]);
+  // `ancestry` starts at this file, so subtract its own declarations to leave
+  // the functions a base script declares.
+  const baseMethods = new Set<string>(ancestry.methods);
+  for (const name of declared.methods) baseMethods.delete(name);
+  // A `connect()` target on self is the only decidable Signals member of a
+  // script without prefixes.
+  const connectTargets = new Set<string>();
+  for (const match of maskedMatches(text, mask, /\bconnect\s*\(/g, (slice) =>
+    /^connect\s*\(\s*"[A-Za-z_]\w*"\s*,\s*self\s*,\s*"([A-Za-z_]\w*)"/.exec(slice),
+  )) {
+    const method = match.groups[1];
+    if (method) connectTargets.add(method);
+  }
   const declaredSignals = new Set<string>(ancestry.signals);
   for (const match of mask.matchAll(/^signal[ \t]+([A-Za-z_]\w*)/gm)) {
     const name = match[1];
@@ -1551,6 +1909,10 @@ function checkGdScript(
   checkIndentation(report, file, mask, starts);
   checkDeclarationPlacement(report, file, mask, starts);
   checkModLayout(report, file, text, mask, starts, mod);
+  checkScriptLayout(report, file, text, mask, starts, layout, {
+    connectTargets,
+    baseMethods,
+  });
   checkScriptPaths(report, file, text, mask, starts, context.index);
   const baseClasses = [...ancestry.engineBases];
   for (const match of maskedMatches(text, mask, /^[ \t]*extends\b/gm, (slice) =>
@@ -1684,6 +2046,7 @@ async function runCheck({
   apiPath,
   files,
   mod,
+  layout,
   strict,
 }: RunCheckOptions): Promise<RunCheckResult> {
   const api = await loadIndex(apiPath);
@@ -1735,7 +2098,7 @@ async function runCheck({
     } else if (gdExtensions.has(extension)) {
       const starts = lineStarts(text);
       const mask = maskCommentsAndStrings(text);
-      checkGdScript(report, file, text, mask, starts, api, context, mod);
+      checkGdScript(report, file, text, mask, starts, api, context, mod, layout);
       checkMoveAndSlide(report, file, text, mask, starts);
     } else if (sceneExtensions.has(extension)) {
       checkScene(report, file, text, api, context.projectClasses, context.index);
@@ -2181,7 +2544,15 @@ const fixtures: readonly Fixture[] = [
     name: 'mod-layout-clean',
     files: {
       'Stats.gd':
-        '# azskills-mod: MoreStatsContainer\nextends Node\n\nsignal stats_changed\n\nfunc _ready():\n\tmoresc_ready()\n\nfunc get_stat(stat_name):\n\treturn moresc_stat_value(stat_name)\n\nfunc on_item_added(item):\n\tmoresc_item_added(item)\n\nfunc moresc_ready():\n\tmsc_prepare_state()\n\tmsc_connect_signals()\n\nfunc moresc_stat_value(stat_name):\n\treturn msc_compute_base(stat_name) + msc_bonus_for(stat_name)\n\nfunc moresc_item_added(item):\n\tmsc_recount(item)\n\nfunc msc_prepare_state():\n\tpass\n\nfunc msc_compute_base(stat_name):\n\treturn 0\n\nfunc msc_bonus_for(stat_name):\n\treturn 0\n\nfunc msc_recount(item):\n\tpass\n\nfunc msc_connect_signals():\n\tconnect("stats_changed", self, "msc_on_stats_changed")\n\nfunc msc_on_stats_changed(stats):\n\tmsc_recount(null)\n',
+        '# azskills-mod: MoreStatsContainer\nextends Node\n\nsignal stats_changed\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tmoresc_ready()\n\nfunc get_stat(stat_name):\n\treturn moresc_stat_value(stat_name)\n\nfunc on_item_added(item):\n\tmoresc_item_added(item)\n\n' +
+        sectionDivider('Custom') +
+        '\n\nfunc moresc_ready():\n\tmsc_prepare_state()\n\tmsc_connect_signals()\n\nfunc moresc_stat_value(stat_name):\n\treturn msc_compute_base(stat_name) + msc_bonus_for(stat_name)\n\nfunc moresc_item_added(item):\n\tmsc_recount(item)\n\n' +
+        sectionDivider('Methods') +
+        '\n\nfunc msc_prepare_state():\n\tpass\n\nfunc msc_compute_base(stat_name):\n\treturn 0\n\nfunc msc_bonus_for(stat_name):\n\treturn 0\n\nfunc msc_recount(item):\n\tpass\n\nfunc msc_connect_signals():\n\tconnect("stats_changed", self, "msc_on_stats_changed")\n\n' +
+        sectionDivider('Signals') +
+        '\n\nfunc msc_on_stats_changed(stats):\n\tmsc_recount(null)\n',
     },
     expect: 'pass',
   },
@@ -2189,7 +2560,11 @@ const fixtures: readonly Fixture[] = [
     name: 'mod-layout-native-base-name',
     files: {
       'Stats.gd':
-        '# azskills-mod: MoreStatsContainer\nextends "res://Base.gd"\n\nfunc UpdateHud():\n\tmoresc_ready()\n\nfunc moresc_ready():\n\tpass\n',
+        '# azskills-mod: MoreStatsContainer\nextends "res://Base.gd"\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc UpdateHud():\n\tmoresc_ready()\n\n' +
+        sectionDivider('Custom') +
+        '\n\nfunc moresc_ready():\n\tpass\n',
       'Base.gd': 'extends Node\n\nfunc UpdateHud():\n\tpass\n',
     },
     expect: 'pass',
@@ -2201,13 +2576,19 @@ const fixtures: readonly Fixture[] = [
         '# azskills-mod: MoreStatsContainer\nextends Node\n\nfunc moresc_ready():\n\tpass\n\nfunc _ready():\n\tpass\n',
     },
     expect: 'fail',
-    expectCodes: ['MOD_FUNCTION_ORDER'],
+    expectCodes: ['MOD_FUNCTION_ORDER', 'MOD_SECTION_MISSING'],
   },
   {
     name: 'mod-layout-name',
     files: {
       'Stats.gd':
-        '# azskills-mod: MoreStatsContainer\nextends Node\n\nfunc _ready():\n\tmoresc_CalcStat()\n\nfunc moresc_CalcStat():\n\tpass\n\nfunc msc__hidden():\n\tpass\n',
+        '# azskills-mod: MoreStatsContainer\nextends Node\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tmoresc_CalcStat()\n\n' +
+        sectionDivider('Custom') +
+        '\n\nfunc moresc_CalcStat():\n\tpass\n\n' +
+        sectionDivider('Methods') +
+        '\n\nfunc msc__hidden():\n\tpass\n',
     },
     expect: 'fail',
     expectCodes: ['MOD_FUNCTION_NAME'],
@@ -2224,7 +2605,13 @@ const fixtures: readonly Fixture[] = [
     name: 'mod-layout-flag',
     files: {
       'Stats.gd':
-        'extends Node\n\nfunc _ready():\n\tmoresc_ready()\n\nfunc moresc_ready():\n\tpass\n\nfunc msc_helper():\n\tpass\n',
+        'extends Node\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tmoresc_ready()\n\n' +
+        sectionDivider('Custom') +
+        '\n\nfunc moresc_ready():\n\tpass\n\n' +
+        sectionDivider('Methods') +
+        '\n\nfunc msc_helper():\n\tpass\n',
     },
     mod: 'MoreStatsContainer',
     expect: 'pass',
@@ -2233,7 +2620,15 @@ const fixtures: readonly Fixture[] = [
     name: 'mod-layout-explicit-prefixes',
     files: {
       'Quality.gd':
-        '# azskills-mod: QualityOfLife qolx ql\nextends Node\n\nfunc _ready():\n\tqolx_ready()\n\nfunc qolx_ready():\n\tql_apply()\n\nfunc ql_apply():\n\tpass\n\nfunc ql_on_ready():\n\tql_apply()\n',
+        '# azskills-mod: QualityOfLife qolx ql\nextends Node\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tqolx_ready()\n\n' +
+        sectionDivider('Custom') +
+        '\n\nfunc qolx_ready():\n\tql_apply()\n\n' +
+        sectionDivider('Methods') +
+        '\n\nfunc ql_apply():\n\tpass\n\n' +
+        sectionDivider('Signals') +
+        '\n\nfunc ql_on_ready():\n\tql_apply()\n',
     },
     expect: 'pass',
   },
@@ -2244,6 +2639,236 @@ const fixtures: readonly Fixture[] = [
         'extends Node\n\nfunc moresc_ready():\n\tpass\n\nfunc _ready():\n\tpass\n',
     },
     expect: 'pass',
+  },
+  {
+    name: 'mod-layout-section-missing',
+    files: {
+      'Stats.gd':
+        '# azskills-mod: MoreStatsContainer\nextends Node\n\nfunc _ready():\n\tmoresc_ready()\n\nfunc moresc_ready():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['MOD_SECTION_MISSING'],
+  },
+  {
+    name: 'mod-layout-section-placement',
+    files: {
+      'Stats.gd':
+        '# azskills-mod: MoreStatsContainer\nextends Node\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tpass\n\nfunc msc_helper():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['MOD_SECTION_PLACEMENT'],
+  },
+  {
+    name: 'mod-layout-section-order',
+    files: {
+      'Stats.gd':
+        '# azskills-mod: MoreStatsContainer\nextends Node\n\n' +
+        sectionDivider('Methods') +
+        '\n\nfunc msc_helper():\n\tpass\n\n' +
+        sectionDivider('Custom') +
+        '\n\nfunc moresc_ready():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['MOD_SECTION_ORDER'],
+  },
+  {
+    name: 'mod-layout-section-format',
+    files: {
+      'Stats.gd':
+        '# azskills-mod: MoreStatsContainer\nextends Node\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tmoresc_ready()\n\n# ' +
+        '\u2550'.repeat(41) +
+        ' Custom ' +
+        '\u2550'.repeat(42) +
+        ' #\n\nfunc moresc_ready():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['MOD_SECTION_FORMAT'],
+  },
+  {
+    name: 'mod-layout-declarations-above',
+    files: {
+      'Stats.gd':
+        '# azskills-mod: MoreStatsContainer\nextends Node\n\nvar cache = {}\n\n' +
+        '# ' +
+        '\u2550'.repeat(42) +
+        ' Variables ' +
+        '\u2550'.repeat(42) +
+        ' #\n\nvar bonus = 0\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tmoresc_ready()\n\n' +
+        sectionDivider('Custom') +
+        '\n\nfunc moresc_ready():\n\tpass\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'mod-layout-indented-banner-ignored',
+    files: {
+      'Stats.gd':
+        '# azskills-mod: MoreStatsContainer\nextends Node\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\t# ' +
+        '\u2550'.repeat(2) +
+        ' local note ' +
+        '\u2550'.repeat(2) +
+        ' #\n\tmoresc_ready()\n\n' +
+        sectionDivider('Custom') +
+        '\n\nfunc moresc_ready():\n\tpass\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'script-layout-pass',
+    files: {
+      'Hud.gd':
+        '# azskills-layout\nextends Node\n\nsignal refreshed\n\nvar cache = {}\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tconnect("refreshed", self, "_on_refreshed")\n\trefresh()\n\n' +
+        sectionDivider('Custom') +
+        '\n\nfunc refresh():\n\tcache.clear()\n\temit_signal("refreshed")\n\n' +
+        sectionDivider('Methods') +
+        '\n\nfunc set_cache(key, value):\n\tcache[key] = value\n\n' +
+        sectionDivider('Signals') +
+        '\n\nfunc _on_refreshed():\n\trefresh()\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'script-layout-flag-pass',
+    files: {
+      'Hud.gd':
+        'extends Node\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\trefresh()\n\n' +
+        sectionDivider('Methods') +
+        '\n\nfunc refresh():\n\tpass\n',
+    },
+    layout: true,
+    expect: 'pass',
+  },
+  {
+    name: 'script-layout-marker-free-skipped',
+    files: {
+      'Hud.gd': 'extends Node\n\nfunc _ready():\n\tpass\n\nfunc refresh():\n\tpass\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'script-layout-missing',
+    files: {
+      'Hud.gd': '# azskills-layout\nextends Node\n\nfunc _ready():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['SCRIPT_SECTION_MISSING'],
+  },
+  {
+    name: 'script-layout-unsectioned',
+    files: {
+      'Hud.gd':
+        '# azskills-layout\nextends Node\n\nfunc _ready():\n\tpass\n\n' +
+        sectionDivider('Methods') +
+        '\n\nfunc refresh():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['SCRIPT_FUNCTION_UNSECTIONED'],
+  },
+  {
+    name: 'script-layout-virtual-misplaced',
+    files: {
+      'Hud.gd':
+        '# azskills-layout\nextends Node\n\n' +
+        sectionDivider('Methods') +
+        '\n\nfunc _ready():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['SCRIPT_SECTION_PLACEMENT'],
+  },
+  {
+    name: 'script-layout-signal-misplaced',
+    files: {
+      'Hud.gd':
+        '# azskills-layout\nextends Node\n\nsignal done\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tconnect("done", self, "_on_done")\n\n' +
+        sectionDivider('Methods') +
+        '\n\nfunc _on_done():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['SCRIPT_SECTION_PLACEMENT'],
+  },
+  {
+    name: 'script-layout-format',
+    files: {
+      'Hud.gd':
+        '# azskills-layout\nextends Node\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tpass\n\n# ' +
+        '\u2550'.repeat(41) +
+        ' Methods ' +
+        '\u2550'.repeat(42) +
+        ' #\n\nfunc refresh():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['SCRIPT_SECTION_FORMAT'],
+  },
+  {
+    name: 'mod-layout-setter-under-setters',
+    files: {
+      'Stats.gd':
+        '# azskills-mod: MoreStatsContainer\nextends Node\n\nvar bonus setget msc_set_bonus\n\n' +
+        sectionDivider('Setters') +
+        '\n\nfunc msc_set_bonus(value):\n\tbonus = value\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tmoresc_ready()\n\n' +
+        sectionDivider('Custom') +
+        '\n\nfunc moresc_ready():\n\tpass\n',
+    },
+    expect: 'pass',
+  },
+  {
+    name: 'script-layout-setter-under-setters',
+    files: {
+      'Hud.gd':
+        '# azskills-layout\nextends Node\n\nvar bonus setget set_bonus\n\n' +
+        sectionDivider('Variables') +
+        '\n\nvar cache = {}\n\n' +
+        sectionDivider('Setters') +
+        '\n\nfunc set_bonus(value):\n\tbonus = value\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tpass\n',
+    },
+    layout: true,
+    expect: 'pass',
+  },
+  {
+    name: 'script-layout-topical-banner-above',
+    files: {
+      'Hud.gd':
+        '# azskills-layout\nextends Node\n\n' +
+        sectionDivider('Setup') +
+        '\n\nfunc refresh():\n\tpass\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['SCRIPT_FUNCTION_UNSECTIONED'],
+  },
+  {
+    name: 'mod-layout-topical-banner-above',
+    files: {
+      'Stats.gd':
+        '# azskills-mod: MoreStatsContainer\nextends Node\n\n' +
+        sectionDivider('Setup') +
+        '\n\nfunc moresc_ready():\n\tpass\n\n' +
+        sectionDivider('Extensions') +
+        '\n\nfunc _ready():\n\tpass\n',
+    },
+    expect: 'fail',
+    expectCodes: ['MOD_SECTION_PLACEMENT'],
   },
 ];
 
@@ -2274,6 +2899,7 @@ async function selfTest(): Promise<void> {
         apiPath: defaultApi,
         files: fixture.files_filter ?? [],
         mod: fixture.mod ? deriveModLayout(fixture.mod) : null,
+        layout: fixture.layout === true,
         strict: false,
       });
       const passed = report.errors.length === 0;
@@ -2317,7 +2943,7 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
     console.log(
-      'Usage: node check-godot-3x.ts --root <project> [--api <api-3.6.json>] [--overlay <dir>] [--files a.gd,b.tscn] [--mod <name>] [--json] [--strict] [--self-test]',
+      'Usage: node check-godot-3x.ts --root <project> [--api <api-3.6.json>] [--overlay <dir>] [--files a.gd,b.tscn] [--mod <name>] [--layout] [--json] [--strict] [--self-test]',
     );
     return;
   }
@@ -2353,6 +2979,7 @@ async function main(): Promise<void> {
     apiPath,
     files,
     mod,
+    layout: args.includes('--layout'),
     strict: args.includes('--strict'),
   });
   if (args.includes('--json')) {

@@ -212,6 +212,69 @@ wins over the flag. The bundled checker reports `MOD_FUNCTION_ORDER`,
 their own conventions. The release is minor: no plugin ID, module id, or mode
 changed, so an upgrade only refreshes the checkout and the installed plugin.
 
+## 7.10.0: script sections with dividers
+
+`godot-3-dev` now names the four layers and makes each one visible in the file.
+The blocks keep their order but take canonical names, and every non-empty
+section opens with its divider line, so a reader finds a function by the shape
+of the file instead of scrolling for a name.
+
+| # | Section | Holds | Called by |
+| :--- | :--- | :--- | :--- |
+| 1 | Extensions | Engine-dispatched virtuals and every base-script function this file overrides | the engine or the base script |
+| 2 | Custom | One `<ext>_*` function per insertion point, plus the mod's own feature logic | Extensions |
+| 3 | Methods | Reusable helpers and the public API | Custom, Methods, or another script |
+| 4 | Signals | Handlers whose only caller is a `connect()` target | a signal |
+
+A function is classified by its caller, in that order: a `connect()` target is
+Signals; an engine or base-script entry is Extensions; a reused helper is
+Methods; the code an Extensions entry runs is Custom. Section is not topic, so
+two functions about one subject split when different callers reach them. This
+replaces the earlier `native`/`extension`/`method`/`signal` block names.
+
+The divider is `#`, one space, 42 U+2550 bars, one space, the label, one space,
+42 bars, one space, `#`:
+
+```text
+# [42 x U+2550] Extensions [42 x U+2550] #
+# [42 x U+2550] Custom [42 x U+2550] #
+# [42 x U+2550] Methods [42 x U+2550] #
+# [42 x U+2550] Signals [42 x U+2550] #
+```
+
+Copy the literal lines from
+[script layout](../godot-3-dev/references/script-layout.md); the labels are
+plural, and both bars carry 42 characters. Declarations stay above the first
+divider, and a `Variables` or `Setters` divider may appear there. A section
+with no function is omitted with its divider.
+
+The checker enforces the sections. `MOD_SECTION_MISSING` fires when a marked
+script has functions but no canonical divider, `MOD_SECTION_PLACEMENT` when a
+function sits under the wrong divider or before the first one,
+`MOD_SECTION_ORDER` when the dividers are out of order or repeated,
+`MOD_SECTION_FORMAT` when a divider-like comment is not the canonical line
+(41 bars, a singular label, a missing ` #`), and `MOD_SECTION_EXTRA` warns when
+a non-canonical divider follows a canonical section. `MOD_FUNCTION_ORDER`,
+`MOD_FUNCTION_NAME`, and `MOD_MARKER_INVALID` keep their meaning.
+
+Standalone scripts get the same gate without prefixes. `# azskills-layout` on
+its own line opts one file in, and `--layout` opts in every reported script
+that carries neither marker; a mod marker wins over both, because its gate is
+stricter. Only the two ends are decidable there: an engine-dispatched callback
+or a function an ancestor script declares is Extensions, and a
+`connect("sig", self, "method")` target or a `_on_<words>` name is Signals. A
+helper may sit in Custom or Methods, since no prefix says which. The findings
+are `SCRIPT_SECTION_MISSING`, `SCRIPT_FUNCTION_UNSECTIONED`,
+`SCRIPT_SECTION_PLACEMENT`, `SCRIPT_SECTION_ORDER`, `SCRIPT_SECTION_FORMAT`,
+and `SCRIPT_SECTION_EXTRA`. Only `Variables` and `Setters` may banner the
+declaration block: a setter body under `Setters` is a declaration rather than a
+layer member, so it is not order-checked, while any other banner above
+Extensions is reported and a function under it has no section. The fixture
+count grows from 47 to 65.
+
+The release is minor: no plugin ID, module id, or mode changed, so an upgrade
+only refreshes the checkout and the installed plugin.
+
 ## 5.0.0: task-level plugins
 4.0.0 made every module its own installable plugin. That fixed hidden
 capabilities, but split closely related work into many tiny entries, so a task
