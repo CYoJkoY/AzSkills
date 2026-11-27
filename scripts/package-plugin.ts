@@ -102,6 +102,9 @@ export function pluginManifest(
   modes: readonly string[],
 ): Record<string, unknown> {
   const hooks = entry.hooks === null ? {} : { hooks: entry.hooks.startsWith("./") ? entry.hooks : "./" + entry.hooks };
+  const mcpServers = entry.mcpServers === undefined
+    ? {}
+    : { mcpServers: entry.mcpServers.startsWith("./") ? entry.mcpServers : "./" + entry.mcpServers };
   return {
     name: entry.id,
     version,
@@ -110,6 +113,7 @@ export function pluginManifest(
     keywords: [...entry.id.split("-"), "azskills", "workflow"],
     skills: "./skills/",
     ...hooks,
+    ...mcpServers,
     interface: {
       displayName: displayName(entry.id),
       shortDescription: description,

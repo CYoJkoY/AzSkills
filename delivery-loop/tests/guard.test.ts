@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import {
   bashCommand,
+  blankCommitReason,
+  catastrophicDeleteReason,
   denyReasonForBash,
   denyReasonForTool,
   isBoundedPush,
+  isDeleteCommand,
   isShellTool,
   normalizeTool,
   reviewWindowOpen,
@@ -107,5 +110,39 @@ assert.equal(bashCommand({ command: "git status" }), "git status");
 assert.equal(bashCommand({ input: "git status" }), "git status");
 assert.equal(bashCommand({ cmd: "git status" }), "git status");
 assert.equal(bashCommand(null), "");
+
+// Deleting is approved: a merged branch, a stale worktree, a scratch build
+// directory, a temp file. Only a whole-volume target is refused.
+assert.equal(isDeleteCommand("rm -rf build"), true);
+assert.equal(isDeleteCommand("rmdir /s /q build"), true);
+assert.equal(isDeleteCommand("Remove-Item -Recurse -Force .azflow/worktrees/t-0001"), true);
+assert.equal(isDeleteCommand("find . -name '*.tmp' -delete"), true);
+assert.equal(isDeleteCommand("git push origin --delete issue/t-0001"), true);
+assert.equal(isDeleteCommand("git branch -d issue/t-0001"), true);
+assert.equal(isDeleteCommand("git worktree prune"), true);
+assert.equal(isDeleteCommand("git stash clear"), true);
+assert.equal(isDeleteCommand("git rm --cached notes.txt"), true);
+assert.equal(isDeleteCommand("rg foo"), false);
+assert.equal(isDeleteCommand("git fetch --prune"), false);
+assert.equal(isDeleteCommand("git commit -m x"), false);
+assert.equal(isDeleteCommand("git worktree add .azflow/worktrees/t-0002"), false);
+
+assert.equal(catastrophicDeleteReason("rm -rf build"), null);
+assert.equal(catastrophicDeleteReason("git push origin --delete issue/x"), null);
+assert.ok(catastrophicDeleteReason("rm -rf /") !== null);
+assert.ok(catastrophicDeleteReason("rm -rf /*") !== null);
+assert.ok(catastrophicDeleteReason("rm -rf ~") !== null);
+assert.ok(catastrophicDeleteReason("rm -rf $HOME") !== null);
+assert.ok(catastrophicDeleteReason("rm -rf $env:USERPROFILE") !== null);
+assert.ok(catastrophicDeleteReason("Remove-Item -Recurse -Force C:\\") !== null);
+
+// A blank commit records nothing to review or resume from.
+assert.equal(blankCommitReason("git commit -m 'feat: ship the guard'"), null);
+assert.equal(blankCommitReason("git commit -am 'fix: guard'"), null);
+assert.equal(blankCommitReason("git status"), null);
+assert.ok(blankCommitReason("git commit --allow-empty -m x") !== null);
+assert.ok(blankCommitReason("git commit --allow-empty-message -m x") !== null);
+assert.ok(blankCommitReason("git commit -m ''") !== null);
+assert.ok(blankCommitReason("git commit --message=") !== null);
 
 console.log("guard.test.ts: all assertions passed");

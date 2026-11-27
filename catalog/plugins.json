@@ -171,6 +171,7 @@
       "extra": [
         "delivery-loop/references",
         "delivery-loop/scripts",
+        "delivery-loop/mcp.json",
         "no-think-tags/hooks",
         "no-think-tags/lib",
         "codex-plugin/hooks/delivery-hooks.json",
@@ -186,7 +187,8 @@
         "codex-plugin/hooks/goal-allowlist.ts",
         "codex-plugin/assets/icons/delivery-loop.svg"
       ],
-      "hooks": "codex-plugin/hooks/delivery-hooks.json"
+      "hooks": "codex-plugin/hooks/delivery-hooks.json",
+      "mcpServers": "delivery-loop/mcp.json"
     },
     {
       "id": "serena",

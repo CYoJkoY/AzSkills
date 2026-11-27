@@ -100,23 +100,31 @@ try {
       }
     } else {
       assert.equal(await exists(path.join(pluginRoot, "skills", plugin.id, "SKILL.md")), true);
-      if (pluginManifest.mcpServers !== undefined) {
-        const serverFile = path.resolve(pluginRoot, pluginManifest.mcpServers);
-        assert.ok(serverFile.startsWith(pluginRoot + path.sep), "MCP manifest must stay inside the plugin");
-        assert.equal(await exists(serverFile), true);
-        const servers = JSON.parse(await readFile(serverFile, "utf8")) as {
-          mcpServers?: Record<string, { command?: string; args?: string[] }>;
-        };
-        const ids = Object.keys(servers.mcpServers ?? {});
-        assert.ok(ids.length > 0, "MCP manifest must declare a server: " + plugin.id);
-        for (const id of ids) {
-          const server = servers.mcpServers?.[id];
-          assert.ok(server !== undefined && (server.command ?? "").length > 0, "MCP server needs a command: " + id);
-        }
-      }
       const composerIcon = pluginManifest.interface?.composerIcon;
       assert.ok(typeof composerIcon === "string" && composerIcon.length > 0, "Standalone plugin needs interface.composerIcon");
       assert.equal(await exists(path.resolve(pluginRoot, composerIcon)), true);
+    }
+    if (pluginManifest.mcpServers !== undefined) {
+      const serverFile = path.resolve(pluginRoot, pluginManifest.mcpServers);
+      assert.ok(serverFile.startsWith(pluginRoot + path.sep), "MCP manifest must stay inside the plugin");
+      assert.equal(await exists(serverFile), true);
+      if (entry.mcpServers !== undefined) assert.equal(pluginManifest.mcpServers, "./" + entry.mcpServers);
+      const servers = JSON.parse(await readFile(serverFile, "utf8")) as {
+        mcpServers?: Record<string, { command?: string; args?: string[] }>;
+      };
+      const ids = Object.keys(servers.mcpServers ?? {});
+      assert.ok(ids.length > 0, "MCP manifest must declare a server: " + plugin.id);
+      for (const id of ids) {
+        const server = servers.mcpServers?.[id];
+        assert.ok(server !== undefined && (server.command ?? "").length > 0, "MCP server needs a command: " + id);
+        for (const arg of server.args ?? []) {
+          const target = /\$\{PLUGIN_ROOT\}\/([^"]+)/.exec(arg);
+          if (target === null) continue;
+          const targetPath = target[1];
+          assert.ok(targetPath, "MCP server argument must name a target: " + arg);
+          assert.equal(await exists(path.join(pluginRoot, targetPath)), true, "MCP target must ship with its plugin: " + targetPath);
+        }
+      }
     }
     if (entry.hooks !== null) {
       assert.equal(await exists(path.join(pluginRoot, entry.hooks)), true);
