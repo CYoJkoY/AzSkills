@@ -1,7 +1,7 @@
 ---
 name: delivery-loop
 description: Run a repository delivery loop that plans concurrent tasks as a dependency DAG with touch-scope leases, isolates each task in its own git worktree, scores reviews mechanically through independent Elephant-Goldfish reviewers, merges automatically on green evidence, and breaks out of dead loops.
-version: 1.7.0
+version: 1.8.0
 status: module
 family: operations
 modes: [init, plan, work, review, ship, recover, goal]
@@ -46,22 +46,26 @@ content of the code being shipped.
 Codex's Goal mode keeps a task alive on its own; this module gives the loop the
 same stamina without it. A local, git-ignored `.azflow/goal.json` holds the
 objective, its done-when criteria, the next step, the progress ledger, and the pass
-budget. On a clean stop the `Stop` hook refuses to end the turn while the goal is
-active and work remains, re-injecting the compass from disk so a compacted context
-is re-grounded rather than trusted to memory; a `SessionStart` hook injects the
-same compass when a session opens. Progress is read from the repository and the
-ledger, never from the model's word: an unchanged HEAD, tree, ledger, and worktree
-set across a pass is no progress, so an idle run first gets one diagnostic pass and
-then stalls instead of spinning. A long run repairs itself within bounds: it
-retries a transient failure, extends a healthy budget, repairs a review that lands
-just under the bar, and completes a goal whose done-when criteria all verify
-against the repository. The guard auto-approves repeated reads, tests, the goal's
-own `--allow` patterns, and a bounded task-branch push; base-branch, force, or tag
-pushes and `gh pr merge` still deny. `azflow goal` owns start, verify, status, note,
-next-step, complete, pause, resume, extend, and abandon; any non-active status ends
-the turn. A goal needs no ledger, and with one the next step is read from that
-ledger. See [goal-run.md](../../delivery-loop/references/goal-run.md) for the state
-file and the full command set.
+budget. The `Stop` hook refuses to end the turn while the goal is active and work
+remains, re-injecting the compass from disk so a compacted context is re-grounded
+rather than trusted to memory; a `SessionStart` hook injects it when a session
+opens. Progress is read from the repository, never the model's word, so an idle
+pass first gets one diagnostic pass and then stalls. A long run retries a transient
+failure, extends a healthy budget, and completes only when every done-when
+criterion verifies. See [goal-run.md](../../delivery-loop/references/goal-run.md)
+for the state file and the full command set.
+
+## Continuity and performance
+
+An unattended run fails more often in quiet ways than at a red gate: the network
+drops mid-push, the turn is interrupted with a task half done, a commit lands with
+an empty message, or the goal reports complete while ledger work is still open.
+`azflow doctor` adds a `continuity` gate that reads the ledger and worktree root
+once and reports an interrupted task, an expired lease, or an orphan worktree; a
+completed goal with open work reopens once, and a blank commit or whole-volume delete is refused.
+Performance is a stated priority: an equally correct cheaper design wins, and a
+check that costs more than the failure it prevents is dropped and named. See
+[continuity.md](../../delivery-loop/references/continuity.md) and [performance.md](../../delivery-loop/references/performance.md).
 
 ## Workflow
 
@@ -75,53 +79,47 @@ file and the full command set.
    [--dep T-0001]`. Each task owns its touch scopes and its dependencies.
 3. Run `azflow plan` to pack planned tasks into waves. A task waits when a
    dependency is unmerged, when the wave is already at `maxParallel`, or when its
-   touch scopes overlap a live lease. Admission is demand-driven, never a fixed
-   roster.
+   touch scopes overlap a live lease; admission is demand-driven, never a roster.
 4. Run `azflow claim <task>` to create the branch and worktree under
    `.azflow/worktrees/`, lease it, and open the task's issue when the ledger has
    none, so the branch always has a number to cite; `--issue <n>` attaches an
    existing issue and `--no-issue` leaves the task unlinked on purpose. Claim
    re-checks admission, so a task cannot start just because `plan` was skipped.
-6. Implement inside the worktree and commit in small, reviewable stages.
-7. Commit each stage with `azflow commit <task> --type <type> --scope <scope>
-   --subject "<subject>"`. The command refuses an empty index, refuses a ledger
-   that records no static check, runs the recorded checks, and enforces the commit
-   standard below, so a red tree never gets a message or a commit; `--skip-check`
-   is the visible escape. It also refuses a new stage while the current head has no
-   stage record, so each commit is scored before the next one lands.
-   A successful commit also pushes the branch to its remote immediately, so the
-   remote backup never waits for a reminder; a push failure keeps the commit and
-   exits 1, and `azflow push <task>` retries idempotently. `--no-push` and
-   `AZFLOW_NO_AUTO_PUSH=1` are the visible escapes.
-8. Run the project's own checks on the final head, then run
-   `azflow review-open <task>` so the guard permits reviewers to spawn, launch the
-   Elephant-Goldfish reviewers in fresh contexts against the diff, and attest them
-   in `review.json`. Score with `azflow review <task> --reviewer <fresh id>
-   --input review.json --scan`. The task must have a claimed worktree; the command
-   derives its real diff and head, always runs the mechanical scanner, and ignores
-   model-supplied file lists. The first review must be round 1; every later round
-   advances by one and carries the previous recorded score. The reviewer must
-   differ from the implementer, and a round needs a live window and an attested
-   fresh-context reviewer, so a self-review or an unattested round is rejected.
-   When the task has a pull request, the scored round is published as the fixed-template
-   review comment automatically; a post failure keeps the record and exits 1 with the
-   retry command. `--no-post` stays offline and `azflow review-post <task>` re-publishes a round.
-9. Run `azflow pr <task>` to open a linked draft pull request with a derived title
-   and body, then `azflow ready <task>` to take it out of draft. Push without asking
-   the user first; `pr` pushes first and confirms the remote branch exists before
-   opening. `pr` refuses any unscored branch commit and refuses until a passing
-   review round with a green verification exists, because opening the pull request
-   is the point where the stage becomes visible; it posts the recorded report as
-   the first comment and exits 1 on a post failure without dropping the pull
-   request. `--allow-unverified` opens it earlier on purpose.
-10. Run `azflow ship <task>` to refresh the pull request body from the recorded
+5. Implement inside the worktree and commit in small, reviewable stages.
+6. Commit each stage with `azflow commit <task> --type <type> --scope <scope>
+   --subject "<subject>"`. It refuses an empty index or a ledger with no recorded
+   check, runs the checks, enforces the standard below, and refuses a new stage
+   while the current head has no stage record, so a red tree never gets a message
+   and each commit is scored before the next lands. A successful commit also pushes
+   the branch immediately, so the remote backup never waits; a push failure keeps
+   the commit and exits 1, and `azflow push <task>` retries idempotently.
+   `--no-push` and `AZFLOW_NO_AUTO_PUSH=1` are the visible escapes.
+7. Run the project's own checks on the final head, then `azflow review-open
+   <task>` so the guard permits reviewers to spawn, launch the Elephant-Goldfish
+   reviewers in fresh contexts against the diff, and attest them in `review.json`.
+   Score with `azflow review <task> --reviewer <fresh id> --input review.json
+   --scan`: the command derives the real diff and head from the claimed worktree,
+   always runs the scanner, and ignores model-supplied file lists. Round 1 comes
+   first, each later round carries the previous score, the reviewer must differ
+   from the implementer, and the round needs a live window and an attested
+   fresh-context reviewer. A scored round publishes itself as the fixed-template
+   pull request comment; a post failure keeps the record and exits 1 with the
+   retry command, `--no-post` stays offline, and `azflow review-post` re-publishes.
+8. Run `azflow pr <task>` to open a linked draft pull request with a derived title
+   and body, then `azflow ready <task>` to take it out of draft. `pr` pushes first,
+   confirms the remote branch exists, refuses any unscored commit, and refuses
+   until a passing round with green verification exists, because opening the pull
+   request makes the stage visible; it posts the recorded report as the first
+   comment and exits 1 on a post failure without dropping the pull request.
+   `--allow-unverified` opens it earlier on purpose.
+9. Run `azflow ship <task>` to refresh the pull request body from the recorded
    review, evaluate every gate at the current head SHA, and merge only on a full
    pass. It opens the pull request itself when the task has none, because `gh pr
    create` is refused inside the project. It closes the issue and exits 1 if it is
    not CLOSED, leaving status `merged-issue-open`; `ship <task> --verify-issue`
    finishes that repair. Then delete the local branch and return to base.
-11. Run `azflow recover` after an interrupted task to release its lease and return
-   it to `planned`; add `--force` to remove orphan worktree directories.
+10. Run `azflow recover` after an interrupted task to release its lease and return
+    it to `planned`; add `--force` to remove orphan worktree directories.
 
 A repair round after `ready` re-runs the checks; the pull request stays open and
 `ship` refuses while the reviewed head differs from the pull request head, so an
@@ -185,8 +183,7 @@ never types a score into the report.
 - Hard caps: any P0 caps at 2.00, any P1 at 3.50, and any P2 at 4.50. P3 and P4 rely on their weight: one P3 lands on 4.80 and one P4 at 4.90, so only a single P4 clears the strict bar; 4.80 is a repair, not a merge.
 - A pass requires zero P0/P1/P2, a score strictly above 4.80, and a round within the repair budget of five.
 - Every commit is scored as its own stage before the next stage lands; the pull request merges only when every branch commit has a record and the head stage is PASS above 4.80, scored by a `--reviewer` distinct from the implementer in a fresh context; a self-review, or an EGM round with no attested fresh-context reviewer, is rejected.
-- An unreviewed diff file, a missing or failed verification command, an incomplete probe set, a dimension marked failing, or an unevidenced finding each caps the report and adds a blocking finding.
-- The score may rise only as fast as the findings recorded as resolved justify, so a weak round cannot jump to a pass.
+- An unreviewed diff file, a missing or failed verification command, an incomplete probe set, a dimension marked failing, or an unevidenced finding each caps the report and adds a blocking finding, and the score may rise only as fast as the resolved findings justify, so a weak round cannot jump to a pass.
 - Review records are grounded in a claimed worktree and the current head. The real diff is scanned on every review, and rounds cannot be replayed, skipped, or omit the previous recorded score.
 - A mechanical scanner injects secrets, conflict markers, `any`, empty catches, framework imports, tab indentation, debug logs, loose equality, and TODO markers before scoring, so the model cannot hide them.
 - The posted report follows a fixed template: head SHA, verdict, score, the review engine, the previous-round closure table, the deduction breakdown, every P0-P4 row, and the four dimension summaries.
@@ -210,11 +207,9 @@ A self review, or an EGM round with no attested reviewer, injects a P2 that caps
 6. The reviewed head SHA equals the pull request head SHA (`review-head`).
 7. The pull request carries the fixed-template review comment for the recorded round, head, verdict, and score; on a live run a missing comment is re-posted and re-validated (`review-comment`).
 8. Required CI checks are green with no failing or pending check (`ci-green`).
-9. The pull request is mergeable and not dirty (`mergeable`).
-10. The base branch is unchanged from the configured base (`base-unchanged`).
-11. No blocking label (`do-not-merge`, `blocked`, `wip`, `needs-decision`).
-12. The pull request is open and not a draft (`not-draft`, `pr-open`).
-13. Autonomy is `full` (`autonomy`); the loop merges on green evidence and does not ask again. Set autonomy to `manual` for an explicit human ship.
+9. The pull request is mergeable and not dirty, and the base branch is unchanged from the configured base (`mergeable`, `base-unchanged`).
+10. The pull request is open and not a draft (`not-draft`, `pr-open`) and carries no blocking label (`do-not-merge`, `blocked`, `wip`, `needs-decision`).
+11. Autonomy is `full` (`autonomy`); the loop merges on green evidence and does not ask again. Set autonomy to `manual` for an explicit human ship.
 
 On a pass the loop merges with `mergeStrategy` (squash by default), records the merge, closes the linked issue, and fast-forwards the base.
 It verifies `gh issue view --json state` reads `CLOSED`, retrying once and exiting 1 otherwise.
@@ -225,25 +220,22 @@ Merge is never delegated to a manual `gh pr merge`; the guard denies it so gates
 An unattended run can repeat one step forever. The failure is quiet: no merge, no error, and no review record.
 The loop therefore treats a repeating step as a failure of the same weight as a broken gate.
 
-- A step repeats when the same tool call, or the same short cycle of calls, runs at the end of the turn: four times for one call, and four repeats of a cycle of two to four calls. The same final reply three times in a row also counts, and so does a second blank reply in one turn: the first blank is recorded, and the second shows the turn is not producing an answer.
-- The `PreToolUse` guard denies the fourth identical shell call before it runs, so a loop is interrupted mid-turn instead of burning the rest of the window.
-- The `Stop` guard catches everything the tool guard cannot see, including repeated replies and repeated reads, and restarts the turn. The restart is scoped to a delivery project, meaning a directory above the turn that carries `.azflow/state.json` or `.azflow/goal.json`; anywhere else a repeated reply or read is ordinary work and is left alone, so a long task outside the loop is never cut short.
-- A restart voids the looped attempt and re-sends the original prompt in the same conversation, with a notice that a dead loop just happened. It never opens a new session and never asks the user to repeat the request.
-- Restarts are budgeted: at most two per turn, so a model that keeps looping is stopped by the budget rather than by an endless guard. After a breaker interruption the counter resets, so a deliberate re-run of the same command after a fix is still allowed.
+- A step repeats when the same tool call, or the same short cycle of calls, runs at the end of the turn: four times for one call, four repeats of a cycle of two to four calls, the same final reply three times in a row, or a second blank reply in one turn. The `PreToolUse` guard denies the fourth identical shell call before it runs, so a loop is interrupted mid-turn instead of burning the rest of the window.
+- The `Stop` guard catches what the tool guard cannot see, including repeated replies and reads, and restarts the turn. The restart is scoped to a delivery project carrying `.azflow/state.json` or `.azflow/goal.json`; anywhere else a repeated reply or read is ordinary work, so a long task outside the loop is never cut short.
+- A restart voids the looped attempt and re-sends the original prompt in the same conversation with a notice that a dead loop just happened; it never opens a new session and never asks the user to repeat the request. Restarts are budgeted at two per turn, so a model that keeps looping stops on the budget rather than an endless guard, and the counter resets after a breaker interruption so a deliberate re-run after a fix is allowed.
 - The `UserPromptSubmit` hook records the prompt in per-session state the moment it arrives. That copy, not the transcript, is what a restart quotes, so the prompt survives compaction and a flooded window.
 
 ## Reasoning-leak guard
 
-A leaked reasoning tag is a visible defect, not only wasted context: it is on screen and cannot be recalled, so three layers guard it and each fails open.
+A leaked reasoning tag is a visible defect, not only wasted context, so three layers guard it and each fails open.
 
-- The `UserPromptSubmit` hook states the rule before the turn's first message, while every message is still unwritten.
-- The `PreToolUse` hook reads the turn's visible messages at the next tool call and injects one short correction per new leak; it never blocks the call and allows two nudges per turn.
-- The `Stop` hook corrects a final reply that leaks a block with one bounded re-send, and reports a blank reply the same way; the mid-turn and Stop budgets stay separate.
+- The `UserPromptSubmit` hook states the rule before the turn's first message, and the `PreToolUse` hook reads the turn's visible messages at the next tool call and injects one short correction per new leak; it never blocks the call and allows two nudges per turn.
+- The `Stop` hook corrects a leaking final reply with one bounded re-send and reports a blank reply the same way; the mid-turn and Stop budgets stay separate.
 
 ## Quality gates
 
-- Confirm the ledger is git-ignored and the guard is active before claiming work.
-- Verify each claim names disjoint touch scopes; a conflict waits for a later wave.
+- Confirm the ledger is git-ignored, the guard is active, and each claim names
+  disjoint touch scopes before work starts; a conflict waits for a later wave.
 - Verify the shipped head SHA equals the reviewed head SHA, not an earlier commit.
 - Confirm the review report carries the closure table, the breakdown, every P0-P4
   row, the four dimensions, and real command output.
@@ -254,6 +246,11 @@ A leaked reasoning tag is a visible defect, not only wasted context: it is on sc
 - Confirm the task branch was pushed without asking, and that the merge was
   followed by a local branch delete and a fast-forwarded base, again without
   asking. Cleanup is part of the loop, not a question for the user.
+- Confirm a delete inside the project ran without a prompt and that only a
+  whole-volume or home-directory delete was refused, so policy never cripples
+  cleanup.
+- Confirm drift was settled before new work: open ledger work blocks `goal
+  complete` without `--force`, and a completed goal with open work reopens once.
 - Confirm the final reply is readable text, that no visible message leaked a
   reasoning tag, and that the reply body is not blank.
 - Confirm a repeating step was interrupted rather than retried, and that the
@@ -274,6 +271,9 @@ SHA is a failed delivery, not a shortcut.
 - [Review comment](../../delivery-loop/references/review-comment.md) - the fixed-template pull request comment, its publishing commands, and the merge gate.
 - [Automation surface](../../delivery-loop/references/automation.md) - command surface, issue and pull request automation, and the guard.
 - [Goal run](../../delivery-loop/references/goal-run.md) - durable objective, stop-hook continuation, progress from real state, and stall and budget safety.
+- [Continuity](../../delivery-loop/references/continuity.md) - drift kinds, interrupted tasks, blank commits, and where each one surfaces.
+- [Performance](../../delivery-loop/references/performance.md) - the performance-first rule and the checks the loop trades away for speed.
+- [Panel](../../delivery-loop/references/panel.md) - the snapshot, the MCP panel server, and the config surface.
 - [Loop guard](../../delivery-loop/references/loop-guard.md) - dead-loop detection, the in-turn breaker, the restart budget, and prompt replay.
 - [Output hygiene](../../delivery-loop/references/output-hygiene.md) - the three-layer reasoning-leak guard and what counts as a leak.
 - [Local ledger](../../delivery-loop/references/ledger.md) - ledger layout, state schema, and atomic locked writes.

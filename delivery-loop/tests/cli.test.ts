@@ -815,6 +815,66 @@ async function main(): Promise<void> {
   assert.match(goalVerified.stdout, /\[pass\] file README\.md exists/);
   assert.match(goalVerified.stdout, /Satisfied: yes/);
 
+  // Completing a goal while the ledger still holds open work is refused, so a
+  // run cannot report a delivery it did not finish; --force is the escape for
+  // work that belongs to a different objective.
+  must(["add", "Loose ends", "--touch", "src/loose/**"]);
+  const blockedComplete = cli(["goal", "complete"]);
+  assert.notEqual(blockedComplete.status, 0, "complete is refused while a ledger task is open");
+  assert.match(blockedComplete.stderr, /still holds open work/);
+  const forcedComplete = must(["goal", "complete", "--force", "--summary", "Shipping the rest elsewhere"]);
+  assert.match(forcedComplete.stdout, /Forced with \d+ open task\(s\)/);
+  const reopenedGoal = must(["goal", "reopen"]);
+  assert.match(reopenedGoal.stdout, /Goal reopened from 'complete'/);
+  const reopenAgain = cli(["goal", "reopen"]);
+  assert.notEqual(reopenAgain.status, 0, "an active goal is not reopened twice");
+  assert.match(reopenAgain.stderr, /already active/);
+
+  // The doctor's continuity gate names the disagreement instead of passing
+  // quietly; an active task with no live lease is the pass that never finished.
+  const ledgerNow = JSON.parse(await readFile(stateFile(project), "utf8")) as {
+    tasks: { id: string; status: string; lease: unknown }[];
+  };
+  const loose = ledgerNow.tasks.find((entry) => entry.id === "T-0007");
+  assert.ok(loose !== undefined, "the loose task is in the ledger");
+  loose.status = "active";
+  loose.lease = null;
+  await writeFile(stateFile(project), JSON.stringify(ledgerNow, null, 2) + "\n", "utf8");
+  const doctor = cli(["doctor", "--json"]);
+  const report = JSON.parse(doctor.stdout) as { checks: { gate: string; pass: boolean; detail: string }[] };
+  const continuity = report.checks.find((check) => check.gate === "continuity");
+  assert.ok(continuity !== undefined, "doctor reports a continuity gate");
+  assert.equal(continuity?.pass, false, "an interrupted task is reported as drift");
+  assert.match(continuity?.detail ?? "", /interrupted-task/);
+
+  // The panel reads the same state as JSON, so the GUI and the CLI can never
+  // disagree about what the run looks like.
+  const panel = JSON.parse(must(["panel", "--json"]).stdout) as {
+    project: string;
+    counts: { total: number; open: number };
+    drift: { kind: string; fix: string }[];
+    waves: { index: number; tasks: string[] }[];
+  };
+  assert.equal(panel.project.toLowerCase(), path.resolve(project).toLowerCase());
+  assert.ok(panel.counts.total >= 7, "the panel reports every ledger task");
+  assert.ok(panel.drift.some((finding) => finding.kind === "interrupted-task"));
+  const panelFile = path.join(work, "panel.html");
+  const panelWritten = must(["panel", "--out", panelFile]);
+  assert.match(panelWritten.stdout, /Panel written:/);
+  const panelDocument = await readFile(panelFile, "utf8");
+  assert.ok(panelDocument.includes('id="snapshot"'), "the panel embeds its snapshot");
+  assert.ok(panelDocument.includes("azflow_config"), "the panel can reach the configuration tool");
+
+  // The configuration form has a command-line equivalent that validates the
+  // same keys, so a bad patch is refused wherever it comes from.
+  assert.match(must(["config", "set", "maxParallel", "5"]).stdout, /Config maxParallel updated/);
+  const panelConfig = JSON.parse(must(["config", "show", "--json"]).stdout) as { maxParallel: number };
+  assert.equal(panelConfig.maxParallel, 5);
+  const badKey = cli(["config", "set", "base", "develop"]);
+  assert.notEqual(badKey.status, 0, "the base branch is not editable from the panel");
+  assert.match(badKey.stderr, /not editable/);
+  assert.match(must(["config", "keys"]).stdout, /reviewThreshold/);
+
   await rm(work, { recursive: true, force: true });
   console.log("cli.test.ts: all assertions passed");
 }

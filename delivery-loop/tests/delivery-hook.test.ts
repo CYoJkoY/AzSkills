@@ -274,10 +274,10 @@ try {
     await rm(goalProject, { recursive: true, force: true });
   }
 
-  // The guard auto-approves the repeated reads, tests, and bounded task-branch
-  // pushes a long run performs, so those stop asking the user, while a base
-  // push, a force push, a tag push, or a merge still goes through the deny
-  // rules and is never let through by the allowlist.
+  // The guard auto-approves the repeated reads, tests, bounded task-branch
+  // pushes, and deletes a long run performs, so those stop asking the user,
+  // while a base push, a force push, a tag push, or a merge still goes through
+  // the deny rules and is never let through by the allowlist.
   const allowProject = await mkdtemp(path.join(tmpdir(), "azskills-goal-allow-"));
   try {
     await mkdir(path.join(allowProject, ".azflow"), { recursive: true });
@@ -305,6 +305,16 @@ try {
       "npm run custom",
       "git push -u origin issue/t-0001",
       "cd task-worktree && git push -u origin issue/t-0001",
+      // Deleting is ordinary loop work: a merged branch, a stale worktree, a
+      // scratch build directory. Each is approved without a prompt.
+      "git push origin --delete issue/t-0001",
+      "git tag -d v1.2.3",
+      "git worktree remove .azflow/worktrees/t-0001",
+      "git stash drop",
+      "rm -rf build",
+      "rmdir /s /q build",
+      "find . -name '*.tmp' -delete",
+      "Remove-Item -Recurse -Force .azflow/worktrees/t-0001",
     ]) {
       assert.equal(guard(approved).permissionDecision, "allow", approved + " is auto-approved");
     }
@@ -313,11 +323,16 @@ try {
       "git push --force origin issue/t-0001",
       "git push --tags origin",
       "git push --all origin",
-      "git push origin --delete issue/t-0001",
-      "git tag -d v1.2.3",
       "rg foo > out.txt",
-      "find . -delete",
       "rg --pre \"rm -rf build\" foo",
+      // The one delete the loop refuses is a whole-volume target.
+      "rm -rf /",
+      "rm -rf ~",
+      "Remove-Item -Recurse -Force C:\\",
+      // A blank commit records nothing to review or resume from.
+      "git commit --allow-empty -m shipped",
+      "git commit -m \"\"",
+      "git commit --message=",
     ]) {
       assert.notEqual(guard(refused).permissionDecision, "allow", refused + " is never auto-approved");
     }

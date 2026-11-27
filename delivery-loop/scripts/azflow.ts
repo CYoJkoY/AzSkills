@@ -85,9 +85,11 @@ import {
   writeState,
 } from "./state.ts";
 import type { FlowState, ReviewRecord, ReviewWindow, Task } from "./state.ts";
+import { detectDrift, driftSummary, openTasks } from "./continuity.ts";
 import {
   DEFAULT_MAX_ITERATIONS,
   DEFAULT_MAX_NO_PROGRESS,
+  MAX_DRIFT_REOPENS,
   MAX_PROGRESS_ENTRIES,
   createGoal,
   findGoalProject,
@@ -101,6 +103,7 @@ import {
 } from "./goal.ts";
 import type { GoalState } from "./goal.ts";
 import { describeDoneWhen, verifyDoneWhen } from "./goal-verify.ts";
+import { PANEL_CONFIG_KEYS, applyPanelPatch, panelBrief, panelHtml, panelSnapshot } from "./panel.ts";
 
 interface Args {
   readonly command: string;
@@ -1915,12 +1918,98 @@ async function doctor(args: Args): Promise<void> {
           : "self review is not accepted; set reviewEngine to egm",
     });
   }
+  // Continuity sits outside the ledger block so a project that lost its ledger
+  // but left a goal or a worktree behind is still reported.
+  const goal = await readGoal(project).catch(() => null);
+  const worktreeNames = await readdir(worktreesRoot(project), { withFileTypes: true })
+    .then((entries) => entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name))
+    .catch(() => [] as string[]);
+  const findings = detectDrift(
+    { goalStatus: goal?.status ?? null, tasks: state?.tasks ?? [], worktreeDirectories: worktreeNames },
+    Date.now(),
+  );
+  const firstFix = findings.at(0)?.fix ?? "";
+  checks.push({
+    gate: "continuity",
+    pass: findings.length === 0,
+    detail: findings.length === 0 ? driftSummary(findings) : driftSummary(findings) + "; " + firstFix,
+  });
   const failed = checks.filter((check) => !check.pass);
   if (args.flags.has("json")) printJson({ checks, failed: failed.map((check) => check.gate) });
   else {
     for (const check of checks) print((check.pass ? "PASS " : "FAIL ") + check.gate + ": " + check.detail);
   }
   if (failed.length > 0) process.exitCode = 2;
+}
+
+async function panelCommand(args: Args): Promise<void> {
+  const project = projectRoot(args);
+  const state = await readState(project).catch(() => null);
+  const goal = await readGoal(project).catch(() => null);
+  const worktreeNames = await readdir(worktreesRoot(project), { withFileTypes: true })
+    .then((entries) => entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name))
+    .catch(() => [] as string[]);
+  const snapshot = panelSnapshot({
+    project,
+    now: Date.now(),
+    goal,
+    state,
+    worktreeDirectories: worktreeNames,
+  });
+  if (args.flags.has("json")) {
+    printJson(snapshot);
+    return;
+  }
+  const out = path.resolve(lastValue(args, "out") ?? path.join(flowRoot(project), "panel.html"));
+  await mkdir(path.dirname(out), { recursive: true });
+  await writeFile(out, panelHtml(snapshot), "utf8");
+  print(panelBrief(snapshot));
+  print("");
+  print("Panel written: " + out);
+}
+
+function parseConfigValue(key: string, raw: string): Record<string, unknown> {
+  if (key === "checks" || key === "allowFrameworks") {
+    return { [key]: raw.split(",").map((item) => item.trim()).filter((item) => item !== "") };
+  }
+  if (key === "maxParallel" || key === "leaseTtlMinutes" || key === "reviewThreshold") {
+    const value = Number(raw);
+    if (raw.trim() === "" || !Number.isFinite(value)) throw new Error("config " + key + " expects a number.");
+    return { [key]: value };
+  }
+  return { [key]: raw.trim() };
+}
+
+async function configCommand(args: Args): Promise<void> {
+  const project = projectRoot(args);
+  const sub = args.positionals[0] ?? "show";
+  if (sub === "keys") {
+    print(PANEL_CONFIG_KEYS.join("\n"));
+    return;
+  }
+  if (sub === "show") {
+    const state = await requireState(project);
+    if (args.flags.has("json")) printJson(state.config);
+    else {
+      for (const [key, value] of Object.entries(state.config)) {
+        print(key + ": " + (Array.isArray(value) ? value.join(", ") || "(none)" : String(value)));
+      }
+    }
+    return;
+  }
+  if (sub === "set") {
+    const key = args.positionals[1];
+    if (key === undefined) throw new Error("Usage: azflow config set <key> <value>");
+    const patch = parseConfigValue(key, args.positionals.slice(2).join(" "));
+    const next = await withLock(project, async (state) => {
+      state.config = applyPanelPatch(state.config, patch);
+      return state.config;
+    });
+    print("Config " + key + " updated.");
+    if (args.flags.has("json")) printJson(next);
+    return;
+  }
+  throw new Error("Unknown config subcommand: " + sub);
 }
 
 function goalUsage(): void {
@@ -1937,7 +2026,8 @@ function goalUsage(): void {
       "  azflow goal pause [--reason \"<why>\"]",
       "  azflow goal resume",
       "  azflow goal extend --by <N>",
-      "  azflow goal complete [--summary \"<result>\"]",
+      "  azflow goal complete [--summary \"<result>\"] [--force]",
+      "  azflow goal reopen",
       "  azflow goal abandon [--reason \"<why>\"]",
       "",
       "Goal file: .azflow/goal.json (local, git-ignored). The Stop hook keeps the turn",
@@ -2082,6 +2172,16 @@ async function goalCommand(args: Args): Promise<void> {
     }
     case "complete": {
       const summary = (lastValue(args, "summary") ?? text).trim();
+      const flow = await readState(project).catch(() => null);
+      const open = flow === null ? [] : openTasks({ goalStatus: "complete", tasks: flow.tasks });
+      const forced = args.flags.has("force");
+      if (open.length > 0 && !forced) {
+        throw new Error(
+          "Refusing to complete: the ledger still holds open work (" +
+            open.map((task) => task.id + " " + task.status).join(", ") +
+            "). Finish it, or run `azflow goal complete --force --summary \"<why>\"` to close anyway.",
+        );
+      }
       const updated = await updateGoal(project, (goal) => ({
         ...goal,
         status: "complete",
@@ -2089,7 +2189,32 @@ async function goalCommand(args: Args): Promise<void> {
         updatedAt: at,
       }));
       if (updated === null) throw new Error("No goal at " + flowRoot(project) + ".");
-      print("Goal complete." + (summary === "" ? "" : " " + summary));
+      print(
+        "Goal complete." +
+          (summary === "" ? "" : " " + summary) +
+          (open.length > 0 ? " Forced with " + open.length + " open task(s); they stay in the ledger." : ""),
+      );
+      return;
+    }
+    case "reopen": {
+      const goal = await requireGoal();
+      if (goal.status === "active") throw new Error("Goal is already active.");
+      const marker = await progressMarker(project).catch(() => goal.lastMarker);
+      const updated = await updateGoal(project, (current) => ({
+        ...current,
+        status: "active",
+        driftReopens: current.driftReopens + 1,
+        noProgress: 0,
+        retry: null,
+        lastMarker: marker,
+        updatedAt: at,
+      }));
+      if (updated === null) throw new Error("No goal at " + flowRoot(project) + ".");
+      const notice =
+        updated.driftReopens > MAX_DRIFT_REOPENS
+          ? " The automatic reopen budget was already spent; this reopen is manual."
+          : "";
+      print("Goal reopened from '" + goal.status + "' (reopen " + updated.driftReopens + ")." + notice);
       return;
     }
     case "abandon": {
@@ -2130,7 +2255,9 @@ function help(): void {
       "  azflow review-post <task> [--round N] [--pr N] [--json]",
       "  azflow ship <task>|--pr <n> [--dry-run] [--verify-issue] [--json]",
       "  azflow recover [--force]",
-      "  azflow goal start|status|next|note|next-step|pause|resume|extend|verify|complete|abandon",
+      "  azflow goal start|status|next|note|next-step|pause|resume|extend|verify|complete|reopen|abandon",
+      "  azflow panel [--json] [--out <path>]",
+      "  azflow config [show|keys|set <key> <value>] [--json]",
       "  azflow doctor [--json]",
       "",
       "Ledger: .azflow/state.json (local, git-ignored). GitHub Issue/PR stays the shared record.",
@@ -2160,6 +2287,8 @@ async function main(): Promise<void> {
     case "ship": await ship(args); break;
     case "recover": await recover(args); break;
     case "goal": await goalCommand(args); break;
+    case "panel": await panelCommand(args); break;
+    case "config": await configCommand(args); break;
     case "doctor": await doctor(args); break;
     case "help":
     case "--help":

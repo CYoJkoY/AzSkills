@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "azflow-panel": {
+      "command": "node",
+      "args": [
+        "${PLUGIN_ROOT}/delivery-loop/scripts/azflow-panel.ts"
+      ],
+      "startup_timeout_sec": 30
+    }
+  }
+}

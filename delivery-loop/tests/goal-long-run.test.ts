@@ -9,7 +9,9 @@ import {
   createGoal,
   estimateBudget,
   isTransientFailure,
+  progressMarker,
   readGoal,
+  updateGoal,
 } from "../scripts/goal.ts";
 import { parseDoneWhen, verifyDoneWhen } from "../scripts/goal-verify.ts";
 import { DEFAULT_CONFIG, makeTask, writeState, type FlowState, type Task } from "../scripts/state.ts";
@@ -213,7 +215,42 @@ try {
   assert.deepEqual(allowGoal.allowedCommands, ["npm run custom"]);
   assert.deepEqual(await readGoalAllowlist(allowRoot), ["npm run custom"]);
 
-  console.log("goal-long-run.test.ts: budget, transient retry, done-when verify, auto-complete, checkpoint, auto-extend, review repair, allowlist passed");
+  // A goal marked complete while the ledger still holds open work is reopened
+  // once, so the run finishes what it started instead of reporting a delivery
+  // that did not happen.
+  const driftRoot = await freshRepo();
+  dirs.push(driftRoot);
+  await createGoal(driftRoot, { objective: "Finish the ledger", doneWhen: ["Ship it"] });
+  await writeState(driftRoot, flowWith("review", { worktree: null, review: null }));
+  await updateGoal(driftRoot, (goal) => ({ ...goal, status: "complete" }));
+  const reopened = await advanceGoal(driftRoot, Date.now());
+  assert.equal(reopened.action, "continue");
+  assert.match(reopened.reason ?? "", /AZFLOW GOAL REOPENED/);
+  const afterReopen = await readGoal(driftRoot);
+  assert.equal(afterReopen?.status, "active");
+  assert.equal(afterReopen?.driftReopens, 1);
+  // Completing again with the same open work is not reopened a second time.
+  await updateGoal(driftRoot, (goal) => ({ ...goal, status: "complete" }));
+  const secondComplete = await advanceGoal(driftRoot, Date.now());
+  assert.equal(secondComplete.action, "allow");
+  assert.equal((await readGoal(driftRoot))?.status, "complete");
+
+  // AZFLOW_FAST trades the content hash for a size-and-mtime marker, which
+  // still moves when a pass edits a dirty file.
+  process.env.AZFLOW_FAST = "1";
+  try {
+    const fastRoot = await freshRepo();
+    dirs.push(fastRoot);
+    await writeFile(path.join(fastRoot, "seed.txt"), "one\ntwo\n", "utf8");
+    const fastA = await progressMarker(fastRoot);
+    assert.equal(await progressMarker(fastRoot), fastA);
+    await writeFile(path.join(fastRoot, "seed.txt"), "one\ntwo\nthree\n", "utf8");
+    assert.notEqual(await progressMarker(fastRoot), fastA);
+  } finally {
+    delete process.env.AZFLOW_FAST;
+  }
+
+  console.log("goal-long-run.test.ts: budget, transient retry, done-when verify, auto-complete, checkpoint, auto-extend, review repair, allowlist, drift reopen, fast marker passed");
 } finally {
   for (const dir of dirs) await rm(dir, { recursive: true, force: true });
 }

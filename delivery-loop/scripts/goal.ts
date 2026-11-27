@@ -26,8 +26,10 @@ import { spawnSync } from "node:child_process";
 import { createReadStream } from "node:fs";
 import { lstat, mkdir, readFile, readdir, readlink, rename, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+import process from "node:process";
 import { flowRoot, isRecord, planWaves, readState, reviewsRoot, statePath } from "./state.ts";
 import type { FlowState } from "./state.ts";
+import { detectDrift, driftReopenReason } from "./continuity.ts";
 import { describeDoneWhen, parseDoneWhen, verifyDoneWhen } from "./goal-verify.ts";
 import type { DoneWhenReport } from "./goal-verify.ts";
 
@@ -47,6 +49,8 @@ export const MAX_TRANSIENT_RETRIES = 3;
 export const DIAGNOSE_GRACE = 2;
 /** Review score below which an automatic repair is not safe. */
 export const MIN_REPAIRABLE_SCORE = 4.0;
+/** Automatic reopens allowed when a complete goal still has open ledger work. */
+export const MAX_DRIFT_REOPENS = 1;
 
 export type GoalStatus = "active" | "paused" | "complete" | "abandoned" | "stalled";
 
@@ -102,6 +106,8 @@ export interface GoalState {
   lastRepairRound: number;
   /** True once the single automatic diagnosis pass has been used. */
   diagnosed: boolean;
+  /** Count of automatic reopens spent on a complete goal that still had open work. */
+  driftReopens: number;
   /** Command patterns the guard may auto-approve inside this project. */
   allowedCommands: string[];
 }
@@ -219,6 +225,7 @@ function readGoalState(value: unknown): GoalState | null {
     autoRepairs: nonNegative(value.autoRepairs),
     lastRepairRound: nonNegative(value.lastRepairRound),
     diagnosed: value.diagnosed === true,
+    driftReopens: nonNegative(value.driftReopens),
     allowedCommands: readAllowedCommands(value.allowedCommands),
   };
 }
@@ -318,11 +325,20 @@ async function hashFile(file: string): Promise<string> {
   return bytes === null ? "" : createHash("sha256").update(bytes).digest("hex").slice(0, 16);
 }
 
+/** AZFLOW_FAST trades an exact content hash for a size-and-mtime marker. */
+const fastMarkers = (): boolean => process.env.AZFLOW_FAST === "1" || process.env.AZFLOW_FAST === "true";
+
 async function dirtyPathMarker(file: string): Promise<string> {
   const info = await lstat(file).catch(() => null);
   if (info === null) return "missing";
   if (info.isSymbolicLink()) return "link:" + await readlink(file);
   if (!info.isFile()) return "other";
+  // Reading every dirty file on every pass is the expensive half of the
+  // progress marker. Size and mtime still move when a pass edits the file, so
+  // AZFLOW_FAST keeps the marker honest while skipping the content read; an
+  // edit that keeps both byte length and mtime identical is rare enough that
+  // the saved IO is the better trade on a long run.
+  if (fastMarkers()) return "fast:" + String(info.size) + ":" + String(Math.round(info.mtimeMs));
   const hash = createHash("sha256");
   for await (const chunk of createReadStream(file)) hash.update(chunk);
   return hash.digest("hex");
@@ -705,6 +721,34 @@ function repairBudgetReason(goal: GoalState, flow: FlowState | null, review: Rev
 }
 
 /**
+ * Reopens a complete goal once when the ledger still holds open work or a
+ * merged task's issue is still open. Returns null when there is nothing to
+ * reopen or the single reopen already happened, so the caller allows the turn.
+ */
+async function reopenOnDrift(project: string, goal: GoalState, now: number): Promise<AdvanceOutcome | null> {
+  if (goal.driftReopens >= MAX_DRIFT_REOPENS) return null;
+  const flow = await readFlowSafe(project);
+  const findings = detectDrift({ goalStatus: goal.status, tasks: flow?.tasks ?? [] }, now).filter(
+    (finding) => finding.kind === "goal-complete-work-open" || finding.kind === "merged-issue-open",
+  );
+  if (findings.length === 0) return null;
+  const marker = await progressMarker(project).catch(() => goal.lastMarker);
+  const at = nowIso(now);
+  const next: GoalState = {
+    ...goal,
+    status: "active",
+    driftReopens: goal.driftReopens + 1,
+    noProgress: 0,
+    retry: null,
+    lastMarker: marker,
+    updatedAt: at,
+    blockers: pushBlocker(goal.blockers, "Reopened: complete goal still had open ledger work."),
+  };
+  await writeGoal(project, next);
+  return { action: "continue", reason: driftReopenReason(findings), goal: next };
+}
+
+/**
  * The Stop-hook decision. Continues an active goal while it is making progress,
  * stalls it once progress stops, and pauses it when the iteration budget is
  * spent. A healthy run extends its own budget, retries a transient failure, and
@@ -713,7 +757,16 @@ function repairBudgetReason(goal: GoalState, flow: FlowState | null, review: Rev
  */
 export async function advanceGoal(project: string, now: number, signal: AdvanceSignal = {}): Promise<AdvanceOutcome> {
   return withGoalLock(project, async (goal) => {
-    if (goal === null || goal.status !== "active") return { action: "allow", reason: null, goal };
+    if (goal === null) return { action: "allow", reason: null, goal };
+    // A goal can be marked complete while the ledger still holds a task nobody
+    // merged, or while a merged task's issue is still open. Reopen it once so
+    // the run finishes what it started; later turns are left alone so a
+    // finished goal is not pulled back open forever.
+    if (goal.status === "complete") {
+      const reopened = await reopenOnDrift(project, goal, now);
+      return reopened ?? { action: "allow", reason: null, goal };
+    }
+    if (goal.status !== "active") return { action: "allow", reason: null, goal };
     const flow = await readFlowSafe(project);
     const marker = await progressMarker(project);
     const changed = goal.lastMarker !== "" && marker !== goal.lastMarker;
@@ -955,6 +1008,7 @@ export async function createGoal(
     autoRepairs: 0,
     lastRepairRound: 0,
     diagnosed: false,
+    driftReopens: 0,
     allowedCommands: readAllowedCommands(input.allowedCommands ?? []),
   };
 

@@ -275,6 +275,42 @@ count grows from 47 to 65.
 The release is minor: no plugin ID, module id, or mode changed, so an upgrade
 only refreshes the checkout and the installed plugin.
 
+## 7.11.0: delivery-loop continuity and side panel
+
+`delivery-loop` now treats the quiet failures of an unattended run as first-class
+state instead of surprises. A network drop, a cancelled turn, a lease that
+expires mid-task, a commit with no message, and a goal that reports complete
+while ledger work is still open each leave the goal, the ledger, and the
+worktrees disagreeing.
+
+- `scripts/continuity.ts` is pure: it reads the goal status, the ledger, and the
+  worktree directory names and reports `interrupted-task`, `merged-issue-open`,
+  `goal-complete-work-open`, `goal-active-work-done`, and `orphan-worktree`.
+- `azflow doctor` gains a `continuity` gate, and the `SessionStart` hook injects
+  the findings so a restarted session re-grounds instead of starting new work.
+- A goal that reports complete while ledger work is open reopens once, bounded
+  per goal, so "done" cannot hide an unmerged task.
+- A commit with a blank message is refused before it lands, and the delivery
+  guard now auto-approves delete commands while refusing only a whole-volume or
+  home-directory target.
+- Performance is a stated priority: an equally correct cheaper design wins, and a
+  check that costs more than the failure it prevents is dropped and named in the
+  change summary.
+
+The panel makes the same state visible. `scripts/panel.ts` joins the goal, the
+ledger, the wave plan, the blocked list, and the drift findings into one
+snapshot, validates configuration patches strictly, and renders a self-contained
+HTML page. `scripts/azflow-panel.ts` serves it over MCP as `azflow_panel` and
+`azflow_config` with `ui://azflow/panel.html` and `azflow://snapshot` resources,
+started from the bundled `delivery-loop/mcp.json` at `${PLUGIN_ROOT}`. The same
+data is reachable without a host: `azflow panel` writes `.azflow/panel.html` or
+prints JSON, and `azflow config show|keys|set` edits the configuration through the
+ledger lock. Live sidebar rendering needs an installed client; the snapshot,
+patch validation, and HTML are unit tested.
+
+The release is minor: no plugin ID, module id, or mode changed, so an upgrade
+only refreshes the checkout and the installed plugin.
+
 ## 5.0.0: task-level plugins
 4.0.0 made every module its own installable plugin. That fixed hidden
 capabilities, but split closely related work into many tiny entries, so a task

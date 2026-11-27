@@ -202,6 +202,142 @@ function positionalArgs(args: readonly string[]): string[] {
   return args.filter((token) => token !== "" && !token.startsWith("-"));
 }
 
+/**
+ * Heads that remove files or directories. Deleting is ordinary loop work -- a
+ * stale worktree, a scratch build directory, a temp file -- so the loop
+ * approves these instead of asking for each one; only a target that would
+ * destroy a whole volume is refused, and that check is `catastrophicDeleteReason`.
+ */
+const DELETE_HEADS: ReadonlySet<string> = new Set([
+  "rm", "rmdir", "del", "rd", "erase", "unlink", "remove-item", "ri", "del-item",
+]);
+
+/** Git subcommands that are a delete on their own. */
+const DELETE_SUBCOMMANDS: ReadonlySet<string> = new Set(["rm", "clean"]);
+
+/** Git subcommands that delete only when one of the delete flags is present. */
+const DELETE_FLAG_SUBCOMMANDS: ReadonlySet<string> = new Set(["branch", "tag", "push"]);
+
+/** Git subcommands that delete only for a named action. */
+const DELETE_ACTION_SUBCOMMANDS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
+  ["worktree", new Set(["remove", "prune"])],
+  ["stash", new Set(["drop", "clear"])],
+  ["remote", new Set(["prune"])],
+]);
+
+const DELETE_FLAGS: ReadonlySet<string> = new Set(["-d", "-D", "--delete"]);
+
+function isGitDelete(call: GitCall): boolean {
+  if (DELETE_SUBCOMMANDS.has(call.command)) return true;
+  if (DELETE_FLAG_SUBCOMMANDS.has(call.command)) return call.args.some((arg) => DELETE_FLAGS.has(arg));
+  const actions = DELETE_ACTION_SUBCOMMANDS.get(call.command);
+  if (actions === undefined) return false;
+  const action = call.args.find((arg) => arg !== "" && !arg.startsWith("-")) ?? "";
+  return actions.has(action);
+}
+
+/**
+ * True when the segment removes something. A run deletes build output, scratch
+ * worktrees, stale branches, and temporary files as part of ordinary work, so a
+ * delete is approved instead of prompting; `isSafeBuiltinCommand` still rejects
+ * it because its flag set answers "is this a read", which is a different
+ * question. The dispatcher checks this before the safe-command set so a delete
+ * flag can never veto an approved delete.
+ */
+export function isDeleteCommand(segment: string): boolean {
+  const tokens = shellTokens(segment);
+  const head = (tokens[0] ?? "").toLowerCase();
+  if (head === "") return false;
+  if (DELETE_HEADS.has(head)) return true;
+  if (head === "find") return tokens.includes("-delete");
+  if (head !== "git") return false;
+  return gitCalls(segment).some(isGitDelete);
+}
+
+/** True when a `-m`/`--message` argument carries no text. */
+function blankMessage(args: readonly string[]): boolean {
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index] ?? "";
+    if (arg === "-m" || arg === "--message") {
+      const next = args[index + 1];
+      if (next === undefined || next.trim() === "") return true;
+      index += 1;
+      continue;
+    }
+    if (arg.startsWith("--message=")) {
+      if (arg.slice("--message=".length).trim() === "") return true;
+      continue;
+    }
+    if (/^-[a-zA-Z]*m$/.test(arg)) {
+      const next = args[index + 1];
+      if (next === undefined || next.trim() === "") return true;
+      index += 1;
+    }
+  }
+  return false;
+}
+
+/**
+ * Decide whether a command would record a blank commit: `--allow-empty`,
+ * `--allow-empty-message`, or a message flag with no text. A blank commit
+ * carries nothing for the review to score and nothing for the next pass to
+ * resume from, so it is refused rather than auto-approved.
+ */
+export function blankCommitReason(command: string): string | null {
+  for (const call of gitCalls(command)) {
+    if (call.command !== "commit") continue;
+    if (call.args.some((arg) => arg === "--allow-empty" || arg === "--allow-empty-message")) {
+      return "Recording an empty commit is blocked: an empty commit has no change for the review to score. Commit real work, or record the step with 'azflow goal note'.";
+    }
+    if (blankMessage(call.args)) {
+      return "Recording a commit with a blank message is blocked: a blank message hides what the stage changed. Pass a real --type/--scope/--subject through 'azflow commit'.";
+    }
+  }
+  return null;
+}
+
+/**
+ * Normalises a delete target so `/`, `/*`, `C:\\`, `~/`, and `$HOME/` all reduce
+ * to the volume or profile they name.
+ */
+function normaliseTarget(raw: string): string {
+  let target = raw.trim().toLowerCase().replace(/\\/g, "/");
+  target = target.replace(/\/?\*+$/, "");
+  target = target.replace(/\/+$/, "");
+  return target;
+}
+
+/** True when a target is a filesystem root or the user profile. */
+function isRootTarget(raw: string): boolean {
+  if (raw.trim() === "") return false;
+  const target = normaliseTarget(raw);
+  if (target === "") return true;
+  if (/^[a-z]:$/.test(target)) return true;
+  return target === "~" || target === "$home" || target === "$env:userprofile" || target === "%userprofile%";
+}
+
+/**
+ * Decide whether a delete would destroy a whole volume or the user profile.
+ * Deleting is auto-approved, but `rm -rf /`, `rm -rf ~`, and `Remove-Item C:\\`
+ * are not a task's own workspace, so they are the one delete the loop refuses.
+ */
+export function catastrophicDeleteReason(command: string): string | null {
+  for (const segment of shellSegments(command)) {
+    const tokens = shellTokens(segment);
+    const head = (tokens[0] ?? "").toLowerCase();
+    if (head === "") continue;
+    const isDelete = DELETE_HEADS.has(head) || (head === "find" && tokens.includes("-delete"));
+    if (!isDelete) continue;
+    for (const target of tokens.slice(1)) {
+      if (target === "" || target.startsWith("-")) continue;
+      if (isRootTarget(target)) {
+        return "Deleting '" + target + "' would destroy a whole volume or the user profile, not a task's own workspace. Point the delete at a specific path inside the project.";
+      }
+    }
+  }
+  return null;
+}
+
 const BASE_ALIASES: readonly string[] = ["main", "master"];
 
 /** True when a ref name is the protected base branch or one of its aliases. */
@@ -326,9 +462,10 @@ export function denyReasonForBash(
       return "Pushing to the protected base branch '" + context.base + "' is blocked. Commit on a task branch and open a PR. Set AZFLOW_ALLOW_BASE_WRITES=1 to override.";
     }
     // With an explicit refspec the push name already says what it moves, so an
-    // explicit task-branch push is allowed even from the base branch — that is
-    // the documented step after `azflow claim` pushes the new worktree branch.
-    if (plan.refspecs.length > 0 && !plan.deleting) continue;
+    // explicit task-branch push or branch delete is allowed even from the base
+    // branch — that is the documented step after `azflow claim` pushes the new
+    // worktree branch, and cleaning up a merged branch is ordinary loop work.
+    if (plan.refspecs.length > 0) continue;
     if (branch !== null && branch === context.base) {
       return "Pushing from the base branch '" + context.base + "' is blocked. Claim a task worktree first. Set AZFLOW_ALLOW_BASE_WRITES=1 to override.";
     }

@@ -35,19 +35,26 @@ fields that matter:
   followed it, so an interrupted run knows where to resume.
 - `extensions` and `autoRepairs`: how many automatic budget extensions and
   review-repair rounds have been spent.
+- `driftReopens`: how many automatic drift reopens the run has spent, capped at
+  one so a completed goal is not fought forever.
 - `allowedCommands`: command patterns the guard auto-approves for this goal.
 
 ## Autonomous long run
 
 A pass that ends without a decision, or on a failure that is only temporary, is
-the main reason a long run needs a user. Seven bounded mechanisms keep it moving:
+the main reason a long run needs a user. Nine bounded mechanisms keep it moving:
 
 - **Allowlist auto-approval**: `azflow goal start ... --allow "npm run custom"`
   records patterns in `.azflow/goal.json`. The guard auto-approves the built-in
   read commands (`git log`, `rg`, and the like), the safe bounded writes the loop
   needs (`npm test`, `git commit`, and the like), and the user's own patterns.
-  Destructive flags, output redirection, `git push`, and `gh pr merge` are never
-  auto-approved. Set `AZFLOW_NO_AUTO_APPROVE=1` to opt out.
+  Deletes are ordinary loop work - a stale worktree, a scratch build directory, a
+  merged branch - so `rm`, `rmdir`, `Remove-Item`, `git rm`, `git clean`, a
+  `-d`/`-D`/`--delete` ref delete, `git worktree remove`, and `find -delete` run
+  without a prompt; only a whole-volume or home-directory target is refused, and
+  that refusal is one deny rule. A bounded task-branch push is approved the same
+  way. Output redirection and `gh pr merge` are never auto-approved. Set
+  `AZFLOW_NO_AUTO_APPROVE=1` to opt out.
 - **Checkpoint resume**: every pass that changes the repository records the
   current commit SHA and the next step, and the compass prints
   `Resume from: <sha> - <step>` so a fresh window picks up where the run stopped.
@@ -69,6 +76,18 @@ the main reason a long run needs a user. Seven bounded mechanisms keep it moving
   merged issue or pull request, a published tag, a reachable commit, a present
   file) completes itself once all of them verify. `azflow goal verify` prints the
   same report on demand.
+- **Blank-commit refusal**: a commit with `--allow-empty`,
+  `--allow-empty-message`, or a `-m`/`--message` carrying no text is denied before
+  it runs, because it gives the review nothing to score and the next pass nothing
+  to resume from. The step is still recorded with `azflow goal note`.
+- **Drift reopen**: when the goal is `complete` but the ledger still holds open
+  work, the run reopens the goal once and continues instead of reporting a
+  delivery that did not happen. The reopen is budgeted at one per goal, and
+  `azflow goal complete` refuses open ledger work unless `--force` says the
+  remaining tasks belong to another objective.
+- **Fast progress marker**: with `AZFLOW_FAST=1` the per-pass fingerprint hashes
+  size and mtime instead of every dirty file's content. A real edit moves both, so
+  the marker stays honest while a pass stops re-reading the working tree.
 
 ## Stop-hook continuation
 
@@ -88,7 +107,9 @@ place to decide whether it is. On a clean stop the hook calls `advanceGoal`:
    change is real progress; an identical fingerprint is no progress at all.
 7. A review that fails just under the bar is repaired automatically; one that is
    far below it pauses the goal.
-8. While the pass budget remains and progress has not stalled, the hook blocks
+8. A goal already marked `complete` is reopened once when open ledger work
+   remains, so the run finishes what it started.
+9. While the pass budget remains and progress has not stalled, the hook blocks
    with the compass and the next step, so the model continues in the same session
    with the goal in front of it.
 
@@ -144,7 +165,8 @@ or approvals. Reopen the project to pick up the saved checkpoint.
 | `azflow goal pause [--reason "<why>"]` | Stop driving the goal until resumed. |
 | `azflow goal resume` | Reactivate a paused or stalled goal and re-baseline progress. |
 | `azflow goal extend --by <N>` | Raise the pass budget by `N`. |
-| `azflow goal complete [--summary "<result>"]` | Mark the goal done, once every done-when criterion is verified. |
+| `azflow goal complete [--summary "<result>"] [--force]` | Mark the goal done, once every done-when criterion is verified and the ledger holds no open work. `--force` closes it anyway and reports how many open tasks stay behind. |
+| `azflow goal reopen` | Move a `complete`, `abandoned`, or `stalled` goal back to `active`, refresh the progress marker, and record the reopen. |
 | `azflow goal abandon [--reason "<why>"]` | Give up the goal without claiming completion. |
 
 ## Relationship to the delivery ledger
@@ -157,6 +179,11 @@ becomes "finish and merge", and a ready planned task becomes "claim and build".
 With no ledger the goal falls back to its recorded next step and then to the
 generic "take the next concrete, verifiable step" directive. This keeps the goal
 walking the task DAG when one exists instead of guessing at it.
+
+When a ledger exists, the two files are also checked against each other: `azflow
+doctor` reports a `continuity` gate, and a `SessionStart` briefing lists each
+disagreement with the one command that repairs it. See
+[continuity.md](continuity.md) for the finding kinds.
 
 ## Opt-in
 

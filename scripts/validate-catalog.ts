@@ -34,6 +34,7 @@ function isPluginEntry(value: unknown): value is PluginCatalogEntry {
     Array.isArray(value.extra) &&
     value.extra.every((item) => typeof item === "string") &&
     (value.hooks === null || typeof value.hooks === "string") &&
+    (value.mcpServers === undefined || typeof value.mcpServers === "string") &&
     (value.modules === undefined || (Array.isArray(value.modules) && value.modules.every((module) => typeof module === "string" && kebab(module)))) &&
     (value.source === undefined || typeof value.source === "string") &&
     (value.description === undefined || typeof value.description === "string") &&
@@ -90,6 +91,13 @@ async function main(): Promise<void> {
     for (const extra of plugin.extra) {
       if (!(await exists(path.join(root, extra)))) fail(plugin.id + ": extra path is missing: " + extra);
       if (path.isAbsolute(extra) || extra.split(/[\\/]/).includes("..")) fail(plugin.id + ": extra path must stay inside the repository: " + extra);
+    }
+    if (plugin.mcpServers !== undefined) {
+      if (path.isAbsolute(plugin.mcpServers) || plugin.mcpServers.split(/[\\/]/).includes("..")) {
+        fail(plugin.id + ": mcpServers path must stay inside the repository: " + plugin.mcpServers);
+      } else if (!(await exists(path.join(root, plugin.mcpServers)))) {
+        fail(plugin.id + ": mcpServers manifest is missing: " + plugin.mcpServers);
+      }
     }
     if (plugin.kind === "module") {
       if (plugin.modules === undefined || plugin.modules.length === 0) fail(plugin.id + ": workflow plugins must declare at least one canonical module");

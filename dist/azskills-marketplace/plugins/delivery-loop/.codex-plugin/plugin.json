@@ -1,6 +1,6 @@
 {
   "name": "delivery-loop",
-  "version": "7.10.0",
+  "version": "7.11.0",
   "description": "Run unattended issue-to-merge delivery or continue a long-horizon repository objective without Codex Goal mode. Uses isolated worktrees, touch-scope leases, independent Elephant-Goldfish review, computed scoring, gated auto-merge, durable checkpoints, and bounded dead-loop recovery.",
   "license": "MIT",
   "keywords": [
@@ -11,6 +11,7 @@
   ],
   "skills": "./skills/",
   "hooks": "./codex-plugin/hooks/delivery-hooks.json",
+  "mcpServers": "./delivery-loop/mcp.json",
   "interface": {
     "displayName": "Delivery Loop",
     "shortDescription": "Run unattended issue-to-merge delivery or continue a long-horizon repository objective without Codex Goal mode. Uses isolated worktrees, touch-scope leases, independent Elephant-Goldfish review, computed scoring, gated auto-merge, durable checkpoints, and bounded dead-loop recovery.",
