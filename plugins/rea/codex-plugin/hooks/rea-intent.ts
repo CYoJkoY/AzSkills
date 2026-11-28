@@ -36,7 +36,7 @@ if (prompt === null) process.exit(0);
 const threshold = CJK.test(prompt) ? 2 : 8;
 if (prompt.length < threshold || !patterns.some((pattern) => pattern.test(prompt))) process.exit(0);
 
-const pluginRoot = process.env.PLUGIN_ROOT;
+const pluginRoot = process.env.PLUGIN_ROOT ?? process.env.CLAUDE_PLUGIN_ROOT;
 const skill = pluginRoot
   ? path.join(pluginRoot, "skills", "rea", "SKILL.md")
   : path.join("skills", "rea", "SKILL.md");

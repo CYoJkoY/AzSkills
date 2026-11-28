@@ -6,6 +6,7 @@
           {
             "type": "command",
             "command": "node",
+            "statusMessage": "Re-grounding an active delivery-loop goal",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-session.ts"
             ]
@@ -19,6 +20,7 @@
           {
             "type": "command",
             "command": "node",
+            "statusMessage": "Recording the delivery-loop prompt for a restart",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-prompt.ts"
             ]
@@ -33,6 +35,7 @@
           {
             "type": "command",
             "command": "node",
+            "statusMessage": "Checking visible messages for leaked reasoning tags",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/no-think-tags/hooks/tool-hook.ts"
             ]
@@ -45,6 +48,7 @@
           {
             "type": "command",
             "command": "node",
+            "statusMessage": "Checking delivery-loop guard",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-guard.ts"
             ]
@@ -58,6 +62,7 @@
           {
             "type": "command",
             "command": "node",
+            "statusMessage": "Checking the reply for a dead loop",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-stop.ts"
             ]
@@ -65,6 +70,7 @@
           {
             "type": "command",
             "command": "node",
+            "statusMessage": "Correcting a leaked reasoning block",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/no-think-tags/hooks/stop-hook.ts"
             ]

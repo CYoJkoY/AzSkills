@@ -6,6 +6,7 @@
           {
             "type": "command",
             "command": "node",
+            "statusMessage": "Loading GPT with Taste main guidance",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/codex-plugin/taste/hooks/steer.ts"
             ]
@@ -19,6 +20,7 @@
           {
             "type": "command",
             "command": "node",
+            "statusMessage": "Applying GPT with Taste request guidance",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/codex-plugin/taste/hooks/steer.ts"
             ]
@@ -32,6 +34,7 @@
           {
             "type": "command",
             "command": "node",
+            "statusMessage": "Applying GPT with Taste subagent guidance",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/codex-plugin/taste/hooks/steer.ts"
             ]
@@ -46,6 +49,7 @@
           {
             "type": "command",
             "command": "node",
+            "statusMessage": "Checking Godot 3.x edits",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/godot3-guard.ts"
             ]
@@ -60,6 +64,7 @@
           {
             "type": "command",
             "command": "node",
+            "statusMessage": "Verifying Godot 3.x edits",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/godot3-guard.ts"
             ]
@@ -72,6 +77,7 @@
           {
             "type": "command",
             "command": "node",
+            "statusMessage": "Applying GPT with Taste agent results guidance",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/codex-plugin/taste/hooks/steer.ts"
             ]

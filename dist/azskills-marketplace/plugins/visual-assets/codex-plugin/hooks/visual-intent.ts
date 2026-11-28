@@ -119,7 +119,7 @@ const prompt = readPrompt();
 if (prompt === null || prompt.length < 8) process.exit(0);
 if (!profile.patterns.some((pattern) => pattern.test(prompt))) process.exit(0);
 
-const pluginRoot = process.env.PLUGIN_ROOT;
+const pluginRoot = process.env.PLUGIN_ROOT ?? process.env.CLAUDE_PLUGIN_ROOT;
 const skill = pluginRoot
   ? path.join(pluginRoot, 'skills', pluginId, 'SKILL.md')
   : path.join('skills', pluginId, 'SKILL.md');

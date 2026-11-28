@@ -62,8 +62,10 @@ interface ProposedEntry {
   content: string;
 }
 
-const pluginRoot = process.env.PLUGIN_ROOT;
-if (!pluginRoot) throw new Error('PLUGIN_ROOT is required');
+// Both hosts substitute their own variable with the installed plugin
+// directory. Read whichever one is set so the same handler file runs either way.
+const pluginRoot = process.env.PLUGIN_ROOT ?? process.env.CLAUDE_PLUGIN_ROOT;
+if (!pluginRoot) throw new Error('PLUGIN_ROOT or CLAUDE_PLUGIN_ROOT is required');
 
 const godotExtensions = new Set(['.gd', '.tscn', '.escn']);
 const checkerTimeoutMs = 15000;

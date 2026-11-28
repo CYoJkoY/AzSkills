@@ -16,6 +16,19 @@ import { writeZip } from "./zip-bundle.ts";
 import type { PluginCatalog, SkillCatalog } from "./types.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+/** Every `statusMessage` string in a nested hook manifest, in document order. */
+function statusMessages(value: unknown, into: string[] = []): string[] {
+  if (Array.isArray(value)) {
+    for (const item of value) statusMessages(item, into);
+  } else if (value !== null && typeof value === "object") {
+    for (const [key, inner] of Object.entries(value as Record<string, unknown>)) {
+      if (key === "statusMessage" && typeof inner === "string") into.push(inner);
+      else statusMessages(inner, into);
+    }
+  }
+  return into;
+}
 const temp = await mkdtemp(path.join(tmpdir(), "azskills-package-"));
 const exists = async (file: string): Promise<boolean> =>
   stat(file).then(() => true).catch((error: unknown) => {
@@ -179,7 +192,13 @@ try {
       const text = await readFile(claudeHooks, "utf8");
       assert.equal(text.includes("${PLUGIN_ROOT}"), false, "Claude hooks must not keep the Codex variable: " + plugin.id);
       assert.ok(text.includes("${CLAUDE_PLUGIN_ROOT}"), "Claude hooks must resolve through CLAUDE_PLUGIN_ROOT: " + plugin.id);
-      assert.equal(text.includes("statusMessage"), false, "statusMessage is Codex-only: " + plugin.id);
+      const sourceMessages = statusMessages(JSON.parse(await readFile(path.join(pluginRoot, entry.hooks), "utf8")));
+      assert.ok(sourceMessages.length > 0, "the source hook manifest carries a progress message: " + plugin.id);
+      assert.deepEqual(
+        statusMessages(JSON.parse(text)),
+        sourceMessages,
+        "the projection keeps every statusMessage in order: " + plugin.id,
+      );
       type HookHandler = { command?: string; args?: string[] };
       const claudeHookCommands = (JSON.parse(text) as { hooks?: Record<string, Array<{ hooks?: HookHandler[] }>> }).hooks ?? {};
       for (const groups of Object.values(claudeHookCommands)) {

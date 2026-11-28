@@ -275,6 +275,65 @@ count grows from 47 to 65.
 The release is minor: no plugin ID, module id, or mode changed, so an upgrade
 only refreshes the checkout and the installed plugin.
 
+## 7.12.2: withdraw the sidebar destination and finish host parity
+
+### The sidebar destination is withdrawn
+
+7.12.0 tried to make the delivery panel a pinned sidebar entry by emitting
+host-specific metadata: `openai/ui:{entrypoints:[{type:"global"}]}`,
+`ui/visibility:["app"]`, the flat `ui/resourceUri` and `ui/visibility` aliases,
+`openai/outputTemplate`, plus a tool title and an inline icon.
+
+That was a mistake and it is withdrawn.
+
+- The keys describe one client's private listing rules, not the documented MCP
+  contract, so they bought nothing for any other host and risked breaking when
+  that client changed.
+- A listing declaration never proved the document rendered. The plugin claimed a
+  sidebar slot while the actual end-to-end path stayed unverified, which is the
+  same gap 7.11.0 already had.
+- It also asked the user to spend one of eight pin slots on a panel that a
+  plain tool call already returns.
+
+`panelToolMeta()` is back to a single key, `ui.resourceUri`, which says only
+"this document renders this result". `PANEL_APP_TITLE` and `PANEL_ICON` are
+gone, the tools carry no destination title or icon, and the panel footer no
+longer mentions pinning. The panel keeps its light/dark theme and host-context
+handling, because those serve the document wherever it renders, not a listing.
+
+### The projection keeps `statusMessage`
+
+7.12.0 and 7.12.1 dropped `statusMessage` from the projected hook files on the
+belief that it was a Codex-only field. The hook reference lists it under the
+common handler fields, described as a custom spinner message shown while the
+hook runs, so dropping it removed a working feature: all seven hook manifests in
+the catalog declare one.
+
+`retargetValue()` now rewrites the root variable and nothing else.
+`scripts/test-package-plugin.ts` compares the `statusMessage` values of the
+source manifest against the projection, in document order, for every plugin.
+
+### Handlers read whichever host variables exist
+
+The same handler file ships to both hosts, but each host exports its own
+variables: `PLUGIN_ROOT` and `PLUGIN_DATA` in Codex, `CLAUDE_PLUGIN_ROOT` and
+`CLAUDE_PLUGIN_DATA` in the other. Reading only the Codex pair meant the Godot
+guard threw `PLUGIN_ROOT is required` on start, the intent hooks pointed at a
+relative skill path, and the session and correction state fell back to the
+system temp directory.
+
+- `godot3-guard`, `visual-intent`, `serena-intent` and `rea-intent` resolve the
+  plugin root from either variable, and the guard's error names both.
+- `session-state`, the no-think-tags runtime and the taste steer hook resolve
+  the data directory from either variable.
+- `azflow review-open` looks in both plugin caches (`CODEX_HOME`, and
+  `CLAUDE_CONFIG_DIR` or `~/.claude`) before it warns that EGM is missing.
+- `scripts/test-host-env.ts` runs the hooks with only the second host's pair
+  set and asserts the resolved skill paths, the state directory, and that no
+  handler refuses to start for a missing Codex variable.
+
+Nothing else changes: no plugin ID, module id, mode, or manifest field moved, so
+this is a patch.
 ## 7.12.1: exec-form hooks in the Claude projection
 
 7.12.0 translated the hook manifest by rewriting the root variable, which left
@@ -300,6 +359,9 @@ changed, and an upgrade only refreshes the checkout and the installed plugin.
 
 ## 7.12.0: Codex App sidebar destination and Claude plugin marketplace
 
+The sidebar half of this release is withdrawn in 7.12.2. The Claude projection
+below stands.
+
 7.11.0 served the delivery-loop panel as an MCP tool with a `ui://` resource and
 called that a side panel. It was not one. A host renders a tool result; it does
 not list a plugin in its own sidebar unless the plugin says it wants a
@@ -320,7 +382,7 @@ which is the opposite of a panel you glance at.
 - `scripts/claude-plugin.ts` projects every built plugin onto the Claude plugin
   format: a metadata-only `.claude-plugin/plugin.json` read back from the Codex
   manifest, `hooks/hooks.json` with `${PLUGIN_ROOT}` rewritten to
-  `${CLAUDE_PLUGIN_ROOT}` and the Codex-only `statusMessage` dropped, and
+  `${CLAUDE_PLUGIN_ROOT}` and the `statusMessage` field dropped (restored in 7.12.2), and
   `.mcp.json` for bundled servers.
 - `publishClaudeMarketplace` writes `.claude-plugin/marketplace.json` at the
   repository root and inside a built marketplace, with sources relative to the

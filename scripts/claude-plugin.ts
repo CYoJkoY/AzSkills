@@ -35,9 +35,10 @@ export function retargetRoot(text: string): string {
 }
 
 /**
- * Rewrites the strings inside a parsed manifest. `statusMessage` is a Codex
- * field with no Claude Code meaning, so it is dropped rather than carried into
- * a hook entry whose schema does not list it.
+ * Rewrites the strings inside a parsed manifest and keeps every other field as
+ * written. `statusMessage` survives on purpose: the hook reference lists it
+ * as a common handler field, so a projected hook keeps the progress text its
+ * author wrote instead of silently losing it.
  */
 function retargetValue(value: unknown): unknown {
   if (typeof value === "string") return retargetRoot(value);
@@ -45,7 +46,6 @@ function retargetValue(value: unknown): unknown {
   if (isRecord(value)) {
     const result: Record<string, unknown> = {};
     for (const [key, inner] of Object.entries(value)) {
-      if (key === "statusMessage") continue;
       result[key] = retargetValue(inner);
     }
     return result;

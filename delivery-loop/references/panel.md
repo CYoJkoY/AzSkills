@@ -69,35 +69,26 @@ The panel also runs without a host:
 Both commands honor `--project` and the upward project search the other commands
 use.
 
-## Sidebar presence
+## UI binding
 
-Serving a `ui://` resource is not enough to appear in the Codex App sidebar. The
-App reads the tool's `_meta["openai/ui"]` and lists the plugin as a sidebar
-destination only when that entry contains `{"type":"global"}`; a tool that
-advertises a resource but no entrypoint stays a tool you have to call.
+`panelToolMeta()` returns one key: `ui.resourceUri`, the document that renders
+the `azflow_panel` result. That is the whole contract. The panel does not ask a
+host to list it as a destination, does not claim an app-surface slot, and
+carries no title or icon for a launcher. A client that renders UI resources
+shows the panel when the tool is called; a client that does not gets the same
+state as text.
 
-`panelToolMeta()` returns the five keys the App and its MCP host look for, so the
-declaration does not depend on one of them surviving a client upgrade:
-
-- `ui`: `{resourceUri, visibility:["app"]}`.
-- `ui/resourceUri` and `ui/visibility`: the flat aliases older hosts read.
-- `openai/outputTemplate`: the URI a template-aware host resolves first.
-- `openai/ui`: `{entrypoints:[{type:"global"}]}`, which is what makes the plugin
-  a sidebar destination rather than a plain tool.
-
-The tool also carries `title: "AzFlow"` and an inline SVG icon, so the sidebar
-entry has a name and a face instead of a bare id.
-
-Local plugins are installed with `visibleByDefault: false`, so the first install
-does not move the user's sidebar. The panel footer says so: pin AzFlow once and
-the panel stays open beside the thread. A pin slot is a scarce resource (eight
-per user), so the plugin does not claim one on its own.
+This is deliberate. Earlier revisions tried to turn the panel into a pinned
+sidebar entry through host-specific metadata. That coupled the plugin to one
+client's private listing rules, said nothing about whether the document
+rendered, and bought nothing a plain tool call does not already give. The
+binding stays at the documented MCP level so any compliant host behaves the
+same way.
 
 ## What is not verified
 
 The snapshot, the patch validation, and the HTML are unit tested without a
 repository or a host, and a stdio handshake test asserts that `tools/list`
-returns the app-surface metadata above. Live rendering inside the Codex sidebar
-still depends on the installed client resolving the `ui://` resource and pinning
-the entry; that end-to-end path is documented here but cannot be exercised from
-the test suite.
+returns the UI binding above. Live rendering still depends on the installed
+client resolving the `ui://` resource; that end-to-end path is documented here
+but cannot be exercised from the test suite.
