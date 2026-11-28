@@ -46,13 +46,27 @@ The hook file shape is the same on both hosts: a matcher list per event, a
 optional `timeout`. The pre-tool output protocol is the same too, so the guards
 that deny a write or approve a delete behave identically.
 
-Two differences are handled at build time:
+Three differences are handled at build time:
 
 - Every `${PLUGIN_ROOT}` is rewritten to `${CLAUDE_PLUGIN_ROOT}`, so a hook
   command resolves inside the plugin directory on either host.
 - `statusMessage` is a Codex-only field. It is dropped from the Claude hook
   file rather than left in place, because an unknown field is a load error on a
   strict host and the message has no Claude equivalent.
+- Command handlers are emitted in exec form: `command: "node"` plus
+  `args: ["${CLAUDE_PLUGIN_ROOT}/..."]`. The hook reference asks for `args`
+  whenever a handler references a path placeholder, because each element is
+  passed as one argument with no quoting and no shell. Shell form would have to
+  survive `sh -c`, Git Bash, or PowerShell depending on the host, and a Windows
+  host without Git Bash can fail to start the program at all. Codex keeps shell
+  form, which its own loader reads.
+
+## Runtime
+
+Hook and MCP entry points are TypeScript executed through node's type stripping,
+so the host needs node in the range `engines.node` declares:
+`^22.18.0 || >=23.6.0`. An older node cannot load the entry point and the hook
+reports a start failure instead of running.
 
 ## Marketplace
 
@@ -84,7 +98,8 @@ marketplace:
   license match the Codex manifest.
 - `hooks/hooks.json` exists exactly when the plugin declares hooks, contains no
   `${PLUGIN_ROOT}`, contains `${CLAUDE_PLUGIN_ROOT}`, carries no `statusMessage`,
-  and every `${CLAUDE_PLUGIN_ROOT}/...` target resolves to a real file.
+  runs every handler as `node` with the script path as its first argument, and
+  every `${CLAUDE_PLUGIN_ROOT}/...` target resolves to a real file.
 - `.mcp.json` exists exactly when the plugin declares MCP servers, and every
   server argument resolves.
 - Each marketplace manifest deep-equals the manifest the catalog would produce,

@@ -70,7 +70,41 @@ export function claudeHooksManifest(codexHooks: unknown): ClaudeHooksManifest {
   if (!isRecord(codexHooks) || !isRecord(codexHooks.hooks)) {
     throw new Error("Hook manifest must be an object with a hooks map");
   }
-  return { hooks: retargetValue(codexHooks.hooks) as Record<string, ClaudeHookEntry[]> };
+  const retargeted = retargetValue(codexHooks.hooks) as Record<string, ClaudeHookEntry[]>;
+  const hooks: Record<string, ClaudeHookEntry[]> = {};
+  for (const [event, groups] of Object.entries(retargeted)) {
+    hooks[event] = groups.map(toClaudeHookEntry);
+  }
+  return { hooks };
+}
+
+/**
+ * Splits `node "<path>"` into the exec form the hook reference documents for
+ * handlers that reference a path placeholder. Exec form spawns `node` directly,
+ * so no shell tokenizes the path and a host without Git Bash still runs the
+ * handler.
+ */
+export function execFormCommand(command: string): { command: string; args: string[] } | null {
+  const match = /^node\s+"([^"]+)"((?:\s+[^\s"]+)*)$/.exec(command.trim());
+  if (match === null) return null;
+  const extra = (match[2] ?? "").trim();
+  return {
+    command: "node",
+    args: extra === "" ? [match[1] as string] : [match[1] as string, ...extra.split(/\s+/)],
+  };
+}
+
+function toClaudeHookEntry(entry: ClaudeHookEntry): ClaudeHookEntry {
+  const converted = entry.args === undefined && typeof entry.command === "string"
+    ? execFormCommand(entry.command)
+    : null;
+  const result: ClaudeHookEntry = converted === null
+    ? { ...entry }
+    : { ...entry, command: converted.command, args: converted.args };
+  if (entry.hooks !== undefined) {
+    return { ...result, hooks: entry.hooks.map(toClaudeHookEntry) };
+  }
+  return result;
 }
 
 export interface ClaudeMcpManifest {

@@ -275,6 +275,29 @@ count grows from 47 to 65.
 The release is minor: no plugin ID, module id, or mode changed, so an upgrade
 only refreshes the checkout and the installed plugin.
 
+## 7.12.1: exec-form hooks in the Claude projection
+
+7.12.0 translated the hook manifest by rewriting the root variable, which left
+every handler in shell form: `node "${CLAUDE_PLUGIN_ROOT}/..."`. That string has
+to be tokenized by a shell before it runs, and which shell depends on the host:
+`sh -c` on macOS and Linux, Git Bash on Windows, or PowerShell when Git Bash is
+missing. A Windows host without Git Bash can fail to start the program, and the
+failure is silent enough that a hook simply never runs.
+
+- `execFormCommand()` splits `node "<path>"` (with or without trailing
+  arguments) into `command: "node"` plus `args: ["<path>", ...]`, the exec form
+  the hook reference asks for whenever a handler references a path placeholder.
+  No shell is involved, so the path is one argument exactly as written and
+  `node` is spawned directly, which works on every platform.
+- Codex keeps shell form: its own loader reads the manifest as written, and
+  nothing about the Codex side changed.
+- `docs/claude-code.md` records the runtime consequence: handlers are
+  TypeScript executed through node's type stripping, so the host needs node in
+  the `^22.18.0 || >=23.6.0` range that `engines.node` already declares.
+
+The release is a patch: no plugin ID, module id, mode, or manifest field
+changed, and an upgrade only refreshes the checkout and the installed plugin.
+
 ## 7.12.0: Codex App sidebar destination and Claude plugin marketplace
 
 7.11.0 served the delivery-loop panel as an MCP tool with a `ui://` resource and

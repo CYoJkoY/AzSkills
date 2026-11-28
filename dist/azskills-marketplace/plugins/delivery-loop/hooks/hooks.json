@@ -5,7 +5,10 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-session.ts\""
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-session.ts"
+            ]
           }
         ]
       }
@@ -15,7 +18,10 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-prompt.ts\""
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-prompt.ts"
+            ]
           }
         ]
       }
@@ -26,7 +32,10 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/no-think-tags/hooks/tool-hook.ts\""
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/no-think-tags/hooks/tool-hook.ts"
+            ]
           }
         ]
       },
@@ -35,7 +44,10 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-guard.ts\""
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-guard.ts"
+            ]
           }
         ]
       }
@@ -45,11 +57,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-stop.ts\""
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-stop.ts"
+            ]
           },
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/no-think-tags/hooks/stop-hook.ts\""
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/no-think-tags/hooks/stop-hook.ts"
+            ]
           }
         ]
       }

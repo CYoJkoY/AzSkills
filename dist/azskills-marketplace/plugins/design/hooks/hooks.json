@@ -5,7 +5,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/visual-intent.ts\" design"
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/visual-intent.ts",
+              "design"
+            ]
           }
         ]
       }
