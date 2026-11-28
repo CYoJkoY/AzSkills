@@ -31,6 +31,7 @@ on:
       - "assets/**"
       - "resume-evidence-workflow/assets/**"
       - "resume-evidence-workflow/tests/**"
+      - ".gitattributes"
       - ".github/workflows/validate-skills.yml"
   workflow_dispatch:
 

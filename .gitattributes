@@ -1,1 +1,11 @@
-* text=auto
+# Generated files are compared byte for byte by scripts/test-package-plugin.ts,
+# so a checkout must not rewrite their line endings.
+* text=auto eol=lf
+*.zip binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
