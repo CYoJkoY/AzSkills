@@ -6,7 +6,7 @@
   <img src="assets/azskills-hero.svg" alt="AzSkills Wabi Press overview: a catalog of independent Codex plugins" width="100%">
 </picture>
 
-Version **7.11.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
+Version **7.12.0**. A catalog of independent Codex plugins, not one plugin with hidden modules.
 
 Every plugin ships with its own manifest, skill entry, trigger description, reference closure, and icon. A single dispatcher entry only fires when a prompt names it or matches one broad description; independent plugins are matched directly, so capabilities stop being invisible to automatic routing. Plugins are grouped by the job a request asks for, and each group stays small enough to answer one kind of request, so grouping never hides a capability behind an unrelated name. `catalog/plugins.json` is the distribution registry and `skills.json` stays the canonical module and alias source.
 

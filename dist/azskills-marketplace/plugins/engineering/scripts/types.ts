@@ -53,6 +53,7 @@ export type IntegrationMechanism =
   | "native-skills"
   | "shared-skills"
   | "codex-plugin"
+  | "claude-plugin"
   | "manual"
   | "mcp";
 

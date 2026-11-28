@@ -1,0 +1,19 @@
+{
+  "name": "visual-production",
+  "displayName": "Visual Production",
+  "version": "7.12.0",
+  "description": "Produce responsive HTML reports and presentations, data-driven video, and deterministic Remotion renders.",
+  "author": {
+    "name": "AzSkills",
+    "url": "https://github.com/CYoJkoY/AzSkills"
+  },
+  "homepage": "https://github.com/CYoJkoY/AzSkills",
+  "repository": "https://github.com/CYoJkoY/AzSkills",
+  "license": "MIT",
+  "keywords": [
+    "visual",
+    "production",
+    "azskills",
+    "workflow"
+  ]
+}

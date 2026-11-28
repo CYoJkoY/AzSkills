@@ -21,18 +21,18 @@
     {
       "id": "claude-code",
       "name": "Claude",
-      "mechanism": "native-skills",
-      "target": ".claude/skills",
-      "userTarget": "~/.claude/skills",
-      "source": "https://docs.claude.com/en/docs/claude-code/skills",
-      "verify": "Run /skills and confirm one AzSkills entry appears.",
-      "automation": "managed-copy",
-      "detection": "target-directory",
+      "mechanism": "claude-plugin",
+      "target": "Claude plugin marketplace",
+      "userTarget": "Claude plugin marketplace",
+      "source": "https://code.claude.com/docs/en/plugins/overview",
+      "verify": "Run /plugin to confirm the azskills marketplace lists every catalog plugin, install the ones the project needs, and confirm each reports the current release version. Check that hooks load from the plugin (engineering adds the Godot 3.x write guard and the GPT with Taste steering; delivery-loop adds the delivery guard and goal continuation), and that a new session selects an installed plugin by description without naming it. Re-run claude plugin validate after editing a plugin.",
+      "automation": "manual-import",
+      "detection": "manual",
       "configTarget": null,
       "verification": [
-        "filesystem",
-        "client-discovery",
-        "invocation"
+        "package-build",
+        "plugin-marketplace-install",
+        "session-context"
       ]
     },
     {

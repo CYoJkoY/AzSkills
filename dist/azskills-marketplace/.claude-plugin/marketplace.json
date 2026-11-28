@@ -1,0 +1,58 @@
+{
+  "name": "azskills",
+  "owner": {
+    "name": "AzSkills",
+    "url": "https://github.com/CYoJkoY/AzSkills"
+  },
+  "description": "Independent Codex plugins maintained by the AzSkills catalog.",
+  "plugins": [
+    {
+      "name": "engineering",
+      "source": "./plugins/engineering",
+      "description": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, and reusable patterns; connect AI clients with verified setup; and steer judgment, collaboration, and execution behavior.",
+      "category": "Productivity"
+    },
+    {
+      "name": "design",
+      "source": "./plugins/design",
+      "description": "Design and refine interfaces, establish design systems, apply visual presets, and build accessible, responsive UI motion.",
+      "category": "Productivity"
+    },
+    {
+      "name": "visual-assets",
+      "source": "./plugins/visual-assets",
+      "description": "Create logos, editorial image treatments, and accurate scientific or medical figures with editable deliverables.",
+      "category": "Productivity"
+    },
+    {
+      "name": "visual-production",
+      "source": "./plugins/visual-production",
+      "description": "Produce responsive HTML reports and presentations, data-driven video, and deterministic Remotion renders.",
+      "category": "Productivity"
+    },
+    {
+      "name": "writing",
+      "source": "./plugins/writing",
+      "description": "Write and audit GitHub documentation, Steam Workshop pages, game localization tables, and evidence-backed resumes.",
+      "category": "Productivity"
+    },
+    {
+      "name": "delivery-loop",
+      "source": "./plugins/delivery-loop",
+      "description": "Run unattended issue-to-merge delivery or continue a long-horizon repository objective without Codex Goal mode. Uses isolated worktrees, touch-scope leases, independent Elephant-Goldfish review, computed scoring, gated auto-merge, durable checkpoints, and bounded dead-loop recovery.",
+      "category": "Productivity"
+    },
+    {
+      "name": "serena",
+      "source": "./plugins/serena",
+      "description": "Use Serena's semantic code intelligence and MCP tools for symbol-aware retrieval, editing, refactoring, and project navigation.",
+      "category": "Developer Tools"
+    },
+    {
+      "name": "rea",
+      "source": "./plugins/rea",
+      "description": "Reverse engineer applications, JavaScript bundles, and native binaries through REA's CLI and MCP server.",
+      "category": "Developer Tools"
+    }
+  ]
+}

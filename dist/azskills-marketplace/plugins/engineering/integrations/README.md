@@ -1,13 +1,13 @@
 # Tool integrations
 
-AzSkills connects to AI tools through native skills, Codex plugins, MCP servers, and manual import.
-AzSkills is a catalog of 8 independent plugins. Skill folders install the workflow plugins individually, the Codex marketplace installs every plugin with its hooks and bundled MCP servers, and the MCP server exposes the catalog to clients without a skill folder.
+AzSkills connects to AI tools through native skills, Codex and Claude plugins, MCP servers, and manual import.
+AzSkills is a catalog of 8 independent plugins. Skill folders install the workflow plugins individually, the Codex and Claude marketplaces install every plugin with its hooks and bundled MCP servers, and the MCP server exposes the catalog to clients without a skill folder.
 Manual import is used only where the vendor workflow is UI-based or not publicly documented for local files.
 
 | Tool | Mechanism | Default target |
 | :--- | :--- | :--- |
 | [Codex](guides/codex.md) | Codex plugin marketplace | Codex plugin marketplace |
-| [Claude](guides/claude-code.md) | Native skill folders | .claude/skills |
+| [Claude](guides/claude-code.md) | Claude plugin marketplace | Claude plugin marketplace |
 | [Claude Desktop](guides/claude-desktop.md) | MCP server | MCP server configuration |
 | [Grok Build](guides/grok-build.md) | Native skill folders | .grok/skills |
 | [Cursor](guides/cursor.md) | Native skill folders | .cursor/skills |

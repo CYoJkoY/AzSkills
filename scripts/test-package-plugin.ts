@@ -3,7 +3,14 @@ import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildPlugin, marketplaceManifest, packageMarketplace, publishRepositoryMarketplace } from "./package-plugin.ts";
+import {
+  buildPlugin,
+  marketplaceManifest,
+  packageMarketplace,
+  publishClaudeMarketplace,
+  publishRepositoryMarketplace,
+} from "./package-plugin.ts";
+import { claudeMarketplaceManifest } from "./claude-plugin.ts";
 import { errorCode, readJson } from "./runtime.ts";
 import { writeZip } from "./zip-bundle.ts";
 import type { PluginCatalog, SkillCatalog } from "./types.ts";
@@ -70,6 +77,7 @@ try {
     const pluginManifest = JSON.parse(await readFile(path.join(pluginRoot, ".codex-plugin/plugin.json"), "utf8")) as {
       name: string;
       version: string;
+      description?: string;
       hooks?: string;
       mcpServers?: string;
       interface?: { composerIcon?: string };
@@ -152,6 +160,45 @@ try {
     assert.equal(await exists(path.join(pluginRoot, "codex-plugin/hooks/session-start.ts")), false, "Routing hook must not ship");
     assert.equal(await exists(path.join(pluginRoot, "codex-plugin/hooks/hooks.json")), false, "Monolithic hook manifest must not ship");
     assert.equal(await exists(path.join(pluginRoot, "skills/azskills")), false, "Single azskills entry must not ship");
+
+    // The same directory also installs in Claude Code, so the projection has to
+    // be present, agree with the Codex manifest, and use that host's root variable.
+    const claudeManifest = JSON.parse(await readFile(path.join(pluginRoot, ".claude-plugin/plugin.json"), "utf8")) as {
+      name: string;
+      version: string;
+      description: string;
+      license: string;
+    };
+    assert.equal(claudeManifest.name, plugin.id);
+    assert.equal(claudeManifest.version, registry.version);
+    assert.equal(claudeManifest.license, "MIT");
+    assert.equal(claudeManifest.description, pluginManifest.description, "Both manifests must agree: " + plugin.id);
+    const claudeHooks = path.join(pluginRoot, "hooks/hooks.json");
+    assert.equal(await exists(claudeHooks), entry.hooks !== null, "Claude hook file presence must follow the catalog: " + plugin.id);
+    if (entry.hooks !== null) {
+      const text = await readFile(claudeHooks, "utf8");
+      assert.equal(text.includes("${PLUGIN_ROOT}"), false, "Claude hooks must not keep the Codex variable: " + plugin.id);
+      assert.ok(text.includes("${CLAUDE_PLUGIN_ROOT}"), "Claude hooks must resolve through CLAUDE_PLUGIN_ROOT: " + plugin.id);
+      assert.equal(text.includes("statusMessage"), false, "statusMessage is Codex-only: " + plugin.id);
+      const claudeHookCommands = (JSON.parse(text) as { hooks?: Record<string, Array<{ hooks?: Array<{ command?: string }> }>> }).hooks ?? {};
+      for (const groups of Object.values(claudeHookCommands)) {
+        for (const group of groups) {
+          for (const hook of group.hooks ?? []) {
+            const target = /\$\{CLAUDE_PLUGIN_ROOT\}\/([^"]+)/.exec(hook.command ?? "");
+            if (target === null) continue;
+            assert.equal(await exists(path.join(pluginRoot, target[1] ?? "")), true, "Claude hook target must ship with its plugin: " + target[1]);
+          }
+        }
+      }
+    }
+    const claudeMcp = path.join(pluginRoot, ".mcp.json");
+    assert.equal(await exists(claudeMcp), entry.mcpServers !== undefined, "Claude MCP file presence must follow the catalog: " + plugin.id);
+    if (entry.mcpServers !== undefined) {
+      const text = await readFile(claudeMcp, "utf8");
+      assert.equal(text.includes("startup_timeout_sec"), false, "startup_timeout_sec is Codex-only: " + plugin.id);
+      assert.ok(text.includes("${CLAUDE_PLUGIN_ROOT}"), "Claude MCP args must resolve through CLAUDE_PLUGIN_ROOT: " + plugin.id);
+    }
+
     const icon = entry.kind === "module"
       ? (entry.icon ?? "codex-plugin/assets/icon.svg")
       : (pluginManifest.interface?.composerIcon ?? "assets/icon.svg");
@@ -159,6 +206,21 @@ try {
   }
 
   assert.equal(built.plugins.some((plugin) => plugin.id === "operations"), false, "operations folds into engineering");
+
+  // The marketplace itself has to be installable in [CC], and every
+  // source has to resolve to a built plugin.
+  const builtClaudeMarketplace = JSON.parse(
+    await readFile(path.join(built.marketplace, ".claude-plugin/marketplace.json"), "utf8"),
+  ) as { name: string; owner?: { name?: string }; plugins: { name: string; source: string }[] };
+  assert.deepEqual(builtClaudeMarketplace, claudeMarketplaceManifest(catalog, ""));
+  assert.equal(builtClaudeMarketplace.name, "azskills");
+  assert.equal(builtClaudeMarketplace.owner?.name, "AzSkills");
+  assert.deepEqual(builtClaudeMarketplace.plugins.map((item) => item.name), catalog.plugins.map((item) => item.id));
+  for (const item of builtClaudeMarketplace.plugins) {
+    assert.ok(item.source.startsWith("./plugins/"), "Claude marketplace source must stay relative: " + item.source);
+    assert.equal(await exists(path.join(built.marketplace, item.source, ".claude-plugin/plugin.json")), true);
+  }
+
   const engineering = built.plugins.find((plugin) => plugin.id === "engineering");
   assert.ok(engineering);
   assert.equal(await exists(path.join(engineering.directory, "codex-plugin/hooks/engineering-hooks.json")), true);
@@ -233,7 +295,15 @@ try {
   assert.deepEqual(committedManifest, committedExpected);
   await assert.rejects(publishRepositoryMarketplace(root, temp), /inside the repository/);
 
-  console.log("Plugin packaging tests passed: " + built.plugins.length + " self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, and no routing hook.");
+  const claudeRepositoryManifest = await publishClaudeMarketplace(root, path.join(root, "dist/azskills-marketplace"));
+  assert.equal(claudeRepositoryManifest, path.join(root, ".claude-plugin/marketplace.json"));
+  assert.deepEqual(
+    JSON.parse(await readFile(claudeRepositoryManifest, "utf8")),
+    claudeMarketplaceManifest(catalog, "dist/azskills-marketplace"),
+  );
+  await assert.rejects(publishClaudeMarketplace(root, temp), /inside the repository/);
+
+  console.log("Plugin packaging tests passed: " + built.plugins.length + " self-contained plugins, marketplace entries, hook assets, skill views, deterministic archives, repository manifest, Claude plugin projection, and no routing hook.");
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

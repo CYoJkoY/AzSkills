@@ -13,6 +13,11 @@ import { tmpdir } from "node:os";
 import { collectClosure, filesUnder, materialize, validateBundle } from "./link-bundle.ts";
 import { writeZip } from "./zip-bundle.ts";
 import { errorCode, errorMessage, isRecord, readJson } from "./runtime.ts";
+import {
+  CLAUDE_MARKETPLACE_FILE,
+  claudeMarketplaceManifest,
+  writeClaudeProjection,
+} from "./claude-plugin.ts";
 import type { PluginCatalog, PluginCatalogEntry, SkillCatalog, SkillModule } from "./types.ts";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -128,6 +133,33 @@ export function pluginManifest(
   };
 }
 
+/**
+ * Adds the Claude Code projection next to the Codex manifest.
+ *
+ * The metadata is read back from the manifest that was just written, so the two
+ * manifests cannot disagree about the name, version, description, or keywords.
+ */
+async function projectClaude(directory: string, entry: PluginCatalogEntry): Promise<void> {
+  const raw: unknown = JSON.parse(await readFile(path.join(directory, ".codex-plugin/plugin.json"), "utf8"));
+  if (!isRecord(raw)) throw new Error(entry.id + ": plugin manifest must be an object");
+  const surface = isRecord(raw.interface) ? raw.interface : {};
+  const keywords = Array.isArray(raw.keywords)
+    ? raw.keywords.filter((item): item is string => typeof item === "string")
+    : [];
+  await writeClaudeProjection(
+    directory,
+    {
+      id: entry.id,
+      displayName: typeof surface.displayName === "string" ? surface.displayName : displayName(entry.id),
+      version: typeof raw.version === "string" ? raw.version : "",
+      description: typeof raw.description === "string" ? raw.description : "",
+      keywords,
+    },
+    entry.hooks ?? null,
+    entry.mcpServers ?? null,
+  );
+}
+
 async function buildModule(
   repoRoot: string,
   entry: PluginCatalogEntry,
@@ -159,6 +191,7 @@ async function buildModule(
     const manifest = pluginManifest(entry, registry.version, description, modes);
     await mkdir(path.join(destination, ".codex-plugin"), { recursive: true });
     await writeFile(path.join(destination, ".codex-plugin/plugin.json"), JSON.stringify(manifest, null, 2) + "\n", "utf8");
+    await projectClaude(destination, entry);
   }
   await validateBundle(destination);
   return {
@@ -189,6 +222,7 @@ async function buildStandalone(
   const raw: unknown = JSON.parse(await readFile(manifestPath, "utf8"));
   if (!isRecord(raw) || raw.name !== entry.id) throw new Error(entry.id + ": plugin manifest name must match the catalog id");
   await writeFile(manifestPath, JSON.stringify({ ...raw, version: registry.version }, null, 2) + "\n", "utf8");
+  await projectClaude(destination, entry);
   await validateBundle(destination);
   return {
     id: entry.id,
@@ -256,6 +290,34 @@ export async function publishRepositoryMarketplace(
   return manifestPath;
 }
 
+/**
+ * Publishes the Claude Code marketplace at the repository root.
+ *
+ * Claude Code resolves a marketplace source relative to the directory that holds
+ * `.claude-plugin/`, so the entries point at the committed build under `dist/`.
+ */
+export async function publishClaudeMarketplace(
+  repoRoot: string,
+  marketplaceDirectory: string,
+): Promise<string> {
+  const base = path.resolve(repoRoot);
+  const marketplace = path.resolve(marketplaceDirectory);
+  const baseReal = await realpath(base);
+  const marketplaceReal = await realpath(marketplace);
+  if (marketplaceReal !== baseReal && !marketplaceReal.startsWith(baseReal + path.sep)) {
+    throw new Error("Claude marketplace must be written inside the repository: " + marketplace);
+  }
+  const catalog = await readJson<PluginCatalog>(path.join(base, "catalog/plugins.json"));
+  const relative = path.relative(base, marketplace).replace(/\\/g, "/");
+  if (relative === "" || relative.startsWith("..")) {
+    throw new Error("Claude marketplace must be a directory below the repository root: " + marketplace);
+  }
+  const manifestPath = path.join(base, CLAUDE_MARKETPLACE_FILE);
+  await mkdir(path.dirname(manifestPath), { recursive: true });
+  await writeFile(manifestPath, JSON.stringify(claudeMarketplaceManifest(catalog, relative), null, 2) + "\n", "utf8");
+  return manifestPath;
+}
+
 export async function packageMarketplace(repoRoot: string, outputDirectory: string): Promise<MarketplaceBuild> {
   const base = path.resolve(repoRoot);
   const output = path.resolve(outputDirectory);
@@ -270,6 +332,9 @@ export async function packageMarketplace(repoRoot: string, outputDirectory: stri
   const manifestPath = path.join(output, ".agents/plugins/marketplace.json");
   await mkdir(path.dirname(manifestPath), { recursive: true });
   await writeFile(manifestPath, JSON.stringify(marketplace, null, 2) + "\n", "utf8");
+  const claudePath = path.join(output, CLAUDE_MARKETPLACE_FILE);
+  await mkdir(path.dirname(claudePath), { recursive: true });
+  await writeFile(claudePath, JSON.stringify(claudeMarketplaceManifest(catalog, ""), null, 2) + "\n", "utf8");
   return { marketplace: output, plugins };
 }
 
@@ -299,10 +364,12 @@ if (isMain) {
       "",
       "Builds one self-contained Codex plugin per catalog entry:",
       "  <output>/azskills-marketplace/.agents/plugins/marketplace.json",
+      "  <output>/azskills-marketplace/.claude-plugin/marketplace.json",
       "  <output>/azskills-marketplace/plugins/<id>/",
       "  <output>/zips/<id>.zip (deterministic archives)",
       "  --refresh removes the target directories first",
       "  repository-local output also refreshes .agents/plugins/marketplace.json",
+      "  and .claude-plugin/marketplace.json",
     ].join("\n"));
     process.exit(0);
   }
@@ -334,6 +401,7 @@ if (isMain) {
       }
       if (destination.startsWith(path.resolve(repositoryRoot) + path.sep)) {
         await publishRepositoryMarketplace(repositoryRoot, destination);
+        await publishClaudeMarketplace(repositoryRoot, destination);
       }
       console.log("Packaged " + built.plugins.length + " independent plugins into " + destination);
       console.log("Plugin archives: " + zipRoot + " (" + files + " files across " + built.plugins.length + " archives)");
