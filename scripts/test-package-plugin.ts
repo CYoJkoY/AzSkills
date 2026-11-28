@@ -180,13 +180,16 @@ try {
       assert.equal(text.includes("${PLUGIN_ROOT}"), false, "Claude hooks must not keep the Codex variable: " + plugin.id);
       assert.ok(text.includes("${CLAUDE_PLUGIN_ROOT}"), "Claude hooks must resolve through CLAUDE_PLUGIN_ROOT: " + plugin.id);
       assert.equal(text.includes("statusMessage"), false, "statusMessage is Codex-only: " + plugin.id);
-      const claudeHookCommands = (JSON.parse(text) as { hooks?: Record<string, Array<{ hooks?: Array<{ command?: string }> }>> }).hooks ?? {};
+      type HookHandler = { command?: string; args?: string[] };
+      const claudeHookCommands = (JSON.parse(text) as { hooks?: Record<string, Array<{ hooks?: HookHandler[] }>> }).hooks ?? {};
       for (const groups of Object.values(claudeHookCommands)) {
         for (const group of groups) {
           for (const hook of group.hooks ?? []) {
-            const target = /\$\{CLAUDE_PLUGIN_ROOT\}\/([^"]+)/.exec(hook.command ?? "");
-            if (target === null) continue;
-            assert.equal(await exists(path.join(pluginRoot, target[1] ?? "")), true, "Claude hook target must ship with its plugin: " + target[1]);
+            assert.equal(hook.command, "node", "Claude handlers must use exec form: " + plugin.id);
+            assert.ok((hook.args?.length ?? 0) >= 1, "Claude handlers must pass the script as an argument: " + plugin.id);
+            const target = /\$\{CLAUDE_PLUGIN_ROOT\}\/(.+)/.exec(hook.args?.[0] ?? "");
+            assert.ok(target !== null, "Claude hook args must resolve through CLAUDE_PLUGIN_ROOT: " + plugin.id);
+            assert.equal(await exists(path.join(pluginRoot, target?.[1] ?? "")), true, "Claude hook target must ship with its plugin: " + target?.[1]);
           }
         }
       }

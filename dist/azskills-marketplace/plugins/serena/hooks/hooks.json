@@ -5,7 +5,10 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/serena-intent.ts\""
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/serena-intent.ts"
+            ]
           }
         ]
       }
