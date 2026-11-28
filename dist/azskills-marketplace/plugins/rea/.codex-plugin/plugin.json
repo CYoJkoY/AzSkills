@@ -1,6 +1,6 @@
 {
   "name": "rea",
-  "version": "7.11.0",
+  "version": "7.12.0",
   "description": "Reverse engineer applications, JavaScript bundles, and native binaries with REA.",
   "author": {
     "name": "morluto",

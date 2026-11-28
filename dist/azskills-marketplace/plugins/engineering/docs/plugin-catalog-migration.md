@@ -275,6 +275,39 @@ count grows from 47 to 65.
 The release is minor: no plugin ID, module id, or mode changed, so an upgrade
 only refreshes the checkout and the installed plugin.
 
+## 7.12.0: Codex App sidebar destination and Claude plugin marketplace
+
+7.11.0 served the delivery-loop panel as an MCP tool with a `ui://` resource and
+called that a side panel. It was not one. A host renders a tool result; it does
+not list a plugin in its own sidebar unless the plugin says it wants a
+destination. The result was a panel reachable only by calling a tool by name,
+which is the opposite of a panel you glance at.
+
+- `panelToolMeta()` returns the five metadata keys the Codex App and its MCP
+  host look for: `ui` with `visibility:["app"]`, the flat `ui/resourceUri` and
+  `ui/visibility` aliases, `openai/outputTemplate`, and
+  `openai/ui:{entrypoints:[{type:"global"}]}`. The entrypoint is what makes the
+  plugin a sidebar destination instead of a tool.
+- The tool carries `title: "AzFlow"` and an inline SVG icon, and the panel ships
+  a light theme with a dark override driven by host context, tuned for a narrow
+  sidebar.
+- A local plugin installs with `visibleByDefault: false`, so the panel does not
+  take a pin slot on its own; the panel footer tells the user to pin it once.
+  Pins are capped per user, so claiming one silently would be hostile.
+- `scripts/claude-plugin.ts` projects every built plugin onto the Claude plugin
+  format: a metadata-only `.claude-plugin/plugin.json` read back from the Codex
+  manifest, `hooks/hooks.json` with `${PLUGIN_ROOT}` rewritten to
+  `${CLAUDE_PLUGIN_ROOT}` and the Codex-only `statusMessage` dropped, and
+  `.mcp.json` for bundled servers.
+- `publishClaudeMarketplace` writes `.claude-plugin/marketplace.json` at the
+  repository root and inside a built marketplace, with sources relative to the
+  manifest directory and checked for containment.
+- `integrations` gains a `claude-plugin` mechanism, and the Claude guide now
+  installs from a marketplace instead of copying skill folders.
+
+The release is minor: no plugin ID, module id, or mode changed. A plugin now
+ships two manifests, and the sidebar entry needs one pin to appear.
+
 ## 7.11.0: delivery-loop continuity and side panel
 
 `delivery-loop` now treats the quiet failures of an unattended run as first-class

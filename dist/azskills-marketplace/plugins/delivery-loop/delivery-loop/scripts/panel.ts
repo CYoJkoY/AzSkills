@@ -26,6 +26,37 @@ export const PANEL_SNAPSHOT_URI = "azflow://snapshot";
 
 export const PANEL_TOOL = "azflow_panel";
 export const PANEL_CONFIG_TOOL = "azflow_config";
+/** The label the host shows for the panel when it is a sidebar destination. */
+export const PANEL_APP_TITLE = "AzFlow";
+
+/**
+ * An inline icon, so the destination needs no extra file in the bundle. The
+ * shape is a rounded brand tile with a flow glyph, which reads at 16 px.
+ */
+export const PANEL_ICON = {
+  src:
+    "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzNENEU4QSIvPjxwYXRoIGQ9Ik05IDEwLjVoNi42bDMuNCA1LjUtMy40IDUuNUg5IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMi40IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48Y2lyY2xlIGN4PSIyMy4yIiBjeT0iMTYiIHI9IjIuNiIgZmlsbD0iI0ZGRkZGRiIvPjwvc3ZnPg==",
+  mimeType: "image/svg+xml",
+  sizes: ["any"],
+} as const;
+
+/**
+ * The `_meta` block that makes the panel a sidebar destination.
+ *
+ * A UI resource alone only matches the tool's output; the host lists a tool in
+ * the sidebar when it also declares a global entrypoint. The resource URI is
+ * repeated in the three key forms hosts read, so an older client that knows
+ * only one of them still resolves the same document.
+ */
+export function panelToolMeta(): Record<string, unknown> {
+  return {
+    ui: { resourceUri: PANEL_UI_URI, visibility: ["app"] },
+    "ui/resourceUri": PANEL_UI_URI,
+    "ui/visibility": ["app"],
+    "openai/outputTemplate": PANEL_UI_URI,
+    "openai/ui": { entrypoints: [{ type: "global" }] },
+  };
+}
 
 export interface PanelTask {
   readonly id: string;
@@ -268,6 +299,26 @@ const escapeHtml = (text: string): string =>
 
 const PANEL_STYLES = `
 :root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --card: #f6f7fa;
+  --line: #dde1e9;
+  --text: #1b1f27;
+  --muted: #5b6473;
+  --accent: #3d4e8a;
+  --warn: #8a5a12;
+  --bad: #a3282d;
+  --good: #1d6b45;
+  --input: #ffffff;
+  --input-line: #ccd3e0;
+  --button: #eef1f7;
+  --button-hover: #e2e7f1;
+  --row: #edeff5;
+  --good-line: #b9d9c6;
+  --accent-line: #bcc5e0;
+  --warn-line: #ddc9a3;
+}
+:root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #14161c;
   --card: #1c1f27;
@@ -278,44 +329,57 @@ const PANEL_STYLES = `
   --warn: #e0a95f;
   --bad: #e07f7f;
   --good: #77c79a;
+  --input: #12141a;
+  --input-line: #2b3040;
+  --button: #2c3350;
+  --button-hover: #343d60;
+  --row: #232734;
+  --good-line: #2f4a3c;
+  --accent-line: #33406b;
+  --warn-line: #4a3f2a;
 }
 * { box-sizing: border-box; }
 body {
   margin: 0;
-  padding: 16px;
+  padding: 12px;
   background: var(--bg);
   color: var(--text);
   font: 13px/1.5 "Segoe UI", system-ui, sans-serif;
 }
-h1 { font-size: 15px; margin: 0; letter-spacing: .01em; }
-h2 { font-size: 12px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+h1 { font-size: 14px; margin: 0; letter-spacing: .01em; }
+h2 { font-size: 11px; margin: 0 0 7px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
 header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .stamp { color: var(--muted); font-size: 11px; }
 .pill { border-radius: 999px; padding: 2px 9px; font-size: 11px; border: 1px solid var(--line); color: var(--muted); }
-.pill.active { color: var(--good); border-color: #2f4a3c; }
-.pill.complete { color: var(--accent); border-color: #33406b; }
-.pill.paused, .pill.stalled { color: var(--warn); border-color: #4a3f2a; }
+.pill.active { color: var(--good); border-color: var(--good-line); }
+.pill.complete { color: var(--accent); border-color: var(--accent-line); }
+.pill.paused, .pill.stalled { color: var(--warn); border-color: var(--warn-line); }
 .pill.abandoned, .pill.none { color: var(--muted); }
-section { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
-.objective { font-size: 14px; margin: 0 0 6px; }
+section { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; margin-bottom: 9px; }
+.objective { font-size: 13.5px; margin: 0 0 6px; }
 .meta { color: var(--muted); font-size: 11px; }
 ul { margin: 6px 0 0; padding-left: 18px; }
 li { margin: 2px 0; }
-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
 th { text-align: left; color: var(--muted); font-weight: 500; padding: 4px 6px 4px 0; border-bottom: 1px solid var(--line); }
-td { padding: 4px 6px 4px 0; border-bottom: 1px solid #232734; vertical-align: top; }
+td { padding: 4px 6px 4px 0; border-bottom: 1px solid var(--row); vertical-align: top; word-break: break-word; }
 tr:last-child td { border-bottom: 0; }
 code { font-family: "Cascadia Mono", Consolas, monospace; font-size: 11px; color: var(--accent); }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
 label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 3px; }
-input, select { width: 100%; background: #12141a; color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; font: inherit; }
-button { margin-top: 10px; background: #2c3350; color: var(--text); border: 1px solid #3a4468; border-radius: 7px; padding: 6px 12px; font: inherit; cursor: pointer; }
-button:hover { background: #343d60; }
+input, select { width: 100%; background: var(--input); color: var(--text); border: 1px solid var(--input-line); border-radius: 6px; padding: 5px 7px; font: inherit; }
+button { margin-top: 10px; background: var(--button); color: var(--text); border: 1px solid var(--input-line); border-radius: 7px; padding: 6px 12px; font: inherit; cursor: pointer; }
+button:hover { background: var(--button-hover); }
 .note { color: var(--muted); font-size: 11px; margin-top: 8px; }
 .warn { color: var(--warn); }
 .bad { color: var(--bad); }
 .good { color: var(--good); }
 .empty { color: var(--muted); font-size: 12px; }
+@media (max-width: 340px) {
+  body { padding: 10px; }
+  .grid { grid-template-columns: 1fr; }
+  th, td { padding-right: 4px; }
+}
 `;
 
 const PANEL_SCRIPT = `
@@ -325,6 +389,16 @@ const PANEL_SCRIPT = `
   var current = JSON.parse(source.textContent || "{}");
   var host = window.parent && window.parent !== window ? window.parent : null;
   var nextId = 100;
+  var initialized = false;
+  var explicitTheme = null;
+  var darkQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+  function applyTheme(value) {
+    if (value === "dark" || value === "light") explicitTheme = value;
+    var dark = explicitTheme === "dark"
+      || (explicitTheme === null && darkQuery !== null && darkQuery.matches);
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  }
 
   function esc(value) {
     return String(value === null || value === undefined ? "" : value)
@@ -435,7 +509,8 @@ const PANEL_SCRIPT = `
       + configSection(snapshot.config)
       + wavesSection(snapshot)
       + tasksSection(snapshot)
-      + driftSection(snapshot);
+      + driftSection(snapshot)
+      + (host ? '<p class="note">Pin this panel in the Codex sidebar to keep it open beside the thread.</p>' : "");
     var apply = document.getElementById("apply");
     if (apply) apply.addEventListener("click", submit);
   }
@@ -494,9 +569,31 @@ const PANEL_SCRIPT = `
       ingest(message.params && (message.params.result || message.params.toolResult));
       return;
     }
+    if (message.method === "ui/notifications/host-context-changed" || message.method === "ui/notifications/host-context") {
+      var context = (message.params && (message.params.hostContext || message.params)) || {};
+      applyTheme(context.theme || null);
+      return;
+    }
+    if (message.id === 1 && message.result !== undefined) {
+      var result = message.result;
+      var resultTheme = result && result.hostContext && result.hostContext.theme;
+      if (resultTheme) applyTheme(resultTheme);
+      if (!initialized) {
+        initialized = true;
+        host.postMessage({ jsonrpc: "2.0", method: "ui/notifications/initialized" }, "*");
+      }
+      return;
+    }
     if (message.id !== undefined && message.result !== undefined) ingest(message.result);
   });
 
+  if (darkQuery && darkQuery.addEventListener) {
+    darkQuery.addEventListener("change", function () {
+      if (explicitTheme === null) applyTheme(null);
+    });
+  }
+
+  applyTheme(null);
   render();
 
   if (host) {
@@ -506,6 +603,12 @@ const PANEL_SCRIPT = `
       method: "ui/initialize",
       params: { appInfo: { name: "azflow-panel", version: "1" }, appCapabilities: { tools: { call: true } } }
     }, "*");
+    setTimeout(function () {
+      if (!initialized) {
+        initialized = true;
+        host.postMessage({ jsonrpc: "2.0", method: "ui/notifications/initialized" }, "*");
+      }
+    }, 2000);
   }
 })();
 `;

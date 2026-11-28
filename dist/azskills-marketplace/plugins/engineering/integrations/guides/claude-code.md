@@ -4,47 +4,41 @@
 
 | Field | Value |
 | :--- | :--- |
-| Connection | Native skill folders |
-| Project target | .claude/skills |
-| User target | ~/.claude/skills |
-| Automation | managed-copy |
-| Detection | target-directory |
-| Verification stages | filesystem → client-discovery → invocation |
-| Source | https://docs.claude.com/en/docs/claude-code/skills |
+| Connection | Claude plugin marketplace |
+| Project target | Claude plugin marketplace |
+| User target | Claude plugin marketplace |
+| Automation | manual-import |
+| Detection | manual |
+| Verification stages | package-build → plugin-marketplace-install → session-context |
+| Source | https://code.claude.com/docs/en/plugins/overview |
 
 ## Install
 
-For an interactive setup, run the guided wizard from the AzSkills checkout:
+The repository root publishes a Claude Code plugin marketplace, so the Git source installs without a local build:
 
-    node scripts/install-skills.ts
+    claude plugin marketplace add https://github.com/CYoJkoY/AzSkills.git
 
-The wizard asks for a client ID and defaults to user scope. Pass --mode project for project scope.
+Install the plugins the project needs from the `azskills` marketplace:
 
-Install a subset of the catalog into a project skill directory:
+    /plugin install engineering@azskills
 
-    node scripts/install-skills.ts --tool claude-code --mode project --project /path/to/project --plugin engineering,design
+AzSkills is a catalog, not one plugin. The marketplace lists 8 independent plugins, and each packaged plugin carries both a Codex manifest (`.codex-plugin/plugin.json`) and a Claude Code manifest (`.claude-plugin/plugin.json`) over the same `skills/`, `hooks/hooks.json`, and `.mcp.json` components:
 
-Install every workflow plugin instead:
+- Workflow plugins: engineering, design, visual-assets, visual-production, writing, delivery-loop.
+- Standalone plugins: serena, rea. These bundle an upstream MCP server, so they install only through the marketplace.
 
-    node scripts/install-skills.ts --tool claude-code --mode project --project /path/to/project --all-plugins
+To build the marketplace locally instead, run `node scripts/package-plugin.ts --refresh` and add `dist/azskills-marketplace` as a directory source. Validate a checkout with `claude plugin validate`. Hooks need Node.js 22.18 or newer on PATH (23.6+ on Node 23); `statusMessage` is a Codex-only hook field and is dropped from the Claude Code hook files.
 
-Install for the current user instead:
-
-    node scripts/install-skills.ts --tool claude-code --mode user --plugin engineering
-
-Each selected plugin becomes its own `<skills-root>/<id>/SKILL.md` with its own reference closure, so clients discover them independently. Use --target to choose another skills root, --dry-run to inspect without writing, --rollback to restore the previous run, and --uninstall to remove only manifest-managed plugin directories. Non-interactive writes require --yes after reviewing the preview. A skills root carries no hooks, so install `delivery-loop` through the Codex plugin marketplace when you want its delivery guard, dead-loop restart, and goal continuation.
 
 ## Use
 
-Start a session and make a request covered by an installed plugin, for example: review this architecture. Each installed plugin is its own entry; member contracts and aliases such as frontend-architecture remain prompt and issue vocabulary for the owning plugin.
+Start a new session and make a request covered by an installed plugin without naming it, for example: review this architecture. Each installed plugin is its own entry, and its skills, hooks, and bundled MCP servers load from the plugin directory.
 
 ## Verify
 
-Run /skills and confirm one AzSkills entry appears.
+Run /plugin to confirm the azskills marketplace lists every catalog plugin, install the ones the project needs, and confirm each reports the current release version. Check that hooks load from the plugin (engineering adds the Godot 3.x write guard and the GPT with Taste steering; delivery-loop adds the delivery guard and goal continuation), and that a new session selects an installed plugin by description without naming it. Re-run claude plugin validate after editing a plugin.
 
 
 ## Remove
 
-Use the manifest-based uninstaller so files not owned by AzSkills are preserved:
-
-    node scripts/install-skills.ts --uninstall --target /path/to/project/.claude/skills
+Uninstall the plugins you no longer need with `/plugin uninstall <id>@azskills`, then remove the marketplace with `claude plugin marketplace remove azskills` when it is no longer used.

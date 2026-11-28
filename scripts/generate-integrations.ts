@@ -18,6 +18,7 @@ const labels: Record<IntegrationMechanism, string> = {
   'native-skills': 'Native skill folders',
   'shared-skills': 'Shared skill folders',
   'codex-plugin': 'Codex plugin marketplace',
+  'claude-plugin': 'Claude plugin marketplace',
   manual: 'Manual import',
   mcp: 'MCP server',
 };
@@ -69,6 +70,24 @@ const guide = (tool: IntegrationTool): string => {
   lines.push('Install the plugins the project needs. Each plugin is matched on its own description, so a capability no longer depends on one shared dispatcher entry. Hooks ship with `engineering` (GPT with Taste steering on session start, request, and subagents, plus the Godot 3.x write guard), `delivery-loop` (delivery-state guard that admits reviewer sub-agents only inside an open review window, dead-loop restart, and goal continuation), `serena` and `rea` (a `UserPromptSubmit` pointer to their own skill when a code-intelligence or reverse-engineering prompt matches, including short Chinese prompts), and `design`/`visual-assets`/`visual-production` (a `UserPromptSubmit` pointer to their router skill when an English or Chinese prompt looks visual); review and trust them when prompted. Hooks require Node.js 22.18 or newer on PATH (23.6+ on Node 23) and support installation paths containing spaces.');
     lines.push('');
   lines.push('When upgrading from an earlier release, refresh the Git snapshot with `codex plugin marketplace upgrade azskills`, then confirm each installed plugin reports ' + skills.version + ' or later. If a cached installation keeps an older version, remove the marketplace, add the Git source again, and reinstall the selected plugins; changing the checkout alone does not replace a cached installation. Hook trust is keyed to the handler hash, so an upgrade that changes a hook manifest or a bundled script marks those hooks for review again. Open the hook list (or `/hooks` in the CLI) to review and trust the handlers, then start a new session.');
+  } else if (tool.mechanism === 'claude-plugin') {
+    lines.push('The repository root publishes a Claude Code plugin marketplace, so the Git source installs without a local build:');
+    lines.push('');
+    lines.push('    claude plugin marketplace add https://github.com/CYoJkoY/AzSkills.git');
+    lines.push('');
+    lines.push('Install the plugins the project needs from the `azskills` marketplace:');
+    lines.push('');
+    lines.push('    /plugin install engineering@azskills');
+    lines.push('');
+    lines.push('AzSkills is a catalog, not one plugin. The marketplace lists ' + pluginCount + ' independent plugins, and each packaged plugin carries both a Codex manifest (`.codex-plugin/plugin.json`) and a Claude Code manifest (`.claude-plugin/plugin.json`) over the same `skills/`, `hooks/hooks.json`, and `.mcp.json` components:');
+    lines.push('');
+    lines.push('- Workflow plugins: ' + workflowIds.join(', ') + '.');
+    if (standaloneIds.length > 0) {
+      lines.push('- Standalone plugins: ' + standaloneIds.join(', ') + '. These bundle an upstream MCP server, so they install only through the marketplace.');
+    }
+    lines.push('');
+    lines.push('To build the marketplace locally instead, run `node scripts/package-plugin.ts --refresh` and add `dist/azskills-marketplace` as a directory source. Validate a checkout with `claude plugin validate`. Hooks need Node.js 22.18 or newer on PATH (23.6+ on Node 23); `statusMessage` is a Codex-only hook field and is dropped from the Claude Code hook files.');
+    lines.push('');
   } else if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
     lines.push(...wizard('user scope'));
     lines.push('');
@@ -120,6 +139,8 @@ const guide = (tool: IntegrationTool): string => {
   lines.push('');
   if (tool.mechanism === 'codex-plugin') {
     lines.push('Start a new Codex session and make a request covered by an installed plugin without naming it. The matching plugin is selected by its own description; no shared routing hook is involved.');
+  } else if (tool.mechanism === 'claude-plugin') {
+    lines.push('Start a new session and make a request covered by an installed plugin without naming it, for example: review this architecture. Each installed plugin is its own entry, and its skills, hooks, and bundled MCP servers load from the plugin directory.');
   } else if (tool.mechanism === 'mcp') {
     lines.push('After the client connects, call the azskills tool with action catalog to list plugins, action plugin with id to read one plugin entry, or action module and action file to read a contract and its support files. Resources: azskills://catalog and azskills://plugins/<id>[/<path>].');
   } else {
@@ -138,6 +159,8 @@ const guide = (tool: IntegrationTool): string => {
   lines.push('');
   if (tool.mechanism === 'codex-plugin') {
     lines.push('Uninstall the plugins you no longer need in Codex, then remove the marketplace with `codex plugin marketplace remove azskills` when it is no longer used.');
+  } else if (tool.mechanism === 'claude-plugin') {
+    lines.push('Uninstall the plugins you no longer need with `/plugin uninstall <id>@azskills`, then remove the marketplace with `claude plugin marketplace remove azskills` when it is no longer used.');
   } else if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
     lines.push('Use the manifest-based uninstaller so files not owned by AzSkills are preserved:');
     lines.push('');
@@ -156,8 +179,8 @@ const index = () => {
   return [
     '# Tool integrations',
     '',
-    'AzSkills connects to AI tools through native skills, Codex plugins, MCP servers, and manual import.',
-    'AzSkills is a catalog of ' + pluginCount + ' independent plugins. Skill folders install the workflow plugins individually, the Codex marketplace installs every plugin with its hooks and bundled MCP servers, and the MCP server exposes the catalog to clients without a skill folder.',
+    'AzSkills connects to AI tools through native skills, Codex and Claude plugins, MCP servers, and manual import.',
+    'AzSkills is a catalog of ' + pluginCount + ' independent plugins. Skill folders install the workflow plugins individually, the Codex and Claude marketplaces install every plugin with its hooks and bundled MCP servers, and the MCP server exposes the catalog to clients without a skill folder.',
     'Manual import is used only where the vendor workflow is UI-based or not publicly documented for local files.',
     '',
     '| Tool | Mechanism | Default target |',

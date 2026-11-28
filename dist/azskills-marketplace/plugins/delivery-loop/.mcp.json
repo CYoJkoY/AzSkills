@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "azflow-panel": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/delivery-loop/scripts/azflow-panel.ts"
+      ]
+    }
+  }
+}

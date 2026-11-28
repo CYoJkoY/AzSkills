@@ -1,0 +1,19 @@
+{
+  "name": "rea",
+  "displayName": "REA",
+  "version": "7.12.0",
+  "description": "Reverse engineer applications, JavaScript bundles, and native binaries with REA.",
+  "author": {
+    "name": "AzSkills",
+    "url": "https://github.com/CYoJkoY/AzSkills"
+  },
+  "homepage": "https://github.com/CYoJkoY/AzSkills",
+  "repository": "https://github.com/CYoJkoY/AzSkills",
+  "license": "MIT",
+  "keywords": [
+    "reverse-engineering",
+    "binary-analysis",
+    "decompiler",
+    "mcp-server"
+  ]
+}

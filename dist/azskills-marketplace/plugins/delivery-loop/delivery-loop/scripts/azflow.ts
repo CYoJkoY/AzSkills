@@ -1966,6 +1966,9 @@ async function panelCommand(args: Args): Promise<void> {
   print(panelBrief(snapshot));
   print("");
   print("Panel written: " + out);
+  print(
+    "This file is static. To keep the panel open beside a thread, install the plugin and pin AzFlow in the Codex App sidebar.",
+  );
 }
 
 function parseConfigValue(key: string, raw: string): Record<string, unknown> {

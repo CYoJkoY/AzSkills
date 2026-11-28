@@ -1,0 +1,19 @@
+{
+  "name": "visual-assets",
+  "displayName": "Visual Assets",
+  "version": "7.12.0",
+  "description": "Create logos, editorial image treatments, and accurate scientific or medical figures with editable deliverables.",
+  "author": {
+    "name": "AzSkills",
+    "url": "https://github.com/CYoJkoY/AzSkills"
+  },
+  "homepage": "https://github.com/CYoJkoY/AzSkills",
+  "repository": "https://github.com/CYoJkoY/AzSkills",
+  "license": "MIT",
+  "keywords": [
+    "visual",
+    "assets",
+    "azskills",
+    "workflow"
+  ]
+}

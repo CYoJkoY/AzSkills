@@ -1,0 +1,58 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-session.ts\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-prompt.ts\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/no-think-tags/hooks/tool-hook.ts\""
+          }
+        ]
+      },
+      {
+        "matcher": "^(?:Bash|Shell|LocalShell|exec_command|run_command|run_shell|Terminal|PowerShell|pwsh|Task|Agent|spawn_agent|spawn_subagent|subagent|delegate|dispatch_agent)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-guard.ts\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/delivery-stop.ts\""
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/no-think-tags/hooks/stop-hook.ts\""
+          }
+        ]
+      }
+    ]
+  }
+}

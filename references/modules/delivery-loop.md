@@ -273,7 +273,7 @@ SHA is a failed delivery, not a shortcut.
 - [Goal run](../../delivery-loop/references/goal-run.md) - durable objective, stop-hook continuation, progress from real state, and stall and budget safety.
 - [Continuity](../../delivery-loop/references/continuity.md) - drift kinds, interrupted tasks, blank commits, and where each one surfaces.
 - [Performance](../../delivery-loop/references/performance.md) - the performance-first rule and the checks the loop trades away for speed.
-- [Panel](../../delivery-loop/references/panel.md) - the snapshot, the MCP panel server, and the config surface.
+- [Panel](../../delivery-loop/references/panel.md) - the snapshot, the sidebar destination, the MCP panel server, and the config surface.
 - [Loop guard](../../delivery-loop/references/loop-guard.md) - dead-loop detection, the in-turn breaker, the restart budget, and prompt replay.
 - [Output hygiene](../../delivery-loop/references/output-hygiene.md) - the three-layer reasoning-leak guard and what counts as a leak.
 - [Local ledger](../../delivery-loop/references/ledger.md) - ledger layout, state schema, and atomic locked writes.

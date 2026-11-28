@@ -14,7 +14,7 @@ const expectedNames = [
   'Kimi Code', 'gjc', 'DSH', 'MiniMax Code', 'ZCode', 'Command Code', 'Prime Agent',
   'Aside', 'Raycast', 'omo', 'Cline CLI', 'Kilo', 'Factory Droid', 'Gentle Shell', 'T3 Code',
 ];
-const mechanisms = new Set<IntegrationTool['mechanism']>(['native-skills', 'shared-skills', 'manual', 'mcp', 'codex-plugin']);
+const mechanisms = new Set<IntegrationTool['mechanism']>(['native-skills', 'shared-skills', 'manual', 'mcp', 'codex-plugin', 'claude-plugin']);
 const errors: string[] = [];
 const names = registry.tools.map((tool) => tool.name);
 const ids = registry.tools.map((tool) => tool.id);
@@ -36,6 +36,7 @@ for (const tool of registry.tools) {
   if (tool.configTarget !== null) errors.push(tool.name + ': automatic configuration target requires a dedicated adapter');
   if (['native-skills', 'shared-skills'].includes(tool.mechanism) && (tool.automation !== 'managed-copy' || tool.detection !== 'target-directory')) errors.push(tool.name + ': inconsistent filesystem capability profile');
   if (tool.mechanism === 'codex-plugin' && (tool.id !== 'codex' || tool.automation !== 'manual-import' || tool.detection !== 'manual')) errors.push(tool.name + ': inconsistent Codex plugin capability profile');
+  if (tool.mechanism === 'claude-plugin' && (tool.id !== 'claude-code' || tool.automation !== 'manual-import' || tool.detection !== 'manual')) errors.push(tool.name + ': inconsistent Claude plugin capability profile');
   if (tool.mechanism === 'mcp' && tool.automation !== 'guided-mcp') errors.push(tool.name + ': MCP setup must be explicitly guided');
   if (tool.mechanism === 'manual' && tool.automation !== 'manual-import') errors.push(tool.name + ': manual setup must be explicit');
   if (!tool.source.startsWith('https://')) errors.push(tool.name + ': source must be an https URL');
