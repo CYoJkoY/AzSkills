@@ -1,7 +1,7 @@
 {
   "name": "rea",
   "displayName": "REA",
-  "version": "7.12.2",
+  "version": "7.13.0",
   "description": "Reverse engineer applications, JavaScript bundles, and native binaries with REA.",
   "author": {
     "name": "AzSkills",

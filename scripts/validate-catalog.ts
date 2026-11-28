@@ -95,6 +95,12 @@ async function main(): Promise<void> {
     if (plugin.mcpServers !== undefined) {
       if (path.isAbsolute(plugin.mcpServers) || plugin.mcpServers.split(/[\\/]/).includes("..")) {
         fail(plugin.id + ": mcpServers path must stay inside the repository: " + plugin.mcpServers);
+      } else if (plugin.kind === "standalone" && typeof plugin.source === "string") {
+        // A standalone plugin is copied from its source directory, so its
+        // component paths are relative to that directory, not the repository.
+        if (!(await exists(path.join(root, plugin.source, plugin.mcpServers)))) {
+          fail(plugin.id + ": mcpServers manifest is missing: " + plugin.source + "/" + plugin.mcpServers);
+        }
       } else if (!(await exists(path.join(root, plugin.mcpServers)))) {
         fail(plugin.id + ": mcpServers manifest is missing: " + plugin.mcpServers);
       }

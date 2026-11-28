@@ -1,11 +1,9 @@
 {
   "mcpServers": {
     "rea": {
-      "command": "npx",
+      "command": "node",
       "args": [
-        "-y",
-        "rea-agents@6.10.1",
-        "mcp"
+        "${PLUGIN_ROOT}/scripts/rea-mcp.ts"
       ],
       "startup_timeout_sec": 30
     }
