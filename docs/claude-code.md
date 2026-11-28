@@ -50,9 +50,6 @@ Three differences are handled at build time:
 
 - Every `${PLUGIN_ROOT}` is rewritten to `${CLAUDE_PLUGIN_ROOT}`, so a hook
   command resolves inside the plugin directory on either host.
-- `statusMessage` is a Codex-only field. It is dropped from the Claude hook
-  file rather than left in place, because an unknown field is a load error on a
-  strict host and the message has no Claude equivalent.
 - Command handlers are emitted in exec form: `command: "node"` plus
   `args: ["${CLAUDE_PLUGIN_ROOT}/..."]`. The hook reference asks for `args`
   whenever a handler references a path placeholder, because each element is
@@ -60,6 +57,15 @@ Three differences are handled at build time:
   survive `sh -c`, Git Bash, or PowerShell depending on the host, and a Windows
   host without Git Bash can fail to start the program at all. Codex keeps shell
   form, which its own loader reads.
+- `statusMessage` is kept as written. The hook reference lists it as a common
+  handler field, a spinner caption for the run, so a projected handler keeps
+  the progress text its author wrote instead of losing it silently.
+
+A handler also runs on the same file under either host, so it reads whichever
+root and data variables the host exports: `PLUGIN_ROOT` or
+`CLAUDE_PLUGIN_ROOT`, and `PLUGIN_DATA` or `CLAUDE_PLUGIN_DATA`. Reading only
+the Codex pair made the Godot guard throw on start under the other host and
+pushed session state into the system temp directory.
 
 ## Runtime
 
@@ -97,13 +103,18 @@ marketplace:
 - `.claude-plugin/plugin.json` exists, and its name, version, description, and
   license match the Codex manifest.
 - `hooks/hooks.json` exists exactly when the plugin declares hooks, contains no
-  `${PLUGIN_ROOT}`, contains `${CLAUDE_PLUGIN_ROOT}`, carries no `statusMessage`,
-  runs every handler as `node` with the script path as its first argument, and
-  every `${CLAUDE_PLUGIN_ROOT}/...` target resolves to a real file.
+  `${PLUGIN_ROOT}`, contains `${CLAUDE_PLUGIN_ROOT}`, keeps every
+  `statusMessage` the source manifest declares, runs every handler as `node`
+  with the script path as its first argument, and every
+  `${CLAUDE_PLUGIN_ROOT}/...` target resolves to a real file.
 - `.mcp.json` exists exactly when the plugin declares MCP servers, and every
   server argument resolves.
 - Each marketplace manifest deep-equals the manifest the catalog would produce,
   and every plugin source resolves.
+- `scripts/test-host-env.ts` runs the hooks with only `CLAUDE_PLUGIN_ROOT` and
+  `CLAUDE_PLUGIN_DATA` set, the way that host exports them, and asserts the
+  resolved skill paths, the state directory, and that no handler refuses to
+  start for a missing Codex variable.
 
 ## What is not verified
 

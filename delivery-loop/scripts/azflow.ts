@@ -1155,8 +1155,9 @@ async function readReviewWindow(project: string): Promise<ReviewWindow | null> {
  * because the cache location differs per host and must never block a review.
  */
 function egmPluginPresent(): boolean {
-  const home = process.env.CODEX_HOME ?? path.join(homedir(), ".codex");
-  return existsSync(path.join(home, "plugins", "cache", "egm"));
+  const codexHome = process.env.CODEX_HOME ?? path.join(homedir(), ".codex");
+  const claudeHome = process.env.CLAUDE_CONFIG_DIR ?? path.join(homedir(), ".claude");
+  return [codexHome, claudeHome].some((home) => existsSync(path.join(home, "plugins", "cache", "egm")));
 }
 
 /**
@@ -1213,7 +1214,7 @@ async function reviewOpen(args: Args): Promise<void> {
   print("Review window open for " + id + " at head " + headSha + " until " + window.expiresAt + ".");
   print("Spawn EGM Goldfish reviewers in fresh contexts (fork_context: false), then attest them with engine 'egm'.");
   if (!egmPluginPresent()) {
-    print("Note: the egm plugin was not found under CODEX_HOME; install it before spawning reviewers.");
+    print("Note: the egm plugin was not found in the host plugin cache; install it before spawning reviewers.");
   }
 }
 
@@ -1967,7 +1968,7 @@ async function panelCommand(args: Args): Promise<void> {
   print("");
   print("Panel written: " + out);
   print(
-    "This file is static. To keep the panel open beside a thread, install the plugin and pin AzFlow in the Codex App sidebar.",
+    "This file is static. Open it in a browser, or call the azflow_panel tool from a UI-capable client for the live view.",
   );
 }
 

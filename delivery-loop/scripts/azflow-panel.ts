@@ -19,8 +19,6 @@ import type { GoalState } from "./goal.ts";
 import {
   PANEL_CONFIG_KEYS,
   PANEL_CONFIG_TOOL,
-  PANEL_APP_TITLE,
-  PANEL_ICON,
   PANEL_SNAPSHOT_URI,
   PANEL_TOOL,
   PANEL_UI_MIME,
@@ -86,12 +84,9 @@ const textResult = (text: string): { content: Array<{ type: "text"; text: string
 
 const panelTool = {
   name: PANEL_TOOL,
-  title: PANEL_APP_TITLE,
   description:
-    "Read the delivery-loop panel for a project: goal, ledger tasks, next waves, drift findings, and configuration. The Codex side panel renders this snapshot as a GUI.",
-  icons: [PANEL_ICON],
+    "Read the delivery-loop panel for a project: goal, ledger tasks, next waves, drift findings, and configuration. A UI-capable host renders this snapshot as a GUI; any other client reads the same state as text.",
   annotations: {
-    title: PANEL_APP_TITLE,
     readOnlyHint: true,
     destructiveHint: false,
     idempotentHint: true,

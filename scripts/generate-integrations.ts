@@ -86,7 +86,7 @@ const guide = (tool: IntegrationTool): string => {
       lines.push('- Standalone plugins: ' + standaloneIds.join(', ') + '. These bundle an upstream MCP server, so they install only through the marketplace.');
     }
     lines.push('');
-    lines.push('To build the marketplace locally instead, run `node scripts/package-plugin.ts --refresh` and add `dist/azskills-marketplace` as a directory source. Validate a checkout with `claude plugin validate`. Hooks need Node.js 22.18 or newer on PATH (23.6+ on Node 23); `statusMessage` is a Codex-only hook field and is dropped from the Claude Code hook files.');
+    lines.push('To build the marketplace locally instead, run `node scripts/package-plugin.ts --refresh` and add `dist/azskills-marketplace` as a directory source. Validate a checkout with `claude plugin validate`. Hooks need Node.js 22.18 or newer on PATH (23.6+ on Node 23), and every handler reads the host variables it is given (`CLAUDE_PLUGIN_ROOT` and `CLAUDE_PLUGIN_DATA` on this host), so the same files run unchanged.');
     lines.push('');
   } else if (tool.mechanism === 'native-skills' || tool.mechanism === 'shared-skills') {
     lines.push(...wizard('user scope'));

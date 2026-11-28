@@ -12,7 +12,6 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import {
   PANEL_CONFIG_KEYS,
-  PANEL_ICON,
   PANEL_TOOL,
   PANEL_UI_URI,
   applyPanelPatch,
@@ -180,22 +179,12 @@ assert.ok(html.includes("ui/initialize"), "the panel performs the host handshake
 assert.equal(html.includes("</script><b>escaped</b>"), false);
 assert.ok(html.includes("\\u003c/script"), "the title is escaped inside the embedded JSON");
 
-// The panel is declared as a sidebar destination, not only as a tool result.
+// The panel binds its result to the UI resource and claims nothing more.
 const meta = panelToolMeta();
-assert.deepEqual(Object.keys(meta).sort(), [
-  "openai/outputTemplate",
-  "openai/ui",
-  "ui",
-  "ui/resourceUri",
-  "ui/visibility",
-]);
-assert.deepEqual(meta.ui, { resourceUri: PANEL_UI_URI, visibility: ["app"] });
-assert.equal(meta["ui/resourceUri"], PANEL_UI_URI);
-assert.deepEqual(meta["ui/visibility"], ["app"]);
-assert.equal(meta["openai/outputTemplate"], PANEL_UI_URI);
-assert.deepEqual(meta["openai/ui"], { entrypoints: [{ type: "global" }] });
-assert.equal(PANEL_ICON.mimeType, "image/svg+xml");
-assert.ok(PANEL_ICON.src.startsWith("data:image/svg+xml;base64,"), "the icon is inlined, so the bundle needs no extra file");
+assert.deepEqual(Object.keys(meta), ["ui"]);
+assert.deepEqual(meta.ui, { resourceUri: PANEL_UI_URI }, "the meta binds the result to the document and nothing else");
+assert.equal("openai/ui" in meta, false, "the panel does not ask a host to list it as a destination");
+assert.equal("ui/visibility" in meta, false, "the panel does not request an app-surface listing");
 
 // The document follows the host theme instead of forcing a dark scheme.
 assert.ok(html.includes("data-theme"), "the panel exposes a theme attribute");
@@ -207,7 +196,7 @@ assert.ok(
 );
 assert.ok(html.includes("host-context-changed"), "the panel follows host theme changes");
 assert.ok(html.includes("ui/notifications/initialized"), "the panel completes the UI handshake");
-assert.ok(html.includes("Pin this panel in the Codex sidebar"), "the panel tells the user how to keep it open");
+assert.equal(html.includes("sidebar"), false, "the panel makes no sidebar claim in its own copy");
 
 // A real stdio handshake proves the advertised meta reaches a client.
 const server = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "scripts", "azflow-panel.ts");
@@ -255,17 +244,11 @@ const listed = await new Promise<{ title?: string; icons?: unknown; annotations?
   },
 );
 
-assert.equal(listed.title, "AzFlow");
-assert.equal(Array.isArray(listed.icons) && listed.icons.length, 1, "the tool advertises its icon");
 assert.equal(listed.annotations?.readOnlyHint, true, "reading the panel changes nothing");
 const advertised = listed._meta ?? {};
-for (const key of ["ui", "ui/resourceUri", "ui/visibility", "openai/outputTemplate", "openai/ui"]) {
-  assert.ok(key in advertised, "tools/list carries " + key);
-}
-assert.deepEqual(
-  (advertised["openai/ui"] as { entrypoints?: unknown }).entrypoints,
-  [{ type: "global" }],
-  "the panel is declared as a global sidebar entrypoint",
-);
+assert.deepEqual(Object.keys(advertised), ["ui"], "tools/list advertises the UI binding and nothing else");
+assert.deepEqual(advertised.ui, { resourceUri: PANEL_UI_URI });
+assert.equal("title" in listed, false, "the tool carries no destination label");
+assert.equal("icons" in listed, false, "the tool carries no destination icon");
 
 console.log("panel.test.ts: all assertions passed");

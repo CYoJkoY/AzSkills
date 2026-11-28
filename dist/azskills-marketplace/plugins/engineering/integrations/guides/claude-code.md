@@ -27,7 +27,7 @@ AzSkills is a catalog, not one plugin. The marketplace lists 8 independent plugi
 - Workflow plugins: engineering, design, visual-assets, visual-production, writing, delivery-loop.
 - Standalone plugins: serena, rea. These bundle an upstream MCP server, so they install only through the marketplace.
 
-To build the marketplace locally instead, run `node scripts/package-plugin.ts --refresh` and add `dist/azskills-marketplace` as a directory source. Validate a checkout with `claude plugin validate`. Hooks need Node.js 22.18 or newer on PATH (23.6+ on Node 23); `statusMessage` is a Codex-only hook field and is dropped from the Claude Code hook files.
+To build the marketplace locally instead, run `node scripts/package-plugin.ts --refresh` and add `dist/azskills-marketplace` as a directory source. Validate a checkout with `claude plugin validate`. Hooks need Node.js 22.18 or newer on PATH (23.6+ on Node 23), and every handler reads the host variables it is given (`CLAUDE_PLUGIN_ROOT` and `CLAUDE_PLUGIN_DATA` on this host), so the same files run unchanged.
 
 
 ## Use

@@ -6,6 +6,7 @@
           {
             "type": "command",
             "command": "node",
+            "statusMessage": "Checking whether the request needs the visual-production workflow",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/codex-plugin/hooks/visual-intent.ts",
               "visual-production"

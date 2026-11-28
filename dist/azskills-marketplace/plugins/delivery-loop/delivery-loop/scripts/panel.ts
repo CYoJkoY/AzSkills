@@ -26,36 +26,15 @@ export const PANEL_SNAPSHOT_URI = "azflow://snapshot";
 
 export const PANEL_TOOL = "azflow_panel";
 export const PANEL_CONFIG_TOOL = "azflow_config";
-/** The label the host shows for the panel when it is a sidebar destination. */
-export const PANEL_APP_TITLE = "AzFlow";
-
 /**
- * An inline icon, so the destination needs no extra file in the bundle. The
- * shape is a rounded brand tile with a flow glyph, which reads at 16 px.
- */
-export const PANEL_ICON = {
-  src:
-    "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzNENEU4QSIvPjxwYXRoIGQ9Ik05IDEwLjVoNi42bDMuNCA1LjUtMy40IDUuNUg5IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMi40IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48Y2lyY2xlIGN4PSIyMy4yIiBjeT0iMTYiIHI9IjIuNiIgZmlsbD0iI0ZGRkZGRiIvPjwvc3ZnPg==",
-  mimeType: "image/svg+xml",
-  sizes: ["any"],
-} as const;
-
-/**
- * The `_meta` block that makes the panel a sidebar destination.
+ * The `_meta` block that binds the tool result to the UI resource.
  *
- * A UI resource alone only matches the tool's output; the host lists a tool in
- * the sidebar when it also declares a global entrypoint. The resource URI is
- * repeated in the three key forms hosts read, so an older client that knows
- * only one of them still resolves the same document.
+ * This only says "the document at this URI renders this result". It makes no
+ * claim that a host lists the tool anywhere on its own; a client that does not
+ * render UI resources still gets the text snapshot.
  */
 export function panelToolMeta(): Record<string, unknown> {
-  return {
-    ui: { resourceUri: PANEL_UI_URI, visibility: ["app"] },
-    "ui/resourceUri": PANEL_UI_URI,
-    "ui/visibility": ["app"],
-    "openai/outputTemplate": PANEL_UI_URI,
-    "openai/ui": { entrypoints: [{ type: "global" }] },
-  };
+  return { ui: { resourceUri: PANEL_UI_URI } };
 }
 
 export interface PanelTask {
@@ -509,8 +488,7 @@ const PANEL_SCRIPT = `
       + configSection(snapshot.config)
       + wavesSection(snapshot)
       + tasksSection(snapshot)
-      + driftSection(snapshot)
-      + (host ? '<p class="note">Pin this panel in the Codex sidebar to keep it open beside the thread.</p>' : "");
+      + driftSection(snapshot);
     var apply = document.getElementById("apply");
     if (apply) apply.addEventListener("click", submit);
   }

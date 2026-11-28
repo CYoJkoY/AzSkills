@@ -35,7 +35,7 @@ export function readStopInput(raw: unknown): StopInput | null {
 }
 
 function stateDirectory(): string | null {
-  const configured = process.env.PLUGIN_DATA;
+  const configured = process.env.PLUGIN_DATA ?? process.env.CLAUDE_PLUGIN_DATA;
   if (typeof configured === "string" && configured.trim() !== "") return configured;
   return tmpdir();
 }

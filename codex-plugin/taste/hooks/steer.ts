@@ -237,9 +237,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
     if (fallback && !fallbackRoute) fail('MISSING_METADATA', 'Expected a Codex hook event JSON object on stdin');
     event = fallback ? {hook_event_name: FALLBACK_ROUTES.get(fallbackRoute ?? '') ?? ''} : parseEvent(input);
     const needsState = event.hook_event_name === 'SubagentStart' || (event.hook_event_name === 'UserPromptSubmit' && Boolean(event.agent_id));
-    if (!fallback && needsState && !process.env.PLUGIN_DATA?.trim()) fail('MISSING_METADATA', `${event.hook_event_name} requires nonempty PLUGIN_DATA for initial child-turn dedup`);
+    const stateRoot = process.env.PLUGIN_DATA ?? process.env.CLAUDE_PLUGIN_DATA;
+    if (!fallback && needsState && !stateRoot?.trim()) fail('MISSING_METADATA', `${event.hook_event_name} requires nonempty PLUGIN_DATA or CLAUDE_PLUGIN_DATA for initial child-turn dedup`);
     if (fallback) fallbackHook(fallbackRoute);
-    const result = evaluateHook(event, path.join(root, 'prompts'), process.env.PLUGIN_DATA ?? null);
+    const result = evaluateHook(event, path.join(root, 'prompts'), stateRoot ?? null);
     route = result.route;
     audit(event, route, fallback, result.reason, Boolean(result.response.hookSpecificOutput));
     process.stdout.write(JSON.stringify(result.response) + '\n');
