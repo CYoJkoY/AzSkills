@@ -147,6 +147,29 @@ try {
         }
       }
     }
+    if (plugin.id === "rea") {
+      const servers = JSON.parse(await readFile(path.join(pluginRoot, ".codex-plugin/mcp.json"), "utf8")) as {
+        mcpServers?: Record<string, { command?: string; args?: string[] }>;
+      };
+      const rea = servers.mcpServers?.rea;
+      assert.ok(rea !== undefined, "the rea plugin declares its server");
+      assert.equal(rea.command, "node", "REA launches a local script instead of npx");
+      assert.equal(JSON.stringify(servers).includes("npx"), false, "REA never resolves the package at startup");
+      for (const script of ["scripts/rea-mcp.ts", "scripts/rea-setup.ts", "scripts/rea-runtime.ts"]) {
+        assert.equal(await exists(path.join(pluginRoot, script)), true, "REA launcher ships with the plugin: " + script);
+      }
+    }
+    if (plugin.id === "delivery-loop") {
+      assert.equal(pluginManifest.mcpServers, undefined, "the delivery panel MCP server no longer ships");
+      for (const gone of [
+        "delivery-loop/scripts/panel.ts",
+        "delivery-loop/scripts/azflow-panel.ts",
+        "delivery-loop/references/panel.md",
+        "delivery-loop/mcp.json",
+      ]) {
+        assert.equal(await exists(path.join(pluginRoot, gone)), false, "panel file is gone: " + gone);
+      }
+    }
     if (entry.hooks !== null) {
       assert.equal(await exists(path.join(pluginRoot, entry.hooks)), true);
       assert.equal(pluginManifest.hooks, "./" + entry.hooks);

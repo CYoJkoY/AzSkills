@@ -1,7 +1,7 @@
 ---
 name: azskills
 description: AzSkills is a catalog of independent Codex plugins for engineering architecture and code style, design systems and UI motion, visual assets, slides and video, documents, resumes, client setup, and Godot 3.x. Install only the plugins a task needs; each one routes on its own.
-version: 7.12.2
+version: 7.13.0
 ---
 
 # AzSkills
@@ -34,8 +34,10 @@ selecting the plugin exposes each contract inside it.
 `serena` and `rea` are standalone plugins. Each bundles an upstream MCP server
 manifest, its own repository icon, and one skill entry, and installs from the
 Codex plugin marketplace; a skills root cannot carry their MCP configuration.
-Their MCP servers must be installed and available on PATH before use: Serena
-through `uv tool install -p 3.13 serena-agent`, REA through `npx rea-agents@latest setup`.
+Their MCP servers must be installed before use: Serena through
+`uv tool install -p 3.13 serena-agent`, REA through its bundled local installer
+(`node scripts/rea-setup.ts` inside the plugin, which prefers bun and accepts
+pnpm or npm).
 
 `engineering` also ships the GPT with Taste behavior hooks: `SessionStart`,
 `UserPromptSubmit`, and `SubagentStart` load the Main recipe and steer each

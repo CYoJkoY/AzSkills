@@ -847,31 +847,13 @@ async function main(): Promise<void> {
   assert.equal(continuity?.pass, false, "an interrupted task is reported as drift");
   assert.match(continuity?.detail ?? "", /interrupted-task/);
 
-  // The panel reads the same state as JSON, so the GUI and the CLI can never
-  // disagree about what the run looks like.
-  const panel = JSON.parse(must(["panel", "--json"]).stdout) as {
-    project: string;
-    counts: { total: number; open: number };
-    drift: { kind: string; fix: string }[];
-    waves: { index: number; tasks: string[] }[];
-  };
-  assert.equal(panel.project.toLowerCase(), path.resolve(project).toLowerCase());
-  assert.ok(panel.counts.total >= 7, "the panel reports every ledger task");
-  assert.ok(panel.drift.some((finding) => finding.kind === "interrupted-task"));
-  const panelFile = path.join(work, "panel.html");
-  const panelWritten = must(["panel", "--out", panelFile]);
-  assert.match(panelWritten.stdout, /Panel written:/);
-  const panelDocument = await readFile(panelFile, "utf8");
-  assert.ok(panelDocument.includes('id="snapshot"'), "the panel embeds its snapshot");
-  assert.ok(panelDocument.includes("azflow_config"), "the panel can reach the configuration tool");
-
-  // The configuration form has a command-line equivalent that validates the
-  // same keys, so a bad patch is refused wherever it comes from.
+  // `azflow config` validates every key it accepts, so a bad patch is refused
+  // instead of stored as a value the loop cannot use.
   assert.match(must(["config", "set", "maxParallel", "5"]).stdout, /Config maxParallel updated/);
-  const panelConfig = JSON.parse(must(["config", "show", "--json"]).stdout) as { maxParallel: number };
-  assert.equal(panelConfig.maxParallel, 5);
+  const storedConfig = JSON.parse(must(["config", "show", "--json"]).stdout) as { maxParallel: number };
+  assert.equal(storedConfig.maxParallel, 5);
   const badKey = cli(["config", "set", "base", "develop"]);
-  assert.notEqual(badKey.status, 0, "the base branch is not editable from the panel");
+  assert.notEqual(badKey.status, 0, "the base branch is not editable through config");
   assert.match(badKey.stderr, /not editable/);
   assert.match(must(["config", "keys"]).stdout, /reviewThreshold/);
 

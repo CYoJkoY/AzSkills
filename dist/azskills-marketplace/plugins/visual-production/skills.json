@@ -185,11 +185,11 @@
       }
     }
   ],
-  "version": "7.12.2",
+  "version": "7.13.0",
   "entry": {
     "id": "azskills",
     "path": "SKILL.md",
-    "version": "7.12.2"
+    "version": "7.13.0"
   },
   "modules": [
     {

@@ -333,6 +333,23 @@ gates live in `azflow` itself, so disabling every hook never weakens them.
 makes `ship` fail its autonomy gate, which turns auto-merge into a human decision
 without changing anything else. Set it in `azflow init --autonomy manual`.
 
+## Configuration
+
+`azflow config` reads and writes the ledger configuration, so a value changes
+under the same lock as every other ledger write instead of a hand edit of
+`.azflow/state.json`.
+
+- `azflow config show [--json]` prints the whole configuration.
+- `azflow config keys` prints the editable keys.
+- `azflow config set <key> <value>` validates the value, then stores it. A bad
+  value is refused and nothing is written.
+
+Editable keys are `autonomy`, `mergeStrategy`, `maxParallel`, `reviewThreshold`,
+`reviewEngine`, `leaseTtlMinutes`, `checks`, and `allowFrameworks`. `base` and
+`remote` are not editable: they change what git means rather than how the loop
+behaves, so they stay in `azflow init`. Lists (`checks`, `allowFrameworks`) are
+comma-separated on the command line.
+
 ## Long-horizon goal run
 
 One objective can outlast a single turn or a single context window. zflow goal

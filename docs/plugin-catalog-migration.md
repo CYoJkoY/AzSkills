@@ -91,7 +91,8 @@ application is GPL-3.0-or-later; `plugins/rea/LICENSE` carries its MIT license.
 The MCP entries are `serena start-mcp-server --project-from-cwd --context=codex`
 and `npx -y rea-agents@6.10.1 mcp`; users still install the upstream runtime
 (`uv tool install -p 3.13 serena-agent` or `npx rea-agents@latest setup`) and
-keep it on PATH.
+keep it on PATH. (The REA entry was superseded in 7.13.0, which installs and
+runs the runtime from disk; see that section below.)
 
 This is additive, so the version moves to 7.1.0. Both plugins install only from
 the marketplace: `install-skills.ts` writes skill folders without an MCP
@@ -274,6 +275,70 @@ count grows from 47 to 65.
 
 The release is minor: no plugin ID, module id, or mode changed, so an upgrade
 only refreshes the checkout and the installed plugin.
+
+## 7.13.0: retire the delivery panel and run REA from disk
+
+### The delivery panel is removed
+
+7.11.0 added a panel module and an MCP server for it, 7.12.0 tried to make it a
+sidebar destination, and 7.12.2 withdrew that destination. The panel still cost
+a second state view that no command needed: the same goal, ledger, waves, and
+drift findings are already printed by `azflow status`, `azflow plan`, and
+`azflow doctor`, and the HTML page was reachable only by calling a tool by name.
+It is deleted outright.
+
+- `delivery-loop/scripts/panel.ts`, `delivery-loop/scripts/azflow-panel.ts`,
+  `delivery-loop/tests/panel.test.ts`, `delivery-loop/references/panel.md`, and
+  `delivery-loop/mcp.json` are gone.
+- The `delivery-loop` catalog entry no longer declares `mcpServers`, so the
+  plugin ships no MCP server and the packaged `.mcp.json` disappears with it.
+- `azflow panel` is removed. `azflow config show|keys|set` stays: it is the only
+  supported way to change the ledger configuration under the ledger lock, and it
+  never depended on the panel. Its validation moved to
+  `delivery-loop/scripts/config.ts` as `CONFIG_KEYS` and `applyConfigPatch`, so
+  the command survives the module deletion unchanged.
+- The panel assertions in `cli.test.ts` are replaced by `tests/config.test.ts`,
+  which covers the same patch rules: unknown keys are refused, `base` and
+  `remote` stay out of reach, and the source configuration is never mutated.
+
+### REA installs locally instead of running `npx`
+
+The `rea` MCP entry ran `npx -y rea-agents@6.10.1 mcp`, so every client start
+re-resolved the package. A cold cache, a slow registry, or an offline machine
+turned into an MCP startup timeout. The plugin now installs the pinned version
+once and launches the same files afterwards.
+
+- `plugins/rea/scripts/rea-runtime.ts` resolves the runtime directory
+  (`AZSKILLS_REA_RUNTIME`, else `%LOCALAPPDATA%\AzSkills\rea-runtime` on Windows
+  or `$XDG_DATA_HOME/azskills/rea-runtime` elsewhere), the installed entry
+  script, and the install marker.
+- `plugins/rea/scripts/rea-setup.ts` writes a manifest that pins
+  `rea-agents@6.10.1`, then installs with the first available manager in the
+  order bun, pnpm, npm. `--manager` forces one, `--force` reinstalls, and
+  `--print-path` reports the directory. **Bun is the recommended manager**; pnpm
+  and npm are the documented fallback path.
+- `plugins/rea/scripts/rea-mcp.ts` is the MCP entry. It launches the installed
+  entry with inherited stdio, and when the runtime is missing it exits non-zero
+  with the exact install command instead of downloading during startup. The
+  manifest is now `node ${PLUGIN_ROOT}/scripts/rea-mcp.ts`.
+- The `rea` catalog entry declares `mcpServers`, so the [CC] projection writes
+  `.mcp.json` with the same `node` command retargeted to `${CLAUDE_PLUGIN_ROOT}`.
+  The panel's removal had left the projection with no MCP consumer; REA is now
+  the one plugin that exercises it.
+
+Install once per machine:
+
+```sh
+node plugins/rea/scripts/rea-setup.ts        # bun, then pnpm, then npm
+node plugins/rea/scripts/rea-setup.ts --manager npm
+```
+
+`scripts/test-rea-runtime.ts` asserts the manifest never contains `npx`, that a
+missing runtime fails with the install command, that the launcher forwards the
+child's exit code, and that `--print-path` resolves without a network call.
+
+The release is minor: the panel was an additive surface, and no plugin ID,
+module id, or mode changed.
 
 ## 7.12.2: withdraw the sidebar destination and finish host parity
 

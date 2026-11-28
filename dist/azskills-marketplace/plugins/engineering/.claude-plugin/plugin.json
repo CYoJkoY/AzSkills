@@ -1,7 +1,7 @@
 {
   "name": "engineering",
   "displayName": "Engineering",
-  "version": "7.12.2",
+  "version": "7.13.0",
   "description": "Choose runtime, frontend, or Godot 3.x architecture; write against the verified 3.6 API; improve code quality, style consistency, and reusable patterns; connect AI clients with verified setup; and steer judgment, collaboration, and execution behavior.",
   "author": {
     "name": "AzSkills",

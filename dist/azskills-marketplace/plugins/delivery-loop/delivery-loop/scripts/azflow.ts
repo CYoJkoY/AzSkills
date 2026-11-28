@@ -103,7 +103,7 @@ import {
 } from "./goal.ts";
 import type { GoalState } from "./goal.ts";
 import { describeDoneWhen, verifyDoneWhen } from "./goal-verify.ts";
-import { PANEL_CONFIG_KEYS, applyPanelPatch, panelBrief, panelHtml, panelSnapshot } from "./panel.ts";
+import { CONFIG_KEYS, applyConfigPatch } from "./config.ts";
 
 interface Args {
   readonly command: string;
@@ -1943,35 +1943,6 @@ async function doctor(args: Args): Promise<void> {
   if (failed.length > 0) process.exitCode = 2;
 }
 
-async function panelCommand(args: Args): Promise<void> {
-  const project = projectRoot(args);
-  const state = await readState(project).catch(() => null);
-  const goal = await readGoal(project).catch(() => null);
-  const worktreeNames = await readdir(worktreesRoot(project), { withFileTypes: true })
-    .then((entries) => entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name))
-    .catch(() => [] as string[]);
-  const snapshot = panelSnapshot({
-    project,
-    now: Date.now(),
-    goal,
-    state,
-    worktreeDirectories: worktreeNames,
-  });
-  if (args.flags.has("json")) {
-    printJson(snapshot);
-    return;
-  }
-  const out = path.resolve(lastValue(args, "out") ?? path.join(flowRoot(project), "panel.html"));
-  await mkdir(path.dirname(out), { recursive: true });
-  await writeFile(out, panelHtml(snapshot), "utf8");
-  print(panelBrief(snapshot));
-  print("");
-  print("Panel written: " + out);
-  print(
-    "This file is static. Open it in a browser, or call the azflow_panel tool from a UI-capable client for the live view.",
-  );
-}
-
 function parseConfigValue(key: string, raw: string): Record<string, unknown> {
   if (key === "checks" || key === "allowFrameworks") {
     return { [key]: raw.split(",").map((item) => item.trim()).filter((item) => item !== "") };
@@ -1988,7 +1959,7 @@ async function configCommand(args: Args): Promise<void> {
   const project = projectRoot(args);
   const sub = args.positionals[0] ?? "show";
   if (sub === "keys") {
-    print(PANEL_CONFIG_KEYS.join("\n"));
+    print(CONFIG_KEYS.join("\n"));
     return;
   }
   if (sub === "show") {
@@ -2006,7 +1977,7 @@ async function configCommand(args: Args): Promise<void> {
     if (key === undefined) throw new Error("Usage: azflow config set <key> <value>");
     const patch = parseConfigValue(key, args.positionals.slice(2).join(" "));
     const next = await withLock(project, async (state) => {
-      state.config = applyPanelPatch(state.config, patch);
+      state.config = applyConfigPatch(state.config, patch);
       return state.config;
     });
     print("Config " + key + " updated.");
@@ -2260,7 +2231,6 @@ function help(): void {
       "  azflow ship <task>|--pr <n> [--dry-run] [--verify-issue] [--json]",
       "  azflow recover [--force]",
       "  azflow goal start|status|next|note|next-step|pause|resume|extend|verify|complete|reopen|abandon",
-      "  azflow panel [--json] [--out <path>]",
       "  azflow config [show|keys|set <key> <value>] [--json]",
       "  azflow doctor [--json]",
       "",
@@ -2291,7 +2261,6 @@ async function main(): Promise<void> {
     case "ship": await ship(args); break;
     case "recover": await recover(args); break;
     case "goal": await goalCommand(args); break;
-    case "panel": await panelCommand(args); break;
     case "config": await configCommand(args); break;
     case "doctor": await doctor(args); break;
     case "help":

@@ -20,9 +20,12 @@ below instead of guessing at tool names.
    (JavaScript bundle, native executable, shared library, or unknown).
 2. State the question in one sentence: which behavior, symbol, control flow,
    or data structure must be recovered.
-3. Confirm prerequisites. Node.js and npm must be available. Run
-   `npx rea-agents@latest setup` once to register REA and install its matching
-   workflow instructions.
+3. Confirm prerequisites. Node.js 22.18 or newer must be on PATH. Install the
+   runtime once, from the plugin directory, with bun:
+   `node scripts/rea-setup.ts` (bun preferred; the script falls back to pnpm
+   or npm, or pass `--manager npm` to choose one). The runtime goes to a
+   user-level directory and is reused on every start, so no package resolution
+   happens while the client boots.
 4. Note whether a native provider is installed. Static JavaScript analysis
    does not need one; disassembly and decompilation do.
 5. Preserve the artifact. Analyze a copy when the target is precious, and do
@@ -82,9 +85,9 @@ below instead of guessing at tool names.
 
 ## Degradation
 
-- If REA MCP tools are unavailable, stop claiming REA analysis. Verify
-  `npx rea-agents@latest setup`, then reload the client. Do not fabricate
-  decompiled output from memory.
+- If REA MCP tools are unavailable, stop claiming REA analysis. Run
+  `node scripts/rea-setup.ts` from the plugin directory, then reload the
+  client. Do not fabricate decompiled output from memory.
 - If no native provider is installed, limit work to static JavaScript and
   string/import triage, and say that disassembly was not performed.
 - If the target format is unsupported, report the blocked step and the reason
@@ -102,8 +105,15 @@ Close with:
 
 ## Troubleshooting
 
-- MCP does not start: confirm Node.js and npm are on the PATH seen by Codex,
-  re-run `npx rea-agents@latest setup`, then reload the client.
+- MCP does not start: confirm Node.js 22.18 or newer is on the PATH seen by the
+  client, run `node scripts/rea-setup.ts` from the plugin directory, then
+  reload the client. The launcher prints the install command when the runtime
+  is missing, so read its stderr before changing anything else.
+- Install fails: run `node scripts/rea-setup.ts --force` to retry, or name the
+  manager explicitly with `--manager bun|pnpm|npm`. Bun is the recommended
+  manager; pnpm and npm are supported fallbacks.
+- The runtime lives outside the plugin: `node scripts/rea-setup.ts
+  --print-path` prints the directory, and `AZSKILLS_REA_RUNTIME` moves it.
 - Native analysis unavailable: check the selected provider and its local
   installation; JS bundle analysis still works without one.
 - Stale results: re-run the smallest query to confirm the current artifact.

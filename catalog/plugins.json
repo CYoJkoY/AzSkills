@@ -171,7 +171,6 @@
       "extra": [
         "delivery-loop/references",
         "delivery-loop/scripts",
-        "delivery-loop/mcp.json",
         "no-think-tags/hooks",
         "no-think-tags/lib",
         "codex-plugin/hooks/delivery-hooks.json",
@@ -187,8 +186,7 @@
         "codex-plugin/hooks/goal-allowlist.ts",
         "codex-plugin/assets/icons/delivery-loop.svg"
       ],
-      "hooks": "codex-plugin/hooks/delivery-hooks.json",
-      "mcpServers": "delivery-loop/mcp.json"
+      "hooks": "codex-plugin/hooks/delivery-hooks.json"
     },
     {
       "id": "serena",
@@ -227,7 +225,8 @@
         "plugins/rea/codex-plugin/hooks/rea-hooks.json",
         "plugins/rea/codex-plugin/hooks/rea-intent.ts"
       ],
-      "hooks": "codex-plugin/hooks/rea-hooks.json"
+      "hooks": "codex-plugin/hooks/rea-hooks.json",
+      "mcpServers": ".codex-plugin/mcp.json"
     }
   ]
 }
